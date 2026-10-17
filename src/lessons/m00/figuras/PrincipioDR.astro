@@ -1,0 +1,225 @@
+---
+/*
+ * Lesson 0.2: how a residual-current device (DR) works. Phase and neutral
+ * pass through the same magnetic ring; while the currents are equal the ring
+ * sees nothing. A leak through a person makes them differ, the sensing coil
+ * feels it and the trip opens both contacts.
+ */
+import Figure from '../../../components/Figure.astro';
+---
+
+<Figure
+  wide
+  alt="Esquema de um DR: a fase e o neutro passam juntos por dentro de um anel magnético. Uma bobina enrolada no anel está ligada ao disparador, que abre os contatos. Depois do DR há um chuveiro; uma pessoa encosta na carcaça e parte da corrente desce pelo corpo até a terra."
+  caption="Como o DR percebe o choque. A fase e o neutro atravessam o mesmo anel. Se toda a corrente que vai pela fase volta pelo neutro, os efeitos se cancelam. Se uma parte escapa pela pessoa para a terra, sobra uma diferença; a bobina sente e o disparador abre o circuito."
+>
+  <svg
+    class="fig-dr"
+    viewBox="0 0 660 300"
+    width="660"
+    height="300"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    font-family="var(--font-sans)"
+    font-size="13"
+  >
+    <!-- DR enclosure -->
+    <rect
+      x="70"
+      y="22"
+      width="250"
+      height="230"
+      rx="12"
+      class="fig-dr__box"
+      stroke-width="1.5"
+      stroke-dasharray="6 5"
+    ></rect>
+    <text x="84" y="44" class="fig-dr__title">
+      DR
+    </text>
+
+    <!-- Phase and neutral lines -->
+    <path d="M10 80H112M134 80H520" class="fig-dr__fase" stroke-width="3"></path>
+    <path d="M10 140H112M134 140H520" class="fig-dr__neutro" stroke-width="3"></path>
+    <text x="12" y="70" class="fig-dr__label fig-dr__fase-t">
+      Fase
+    </text>
+    <text x="12" y="160" class="fig-dr__label fig-dr__neutro-t">
+      Neutro
+    </text>
+
+    <!-- Contacts (closed) -->
+    <path d="M112 80l22-10M112 140l22-10" stroke="currentColor" stroke-width="2.5"></path>
+    <circle cx="112" cy="80" r="3" fill="currentColor"></circle>
+    <circle cx="112" cy="140" r="3" fill="currentColor"></circle>
+    <circle cx="134" cy="80" r="3" fill="currentColor"></circle>
+    <circle cx="134" cy="140" r="3" fill="currentColor"></circle>
+    <text x="98" y="112" class="fig-dr__small">
+      contatos
+    </text>
+
+    <!-- Magnetic ring around both wires -->
+    <ellipse cx="205" cy="110" rx="24" ry="56" class="fig-dr__ring" stroke-width="9"></ellipse>
+    <text x="205" y="44" text-anchor="middle" class="fig-dr__small">
+      anel magnético
+    </text>
+
+    <!-- Sensing coil and trip -->
+    <path
+      d="M190 163c6 6 10 6 15 0M190 170c6 6 10 6 15 0M190 177c6 6 10 6 15 0"
+      stroke="currentColor"
+      stroke-width="2"
+    ></path>
+    <path d="M205 180v30h33" stroke="currentColor" stroke-width="1.5"></path>
+    <rect
+      x="238"
+      y="196"
+      width="78"
+      height="30"
+      rx="6"
+      stroke="currentColor"
+      stroke-width="1.5"
+    ></rect>
+    <text x="278" y="215" text-anchor="middle" class="fig-dr__small">
+      disparador
+    </text>
+    <path
+      d="M238 211H123V150"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-dasharray="4 4"
+      marker-end="url(#fig-dr-arrow)"
+    ></path>
+    <text x="138" y="235" class="fig-dr__small">
+      bobina sensora
+    </text>
+
+    <!-- Load: shower with metal case -->
+    <rect
+      x="470"
+      y="60"
+      width="110"
+      height="100"
+      rx="10"
+      class="fig-dr__case"
+      stroke-width="2"
+    ></rect>
+    <path d="M520 80v20l8 6-16 8 16 8-16 8 8 6v4" stroke="currentColor" stroke-width="2"></path>
+    <text x="525" y="182" text-anchor="middle" class="fig-dr__label">
+      Chuveiro
+    </text>
+
+    <!-- Leak through a person to earth -->
+    <circle cx="616" cy="166" r="9" stroke="currentColor" stroke-width="2"></circle>
+    <path
+      d="M616 175v46M616 186l-31-34M616 186l14 20M616 221l-10 30M616 221l10 30"
+      stroke="currentColor"
+      stroke-width="2.5"
+    ></path>
+    <path d="M592 258h48M599 264h34M607 270h18" class="fig-dr__terra" stroke-width="2"></path>
+    <path
+      d="M590 136c44 4 58 40 52 80s-14 30-22 34"
+      class="fig-dr__fuga"
+      stroke-width="2.5"
+      stroke-dasharray="3 6"
+      marker-end="url(#fig-dr-arrow-fuga)"
+    ></path>
+    <text x="588" y="290" text-anchor="end" class="fig-dr__small fig-dr__fuga-t">
+      fuga pela pessoa
+    </text>
+
+    <defs>
+      <marker
+        id="fig-dr-arrow"
+        viewBox="0 0 10 10"
+        refX="8"
+        refY="5"
+        markerWidth="7"
+        markerHeight="7"
+        orient="auto-start-reverse"
+      >
+        <path d="M0 0L10 5L0 10z" fill="currentColor"></path>
+      </marker>
+      <marker
+        id="fig-dr-arrow-fuga"
+        viewBox="0 0 10 10"
+        refX="8"
+        refY="5"
+        markerWidth="7"
+        markerHeight="7"
+        orient="auto-start-reverse"
+      >
+        <path d="M0 0L10 5L0 10z" class="fig-dr__fuga-fill"></path>
+      </marker>
+    </defs>
+  </svg>
+</Figure>
+
+<style>
+  .fig-dr {
+    color: var(--fg);
+  }
+
+  .fig-dr text {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .fig-dr__box {
+    stroke: var(--fg-subtle);
+  }
+
+  .fig-dr__title {
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .fig-dr__label {
+    font-weight: 600;
+  }
+
+  .fig-dr__small {
+    font-size: 12px;
+  }
+
+  .fig-dr__fase {
+    stroke: var(--danger);
+  }
+
+  .fig-dr text.fig-dr__fase-t {
+    fill: var(--danger);
+  }
+
+  .fig-dr__neutro {
+    stroke: var(--accent);
+  }
+
+  .fig-dr text.fig-dr__neutro-t {
+    fill: var(--accent);
+  }
+
+  .fig-dr__ring {
+    stroke: color-mix(in oklab, var(--fg-subtle) 55%, transparent);
+  }
+
+  .fig-dr__case {
+    stroke: var(--fg-muted);
+  }
+
+  .fig-dr__fuga {
+    stroke: var(--warning);
+  }
+
+  .fig-dr__fuga-fill {
+    fill: var(--warning);
+  }
+
+  .fig-dr text.fig-dr__fuga-t {
+    fill: var(--warning);
+  }
+
+  .fig-dr__terra {
+    stroke: var(--success);
+  }
+</style>

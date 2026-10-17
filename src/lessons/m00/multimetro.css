@@ -1,0 +1,133 @@
+/* MultimetroInterativo.tsx: a generic digital multimeter drawn in SVG. */
+
+.mmi__body {
+  align-items: start;
+}
+
+@media (min-width: 40rem) {
+  .mmi__body {
+    grid-template-columns: 13.75rem 1fr;
+  }
+}
+
+.mmi__svg {
+  justify-self: center;
+  width: 100%;
+  max-width: 13.75rem;
+  height: auto;
+}
+
+.mmi__side {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.mmi__name {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.mmi__bumper {
+  fill: #e0782f;
+}
+
+.mmi__face {
+  fill: #2b3038;
+}
+
+.mmi__lcd {
+  fill: #bfcaa6;
+  stroke: #11151b;
+  stroke-width: 3;
+}
+
+.mmi__digits {
+  fill: #1d2318;
+  font-family: var(--font-mono);
+  font-size: 34px;
+  font-weight: 600;
+}
+
+.mmi__unit {
+  fill: #1d2318;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.mmi__pos {
+  cursor: pointer;
+}
+
+.mmi__hit {
+  fill: transparent;
+}
+
+.mmi__label {
+  fill: #c9d0da;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mmi__label--on {
+  fill: #ffd27a;
+}
+
+.mmi__ring {
+  fill: #1c2027;
+  stroke: #474f5c;
+  stroke-width: 2;
+}
+
+.mmi__knob {
+  transition: transform 250ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mmi__knob {
+    transition: none;
+  }
+}
+
+.mmi__knob-body {
+  fill: #3a414c;
+}
+
+.mmi__grip {
+  fill: #59616e;
+}
+
+.mmi__pointer {
+  stroke: #ffd27a;
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.mmi__jack {
+  fill: #c0392b;
+}
+
+.mmi__jack--com {
+  fill: #111418;
+  stroke: #5c6470;
+  stroke-width: 2;
+}
+
+.mmi__hole {
+  fill: #0b0d10;
+}
+
+.mmi__glow {
+  fill: none;
+  stroke: #ffd27a;
+  stroke-width: 3;
+}
+
+.mmi__jack-label {
+  fill: #c9d0da;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+}

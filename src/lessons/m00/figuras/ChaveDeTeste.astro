@@ -1,0 +1,225 @@
+---
+/*
+ * Lesson 0.3: inside a neon voltage tester. The tiny current goes from the
+ * phase through the tip, a resistor of about a megaohm and the neon lamp,
+ * then through the person's finger and body to the earth.
+ */
+import Figure from '../../../components/Figure.astro';
+---
+
+<Figure
+  wide
+  alt="Corte de uma chave de teste neon. Da esquerda para a direita: a ponta metálica de chave de fenda, um resistor de valor alto, a lâmpada neon dentro de um tubo transparente, uma mola e a tampa metálica onde o dedo encosta. Uma seta mostra a corrente entrando pela ponta, encostada num fio fase, passando por todas as partes, pelo dedo e pelo corpo até a terra."
+  caption="Por dentro da chave de teste neon. A corrente sai do fio fase, atravessa o resistor e a lâmpada neon e segue pelo seu corpo até a terra. O resistor deixa passar só uma corrente minúscula, que você não sente, mas que basta para a neon brilhar."
+>
+  <svg
+    class="fig-neon"
+    viewBox="0 0 640 230"
+    width="640"
+    height="230"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    font-family="var(--font-sans)"
+    font-size="13"
+  >
+    <!-- Phase wire touched by the tip -->
+    <path d="M20 120h44" class="fig-neon__fase" stroke-width="8"></path>
+    <text x="20" y="104" class="fig-neon__small fig-neon__fase-t">
+      fio fase
+    </text>
+
+    <!-- Blade -->
+    <path d="M64 114l14-4h96v20H78l-14-4z" class="fig-neon__metal" stroke-width="2"></path>
+
+    <!-- Transparent body -->
+    <rect
+      x="174"
+      y="92"
+      width="330"
+      height="56"
+      rx="18"
+      class="fig-neon__body"
+      stroke-width="2"
+    ></rect>
+
+    <!-- Resistor -->
+    <rect
+      x="196"
+      y="110"
+      width="80"
+      height="20"
+      rx="6"
+      class="fig-neon__resistor"
+      stroke-width="1.5"
+    ></rect>
+    <path d="M216 110v20M232 110v20M248 110v20" class="fig-neon__bands" stroke-width="4"></path>
+    <path d="M174 120h22M276 120h22" stroke="currentColor" stroke-width="2"></path>
+
+    <!-- Neon lamp -->
+    <rect
+      x="298"
+      y="106"
+      width="86"
+      height="28"
+      rx="14"
+      class="fig-neon__glass"
+      stroke-width="1.5"
+    ></rect>
+    <ellipse cx="341" cy="120" rx="34" ry="9" class="fig-neon__glow"></ellipse>
+    <path d="M306 120h22M354 120h22" stroke="currentColor" stroke-width="2.5"></path>
+
+    <!-- Spring -->
+    <path
+      d="M384 120h8l5-10 8 20 8-20 8 20 8-20 8 20 5-10h20"
+      stroke="currentColor"
+      stroke-width="1.8"
+    ></path>
+
+    <!-- Metal cap -->
+    <rect
+      x="482"
+      y="98"
+      width="30"
+      height="44"
+      rx="8"
+      class="fig-neon__metal"
+      stroke-width="2"
+    ></rect>
+
+    <!-- Finger -->
+    <path
+      d="M512 110c20-6 50-4 74 2 14 4 16 20 2 24-22 6-52 6-76 0"
+      stroke="currentColor"
+      stroke-width="2"
+    ></path>
+
+    <!-- Current path: along the tester, through the body, to the earth -->
+    <path
+      d="M44 132v26h518c16 0 28 10 28 24v4"
+      class="fig-neon__path"
+      stroke-width="2"
+      stroke-dasharray="3 6"
+      marker-end="url(#fig-neon-arrow)"
+    ></path>
+    <path d="M572 196h36M578 203h24M584 210h12" class="fig-neon__earth" stroke-width="2"></path>
+    <text x="614" y="207" class="fig-neon__small">
+      terra
+    </text>
+    <text x="300" y="182" text-anchor="middle" class="fig-neon__small fig-neon__path-t">
+      a corrente passa pela chave e pelo seu corpo até a terra
+    </text>
+
+    <!-- Labels -->
+    <text x="120" y="80" text-anchor="middle" class="fig-neon__label">
+      ponta
+    </text>
+    <text x="236" y="80" text-anchor="middle" class="fig-neon__label">
+      resistor
+    </text>
+    <text x="236" y="64" text-anchor="middle" class="fig-neon__small">
+      cerca de 1 MΩ
+    </text>
+    <text x="341" y="80" text-anchor="middle" class="fig-neon__label">
+      lâmpada neon
+    </text>
+    <text x="427" y="80" text-anchor="middle" class="fig-neon__label">
+      mola
+    </text>
+    <text x="497" y="80" text-anchor="middle" class="fig-neon__label">
+      tampa metálica
+    </text>
+    <text x="596" y="80" text-anchor="middle" class="fig-neon__label">
+      seu dedo
+    </text>
+
+    <defs>
+      <marker
+        id="fig-neon-arrow"
+        viewBox="0 0 10 10"
+        refX="8"
+        refY="5"
+        markerWidth="7"
+        markerHeight="7"
+        orient="auto-start-reverse"
+      >
+        <path d="M0 0L10 5L0 10z" class="fig-neon__arrow"></path>
+      </marker>
+    </defs>
+  </svg>
+</Figure>
+
+<style>
+  .fig-neon {
+    color: var(--fg);
+  }
+
+  .fig-neon text {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .fig-neon__label {
+    font-weight: 600;
+  }
+
+  .fig-neon__small {
+    font-size: 12px;
+  }
+
+  .fig-neon text.fig-neon__small {
+    fill: var(--fg-muted);
+  }
+
+  .fig-neon__fase {
+    stroke: var(--danger);
+  }
+
+  .fig-neon text.fig-neon__fase-t {
+    fill: var(--danger);
+  }
+
+  .fig-neon__metal {
+    stroke: var(--fg-muted);
+    fill: color-mix(in oklab, var(--fg-subtle) 25%, transparent);
+  }
+
+  .fig-neon__body {
+    stroke: var(--fg-subtle);
+    fill: color-mix(in oklab, var(--accent) 6%, transparent);
+  }
+
+  .fig-neon__resistor {
+    stroke: var(--fg-muted);
+    fill: color-mix(in oklab, #c9a36b 55%, transparent);
+  }
+
+  .fig-neon__bands {
+    stroke: color-mix(in oklab, var(--fg) 70%, transparent);
+  }
+
+  .fig-neon__glass {
+    stroke: var(--fg-subtle);
+    fill: color-mix(in oklab, var(--bg) 60%, transparent);
+  }
+
+  .fig-neon__glow {
+    fill: color-mix(in oklab, #ff7a1a 55%, transparent);
+  }
+
+  .fig-neon__path {
+    stroke: var(--warning);
+  }
+
+  .fig-neon__earth {
+    stroke: var(--fg-muted);
+  }
+
+  .fig-neon__arrow {
+    fill: var(--warning);
+  }
+
+  .fig-neon text.fig-neon__path-t {
+    fill: var(--warning);
+  }
+</style>

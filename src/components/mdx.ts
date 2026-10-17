@@ -14,6 +14,7 @@ import Workshop from '../course/Workshop.astro';
 import Callout from './Callout.astro';
 import DeepDive from './DeepDive.astro';
 import Figure from './Figure.astro';
+import LinkAula from './LinkAula.astro';
 import RealCase from './RealCase.astro';
 import Step from './Step.astro';
 import Steps from './Steps.astro';
@@ -27,6 +28,7 @@ export const components = {
   Step,
   DeepDive,
   RealCase,
+  LinkAula,
   // Experiência
   Term,
   Quiz,

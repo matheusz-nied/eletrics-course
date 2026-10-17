@@ -69,16 +69,19 @@ test('home page lists the modules', async ({ page }) => {
   errors.expectClean();
 });
 
-test('module page shows the module and has no lessons listed while they are drafts', async ({
-  page,
-}) => {
+test('module page lists its published lessons and never the draft', async ({ page }) => {
   const errors = watchErrors(page);
   await page.goto('m00-comece-aqui/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Comece aqui');
   await expect(page.getByText('Parte 1 · Fundamentos')).toBeVisible();
   // The example lesson is a draft: never linked in production.
   await expect(page.locator(`a[href$="/${EXAMPLE_LESSON}"]`)).toHaveCount(0);
-  await expect(page.getByText(/estão sendo escritas/)).toBeVisible();
+  const lessons = page.getByRole('region', { name: 'Aulas' }).getByRole('listitem');
+  await expect(lessons).toHaveCount(3);
+  await expect(lessons.first().getByRole('link')).toHaveAttribute(
+    'href',
+    /\/m00-comece-aqui\/01-como-usar-este-curso\/$/,
+  );
   await expectNoHorizontalOverflow(page);
   errors.expectClean();
 });

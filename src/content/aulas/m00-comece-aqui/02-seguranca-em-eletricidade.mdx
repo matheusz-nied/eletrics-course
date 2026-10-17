@@ -1,0 +1,335 @@
+---
+titulo: Segurança em eletricidade
+modulo: m00-comece-aqui
+ordem: 2
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Explicar por que o dano do choque vem da corrente que atravessa o corpo
+  - Estimar a corrente de um choque a partir da tensão e da resistência do corpo
+  - Seguir a regra de ouro antes de mexer em qualquer fio
+  - Saber o que o disjuntor, o DR e o fio terra protegem, e o que eles não protegem
+  - Reconhecer quando o serviço é para um eletricista habilitado
+prerequisitos: [m00-comece-aqui/01-como-usar-este-curso]
+tags: [segurança, choque elétrico, DR, disjuntor, aterramento, NR-10, EPI]
+seguranca: rede
+---
+
+import CalculadoraChoque from '../../../lessons/m00/CalculadoraChoque';
+import CorpoNoCircuito from '../../../lessons/m00/figuras/CorpoNoCircuito.astro';
+import PrincipioDR from '../../../lessons/m00/figuras/PrincipioDR.astro';
+
+Você abre o registro do chuveiro e sente um formigamento na mão. Muita gente acha normal, ou resolve com um chinelo de borracha. Não é normal. Aquele formigamento é corrente elétrica passando pelo seu corpo, e ele avisa que existe um defeito que, num dia de mão molhada e pé descalço, pode matar.
+
+Esta aula vem antes de todas as outras porque as regras dela valem para o curso inteiro: para trocar uma tomada, para abrir a central do portão, para mexer no chuveiro. Você vai entender o que o choque faz no corpo, por que algumas situações são tão mais perigosas que outras e o que cada proteção da casa faz por você.
+
+## O que o choque faz no corpo
+
+O corpo funciona com eletricidade. Os nervos levam sinais elétricos minúsculos até os músculos, e o coração bate porque um pulso elétrico percorre o músculo dele a cada batida. Um <Term id="choque-eletrico">choque elétrico</Term> acontece quando uma corrente vinda de fora atravessa o corpo e atropela esses sinais. Os efeitos dependem de quanta corrente passa, por onde ela passa e por quanto tempo:
+
+- **Contração muscular.** A corrente faz os músculos se contraírem sozinhos. Os músculos que fecham a mão são mais fortes que os que abrem, por isso quem segura um fio energizado às vezes não consegue soltar: a mão "gruda".
+- **Parada respiratória.** Os músculos do peito travam e a pessoa para de respirar enquanto o choque dura, e às vezes depois dele.
+- **Fibrilação ventricular.** O coração perde o ritmo e passa a tremer em vez de bater. O sangue para de circular e, sem socorro com desfibrilador, a pessoa morre em poucos minutos. É a principal causa de morte por choque em baixa tensão. Veja <Term id="fibrilacao-ventricular">fibrilação ventricular</Term>.
+- **Queimaduras.** A corrente esquenta o que atravessa, inclusive por dentro do corpo, ao longo do caminho dela.
+- **Efeitos indiretos.** O susto de um choque pequeno derruba gente de escadas e de telhados. Muitos acidentes graves com eletricidade são, na verdade, quedas.
+
+O **caminho** importa: uma corrente que entra por uma mão e sai pela outra, ou por uma mão e pelos pés, passa pelo peito e pelo coração. O **tempo** também importa: a mesma corrente é muito mais perigosa durante um segundo do que durante um centésimo de segundo. Guarde essas duas ideias, porque elas explicam como o DR salva vidas.
+
+## Quem mata é a corrente
+
+Duas grandezas aparecem em todo choque. A <Term id="tensao">tensão</Term> é o "empurrão" elétrico entre dois pontos, medida em volts (V). A <Term id="corrente-eletrica">corrente</Term> é a quantidade de eletricidade que realmente passa, medida em ampères (A). Quem causa os efeitos da lista acima é a corrente. A tensão só decide quanta corrente vai conseguir passar.
+
+Um exemplo do dia a dia mostra a diferença. O estalo que você leva ao encostar na porta do carro num dia seco é eletricidade estática: a tensão chega a milhares de volts, mas a quantidade de carga é tão pequena que a corrente dura uma fração de milionésimo de segundo. Dá um susto e para por aí. Já os 127 V de uma tomada conseguem empurrar uma corrente contínua, sem fim, pelo corpo de uma pessoa com a mão molhada, e isso pode matar.
+
+### Quanta corrente é perigosa
+
+As correntes de um choque são pequenas, então a unidade prática é o miliampère (mA), a milésima parte do ampère: $1\,\text{mA} = 0{,}001\,\text{A}$. As faixas abaixo são típicas para corrente alternada de 60 Hz, num adulto, com a corrente indo da mão até os pés:
+
+| Corrente pelo corpo | O que costuma acontecer |
+|---------------------|-------------------------|
+| até cerca de 0,5 mA | Em geral a pessoa não sente nada |
+| de 0,5 mA a 10 mA | Formigamento, depois dor. Em geral ainda dá para soltar |
+| de 10 mA a 30 mA | Os músculos travam: a mão pode não conseguir soltar. Respirar fica difícil |
+| acima de cerca de 30 mA, durante perto de 1 s | Risco de parada respiratória e de fibrilação ventricular |
+
+A norma internacional IEC 60479 descreve esses efeitos em detalhe, com curvas que combinam corrente e tempo. Os números da tabela são faixas usadas no ensino, não limites exatos: crianças, pessoas com problemas cardíacos e caminhos pelo peito toleram menos. **Não existe uma corrente de choque que seja segura para todo mundo.**
+
+<Callout type="nota" title="E a corrente contínua?">
+A tomada da casa é de corrente alternada (CA): a tensão sobe e desce 60 vezes por segundo. Baterias e fontes de eletrônicos são de corrente contínua (CC). A CC também dá choque e também mata; as faixas de efeito são um pouco diferentes, mas o cuidado é exatamente o mesmo. A diferença entre as duas é o assunto da aula <LinkAula id="m06-corrente-alternada/01-da-cc-a-ca" />.
+</Callout>
+
+## A resistência do corpo
+
+Se a corrente é o que importa, a pergunta seguinte é: com 127 V, quanta corrente passa por uma pessoa? Depende da <Term id="resistencia-eletrica">resistência</Term> do caminho, a dificuldade que o corpo oferece à passagem da corrente, medida em ohms (Ω).
+
+Por dentro, o corpo é feito principalmente de água com sais e conduz bem: da mão até os pés, a resistência interna fica tipicamente em torno de 500 Ω. A grande barreira é a **pele**:
+
+- Pele **seca** e grossa: tipicamente 100 kΩ (cem mil ohms) ou mais.
+- Pele **suada ou molhada**: cai para algo perto de 1 kΩ (mil ohms).
+- Pele **cortada ou ferida**: a barreira praticamente desaparece.
+
+A área de contato também conta. Segurar um cano com a mão inteira dá uma resistência muito menor que encostar a ponta de um dedo. E com tensões mais altas a pele pode ser perfurada pela própria corrente, e a resistência cai ainda mais.
+
+Depois de atravessar o corpo, a corrente precisa sair. Descalço num piso molhado, a saída pelos pés é muito fácil. De chinelo de borracha seco, ela fica muito difícil. É por isso que o banheiro é o lugar mais perigoso da casa: pele molhada, pé descalço e piso molhado, tudo ao mesmo tempo.
+
+<CorpoNoCircuito />
+
+As três resistências estão em sequência, uma depois da outra: a corrente precisa passar pelas três. Por isso elas se somam. A relação entre tensão, resistência e corrente é a <Term id="lei-de-ohm">Lei de Ohm</Term>, que você vai estudar com calma na aula <LinkAula id="m01-eletricidade-do-zero/04-lei-de-ohm" />:
+
+$$
+I = \frac{V}{R}
+$$
+
+Aqui, $I$ é a corrente em ampères (A), $V$ é a tensão em volts (V) e $R$ é a resistência total do caminho em ohms (Ω). Mais tensão, mais corrente. Mais resistência, menos corrente.
+
+### Exemplo resolvido: o mesmo registro, dois dias diferentes
+
+Um registro de chuveiro ficou com 127 V por causa de um defeito. A pessoa está descalça no piso molhado do banheiro (cerca de 100 Ω na saída pelos pés).
+
+**Dia 1, mão seca.** A resistência total é a soma das três:
+
+$$
+R = 100.000\,\Omega + 500\,\Omega + 100\,\Omega = 100.600\,\Omega
+$$
+
+$$
+I = \frac{127\,\text{V}}{100.600\,\Omega} \approx 0{,}00126\,\text{A} = 1{,}26\,\text{mA}
+$$
+
+Pela tabela, isso é formigamento. É o "choquinho" que tanta gente diz sentir no chuveiro.
+
+**Dia 2, mão molhada.** O defeito é o mesmo. Só a pele mudou:
+
+$$
+R = 1.000\,\Omega + 500\,\Omega + 100\,\Omega = 1.600\,\Omega
+$$
+
+$$
+I = \frac{127\,\text{V}}{1.600\,\Omega} \approx 0{,}079\,\text{A} = 79\,\text{mA}
+$$
+
+A corrente ficou mais de 60 vezes maior e caiu na faixa de risco de morte. O formigamento do dia 1 era o aviso do dia 2.
+
+## Explore: o corpo no circuito
+
+A simulação abaixo monta exatamente esse circuito. As resistências são valores típicos, para comparar situações.
+
+<Simulation circuit="m00/choque" />
+
+Faça os testes nesta ordem e anote a corrente de cada um:
+
+1. Comece como está: 127 V, mão seca, descalço no piso molhado. Confira o valor de 1,26 mA do exemplo.
+2. Troque a mão para **molhada**. A corrente passa de 75 mA.
+3. Mantenha a mão molhada e troque a saída para **chinelo de borracha seco**. Quanto a corrente caiu?
+4. Volte para descalço no piso molhado e troque a tensão para **220 V**. O que aconteceu com a corrente?
+5. Escolha **12 V** com a mão molhada. Por que fontes de 12 V são usadas em lugares molhados, como piscinas?
+
+<Callout type="nota" title="Por que a tomada aparece como fonte contínua">
+A tensão da tomada é alternada, mas o valor "127 V" escrito nela é o valor eficaz: o valor de uma tensão contínua que aqueceria uma resistência do mesmo jeito. Num caminho feito só de resistências, a fonte contínua de 127 V dá a mesma corrente eficaz que a tomada, por isso a simulação usa a forma mais simples. Esse assunto volta na aula <LinkAula id="m06-corrente-alternada/02-pico-eficaz-e-medio" />.
+</Callout>
+
+Agora use a calculadora para ver onde cada corrente cai na escala de efeitos e o que um DR faria. Teste também a saída **"a outra mão, molhada, no neutro"** com o DR ligado e leia a explicação: ela mostra o único tipo de choque que o DR não consegue perceber.
+
+<CalculadoraChoque client:visible />
+
+## A regra de ouro
+
+Quase todo acidente elétrico em casa acontece com alguém que achou que o circuito estava desligado. A regra de ouro tem três palavras: **desligar, testar e sinalizar**. Na prática, a ordem mais segura é desligar, sinalizar e só então testar, para ninguém religar enquanto você confere.
+
+<Steps>
+  <Step title="Desligue o disjuntor certo">
+    Desligue o disjuntor do circuito em que você vai mexer. Se o quadro não tiver identificação, ou se você tiver qualquer dúvida, desligue o disjuntor geral. **Desligar o interruptor não basta**: dependendo da ligação, ele corta só um dos fios, e o outro continua com tensão.
+  </Step>
+  <Step title="Impeça que alguém religue">
+    Coloque um aviso no quadro ("Não ligue: manutenção"), prenda o disjuntor desligado com fita e avise quem está em casa. Em empresas, o disjuntor é travado com cadeado, e só quem está trabalhando tem a chave.
+  </Step>
+  <Step title="Teste a ausência de tensão">
+    Antes, confira o seu instrumento numa tomada que você sabe que está funcionando. Depois teste os fios em que vai mexer, todos eles: fase com neutro, fase com terra e neutro com terra. Um instrumento com bateria fraca ou ponta quebrada mostra zero, e você acharia que está tudo desligado. Por isso o teste do instrumento vem antes.
+  </Step>
+  <Step title="Trabalhe como se ainda houvesse tensão">
+    Use ferramentas isoladas, tire anéis, pulseiras e relógio, trabalhe seco e calçado, e não encoste em canos ou partes metálicas aterradas enquanto segura um fio. Esses cuidados protegem você se algo deu errado nos passos anteriores.
+  </Step>
+  <Step title="Termine com cuidado">
+    Aperte e confira as ligações, recoloque as tampas e espelhos, retire o aviso e só então religue o disjuntor. Teste o funcionamento.
+  </Step>
+</Steps>
+
+<Callout type="perigo" title="Se alguém levar um choque">
+Não encoste na pessoa enquanto ela estiver em contato com a eletricidade: você vira parte do circuito. Desligue o disjuntor (ou o geral) primeiro. Se não for possível, afaste a pessoa da fonte com um objeto seco que não conduza, como um cabo de vassoura de madeira, pisando em algo seco. Ligue para o SAMU (192) ou para os Bombeiros (193). Se a pessoa não respirar e você souber fazer, comece a reanimação até o socorro chegar. Toda vítima de choque deve ser avaliada por um médico, mesmo que pareça bem.
+</Callout>
+
+## O disjuntor protege o fio; o DR protege você
+
+O quadro de distribuição da casa tem dois tipos de proteção, e é importante não confundir o que cada um faz.
+
+O <Term id="disjuntor">disjuntor</Term> desliga quando a corrente passa do valor que ele aguenta: por sobrecarga (aparelhos demais ligados no mesmo circuito) ou por <Term id="curto-circuito">curto-circuito</Term>. Os disjuntores de uma casa são de 10 A, 16 A, 20 A ou mais. Ele existe para impedir que os fios esquentem e peguem fogo. Um choque fatal, de algumas dezenas de miliampères, é centenas de vezes menor que isso: **o disjuntor nem percebe que alguém está levando choque.**
+
+O <Term id="dr">DR</Term> (dispositivo diferencial residual) foi feito para proteger pessoas. Ele não olha o tamanho da corrente, e sim se toda a corrente que vai pela fase volta pelo neutro.
+
+<PrincipioDR />
+
+Num circuito sem defeito, a corrente que entra por um fio sai pelo outro, e o DR não faz nada. Quando uma parte da corrente escapa por outro caminho, por exemplo pelo corpo de uma pessoa até a terra, a volta fica menor que a ida. O DR de alta sensibilidade usado nas casas desliga quando essa diferença chega a 30 mA, em uma fração de segundo. A pessoa ainda sente o choque, mas o tempo curto reduz muito o risco de fibrilação.
+
+O que o DR **não** faz:
+
+- **Não percebe um choque entre fase e neutro.** Se uma pessoa isolada do chão (de chinelo seco, numa escada de madeira) segura a fase com uma mão e o neutro com a outra, toda a corrente que passa por ela volta pelo neutro. Para o DR, ela é só mais um aparelho ligado.
+- **Não protege contra sobrecarga e curto.** Para isso continua sendo preciso o disjuntor. Existe o disjuntor DR, que junta as duas funções num só aparelho.
+- **Não funciona se estiver quebrado.** O DR tem um botão de teste, que simula uma fuga. Aperte de tempos em tempos (muitos fabricantes recomendam todo mês): ele precisa desarmar. Se não desarmar, troque.
+
+A NBR 5410, a norma brasileira das instalações elétricas de baixa tensão, exige DR de alta sensibilidade em vários circuitos da casa, como os de banheiros, cozinhas, áreas de serviço e áreas externas. Se o DR da sua casa desarma com frequência, ele está avisando que existe uma fuga em algum lugar (muitas vezes no chuveiro). **Nunca retire nem "pule" o DR**: procure o defeito.
+
+Como escolher e ligar disjuntores e DR é assunto da aula <LinkAula id="m07-instalacoes/03-disjuntores-dr-e-dps" />.
+
+### O fio terra
+
+O <Term id="aterramento">fio terra</Term>, verde ou verde-amarelo, liga as partes metálicas dos aparelhos (a carcaça da máquina de lavar, o corpo do chuveiro) à terra. Se um fio interno encosta na carcaça, a corrente de falha encontra um caminho de resistência baixíssima pelo fio terra, em vez de esperar alguém encostar. Com o DR, essa fuga desliga o circuito na hora. Sem o fio terra, a carcaça fica com tensão em silêncio, e o caminho para a terra passa a ser a primeira pessoa que encostar nela.
+
+<RealCase title="O choque no registro do chuveiro">
+O defeito clássico: a resistência do chuveiro rompe ou fica velha e passa a ter contato com a água ou com partes metálicas. A água do chuveiro conduz eletricidade (ela tem sais dissolvidos), e o cano de metal leva a tensão até o registro. Se o chuveiro não tem fio terra ligado, nada desliga. Quem encosta no registro com a mão seca sente um formigamento; com a mão molhada e o pé no chão, o choque pode ser fatal.
+
+O que fazer:
+
+- Pare de usar o chuveiro e desligue o disjuntor dele.
+- Chame um eletricista para conferir a resistência, a fiação e, principalmente, se o chuveiro tem fio terra ligado e se o circuito tem DR.
+- Não "resolva" com chinelo de borracha: você só esconde o aviso.
+- Não ligue o fio terra do chuveiro no neutro, uma gambiarra comum. Se o neutro se romper, a carcaça passa a receber a tensão da fase por dentro do próprio chuveiro.
+
+A troca da resistência e a ligação correta do chuveiro aparecem na aula <LinkAula id="m07-instalacoes/08-chuveiro-eletrico" />.
+</RealCase>
+
+## EPI e ferramentas
+
+<Term id="epi">EPI</Term> (equipamento de proteção individual) é o que você veste para se proteger: luvas isolantes adequadas à tensão, óculos de proteção, calçado fechado de solado isolante e sem partes metálicas. Somam-se a isso as ferramentas com isolamento para 1.000 V, marcadas com um símbolo de dois triângulos e "1000 V" no cabo, que você vai conhecer na aula <LinkAula id="m00-comece-aqui/03-ferramentas-essenciais" />.
+
+Dois cuidados simples também contam: tire anéis, alianças, pulseiras e relógio (metal conduz, e num curto-circuito um anel pode esquentar a ponto de queimar o dedo) e prefira roupas de algodão de manga comprida.
+
+O EPI é a última barreira, não a primeira. Ele protege você quando algo dá errado, mas não substitui desligar e testar.
+
+## A NR-10 em linguagem simples
+
+A <Term id="nr-10">NR-10</Term> é a Norma Regulamentadora 10, do Ministério do Trabalho, sobre segurança em instalações e serviços com eletricidade. Ela vale para empresas e trabalhadores: exige treinamento específico, autorização, procedimentos escritos, EPI e equipamentos de proteção coletiva. Por isso um eletricista que trabalha em empresas precisa ter o curso de NR-10.
+
+Para trabalhar sem tensão, a NR-10 descreve uma sequência para desenergizar a instalação: seccionar (desligar), impedir a reenergização (travar e sinalizar), constatar a ausência de tensão, instalar aterramento temporário, proteger as partes que continuam energizadas por perto e sinalizar. A regra de ouro desta aula é a versão doméstica dessa sequência. Quem conserta a própria casa não está sob a NR-10, mas não existe referência melhor de como trabalhar com segurança.
+
+## Quando chamar um eletricista
+
+Este curso vai ensinar a fazer muita coisa sozinho. Saber onde parar faz parte desse conhecimento. Chame um eletricista habilitado quando:
+
+- **O serviço envolve o padrão de entrada ou o medidor.** Eles pertencem à distribuidora de energia, e os cabos que chegam até eles não têm disjuntor antes: estão sempre energizados.
+- **Você precisa mexer dentro do quadro.** Mesmo com o disjuntor geral desligado, os cabos que chegam nele, vindos do medidor, continuam com tensão.
+- **Há sinal de problema:** cheiro de queimado, tomada escurecida ou derretida, disjuntor que desarma sempre, choques repetidos, luzes que piscam.
+- **A casa não tem fio terra ou DR.** Corrigir isso pede um projeto, não um remendo.
+- **O trabalho é em altura**, em poste, em rede da rua ou em instalação trifásica de comércio e indústria.
+- **Você tem qualquer dúvida em qualquer etapa.** Esta é a regra mais importante.
+
+## Erros comuns
+
+- **"Desliguei o interruptor, então está sem energia."** O interruptor pode cortar só um dos fios. Desligue o disjuntor e teste.
+- **"Testei com o dedo, ou com as costas da mão."** Nunca use o corpo como instrumento.
+- **"A chave de teste não acendeu."** Ela pode estar com defeito ou você pode estar isolado do chão. Confira o instrumento numa tomada energizada antes e depois.
+- **"O disjuntor desarma muito, vou colocar um maior."** O disjuntor protege o fio. Um disjuntor maior que o fio aguenta deixa o fio esquentar até pegar fogo.
+- **"O DR desarma à toa, vou tirar."** Ele está avisando que há uma fuga. Tirar o DR é desligar o alarme de incêndio porque ele apita.
+- **"127 V não mata, só 220 V."** Como você viu no exemplo, 127 V com a mão molhada levam a corrente bem para dentro da faixa de risco de morte.
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Uma pessoa com a mão molhada (1.000 Ω) encosta numa carcaça com 127 V. O interior do corpo tem 500 Ω e os pés, descalços no piso molhado, 100 Ω. Qual é a corrente pelo corpo, em mA?',
+      answer: 79.4,
+      tolerance: 0.03,
+      unit: 'mA',
+      explanation:
+        'As resistências estão em série e se somam: 1.000 + 500 + 100 = 1.600 Ω. I = 127 V ÷ 1.600 Ω ≈ 0,079 A, ou seja, cerca de 79 mA: faixa de risco de morte.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'O que causa os efeitos de um choque elétrico no corpo?',
+      options: [
+        {
+          text: 'A corrente que atravessa o corpo',
+          correct: true,
+          feedback: 'Isso. A tensão decide quanta corrente passa, mas o dano vem da corrente.',
+        },
+        {
+          text: 'A tensão, sozinha',
+          feedback:
+            'O choque de eletricidade estática tem milhares de volts e não faz mal, porque a corrente é minúscula e dura quase nada.',
+        },
+        {
+          text: 'A potência total da instalação da casa',
+          feedback:
+            'A potência da instalação não muda o que acontece com a pessoa. O que importa é a corrente pelo caminho dela.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Um disjuntor de 20 A desliga quando uma pessoa leva um choque de 80 mA.',
+      answer: false,
+      explanation:
+        '80 mA são 0,08 A, centenas de vezes menos que os 20 A do disjuntor. Ele nem percebe. Quem desliga nesse caso é o DR.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma pessoa de chinelo de borracha seco, em cima de uma escada de madeira, segura a fase com uma mão e o neutro com a outra. Por que o DR não desarma?',
+      options: [
+        {
+          text: 'Porque toda a corrente que passa pela pessoa sai pela fase e volta pelo neutro',
+          correct: true,
+          feedback:
+            'Isso. O DR compara a ida e a volta. Sem fuga para a terra, a pessoa é, para ele, só mais um aparelho ligado.',
+        },
+        {
+          text: 'Porque a corrente é pequena demais',
+          feedback:
+            'Com as duas mãos no circuito a corrente pode ser grande. O problema é que ela não escapa para a terra.',
+        },
+        {
+          text: 'Porque o DR só funciona em 220 V',
+          feedback: 'O DR funciona em 127 V e em 220 V.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque os passos para trocar uma tomada na ordem segura.',
+      items: [
+        'Desligar o disjuntor do circuito',
+        'Confirmar com o instrumento que não há tensão nos fios',
+        'Soltar a tomada velha e ligar a nova',
+        'Recolocar o espelho e só então religar o disjuntor',
+      ],
+      explanation:
+        'Primeiro desligar, depois confirmar que está mesmo desligado, e só então mexer. O disjuntor é religado com tudo fechado.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada proteção ao que ela faz.',
+      pairs: [
+        ['Disjuntor', 'Desliga com sobrecarga e curto-circuito, protegendo os fios'],
+        ['DR', 'Desliga quando parte da corrente escapa para a terra'],
+        ['Fio terra', 'Dá um caminho seguro para a corrente de falha das carcaças'],
+        ['EPI', 'Protege você se algo der errado, como última barreira'],
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Com o disjuntor geral desligado, os cabos que chegam do medidor até o quadro ficam sem tensão.',
+      answer: false,
+      explanation:
+        'Os cabos que chegam no disjuntor geral, vindos do medidor, continuam energizados. É por isso que mexer dentro do quadro é serviço para eletricista.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O dano do choque vem da **corrente** que atravessa o corpo; a tensão decide quanta corrente passa. Acima de algumas dezenas de miliampères, durante cerca de um segundo, existe risco de morte.
+- A **pele** é a principal resistência do corpo. Mão molhada e pé descalço no chão molhado podem multiplicar a corrente por mais de 60.
+- Antes de mexer em qualquer fio: **desligue** o disjuntor, **sinalize** para ninguém religar e **teste** a ausência de tensão com um instrumento conferido.
+- O **disjuntor** protege os fios contra sobrecarga e curto. O **DR** protege as pessoas, desligando quando a corrente escapa para a terra. O **fio terra** dá à corrente de falha um caminho que não é você.
+- Padrão de entrada, medidor, interior do quadro, sinais de queimado e qualquer dúvida: **chame um eletricista habilitado**.
