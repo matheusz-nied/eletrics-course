@@ -18,13 +18,17 @@ export class ResistiveHeating {
   private readonly avg = new Average(0.01);
   burned = false;
 
-  constructor(private readonly rating: () => number) {}
+  /** `tau` overrides the time constant that follows from the rating (s). */
+  constructor(
+    private readonly rating: () => number,
+    private readonly tau?: number,
+  ) {}
 
   /** Advances by dt with the dissipated power; reports a new warning or burn. */
   step(power: number, dt: number): 'ok' | 'hot' | 'burned' {
     if (dt <= 0) return 'ok';
     const watts = this.rating();
-    const tau = 8 * Math.sqrt(watts / 0.25);
+    const tau = this.tau ?? 8 * Math.sqrt(watts / 0.25);
     if (this.burned) {
       this.rise = relax(this.rise, 0, dt, tau);
       return 'ok';
