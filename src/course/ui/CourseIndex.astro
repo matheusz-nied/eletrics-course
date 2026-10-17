@@ -1,0 +1,21 @@
+---
+/*
+ * The lessons that have a page, in course order, as JSON for the browser
+ * scripts that need titles and links ("continuar de onde parou", /progresso/).
+ */
+import type { CatalogLesson, CatalogModule } from '../catalog';
+import type { IndexLesson } from './course-index';
+
+interface Props {
+  modules: CatalogModule[];
+}
+
+const { modules } = Astro.props;
+const lessons: IndexLesson[] = modules.flatMap((m) =>
+  m.lessons
+    .filter((l): l is CatalogLesson & { href: string } => l.href !== undefined)
+    .map((l) => ({ i: l.id, n: l.number, t: l.titulo, m: m.titulo, mi: m.id, h: l.href })),
+);
+---
+
+<script is:inline type="application/json" id="curso-indice" set:html={JSON.stringify(lessons)} />

@@ -1,0 +1,28 @@
+---
+/*
+ * Head tags for offline use and installing the app (rendered by
+ * BaseLayout.astro): the web manifest, the iOS icon and the service worker
+ * registration. The service worker itself comes from src/course/pwa/options.mjs.
+ */
+import { pwaInfo } from 'virtual:pwa-info';
+import { withBase } from '../lib/url';
+---
+
+{pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
+<link rel="apple-touch-icon" href={withBase('icons/apple-touch-icon.png')} />
+<meta name="apple-mobile-web-app-title" content="Eletrônica" />
+
+<script>
+  // Only the build has a service worker (dist/sw.js). Updates apply on the next
+  // page opened, so an open lesson or workshop is never reloaded.
+  if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+    const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+    const register = () => {
+      navigator.serviceWorker.register(`${base}sw.js`, { scope: base }).catch(() => {
+        // Private mode or blocked: the site works online as usual.
+      });
+    };
+    if (document.readyState === 'complete') register();
+    else window.addEventListener('load', register, { once: true });
+  }
+</script>

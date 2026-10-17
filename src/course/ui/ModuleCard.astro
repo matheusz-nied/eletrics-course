@@ -1,0 +1,116 @@
+---
+import { available, plural, type CatalogModule } from '../catalog';
+import { withBase } from '../../lib/url';
+import CourseIcon from './CourseIcon.astro';
+import ProgressBar from './ProgressBar.astro';
+
+interface Props {
+  module: CatalogModule;
+  /** h3 on the home page, h2 elsewhere. */
+  headingLevel?: 2 | 3 | 4;
+}
+
+const { module, headingLevel = 3 } = Astro.props;
+const ready = available(module.lessons);
+const href = module.href ?? withBase(`modulos/#${module.id}`);
+const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
+const meta = module.published
+  ? plural(ready.length, 'aula', 'aulas')
+  : `${plural(module.lessons.length, 'aula planejada', 'aulas planejadas')}`;
+---
+
+<a href={href} class:list={['card', 'mcard', { 'mcard--soon': !module.published }]}>
+  <span class="mcard__top">
+    <span class="mcard__icon">
+      <CourseIcon name={module.icone} size={22} />
+    </span>
+    <span class="mcard__number num">M{String(module.numero).padStart(2, '0')}</span>
+  </span>
+  <Heading class="mcard__title">{module.titulo}</Heading>
+  <span class="mcard__summary">{module.resumo}</span>
+  <span class="mcard__foot">
+    <span class="mcard__meta">
+      {module.published ? meta : <span class="mcard__soon">Em breve</span>}
+      {!module.published && <span class="mcard__planned"> · {meta}</span>}
+    </span>
+    {ready.length > 0 && (
+      <ProgressBar
+        lessons={ready.map((l) => l.id)}
+        label={`Progresso no módulo ${module.numero}`}
+        variant="compact"
+      />
+    )}
+  </span>
+</a>
+
+<style>
+  .mcard {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 0.5rem;
+    height: 100%;
+    padding: 1.125rem 1.125rem 1rem;
+  }
+
+  .mcard__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+  }
+
+  .mcard__icon {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.625rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .mcard--soon .mcard__icon {
+    background: var(--surface-2);
+    color: var(--fg-muted);
+  }
+
+  .mcard__number {
+    color: var(--fg-subtle);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  .mcard__title {
+    font-size: 1.0625rem;
+    font-weight: 650;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  .mcard__summary {
+    color: var(--fg-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .mcard__foot {
+    display: grid;
+    gap: 0.625rem;
+    margin-top: 0.375rem;
+  }
+
+  .mcard__meta {
+    color: var(--accent);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  .mcard__soon {
+    color: var(--fg-muted);
+  }
+
+  .mcard__planned {
+    color: var(--fg-subtle);
+    font-weight: 500;
+  }
+</style>

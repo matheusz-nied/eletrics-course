@@ -1,0 +1,32 @@
+# Trilha Portão (docs/plano/01-curriculo.md, "Trilhas"; docs/plano/05-portao.md).
+titulo: Portão eletrônico
+paraQuem: Quem vai instalar, trocar ou consertar um automatizador de portão.
+resumo: >-
+  O caminho mais curto para trocar o motor e a central do portão com segurança e entender cada
+  ligação: rede elétrica, multímetro, motor com capacitor, fim de curso, jumpers e controle remoto.
+ordem: 1
+icone: portao
+itens:
+  - m00-comece-aqui/02-seguranca-em-eletricidade
+  - m00-comece-aqui/03-ferramentas-essenciais
+  - m01-eletricidade-do-zero/02-corrente-eletrica
+  - m01-eletricidade-do-zero/03-tensao
+  - m01-eletricidade-do-zero/04-lei-de-ohm
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+  - m03-medicoes/01-multimetro
+  - m03-medicoes/02-medindo-tensao
+  - m03-medicoes/03-medindo-corrente
+  - m03-medicoes/04-resistencia-continuidade-e-diodo
+  - m04-passivos/03-capacitores
+  - m04-passivos/07-chaves-botoes-e-reles
+  - m05-magnetismo/05-sensores-magneticos
+  - m06-corrente-alternada/01-da-cc-a-ca
+  - m06-corrente-alternada/02-pico-eficaz-e-medio
+  - m07-instalacoes/02-fase-neutro-e-terra
+  - m07-instalacoes/03-disjuntores-dr-e-dps
+  - m08-motores/04-motor-monofasico-capacitor
+  - m08-motores/06-redutores-torque-e-potencia
+  - m14-placas/03-identificando-componentes
+  - m14-placas/04-jumpers-e-dip-switches
+  - m14-placas/06-bornes-conectores-e-emendas
+  - m16-portao

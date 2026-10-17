@@ -1,0 +1,81 @@
+---
+/* One lesson's mark (new, started, done), filled in the browser (src/course/progress/ui.ts). */
+interface Props {
+  lessonId: string;
+}
+
+const { lessonId } = Astro.props;
+---
+
+<span class="lstate" data-lesson-state={lessonId} data-state="nova" data-pagefind-ignore>
+  <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false">
+    <circle class="lstate__ring" cx="10" cy="10" r="8.25"></circle>
+    <path class="lstate__half" d="M10 1.75a8.25 8.25 0 0 1 0 16.5z"></path>
+    <path class="lstate__check" d="M6 10.4l2.6 2.6L14 7.6"></path>
+  </svg>
+  <span class="sr-only" data-lesson-state-label></span>
+</span>
+
+<script>
+  import { startProgressUi } from '../progress/ui';
+  startProgressUi();
+</script>
+
+<style>
+  .lstate {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--border-strong);
+  }
+
+  .lstate svg {
+    overflow: visible;
+  }
+
+  .lstate__ring {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+
+  .lstate__half,
+  .lstate__check {
+    opacity: 0;
+  }
+
+  .lstate__half {
+    fill: var(--accent);
+  }
+
+  .lstate__check {
+    fill: none;
+    stroke: var(--on-accent);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .lstate[data-state='iniciada'] {
+    color: var(--accent);
+  }
+
+  .lstate[data-state='iniciada'] .lstate__half {
+    opacity: 1;
+  }
+
+  .lstate[data-state='lida'] {
+    color: var(--success);
+  }
+
+  .lstate[data-state='lida'] .lstate__ring {
+    fill: var(--success);
+  }
+
+  .lstate[data-state='lida'] .lstate__check {
+    opacity: 1;
+    stroke: light-dark(#fff, #0b0e13);
+  }
+</style>

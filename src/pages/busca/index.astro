@@ -1,0 +1,15 @@
+---
+/* Site search (Pagefind): lessons and glossary terms. */
+import CoursePage from '../../course/ui/CoursePage.astro';
+import SearchBox from '../../course/search/SearchBox.astro';
+---
+
+<CoursePage
+  title="Busca"
+  eyebrow="Encontre no curso"
+  icon="buscar"
+  lead="Procure por aulas e termos do glossário. Em qualquer página, use o botão de busca do cabeçalho ou as teclas Ctrl + K."
+  width="narrow"
+>
+  <SearchBox id="busca-pagina" autofocus syncUrl />
+</CoursePage>

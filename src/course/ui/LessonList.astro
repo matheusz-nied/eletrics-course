@@ -1,0 +1,145 @@
+---
+/* Lessons of a module or of a track: published ones link and show progress; planned ones say "em breve". */
+import type { CatalogLesson } from '../catalog';
+import { LEVEL_LABELS } from '../../lib/site';
+import CourseIcon from './CourseIcon.astro';
+import LessonState from './LessonState.astro';
+
+interface Props {
+  lessons: CatalogLesson[];
+  /** Accessible name of the list. */
+  label?: string;
+}
+
+const { lessons, label } = Astro.props;
+---
+
+<ol class="llist" aria-label={label}>
+  {lessons.map((lesson) => {
+    const meta = [
+      lesson.nivel ? LEVEL_LABELS[lesson.nivel] : undefined,
+      lesson.duracaoMin ? `${lesson.duracaoMin} min` : undefined,
+    ].filter(Boolean);
+    const body = (
+      <>
+        <span class="llist__number num">{lesson.number}</span>{' '}
+        <span class="llist__main">
+          <span class="llist__title">{lesson.titulo}</span>{' '}
+          <span class="llist__meta">
+            {lesson.status === 'em-breve' ? (
+              <span class="llist__soon">Em breve</span>
+            ) : (
+              meta.join(' · ')
+            )}
+            {lesson.status === 'em-breve' && lesson.nivel === 'A' && ' · Avançada'}
+            {lesson.seguranca === 'rede' && <span class="llist__danger"> · Rede elétrica</span>}
+            {lesson.status === 'rascunho' && <span class="llist__draft"> · Rascunho</span>}
+          </span>
+        </span>
+      </>
+    );
+    return (
+      <li class:list={['llist__item', { 'llist__item--soon': !lesson.href }]}>
+        {lesson.href ? (
+          <a href={lesson.href} class="llist__row">
+            <LessonState lessonId={lesson.id} />
+            {body}
+            <CourseIcon name="seta-direita" size={18} class="llist__arrow" />
+          </a>
+        ) : (
+          <div class="llist__row">
+            <span class="llist__dot" aria-hidden="true"></span>
+            {body}
+          </div>
+        )}
+      </li>
+    );
+  })}
+</ol>
+
+<style>
+  .llist {
+    display: grid;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .llist__item + .llist__item {
+    border-top: 1px solid var(--border);
+  }
+
+  .llist__row {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    min-height: 3.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  a.llist__row {
+    transition: background-color 150ms;
+  }
+
+  a.llist__row:hover {
+    background: var(--surface);
+  }
+
+  .llist__item--soon .llist__row {
+    background: color-mix(in oklab, var(--surface) 55%, transparent);
+  }
+
+  .llist__dot {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 1.5px dashed var(--border-strong);
+    border-radius: 999px;
+  }
+
+  .llist__number {
+    flex: none;
+    min-width: 2.75rem;
+    color: var(--fg-subtle);
+  }
+
+  .llist__main {
+    display: grid;
+    flex: 1;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .llist__title {
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .llist__item--soon .llist__title {
+    color: var(--fg-muted);
+    font-weight: 500;
+  }
+
+  .llist__meta {
+    color: var(--fg-muted);
+    font-size: 0.8125rem;
+  }
+
+  .llist__soon {
+    color: var(--fg-subtle);
+  }
+
+  .llist__danger {
+    color: var(--danger);
+  }
+
+  .llist__draft {
+    color: var(--warning);
+  }
+
+  .llist :global(.llist__arrow) {
+    flex: none;
+    color: var(--fg-subtle);
+  }
+</style>

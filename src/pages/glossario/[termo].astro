@@ -1,0 +1,204 @@
+---
+/* One glossary term: short definition, full explanation, synonyms, related terms and lesson. */
+import 'katex/dist/katex.min.css';
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import { getCourseData, termUrl, type Term } from '../../course/data';
+import type { CatalogLesson } from '../../course/catalog';
+import CourseIcon from '../../course/ui/CourseIcon.astro';
+import CoursePage from '../../course/ui/CoursePage.astro';
+import { withBase } from '../../lib/url';
+
+export const getStaticPaths = (async () => {
+  const { terms, lessons } = await getCourseData();
+  return terms.map((term) => ({
+    params: { termo: term.id },
+    props: {
+      term,
+      related: term.data.relacionados
+        .map((id) => terms.find((t) => t.id === id))
+        .filter((t): t is Term => t !== undefined),
+      lesson: lessons.find((l) => l.id === term.data.aula),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  term: Term;
+  related: Term[];
+  lesson?: CatalogLesson | undefined;
+}
+
+const { term, related, lesson } = Astro.props;
+const { Content } = await render(term);
+---
+
+<CoursePage
+  title={term.data.termo}
+  eyebrow="Glossário"
+  lead={term.data.resumo}
+  description={term.data.resumo}
+  width="narrow"
+  search="Glossário"
+>
+  <Fragment slot="header">
+    {term.data.sinonimos.length > 0 && (
+      <p class="term__syn">
+        <span class="term__syn-label">Também chamado de</span>
+        {term.data.sinonimos.map((s) => (
+          <span class="chip">{s}</span>
+        ))}
+      </p>
+    )}
+  </Fragment>
+
+  <article class="term__body">
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+
+  <div class="term__links" data-pagefind-ignore>
+    {lesson && (
+      <section class="term__box" aria-labelledby="term-aula">
+        <h2 id="term-aula" class="eyebrow">
+          Para aprofundar
+        </h2>
+        {lesson.href ? (
+          <a href={lesson.href} class="term__lesson">
+            <CourseIcon name="livro" />
+            <span>
+              <span class="num">Aula {lesson.number}</span> {lesson.titulo}
+            </span>
+          </a>
+        ) : (
+          <p class="term__lesson term__lesson--soon">
+            <CourseIcon name="livro" />
+            <span>
+              <span class="num">Aula {lesson.number}</span> {lesson.titulo} (em breve)
+            </span>
+          </p>
+        )}
+      </section>
+    )}
+    {related.length > 0 && (
+      <section class="term__box" aria-labelledby="term-rel">
+        <h2 id="term-rel" class="eyebrow">
+          Termos relacionados
+        </h2>
+        <ul class="term__related">
+          {related.map((r) => (
+            <li>
+              <a href={termUrl(r.id)}>{r.data.termo}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </div>
+
+  <a href={withBase('glossario/')} class="term__back">
+    <CourseIcon name="seta-esquerda" size={18} />
+    Todos os termos
+  </a>
+</CoursePage>
+
+<style>
+  .term__syn {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .term__syn-label {
+    margin-right: 0.25rem;
+    color: var(--fg-subtle);
+    font-size: 0.875rem;
+  }
+
+  .term__body {
+    padding-top: 0.5rem;
+  }
+
+  .term__links {
+    display: grid;
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  @media (min-width: 40rem) {
+    .term__links {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .term__box {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    padding: 1.125rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .term__lesson {
+    display: flex;
+    gap: 0.5rem;
+    color: var(--accent);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .term__lesson :global(svg) {
+    flex: none;
+    margin-top: 0.1rem;
+  }
+
+  a.term__lesson:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .term__lesson--soon {
+    color: var(--fg-muted);
+    font-weight: 500;
+  }
+
+  .term__related {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .term__related a {
+    display: inline-flex;
+    padding: 0.35rem 0.75rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .term__related a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .term__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 2.5rem;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .term__back:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+</style>

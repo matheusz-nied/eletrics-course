@@ -1,112 +1,296 @@
 ---
 /*
- * Provisional home page from the Fundação. The Experiência front replaces it
- * with the real one (tracks, progress, "continue where you left off").
+ * Home page (Experiência): what the course is, where to continue, the tracks,
+ * the gate reference case and the curriculum map.
  */
-import Icon from '../components/Icon.astro';
+import { available, plural, type CatalogModule } from '../course/catalog';
+import { getCourseData, trackUrl } from '../course/data';
+import CourseIcon from '../course/ui/CourseIcon.astro';
+import CourseIndex from '../course/ui/CourseIndex.astro';
+import HeroCircuit from '../course/ui/HeroCircuit.astro';
+import ModuleCard from '../course/ui/ModuleCard.astro';
+import TrackCard from '../course/ui/TrackCard.astro';
+import type { CourseIconName } from '../course/ui/icons';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getCourse, lessonsOf, type Module } from '../lib/content';
 import { PARTS, SITE } from '../lib/site';
-import { lessonUrl, moduleUrl } from '../lib/url';
+import { withBase } from '../lib/url';
 
-const { modules, listed } = await getCourse();
-const first = listed[0];
+const { modules, lessons, tracks, terms } = await getCourseData();
+const ready = available(lessons);
+const first = ready[0];
+const startHref = first?.href ?? modules[0]?.href ?? withBase('modulos/');
 
-const parts = new Map<number, Module[]>();
-for (const m of modules) parts.set(m.data.parte, [...(parts.get(m.data.parte) ?? []), m]);
+const parts = new Map<number, CatalogModule[]>();
+for (const m of modules) parts.set(m.parte, [...(parts.get(m.parte) ?? []), m]);
 
-const pillars = [
+const gate = tracks.find((t) => t.id === 'portao-eletronico');
+const otherTracks = tracks.filter((t) => t !== gate);
+
+const stats = [
+  { value: modules.length, label: 'módulos' },
+  { value: lessons.length, label: 'aulas no currículo' },
+  { value: tracks.length, label: 'trilhas' },
+  { value: terms.length, label: 'termos no glossário' },
+];
+
+const features: { icon: CourseIconName; title: string; text: string }[] = [
   {
     icon: 'circuito',
-    title: 'Simulações de verdade',
-    text: 'Circuitos calculados como num simulador profissional: o LED queima, o fusível rompe e o motor zumbe sem capacitor.',
+    title: 'Simulações que calculam de verdade',
+    text: 'Circuitos resolvidos como num simulador profissional: o LED queima, o fusível rompe e o motor só zumbe sem o capacitor.',
   },
   {
     icon: 'chip',
-    title: 'Componentes em 3D',
-    text: 'Gire, abra e corte cada peça para ver onde fica cada terminal e o que existe dentro dela.',
+    title: 'Componentes em 3D, por dentro',
+    text: 'Gire, abra e corte cada peça em escala real para ver onde fica cada terminal e o que existe lá dentro.',
   },
   {
-    icon: 'portao',
-    title: 'Casos reais',
-    text: 'Da tomada ao motor do portão: cada aula termina numa situação da vida real, com segurança em primeiro lugar.',
+    icon: 'ferramenta',
+    title: 'Casos reais em toda aula',
+    text: 'Do chuveiro ao portão eletrônico: cada conceito termina numa situação da vida real e no que fazer com ela.',
   },
-] as const;
+  {
+    icon: 'seguranca',
+    title: 'Segurança primeiro',
+    text: 'Desligar, testar e sinalizar antes de mexer. A própria simulação reforça a ordem segura de cada procedimento.',
+  },
+  {
+    icon: 'offline',
+    title: 'Modo oficina, sem internet',
+    text: 'Passos grandes no celular, marcados um a um, para usar ao lado do equipamento. Funciona offline.',
+  },
+  {
+    icon: 'progresso',
+    title: 'Seu progresso, sem cadastro',
+    text: 'O curso lembra o que você leu e acertou, direto no navegador. Exporte um arquivo para levar a outro aparelho.',
+  },
+];
+
+const gatePhases = [
+  {
+    title: 'Antes de comprar',
+    text: 'Anotar tensão, potência e tipo do motor atual; conferir disjuntor e terra.',
+  },
+  {
+    title: 'Desmontar',
+    text: 'Desligar, testar a ausência de tensão, fotografar e etiquetar cada fio.',
+  },
+  {
+    title: 'Montar',
+    text: 'Achar comum, abre e fecha com o multímetro; ligar motor, capacitor e sensores.',
+  },
+  {
+    title: 'Testar e ajustar',
+    text: 'Fins de curso, força, pausa, controles e o teste da fotocélula.',
+  },
+];
 ---
 
 <BaseLayout>
   <main id="conteudo" tabindex="-1" class="home">
-    <section class="hero">
-      <p class="eyebrow">{SITE.fullName}</p>
-      <h1>Entenda a eletricidade e a eletrônica, do princípio à bancada.</h1>
-      <p class="hero__lead">
-        Aulas claras, simulações que calculam de verdade e modelos 3D dos componentes. Você aprende
-        como as coisas funcionam e como fazer: medir, ligar, montar e consertar com segurança.
-      </p>
-      <div class="hero__actions">
-        {first ? (
-          <a href={lessonUrl(first.id)} class="btn btn--primary">
-            Começar pela primeira aula
-            <Icon name="seta-direita" size={18} />
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__text">
+        <p class="hero__eyebrow">
+          <span class="hero__dot" aria-hidden="true"></span>
+          {SITE.fullName}
+        </p>
+        <h1 id="hero-title">Entenda a eletricidade e a eletrônica, do princípio à bancada.</h1>
+        <p class="hero__lead">
+          Um curso completo e gratuito, com aulas claras, simulações que calculam de verdade e
+          modelos 3D dos componentes. Você aprende como as coisas funcionam e como fazer: medir,
+          ligar, montar e consertar com segurança.
+        </p>
+        <div class="hero__actions">
+          <a href={startHref} class="btn btn--primary">
+            {first ? 'Começar o curso' : 'Conhecer o curso'}
+            <CourseIcon name="seta-direita" size={18} />
           </a>
-        ) : (
-          <a href="#modulos" class="btn btn--primary">
-            Ver os módulos
-            <Icon name="seta-direita" size={18} />
+          <a href="#trilhas" class="btn btn--ghost">
+            <CourseIcon name="trilha" size={18} />
+            Escolher uma trilha
           </a>
-        )}
+        </div>
+        <ul class="hero__stats" aria-label="O curso em números">
+          {stats.map((s) => (
+            <li>
+              <span class="hero__stat-value num">{s.value.toLocaleString('pt-BR')}</span>{' '}
+              <span class="hero__stat-label">{s.label}</span>
+            </li>
+          ))}
+        </ul>
       </div>
-      <ul class="pillars">
-        {pillars.map((p) => (
-          <li class="pillar">
-            <span class="pillar__icon">
-              <Icon name={p.icon} size={22} />
+      <div class="hero__visual">
+        <HeroCircuit />
+      </div>
+    </section>
+
+    <section class="resume" data-resume hidden aria-labelledby="resume-title">
+      <span class="resume__icon">
+        <CourseIcon name="livro" size={22} />
+      </span>
+      <div class="resume__text">
+        <p class="eyebrow" data-resume-kicker>
+          Continuar de onde parou
+        </p>
+        <h2 id="resume-title" class="resume__title" data-resume-title>
+          Aula
+        </h2>
+        <p class="resume__meta" data-resume-meta></p>
+      </div>
+      <a href={withBase('progresso/')} class="btn btn--primary resume__link" data-resume-link>
+        Continuar
+        <CourseIcon name="seta-direita" size={18} />
+      </a>
+    </section>
+
+    <section id="trilhas" class="section" aria-labelledby="trilhas-titulo">
+      <div class="section__head">
+        <p class="eyebrow">Por onde começar</p>
+        <h2 id="trilhas-titulo">Trilhas</h2>
+        <p class="section__lead">
+          Caminhos curtos pelo currículo para quem tem um objetivo prático. Cada trilha reúne só as
+          aulas necessárias, na ordem certa.
+        </p>
+      </div>
+      <div class="tracks">
+        {gate && <TrackCard track={gate} featured />}
+        <ul class="tracks__others">
+          {otherTracks.map((t) => (
+            <li>
+              <TrackCard track={t} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    {gate && (
+      <section class="section gate" aria-labelledby="portao-titulo">
+        <div class="gate__intro">
+          <p class="eyebrow">Caso de referência</p>
+          <h2 id="portao-titulo">Trocar o motor do portão, entendendo cada fio</h2>
+          <p>
+            O módulo do portão eletrônico é a prova do curso. Ao terminar a trilha, você consegue
+            desligar e soltar os cabos com segurança, identificar os fios do motor com o multímetro,
+            ligar a central nova, configurar os jumpers, cadastrar os controles e testar a
+            fotocélula, sabendo por que cada ligação é feita daquele jeito.
+          </p>
+          <a href={trackUrl(gate.id)} class="btn btn--primary">
+            Ver a trilha do portão
+            <CourseIcon name="seta-direita" size={18} />
+          </a>
+        </div>
+        <ol class="gate__phases">
+          {gatePhases.map((p, i) => (
+            <li class="gate__phase">
+              <span class="gate__step num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="gate__phase-title">{p.title}</span>
+              <span class="gate__phase-text">{p.text}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
+
+    <section class="section" aria-labelledby="como-titulo">
+      <div class="section__head">
+        <p class="eyebrow">Como o curso funciona</p>
+        <h2 id="como-titulo">Aprender vendo, mexendo e fazendo</h2>
+      </div>
+      <ul class="features">
+        {features.map((f) => (
+          <li class="feature">
+            <span class="feature__icon">
+              <CourseIcon name={f.icon} size={22} />
             </span>
-            <span class="pillar__title">{p.title}</span> <span class="pillar__text">{p.text}</span>
+            <span class="feature__title">{f.title}</span>{' '}
+            <span class="feature__text">{f.text}</span>
           </li>
         ))}
       </ul>
     </section>
 
-    <section id="modulos" class="modules" aria-labelledby="modulos-titulo">
-      <h2 id="modulos-titulo">Módulos</h2>
-      <p class="modules__note">
-        O curso está sendo construído. Cada módulo aparece aqui assim que fica pronto.
-      </p>
+    <section id="modulos" class="section" aria-labelledby="modulos-titulo">
+      <div class="section__head section__head--row">
+        <div>
+          <p class="eyebrow">Currículo</p>
+          <h2 id="modulos-titulo">Módulos</h2>
+          <p class="section__lead">
+            {plural(modules.length, 'módulo', 'módulos')} em quatro partes. O curso está sendo
+            publicado módulo a módulo; os que ainda não abriram aparecem como "em breve".
+          </p>
+        </div>
+        <a href={withBase('modulos/')} class="btn btn--ghost">
+          Ver todas as aulas
+          <CourseIcon name="seta-direita" size={18} />
+        </a>
+      </div>
       {[...parts.entries()].map(([parte, mods]) => (
         <div class="part">
-          <h3 class="eyebrow">
-            Parte {parte} · {PARTS[parte]}
+          <h3 class="part__title">
+            <span class="num">Parte {parte}</span> {PARTS[parte]}
           </h3>
           <ul class="module-grid">
-            {mods.map((m) => {
-              const count = lessonsOf(listed, m.id).length;
-              return (
-                <li>
-                  <a href={moduleUrl(m.id)} class="card module-card">
-                    <span class="module-card__icon">
-                      <Icon name={m.data.icone} size={22} />
-                    </span>
-                    <span class="module-card__number">Módulo {m.data.numero}</span>{' '}
-                    <span class="module-card__title">{m.data.titulo}</span>{' '}
-                    <span class="module-card__summary">{m.data.resumo}</span>{' '}
-                    <span class="module-card__meta">
-                      {count > 0 ? `${count} ${count === 1 ? 'aula' : 'aulas'}` : 'Em breve'}
-                    </span>
-                  </a>
-                </li>
-              );
-            })}
+            {mods.map((m) => (
+              <li>
+                <ModuleCard module={m} headingLevel={4} />
+              </li>
+            ))}
           </ul>
         </div>
       ))}
     </section>
+
+    <aside class="safety" aria-label="Aviso de segurança">
+      <CourseIcon name="seguranca" size={24} />
+      <p>
+        <strong>Eletricidade da rede mata.</strong> O curso ensina a trabalhar com o disjuntor
+        desligado, a testar a ausência de tensão e a reconhecer quando é hora de chamar um
+        eletricista habilitado. Em instalações, siga a NBR 5410 e o manual do fabricante.
+      </p>
+    </aside>
   </main>
+  <CourseIndex modules={modules} />
 </BaseLayout>
+
+<script>
+  import { getProgress } from '../course/progress/store';
+  import { readCourseIndex, resumeTarget } from '../course/ui/course-index';
+
+  // "Continuar de onde parou": the last lesson opened, or the next one after it.
+  const box = document.querySelector<HTMLElement>('[data-resume]');
+  const store = getProgress();
+
+  function update() {
+    if (!box) return;
+    const target = resumeTarget(readCourseIndex(), store.lastLesson()?.id, (id) =>
+      store.isRead(id),
+    );
+    if (!target) {
+      box.hidden = true;
+      return;
+    }
+    const { lesson, kind } = target;
+    box.querySelector('[data-resume-kicker]')!.textContent =
+      kind === 'continuar' ? 'Continuar de onde parou' : 'Próxima aula';
+    box.querySelector('[data-resume-title]')!.textContent = lesson.t;
+    box.querySelector('[data-resume-meta]')!.textContent = `Aula ${lesson.n} · ${lesson.m}`;
+    const link = box.querySelector<HTMLAnchorElement>('[data-resume-link]')!;
+    link.href = lesson.h;
+    link.setAttribute(
+      'aria-label',
+      `${kind === 'continuar' ? 'Continuar' : 'Começar'}: ${lesson.t}`,
+    );
+    box.hidden = false;
+  }
+
+  update();
+  store.subscribe(update);
+</script>
 
 <style>
   .home {
-    max-width: 72rem;
+    max-width: 76rem;
     margin: 0 auto;
     padding: 0 1rem;
   }
@@ -121,20 +305,47 @@ const pillars = [
     }
   }
 
+  /* Hero */
+
   .hero {
-    padding: 3.5rem 0 3rem;
+    display: grid;
+    gap: 2.5rem;
+    padding: 3rem 0 3.5rem;
   }
 
-  @media (min-width: 48rem) {
+  @media (min-width: 64rem) {
     .hero {
-      padding: 6rem 0 4.5rem;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      align-items: center;
+      gap: 3.5rem;
+      padding: 5.5rem 0 5rem;
     }
   }
 
+  .hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.75rem 0.3rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--fg-muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  .hero__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--copper);
+  }
+
   .hero h1 {
-    max-width: 48rem;
-    margin-top: 1rem;
-    font-size: clamp(2.25rem, 1.5rem + 3.6vw, 4rem);
+    max-width: 40rem;
+    margin-top: 1.25rem;
+    font-size: clamp(2.25rem, 1.5rem + 3vw, 3.5rem);
     font-weight: 750;
     letter-spacing: -0.035em;
     line-height: 1.04;
@@ -142,76 +353,318 @@ const pillars = [
   }
 
   .hero__lead {
-    max-width: 40rem;
-    margin-top: 1.5rem;
+    max-width: 38rem;
+    margin-top: 1.375rem;
     color: var(--fg-muted);
-    font-size: 1.1875rem;
+    font-size: 1.15rem;
     line-height: 1.6;
   }
 
   .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
     margin-top: 2rem;
   }
 
-  .pillars {
-    display: grid;
-    gap: 1rem;
-    margin-top: 3.5rem;
+  .btn--ghost {
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--fg);
   }
 
-  @media (min-width: 48rem) {
-    .pillars {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
-    }
+  .btn--ghost:hover {
+    background: var(--surface-2);
   }
 
-  .pillar {
+  .hero__stats {
     display: grid;
-    align-content: start;
-    gap: 0.5rem;
-    padding-top: 1.25rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.5rem;
+    max-width: 34rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
     border-top: 1px solid var(--border);
   }
 
-  .pillar__icon {
-    color: var(--copper);
+  @media (min-width: 30rem) {
+    .hero__stats {
+      grid-template-columns: repeat(4, auto);
+      justify-content: start;
+      gap: 2rem;
+    }
   }
 
-  .pillar__title {
+  .hero__stats li {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .hero__stat-value {
+    font-size: 1.5rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+
+  .hero__stat-label {
+    color: var(--fg-muted);
+    font-size: 0.8125rem;
+  }
+
+  /* Resume */
+
+  .resume {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    padding: 1.25rem;
+    border: 1px solid color-mix(in oklab, var(--accent) 30%, var(--border));
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+  }
+
+  .resume[hidden] {
+    display: none;
+  }
+
+  @media (min-width: 40rem) {
+    .resume {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      padding: 1.25rem 1.5rem;
+    }
+  }
+
+  .resume__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background: var(--bg);
+    color: var(--accent);
+  }
+
+  .resume__title {
+    margin-top: 0.15rem;
+    font-size: 1.1875rem;
+    font-weight: 650;
+    line-height: 1.3;
+  }
+
+  .resume__meta {
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+  }
+
+  .resume__link {
+    grid-column: 1 / -1;
+  }
+
+  @media (min-width: 40rem) {
+    .resume__link {
+      grid-column: auto;
+    }
+  }
+
+  /* Sections */
+
+  .section {
+    padding: 3.5rem 0 1rem;
+  }
+
+  @media (min-width: 48rem) {
+    .section {
+      padding-top: 5rem;
+    }
+  }
+
+  .section__head {
+    display: grid;
+    gap: 0.5rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .section__head--row {
+    align-items: end;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 48rem) {
+    .section__head--row {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+  }
+
+  .section h2 {
+    font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.375rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  .section__lead {
+    max-width: 42rem;
+    color: var(--fg-muted);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+
+  /* Tracks */
+
+  .tracks {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .tracks__others {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 48rem) {
+    .tracks__others {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Gate */
+
+  .gate {
+    display: grid;
+    gap: 2rem;
+  }
+
+  @media (min-width: 64rem) {
+    .gate {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      align-items: center;
+      gap: 4rem;
+    }
+  }
+
+  .gate__intro {
+    display: grid;
+    justify-items: start;
+    gap: 1rem;
+  }
+
+  .gate__intro p:not(.eyebrow) {
+    color: var(--fg-muted);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+
+  .gate__phases {
+    display: grid;
+    gap: 0.75rem;
+    counter-reset: phase;
+  }
+
+  @media (min-width: 40rem) {
+    .gate__phases {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .gate__phase {
+    display: grid;
+    align-content: start;
+    gap: 0.375rem;
+    padding: 1.125rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .gate__step {
+    color: var(--copper);
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  .gate__phase-title {
     font-weight: 650;
   }
 
-  .pillar__text {
+  .gate__phase-text {
+    color: var(--fg-muted);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  /* Features */
+
+  .features {
+    display: grid;
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--border);
+  }
+
+  @media (min-width: 40rem) {
+    .features {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .features {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .feature {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    background: var(--bg);
+  }
+
+  .feature__icon {
+    margin-bottom: 0.25rem;
+    color: var(--copper);
+  }
+
+  .feature__title {
+    font-weight: 650;
+  }
+
+  .feature__text {
     color: var(--fg-muted);
     font-size: 0.9375rem;
     line-height: 1.55;
   }
 
-  .modules {
-    padding-top: 2rem;
-    border-top: 1px solid var(--border);
-  }
+  /* Modules */
 
-  .modules h2 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-
-  .modules__note {
-    margin-top: 0.5rem;
-    color: var(--fg-muted);
-  }
-
-  .part {
+  .part + .part {
     margin-top: 2.5rem;
+  }
+
+  .part__title {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.625rem;
+    align-items: baseline;
+    margin-bottom: 1rem;
+    font-size: 1.0625rem;
+    font-weight: 650;
+  }
+
+  .part__title .num {
+    color: var(--copper);
+    font-size: 0.875rem;
   }
 
   .module-grid {
     display: grid;
     gap: 1rem;
-    margin-top: 1rem;
   }
 
   @media (min-width: 40rem) {
@@ -226,47 +679,28 @@ const pillars = [
     }
   }
 
-  .module-card {
-    display: grid;
-    align-content: start;
-    gap: 0.375rem;
-    height: 100%;
-    padding: 1.25rem;
+  @media (min-width: 80rem) {
+    .module-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
   }
 
-  .module-card__icon {
-    display: grid;
-    place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    margin-bottom: 0.5rem;
-    border-radius: 0.625rem;
-    background: var(--accent-soft);
-    color: var(--accent);
+  /* Safety */
+
+  .safety {
+    display: flex;
+    gap: 1rem;
+    margin-top: 4rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--danger-border);
+    border-radius: var(--radius);
+    background: var(--danger-soft);
+    color: var(--fg);
+    line-height: 1.6;
   }
 
-  .module-card__number {
-    color: var(--fg-subtle);
-    font-size: 0.8125rem;
-    font-weight: 600;
-  }
-
-  .module-card__title {
-    font-size: 1.125rem;
-    font-weight: 650;
-    line-height: 1.3;
-  }
-
-  .module-card__summary {
-    color: var(--fg-muted);
-    font-size: 0.9375rem;
-    line-height: 1.55;
-  }
-
-  .module-card__meta {
-    margin-top: 0.5rem;
-    color: var(--accent);
-    font-size: 0.875rem;
-    font-weight: 600;
+  .safety :global(svg) {
+    flex: none;
+    color: var(--danger);
   }
 </style>

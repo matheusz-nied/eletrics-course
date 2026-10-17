@@ -1,0 +1,102 @@
+---
+/*
+ * Sheet of every schematic symbol (IEC/ABNT), at rest, active and damaged.
+ * Not linked from the course.
+ */
+import SymbolSheet from '../../../circuit/dev/SymbolSheet';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { withBase } from '../../../lib/url';
+---
+
+<BaseLayout title="Símbolos do esquemático" noindex>
+  <main id="conteudo" tabindex="-1" class="symbols">
+    <p class="eyebrow">
+      <a href={withBase('dev/circuitos/')}>Circuitos</a>
+    </p>
+    <h1>Símbolos do esquemático</h1>
+    <p class="lead">
+      Um símbolo por tipo de componente, no padrão IEC/ABNT usado no Brasil: em repouso, ativo
+      (aceso, fechado, girando) e danificado, quando o componente pode queimar. Os pontos marcam os
+      terminais.
+    </p>
+    <SymbolSheet />
+  </main>
+</BaseLayout>
+
+<style>
+  .symbols {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 3rem 1rem 4rem;
+  }
+
+  .symbols:focus {
+    outline: none;
+  }
+
+  .eyebrow a {
+    color: var(--accent);
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .lead {
+    max-width: 44rem;
+    margin: 0.5rem 0 1.5rem;
+    color: var(--fg-muted);
+  }
+
+  .symbols :global(.symbol-sheet) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .symbols :global(.symbol-sheet__item) {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.625rem;
+    background: var(--surface);
+  }
+
+  .symbols :global(.symbol-sheet__glyphs) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem 0.75rem;
+    min-height: 5.5rem;
+    color: var(--fg);
+  }
+
+  .symbols :global(.symbol-sheet__svg) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .symbols :global(.symbol-sheet__pin circle) {
+    fill: var(--accent);
+  }
+
+  .symbols :global(.symbol-sheet__pin text) {
+    fill: var(--accent);
+    font-family: var(--font-mono);
+  }
+
+  .symbols :global(.symbol-sheet__name) {
+    font-weight: 600;
+  }
+
+  .symbols :global(.symbol-sheet__type) {
+    color: var(--fg-muted);
+    font-size: 0.8125rem;
+  }
+</style>
