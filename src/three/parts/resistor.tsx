@@ -10,6 +10,7 @@ import { BAND_RGB, resistorBands, resistorBodyColor } from '../core/colorCode';
 import { formatOhms, formatWatts, smdResistorCode } from '../core/format';
 import { Anchor, Explode } from '../core/view';
 import { blackbodyColor, celsiusToKelvin, glowIntensity } from '../fx/blackbody';
+import { Smoke } from '../fx/Smoke';
 import { Material } from '../materials/Material';
 import { FONT_MONO, fitText, getNoiseTexture, useCanvasTexture } from '../materials/textures';
 import { axialLathe } from '../shapes/geometry';
@@ -29,7 +30,7 @@ export interface ResistorProps {
   leads?: 'retos' | 'dobrados';
   /** Height of the body axis above the lead ends when the leads are bent (mm). */
   leadDrop?: number;
-  /** Body temperature in °C: discolours above 150 °C, glows above ~480 °C. */
+  /** Body temperature in °C: discolours above 150 °C, smokes above 200 °C, glows above ~480 °C. */
   temperature?: number;
   /** Burned by overload: charred body. */
   burned?: boolean;
@@ -185,12 +186,41 @@ function bandCountOf(p: PartProps): 4 | 5 {
   return Number(p.tolerance) <= 2 ? 5 : 4;
 }
 
+/** Smoke from the lacquer and the film: starts around 200 °C, heavy above 450 °C. */
+export function resistorSmoke(temperature: number): number {
+  return Math.min(Math.max((temperature - 200) / 250, 0), 1.5);
+}
+
 export default function Resistor(props: ResistorProps) {
   const p = { ...meta.defaults, ...props } as Required<ResistorProps>;
   const kind = kindOf(p);
-  if (kind === 'smd') return <SmdResistor {...p} />;
-  if (kind === 'cement') return <CementResistor {...p} />;
-  return <AxialResistor {...p} />;
+  const smoke = resistorSmoke(p.temperature);
+  // Top of the body and its half-width, where the smoke comes from.
+  let top: number, half: number;
+  if (kind === 'smd') {
+    const [L, , T] = SMD_SIZES[p.package] ?? SMD_SIZES['smd-0805']!;
+    [top, half] = [T, L / 3];
+  } else if (kind === 'cement') {
+    [top, half] = [9.5, 6];
+  } else {
+    const R = sizeOf(p).diameter / 2;
+    const lift = p.leads === 'dobrados' ? Math.max(p.leadDrop, R + 0.5) : R;
+    [top, half] = [lift + R, sizeOf(p).length / 3];
+  }
+  return (
+    <>
+      {kind === 'smd' ? (
+        <SmdResistor {...p} />
+      ) : kind === 'cement' ? (
+        <CementResistor {...p} />
+      ) : (
+        <AxialResistor {...p} />
+      )}
+      {smoke > 0 && (
+        <Smoke position={[0, top, 0]} intensity={smoke} radius={half} height={half * 14 + 20} />
+      )}
+    </>
+  );
 }
 
 /** Lacquer colour darkened by heat and by burning. */

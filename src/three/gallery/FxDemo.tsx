@@ -153,7 +153,7 @@ export default function FxDemo() {
                 >
                   {demo === 'fumaca' && (
                     <>
-                      <Resistor watts={2} burned={smoke > 0} temperature={smoke > 0 ? 320 : 25} />
+                      <Resistor watts={2} burned={smoke > 0} />
                       <Smoke position={[0, 4, 0]} intensity={smoke} radius={3} height={45} />
                     </>
                   )}
