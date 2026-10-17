@@ -1,0 +1,242 @@
+---
+titulo: Máxima transferência de potência
+modulo: m02-circuitos-cc
+ordem: 9
+nivel: A
+duracaoMin: 25
+objetivos:
+  - Mostrar que a potência na carga é máxima quando a resistência da carga é igual à resistência interna da fonte
+  - Calcular a potência máxima e a eficiência nesse ponto
+  - Explicar por que a rede elétrica, as baterias e os carregadores trabalham longe desse ponto
+  - Reconhecer onde o casamento de carga é usado de propósito
+prerequisitos:
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+  - m02-circuitos-cc/07-fontes-reais-e-baterias
+  - m02-circuitos-cc/08-thevenin-norton-e-superposicao
+tags: [potência, casamento de carga, eficiência, resistência interna, painel solar]
+seguranca: baixa-tensao
+rascunho: true
+---
+
+import PowerExtremes from '../../../lessons/m02/figures/PowerExtremes.astro';
+import { LESSON_CURVE } from '../../../lessons/m02/power-curve';
+
+<Callout type="nota" title="Aula avançada">
+Esta aula é de nível avançado (A). Ela responde uma pergunta clássica de projeto, mas você pode pular direto para o módulo 3, Medições e instrumentos, sem perder a sequência do curso.
+</Callout>
+
+Na [primeira aula do módulo](../01-o-circuito-eletrico/), uma bateria de 9 V em curto com moedas entregava mais de 5 A, mas as moedas recebiam só 1,3 W; quase toda a energia virava calor dentro da bateria. Com a carga aberta, ao contrário, a tensão é máxima e a corrente é zero: potência nenhuma. Se os dois extremos dão zero, existe uma carga, no meio do caminho, que tira **a maior potência possível** da fonte. Qual é ela? E será que vale a pena trabalhar nesse ponto?
+
+## Entre o curto e o aberto
+
+Pense numa fonte de 12 V com 4 Ω de <Term id="resistencia-interna">resistência interna</Term>, alimentando uma carga $R_L$. Pelo [equivalente de Thévenin](../08-thevenin-norton-e-superposicao/), qualquer fonte linear vista de dois terminais tem essa forma.
+
+<Figure caption="Figura 1. A mesma fonte (12 V com r = 4 Ω) em três situações. No curto, a corrente é máxima, mas a tensão na carga é zero. Em aberto, a tensão é máxima, mas não há corrente. A potência na carga, produto das duas, só é grande no meio do caminho.">
+  <PowerExtremes />
+</Figure>
+
+A potência na carga é tensão vezes corrente. Quando a carga diminui, a corrente sobe, mas a tensão na carga cai, porque cada vez mais tensão fica dentro da fonte. Quando a carga aumenta, a tensão sobe, mas a corrente cai. O produto das duas tem um pico, e esse pico fica exatamente onde a carga é igual à resistência interna.
+
+## A conta
+
+Com a fonte $V$, a resistência interna $r$ e a carga $R_L$ em série, a corrente é $I = V / (r + R_L)$, e a potência na carga é
+
+$$
+P_L = I^2 \cdot R_L = \frac{V^2 \cdot R_L}{(r + R_L)^2}
+$$
+
+em que $P_L$ é a potência na carga, em watts (W), $V$ é a tensão da fonte em volts, e $r$ e $R_L$ estão em ohms. Essa expressão tem um único máximo, quando
+
+$$
+R_L = r \qquad \Rightarrow \qquad P_\text{máx} = \frac{V^2}{4\,r}
+$$
+
+Esse é o teorema da <Term id="maxima-transferencia-de-potencia">máxima transferência de potência</Term>. A fonte do exemplo, com 12 V e 4 Ω, entrega no máximo $12^2 / (4 \cdot 4) = 9\,\text{W}$, e só quando a carga também tem 4 Ω.
+
+O preço aparece quando se olha para a **eficiência**, a fração da potência da fonte que chega à carga:
+
+$$
+\eta = \frac{P_L}{P_\text{total}} = \frac{I^2 R_L}{I^2 (r + R_L)} = \frac{R_L}{r + R_L}
+$$
+
+Com $R_L = r$, a eficiência é $\eta = r/(2r) = 50\,\%$. No ponto de máxima potência, **metade da energia se perde dentro da fonte**.
+
+<DeepDive title="De onde vem a condição RL = r">
+Para achar o máximo de $P_L(R_L)$, derive em relação a $R_L$ e iguale a zero:
+
+$$
+\frac{dP_L}{dR_L} = V^2 \cdot \frac{(r + R_L)^2 - 2 R_L (r + R_L)}{(r + R_L)^4} = V^2 \cdot \frac{r - R_L}{(r + R_L)^3}
+$$
+
+A derivada é positiva para $R_L < r$ (a potência cresce), zero em $R_L = r$ e negativa para $R_L > r$ (a potência diminui). Logo o máximo está em $R_L = r$.
+
+Há uma simetria curiosa: trocando $R_L$ por $r^2 / R_L$, a potência na carga não muda. Com $r = 4\,\Omega$, as cargas de 2 Ω e de 8 Ω ($4^2/2 = 8$) recebem os mesmos 8 W. Mas a eficiência é bem diferente: 33 % com 2 Ω e 67 % com 8 Ω.
+</DeepDive>
+
+## Explore: procure o pico
+
+A simulação tem a fonte de 12 V com a resistência interna desenhada como o resistor r, de 4 Ω, e uma carga RL ajustável de 0,1 Ω a 100 Ω. Os multímetros mostram a potência na carga, a potência perdida dentro da fonte, a potência total e a tensão na carga.
+
+<Simulation circuit="m02/maxima-potencia" instruments={['multimetro']} />
+
+1. Com RL em 1 Ω, anote a potência na carga e a potência perdida na fonte. Qual das duas é maior?
+2. Aumente RL devagar, observando a potência na carga. Em que valor ela para de subir e começa a cair?
+3. Ajuste RL para 4 Ω. Compare a potência na carga com a perdida na fonte. Qual é a eficiência?
+4. Coloque RL em 2 Ω e depois em 8 Ω. A potência na carga muda? E a perdida na fonte?
+5. Leve RL a 40 Ω. A potência na carga ficou maior ou menor que no pico? E a eficiência?
+
+No pico, com 4 Ω, a carga recebe 9 W e a fonte desperdiça outros 9 W: eficiência de 50 %. Com 2 Ω e com 8 Ω, a carga recebe os mesmos 8 W, mas com 2 Ω a fonte perde 16 W e com 8 Ω perde só 4 W. Com 40 Ω, a carga recebe menos, cerca de 3 W, mas a perda dentro da fonte cai para 0,3 W: eficiência de 91 %.
+
+O gráfico abaixo mostra as duas curvas para a mesma fonte, com a carga variando de 0 a 40 Ω.
+
+<Plot
+  data={LESSON_CURVE}
+  xUnit="Ω"
+  title="potência na carga e eficiência em função da resistência da carga (fonte de 12 V com 4 Ω)"
+/>
+
+A potência tem um pico largo em 4 Ω. A eficiência só cresce: quanto maior a carga em relação à resistência interna, menor a fração perdida. **Máxima potência e máxima eficiência não acontecem no mesmo ponto.**
+
+## Exemplo resolvido
+
+**Pergunta:** a fonte de 12 V com 4 Ω alimenta uma carga de 8 Ω. Qual é a potência na carga, a potência total e a eficiência? E qual é a maior potência que essa fonte consegue entregar?
+
+**Corrente:**
+
+$$
+I = \frac{12\,\text{V}}{4\,\Omega + 8\,\Omega} = 1\,\text{A}
+$$
+
+**Potências:** na carga, $P_L = 1^2 \cdot 8 = 8\,\text{W}$; dentro da fonte, $P_r = 1^2 \cdot 4 = 4\,\text{W}$; total, $12\,\text{V} \cdot 1\,\text{A} = 12\,\text{W}$.
+
+**Eficiência:** $\eta = 8 / 12 \approx 67\,\%$, igual a $R_L/(r + R_L) = 8/12$.
+
+**Máximo:** $P_\text{máx} = 12^2 / (4 \cdot 4) = 9\,\text{W}$, com uma carga de 4 Ω. Ou seja, a carga de 8 Ω recebe só 1 W a menos que o máximo possível e desperdiça 5 W a menos dentro da fonte (4 W contra 9 W). Na prática, essa troca quase sempre vale a pena.
+
+A bateria de 9 V da primeira aula, com resistência interna de 1,7 Ω, entregaria no máximo $9^2 / (4 \cdot 1{,}7) \approx 11{,}9\,\text{W}$, e só a uma carga de 1,7 Ω. Isso é a capacidade de potência dela, muito acima do que qualquer aparelho de bateria de 9 V pede, e com metade da energia esquentando a própria bateria.
+
+## Por que a rede elétrica não trabalha no pico
+
+Em energia, o que importa é **não desperdiçar** e **manter a tensão estável**. Por isso as fontes de energia são construídas com resistência interna muito menor que a das cargas:
+
+- **A rede da sua casa.** Um chuveiro de 5.500 W em 220 V tem resistência de $220^2 / 5.500 = 8{,}8\,\Omega$. Vista da tomada, a resistência da rede e da fiação é tipicamente uma fração de ohm. Se ela fosse "casada", com 8,8 Ω, o chuveiro ficaria com metade da tensão e um quarto da potência, e outro tanto viraria calor nos fios e nos transformadores.
+- **A bateria do carro e o alternador.** A bateria tem resistência interna de centésimos de ohm, justamente para que a tensão quase não caia quando o motor de partida puxa centenas de ampères (você viu isso na [aula sobre fontes reais](../07-fontes-reais-e-baterias/)).
+- **O carregador do celular.** Quanto menor a resistência do carregador e do cabo comparada com a carga, mais perto de 5 V o celular recebe e menos o conjunto esquenta.
+
+A regra prática: **em energia, carga muito maior que a resistência interna** (eficiência alta). **Em sinais, carga casada** (potência máxima), porque a energia do sinal é pouca e o que importa é aproveitar o máximo dela. Os cabos de antena de TV, por exemplo, são de 75 Ω, e a entrada da TV também, para o sinal fraco da antena chegar inteiro e sem reflexões.
+
+<RealCase title="O painel solar e o ponto de máxima potência">
+
+Um painel solar não é uma fonte com resistência interna fixa: a curva de corrente e tensão dele muda com a luz e com a temperatura. Mas a ideia desta aula vale do mesmo jeito. Em curto, o painel dá a corrente máxima com tensão zero; em aberto, a tensão máxima com corrente zero. Entre os dois existe um ponto de trabalho que tira a maior potência do painel, chamado de **ponto de máxima potência**. Em painéis de silício comuns, ele fica tipicamente perto de 80 % da tensão em aberto.
+
+Aqui o raciocínio se inverte em relação à rede elétrica: a luz do sol é de graça, e o "desperdício" dentro do painel não custa nada. O que importa é tirar o máximo de energia de um painel que já está instalado. Por isso os controladores de carga do tipo **MPPT** (do inglês *maximum power point tracking*, rastreamento do ponto de máxima potência) ficam o tempo todo mudando a carga que o painel enxerga, procurando o pico da curva, do mesmo jeito que você fez com o controle RL na simulação. Controladores mais simples ligam o painel direto na tensão da bateria e trabalham fora do pico na maior parte do tempo.
+
+</RealCase>
+
+## Erros comuns
+
+- **Achar que máxima potência é a mesma coisa que máxima eficiência.** No pico de potência, metade da energia se perde dentro da fonte. A eficiência só cresce com a carga.
+- **"Casar" o alto-falante com o amplificador.** O "4 Ω" ou "8 Ω" impresso num amplificador é a **menor** impedância de alto-falante que ele aguenta, não um pedido de casamento. A resistência de saída de um amplificador moderno é muito menor que isso, de propósito, para controlar bem o alto-falante. Ligar um alto-falante de impedância menor que a indicada sobrecarrega o amplificador e pode queimá-lo. (Impedância é a "resistência" em corrente alternada; você vai vê-la no módulo de corrente alternada.)
+- **Achar que um curto "tira o máximo" da bateria.** No curto, a corrente é máxima, mas a potência vai toda para o calor dentro da própria bateria e nos fios, não para nenhuma carga útil. É perigoso e não aproveita nada.
+- **Aplicar o teorema com a carga fixa.** O teorema diz qual **carga** tira mais potência de uma **fonte** dada. Se a carga é fixa e você pode escolher a fonte, a melhor fonte é a de menor resistência interna possível, nunca uma "casada".
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Uma fonte tem 9 V e resistência interna de 3 Ω. Qual é a maior potência que ela consegue entregar a uma carga?',
+      answer: 6.75,
+      tolerance: 0.02,
+      unit: 'W',
+      explanation: 'P máx = V² ÷ (4 r) = 81 ÷ 12 = 6,75 W, com uma carga de 3 Ω.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma fonte de 12 V tem resistência interna de 4 Ω. Qual carga recebe a maior potência?',
+      options: [
+        {
+          text: '4 Ω',
+          correct: true,
+          feedback: 'A potência na carga é máxima quando a carga é igual à resistência interna.',
+        },
+        {
+          text: '0 Ω (um curto)',
+          feedback:
+            'No curto a corrente é máxima, mas a tensão na carga é zero, e a potência nela também. Tudo vira calor dentro da fonte.',
+        },
+        {
+          text: 'A maior possível',
+          feedback:
+            'Com a carga muito grande, a tensão chega perto de 12 V, mas a corrente quase zera, e a potência também.',
+        },
+        {
+          text: '3 Ω, porque 12 ÷ 4 = 3',
+          feedback: 'Esse 3 seria uma corrente em ampères (num curto), não uma resistência de carga.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'A mesma fonte, com resistência interna de 4 Ω, alimenta uma carga de 12 Ω. Qual é a eficiência, em porcentagem?',
+      answer: 75,
+      tolerance: 0.02,
+      unit: '%',
+      explanation: 'η = R_L ÷ (r + R_L) = 12 ÷ 16 = 0,75, ou seja, 75 %.',
+    },
+    {
+      type: 'vf',
+      prompt: 'No ponto de máxima transferência de potência, a eficiência é a maior possível.',
+      answer: false,
+      explanation:
+        'No ponto de máxima potência a eficiência é de só 50 %: metade da energia se perde dentro da fonte. A eficiência cresce quanto maior for a carga.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma fonte com resistência interna de 4 Ω entrega 8 W a uma carga de 2 Ω. Que outro valor de carga recebe exatamente a mesma potência?',
+      answer: 8,
+      tolerance: 0.02,
+      unit: 'Ω',
+      explanation:
+        'As cargas R e r²/R recebem a mesma potência: 4² ÷ 2 = 8 Ω. Confira: com 8 Ω, I = 12 ÷ 12 = 1 A e P = 1² × 8 = 8 W.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Por que a rede elétrica tem resistência interna muito menor que a dos aparelhos ligados nela, longe do ponto de máxima potência?',
+      options: [
+        {
+          text: 'Para desperdiçar pouca energia nos fios e manter a tensão estável',
+          correct: true,
+          feedback:
+            'Em energia, o que importa é a eficiência: com carga muito maior que a resistência interna, quase toda a energia chega aos aparelhos.',
+        },
+        {
+          text: 'Porque a rede não consegue entregar a potência máxima',
+          feedback:
+            'Ela conseguiria, mas metade da energia viraria calor nos fios e a tensão nas tomadas cairia pela metade.',
+        },
+        {
+          text: 'Por causa de uma regra de segurança que proíbe o casamento',
+          feedback:
+            'Não é uma regra: é uma escolha de projeto pela eficiência. O casamento é usado em sinais, onde a energia é pouca.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Uma fonte com resistência interna $r$ entrega a **maior potência** a uma carga $R_L = r$, e essa potência vale $V^2 / (4r)$.
+- Nesse ponto a **eficiência é de 50 %**: metade da energia esquenta a própria fonte.
+- A eficiência $\eta = R_L / (r + R_L)$ só cresce com a carga. Máxima potência e máxima eficiência não acontecem juntas.
+- **Em energia** (rede, baterias, carregadores), as fontes têm resistência interna muito menor que as cargas, para desperdiçar pouco e manter a tensão estável.
+- **Em sinais** (antenas, sensores) e onde a fonte é de graça (painel solar com MPPT), procura-se o ponto de máxima potência.
+
+Esta é a última aula do módulo de circuitos de corrente contínua. No próximo módulo, Medições e instrumentos, você vai aprender a conferir tudo isso na bancada, começando pelo multímetro: como ele é por dentro e como medir tensão, corrente e resistência sem se machucar nem queimar o instrumento.
