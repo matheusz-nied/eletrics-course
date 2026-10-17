@@ -10,6 +10,8 @@ import type {
 import type {
   DeviceDefinition,
   DeviceModel,
+  Method,
+  NewtonState,
   StepInfo,
   SolutionView,
   UpdateContext,
@@ -19,6 +21,7 @@ import { pinPoints } from '../format/geometry';
 import { buildNetlist, GROUND } from '../format/netlist';
 import { checkParam, CircuitError, validateCircuit } from '../format/validate';
 import { AMBIENT_C, GMIN } from '../models/constants';
+import { ComplexMna } from '../solver/complex';
 import { MnaSystem } from '../solver/mna';
 import { SingularMatrixError } from '../solver/lu';
 import { buildWireGraph, wireCurrents, type WireGraph } from './wires';
@@ -27,10 +30,36 @@ import { buildWireGraph, wireCurrents, type WireGraph } from './wires';
 export const DC_STEP = 1e-3;
 /** Step used to show a paused transient after a change, without advancing time (s). */
 const REFRESH_STEP = 1e-9;
-const MAX_NEWTON = 100;
+/** Newton iterations for DC solves, and for a transient step before it is split. */
+const MAX_NEWTON_DC = 100;
+const MAX_NEWTON_TRAN = 30;
+/** A step that does not converge is split down to this many pieces. */
+const MAX_PIECES = 1024;
+/**
+ * From this many pieces on, a piece that still fails gets gmin stepping: a
+ * circuit with positive feedback (a multivibrator, a Schmitt trigger) reaches
+ * points where its solution jumps, and no step is short enough for Newton
+ * alone to follow the jump.
+ */
+const HOMOTOPY_PIECES = 8;
 const RELTOL = 1e-6;
 const VNTOL = 1e-6;
 const ABSTOL = 1e-12;
+/**
+ * Residual, relative to the size of a row's terms, below which a guess
+ * satisfies its equations: a few orders above rounding, far below RELTOL
+ * (a looser value lets companion-model errors pile up step after step).
+ */
+const RESIDUAL_RELTOL = 1e-10;
+
+const NO_CONVERGENCE = 'A simulação parou: o circuito não convergiu neste instante.';
+const SINGULAR =
+  'A simulação parou: o circuito não tem solução. Há um laço só de fontes de tensão ou uma fonte de corrente sem caminho de volta?';
+const DIVERGED = 'A simulação parou: os valores divergiram (resultado infinito).';
+
+function newtonState(): NewtonState {
+  return { iteration: 0, limited: false, gmin: 0, sourceScale: 1, initJunctions: false };
+}
 
 export class SimulationError extends Error {
   constructor(message: string) {
@@ -49,6 +78,8 @@ interface Element {
   pins: number[];
   currents: Float64Array;
   twoTerminal: boolean;
+  /** It emitted a 'damaged' event since the last reset (readout `X.damaged`). */
+  damaged: boolean;
 }
 
 /** UpdateContext with the fields the simulator rewrites for each device. */
@@ -90,6 +121,10 @@ export class Simulator {
   private readonly probes: ResolvedProbe[];
   private readonly initialParams = new Map<string, Record<string, ParamValue>>();
   private restart = true;
+  /** False until the first solution after load or reset (junctions start at Vcrit). */
+  private solved = false;
+  private complex?: ComplexMna;
+  private lastSweep?: NonNullable<SimFrame['sweep']>;
   private pendingEvents: SimEvent[] = [];
   private sampleT: number[] = [];
   private sampleValues: Record<string, number[]> = {};
@@ -97,13 +132,13 @@ export class Simulator {
   constructor(doc: CircuitDoc) {
     const { errors } = validateCircuit(doc);
     if (errors.length) throw new CircuitError(doc?.id ?? '?', errors);
-    if (doc.analysis.kind === 'ac-sweep' || doc.analysis.kind === 'quasi-static') {
+    if (doc.analysis.kind === 'quasi-static') {
       throw new CircuitError(doc.id, [
         `a análise "${doc.analysis.kind}" ainda não está disponível no motor`,
       ]);
     }
     this.doc = doc;
-    this.mode = doc.analysis.kind === 'dc' ? 'dc' : 'tran';
+    this.mode = doc.analysis.kind === 'transient' ? 'tran' : 'dc';
     this.dt = doc.analysis.kind === 'transient' ? doc.analysis.dt : DC_STEP;
 
     const netlist = buildNetlist(doc);
@@ -154,11 +189,19 @@ export class Simulator {
         pins,
         currents: new Float64Array(info.pins.length),
         twoTerminal: info.terminals === 'two',
+        damaged: false,
       };
       this.elements.push(element);
       this.byId.set(el.id, element);
     }
     this.nonlinear = this.elements.some((e) => e.model.nonlinear);
+    if (doc.analysis.kind === 'ac-sweep') {
+      const missing = this.elements.filter((e) => !e.model.stampAc).map((e) => e.id);
+      if (missing.length)
+        throw new CircuitError(doc.id, [
+          `estes componentes não entram na varredura CA: ${missing.join(', ')}`,
+        ]);
+    }
     this.system = new MnaSystem(this.isNode.length);
     this.accepted = new Float64Array(this.isNode.length);
     this.guess = new Float64Array(this.isNode.length);
@@ -180,6 +223,11 @@ export class Simulator {
     for (const p of this.probes) this.sampleValues[p.id] = [];
   }
 
+  /** AC sweep: one solution per frequency instead of a run in time (play does nothing). */
+  get isSweep(): boolean {
+    return this.doc.analysis.kind === 'ac-sweep';
+  }
+
   /** Whether the analysis has a stop time and reached it. */
   get finished(): boolean {
     return this.doc.analysis.kind === 'transient' && this.doc.analysis.tStop !== undefined
@@ -187,19 +235,25 @@ export class Simulator {
       : false;
   }
 
-  /** Advances one fixed step. Throws SimulationError when the circuit has no solution. */
+  /**
+   * Advances one fixed step. When Newton-Raphson does not converge, the step
+   * is done in smaller pieces (down to 1/1024), with gmin stepping for the
+   * pieces that still fail. Throws SimulationError when the circuit has no
+   * solution.
+   */
   step(): void {
-    const step: StepInfo = {
-      mode: this.mode,
-      t: this.t + this.dt,
-      dt: this.dt,
-      method: this.restart ? 'be' : 'trap',
-    };
-    const x = this.solve(step);
-    this.restart = false;
-    this.update(step, x, true);
-    this.accepted.set(x);
-    this.t = step.t;
+    const end = this.t + this.dt;
+    if (!this.tryAdvance(this.dt, this.restart ? 'be' : 'trap')) {
+      let pieces = 2;
+      while (this.t < end - this.dt * 1e-9) {
+        const h = Math.min(this.dt / pieces, end - this.t);
+        if (this.tryAdvance(h, 'be')) continue;
+        if (pieces >= HOMOTOPY_PIECES && this.tryAdvance(h, 'be', true)) continue;
+        if (pieces >= MAX_PIECES) throw new SimulationError(NO_CONVERGENCE);
+        pieces *= 2;
+      }
+    }
+    this.t = end;
     this.steps++;
     this.recordSamples();
   }
@@ -211,11 +265,13 @@ export class Simulator {
   refresh(): void {
     const step: StepInfo =
       this.mode === 'dc'
-        ? { mode: 'dc', t: this.t, dt: 0, method: 'be' }
-        : { mode: 'tran', t: this.t, dt: REFRESH_STEP, method: 'be' };
-    const x = this.solve(step);
+        ? { mode: 'dc', t: this.t, dt: 0, method: 'be', nl: newtonState() }
+        : { mode: 'tran', t: this.t, dt: REFRESH_STEP, method: 'be', nl: newtonState() };
+    const x = this.solveRobust(step);
     this.update(step, x, false);
     this.accepted.set(x);
+    this.solved = true;
+    if (this.isSweep) this.lastSweep = this.sweep();
   }
 
   setParam(element: string, param: string, value: ParamValue): void {
@@ -238,10 +294,14 @@ export class Simulator {
     this.t = 0;
     this.steps = 0;
     this.restart = true;
+    this.solved = false;
     this.accepted.fill(0);
     this.pendingEvents = [];
     this.clearSamples();
-    for (const el of this.elements) el.model.reset?.();
+    for (const el of this.elements) {
+      el.damaged = false;
+      el.model.reset?.();
+    }
   }
 
   /** Parameters as the document defines them (for "restore defaults"). */
@@ -268,6 +328,7 @@ export class Simulator {
     for (const p of this.probes) readouts[p.id] = this.probeValue(p, x, readouts);
     const frame: SimFrame = { t: this.t, nodeVoltages, readouts, events: this.pendingEvents };
     this.pendingEvents = [];
+    if (this.lastSweep) frame.sweep = this.lastSweep;
     if (opts.samples !== false && this.probes.length) {
       frame.samples = this.takeSamples(opts.maxSamples ?? 2000);
     }
@@ -286,43 +347,212 @@ export class Simulator {
     return { x, v: (i: number) => (i < 0 ? 0 : x[i]) };
   }
 
-  private solve(step: StepInfo): Float64Array {
+  /**
+   * One step of length h; false when it did not converge (nothing committed).
+   * `homotopy` solves it by gmin stepping instead of plain Newton-Raphson.
+   */
+  private tryAdvance(h: number, method: Method, homotopy = false): boolean {
+    const step: StepInfo = { mode: this.mode, t: this.t + h, dt: h, method, nl: newtonState() };
+    for (const el of this.elements) el.model.beginSolve?.();
+    // DC steps and the first step from rest get the full set of fallbacks.
+    const x =
+      this.mode === 'dc' || this.steps === 0
+        ? this.solveRobust(step)
+        : homotopy
+          ? this.gminStepping(step, this.accepted, false)
+          : this.newton(step, MAX_NEWTON_TRAN);
+    if (!x) return false;
+    // After a jump the trapezoidal rule would ring: the next step restarts with backward Euler.
+    this.restart = homotopy;
+    this.solved = true;
+    this.update(step, x, true);
+    this.accepted.set(x);
+    this.t = step.t;
+    return true;
+  }
+
+  /** Newton-Raphson, then gmin stepping, then source stepping (as SPICE does for DC). */
+  private solveRobust(step: StepInfo): Float64Array {
+    for (const el of this.elements) el.model.beginSolve?.();
+    const start = new Float64Array(this.accepted);
+    const x = this.newton(step, MAX_NEWTON_DC, start, !this.solved);
+    if (x || !this.nonlinear) return x ?? this.fail();
+    return this.gminStepping(step, start, !this.solved) ?? this.sourceStepping(step);
+  }
+
+  /**
+   * gmin stepping: a large conductance from every node to ground (and across
+   * every junction), reduced decade by decade, each solution starting the next.
+   */
+  private gminStepping(
+    step: StepInfo,
+    start: Float64Array,
+    init: boolean,
+  ): Float64Array | undefined {
+    let from = new Float64Array(start);
+    for (let gmin = 1e-2; gmin >= 1e-12; gmin /= 10) {
+      step.nl.gmin = gmin;
+      const xi = this.newton(step, MAX_NEWTON_DC, from, init && gmin === 1e-2);
+      if (!xi) {
+        step.nl.gmin = 0;
+        return undefined;
+      }
+      from = new Float64Array(xi);
+    }
+    step.nl.gmin = 0;
+    return this.newton(step, MAX_NEWTON_DC, from);
+  }
+
+  /** Source stepping: sources ramp from zero to their value. */
+  private sourceStepping(step: StepInfo): Float64Array {
+    for (const el of this.elements) el.model.beginSolve?.();
+    let from = new Float64Array(this.accepted.length);
+    let scale = 0;
+    let delta = 0.1;
+    while (scale < 1) {
+      const next = Math.min(1, scale + delta);
+      step.nl.sourceScale = next;
+      const xi = this.newton(step, MAX_NEWTON_DC, from, scale === 0);
+      if (xi) {
+        from = new Float64Array(xi);
+        scale = next;
+        delta = Math.min(delta * 2, 0.25);
+      } else {
+        delta /= 4;
+        if (delta < 1e-4) return this.fail();
+      }
+    }
+    step.nl.sourceScale = 1;
+    return from;
+  }
+
+  /**
+   * AC sweep at the operating point in `accepted`: the sweep source carries
+   * 1 V (or 1 A) at phase 0, other sources are zeroed, and each voltage probe
+   * gets its gain (V/V) and unwrapped phase (degrees) at log-spaced frequencies.
+   */
+  private sweep(): NonNullable<SimFrame['sweep']> {
+    const analysis = this.doc.analysis as Extract<CircuitDoc['analysis'], { kind: 'ac-sweep' }>;
+    const { fStart, fStop, points, source } = analysis;
+    const n = this.isNode.length;
+    const cm = (this.complex ??= new ComplexMna(n));
+    const op = this.view(this.accepted);
+    const probes = this.probes.filter((p) => p.kind === 'voltage');
+    const result: NonNullable<SimFrame['sweep']> = { f: [], magnitude: {}, phase: {} };
+    for (const p of probes) {
+      result.magnitude[p.id] = [];
+      result.phase[p.id] = [];
+    }
+    const ctx = { omega: 0, source, id: '' };
+    for (let k = 0; k < points; k++) {
+      const f = fStart * Math.pow(fStop / fStart, k / (points - 1));
+      ctx.omega = 2 * Math.PI * f;
+      cm.clear();
+      for (let i = 0; i < n; i++) if (this.isNode[i]) cm.add(i, i, GMIN);
+      for (const el of this.elements) {
+        ctx.id = el.id;
+        el.model.stampAc!(cm, ctx, op);
+      }
+      try {
+        cm.solve();
+      } catch (error) {
+        if (error instanceof SingularMatrixError) throw new SimulationError(SINGULAR);
+        throw error;
+      }
+      result.f.push(f);
+      const at = (arr: Float64Array, i: number) => (i < 0 ? 0 : arr[i]);
+      for (const p of probes) {
+        if (p.kind !== 'voltage') continue;
+        const re = at(cm.xRe, p.plus) - at(cm.xRe, p.minus);
+        const im = at(cm.xIm, p.plus) - at(cm.xIm, p.minus);
+        const phases = result.phase[p.id];
+        let ph = (Math.atan2(im, re) * 180) / Math.PI;
+        const prev = phases.at(-1);
+        if (prev !== undefined) ph -= 360 * Math.round((ph - prev) / 360);
+        result.magnitude[p.id].push(Math.hypot(re, im));
+        phases.push(ph);
+      }
+    }
+    return result;
+  }
+
+  private fail(): never {
+    throw new SimulationError(NO_CONVERGENCE);
+  }
+
+  /**
+   * Newton-Raphson from `start` (default: the accepted solution). Returns the
+   * converged solution (a view of an internal buffer) or undefined.
+   */
+  private newton(
+    step: StepInfo,
+    maxIter: number,
+    start = this.accepted,
+    init = false,
+  ): Float64Array | undefined {
     const sys = this.system;
     const guess = this.guess;
-    guess.set(this.accepted);
+    guess.set(start);
     const view = this.view(guess);
-    for (let iter = 0; iter < MAX_NEWTON; iter++) {
+    const gmin = GMIN + step.nl.gmin;
+    for (let iter = 0; iter < maxIter; iter++) {
+      step.nl.iteration = iter;
+      step.nl.limited = false;
+      step.nl.initJunctions = init && iter === 0;
       sys.clear();
-      for (let i = 0; i < this.isNode.length; i++) if (this.isNode[i]) sys.add(i, i, GMIN);
+      for (let i = 0; i < this.isNode.length; i++) if (this.isNode[i]) sys.add(i, i, gmin);
       for (const el of this.elements) el.model.stamp(sys, step, view);
+      // A slow convergence may only be rounding noise in a badly conditioned
+      // unknown (a floating winding, a node held only by reverse-biased
+      // junctions): when the guess already satisfies every equation, this
+      // solve only polishes it and ends the iteration.
+      const settled = iter >= 2 && !step.nl.limited && this.satisfies(guess);
       let x: Float64Array;
       try {
         x = sys.solve();
       } catch (error) {
-        if (error instanceof SingularMatrixError) throw new SimulationError(this.singularMessage());
-        throw error;
+        if (!(error instanceof SingularMatrixError)) throw error;
+        if (this.nonlinear) return undefined;
+        throw new SimulationError(SINGULAR);
       }
       for (let i = 0; i < x.length; i++) {
         if (!Number.isFinite(x[i])) {
-          throw new SimulationError(
-            'A simulação parou: os valores divergiram (resultado infinito).',
-          );
+          if (this.nonlinear) return undefined;
+          throw new SimulationError(DIVERGED);
         }
       }
       if (!this.nonlinear) return x;
-      let converged = true;
-      for (let i = 0; i < x.length; i++) {
+      let converged = !step.nl.limited;
+      for (let i = 0; converged && !settled && i < x.length; i++) {
         const tol =
           RELTOL * Math.max(Math.abs(x[i]), Math.abs(guess[i])) + (this.isNode[i] ? VNTOL : ABSTOL);
-        if (Math.abs(x[i] - guess[i]) > tol) {
-          converged = false;
-          break;
-        }
+        if (Math.abs(x[i] - guess[i]) > tol) converged = false;
       }
       guess.set(x);
       if (converged && iter > 0) return guess;
     }
-    throw new SimulationError('A simulação parou: o circuito não convergiu neste instante.');
+    return undefined;
+  }
+
+  /**
+   * Whether `x` satisfies the system just stamped at it: every row's residual
+   * within RESIDUAL_RELTOL of the size of its terms (or an absolute floor).
+   */
+  private satisfies(x: Float64Array): boolean {
+    const { a, b, size: n } = this.system;
+    for (let i = 0; i < n; i++) {
+      let residual = -b[i];
+      let scale = Math.abs(b[i]);
+      for (let j = 0, k = i * n; j < n; j++, k++) {
+        if (a[k] === 0) continue;
+        const term = a[k] * x[j];
+        residual += term;
+        scale += Math.abs(term);
+      }
+      const floor = this.isNode[i] ? ABSTOL : VNTOL;
+      if (Math.abs(residual) > RESIDUAL_RELTOL * scale + floor) return false;
+    }
+    return true;
   }
 
   private update(step: StepInfo, x: Float64Array, commit: boolean): void {
@@ -346,6 +576,7 @@ export class Simulator {
     emit: (kind: SimEvent['kind'], message: string) => {
       const ctx = this.updateContext;
       this.pendingEvents.push({ t: ctx.t, element: ctx.element, kind, message });
+      if (kind === 'damaged') this.byId.get(ctx.element)!.damaged = true;
     },
     discontinuity: () => {
       this.restart = true;
@@ -363,6 +594,7 @@ export class Simulator {
       out[`${prefix}power`] = v * i;
     }
     el.model.readouts?.(x, (name, value) => (out[prefix + name] = value));
+    if (el.damaged) out[`${prefix}damaged`] = true;
   }
 
   private probeValue(p: ResolvedProbe, x: SolutionView, readouts?: SimFrame['readouts']): number {
@@ -390,9 +622,5 @@ export class Simulator {
     for (const p of this.probes) samples.values[p.id] = pick(this.sampleValues[p.id]);
     this.clearSamples();
     return samples;
-  }
-
-  private singularMessage(): string {
-    return 'A simulação parou: o circuito não tem solução. Há um laço só de fontes de tensão ou uma fonte de corrente sem caminho de volta?';
   }
 }

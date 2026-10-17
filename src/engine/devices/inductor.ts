@@ -48,6 +48,10 @@ export default defineDevice({
           m.branch(br, a, b, -vPrev + (r - (2 * l) / dt) * iPrev, r + (2 * l) / dt);
         }
       },
+      stampAc(m, { omega }) {
+        const r = Math.max(num(params, 'resistance'), R_SERIES_MIN);
+        m.branch(br, a, b, 0, 0, r, omega * num(params, 'inductance'));
+      },
       update(_step, x, ctx) {
         i = x.x[br];
         if (ctx.commit) {

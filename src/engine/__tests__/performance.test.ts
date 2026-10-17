@@ -26,4 +26,16 @@ describe('performance', () => {
     expect(stepsPerSecond).toBeGreaterThan(10000);
     expect(frameMs).toBeLessThan(2);
   });
+
+  it('steps a 50-node circuit with diodes and LEDs (Newton-Raphson every step)', () => {
+    const sim = new Simulator(ladderCircuit(50, true));
+    sim.refresh();
+    for (let i = 0; i < 200; i++) sim.step();
+    const n = 3000;
+    const start = performance.now();
+    for (let i = 0; i < n; i++) sim.step();
+    const stepsPerSecond = n / ((performance.now() - start) / 1000);
+    console.log(`50 nós com diodos e LEDs: ${Math.round(stepsPerSecond)} passos/s`);
+    expect(stepsPerSecond).toBeGreaterThan(5000);
+  });
 });

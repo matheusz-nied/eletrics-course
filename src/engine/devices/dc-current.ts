@@ -24,8 +24,12 @@ export default defineDevice({
   source: true,
   create({ params, pins: [a, b] }) {
     return {
-      stamp(m) {
-        m.current(b, a, num(params, 'current'));
+      stamp(m, step) {
+        m.current(b, a, num(params, 'current') * step.nl.sourceScale);
+      },
+      // In a sweep, the source under test carries 1 A; any other is open.
+      stampAc(m, ctx) {
+        if (ctx.source === ctx.id) m.current(b, a, 1);
       },
       pinCurrents(_x, out) {
         out[0] = -num(params, 'current');

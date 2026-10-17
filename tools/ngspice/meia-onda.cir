@@ -1,0 +1,16 @@
+* Retificador de meia onda com filtro: senoide de 10 V de pico, 60 Hz, diodo 1N4007, 1 kOhm || 100 uF
+V1 1 0 SIN(0 10 60)
+D1 1 2 DRET
+R1 2 0 1k
+C1 2 0 100u ic=0
+.model DRET D(IS=7.03n N=1.808 RS=0.0342 BV=1000 IBV=5u)
+.options reltol=1e-7 abstol=1e-14 vntol=1e-10
+.control
+set wr_singlescale
+set wr_vecnames
+tran 50u 50m 0 5u uic
+linearize v(2) i(V1)
+wrdata out.txt v(2) i(V1)
+quit
+.endc
+.end

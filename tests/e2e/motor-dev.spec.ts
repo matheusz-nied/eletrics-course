@@ -44,13 +44,15 @@ test('50 nodes run above 1.000 steps/s at 60 frames/s with the CPU 4× slower', 
   const result = page.locator('#resultado');
   await expect(result).toHaveAttribute('data-raw', /\d+/, { timeout: 30_000 });
   const raw = Number(await result.getAttribute('data-raw'));
+  const nonlinear = Number(await result.getAttribute('data-nonlinear'));
   const worker = Number(await result.getAttribute('data-worker'));
   const fps = Number(await result.getAttribute('data-fps'));
   test.info().annotations.push({
     type: 'desempenho',
-    description: `página ${raw} passos/s; worker ${worker} passos/s a ${fps} quadros/s`,
+    description: `página ${raw} passos/s (não linear ${nonlinear}); worker ${worker} passos/s a ${fps} quadros/s`,
   });
   expect(raw).toBeGreaterThan(1000);
+  expect(nonlinear).toBeGreaterThan(1000);
   expect(worker).toBeGreaterThan(1000);
   expect(fps).toBeGreaterThan(50);
   errors.expectClean();
