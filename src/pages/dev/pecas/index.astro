@@ -1,0 +1,62 @@
+---
+/*
+ * Internal gallery of the 3D kit (Kit 3D front): every part with controls for
+ * its props. Not linked from the course navigation.
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getPoster, listParts } from '../../../three/catalog';
+import Gallery, { type GalleryPart } from '../../../three/gallery/Gallery';
+
+const parts: GalleryPart[] = listParts().map((meta) => ({
+  id: meta.id,
+  label: meta.label,
+  category: meta.category,
+  summary: meta.summary,
+  defaults: meta.defaults,
+  controls: meta.controls ?? {},
+  poster: getPoster(meta.id),
+  explode: !!meta.explode,
+  cutaway: !!meta.cutaway,
+}));
+---
+
+<BaseLayout title="Galeria de peças 3D" noindex>
+  <main id="conteudo" tabindex="-1" class="dev-pecas">
+    <header class="dev-pecas__intro">
+      <p class="eyebrow">Interno · Kit 3D</p>
+      <h1>Galeria de peças 3D</h1>
+      <p>
+        {parts.length} peças paramétricas em tamanho real. Escolha uma peça, mude as propriedades e
+        copie o código para usar na aula.
+      </p>
+    </header>
+    <Gallery client:only="react" parts={parts} />
+  </main>
+</BaseLayout>
+
+<style>
+  .dev-pecas {
+    max-width: 90rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .dev-pecas:focus {
+    outline: none;
+  }
+
+  .dev-pecas__intro {
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  .dev-pecas__intro p:last-child {
+    margin-top: 0.375rem;
+    color: var(--fg-muted);
+  }
+</style>
