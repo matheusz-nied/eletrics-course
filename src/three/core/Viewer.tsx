@@ -17,7 +17,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
-import { annotationsFor, isAnimated, loadPart, resolveProps } from '../registry';
+import { annotationsFor, cutFor, isAnimated, loadPart, resolveProps } from '../registry';
 import type { PartModule, PartProps } from '../types';
 import { Annotations, visibleAnnotations } from './Annotations';
 import { FrameRateMonitor, KeyboardOrbit, ReadySignal, ViewerErrorBoundary } from './helpers';
@@ -135,6 +135,7 @@ export default function Viewer({
   const canExplode = !!meta?.explode;
   const canCut = !!meta?.cutaway;
   const hasNotes = !!meta && annotationsFor(meta, resolved).length > 0;
+  const cutPlane = meta ? cutFor(meta, resolved) : {};
   const animated = autoRotate || (!!meta && isAnimated(meta, resolved));
   const text = description ?? (meta ? (meta.describe?.(resolved) ?? meta.summary) : label);
 
@@ -222,6 +223,8 @@ export default function Viewer({
                 <ViewProvider
                   explode={exploded}
                   cutaway={cut}
+                  cutNormal={cutPlane.normal}
+                  cutThrough={cutPlane.through}
                   instant={reducedMotion || capture}
                   extent={extent}
                 >

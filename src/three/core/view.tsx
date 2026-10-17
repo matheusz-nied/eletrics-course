@@ -46,6 +46,8 @@ interface ViewProviderProps {
   cutaway?: boolean;
   /** Normal of the cut plane: the half the normal points away from is removed. */
   cutNormal?: Vec3;
+  /** A point the cut plane goes through once the cut is complete (mm). */
+  cutThrough?: Vec3;
   /** Size of the model, to start the cut plane outside it. */
   extent?: number;
   /** Instant transitions (prefers-reduced-motion, posters). */
@@ -61,16 +63,21 @@ export function ViewProvider({
   explode = false,
   cutaway = false,
   cutNormal = [0, 0, -1],
+  cutThrough = [0, 0, 0],
   extent = 100,
   instant = false,
   children,
 }: ViewProviderProps) {
   const explodeRef = useRef(explode ? 1 : 0);
   const [nx, ny, nz] = cutNormal;
+  const [tx, ty, tz] = cutThrough;
   const plane = useMemo(
     () => new Plane(new Vector3(nx, ny, nz).normalize(), extent),
     [nx, ny, nz, extent],
   );
+  // Constant of the finished cut, and of a plane far enough to cut nothing.
+  const cutEnd = -plane.normal.dot(new Vector3(tx, ty, tz));
+  const cutStart = cutEnd + extent + Math.abs(cutEnd);
   const cutRef = useRef(cutaway ? 1 : 0);
   const invalidate = useThree((s) => s.invalidate);
   const anchors = useMemo(() => new Map<string, Object3D>(), []);
@@ -86,7 +93,7 @@ export function ViewProvider({
     cutRef.current = instant ? targetCut : damp(cutRef.current, targetCut, 6, step);
     if (Math.abs(explodeRef.current - targetExplode) < 0.0005) explodeRef.current = targetExplode;
     if (Math.abs(cutRef.current - targetCut) < 0.0005) cutRef.current = targetCut;
-    plane.constant = extent * (1 - easeInOut(cutRef.current));
+    plane.constant = cutEnd + (cutStart - cutEnd) * (1 - easeInOut(cutRef.current));
     if (explodeRef.current !== targetExplode || cutRef.current !== targetCut) invalidate();
   });
 

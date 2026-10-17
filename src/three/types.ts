@@ -84,12 +84,24 @@ export interface PartMeta {
   explode?: boolean;
   /** The part has a cutaway view (it uses clipped materials). */
   cutaway?: boolean;
+  /**
+   * Where the cutaway cuts (default: the plane z = 0, removing the half that
+   * faces the camera). A function when it depends on the props.
+   */
+  cut?: PartCut | ((props: PartProps) => PartCut);
   /** Accessible description of the part with these props (pt-BR). */
   describe?: (props: PartProps) => string;
   /** Preferred camera direction (from the target towards the camera). */
   view?: Vec3;
   /** Keeps rendering every frame (motors, blinking, smoke). */
   animated?: boolean | ((props: PartProps) => boolean);
+}
+
+export interface PartCut {
+  /** Normal of the cut plane: the half it points away from is removed. */
+  normal?: Vec3;
+  /** A point the plane goes through (mm). */
+  through?: Vec3;
 }
 
 export interface PartModule {

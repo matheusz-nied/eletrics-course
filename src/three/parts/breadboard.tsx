@@ -289,6 +289,11 @@ export const meta: PartMeta = {
   },
   explode: true,
   cutaway: true,
+  // Across row c: the front rows come off and every clip shows its U section.
+  cut: (p) => ({
+    normal: [0, 0, -1],
+    through: breadboardHole(p.variant === 'meia' ? 'meia' : 'inteira', 'c', 1),
+  }),
   describe: (p) => {
     const variant = p.variant === 'meia' ? 'meia' : 'inteira';
     const s = spec(variant);

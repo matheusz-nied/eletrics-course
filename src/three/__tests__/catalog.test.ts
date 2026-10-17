@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { describePart, listParts } from '../catalog';
-import { annotationsFor, partIdFromPath, resolveProps } from '../registry';
+import { annotationsFor, cutFor, partIdFromPath, resolveProps } from '../registry';
 import { CATEGORY_LABELS, type PartMeta, type PartProps } from '../types';
 
 const files = Object.keys(
@@ -69,6 +69,10 @@ describe('3D kit catalogue', () => {
           expect(note.at.every(Number.isFinite), note.text).toBe(true);
           expect(note.text).not.toMatch(/undefined|NaN/);
         }
+        const cut = cutFor(meta, resolveProps(meta, props));
+        for (const v of [cut.normal, cut.through])
+          if (v) expect(v.every(Number.isFinite)).toBe(true);
+        if (cut.normal) expect(Math.hypot(...cut.normal)).toBeGreaterThan(0);
       }
     },
   );

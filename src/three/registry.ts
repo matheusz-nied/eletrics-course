@@ -4,7 +4,7 @@
  * section 7.3). Files starting with `_` are shared helpers, not parts.
  */
 import type { ComponentType } from 'react';
-import type { PartAnnotation, PartMeta, PartModule, PartProps } from './types';
+import type { PartAnnotation, PartCut, PartMeta, PartModule, PartProps } from './types';
 
 const loaders = import.meta.glob<{ meta: PartMeta; default: ComponentType<never> }>([
   './parts/*.tsx',
@@ -44,6 +44,10 @@ export function resolveProps(meta: PartMeta, props: PartProps = {}): PartProps {
 export function annotationsFor(meta: PartMeta, props: PartProps): PartAnnotation[] {
   const list = typeof meta.annotations === 'function' ? meta.annotations(props) : meta.annotations;
   return list ?? [];
+}
+
+export function cutFor(meta: PartMeta, props: PartProps): PartCut {
+  return (typeof meta.cut === 'function' ? meta.cut(props) : meta.cut) ?? {};
 }
 
 export function isAnimated(meta: PartMeta, props: PartProps): boolean {
