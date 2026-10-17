@@ -81,20 +81,11 @@ test.describe('example lesson', () => {
   test('shows placeholders for the interactive components still in construction', async ({
     page,
   }) => {
-    for (const stub of [
-      'Simulation',
-      'Plot',
-      'Model3D',
-      'Scene3D',
-      'WiringExercise',
-      'Workshop',
-      'Quiz',
-    ]) {
+    for (const stub of ['Simulation', 'Plot', 'Model3D', 'Scene3D', 'WiringExercise']) {
       const box = page.locator(`[data-stub="${stub}"]`);
       await expect(box, stub).toHaveCount(1);
       await expect(box, stub).toContainText('em construção');
     }
-    await expect(page.locator('[data-stub="Quiz"]')).toContainText('5 questões');
   });
 
   test('table of contents links to the sections', async ({ page, isMobile }) => {

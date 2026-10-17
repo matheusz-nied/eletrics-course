@@ -1,0 +1,122 @@
+---
+/*
+ * Shell of the course experience pages (/modulos/, /trilhas/, /glossario/,
+ * /busca/, /progresso/): the site layout, a page header and a content column.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import type { CourseIconName } from './icons';
+import CourseIcon from './CourseIcon.astro';
+
+interface Props {
+  title: string;
+  /** Text above the title. */
+  eyebrow?: string | undefined;
+  lead?: string | undefined;
+  icon?: CourseIconName | undefined;
+  description?: string | undefined;
+  noindex?: boolean;
+  /** Content width: `wide` for catalogs, `narrow` for reading. */
+  width?: 'wide' | 'narrow';
+  /** Indexes the page in the site search under this type ("Glossário"). */
+  search?: string | undefined;
+}
+
+const {
+  title,
+  eyebrow,
+  lead,
+  icon,
+  description = lead,
+  noindex = false,
+  width = 'wide',
+  search,
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description} noindex={noindex}>
+  <slot name="head" slot="head" />
+  <main
+    id="conteudo"
+    tabindex="-1"
+    class:list={['cpage', `cpage--${width}`]}
+    data-pagefind-body={search ? '' : undefined}
+    data-pagefind-meta={search ? `tipo:${search}` : undefined}
+    data-pagefind-filter={search ? `tipo:${search}` : undefined}
+  >
+    <header class="cpage__header">
+      {icon && (
+        <span class="cpage__icon">
+          <CourseIcon name={icon} size={26} />
+        </span>
+      )}
+      {eyebrow && (
+        <p class="eyebrow" data-pagefind-ignore>
+          {eyebrow}
+        </p>
+      )}
+      <h1>{title}</h1>
+      {lead && <p class="cpage__lead">{lead}</p>}
+      <slot name="header" />
+    </header>
+    <slot />
+  </main>
+</BaseLayout>
+
+<style>
+  .cpage {
+    margin: 0 auto;
+    padding: 2.5rem 1rem 0;
+  }
+
+  .cpage:focus {
+    outline: none;
+  }
+
+  .cpage--wide {
+    max-width: 76rem;
+  }
+
+  .cpage--narrow {
+    max-width: 52rem;
+  }
+
+  @media (min-width: 48rem) {
+    .cpage {
+      padding: 3.5rem 1.5rem 0;
+    }
+  }
+
+  .cpage__header {
+    display: grid;
+    justify-items: start;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .cpage__icon {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-bottom: 0.25rem;
+    border: 1px solid var(--border);
+    border-radius: 0.875rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  h1 {
+    font-size: clamp(2rem, 1.5rem + 2.4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  .cpage__lead {
+    max-width: 44rem;
+    color: var(--fg-muted);
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+</style>

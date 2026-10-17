@@ -1,0 +1,46 @@
+---
+/* The tracks: short paths through the curriculum for a practical goal. */
+import { getCourseData } from '../../course/data';
+import CoursePage from '../../course/ui/CoursePage.astro';
+import TrackCard from '../../course/ui/TrackCard.astro';
+
+const { tracks } = await getCourseData();
+const [featured, ...others] = tracks;
+---
+
+<CoursePage
+  title="Trilhas"
+  eyebrow="Por onde começar"
+  icon="trilha"
+  lead="Caminhos pelo currículo para quem tem um objetivo prático. Cada trilha reúne só as aulas necessárias, na ordem certa; o progresso é o mesmo das aulas, então o que você já estudou conta em todas."
+>
+  <ul class="tracks">
+    {featured && (
+      <li class="tracks__featured">
+        <TrackCard track={featured} headingLevel={2} featured />
+      </li>
+    )}
+    {others.map((t) => (
+      <li>
+        <TrackCard track={t} headingLevel={2} />
+      </li>
+    ))}
+  </ul>
+</CoursePage>
+
+<style>
+  .tracks {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 48rem) {
+    .tracks {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .tracks__featured {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

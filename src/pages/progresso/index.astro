@@ -1,0 +1,827 @@
+---
+/*
+ * /progresso/: everything the browser remembers about the student (lessons,
+ * exercises, workshops), progress per track and module, backup to a file,
+ * and offline use / installing the app.
+ */
+import { available } from '../../course/catalog';
+import { getCourseData, trackUrl } from '../../course/data';
+import CourseIcon from '../../course/ui/CourseIcon.astro';
+import CourseIndex from '../../course/ui/CourseIndex.astro';
+import CoursePage from '../../course/ui/CoursePage.astro';
+import ProgressBar from '../../course/ui/ProgressBar.astro';
+import { workshops } from '../../course/workshop/registry';
+import { workshopLessons } from '../../course/workshop/usage';
+import { getCourse, lessonNumber } from '../../lib/content';
+import { lessonUrl, withBase } from '../../lib/url';
+
+const { modules, lessons, tracks } = await getCourseData();
+const ready = available(lessons);
+const readyIds = ready.map((l) => l.id);
+const withLessons = modules.filter((m) => available(m.lessons).length > 0);
+// Titles of every lesson page, drafts included, for the lists of exercises.
+const course = await getCourse();
+const titles = Object.fromEntries(
+  course.lessons.map((l) => [
+    l.id,
+    { n: lessonNumber(l, course.modules), t: l.data.titulo, h: lessonUrl(l.id) },
+  ]),
+);
+const where = await workshopLessons();
+const workshopIndex = [...workshops().values()].map((w) => {
+  const lesson = where.get(w.id);
+  return {
+    id: w.id,
+    t: w.title,
+    n: w.steps.length,
+    h: lesson ? `${lessonUrl(lesson)}#oficina-${w.id}` : undefined,
+  };
+});
+---
+
+<CoursePage
+  title="Meu progresso"
+  icon="progresso"
+  lead="O curso guarda seu progresso só neste navegador, sem cadastro. Para levar a outro aparelho ou guardar uma cópia, exporte um arquivo."
+  width="narrow"
+  noindex
+>
+  <section class="prog__overview" aria-labelledby="visao-geral">
+    <h2 id="visao-geral" class="sr-only">
+      Visão geral
+    </h2>
+    <ul class="prog__stats">
+      <li class="prog__stat">
+        <span class="prog__stat-value num" data-stat="aulas">
+          0
+        </span>
+        <span class="prog__stat-label">
+          {ready.length === 1 ? 'aula concluída' : 'aulas concluídas'} de{' '}
+          <span class="num">{ready.length}</span>
+        </span>
+      </li>
+      <li class="prog__stat">
+        <span class="prog__stat-value num" data-stat="acertos">
+          0
+        </span>
+        <span class="prog__stat-label" data-stat-label="acertos">
+          acertos nos exercícios
+        </span>
+      </li>
+      <li class="prog__stat">
+        <span class="prog__stat-value num" data-stat="oficinas">
+          0
+        </span>
+        <span class="prog__stat-label" data-stat-label="oficinas">
+          oficinas em andamento
+        </span>
+      </li>
+    </ul>
+    <ProgressBar lessons={readyIds} label="Progresso no curso" />
+
+    <a class="prog__resume card" href={withBase('')} data-resume hidden>
+      <span class="prog__resume-icon">
+        <CourseIcon name="livro" size={22} />
+      </span>
+      <span class="prog__resume-text">
+        <span class="prog__resume-kicker" data-resume-kicker>
+          Continuar de onde parou
+        </span>
+        <span class="prog__resume-title" data-resume-title></span>
+        <span class="prog__resume-meta" data-resume-meta></span>
+      </span>
+      <CourseIcon name="seta-direita" size={20} />
+    </a>
+
+    <p class="prog__empty" data-empty hidden>
+      Você ainda não abriu nenhuma aula. Comece pelo
+      <a href={withBase('m00-comece-aqui/')}>Módulo 0: Comece aqui</a> ou escolha uma
+      <a href={withBase('trilhas/')}>trilha</a>.
+    </p>
+  </section>
+
+  <section class="prog__section" aria-labelledby="por-trilha">
+    <h2 id="por-trilha" class="prog__h2">
+      Trilhas
+    </h2>
+    <ul class="prog__rows">
+      {tracks.map((track) => {
+        const ids = available(track.lessons).map((l) => l.id);
+        return (
+          <li class="prog__row">
+            <a class="prog__row-title" href={trackUrl(track.id)}>
+              <CourseIcon name={track.icone} size={18} />
+              {track.titulo}
+            </a>
+            <ProgressBar lessons={ids} label={`Progresso na trilha ${track.titulo}`} />
+          </li>
+        );
+      })}
+    </ul>
+  </section>
+
+  <section class="prog__section" aria-labelledby="por-modulo">
+    <h2 id="por-modulo" class="prog__h2">
+      Módulos
+    </h2>
+    {withLessons.length > 0 ? (
+      <ul class="prog__rows">
+        {withLessons.map((module) => (
+          <li class="prog__row">
+            <a class="prog__row-title" href={module.href ?? withBase(`modulos/#${module.id}`)}>
+              <span class="num prog__row-num">{module.numero}</span>
+              {module.titulo}
+            </a>
+            <ProgressBar
+              lessons={available(module.lessons).map((l) => l.id)}
+              label={`Progresso no módulo ${module.numero}`}
+            />
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="prog__muted">
+        As aulas estão sendo publicadas. O progresso de cada módulo aparece aqui assim que ele tiver
+        aulas.
+      </p>
+    )}
+  </section>
+
+  <section class="prog__section" aria-labelledby="exercicios">
+    <h2 id="exercicios" class="prog__h2">
+      Exercícios
+    </h2>
+    <ul class="prog__list" data-quiz-list></ul>
+    <p class="prog__muted" data-quiz-empty>
+      Os resultados dos exercícios das aulas aparecem aqui.
+    </p>
+  </section>
+
+  <section class="prog__section" aria-labelledby="oficinas">
+    <h2 id="oficinas" class="prog__h2">
+      Oficinas
+    </h2>
+    <ul class="prog__list" data-workshop-list></ul>
+    <p class="prog__muted" data-workshop-empty>
+      Os procedimentos que você fizer no modo oficina aparecem aqui, com os passos já feitos.
+    </p>
+  </section>
+
+  <section class="prog__section" aria-labelledby="copia">
+    <h2 id="copia" class="prog__h2">
+      Cópia do progresso
+    </h2>
+    <p class="prog__muted">
+      O arquivo exportado tem as aulas concluídas, os resultados dos exercícios e os passos das
+      oficinas. Importe-o em outro navegador ou aparelho para continuar de lá.
+    </p>
+    <div class="prog__panel">
+      <div class="prog__block">
+        <h3 class="prog__h3">Exportar</h3>
+        <button type="button" class="btn btn--primary" data-export>
+          <CourseIcon name="baixar" size={18} />
+          Baixar arquivo do progresso
+        </button>
+      </div>
+      <form class="prog__block" data-import>
+        <h3 class="prog__h3">Importar</h3>
+        <label class="prog__file">
+          <span>Arquivo exportado (.json)</span>
+          <input type="file" accept=".json,application/json" required data-import-file />
+        </label>
+        <fieldset class="prog__modes">
+          <legend>O que fazer com o progresso deste navegador</legend>
+          <label>
+            <input type="radio" name="modo" value="juntar" checked />
+            <span>
+              <strong>Juntar:</strong> mantém o que já está aqui e acrescenta o do arquivo
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="modo" value="substituir" />
+            <span>
+              <strong>Substituir:</strong> apaga o progresso daqui e usa só o do arquivo
+            </span>
+          </label>
+        </fieldset>
+        <button type="submit" class="btn prog__btn-outline">
+          <CourseIcon name="enviar" size={18} />
+          Importar
+        </button>
+      </form>
+      <div class="prog__block">
+        <h3 class="prog__h3">Apagar</h3>
+        <p class="prog__muted">
+          Apaga aulas, exercícios e oficinas deste navegador. O tema escolhido continua.
+        </p>
+        <button type="button" class="btn prog__btn-danger" data-clear>
+          <CourseIcon name="lixeira" size={18} />
+          <span data-clear-label>Apagar meu progresso</span>
+        </button>
+      </div>
+    </div>
+    <p class="prog__message" role="status" data-message></p>
+  </section>
+
+  <section class="prog__section" aria-labelledby="offline">
+    <h2 id="offline" class="prog__h2">
+      Usar sem internet
+    </h2>
+    <p class="prog__offline" data-offline-status>
+      <CourseIcon name="offline" size={20} />
+      <span data-offline-text>
+        As páginas que você abre ficam guardadas neste aparelho e continuam abrindo sem internet.
+      </span>
+    </p>
+    <div class="prog__install" data-install hidden>
+      <p>
+        Instale o curso como um aplicativo para abrir direto da tela inicial, mesmo sem internet.
+      </p>
+      <button type="button" class="btn btn--primary" data-install-button>
+        <CourseIcon name="baixar" size={18} />
+        Instalar o aplicativo
+      </button>
+    </div>
+    <p class="prog__muted" data-install-ios hidden>
+      No iPhone ou iPad: toque em Compartilhar e depois em{' '}
+      <strong>Adicionar à Tela de Início</strong>.
+    </p>
+    <p class="prog__muted" data-installed hidden>
+      O curso está instalado como aplicativo neste aparelho.
+    </p>
+  </section>
+
+  <CourseIndex modules={modules} />
+  <script
+    is:inline
+    type="application/json"
+    id="oficinas-indice"
+    set:html={JSON.stringify(workshopIndex)}
+  />
+  <script is:inline type="application/json" id="aulas-titulos" set:html={JSON.stringify(titles)} />
+</CoursePage>
+
+<script>
+  import { getProgress, ImportError } from '../../course/progress/store';
+  import { readCourseIndex, resumeTarget } from '../../course/ui/course-index';
+
+  interface WorkshopInfo {
+    id: string;
+    t: string;
+    n: number;
+    h?: string;
+  }
+
+  const store = getProgress();
+  const index = readCourseIndex();
+  const titles = JSON.parse(
+    document.getElementById('aulas-titulos')?.textContent ?? '{}',
+  ) as Record<string, { n: string; t: string; h: string }>;
+  const workshopInfo = new Map(
+    (
+      JSON.parse(document.getElementById('oficinas-indice')?.textContent ?? '[]') as WorkshopInfo[]
+    ).map((w) => [w.id, w]),
+  );
+  const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
+    document.querySelector<T>(selector);
+  const n = (x: number) => x.toLocaleString('pt-BR');
+  const dateFormat = new Intl.DateTimeFormat('pt-BR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+  const date = (iso?: string) => (iso ? dateFormat.format(new Date(iso)) : '');
+
+  function item(title: string, href: string | undefined, meta: string, extra?: string) {
+    const li = document.createElement('li');
+    li.className = 'prog__item';
+    const head = document.createElement(href ? 'a' : 'span');
+    head.className = 'prog__item-title';
+    head.textContent = title;
+    if (href && head instanceof HTMLAnchorElement) head.href = href;
+    const info = document.createElement('span');
+    info.className = 'prog__item-meta';
+    info.textContent = meta;
+    li.append(head, info);
+    if (extra) {
+      const note = document.createElement('span');
+      note.className = 'prog__item-extra';
+      note.textContent = extra;
+      li.append(note);
+    }
+    return li;
+  }
+
+  function render() {
+    const lessons = store.lessons();
+    const read = index.filter((l) => store.isRead(l.i)).length;
+    $('[data-stat="aulas"]')!.textContent = n(read);
+
+    // Exercises
+    let right = 0;
+    let asked = 0;
+    const quizList = $('[data-quiz-list]')!;
+    quizList.replaceChildren();
+    for (const [id, record] of lessons) {
+      const score = store.quizScore(id);
+      if (!score) continue;
+      right += score.acertos;
+      asked += score.total;
+      const lesson = titles[id];
+      const last = Object.values(record.quizzes ?? {})
+        .map((q) => q.em)
+        .sort()
+        .at(-1);
+      const best = score.melhor > score.acertos ? ` · melhor: ${n(score.melhor)}` : '';
+      quizList.append(
+        item(
+          lesson ? `${lesson.n} · ${lesson.t}` : id,
+          lesson?.h,
+          `${n(score.acertos)} de ${n(score.total)} acertos${best}`,
+          date(last),
+        ),
+      );
+    }
+    $('[data-stat="acertos"]')!.textContent = asked > 0 ? `${n(right)}/${n(asked)}` : '0';
+    $('[data-quiz-empty]')!.hidden = quizList.childElementCount > 0;
+
+    // Workshops
+    const workshopList = $('[data-workshop-list]')!;
+    workshopList.replaceChildren();
+    let open = 0;
+    for (const [id, record] of store.workshops()) {
+      const info = workshopInfo.get(id);
+      const total = info?.n ?? record.feitos.length;
+      const done = Math.min(record.feitos.length, total);
+      if (done < total) open += 1;
+      workshopList.append(
+        item(
+          info?.t ?? id,
+          info?.h,
+          done >= total ? 'Todos os passos feitos' : `${n(done)} de ${n(total)} passos feitos`,
+          date(record.em),
+        ),
+      );
+    }
+    $('[data-stat="oficinas"]')!.textContent = n(open);
+    $('[data-stat-label="oficinas"]')!.textContent =
+      open === 1 ? 'oficina em andamento' : 'oficinas em andamento';
+    $('[data-workshop-empty]')!.hidden = workshopList.childElementCount > 0;
+
+    // Continue
+    const box = $<HTMLAnchorElement>('[data-resume]')!;
+    const target = resumeTarget(index, store.lastLesson()?.id, (id) => store.isRead(id));
+    if (target) {
+      const { lesson, kind } = target;
+      box.querySelector('[data-resume-kicker]')!.textContent =
+        kind === 'continuar' ? 'Continuar de onde parou' : 'Próxima aula';
+      box.querySelector('[data-resume-title]')!.textContent = lesson.t;
+      box.querySelector('[data-resume-meta]')!.textContent = `Aula ${lesson.n} · ${lesson.m}`;
+      box.href = lesson.h;
+    }
+    box.hidden = !target;
+    $('[data-empty]')!.hidden = lessons.size > 0 || store.workshops().size > 0;
+  }
+
+  // Backup
+
+  const message = $('[data-message]')!;
+  const say = (text: string, kind: 'ok' | 'erro' = 'ok') => {
+    message.textContent = text;
+    message.dataset.kind = kind;
+  };
+
+  $('[data-export]')?.addEventListener('click', () => {
+    const data = JSON.stringify(store.exportData(), null, 2);
+    const url = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `progresso-curso-eletronica-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    say('Arquivo baixado. Guarde-o ou importe-o em outro aparelho.');
+  });
+
+  $<HTMLFormElement>('[data-import]')?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget as HTMLFormElement;
+    const file = form.querySelector<HTMLInputElement>('[data-import-file]')?.files?.[0];
+    if (!file) return say('Escolha o arquivo exportado antes de importar.', 'erro');
+    const mode = (new FormData(form).get('modo') === 'substituir' ? 'substituir' : 'juntar') as
+      'juntar' | 'substituir';
+    try {
+      const raw: unknown = JSON.parse(await file.text());
+      const count = store.importData(raw, mode);
+      say(
+        mode === 'juntar'
+          ? `Progresso importado e juntado ao deste navegador (${n(count)} ${count === 1 ? 'item' : 'itens'}).`
+          : `Progresso substituído pelo do arquivo (${n(count)} ${count === 1 ? 'item' : 'itens'}).`,
+      );
+      form.reset();
+    } catch (error) {
+      say(
+        error instanceof ImportError
+          ? error.message
+          : 'Não consegui ler este arquivo. Escolha o arquivo .json exportado por este curso.',
+        'erro',
+      );
+    }
+  });
+
+  const clear = $<HTMLButtonElement>('[data-clear]')!;
+  const clearLabel = $('[data-clear-label]')!;
+  let armed: number | undefined;
+  const disarm = () => {
+    window.clearTimeout(armed);
+    armed = undefined;
+    clear.removeAttribute('data-confirm');
+    clearLabel.textContent = 'Apagar meu progresso';
+  };
+  clear.addEventListener('click', () => {
+    if (armed === undefined) {
+      clear.setAttribute('data-confirm', '');
+      clearLabel.textContent = 'Confirmar: apagar tudo';
+      say(
+        'Clique de novo para confirmar. Não dá para desfazer, a não ser que você tenha um arquivo exportado.',
+      );
+      armed = window.setTimeout(() => {
+        disarm();
+        say('');
+      }, 6000);
+      return;
+    }
+    disarm();
+    store.clearProgress();
+    say('Progresso apagado.');
+  });
+  clear.addEventListener('blur', disarm);
+
+  // Offline and install
+
+  interface InstallPrompt extends Event {
+    prompt(): Promise<void>;
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  }
+
+  const standalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true;
+  const installBox = $('[data-install]')!;
+  $('[data-installed]')!.hidden = !standalone;
+  if (!standalone && /iPhone|iPad|iPod/.test(navigator.userAgent))
+    $('[data-install-ios]')!.hidden = false;
+
+  let deferred: InstallPrompt | undefined;
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferred = event as InstallPrompt;
+    installBox.hidden = false;
+  });
+  $('[data-install-button]')?.addEventListener('click', async () => {
+    if (!deferred) return;
+    await deferred.prompt();
+    const { outcome } = await deferred.userChoice;
+    deferred = undefined;
+    installBox.hidden = true;
+    if (outcome === 'accepted')
+      say('Curso instalado. Ele aparece junto com os outros aplicativos.');
+  });
+  window.addEventListener('appinstalled', () => {
+    installBox.hidden = true;
+    $('[data-installed]')!.hidden = false;
+  });
+
+  const offlineText = $('[data-offline-text]')!;
+  if (!('serviceWorker' in navigator)) {
+    offlineText.textContent = 'Este navegador não guarda as páginas para uso sem internet.';
+    $('[data-offline-status]')!.dataset.state = 'indisponivel';
+  } else {
+    void navigator.serviceWorker.ready.then(() => {
+      $('[data-offline-status]')!.dataset.state = 'pronto';
+      offlineText.textContent =
+        'Pronto para usar sem internet: a página inicial, as oficinas e as páginas que você abrir ficam guardadas neste aparelho.';
+    });
+  }
+
+  render();
+  store.subscribe(render);
+</script>
+
+<style>
+  .prog__overview {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .prog__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 30rem) {
+    .prog__stats {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .prog__stat {
+    display: grid;
+    gap: 0.125rem;
+    padding: 1rem 1.125rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .prog__stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .prog__stat-label {
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+  }
+
+  .prog__resume {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    color: var(--fg);
+  }
+
+  .prog__resume[hidden],
+  .prog__empty[hidden],
+  [data-install][hidden] {
+    display: none;
+  }
+
+  .prog__resume-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .prog__resume-text {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .prog__resume-kicker {
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .prog__resume-title {
+    font-weight: 650;
+  }
+
+  .prog__resume-meta,
+  .prog__muted {
+    color: var(--fg-muted);
+    font-size: 0.9375rem;
+  }
+
+  .prog__empty {
+    padding: 1rem 1.25rem;
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--fg-muted);
+  }
+
+  .prog__empty a,
+  .prog__row-title:hover,
+  .prog__item a:hover {
+    color: var(--accent);
+  }
+
+  .prog__empty a {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .prog__section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  .prog__h2 {
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+
+  .prog__h3 {
+    font-size: 1rem;
+    font-weight: 650;
+  }
+
+  .prog__rows {
+    display: grid;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .prog__row {
+    display: grid;
+    gap: 0.625rem;
+    padding: 1rem 1.125rem;
+  }
+
+  .prog__row + .prog__row {
+    border-top: 1px solid var(--border);
+  }
+
+  .prog__row-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-self: start;
+    font-weight: 600;
+  }
+
+  .prog__row-num {
+    color: var(--fg-subtle);
+  }
+
+  .prog__list {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .prog__list:empty {
+    display: none;
+  }
+
+  :global(.prog__item) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.125rem 1rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.625rem;
+  }
+
+  :global(.prog__item-title) {
+    font-weight: 600;
+  }
+
+  :global(.prog__item-meta) {
+    grid-column: 1;
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+  }
+
+  :global(.prog__item-extra) {
+    grid-row: 1 / 3;
+    grid-column: 2;
+    align-self: center;
+    color: var(--fg-subtle);
+    font-size: 0.8125rem;
+  }
+
+  .prog__panel {
+    display: grid;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .prog__block {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+    gap: 0.75rem;
+    padding: 1.25rem;
+  }
+
+  .prog__block + .prog__block {
+    border-top: 1px solid var(--border);
+  }
+
+  .prog__file {
+    display: grid;
+    gap: 0.375rem;
+    max-width: 100%;
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  .prog__file input {
+    width: 100%;
+    max-width: 100%;
+    font-size: 0.9375rem;
+  }
+
+  .prog__modes {
+    display: grid;
+    gap: 0.5rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 0.9375rem;
+  }
+
+  .prog__modes legend {
+    margin-bottom: 0.375rem;
+    font-weight: 500;
+  }
+
+  .prog__modes label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .prog__modes input {
+    flex: none;
+    width: 1.125rem;
+    height: 1.125rem;
+    margin-top: 0.2rem;
+    accent-color: var(--accent);
+  }
+
+  .prog__btn-outline {
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--fg);
+  }
+
+  .prog__btn-outline:hover {
+    border-color: var(--accent);
+  }
+
+  .prog__btn-danger {
+    border: 1px solid var(--danger-border);
+    background: var(--bg);
+    color: var(--danger);
+  }
+
+  .prog__btn-danger:hover,
+  .prog__btn-danger[data-confirm] {
+    background: var(--danger);
+    color: light-dark(#fff, #0b0e13);
+  }
+
+  .prog__message:empty {
+    display: none;
+  }
+
+  .prog__message {
+    padding: 0.75rem 1rem;
+    border-radius: 0.625rem;
+    background: var(--success-soft);
+    color: var(--fg);
+  }
+
+  .prog__message[data-kind='erro'] {
+    background: var(--danger-soft);
+  }
+
+  .prog__offline {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.625rem;
+    padding: 1rem 1.125rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .prog__offline :global(svg) {
+    flex: none;
+    margin-top: 0.15rem;
+    color: var(--fg-subtle);
+  }
+
+  .prog__offline[data-state='pronto'] {
+    border-color: var(--success-border);
+  }
+
+  .prog__offline[data-state='pronto'] :global(svg) {
+    color: var(--success);
+  }
+
+  .prog__install {
+    display: grid;
+    justify-items: start;
+    gap: 0.75rem;
+  }
+</style>

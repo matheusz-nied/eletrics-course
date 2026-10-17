@@ -1,7 +1,327 @@
 ---
 /*
- * Placeholder created by the Fundação: the site header renders this component
- * next to the theme button, so the Experiência front can add the search
- * shortcut and the progress link by replacing this file.
+ * Header actions of the course experience: quick search (dialog, Ctrl+K or /),
+ * the progress page and, on phones, the menu with the site navigation
+ * (Header.astro hides its own links below 48rem).
  */
+import { NAV } from '../lib/site';
+import { withBase } from '../lib/url';
+import SearchBox from './search/SearchBox.astro';
+import CourseIcon from './ui/CourseIcon.astro';
+
+const links = [
+  { label: 'Início', path: '' },
+  ...NAV,
+  { label: 'Busca', path: 'busca/' },
+  { label: 'Meu progresso', path: 'progresso/' },
+];
+const current = Astro.url.pathname;
 ---
+
+<div class="hactions">
+  <a
+    href={withBase('busca/')}
+    class="hactions__search"
+    data-search-open
+    aria-keyshortcuts="Control+K"
+  >
+    <CourseIcon name="buscar" size={18} />
+    <span class="hactions__search-text">Buscar</span>
+    <kbd class="hactions__kbd" aria-hidden="true">
+      Ctrl K
+    </kbd>
+  </a>
+  <a href={withBase('progresso/')} class="icon-btn hactions__progress" title="Meu progresso">
+    <CourseIcon name="progresso" />
+    <span class="sr-only">Meu progresso</span>
+  </a>
+  <button
+    type="button"
+    class="icon-btn hactions__menu"
+    aria-haspopup="dialog"
+    aria-expanded="false"
+    aria-controls="menu-movel"
+    data-menu-open
+  >
+    <CourseIcon name="menu" />
+    <span class="sr-only">Menu</span>
+  </button>
+</div>
+
+<dialog id="busca-rapida" class="sdialog" aria-labelledby="busca-rapida-titulo" data-search-dialog>
+  <div class="sdialog__panel">
+    <div class="sdialog__head">
+      <h2 id="busca-rapida-titulo" class="sdialog__title">
+        Buscar no curso
+      </h2>
+      <button type="button" class="icon-btn" data-dialog-close>
+        <CourseIcon name="x" />
+        <span class="sr-only">Fechar a busca</span>
+      </button>
+    </div>
+    <SearchBox id="busca-rapida" />
+  </div>
+</dialog>
+
+<dialog id="menu-movel" class="mmenu" aria-label="Menu" data-menu-dialog>
+  <div class="mmenu__head">
+    <span class="mmenu__title">Menu</span>
+    <button type="button" class="icon-btn" data-dialog-close>
+      <CourseIcon name="x" />
+      <span class="sr-only">Fechar o menu</span>
+    </button>
+  </div>
+  <nav aria-label="Navegação do site">
+    <ul class="mmenu__list">
+      {links.map((link) => {
+        const href = withBase(link.path);
+        return (
+          <li>
+            <a href={href} aria-current={href === current ? 'page' : undefined}>
+              {link.label}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </nav>
+</dialog>
+
+<script>
+  import { preloadSearch } from './search/engine';
+
+  const searchDialog = document.querySelector<HTMLDialogElement>('[data-search-dialog]');
+  const menuDialog = document.querySelector<HTMLDialogElement>('[data-menu-dialog]');
+  const menuButton = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+
+  function openSearch() {
+    if (!searchDialog || searchDialog.open) return;
+    menuDialog?.close();
+    searchDialog.showModal();
+    const input = searchDialog.querySelector<HTMLInputElement>('[data-search-input]');
+    input?.focus();
+    input?.select();
+  }
+
+  document.querySelectorAll<HTMLAnchorElement>('[data-search-open]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+      event.preventDefault();
+      openSearch();
+    });
+    link.addEventListener('pointerenter', preloadSearch, { once: true });
+  });
+
+  document.addEventListener('keydown', (event) => {
+    const typing = (event.target as HTMLElement).closest(
+      'input, textarea, select, [contenteditable="true"]',
+    );
+    if ((event.key === 'k' || event.key === 'K') && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      openSearch();
+    } else if (event.key === '/' && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      openSearch();
+    }
+  });
+
+  menuButton?.addEventListener('click', () => {
+    menuDialog?.showModal();
+    menuButton.setAttribute('aria-expanded', 'true');
+  });
+  menuDialog?.addEventListener('close', () => menuButton?.setAttribute('aria-expanded', 'false'));
+
+  // Close buttons, and clicks on the backdrop.
+  for (const dialog of [searchDialog, menuDialog]) {
+    dialog?.querySelector('[data-dialog-close]')?.addEventListener('click', () => dialog.close());
+    dialog?.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  }
+</script>
+
+<style>
+  .hactions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .hactions__search {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.625rem;
+    color: var(--fg-muted);
+  }
+
+  .hactions__search:hover {
+    background: var(--surface-2);
+    color: var(--fg);
+  }
+
+  /* Phones: icon only (the name stays for screen readers); progress is in the menu. */
+  .hactions__search-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .hactions__kbd,
+  .hactions__progress {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .hactions__search {
+      width: auto;
+      height: 2.25rem;
+      margin-right: 0.25rem;
+      padding: 0 0.5rem 0 0.75rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 0.875rem;
+    }
+
+    .hactions__search:hover {
+      border-color: var(--border-strong);
+    }
+
+    .hactions__search-text {
+      position: static;
+      width: auto;
+      min-width: 6rem;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+    }
+
+    .hactions__kbd {
+      display: inline;
+      padding: 0.1rem 0.375rem;
+      border: 1px solid var(--border);
+      border-radius: 0.3rem;
+      background: var(--bg);
+      color: var(--fg-subtle);
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .hactions__menu {
+      display: none;
+    }
+
+    .hactions__progress {
+      display: inline-grid;
+    }
+  }
+
+  /* Dialogs */
+
+  dialog {
+    max-width: none;
+    max-height: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--fg);
+  }
+
+  dialog::backdrop {
+    background: rgb(5 8 12 / 0.5);
+    backdrop-filter: blur(2px);
+  }
+
+  .sdialog {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+
+  .sdialog__panel {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+
+  @media (min-width: 48rem) {
+    .sdialog {
+      width: min(42rem, calc(100% - 3rem));
+      height: auto;
+      max-height: calc(100dvh - 8rem);
+      margin: 5rem auto auto;
+    }
+
+    .sdialog__panel {
+      height: auto;
+      max-height: calc(100dvh - 8rem);
+      padding: 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  .sdialog__head,
+  .mmenu__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .sdialog__title,
+  .mmenu__title {
+    font-size: 1.0625rem;
+    font-weight: 650;
+  }
+
+  .mmenu {
+    width: min(20rem, 85vw);
+    height: 100%;
+    margin: 0 0 0 auto;
+    padding: 0.75rem 1rem 1.5rem;
+    background: var(--bg);
+    box-shadow: var(--shadow-md);
+  }
+
+  .mmenu__list {
+    display: grid;
+    gap: 0.125rem;
+    margin-top: 1rem;
+  }
+
+  .mmenu__list a {
+    display: flex;
+    align-items: center;
+    min-height: 3rem;
+    padding: 0 0.875rem;
+    border-radius: 0.625rem;
+    color: var(--fg);
+    font-size: 1.0625rem;
+    font-weight: 500;
+  }
+
+  .mmenu__list a:hover {
+    background: var(--surface-2);
+  }
+
+  .mmenu__list a[aria-current='page'] {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+</style>

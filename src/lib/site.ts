@@ -32,4 +32,8 @@ export const SAFETY_LABELS = {
  * Header navigation, as paths relative to the site base.
  * A front adds its page here when the page exists, so no link points to a 404.
  */
-export const NAV: { label: string; path: string }[] = [{ label: 'Módulos', path: '#modulos' }];
+export const NAV: { label: string; path: string }[] = [
+  { label: 'Módulos', path: 'modulos/' },
+  { label: 'Trilhas', path: 'trilhas/' },
+  { label: 'Glossário', path: 'glossario/' },
+];
