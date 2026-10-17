@@ -27,6 +27,8 @@ export interface ResistorProps {
   package?: Package;
   /** Lead shape of axial resistors. */
   leads?: 'retos' | 'dobrados';
+  /** Height of the body axis above the lead ends when the leads are bent (mm). */
+  leadDrop?: number;
   /** Body temperature in °C: discolours above 150 °C, glows above ~480 °C. */
   temperature?: number;
   /** Burned by overload: charred body. */
@@ -67,6 +69,7 @@ export const meta: PartMeta = {
     watts: 0.25,
     package: 'axial',
     leads: 'retos',
+    leadDrop: 9,
     temperature: 25,
     burned: false,
   },
@@ -112,6 +115,14 @@ export const meta: PartMeta = {
         { value: 'retos', label: 'Retos' },
         { value: 'dobrados', label: 'Dobrados para a placa' },
       ],
+    },
+    leadDrop: {
+      kind: 'number',
+      label: 'Altura dos terminais dobrados',
+      min: 3,
+      max: 20,
+      step: 0.5,
+      unit: 'mm',
     },
     temperature: { kind: 'number', label: 'Temperatura', min: 25, max: 900, step: 5, unit: '°C' },
     burned: { kind: 'toggle', label: 'Queimado' },
@@ -292,7 +303,7 @@ function AxialResistor(p: Required<ResistorProps>) {
   const capLength = L * 0.2;
   const leadR = lead / 2;
   const bent = p.leads === 'dobrados';
-  const lift = bent ? 9 : R;
+  const lift = bent ? Math.max(p.leadDrop, R + 0.5) : R;
   const half = bent ? size.pitch / 2 : L / 2 + LEAD_LENGTH;
   const leadPoints = (side: 1 | -1): Vec3[] =>
     bent

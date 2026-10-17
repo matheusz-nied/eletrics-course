@@ -84,7 +84,6 @@ test.describe('example lesson', () => {
     for (const stub of [
       'Simulation',
       'Plot',
-      'Model3D',
       'Scene3D',
       'WiringExercise',
       'Workshop',

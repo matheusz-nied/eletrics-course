@@ -27,6 +27,9 @@ import { withBase } from '../../lib/url';
 import { QUALITY, useQuality } from './quality';
 import type { Vec3 } from '../types';
 import type { OrbitControlsLike } from './controls';
+import { fitDistance } from './framing';
+
+export { fitDistance };
 
 /**
  * Only light-emitting surfaces bloom: the studio HDRI peaks below ~85, so
@@ -59,7 +62,11 @@ export interface StageProps {
   children: ReactNode;
   environment?: EnvironmentName;
   environmentIntensity?: number;
-  /** Rotation of the environment around Y (radians), to move the reflections. */
+  /**
+   * Rotation of the environment around Y (radians). The default puts the
+   * studio's big softbox at the side of the default camera, so flat glossy
+   * surfaces (boards, panels) do not mirror it. Debug: `?efeitos=giro90`.
+   */
   environmentRotation?: number;
   /**
    * `neutral` (Khronos PBR Neutral) keeps catalogue colours true, which matters
@@ -92,7 +99,7 @@ export function Stage({
   children,
   environment = 'estudio',
   environmentIntensity = 0.85,
-  environmentRotation = 0,
+  environmentRotation = Math.PI / 2,
   toneMapping = 'neutral',
   exposure = 1,
   background = 'studio',
@@ -138,13 +145,15 @@ export function Stage({
   const showAo = (ao ?? quality.ao) && usePasses && !debug.includes('sem-ao');
   const showBloom = (bloom ?? quality.bloom) && usePasses && !debug.includes('sem-bloom');
   const extent = bounds?.radius ?? 10;
+  const turn = /giro(-?\d+)/.exec(debug);
+  const envTurn = turn ? (Number(turn[1]) * Math.PI) / 180 : environmentRotation;
 
   return (
     <>
       <Environment
         files={hdriUrl(environment, quality.hdri)}
         environmentIntensity={environmentIntensity}
-        environmentRotation={[0, environmentRotation, 0]}
+        environmentRotation={[0, envTurn, 0]}
       />
       <StageBackground kind={background} />
       <directionalLight position={[extent * 2, extent * 4, extent * 3]} intensity={0.6} />
@@ -289,47 +298,6 @@ interface FitCameraProps {
 }
 
 const FOLLOW_SECONDS = 1.6;
-
-const UP = new Vector3(0, 1, 0);
-
-/**
- * Camera distance (from `center`, along `dir`) at which every corner of the
- * box fits the view, for a perspective camera with vertical `fov` (degrees).
- * Long thin parts get framed by their silhouette, not by a bounding sphere.
- */
-export function fitDistance(
-  box: Box3,
-  center: Vector3,
-  dir: Vector3,
-  fov: number,
-  aspect: number,
-): number {
-  const tanV = Math.tan((fov * Math.PI) / 360);
-  const tanH = tanV * aspect;
-  const forward = dir.clone().normalize();
-  const right = new Vector3().crossVectors(UP, forward);
-  if (right.lengthSq() < 1e-8) right.set(1, 0, 0);
-  right.normalize();
-  const up = new Vector3().crossVectors(forward, right);
-  const corner = new Vector3();
-  let distance = 0;
-  for (let i = 0; i < 8; i++) {
-    corner
-      .set(
-        i & 1 ? box.max.x : box.min.x,
-        i & 2 ? box.max.y : box.min.y,
-        i & 4 ? box.max.z : box.min.z,
-      )
-      .sub(center);
-    const depth = corner.dot(forward);
-    distance = Math.max(
-      distance,
-      depth + Math.abs(corner.dot(right)) / tanH,
-      depth + Math.abs(corner.dot(up)) / tanV,
-    );
-  }
-  return Math.max(distance, 1e-3);
-}
 
 /**
  * Frames the content: jumps on a new `fitKey`, follows smoothly on a new

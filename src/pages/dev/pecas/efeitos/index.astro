@@ -1,0 +1,46 @@
+---
+/*
+ * Internal demo of the 3D effects (Kit 3D front): smoke, sparks, magnetic
+ * field lines and current flow. Not linked from the course navigation.
+ */
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import FxDemo from '../../../../three/gallery/FxDemo';
+---
+
+<BaseLayout title="Efeitos 3D" noindex>
+  <main id="conteudo" tabindex="-1" class="dev-efeitos">
+    <header>
+      <p class="eyebrow">Interno · Kit 3D</p>
+      <h1>Efeitos 3D</h1>
+      <p>Fumaça, faíscas, linhas de campo magnético calculadas e corrente nos fios.</p>
+    </header>
+    <FxDemo client:only="react" />
+  </main>
+</BaseLayout>
+
+<style>
+  .dev-efeitos {
+    max-width: 90rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .dev-efeitos:focus {
+    outline: none;
+  }
+
+  header {
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  header p:last-child {
+    margin-top: 0.375rem;
+    color: var(--fg-muted);
+  }
+</style>

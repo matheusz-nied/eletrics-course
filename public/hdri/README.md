@@ -9,3 +9,5 @@ Mapas de ambiente usados pelo palco 3D (`src/three/core/Stage.tsx`). Todos são 
 | `interno-1k.hdr`, `interno-512.hdr` | [Lebombo](https://polyhaven.com/a/lebombo), Greg Zaal | Cenas dentro de casa (quadro, tomadas) |
 
 As versões `-1k` são as originais (1024 × 512). As versões `-512` (512 × 256) foram reduzidas com média em ponto flutuante, preservando a faixa dinâmica, e são usadas nos níveis de qualidade média e baixa.
+
+O `estudio` foi tratado para iluminar peças como numa foto de produto: as fontes de luz pequenas e muito fortes foram espalhadas (desfoque que preserva a energia total, acima de 4 de radiância), o que tira os pontos estourados dos metais, e as áreas escuras foram clareadas em 0,35, para metais não refletirem um quarto preto. O palco gira esse ambiente em 90° por padrão, deixando a caixa de luz principal ao lado da câmera, para superfícies planas e brilhantes (placas, painéis) não a refletirem inteira.

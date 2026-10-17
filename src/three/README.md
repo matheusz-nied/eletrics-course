@@ -83,6 +83,42 @@ Regras:
 - **Animação:** `useFrame` para mexer; declare `animated` no `meta` para a vista renderizar todo quadro enquanto for preciso.
 - **Lint:** o React Compiler não é usado aqui; arquivos que mudam objetos do three.js dentro de `useFrame` podem começar com `/* eslint-disable react-hooks/immutability -- … */`.
 
+## Placas de circuito impresso
+
+`pcb/PrintedCircuitBoard.tsx` gera uma placa a partir de um layout (`pcb/layout.ts`): contorno, ilhas (PTH e SMD), trilhas, planos de cobre com afastamento por rede, vias, furos de fixação e serigrafia, em milímetros vistos de cima (origem no canto superior esquerdo, y para baixo). O substrato é extrudado com os furos de verdade; cobre, máscara, acabamento e serigrafia são pintados nos mapas de cada face, então uma placa com centenas de ilhas continua leve. Furos metalizados ganham o tubo de cobre; ilhas com `solder: true` ganham o filete de solda e a ponta do terminal. Na vista explodida as camadas se separam.
+
+```tsx
+import { OnBoard, PrintedCircuitBoard } from '../three/pcb/PrintedCircuitBoard';
+import { padPosition, type PcbLayout } from '../three/pcb/layout';
+
+const LAYOUT: PcbLayout = {            // constante do módulo (ou useMemo)
+  width: 40, height: 25, copper: 'bottom', mask: 'verde',
+  pads: [{ id: 'J1.1', at: [6, 10], drill: 1.3, size: 2.6, shape: 'square' }],
+  traces: [{ points: [[6, 10], [20, 10]], width: 1, side: 'bottom' }],
+  silk: [{ kind: 'text', at: [6, 6], text: 'J1', size: 1.2 }],
+};
+
+<PrintedCircuitBoard layout={LAYOUT}>
+  <OnBoard layout={LAYOUT} at={[20, 12.5]}><Resistor leads="dobrados" /></OnBoard>
+</PrintedCircuitBoard>
+```
+
+`padPosition(layout, 'J1.1')` dá a posição 3D de uma ilha (para a bancada encaixar fios). Exemplos completos em `pcb/samples.ts` (placa do LED, placa ilhada, placa SMD com plano de terra).
+
+## Efeitos
+
+Em `fx/`, todos dirigidos por props (a simulação muda os valores). Demonstração em **`/dev/pecas/efeitos/`**.
+
+| Componente | Uso |
+|------------|-----|
+| `<Smoke position intensity>` | fumaça de peça queimando; ao voltar a 0, a fumaça que já subiu termina de sumir |
+| `<Sparks position trigger rate>` | faíscas: cada mudança de `trigger` dispara uma rajada; `rate` mantém um arco |
+| `<FieldLines sources>` | linhas de campo magnético **calculadas** (`fx/field.ts`): ímã em barra, dipolo, espira (exata, com integrais elípticas), solenoide e fio reto; setas no sentido do campo, `flow` faz as setas andarem |
+| `<CurrentFlow points current convention>` | pontos andando no fio com velocidade proporcional à corrente, no sentido convencional ou dos elétrons |
+| `emission`, `<GlowSprite>`, `blackbodyColor` | brilho de LEDs, displays e filamentos (veja "Luz" e "Calor" acima) |
+
+A vista explodida e o corte já têm transição animada (`core/view.tsx`); as peças só declaram `<Explode>` e `<Material clip>`.
+
 ## Pôsteres
 
 Cada peça tem um pôster em `posters/<id>.webp` (960 × 600, props padrão), usado enquanto o 3D carrega e quando não há WebGL. Para gerar de novo depois de mudar uma peça:

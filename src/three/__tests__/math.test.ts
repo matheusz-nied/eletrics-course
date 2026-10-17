@@ -1,0 +1,195 @@
+import { Box3, Vector3 } from 'three';
+import { describe, expect, it } from 'vitest';
+import { resistorBands } from '../core/colorCode';
+import { fitDistance } from '../core/framing';
+import {
+  capacitorCode,
+  formatFarads,
+  formatNumber,
+  formatOhms,
+  formatWatts,
+  smdResistorCode,
+} from '../core/format';
+import { blackbodyRGB, glowIntensity } from '../fx/blackbody';
+import { flowSpeed } from '../fx/CurrentFlow';
+import { ellipticKE, fieldAt, fieldLines, loopField, traceLine } from '../fx/field';
+import { boardPoint, padPosition, resolveLayout } from '../pcb/layout';
+import { ledBoard, perfBoard, smdBoard } from '../pcb/samples';
+
+describe('format', () => {
+  it('writes numbers the Brazilian way', () => {
+    expect(formatNumber(4.7)).toBe('4,7');
+    expect(formatNumber(1000)).toBe('1.000');
+    expect(formatOhms(4700)).toBe('4,7 kΩ');
+    expect(formatOhms(1_000_000)).toBe('1 MΩ');
+    expect(formatOhms(470)).toBe('470 Ω');
+    expect(formatFarads(100e-9)).toBe('100 nF');
+    expect(formatFarads(2.2e-6)).toBe('2,2 µF');
+  });
+
+  it('prints catalogue power ratings', () => {
+    expect(formatWatts(0.25)).toBe('1/4 W');
+    expect(formatWatts(0.5)).toBe('1/2 W');
+    expect(formatWatts(5)).toBe('5 W');
+  });
+
+  it('builds SMD and capacitor codes', () => {
+    expect(smdResistorCode(4700)).toBe('472');
+    expect(smdResistorCode(4700, true)).toBe('4701');
+    expect(smdResistorCode(100)).toBe('101');
+    expect(smdResistorCode(4.7)).toBe('4R7');
+    expect(capacitorCode(100e-9)).toBe('104');
+    expect(capacitorCode(4.7e-9)).toBe('472');
+    expect(capacitorCode(22e-12)).toBe('22');
+  });
+});
+
+describe('resistor colour code', () => {
+  it('encodes 4 and 5 bands', () => {
+    expect(resistorBands(4700).bands).toEqual(['amarelo', 'violeta', 'vermelho', 'dourado']);
+    expect(resistorBands(470, 5).bands).toEqual(['amarelo', 'violeta', 'marrom', 'dourado']);
+    expect(resistorBands(10, 10).bands).toEqual(['marrom', 'preto', 'preto', 'prateado']);
+    expect(resistorBands(4.7).bands).toEqual(['amarelo', 'violeta', 'dourado', 'dourado']);
+    expect(resistorBands(12_100, 1, 5).bands).toEqual([
+      'marrom',
+      'vermelho',
+      'marrom',
+      'vermelho',
+      'marrom',
+    ]);
+  });
+
+  it('rounds to what the bands can say', () => {
+    expect(resistorBands(4689).ohms).toBe(4700);
+  });
+});
+
+describe('black body', () => {
+  it('goes from red to white', () => {
+    const [r1, g1, b1] = blackbodyRGB(1200);
+    expect(r1).toBe(1);
+    expect(g1).toBeLessThan(0.5);
+    expect(b1).toBe(0);
+    const [r2, g2, b2] = blackbodyRGB(6500);
+    expect(Math.min(r2, g2, b2)).toBeGreaterThan(0.9);
+  });
+
+  it('only glows above ~750 K and reaches 1 at 2700 K', () => {
+    expect(glowIntensity(600)).toBe(0);
+    expect(glowIntensity(1000)).toBeGreaterThan(0);
+    expect(glowIntensity(2700)).toBeCloseTo(1);
+    expect(glowIntensity(3000)).toBeGreaterThan(1);
+  });
+});
+
+describe('framing', () => {
+  it('backs off further for a wider box', () => {
+    const center = new Vector3();
+    const dir = new Vector3(0, 0, 1);
+    const small = new Box3(new Vector3(-5, -5, -5), new Vector3(5, 5, 5));
+    const wide = new Box3(new Vector3(-50, -5, -5), new Vector3(50, 5, 5));
+    const a = fitDistance(small, center, dir, 30, 1.5);
+    const b = fitDistance(wide, center, dir, 30, 1.5);
+    expect(b).toBeGreaterThan(a * 4);
+    // A 10 mm cube, 30° vertical fov: half-height 5 at depth d − 5 → d ≈ 5 + 5/tan(15°).
+    expect(a).toBeCloseTo(5 + 5 / Math.tan(Math.PI / 12), 1);
+  });
+});
+
+describe('magnetic field', () => {
+  it('computes the elliptic integrals', () => {
+    const [K0, E0] = ellipticKE(0);
+    expect(K0).toBeCloseTo(Math.PI / 2, 10);
+    expect(E0).toBeCloseTo(Math.PI / 2, 10);
+    const [K, E] = ellipticKE(0.5);
+    expect(K).toBeCloseTo(1.854074677, 8);
+    expect(E).toBeCloseTo(1.350643881, 8);
+  });
+
+  it('matches the on-axis field of a loop', () => {
+    const a = 10;
+    const z = 7;
+    const [brho, bz] = loopField(a, 2, 0, z);
+    expect(brho).toBe(0);
+    // μ0 I a² / (2 (a² + z²)^{3/2}) with μ0 = 4π.
+    expect(bz).toBeCloseTo((2 * Math.PI * 2 * a * a) / (a * a + z * z) ** 1.5, 9);
+  });
+
+  it('points from north to south outside a bar magnet', () => {
+    const bar = [{ kind: 'bar' as const, length: 40, axis: [1, 0, 0] as [number, number, number] }];
+    // Beyond the north pole the field points away from the magnet…
+    expect(fieldAt(bar, [40, 0, 0])[0]).toBeGreaterThan(0);
+    // …and beside the middle it runs back towards the south pole.
+    expect(fieldAt(bar, [0, 15, 0])[0]).toBeLessThan(0);
+  });
+
+  it('circles a straight wire by the right-hand rule', () => {
+    const wire = [
+      {
+        kind: 'wire' as const,
+        start: [0, -100, 0] as [number, number, number],
+        end: [0, 100, 0] as [number, number, number],
+      },
+    ];
+    const b = fieldAt(wire, [10, 0, 0]);
+    // Current up (+y), point at +x: B along −z.
+    expect(b[2]).toBeLessThan(0);
+    expect(Math.abs(b[0])).toBeLessThan(1e-9);
+    // Nearly infinite wire: B = μ0 I / (2π d) = 2 I / d with μ0 = 4π.
+    expect(Math.abs(b[2])).toBeCloseTo(2 / 10, 2);
+    const line = traceLine(wire, [10, 0, 0], 1, { step: 0.5, extent: 50 });
+    expect(line.closed).toBe(true);
+  });
+
+  it('draws lines that leave the north pole and reach the south pole', () => {
+    const lines = fieldLines([{ kind: 'bar', length: 40, axis: [1, 0, 0] }], { count: 8 });
+    expect(lines.length).toBeGreaterThanOrEqual(8);
+    const closing = lines.filter((l) => l[0]![0] > 19 && l[l.length - 1]![0] < -19);
+    expect(closing.length).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe('current flow', () => {
+  it('grows with the current and keeps its sign', () => {
+    expect(flowSpeed(0)).toBe(0);
+    expect(flowSpeed(0.5, 30)).toBe(15);
+    expect(flowSpeed(-0.5, 30)).toBe(-15);
+    expect(flowSpeed(10, 30)).toBeGreaterThan(flowSpeed(1, 30));
+    expect(flowSpeed(1e6, 30)).toBe(150);
+  });
+});
+
+describe('printed circuit board layouts', () => {
+  it('fills the defaults', () => {
+    const l = resolveLayout({ width: 10, height: 10 });
+    expect(l.thickness).toBe(1.6);
+    expect(l.maskSides).toEqual(['top', 'bottom']);
+    expect(resolveLayout({ width: 10, height: 10, copper: 'bottom' }).maskSides).toEqual([
+      'bottom',
+    ]);
+    expect(resolveLayout({ width: 10, height: 10, mask: 'nenhuma' }).maskSides).toEqual([]);
+  });
+
+  it('maps layout points to the part space', () => {
+    const layout = { width: 40, height: 20 };
+    expect(boardPoint(layout, [0, 0])).toEqual([-20, 1.6, -10]);
+    expect(boardPoint(layout, [40, 20], 'bottom')).toEqual([20, 0, 10]);
+    expect(padPosition(ledBoard(), 'R1.1')).toEqual([20 - 5.08 - 20, 1.6, 0]);
+  });
+
+  it('keeps every sample pad and hole inside the board', () => {
+    for (const layout of [ledBoard(true), perfBoard(), smdBoard()]) {
+      for (const item of [
+        ...(layout.pads ?? []),
+        ...(layout.holes ?? []),
+        ...(layout.vias ?? []),
+      ]) {
+        expect(item.at[0]).toBeGreaterThan(0);
+        expect(item.at[0]).toBeLessThan(layout.width);
+        expect(item.at[1]).toBeGreaterThan(0);
+        expect(item.at[1]).toBeLessThan(layout.height);
+      }
+    }
+    expect(perfBoard().pads).toHaveLength(18 * 24);
+  });
+});

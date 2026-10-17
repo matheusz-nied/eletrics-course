@@ -269,6 +269,11 @@
   white-space: nowrap;
 }
 
+.m3d-pin[data-side='left'] {
+  flex-direction: row-reverse;
+  transform: translateX(calc(-50% + 0.625rem));
+}
+
 .m3d-pin__number {
   box-shadow:
     0 0 0 2px color-mix(in oklab, var(--bg) 85%, transparent),

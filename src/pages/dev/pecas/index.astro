@@ -4,6 +4,7 @@
  * its props. Not linked from the course navigation.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { withBase } from '../../../lib/url';
 import { getPoster, listParts } from '../../../three/catalog';
 import Gallery, { type GalleryPart } from '../../../three/gallery/Gallery';
 
@@ -26,8 +27,9 @@ const parts: GalleryPart[] = listParts().map((meta) => ({
       <p class="eyebrow">Interno · Kit 3D</p>
       <h1>Galeria de peças 3D</h1>
       <p>
-        {parts.length} peças paramétricas em tamanho real. Escolha uma peça, mude as propriedades e
-        copie o código para usar na aula.
+        {parts.length === 1 ? '1 peça paramétrica' : `${parts.length} peças paramétricas`} em tamanho
+        real. Escolha uma peça, mude as propriedades e copie o código para usar na aula. Veja também os
+        <a href={withBase('dev/pecas/efeitos/')}>efeitos 3D</a>.
       </p>
     </header>
     <Gallery client:only="react" parts={parts} />
