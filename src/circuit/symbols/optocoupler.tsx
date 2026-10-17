@@ -3,27 +3,32 @@ import { Arrow, defineSymbol } from './_kit';
 /** Optocoupler: LED and phototransistor in the same package, isolated. */
 export default defineSymbol({
   type: 'optocoupler',
-  pins: { a: [-3, -1], k: [-3, 1], c: [3, -1], e: [3, 1] },
-  box: [-30, -20, 60, 40],
-  draw: () => (
-    <>
-      <rect
-        x={-22}
-        y={-20}
-        width={44}
-        height={40}
-        rx={3}
-        strokeDasharray="3 2.5"
-        strokeWidth={1.2}
-      />
-      <path d="M-30 -10H-14V-6M-30 10H-14V6" />
-      <path d="M-20 -6H-8L-14 5Z" className="sym-fill" />
-      <path d="M-20 6H-8" />
-      <Arrow x1={-5} y1={-3} x2={3} y2={-3} size={4} />
-      <Arrow x1={-5} y1={3} x2={3} y2={3} size={4} />
-      <path d="M8 -9V9" strokeWidth={2.6} />
-      <path d="M8 -4L16 -10H30M16 10H30" />
-      <Arrow x1={8} y1={4} x2={16} y2={10} size={5} />
-    </>
-  ),
+  pins: { a: [-4, -2], k: [-4, 2], c: [4, -2], e: [4, 2] },
+  box: [-40, -28, 80, 56],
+  live: ['brightness'],
+  draw: ({ live }) => {
+    const lit = typeof live.brightness === 'number' && live.brightness > 0.05;
+    return (
+      <>
+        <rect
+          x={-28}
+          y={-28}
+          width={56}
+          height={56}
+          rx={3}
+          strokeDasharray="3 2.5"
+          strokeWidth={1.2}
+        />
+        <path d="M-40 -20H-17V-8M-40 20H-17V7" />
+        <path d="M-24 -7H-10L-17 6Z" className={lit ? 'sym-fill sym-accent' : 'sym-fill'} />
+        <path d="M-24 7H-10" />
+        <Arrow x1={-6} y1={-4} x2={3} y2={-4} size={4} />
+        <Arrow x1={-6} y1={4} x2={3} y2={4} size={4} />
+        <path d="M9 -11V11" strokeWidth={2.6} />
+        <path d="M9 -5L20 -12V-20H40M20 20H40" />
+        <Arrow x1={9} y1={5} x2={20} y2={12} size={5} />
+        <path d="M20 12V20" />
+      </>
+    );
+  },
 });

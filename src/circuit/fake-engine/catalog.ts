@@ -163,7 +163,7 @@ const DEVICES: DeviceInfo[] = [
     ['blown'],
   ),
 
-  // Nível 2
+  // Nível 2 (names as announced by the Simulação front for S2)
   two('diode', 'Diodo', {}, ['burned']),
   two(
     'led',
@@ -172,8 +172,15 @@ const DEVICES: DeviceInfo[] = [
       color: {
         default: 'red',
         label: 'Cor',
+        options: [
+          { value: 'red', label: 'Vermelho' },
+          { value: 'yellow', label: 'Amarelo' },
+          { value: 'green', label: 'Verde' },
+          { value: 'blue', label: 'Azul' },
+          { value: 'white', label: 'Branco' },
+          { value: 'infrared', label: 'Infravermelho' },
+        ],
       },
-      maxCurrent: { default: 0.03, label: 'Corrente máxima', unit: 'A', min: 0 },
     },
     ['brightness', 'burned'],
   ),
@@ -181,14 +188,14 @@ const DEVICES: DeviceInfo[] = [
     'zener',
     'Diodo zener',
     {
-      breakdownVoltage: { default: 5.1, label: 'Tensão zener', unit: 'V', min: 0 },
+      voltage: { default: 5.1, label: 'Tensão zener', unit: 'V', min: 0 },
     },
     ['burned'],
   ),
   fixed(
     'npn',
     'Transistor NPN',
-    { b: [-2, 0], c: [1, -2], e: [1, 2] },
+    { b: [-4, 0], c: [2, -4], e: [2, 4] },
     {
       beta: { default: 100, label: 'Ganho (β)', min: 1 },
     },
@@ -197,7 +204,7 @@ const DEVICES: DeviceInfo[] = [
   fixed(
     'pnp',
     'Transistor PNP',
-    { b: [-2, 0], c: [1, -2], e: [1, 2] },
+    { b: [-4, 0], e: [2, -4], c: [2, 4] },
     {
       beta: { default: 100, label: 'Ganho (β)', min: 1 },
     },
@@ -206,7 +213,7 @@ const DEVICES: DeviceInfo[] = [
   fixed(
     'nmos',
     'MOSFET canal N',
-    { g: [-2, 0], d: [1, -2], s: [1, 2] },
+    { g: [-4, 0], d: [2, -4], s: [2, 4] },
     {
       threshold: { default: 2, label: 'Tensão de limiar', unit: 'V' },
     },
@@ -214,7 +221,7 @@ const DEVICES: DeviceInfo[] = [
   fixed(
     'pmos',
     'MOSFET canal P',
-    { g: [-2, 0], d: [1, -2], s: [1, 2] },
+    { g: [-4, 0], s: [2, -4], d: [2, 4] },
     {
       threshold: { default: -2, label: 'Tensão de limiar', unit: 'V' },
     },
@@ -222,17 +229,20 @@ const DEVICES: DeviceInfo[] = [
   fixed(
     'relay-spdt',
     'Relé',
-    { coil1: [-2, -2], coil2: [-2, 2], com: [2, 2], nc: [1, -2], no: [3, -2] },
+    { coil1: [-4, -4], coil2: [-4, 4], com: [2, 4], nc: [0, -4], no: [4, -4] },
     {
       coilVoltage: { default: 12, label: 'Tensão da bobina', unit: 'V', min: 0 },
       coilResistance: R(400, 'Resistência da bobina'),
+      coilInductance: { default: 0.1, label: 'Indutância da bobina', unit: 'H', min: 0 },
+      travelTime: { default: 0.008, label: 'Tempo de comutação', unit: 's', min: 0 },
+      contactRating: { default: 10, label: 'Corrente máxima do contato', unit: 'A', min: 0 },
     },
-    ['closed'],
+    ['closed', 'energized', 'position', 'welded'],
   ),
   fixed(
     'transformer',
     'Transformador',
-    { p1: [-2, -2], p2: [-2, 2], s1: [2, -2], s2: [2, 2] },
+    { p1: [-4, -4], p2: [-4, 4], s1: [4, -4], s2: [4, 4] },
     {
       ratio: { default: 10, label: 'Relação de espiras (primário : secundário)', min: 0 },
     },
@@ -245,7 +255,7 @@ const DEVICES: DeviceInfo[] = [
       ke: { default: 0.01, label: 'Constante de força contraeletromotriz', unit: 'V·s/rad' },
       load: { default: 0, label: 'Carga', unit: 'N·m', min: 0 },
     },
-    ['rpm', 'torque', 'burned'],
+    ['rpm', 'speed', 'torque', 'burned'],
   ),
   two('buzzer', 'Buzzer', { resistance: R(200) }, ['sounding']),
   two('ldr', 'LDR (resistor sensível à luz)', {
@@ -258,67 +268,85 @@ const DEVICES: DeviceInfo[] = [
   fixed(
     'opamp',
     'Amplificador operacional',
-    { inn: [-3, -1], inp: [-3, 1], out: [3, 0] },
+    { minus: [-4, -2], plus: [-4, 2], out: [4, 0] },
     {
-      supply: { default: 15, label: 'Alimentação (±)', unit: 'V', min: 0 },
+      vcc: { default: 15, label: 'Alimentação positiva', unit: 'V' },
+      vee: { default: -15, label: 'Alimentação negativa', unit: 'V' },
     },
   ),
   fixed(
     'timer-555',
     'Temporizador 555',
     {
-      reset: [-1, -5],
-      vcc: [1, -5],
-      dis: [-4, -2],
-      thres: [-4, 0],
-      trig: [-4, 2],
-      gnd: [-1, 5],
-      ctrl: [1, 5],
-      out: [4, 0],
+      gnd: [0, 5],
+      trig: [-5, -2],
+      out: [5, -1],
+      reset: [2, -5],
+      ctrl: [5, 2],
+      thr: [-5, 0],
+      dis: [-5, 2],
+      vcc: [-2, -5],
     },
     {},
+    ['high', 'discharging', 'vout'],
   ),
   ...(['and', 'or', 'nand', 'nor', 'xor'] as const).map((g) =>
     fixed(
       g,
       `Porta ${g.toUpperCase()}`,
-      { a: [-3, -1], b: [-3, 1], y: [3, 0] },
+      { a: [-4, -1], b: [-4, 1], y: [4, 0] },
       {
         vcc: { default: 5, label: 'Nível lógico alto', unit: 'V' },
       },
+      ['a', 'b', 'y'],
     ),
   ),
   fixed(
     'not',
     'Porta NOT (inversora)',
-    { a: [-2, 0], y: [2, 0] },
+    { a: [-4, 0], y: [4, 0] },
     {
       vcc: { default: 5, label: 'Nível lógico alto', unit: 'V' },
     },
+    ['a', 'y'],
   ),
-  fixed('scr', 'SCR (tiristor)', { a: [-2, 0], k: [2, 0], g: [1, 2] }, {}),
-  fixed('triac', 'TRIAC', { mt2: [-2, 0], mt1: [2, 0], g: [1, 2] }, {}),
-  fixed('optocoupler', 'Optoacoplador', { a: [-3, -1], k: [-3, 1], c: [3, -1], e: [3, 1] }, {}),
+  fixed('scr', 'SCR (tiristor)', { a: [-4, 0], k: [4, 0], g: [2, 4] }, {}),
+  fixed('triac', 'TRIAC', { mt2: [-4, 0], mt1: [4, 0], g: [2, 4] }, {}),
+  fixed('optocoupler', 'Optoacoplador', { a: [-4, -2], k: [-4, 2], c: [4, -2], e: [4, 2] }, {}),
   two(
     'breaker',
     'Disjuntor',
     {
       rating: { default: 16, label: 'Corrente nominal', unit: 'A', min: 0 },
-      curve: { default: 'C', label: 'Curva' },
+      curve: {
+        default: 'C',
+        label: 'Curva',
+        options: [
+          { value: 'B', label: 'B (3 a 5 × In)' },
+          { value: 'C', label: 'C (5 a 10 × In)' },
+          { value: 'D', label: 'D (10 a 20 × In)' },
+        ],
+      },
       closed: { default: true, label: 'Ligado' },
     },
-    ['tripped'],
+    ['closed', 'tripped', 'heat'],
   ),
   fixed(
     'rcd',
     'Dispositivo DR',
-    { l1: [-3, -1], n1: [-3, 1], l2: [3, -1], n2: [3, 1] },
+    { l1: [-4, -3], n1: [-4, 3], l2: [4, -3], n2: [4, 3] },
     {
       sensitivity: { default: 0.03, label: 'Sensibilidade (IΔn)', unit: 'A', min: 0 },
+      closed: { default: true, label: 'Ligado' },
+      test: { default: false, label: 'Botão de teste' },
     },
-    ['tripped'],
+    ['closed', 'tripped', 'residual'],
   ),
-  two('human-body', 'Corpo humano', { resistance: R(1000, 'Resistência do corpo') }, ['danger']),
+  two('human-body', 'Corpo humano', { resistance: R(1000, 'Resistência do corpo') }, [
+    'zone',
+    'effect',
+    'worst',
+  ]),
 
   // Nível 3
   fixed(

@@ -1,4 +1,4 @@
-import type { ControlDoc, ParamValue } from '../../engine/contract';
+import type { ControlDoc, ParamValue, SimFrame } from '../../engine/contract';
 import { formatSI } from '../format';
 
 export const isOn = (v: ParamValue | undefined) => v === true || v === 'true' || v === 1;
@@ -44,4 +44,19 @@ export function formatControlValue(c: ControlDoc, value: ParamValue | undefined)
 /** The control drawn on the symbol itself (the first that is not a list). */
 export function primaryControl(controls: ControlDoc[]): ControlDoc | undefined {
   return controls.find((c) => c.kind !== 'select') ?? controls[0];
+}
+
+/**
+ * State of a toggle as the engine reports it, when the device has a readout
+ * with the parameter's name: a breaker that trips reports `closed: false`
+ * although the student left it on, and turning it on again re-arms it.
+ */
+export function engineToggle(
+  frame: SimFrame | null,
+  element: string,
+  c: ControlDoc,
+): boolean | undefined {
+  if (c.kind !== 'toggle') return undefined;
+  const v = frame?.readouts[`${element}.${c.param}`];
+  return typeof v === 'boolean' ? v : undefined;
 }

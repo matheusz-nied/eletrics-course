@@ -1,16 +1,14 @@
 import { defineSymbol, isBurned, num } from './_kit';
 
+/** Colors the engine accepts (`led.color`), with the pt-BR name and the glow. */
 export const LED_COLORS: Record<string, { label: string; css: string }> = {
   red: { label: 'vermelho', css: '#ff3b30' },
-  vermelho: { label: 'vermelho', css: '#ff3b30' },
-  green: { label: 'verde', css: '#34c759' },
-  verde: { label: 'verde', css: '#34c759' },
-  blue: { label: 'azul', css: '#3b82ff' },
-  azul: { label: 'azul', css: '#3b82ff' },
   yellow: { label: 'amarelo', css: '#ffcc00' },
-  amarelo: { label: 'amarelo', css: '#ffcc00' },
+  green: { label: 'verde', css: '#34c759' },
+  blue: { label: 'azul', css: '#3b82ff' },
   white: { label: 'branco', css: '#f5f7ff' },
-  branco: { label: 'branco', css: '#f5f7ff' },
+  // invisible to the eye: a dim violet stands in for the camera view
+  infrared: { label: 'infravermelho', css: '#8e5cc4' },
 };
 
 /** LED: diode with two arrows of emitted light; glows in its color. */

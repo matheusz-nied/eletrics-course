@@ -5,6 +5,7 @@
 import type { CircuitDoc, SimFrame } from '../../engine/contract';
 import { engineFor } from '../engine';
 import { probeMeta, seriesMeta } from '../readouts';
+import { sweepOf } from '../runtime/sweep';
 import type { PlotSeriesInput } from './layout';
 
 export interface PlotData {
@@ -31,6 +32,7 @@ export async function simulateForPlot(
       maxFrames: 1200,
     });
     if (sweep) {
+      const result = sweepOf(frames);
       const probes = (doc.probes ?? []).filter((p) => keys.includes(p.id));
       return {
         xUnit: 'Hz',
@@ -38,9 +40,9 @@ export async function simulateForPlot(
         series: probes.map((p) => ({
           label: `Ganho: ${probeMeta(p).label}`,
           unit: 'dB',
-          points: frames.map((f): [number, number] => {
-            const m = asNumber(f.readouts[p.id]);
-            return [f.t, m > 0 ? 20 * Math.log10(m) : Number.NaN];
+          points: (result?.f ?? []).map((f, i): [number, number] => {
+            const m = result!.magnitude[p.id]?.[i] ?? Number.NaN;
+            return [f, m > 0 ? 20 * Math.log10(m) : Number.NaN];
           }),
         })),
       };

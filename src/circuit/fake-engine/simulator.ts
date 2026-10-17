@@ -7,6 +7,7 @@ import type { CircuitDoc, Netlist, ProbeDoc, SimEvent, SimFrame } from '../../en
 import { elementParams } from '../geometry';
 import { getDeviceInfo, hasDevice } from './catalog';
 import { FACTORIES, type DevCtx, type Device, type Mode } from './devices';
+import { unwrapDegrees, type Sweep, type SweepFrame } from '../runtime/sweep';
 import { Recorder, System, systemStamper } from './linear';
 import { buildNetlist } from './netlist';
 
@@ -31,6 +32,8 @@ export class Simulator {
   private pendingEvents: SimEvent[] = [];
   private warnedUnsupported = false;
   private converged = true;
+  /** Elements that reported a 'damaged' event since the last reset. */
+  private damaged = new Set<string>();
   t = 0;
 
   constructor(readonly doc: CircuitDoc) {
@@ -109,7 +112,9 @@ export class Simulator {
 
   setParam(element: string, param: string, value: number | boolean | string) {
     const d = this.devices.find((dev) => dev.id === element);
-    if (d) d.params[param] = value;
+    if (!d) return;
+    d.params[param] = value;
+    d.onParam?.(param, value);
   }
 
   getParam(element: string, param: string) {
@@ -120,6 +125,7 @@ export class Simulator {
     this.t = 0;
     this.x.fill(0);
     for (const d of this.devices) d.reset();
+    this.damaged.clear();
     this.converged = true;
   }
 
@@ -179,7 +185,13 @@ export class Simulator {
       c.dt = mode === 'dc' ? wallDt / rounds : dt;
       for (const d of this.devices) d.accept?.(c);
     }
+    this.noteDamage(events);
     return frame;
+  }
+
+  /** Remembers the elements damaged by these events (`X.damaged` readout). */
+  private noteDamage(events: SimEvent[]) {
+    for (const e of events) if (e.kind === 'damaged' && e.element) this.damaged.add(e.element);
   }
 
   /** Events produced since the last call. */
@@ -197,7 +209,12 @@ export class Simulator {
         c.dt = 0;
         for (const d of this.devices) if (d.type === 'lamp' || d.type === 'dc-motor') d.accept?.(c);
       }
+    } else {
+      // the instant after the current state (capacitor charges, coil currents),
+      // so a paused circuit shows its voltages instead of all zeros
+      this.newton(c);
     }
+    this.noteDamage(events);
     return this.frame();
   }
 
@@ -205,22 +222,23 @@ export class Simulator {
   private pinCurrents(c: DevCtx): Map<Device, Record<string, number>> {
     const out = new Map<Device, Record<string, number>>();
     for (const d of this.devices) {
+      // Pins on the reference node get spare indices past the unknowns (read
+      // as 0 V) so the current of each one is recorded, even when a device has
+      // two pins on ground (a relay's coil and contact).
+      const original = { ...d.pins };
+      let spare = this.x.length;
+      for (const [pin, idx] of Object.entries(d.pins)) if (idx < 0) d.pins[pin] = spare++;
       const rec = new Recorder();
-      d.stamp(rec, { ...c, limited: false });
-      const currents: Record<string, number> = {};
-      let sum = 0;
-      let refPin: string | undefined;
-      for (const [pin, idx] of Object.entries(d.pins)) {
-        if (idx < 0) {
-          refPin ??= pin;
-          currents[pin] = 0;
-          continue;
-        }
-        currents[pin] = rec.currentFrom(idx, this.x);
-        sum += currents[pin]!;
+      try {
+        d.stamp(rec, { ...c, limited: false });
+      } finally {
+        Object.assign(d.pins, original);
       }
-      // KCL: whatever enters through the other pins leaves through the reference pin
-      if (refPin) currents[refPin] = -sum;
+      const currents: Record<string, number> = {};
+      let k = this.x.length;
+      for (const [pin, idx] of Object.entries(original)) {
+        currents[pin] = rec.currentFrom(idx < 0 ? k++ : idx, this.x);
+      }
       out.set(d, currents);
     }
     return out;
@@ -265,6 +283,7 @@ export class Simulator {
         readouts[`${d.id}.power`] = sign * vab * cur.a!;
       }
       const extra: Record<string, number | boolean | string> = {};
+      if (this.damaged.has(d.id)) extra.damaged = true;
       d.readouts?.(extra, c);
       for (const [k, value] of Object.entries(extra)) readouts[`${d.id}.${k}`] = value;
     }
@@ -276,8 +295,11 @@ export class Simulator {
     return idx < 0 ? 0 : this.x[idx]!;
   }
 
-  /** Small-signal sweep: one frame per frequency, t = frequency (Hz). */
-  acSweep(): SimFrame[] {
+  /**
+   * Small-signal sweep. Like the real engine, one frame carries the whole
+   * sweep: gain (V/V) and unwrapped phase (°) of each voltage probe.
+   */
+  acSweep(): SweepFrame[] {
     const a = this.doc.analysis;
     if (a.kind !== 'ac-sweep') return [];
     // operating point first (linearizes diodes and friends)
@@ -286,12 +308,22 @@ export class Simulator {
     this.newton(dcCtx);
     for (const d of this.devices) d.accept?.(dcCtx);
 
-    const frames: SimFrame[] = [];
     const n = this.size;
     const sys = new System(Math.max(n, 1));
     const st = systemStamper(sys);
     const xr = new Float64Array(Math.max(n, 1));
     const xi = new Float64Array(Math.max(n, 1));
+    const probes = (this.doc.probes ?? []).filter((p) => p.kind === 'voltage');
+    const sweep: Sweep = { f: [], magnitude: {}, phase: {} };
+    for (const p of probes) {
+      sweep.magnitude[p.id] = [];
+      sweep.phase[p.id] = [];
+    }
+    const complexAt = (ref: string): [number, number] => {
+      if (ref === 'GND' || ref === '0') return [0, 0];
+      const idx = this.nodeIndex.get(this.netlist.pins[ref] ?? ref);
+      return idx === undefined || idx < 0 ? [0, 0] : [xr[idx]!, xi[idx]!];
+    };
     const points = Math.max(2, a.points);
     for (let i = 0; i < points; i++) {
       const f = a.fStart * (a.fStop / a.fStart) ** (i / (points - 1));
@@ -309,30 +341,16 @@ export class Simulator {
       for (const d of this.devices) d.stamp(st, c);
       for (let j = 0; j < this.nodeIds.length; j++) sys.add(j, j, 1e-12);
       sys.solve(xr, xi);
-      const nodeVoltages: Record<string, number> = {};
-      const phases: Record<string, number> = {};
-      const complexAt = (ref: string): [number, number] => {
-        if (ref === 'GND' || ref === '0') return [0, 0];
-        const idx = this.nodeIndex.get(this.netlist.pins[ref] ?? ref);
-        return idx === undefined || idx < 0 ? [0, 0] : [xr[idx]!, xi[idx]!];
-      };
-      for (const node of this.netlist.nodes) {
-        const [re, im] = complexAt(node.id);
-        nodeVoltages[node.id] = Math.hypot(re, im);
-        phases[node.id] = (Math.atan2(im, re) * 180) / Math.PI;
-      }
-      const readouts: SimFrame['readouts'] = {};
-      for (const p of this.doc.probes ?? []) {
+      sweep.f.push(f);
+      for (const p of probes) {
         if (p.kind !== 'voltage') continue;
         const [pr, pi] = complexAt(p.plus);
         const [mr, mi] = complexAt(p.minus);
-        const re = pr - mr;
-        const im = pi - mi;
-        readouts[p.id] = Math.hypot(re, im);
-        readouts[`${p.id}.phase`] = (Math.atan2(im, re) * 180) / Math.PI;
+        sweep.magnitude[p.id]!.push(Math.hypot(pr - mr, pi - mi));
+        sweep.phase[p.id]!.push((Math.atan2(pi - mi, pr - mr) * 180) / Math.PI);
       }
-      frames.push({ t: f, nodeVoltages, readouts, events: [] });
     }
-    return frames;
+    for (const p of probes) sweep.phase[p.id] = unwrapDegrees(sweep.phase[p.id]!);
+    return [{ t: 0, nodeVoltages: {}, readouts: {}, events: [], sweep }];
   }
 }

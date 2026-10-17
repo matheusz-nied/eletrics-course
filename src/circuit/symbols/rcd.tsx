@@ -1,31 +1,33 @@
 import { formatSI } from '../format';
 import { defineSymbol, num, Upright } from './_kit';
 
-/** Residual-current device (DR): two poles and the differential sensor. */
+/** Residual-current device (DR): two poles, the differential sensor and the test button. */
 export default defineSymbol({
   type: 'rcd',
-  pins: { l1: [-3, -1], n1: [-3, 1], l2: [3, -1], n2: [3, 1] },
-  box: [-30, -22, 60, 44],
-  live: ['tripped'],
+  pins: { l1: [-4, -3], n1: [-4, 3], l2: [4, -3], n2: [4, 3] },
+  box: [-40, -40, 80, 80],
+  live: ['closed', 'tripped'],
   draw: (ctx) => {
-    const tripped = ctx.live.tripped === true;
+    const open =
+      ctx.live.closed === false || ctx.live.tripped === true || ctx.params.closed === false;
     return (
       <>
-        <path d="M-30 -10H-12M-30 10H-12M12 -10H30M12 10H30" />
+        <path d="M-40 -30H-16M-40 30H-16M16 -30H40M16 30H40" />
         <rect
-          x={-20}
-          y={-22}
-          width={40}
-          height={44}
+          x={-26}
+          y={-40}
+          width={52}
+          height={80}
           rx={3}
           className="sym-body"
           strokeWidth={1.4}
         />
         <path
-          d={tripped ? 'M-12 -10L8 -18M-12 10L8 2' : 'M-12 -10H12M-12 10H12'}
-          className="sym-blade"
+          d={open ? 'M-16 -30L12 -40M-16 30L12 20' : 'M-16 -30H16M-16 30H16'}
+          className={ctx.live.tripped === true ? 'sym-blade sym-danger' : 'sym-blade'}
         />
-        <Upright x={0} y={16} ctx={ctx} size={8} weight={600}>
+        <circle cx={0} cy={0} r={9} strokeWidth={1.2} />
+        <Upright x={0} y={0} ctx={ctx} size={8} weight={600}>
           IΔ
         </Upright>
       </>

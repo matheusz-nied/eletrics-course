@@ -1,18 +1,18 @@
 import { defineSymbol, Upright } from './_kit';
 
-/** Operational amplifier. */
+/** Operational amplifier (supplies are parameters, not pins). */
 export default defineSymbol({
   type: 'opamp',
-  pins: { inn: [-3, -1], inp: [-3, 1], out: [3, 0] },
-  box: [-30, -22, 60, 44],
+  pins: { minus: [-4, -2], plus: [-4, 2], out: [4, 0] },
+  box: [-40, -30, 80, 60],
   draw: (ctx) => (
     <>
-      <path d="M-30 -10H-20M-30 10H-20M22 0H30" />
-      <path d="M-20 -22V22L22 0Z" className="sym-body" />
-      <Upright x={-14} y={-10} ctx={ctx} size={12} weight={700}>
+      <path d="M-40 -20H-24M-40 20H-24M24 0H40" />
+      <path d="M-24 -30V30L24 0Z" className="sym-body" />
+      <Upright x={-17} y={-20} ctx={ctx} size={13} weight={700}>
         −
       </Upright>
-      <Upright x={-14} y={10} ctx={ctx} size={12} weight={700}>
+      <Upright x={-17} y={20} ctx={ctx} size={13} weight={700}>
         +
       </Upright>
     </>

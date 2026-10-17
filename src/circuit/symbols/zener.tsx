@@ -14,5 +14,5 @@ export default defineSymbol({
       <path d="M3 -10L7 -8V8L11 10" />
     </>
   ),
-  value: (p) => formatSI(num(p.breakdownVoltage, 5.1), 'V'),
+  value: (p) => formatSI(num(p.voltage, 5.1), 'V'),
 });

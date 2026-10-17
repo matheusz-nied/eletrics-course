@@ -195,7 +195,8 @@ export class Recorder implements Stamper {
     const e = this.rows.get(r);
     if (!e) return 0;
     let s = -e.rhs;
-    for (const [c, val] of e.cols) if (c >= 0) s += val * x[c]!;
+    // indices past the unknowns stand for the reference node (0 V)
+    for (const [c, val] of e.cols) if (c >= 0 && c < x.length) s += val * x[c]!;
     return s;
   }
 }
