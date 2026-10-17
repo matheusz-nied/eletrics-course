@@ -21,7 +21,7 @@ rascunho: true
 import MultimeterTrainer from '../../../lessons/m03/MultimeterTrainer';
 import MeterModes from '../../../lessons/m03/figures/MeterModes.astro';
 
-O motor do portão parou, e você quer saber se o problema é a placa, o motor ou a fiação. Sem instrumento, sobra adivinhar e trocar peça até acertar. Com um <Term id="multimetro">multímetro</Term> de R$ 60 na mão, dá para responder em minutos se chega energia na placa, se o fio do motor está inteiro e se o fusível queimou.
+O motor do portão parou, e você quer saber se o problema é a placa, o motor ou a fiação. Sem instrumento, sobra adivinhar e trocar peça até acertar. Com um <Term id="multimetro">multímetro</Term> de R$ 60 na mão, dá para responder em minutos se chega energia na placa, se o fio do motor está inteiro e se o <Term id="fusivel">fusível</Term> queimou.
 
 O multímetro é o primeiro instrumento de qualquer eletricista ou técnico. Nesta aula você vai conhecer cada parte dele, entender o que acontece lá dentro quando você gira o seletor e treinar num multímetro virtual, onde errar o borne queima só um fusível de mentira.
 
@@ -92,7 +92,7 @@ Do lado dos bornes vem impresso o limite de cada um, e quase sempre um triângul
 
 ### As pontas de prova
 
-As **pontas de prova** são os dois cabos com uma agulha de metal na ponta e um pino que entra no borne. Uma boa ponta tem:
+As **<Term id="ponta-de-prova">pontas de prova</Term>** são os dois cabos com uma agulha de metal na ponta e um pino que entra no borne. Uma boa ponta tem:
 
 - capa de borracha que cobre o pino inteiro dentro do borne, para nenhum dedo encostar em metal;
 - um ressalto na empunhadura (a "trava de dedo"), que impede o dedo de escorregar até a agulha;
@@ -117,7 +117,7 @@ Nada esquenta e nada queima. É por isso que encostar as pontas em paralelo com 
 
 ### Amperímetro: um fio quase perfeito
 
-Na função de corrente, a ponta vermelha entra no borne mA ou 10A. Entre esse borne e o COM existe um **resistor de derivação** (o *shunt*), de resistência muito baixa: tipicamente cerca de 1 Ω no borne mA e 0,01 Ω no borne 10A. A corrente atravessa o shunt e cria nele uma tensão pequena, que o conversor lê. Pela Lei de Ohm:
+Na função de corrente, a ponta vermelha entra no borne mA ou 10A. Entre esse borne e o COM existe um **resistor de derivação** (o <Term id="shunt">shunt</Term>), de resistência muito baixa: tipicamente cerca de 1 Ω no borne mA e 0,01 Ω no borne 10A. A corrente atravessa o shunt e cria nele uma tensão pequena, que o conversor lê. Pela <Term id="lei-de-ohm">Lei de Ohm</Term>:
 
 $$
 I = \frac{V_\text{shunt}}{R_\text{shunt}}
@@ -127,7 +127,7 @@ $$
 - $V_\text{shunt}$: a tensão que aparece no shunt, em volts (V);
 - $R_\text{shunt}$: a resistência do shunt, em ohms (Ω).
 
-Por exemplo, 5 A passando por 0,01 Ω criam 0,05 V, e o visor mostra `5.00 A`. O shunt precisa ser baixo para quase não atrapalhar o circuito: um amperímetro ideal seria um fio perfeito. Esse fio quase perfeito é exatamente o problema quando a ponta vermelha fica no borne de corrente e você encosta numa fonte: o multímetro vira um **curto-circuito**. É para isso que existe o fusível interno.
+Por exemplo, 5 A passando por 0,01 Ω criam 0,05 V, e o visor mostra `5.00 A`. O shunt precisa ser baixo para quase não atrapalhar o circuito: um amperímetro ideal seria um fio perfeito. Esse fio quase perfeito é exatamente o problema quando a ponta vermelha fica no borne de corrente e você encosta numa fonte: o multímetro vira um **<Term id="curto-circuito">curto-circuito</Term>**. É para isso que existe o fusível interno.
 
 <Callout type="perigo" title="O borne de corrente é um curto">
 Com a ponta vermelha no borne mA ou 10A, o multímetro tem resistência de uma fração de ohm, **qualquer que seja a posição do seletor**. Encostar as pontas numa bateria ou numa tomada desse jeito é o mesmo que encostar um fio nos dois polos. No borne mA, o fusível rompe na hora. No borne 10A, numa tomada, a corrente de curto pode chegar a centenas de ampères: um fusível de boa qualidade, feito para isso, interrompe com segurança; um fusível de vidro barato, ou a falta de fusível, pode fazer o multímetro explodir na sua mão.
@@ -139,7 +139,7 @@ Na função Ω, o multímetro usa a própria bateria para empurrar uma corrente 
 
 Como o ohmímetro conta com a própria corrente, qualquer outra fonte no circuito estraga a conta. Por isso **resistência e continuidade só se medem com o circuito desligado**. Em circuitos com capacitores grandes, como a placa do portão ou uma fonte de computador, espere eles descarregarem antes.
 
-A continuidade é o ohmímetro com um apito: abaixo de uma resistência pequena (tipicamente algumas dezenas de ohms, varia de modelo para modelo), o aparelho apita. É a função para descobrir, sem olhar para o visor, se um fio está inteiro de ponta a ponta.
+A <Term id="continuidade">continuidade</Term> é o ohmímetro com um apito: abaixo de uma resistência pequena (tipicamente algumas dezenas de ohms, varia de modelo para modelo), o aparelho apita. É a função para descobrir, sem olhar para o visor, se um fio está inteiro de ponta a ponta.
 
 ## O voltímetro também mexe no circuito
 
@@ -182,7 +182,7 @@ Na tarefa 6, os 10 MΩ do voltímetro ficam no caminho da corrente e ela pratica
 
 ## Categoria de medição: CAT II, CAT III e CAT IV
 
-Na rede elétrica aparecem, de vez em quando, picos de tensão de milhares de volts que duram milionésimos de segundo: um raio que cai perto, um motor grande que desliga. Um multímetro malfeito, atingido por um pico desses no meio de uma medição, pode formar um arco elétrico por dentro e explodir. A norma internacional IEC 61010 divide a instalação em **categorias de medição**, de acordo com a energia que um pico pode ter em cada ponto: quanto mais perto da entrada de energia, maior a categoria exigida.
+Na rede elétrica aparecem, de vez em quando, picos de tensão de milhares de volts que duram milionésimos de segundo: um raio que cai perto, um motor grande que desliga. Um multímetro malfeito, atingido por um pico desses no meio de uma medição, pode formar um arco elétrico por dentro e explodir. A norma internacional IEC 61010 divide a instalação em **<Term id="categoria-de-medicao">categorias de medição</Term>**, de acordo com a energia que um pico pode ter em cada ponto: quanto mais perto da entrada de energia, maior a categoria exigida.
 
 | Categoria | Onde se aplica | Exemplos |
 |-----------|----------------|----------|
