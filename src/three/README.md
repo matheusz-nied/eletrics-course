@@ -82,6 +82,8 @@ Regras:
 - **Calor:** `blackbodyColor` e `glowIntensity` (`fx/blackbody.ts`) para filamentos e peças superaquecidas.
 - **Animação:** `useFrame` para mexer; declare `animated` no `meta` para a vista renderizar todo quadro enquanto for preciso.
 - **Lint:** o React Compiler não é usado aqui; arquivos que mudam objetos do three.js dentro de `useFrame` podem começar com `/* eslint-disable react-hooks/immutability -- … */`.
+- **Custo:** `?efeitos=stats` grava no `<canvas>` (`data-stats`) as chamadas de desenho, os triângulos e a memória de texturas da peça. Para o celular médio, mire em menos de 60 chamadas e 150 mil triângulos por peça no nível `baixa`.
+- **Testes:** `src/three/__tests__/catalog.test.ts` confere metadados, padrões e descrições de todas as peças. Se ele acusar peça faltando logo depois de criar um arquivo, apague o cache do Vitest (`rm -rf node_modules/.vitest-cache`): o cache guarda o resultado antigo do `import.meta.glob`.
 
 ## Placas de circuito impresso
 
