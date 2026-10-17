@@ -1,6 +1,12 @@
 ---
 /* Module catalog: every module of the curriculum with its lessons, published or planned. */
-import { available, formatDuration, minutesOf, plural, type CatalogModule } from '../../course/catalog';
+import {
+  available,
+  formatDuration,
+  minutesOf,
+  plural,
+  type CatalogModule,
+} from '../../course/catalog';
 import { getCourseData } from '../../course/data';
 import CourseIcon from '../../course/ui/CourseIcon.astro';
 import CoursePage from '../../course/ui/CoursePage.astro';
@@ -23,11 +29,16 @@ const readyCount = available(lessons).length;
   <p class="catalog__status" slot="header">
     <span class="chip">
       <CourseIcon name="livro" />
-      <span><span class="num">{readyCount}</span> {readyCount === 1 ? 'aula publicada' : 'aulas publicadas'}</span>
+      <span>
+        <span class="num">{readyCount}</span>{' '}
+        {readyCount === 1 ? 'aula publicada' : 'aulas publicadas'}
+      </span>
     </span>
     <span class="chip">
       <CourseIcon name="construcao" />
-      <span><span class="num">{lessons.length - readyCount}</span> em produção</span>
+      <span>
+        <span class="num">{lessons.length - readyCount}</span> em produção
+      </span>
     </span>
   </p>
 
@@ -39,60 +50,62 @@ const readyCount = available(lessons).length;
     ))}
   </nav>
 
-  {
-    [...parts.entries()].map(([parte, mods]) => (
-      <section id={`parte-${parte}`} class="catalog__part" aria-labelledby={`parte-${parte}-titulo`}>
-        <h2 id={`parte-${parte}-titulo`} class="catalog__part-title">
-          <span class="num">Parte {parte}</span> {PARTS[parte]}
-        </h2>
-        <div class="catalog__modules">
-          {mods.map((m) => {
-            const ready = available(m.lessons);
-            const minutes = minutesOf(ready);
-            return (
-              <details id={m.id} class="mrow" data-module-row open={m.published ? true : undefined}>
-                <summary class="mrow__summary">
-                  <span class:list={['mrow__icon', { 'mrow__icon--soon': !m.published }]}>
-                    <CourseIcon name={m.icone} size={22} />
+  {[...parts.entries()].map(([parte, mods]) => (
+    <section id={`parte-${parte}`} class="catalog__part" aria-labelledby={`parte-${parte}-titulo`}>
+      <h2 id={`parte-${parte}-titulo`} class="catalog__part-title">
+        <span class="num">Parte {parte}</span> {PARTS[parte]}
+      </h2>
+      <div class="catalog__modules">
+        {mods.map((m) => {
+          const ready = available(m.lessons);
+          const minutes = minutesOf(ready);
+          return (
+            <details id={m.id} class="mrow" data-module-row open={m.published ? true : undefined}>
+              <summary class="mrow__summary">
+                <span class:list={['mrow__icon', { 'mrow__icon--soon': !m.published }]}>
+                  <CourseIcon name={m.icone} size={22} />
+                </span>
+                <span class="mrow__main">
+                  <span class="mrow__number num">Módulo {m.numero}</span>
+                  <h3 class="mrow__title">{m.titulo}</h3>
+                  <span class="mrow__summary-text">{m.resumo}</span>
+                  <span class="mrow__meta">
+                    {m.published ? (
+                      <>
+                        {plural(ready.length, 'aula', 'aulas')}
+                        {minutes > 0 && <> · {formatDuration(minutes)}</>}
+                      </>
+                    ) : (
+                      <>
+                        <span class="mrow__soon">Em breve</span> ·{' '}
+                        {plural(m.lessons.length, 'aula planejada', 'aulas planejadas')}
+                      </>
+                    )}
                   </span>
-                  <span class="mrow__main">
-                    <span class="mrow__number num">Módulo {m.numero}</span>
-                    <h3 class="mrow__title">{m.titulo}</h3>
-                    <span class="mrow__summary-text">{m.resumo}</span>
-                    <span class="mrow__meta">
-                      {m.published ? (
-                        <>
-                          {plural(ready.length, 'aula', 'aulas')}
-                          {minutes > 0 && <> · {formatDuration(minutes)}</>}
-                        </>
-                      ) : (
-                        <>
-                          <span class="mrow__soon">Em breve</span> · {plural(m.lessons.length, 'aula planejada', 'aulas planejadas')}
-                        </>
-                      )}
-                    </span>
-                  </span>
-                  <CourseIcon name="baixo" size={20} class="mrow__chevron" />
-                </summary>
-                <div class="mrow__body">
-                  {ready.length > 0 && (
-                    <ProgressBar lessons={ready.map((l) => l.id)} label={`Progresso no módulo ${m.numero}`} />
-                  )}
-                  <LessonList lessons={m.lessons} label={`Aulas do módulo ${m.numero}`} />
-                  {m.href && (
-                    <a href={m.href} class="mrow__open">
-                      Abrir a página do módulo
-                      <CourseIcon name="seta-direita" size={16} />
-                    </a>
-                  )}
-                </div>
-              </details>
-            );
-          })}
-        </div>
-      </section>
-    ))
-  }
+                </span>
+                <CourseIcon name="baixo" size={20} class="mrow__chevron" />
+              </summary>
+              <div class="mrow__body">
+                {ready.length > 0 && (
+                  <ProgressBar
+                    lessons={ready.map((l) => l.id)}
+                    label={`Progresso no módulo ${m.numero}`}
+                  />
+                )}
+                <LessonList lessons={m.lessons} label={`Aulas do módulo ${m.numero}`} />
+                {m.href && (
+                  <a href={m.href} class="mrow__open">
+                    Abrir a página do módulo
+                    <CourseIcon name="seta-direita" size={16} />
+                  </a>
+                )}
+              </div>
+            </details>
+          );
+        })}
+      </div>
+    </section>
+  ))}
 </CoursePage>
 
 <script>

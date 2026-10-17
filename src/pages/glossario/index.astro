@@ -36,56 +36,56 @@ const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
   </div>
 
   <nav class="gloss__letters" aria-label="Letras">
-    {
-      alphabet.map((letter) =>
-        present.has(letter) ? (
-          <a href={`#letra-${letter}`} class="gloss__letter" data-gloss-letter={letter}>
-            {letter}
-          </a>
-        ) : (
-          <span class="gloss__letter gloss__letter--off" aria-hidden="true">
-            {letter}
-          </span>
-        ),
-      )
-    }
+    {alphabet.map((letter) =>
+      present.has(letter) ? (
+        <a href={`#letra-${letter}`} class="gloss__letter" data-gloss-letter={letter}>
+          {letter}
+        </a>
+      ) : (
+        <span class="gloss__letter gloss__letter--off" aria-hidden="true">
+          {letter}
+        </span>
+      ),
+    )}
   </nav>
 
   <div class="gloss__groups">
-    {
-      groups.map((group) => (
-        <section
-          id={`letra-${group.letter}`}
-          class="gloss__group"
-          aria-labelledby={`letra-${group.letter}-titulo`}
-          data-gloss-group={group.letter}
-        >
-          <h2 id={`letra-${group.letter}-titulo`} class="gloss__group-letter">
-            {group.letter}
-          </h2>
-          <ul class="gloss__list">
-            {group.terms.map((term) => (
-              <li
-                class="gloss__item"
-                data-gloss-item
-                data-text={searchable(term.data.termo, ...term.data.sinonimos, term.data.resumo)}
-              >
-                <a href={termUrl(term.id)} class="gloss__term">
-                  {term.data.termo}
-                </a>
-                {term.data.sinonimos.length > 0 && (
-                  <p class="gloss__syn">{term.data.sinonimos.join(' · ')}</p>
-                )}
-                <p class="gloss__summary">{term.data.resumo}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))
-    }
+    {groups.map((group) => (
+      <section
+        id={`letra-${group.letter}`}
+        class="gloss__group"
+        aria-labelledby={`letra-${group.letter}-titulo`}
+        data-gloss-group={group.letter}
+      >
+        <h2 id={`letra-${group.letter}-titulo`} class="gloss__group-letter">
+          {group.letter}
+        </h2>
+        <ul class="gloss__list">
+          {group.terms.map((term) => (
+            <li
+              class="gloss__item"
+              data-gloss-item
+              data-text={searchable(term.data.termo, ...term.data.sinonimos, term.data.resumo)}
+            >
+              <a href={termUrl(term.id)} class="gloss__term">
+                {term.data.termo}
+              </a>
+              {term.data.sinonimos.length > 0 && (
+                <p class="gloss__syn">{term.data.sinonimos.join(' · ')}</p>
+              )}
+              <p class="gloss__summary">{term.data.resumo}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
   </div>
   <p class="gloss__empty" hidden data-gloss-empty>
-    Nenhum termo encontrado. Tente outra palavra ou use a <a href={withBase('busca/')} data-gloss-search>busca do curso</a>.
+    Nenhum termo encontrado. Tente outra palavra ou use a{' '}
+    <a href={withBase('busca/')} data-gloss-search>
+      busca do curso
+    </a>
+    .
   </p>
 </CoursePage>
 
@@ -110,7 +110,9 @@ const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
     for (const group of groups) {
       const visible = group.querySelector('[data-gloss-item]:not([hidden])') !== null;
       group.hidden = !visible;
-      const letter = document.querySelector<HTMLElement>(`[data-gloss-letter="${group.dataset.glossGroup}"]`);
+      const letter = document.querySelector<HTMLElement>(
+        `[data-gloss-letter="${group.dataset.glossGroup}"]`,
+      );
       letter?.toggleAttribute('data-off', !visible);
     }
     if (count) count.textContent = `${shown} ${shown === 1 ? 'termo' : 'termos'}`;

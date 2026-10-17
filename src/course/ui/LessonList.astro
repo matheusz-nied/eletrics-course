@@ -15,48 +15,46 @@ const { lessons, label } = Astro.props;
 ---
 
 <ol class="llist" aria-label={label}>
-  {
-    lessons.map((lesson) => {
-      const meta = [
-        lesson.nivel ? LEVEL_LABELS[lesson.nivel] : undefined,
-        lesson.duracaoMin ? `${lesson.duracaoMin} min` : undefined,
-      ].filter(Boolean);
-      const body = (
-        <>
-          <span class="llist__number num">{lesson.number}</span>{' '}
-          <span class="llist__main">
-            <span class="llist__title">{lesson.titulo}</span>{' '}
-            <span class="llist__meta">
-              {lesson.status === 'em-breve' ? (
-                <span class="llist__soon">Em breve</span>
-              ) : (
-                meta.join(' · ')
-              )}
-              {lesson.status === 'em-breve' && lesson.nivel === 'A' && ' · Avançada'}
-              {lesson.seguranca === 'rede' && <span class="llist__danger"> · Rede elétrica</span>}
-              {lesson.status === 'rascunho' && <span class="llist__draft"> · Rascunho</span>}
-            </span>
+  {lessons.map((lesson) => {
+    const meta = [
+      lesson.nivel ? LEVEL_LABELS[lesson.nivel] : undefined,
+      lesson.duracaoMin ? `${lesson.duracaoMin} min` : undefined,
+    ].filter(Boolean);
+    const body = (
+      <>
+        <span class="llist__number num">{lesson.number}</span>{' '}
+        <span class="llist__main">
+          <span class="llist__title">{lesson.titulo}</span>{' '}
+          <span class="llist__meta">
+            {lesson.status === 'em-breve' ? (
+              <span class="llist__soon">Em breve</span>
+            ) : (
+              meta.join(' · ')
+            )}
+            {lesson.status === 'em-breve' && lesson.nivel === 'A' && ' · Avançada'}
+            {lesson.seguranca === 'rede' && <span class="llist__danger"> · Rede elétrica</span>}
+            {lesson.status === 'rascunho' && <span class="llist__draft"> · Rascunho</span>}
           </span>
-        </>
-      );
-      return (
-        <li class:list={['llist__item', { 'llist__item--soon': !lesson.href }]}>
-          {lesson.href ? (
-            <a href={lesson.href} class="llist__row">
-              <LessonState lessonId={lesson.id} />
-              {body}
-              <CourseIcon name="seta-direita" size={18} class="llist__arrow" />
-            </a>
-          ) : (
-            <div class="llist__row">
-              <span class="llist__dot" aria-hidden="true"></span>
-              {body}
-            </div>
-          )}
-        </li>
-      );
-    })
-  }
+        </span>
+      </>
+    );
+    return (
+      <li class:list={['llist__item', { 'llist__item--soon': !lesson.href }]}>
+        {lesson.href ? (
+          <a href={lesson.href} class="llist__row">
+            <LessonState lessonId={lesson.id} />
+            {body}
+            <CourseIcon name="seta-direita" size={18} class="llist__arrow" />
+          </a>
+        ) : (
+          <div class="llist__row">
+            <span class="llist__dot" aria-hidden="true"></span>
+            {body}
+          </div>
+        )}
+      </li>
+    );
+  })}
 </ol>
 
 <style>

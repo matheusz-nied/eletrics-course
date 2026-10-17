@@ -41,15 +41,14 @@ const {
     class:list={['cpage', `cpage--${width}`]}
     data-pagefind-body={search ? '' : undefined}
     data-pagefind-meta={search ? `tipo:${search}` : undefined}
+    data-pagefind-filter={search ? `tipo:${search}` : undefined}
   >
     <header class="cpage__header">
-      {
-        icon && (
-          <span class="cpage__icon">
-            <CourseIcon name={icon} size={26} />
-          </span>
-        )
-      }
+      {icon && (
+        <span class="cpage__icon">
+          <CourseIcon name={icon} size={26} />
+        </span>
+      )}
       {eyebrow && (
         <p class="eyebrow" data-pagefind-ignore>
           {eyebrow}

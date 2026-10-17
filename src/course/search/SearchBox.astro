@@ -25,7 +25,9 @@ const filters = [
 
 <div class="sbox" data-search-box data-sync-url={syncUrl ? '' : undefined}>
   <form class="sbox__form" role="search" action={withBase('busca/')} method="get">
-    <label for={`${id}-q`} class="sr-only">Buscar no curso</label>
+    <label for={`${id}-q`} class="sr-only">
+      Buscar no curso
+    </label>
     <CourseIcon name="buscar" size={20} class="sbox__icon" />
     <input
       id={`${id}-q`}
@@ -43,20 +45,18 @@ const filters = [
     />
   </form>
   <div class="sbox__filters" role="radiogroup" aria-label="Mostrar">
-    {
-      filters.map((f, i) => (
-        <button
-          type="button"
-          role="radio"
-          class="sbox__filter"
-          aria-checked={i === 0 ? 'true' : 'false'}
-          tabindex={i === 0 ? 0 : -1}
-          data-search-filter={f.value}
-        >
-          {f.label}
-        </button>
-      ))
-    }
+    {filters.map((f, i) => (
+      <button
+        type="button"
+        role="radio"
+        class="sbox__filter"
+        aria-checked={i === 0 ? 'true' : 'false'}
+        tabindex={i === 0 ? 0 : -1}
+        data-search-filter={f.value}
+      >
+        {f.label}
+      </button>
+    ))}
   </div>
   <p id={`${id}-status`} class="sbox__status" aria-live="polite" data-search-status>
     Digite pelo menos duas letras.

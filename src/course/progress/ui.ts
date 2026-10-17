@@ -44,7 +44,8 @@ function render(store: ProgressStore) {
     const started = ids.some((id) => lessonState(store, id) !== 'nova');
     const fraction = ids.length > 0 ? done / ids.length : 0;
     el.style.setProperty('--progress', String(fraction));
-    el.dataset.progressState = done === ids.length && done > 0 ? 'completo' : started ? 'iniciado' : 'vazio';
+    el.dataset.progressState =
+      done === ids.length && done > 0 ? 'completo' : started ? 'iniciado' : 'vazio';
     const text = countLabel(done, ids.length);
     const meter = el.querySelector<HTMLElement>('[data-progress-meter]');
     if (meter) {

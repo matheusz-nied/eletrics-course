@@ -111,14 +111,12 @@ const gatePhases = [
           </a>
         </div>
         <ul class="hero__stats" aria-label="O curso em números">
-          {
-            stats.map((s) => (
-              <li>
-                <span class="hero__stat-value num">{s.value.toLocaleString('pt-BR')}</span>{' '}
-                <span class="hero__stat-label">{s.label}</span>
-              </li>
-            ))
-          }
+          {stats.map((s) => (
+            <li>
+              <span class="hero__stat-value num">{s.value.toLocaleString('pt-BR')}</span>{' '}
+              <span class="hero__stat-label">{s.label}</span>
+            </li>
+          ))}
         </ul>
       </div>
       <div class="hero__visual">
@@ -131,8 +129,12 @@ const gatePhases = [
         <CourseIcon name="livro" size={22} />
       </span>
       <div class="resume__text">
-        <p class="eyebrow" data-resume-kicker>Continuar de onde parou</p>
-        <h2 id="resume-title" class="resume__title" data-resume-title>Aula</h2>
+        <p class="eyebrow" data-resume-kicker>
+          Continuar de onde parou
+        </p>
+        <h2 id="resume-title" class="resume__title" data-resume-title>
+          Aula
+        </h2>
         <p class="resume__meta" data-resume-meta></p>
       </div>
       <a href={withBase('progresso/')} class="btn btn--primary resume__link" data-resume-link>
@@ -153,46 +155,42 @@ const gatePhases = [
       <div class="tracks">
         {gate && <TrackCard track={gate} featured />}
         <ul class="tracks__others">
-          {
-            otherTracks.map((t) => (
-              <li>
-                <TrackCard track={t} />
-              </li>
-            ))
-          }
+          {otherTracks.map((t) => (
+            <li>
+              <TrackCard track={t} />
+            </li>
+          ))}
         </ul>
       </div>
     </section>
 
-    {
-      gate && (
-        <section class="section gate" aria-labelledby="portao-titulo">
-          <div class="gate__intro">
-            <p class="eyebrow">Caso de referência</p>
-            <h2 id="portao-titulo">Trocar o motor do portão, entendendo cada fio</h2>
-            <p>
-              O módulo do portão eletrônico é a prova do curso. Ao terminar a trilha, você consegue
-              desligar e soltar os cabos com segurança, identificar os fios do motor com o
-              multímetro, ligar a central nova, configurar os jumpers, cadastrar os controles e
-              testar a fotocélula, sabendo por que cada ligação é feita daquele jeito.
-            </p>
-            <a href={trackUrl(gate.id)} class="btn btn--primary">
-              Ver a trilha do portão
-              <CourseIcon name="seta-direita" size={18} />
-            </a>
-          </div>
-          <ol class="gate__phases">
-            {gatePhases.map((p, i) => (
-              <li class="gate__phase">
-                <span class="gate__step num">{String(i + 1).padStart(2, '0')}</span>
-                <span class="gate__phase-title">{p.title}</span>
-                <span class="gate__phase-text">{p.text}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )
-    }
+    {gate && (
+      <section class="section gate" aria-labelledby="portao-titulo">
+        <div class="gate__intro">
+          <p class="eyebrow">Caso de referência</p>
+          <h2 id="portao-titulo">Trocar o motor do portão, entendendo cada fio</h2>
+          <p>
+            O módulo do portão eletrônico é a prova do curso. Ao terminar a trilha, você consegue
+            desligar e soltar os cabos com segurança, identificar os fios do motor com o multímetro,
+            ligar a central nova, configurar os jumpers, cadastrar os controles e testar a
+            fotocélula, sabendo por que cada ligação é feita daquele jeito.
+          </p>
+          <a href={trackUrl(gate.id)} class="btn btn--primary">
+            Ver a trilha do portão
+            <CourseIcon name="seta-direita" size={18} />
+          </a>
+        </div>
+        <ol class="gate__phases">
+          {gatePhases.map((p, i) => (
+            <li class="gate__phase">
+              <span class="gate__step num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="gate__phase-title">{p.title}</span>
+              <span class="gate__phase-text">{p.text}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
 
     <section class="section" aria-labelledby="como-titulo">
       <div class="section__head">
@@ -200,17 +198,15 @@ const gatePhases = [
         <h2 id="como-titulo">Aprender vendo, mexendo e fazendo</h2>
       </div>
       <ul class="features">
-        {
-          features.map((f) => (
-            <li class="feature">
-              <span class="feature__icon">
-                <CourseIcon name={f.icon} size={22} />
-              </span>
-              <span class="feature__title">{f.title}</span>{' '}
-              <span class="feature__text">{f.text}</span>
-            </li>
-          ))
-        }
+        {features.map((f) => (
+          <li class="feature">
+            <span class="feature__icon">
+              <CourseIcon name={f.icon} size={22} />
+            </span>
+            <span class="feature__title">{f.title}</span>{' '}
+            <span class="feature__text">{f.text}</span>
+          </li>
+        ))}
       </ul>
     </section>
 
@@ -229,30 +225,28 @@ const gatePhases = [
           <CourseIcon name="seta-direita" size={18} />
         </a>
       </div>
-      {
-        [...parts.entries()].map(([parte, mods]) => (
-          <div class="part">
-            <h3 class="part__title">
-              <span class="num">Parte {parte}</span> {PARTS[parte]}
-            </h3>
-            <ul class="module-grid">
-              {mods.map((m) => (
-                <li>
-                  <ModuleCard module={m} headingLevel={4} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))
-      }
+      {[...parts.entries()].map(([parte, mods]) => (
+        <div class="part">
+          <h3 class="part__title">
+            <span class="num">Parte {parte}</span> {PARTS[parte]}
+          </h3>
+          <ul class="module-grid">
+            {mods.map((m) => (
+              <li>
+                <ModuleCard module={m} headingLevel={4} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </section>
 
     <aside class="safety" aria-label="Aviso de segurança">
       <CourseIcon name="seguranca" size={24} />
       <p>
-        <strong>Eletricidade da rede mata.</strong> O curso ensina a trabalhar com o disjuntor desligado,
-        a testar a ausência de tensão e a reconhecer quando é hora de chamar um eletricista habilitado.
-        Em instalações, siga a NBR 5410 e o manual do fabricante.
+        <strong>Eletricidade da rede mata.</strong> O curso ensina a trabalhar com o disjuntor
+        desligado, a testar a ausência de tensão e a reconhecer quando é hora de chamar um
+        eletricista habilitado. Em instalações, siga a NBR 5410 e o manual do fabricante.
       </p>
     </aside>
   </main>
@@ -269,7 +263,9 @@ const gatePhases = [
 
   function update() {
     if (!box) return;
-    const target = resumeTarget(readCourseIndex(), store.lastLesson()?.id, (id) => store.isRead(id));
+    const target = resumeTarget(readCourseIndex(), store.lastLesson()?.id, (id) =>
+      store.isRead(id),
+    );
     if (!target) {
       box.hidden = true;
       return;
@@ -281,7 +277,10 @@ const gatePhases = [
     box.querySelector('[data-resume-meta]')!.textContent = `Aula ${lesson.n} · ${lesson.m}`;
     const link = box.querySelector<HTMLAnchorElement>('[data-resume-link]')!;
     link.href = lesson.h;
-    link.setAttribute('aria-label', `${kind === 'continuar' ? 'Continuar' : 'Começar'}: ${lesson.t}`);
+    link.setAttribute(
+      'aria-label',
+      `${kind === 'continuar' ? 'Continuar' : 'Começar'}: ${lesson.t}`,
+    );
     box.hidden = false;
   }
 

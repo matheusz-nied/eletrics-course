@@ -38,29 +38,29 @@ const pad = (n: number) => String(n).padStart(2, '0');
       <CourseIcon name="ferramenta" size={16} />
       Modo oficina
     </p>
-    <h3 id={`${dom}-titulo`} class="wshop__title">{workshop.title}</h3>
+    <h3 id={`${dom}-titulo`} class="wshop__title">
+      {workshop.title}
+    </h3>
     <p class="wshop__summary">{workshop.summary}</p>
     <ul class="wshop__facts" aria-label="Sobre o procedimento">
       <li class="chip">
         <CourseIcon name="lista" />
-        <span><span class="num">{total}</span> {total === 1 ? 'passo' : 'passos'}</span>
+        <span>
+          <span class="num">{total}</span> {total === 1 ? 'passo' : 'passos'}
+        </span>
       </li>
-      {
-        workshop.duration && (
-          <li class="chip">
-            <CourseIcon name="relogio" />
-            {workshop.duration}
-          </li>
-        )
-      }
-      {
-        workshop.safety === 'rede' && (
-          <li class="chip chip--danger">
-            <CourseIcon name="raio" />
-            Rede elétrica
-          </li>
-        )
-      }
+      {workshop.duration && (
+        <li class="chip">
+          <CourseIcon name="relogio" />
+          {workshop.duration}
+        </li>
+      )}
+      {workshop.safety === 'rede' && (
+        <li class="chip chip--danger">
+          <CourseIcon name="raio" />
+          Rede elétrica
+        </li>
+      )}
       <li class="chip wshop__offline" hidden data-workshop-offline>
         <CourseIcon name="offline" />
         Disponível sem internet
@@ -109,121 +109,124 @@ const pad = (n: number) => String(n).padStart(2, '0');
         <CourseIcon name="x" />
         <span class="sr-only">Sair do modo oficina</span>
       </button>
-      <div class="wshop__bar-meter" aria-hidden="true"><span></span></div>
+      <div class="wshop__bar-meter" aria-hidden="true">
+        <span></span>
+      </div>
     </div>
 
     <div class="wshop__scroll" data-workshop-scroll>
       <div class="wshop__intro" data-step="inicio" tabindex="-1">
         <p class="wshop__intro-kicker">Antes de começar</p>
         {workshop.safety === 'rede' && <Callout type="seguranca-rede" />}
-        {
-          (workshop.tools?.length || workshop.materials?.length) && (
-            <div class="wshop__lists">
-              {workshop.tools?.length ? (
-                <div>
-                  <p class="wshop__list-title">Ferramentas</p>
-                  <ul>
-                    {workshop.tools.map((t) => (
-                      <li>{t}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-              {workshop.materials?.length ? (
-                <div>
-                  <p class="wshop__list-title">Materiais</p>
-                  <ul>
-                    {workshop.materials.map((t) => (
-                      <li>{t}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </div>
-          )
-        }
+        {(workshop.tools?.length || workshop.materials?.length) && (
+          <div class="wshop__lists">
+            {workshop.tools?.length ? (
+              <div>
+                <p class="wshop__list-title">Ferramentas</p>
+                <ul>
+                  {workshop.tools.map((t) => (
+                    <li>{t}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            {workshop.materials?.length ? (
+              <div>
+                <p class="wshop__list-title">Materiais</p>
+                <ul>
+                  {workshop.materials.map((t) => (
+                    <li>{t}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
 
       <ol class="wshop__sections">
-        {
-          workshop.sections.map((section) => (
-            <li class="wshop__section">
-              <p class="wshop__section-title">{section.title}</p>
-              <ol class="wshop__steps">
-                {section.steps.map((step) => (
-                  <li
-                    class="wshop__step"
-                    id={`${dom}-${step.id}`}
-                    data-step={step.id}
-                    data-number={step.number}
-                    data-section={section.title}
-                  >
-                    <div class="wshop__step-head">
-                      <label class="wshop__check" data-pagefind-ignore>
-                        <input type="checkbox" data-step-done />
-                        <span class="sr-only">
-                          Passo {step.number} feito: {step.title}
-                        </span>
-                      </label>
-                      <span class="wshop__num num" aria-hidden="true">
-                        {pad(step.number)}
+        {workshop.sections.map((section) => (
+          <li class="wshop__section">
+            <p class="wshop__section-title">{section.title}</p>
+            <ol class="wshop__steps">
+              {section.steps.map((step) => (
+                <li
+                  class="wshop__step"
+                  id={`${dom}-${step.id}`}
+                  data-step={step.id}
+                  data-number={step.number}
+                  data-section={section.title}
+                >
+                  <div class="wshop__step-head">
+                    <label class="wshop__check" data-pagefind-ignore>
+                      <input type="checkbox" data-step-done />
+                      <span class="sr-only">
+                        Passo {step.number} feito: {step.title}
                       </span>
-                      <h4 class="wshop__step-title" tabindex="-1" data-step-title>
-                        <span class="sr-only">Passo {step.number}: </span>
-                        {step.title}
-                      </h4>
-                    </div>
-                    <div class="wshop__step-body">
-                      {step.warning && (
-                        <p class="wshop__warning">
-                          <CourseIcon name="perigo" size={20} />
-                          <span set:html={inlineMarkup(step.warning)} />
+                    </label>
+                    <span class="wshop__num num" aria-hidden="true">
+                      {pad(step.number)}
+                    </span>
+                    <h4 class="wshop__step-title" tabindex="-1" data-step-title>
+                      <span class="sr-only">Passo {step.number}: </span>
+                      {step.title}
+                    </h4>
+                  </div>
+                  <div class="wshop__step-body">
+                    {step.warning && (
+                      <p class="wshop__warning">
+                        <CourseIcon name="perigo" size={20} />
+                        <span set:html={inlineMarkup(step.warning)} />
+                      </p>
+                    )}
+                    {step.paragraphs.map((p) => (
+                      <p set:html={inlineMarkup(p)} />
+                    ))}
+                    {step.items && (
+                      <ul class="wshop__items">
+                        {step.items.map((item) => (
+                          <li set:html={inlineMarkup(item)} />
+                        ))}
+                      </ul>
+                    )}
+                    {step.measure && (
+                      <div class="wshop__measure">
+                        <p class="wshop__measure-title">
+                          <CourseIcon name="multimetro" size={18} />
+                          Medir: {step.measure.what}
                         </p>
-                      )}
-                      {step.paragraphs.map((p) => (
-                        <p set:html={inlineMarkup(p)} />
-                      ))}
-                      {step.items && (
-                        <ul class="wshop__items">
-                          {step.items.map((item) => (
-                            <li set:html={inlineMarkup(item)} />
-                          ))}
-                        </ul>
-                      )}
-                      {step.measure && (
-                        <div class="wshop__measure">
-                          <p class="wshop__measure-title">
-                            <CourseIcon name="multimetro" size={18} />
-                            Medir: {step.measure.what}
-                          </p>
-                          {step.measure.how && <p set:html={inlineMarkup(step.measure.how)} />}
-                          <p>
-                            <strong>Esperado:</strong> <span set:html={inlineMarkup(step.measure.expected)} />
-                          </p>
-                        </div>
-                      )}
-                      {step.tip && (
-                        <p class="wshop__tip">
-                          <CourseIcon name="dica" size={18} />
-                          <span set:html={inlineMarkup(step.tip)} />
+                        {step.measure.how && <p set:html={inlineMarkup(step.measure.how)} />}
+                        <p>
+                          <strong>Esperado:</strong>{' '}
+                          <span set:html={inlineMarkup(step.measure.expected)} />
                         </p>
-                      )}
-                      {(step.image || step.scene || step.model) && (
-                        <div class="wshop__media">
-                          {step.image && (
-                            <Figure src={step.image.src} alt={step.image.alt} caption={step.image.caption} />
-                          )}
-                          {step.scene && <Scene3D {...step.scene} height={360} />}
-                          {step.model && <Model3D {...step.model} height={320} />}
-                        </div>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </li>
-          ))
-        }
+                      </div>
+                    )}
+                    {step.tip && (
+                      <p class="wshop__tip">
+                        <CourseIcon name="dica" size={18} />
+                        <span set:html={inlineMarkup(step.tip)} />
+                      </p>
+                    )}
+                    {(step.image || step.scene || step.model) && (
+                      <div class="wshop__media">
+                        {step.image && (
+                          <Figure
+                            src={step.image.src}
+                            alt={step.image.alt}
+                            caption={step.image.caption}
+                          />
+                        )}
+                        {step.scene && <Scene3D {...step.scene} height={360} />}
+                        {step.model && <Model3D {...step.model} height={320} />}
+                      </div>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </li>
+        ))}
       </ol>
 
       <div class="wshop__done" data-step="fim" tabindex="-1">
@@ -268,8 +271,22 @@ const pad = (n: number) => String(n).padStart(2, '0');
     line-height: 1.6;
   }
 
-  .wshop :global(p) {
+  /* Undo the lesson text styles (.prose) on the block's own elements. */
+  .wshop :global(p),
+  .wshop__title,
+  .wshop__step-title,
+  .wshop__facts > li,
+  .wshop__section,
+  .wshop__step {
     margin: 0;
+  }
+
+  .wshop__facts,
+  .wshop__sections,
+  .wshop__steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
   /* Header */
@@ -281,7 +298,11 @@ const pad = (n: number) => String(n).padStart(2, '0');
     border-bottom: 1px solid var(--border);
     border-radius: 1rem 1rem 0 0;
     background:
-      repeating-linear-gradient(-45deg, transparent 0 10px, color-mix(in oklab, var(--copper) 6%, transparent) 10px 20px),
+      repeating-linear-gradient(
+        -45deg,
+        transparent 0 10px,
+        color-mix(in oklab, var(--copper) 6%, transparent) 10px 20px
+      ),
       var(--surface);
   }
 
@@ -583,7 +604,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
   }
 
   /* With JavaScript, 3D scenes and models open only in workshop mode (one at a time). */
-  .wshop[data-ready]:not([data-mode='oficina']) .wshop__media:has(:global([data-stub]), :global(astro-island)) {
+  .wshop[data-ready]:not([data-mode='oficina'])
+    .wshop__media:has(:global([data-stub]), :global(astro-island)) {
     display: none;
   }
 

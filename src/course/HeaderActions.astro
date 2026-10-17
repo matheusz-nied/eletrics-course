@@ -19,12 +19,19 @@ const current = Astro.url.pathname;
 ---
 
 <div class="hactions">
-  <a href={withBase('busca/')} class="hactions__search" data-search-open aria-keyshortcuts="Control+K">
+  <a
+    href={withBase('busca/')}
+    class="hactions__search"
+    data-search-open
+    aria-keyshortcuts="Control+K"
+  >
     <CourseIcon name="buscar" size={18} />
     <span class="hactions__search-text">Buscar</span>
-    <kbd class="hactions__kbd" aria-hidden="true">Ctrl K</kbd>
+    <kbd class="hactions__kbd" aria-hidden="true">
+      Ctrl K
+    </kbd>
   </a>
-  <a href={withBase('progresso/')} class="icon-btn" title="Meu progresso">
+  <a href={withBase('progresso/')} class="icon-btn hactions__progress" title="Meu progresso">
     <CourseIcon name="progresso" />
     <span class="sr-only">Meu progresso</span>
   </a>
@@ -44,7 +51,9 @@ const current = Astro.url.pathname;
 <dialog id="busca-rapida" class="sdialog" aria-labelledby="busca-rapida-titulo" data-search-dialog>
   <div class="sdialog__panel">
     <div class="sdialog__head">
-      <h2 id="busca-rapida-titulo" class="sdialog__title">Buscar no curso</h2>
+      <h2 id="busca-rapida-titulo" class="sdialog__title">
+        Buscar no curso
+      </h2>
       <button type="button" class="icon-btn" data-dialog-close>
         <CourseIcon name="x" />
         <span class="sr-only">Fechar a busca</span>
@@ -64,18 +73,16 @@ const current = Astro.url.pathname;
   </div>
   <nav aria-label="Navegação do site">
     <ul class="mmenu__list">
-      {
-        links.map((link) => {
-          const href = withBase(link.path);
-          return (
-            <li>
-              <a href={href} aria-current={href === current ? 'page' : undefined}>
-                {link.label}
-              </a>
-            </li>
-          );
-        })
-      }
+      {links.map((link) => {
+        const href = withBase(link.path);
+        return (
+          <li>
+            <a href={href} aria-current={href === current ? 'page' : undefined}>
+              {link.label}
+            </a>
+          </li>
+        );
+      })}
     </ul>
   </nav>
 </dialog>
@@ -156,8 +163,18 @@ const current = Astro.url.pathname;
     color: var(--fg);
   }
 
-  .hactions__search-text,
-  .hactions__kbd {
+  /* Phones: icon only (the name stays for screen readers); progress is in the menu. */
+  .hactions__search-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .hactions__kbd,
+  .hactions__progress {
     display: none;
   }
 
@@ -177,8 +194,12 @@ const current = Astro.url.pathname;
     }
 
     .hactions__search-text {
-      display: inline;
+      position: static;
+      width: auto;
       min-width: 6rem;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
     }
 
     .hactions__kbd {
@@ -196,6 +217,10 @@ const current = Astro.url.pathname;
   @media (min-width: 48rem) {
     .hactions__menu {
       display: none;
+    }
+
+    .hactions__progress {
+      display: inline-grid;
     }
   }
 

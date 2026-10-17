@@ -33,7 +33,13 @@ const meta = module.published
       {module.published ? meta : <span class="mcard__soon">Em breve</span>}
       {!module.published && <span class="mcard__planned"> · {meta}</span>}
     </span>
-    {ready.length > 0 && <ProgressBar lessons={ready.map((l) => l.id)} label={`Progresso no módulo ${module.numero}`} variant="compact" />}
+    {ready.length > 0 && (
+      <ProgressBar
+        lessons={ready.map((l) => l.id)}
+        label={`Progresso no módulo ${module.numero}`}
+        variant="compact"
+      />
+    )}
   </span>
 </a>
 

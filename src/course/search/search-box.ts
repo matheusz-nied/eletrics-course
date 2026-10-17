@@ -65,7 +65,9 @@ function setup(box: HTMLElement) {
         result.total === 0
           ? `Nada encontrado para "${query}". Tente outra palavra ou um sinônimo.`
           : `${result.total} ${result.total === 1 ? 'resultado' : 'resultados'} para "${query}"` +
-            (result.total > result.hits.length ? `; mostrando os ${result.hits.length} primeiros.` : '.');
+            (result.total > result.hits.length
+              ? `; mostrando os ${result.hits.length} primeiros.`
+              : '.');
     } catch (error) {
       if (mine !== run) return;
       list.replaceChildren();

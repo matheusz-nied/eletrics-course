@@ -1,7 +1,13 @@
 ---
 /* One track: who it is for, progress and its lessons grouped by module. */
 import type { GetStaticPaths } from 'astro';
-import { available, formatDuration, minutesOf, plural, type CatalogTrack } from '../../course/catalog';
+import {
+  available,
+  formatDuration,
+  minutesOf,
+  plural,
+  type CatalogTrack,
+} from '../../course/catalog';
 import { getCourseData } from '../../course/data';
 import CourseIcon from '../../course/ui/CourseIcon.astro';
 import CoursePage from '../../course/ui/CoursePage.astro';
@@ -24,7 +30,13 @@ const minutes = minutesOf(ready);
 const first = ready[0];
 ---
 
-<CoursePage title={track.titulo} eyebrow="Trilha" icon={track.icone} lead={track.resumo} width="narrow">
+<CoursePage
+  title={track.titulo}
+  eyebrow="Trilha"
+  icon={track.icone}
+  lead={track.resumo}
+  width="narrow"
+>
   <Fragment slot="header">
     <p class="track__who">
       <strong>Para quem:</strong>
@@ -51,19 +63,30 @@ const first = ready[0];
   <section class="track__progress" aria-label="Seu progresso na trilha">
     {ready.length > 0 ? (
       <>
-        <ProgressBar lessons={ready.map((l) => l.id)} label={`Progresso na trilha ${track.titulo}`} />
+        <ProgressBar
+          lessons={ready.map((l) => l.id)}
+          label={`Progresso na trilha ${track.titulo}`}
+        />
         <a href={first!.href} class="btn btn--primary track__cta" data-track-next>
           <span data-track-next-label>Começar a trilha</span>
           <CourseIcon name="seta-direita" size={18} />
         </a>
-        <script is:inline type="application/json" data-track-lessons set:html={JSON.stringify(ready.map((l) => ({ id: l.id, href: l.href, titulo: l.titulo })))} />
+        <script
+          is:inline
+          type="application/json"
+          data-track-lessons
+          set:html={JSON.stringify(
+            ready.map((l) => ({ id: l.id, href: l.href, titulo: l.titulo })),
+          )}
+        />
       </>
     ) : (
       <p class="track__soon">
         <CourseIcon name="construcao" />
         <span>
-          As aulas desta trilha estão em produção e aparecem aqui assim que forem publicadas. Enquanto isso,
-          veja o <a href={withBase('glossario/')}>glossário</a> ou a lista completa de <a href={withBase('modulos/')}>módulos e aulas</a>.
+          As aulas desta trilha estão em produção e aparecem aqui assim que forem publicadas.
+          Enquanto isso, veja o <a href={withBase('glossario/')}>glossário</a> ou a lista completa
+          de <a href={withBase('modulos/')}>módulos e aulas</a>.
         </span>
       </p>
     )}

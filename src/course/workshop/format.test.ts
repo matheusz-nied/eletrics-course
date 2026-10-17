@@ -22,9 +22,9 @@ describe('normalizeWorkshop', () => {
   });
 
   it('rejects a wrong id, repeated steps and missing fields', () => {
-    expect(() => normalizeWorkshop(doc([{ title: 'A', steps: [{ title: 'X' }] }]), 'outro')).toThrow(
-      /nome do arquivo/,
-    );
+    expect(() =>
+      normalizeWorkshop(doc([{ title: 'A', steps: [{ title: 'X' }] }]), 'outro'),
+    ).toThrow(/nome do arquivo/);
     expect(() =>
       normalizeWorkshop(doc([{ title: 'A', steps: [{ title: 'X' }, { title: 'X' }] }]), 'teste'),
     ).toThrow(/dois passos/);
@@ -38,7 +38,9 @@ describe('normalizeWorkshop', () => {
 
 describe('helpers', () => {
   it('slugifies titles in Portuguese', () => {
-    expect(slugify('Teste a ausência de tensão (F, N e ⏚)')).toBe('teste-a-ausencia-de-tensao-f-n-e');
+    expect(slugify('Teste a ausência de tensão (F, N e ⏚)')).toBe(
+      'teste-a-ausencia-de-tensao-f-n-e',
+    );
   });
 
   it('escapes HTML and keeps bold', () => {

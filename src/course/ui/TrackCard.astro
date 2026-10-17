@@ -29,10 +29,18 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
       {plural(track.lessons.length, 'aula', 'aulas')}
       <span class="tcard__ready">
         {' · '}
-        {ready.length === 0 ? 'em produção' : `${ready.length.toLocaleString('pt-BR')} ${ready.length === 1 ? 'disponível' : 'disponíveis'}`}
+        {ready.length === 0
+          ? 'em produção'
+          : `${ready.length.toLocaleString('pt-BR')} ${ready.length === 1 ? 'disponível' : 'disponíveis'}`}
       </span>
     </span>
-    {ready.length > 0 && <ProgressBar lessons={ready.map((l) => l.id)} label={`Progresso na trilha ${track.titulo}`} variant="compact" />}
+    {ready.length > 0 && (
+      <ProgressBar
+        lessons={ready.map((l) => l.id)}
+        label={`Progresso na trilha ${track.titulo}`}
+        variant="compact"
+      />
+    )}
   </span>
   <span class="tcard__cta" aria-hidden="true">
     Ver a trilha
@@ -113,7 +121,11 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
     gap: 0.625rem;
     padding: 1.5rem;
     background:
-      radial-gradient(120% 90% at 100% 0%, color-mix(in oklab, var(--copper) 14%, transparent), transparent 60%),
+      radial-gradient(
+        120% 90% at 100% 0%,
+        color-mix(in oklab, var(--copper) 14%, transparent),
+        transparent 60%
+      ),
       var(--bg);
   }
 

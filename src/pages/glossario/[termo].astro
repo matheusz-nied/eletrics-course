@@ -42,16 +42,14 @@ const { Content } = await render(term);
   search="Glossário"
 >
   <Fragment slot="header">
-    {
-      term.data.sinonimos.length > 0 && (
-        <p class="term__syn">
-          <span class="term__syn-label">Também chamado de</span>
-          {term.data.sinonimos.map((s) => (
-            <span class="chip">{s}</span>
-          ))}
-        </p>
-      )
-    }
+    {term.data.sinonimos.length > 0 && (
+      <p class="term__syn">
+        <span class="term__syn-label">Também chamado de</span>
+        {term.data.sinonimos.map((s) => (
+          <span class="chip">{s}</span>
+        ))}
+      </p>
+    )}
   </Fragment>
 
   <article class="term__body">
@@ -61,46 +59,42 @@ const { Content } = await render(term);
   </article>
 
   <div class="term__links" data-pagefind-ignore>
-    {
-      lesson && (
-        <section class="term__box" aria-labelledby="term-aula">
-          <h2 id="term-aula" class="eyebrow">
-            Para aprofundar
-          </h2>
-          {lesson.href ? (
-            <a href={lesson.href} class="term__lesson">
-              <CourseIcon name="livro" />
-              <span>
-                <span class="num">Aula {lesson.number}</span> {lesson.titulo}
-              </span>
-            </a>
-          ) : (
-            <p class="term__lesson term__lesson--soon">
-              <CourseIcon name="livro" />
-              <span>
-                <span class="num">Aula {lesson.number}</span> {lesson.titulo} (em breve)
-              </span>
-            </p>
-          )}
-        </section>
-      )
-    }
-    {
-      related.length > 0 && (
-        <section class="term__box" aria-labelledby="term-rel">
-          <h2 id="term-rel" class="eyebrow">
-            Termos relacionados
-          </h2>
-          <ul class="term__related">
-            {related.map((r) => (
-              <li>
-                <a href={termUrl(r.id)}>{r.data.termo}</a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
+    {lesson && (
+      <section class="term__box" aria-labelledby="term-aula">
+        <h2 id="term-aula" class="eyebrow">
+          Para aprofundar
+        </h2>
+        {lesson.href ? (
+          <a href={lesson.href} class="term__lesson">
+            <CourseIcon name="livro" />
+            <span>
+              <span class="num">Aula {lesson.number}</span> {lesson.titulo}
+            </span>
+          </a>
+        ) : (
+          <p class="term__lesson term__lesson--soon">
+            <CourseIcon name="livro" />
+            <span>
+              <span class="num">Aula {lesson.number}</span> {lesson.titulo} (em breve)
+            </span>
+          </p>
+        )}
+      </section>
+    )}
+    {related.length > 0 && (
+      <section class="term__box" aria-labelledby="term-rel">
+        <h2 id="term-rel" class="eyebrow">
+          Termos relacionados
+        </h2>
+        <ul class="term__related">
+          {related.map((r) => (
+            <li>
+              <a href={termUrl(r.id)}>{r.data.termo}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
   </div>
 
   <a href={withBase('glossario/')} class="term__back">
