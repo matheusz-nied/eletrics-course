@@ -1,0 +1,38 @@
+---
+/*
+ * Placeholder created by the Fundação. The Experiência front replaces this file
+ * with the real quiz; the props are the public API used by lessons
+ * (docs/plano/02-arquitetura.md, section 4.3; docs/plano/03-guia-de-conteudo.md).
+ */
+import UnderConstruction from '../components/UnderConstruction.astro';
+
+interface Base {
+  prompt: string;
+  /** Shown after answering, right or wrong. */
+  explanation?: string;
+}
+
+export type QuizQuestion =
+  | (Base & {
+      type: 'multipla';
+      options: { text: string; correct?: boolean; feedback?: string }[];
+    })
+  | (Base & { type: 'numerica'; answer: number; tolerance?: number; unit?: string })
+  | (Base & { type: 'vf'; answer: boolean })
+  | (Base & { type: 'ordenar'; items: string[] })
+  | (Base & { type: 'associar'; pairs: [string, string][] });
+
+export interface Props {
+  questions: QuizQuestion[];
+  title?: string;
+}
+
+const { questions } = Astro.props;
+const count = questions.length;
+---
+
+<UnderConstruction
+  component="Quiz"
+  label="Exercícios"
+  detail={`${count} ${count === 1 ? 'questão' : 'questões'}`}
+/>

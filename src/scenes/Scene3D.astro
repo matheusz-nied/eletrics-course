@@ -1,0 +1,24 @@
+---
+/*
+ * Placeholder created by the Fundação. The Cenas reais front replaces this file
+ * with the real scene viewer; the props are the public API used by lessons
+ * (docs/plano/02-arquitetura.md, section 4.3).
+ */
+import UnderConstruction from '../components/UnderConstruction.astro';
+
+export interface Props {
+  /** Scene id, the folder name in src/scenes: "portao-deslizante". */
+  scene: string;
+  /** Scene state: `{ gatePosition: 0.5 }`. */
+  props?: Record<string, unknown>;
+  /** Named camera of the scene. */
+  camera?: string;
+  /** Clickable points with explanations. */
+  hotspots?: boolean;
+  height?: number;
+}
+
+const { scene, height = 420 } = Astro.props;
+---
+
+<UnderConstruction component="Scene3D" label="Cena 3D" detail={scene} height={height} />

@@ -1,0 +1,55 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import { components } from '../../components/mdx';
+import LessonLayout, { type Prerequisite } from '../../layouts/LessonLayout.astro';
+import { getCourse, lessonNumber, lessonsOf, type Lesson } from '../../lib/content';
+import { neighbors, sortLessons, splitLessonId } from '../../lib/course';
+import { lessonUrl } from '../../lib/url';
+
+export const getStaticPaths = (async () => {
+  const { modules, lessons, listed } = await getCourse();
+
+  const link = (l: Lesson | undefined) =>
+    l && {
+      href: lessonUrl(l.id),
+      kicker: `Aula ${lessonNumber(l, modules)}`,
+      title: l.data.titulo,
+    };
+
+  // Every lesson gets a page; drafts are reachable by URL but never linked in production.
+  return lessons.map((lesson) => {
+    const module = modules.find((m) => m.id === lesson.data.modulo);
+    if (!module) throw new Error(`Aula "${lesson.id}" sem módulo.`);
+    const inModule = lessonsOf(listed, module.id);
+    const moduleLessons = inModule.some((l) => l.id === lesson.id)
+      ? inModule
+      : sortLessons([...inModule, lesson], modules);
+    const { prev, next } = neighbors(listed, lesson.id);
+    const prerequisites: Prerequisite[] = lesson.data.prerequisitos.map((id) => {
+      const found = listed.find((l) => l.id === id);
+      return { id, title: found?.data.titulo, href: found && lessonUrl(found.id) };
+    });
+
+    return {
+      params: splitLessonId(lesson.id),
+      props: {
+        lesson,
+        module,
+        number: lessonNumber(lesson, modules),
+        moduleLessons,
+        prerequisites,
+        prev: link(prev),
+        next: link(next),
+      },
+    };
+  });
+}) satisfies GetStaticPaths;
+
+const { lesson, ...rest } = Astro.props;
+const { Content, headings } = await render(lesson);
+---
+
+<LessonLayout lesson={lesson} headings={headings} {...rest}>
+  <Content components={components} />
+</LessonLayout>

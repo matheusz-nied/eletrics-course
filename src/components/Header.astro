@@ -1,0 +1,104 @@
+---
+import HeaderActions from '../course/HeaderActions.astro';
+import { NAV, SITE } from '../lib/site';
+import { withBase } from '../lib/url';
+import Logo from './Logo.astro';
+import ThemeToggle from './ThemeToggle.astro';
+---
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a href={withBase()} class="brand">
+      <Logo />
+      <span class="brand__name">{SITE.name}</span>
+    </a>
+    <nav aria-label="Principal" class="site-nav">
+      <ul>
+        {NAV.map((item) => (
+          <li>
+            <a href={withBase(item.path)}>{item.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <div class="site-header__actions">
+      <HeaderActions />
+      <ThemeToggle />
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    height: var(--header-h);
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in oklab, var(--bg) 88%, transparent);
+    backdrop-filter: saturate(1.4) blur(10px);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 88rem;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  @media (min-width: 48rem) {
+    .site-header__inner {
+      padding: 0 1.5rem;
+    }
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: var(--fg);
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  .site-nav {
+    margin-left: auto;
+  }
+
+  .site-nav ul {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .site-nav a {
+    display: inline-flex;
+    align-items: center;
+    height: 2.25rem;
+    padding: 0 0.75rem;
+    border-radius: 0.5rem;
+    color: var(--fg-muted);
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  .site-nav a:hover {
+    background: var(--surface-2);
+    color: var(--fg);
+  }
+
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  @media (max-width: 26rem) {
+    .brand__name {
+      font-size: 0.9375rem;
+    }
+  }
+</style>

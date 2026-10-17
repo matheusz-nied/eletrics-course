@@ -1,0 +1,20 @@
+---
+/*
+ * Placeholder created by the Fundação. The Esquemático front replaces this file
+ * with the real simulation; the props are the public API used by lessons
+ * (docs/plano/02-arquitetura.md, section 4.3).
+ */
+import UnderConstruction from '../components/UnderConstruction.astro';
+
+export interface Props {
+  /** Circuit id, the path under src/lessons without `.circuit.ts`: "m02/serie-lampadas". */
+  circuit: string;
+  height?: number;
+  layout?: 'esquema' | 'esquema+3d' | '3d';
+  autoplay?: boolean;
+}
+
+const { circuit, height = 360 } = Astro.props;
+---
+
+<UnderConstruction component="Simulation" label="Simulação" detail={circuit} height={height} />

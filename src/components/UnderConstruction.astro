@@ -1,0 +1,63 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  /** Name of the real component, e.g. "Simulation". Used by tests. */
+  component: string;
+  /** What the student will see here, in pt-BR: "Simulação". */
+  label: string;
+  /** Identifier of the content (circuit, part, scene…). */
+  detail?: string | undefined;
+  /** Reserved height in px, so the page does not jump when the real one arrives. */
+  height?: number | undefined;
+}
+
+const { component, label, detail, height = 0 } = Astro.props;
+---
+
+<div
+  class="wip breakout"
+  data-stub={component}
+  style={height > 0 ? `min-height: ${height}px` : undefined}
+>
+  <Icon name="construcao" size={24} />
+  <p class="wip__label">{label}: em construção</p>
+  {detail && <p class="wip__detail num">{detail}</p>}
+  <p class="wip__text">Esta parte interativa ainda está sendo construída.</p>
+</div>
+
+<style>
+  .wip {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 0.35rem;
+    margin: 1.75em 0;
+    padding: 1.5rem 1rem;
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--fg-muted);
+    text-align: center;
+  }
+
+  .wip p {
+    margin: 0;
+  }
+
+  .wip__label {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .wip__detail {
+    padding: 0.1rem 0.5rem;
+    border-radius: 0.375rem;
+    background: var(--surface-2);
+    font-size: 0.8125rem;
+  }
+
+  .wip__text {
+    font-size: 0.875rem;
+  }
+</style>

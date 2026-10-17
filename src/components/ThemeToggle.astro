@@ -1,0 +1,60 @@
+---
+import Icon from './Icon.astro';
+---
+
+<button type="button" class="icon-btn theme-toggle" data-theme-toggle aria-pressed="false">
+  <span class="sr-only">Tema escuro</span>
+  <Icon name="lua" class="theme-toggle__moon" />
+  <Icon name="sol" class="theme-toggle__sun" />
+</button>
+
+<script>
+  // The theme preference is stored as "claro" or "escuro"; without it the
+  // system setting wins. The inline script in BaseLayout applies it before paint.
+  const KEY = 'curso:v1:tema';
+  const root = document.documentElement;
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+
+  function sync() {
+    const dark = root.dataset.theme === 'dark';
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(dark));
+    });
+  }
+
+  function stored(): string | null {
+    try {
+      return localStorage.getItem(KEY);
+    } catch {
+      return null;
+    }
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem(KEY, next === 'dark' ? 'escuro' : 'claro');
+      } catch {
+        // Private mode: the choice lasts until the page is closed.
+      }
+      sync();
+    });
+  });
+
+  media.addEventListener('change', (event) => {
+    if (stored()) return;
+    root.dataset.theme = event.matches ? 'dark' : 'light';
+    sync();
+  });
+
+  sync();
+</script>
+
+<style>
+  :global([data-theme='dark']) .theme-toggle :global(.theme-toggle__moon),
+  :global(:root:not([data-theme='dark'])) .theme-toggle :global(.theme-toggle__sun) {
+    display: none;
+  }
+</style>

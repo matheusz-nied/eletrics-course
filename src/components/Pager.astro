@@ -1,0 +1,92 @@
+---
+import Icon from './Icon.astro';
+
+export interface PagerLink {
+  href: string;
+  /** "Aula 4.2", "Módulo 3" */
+  kicker: string;
+  title: string;
+}
+
+interface Props {
+  label: string;
+  prev?: PagerLink | undefined;
+  next?: PagerLink | undefined;
+}
+
+const { label, prev, next } = Astro.props;
+---
+
+{(prev || next) && (
+  <nav aria-label={label} class="pager">
+    {prev ? (
+      <a href={prev.href} class="card pager__link pager__link--prev" rel="prev">
+        <span class="pager__dir">
+          <Icon name="seta-esquerda" size={16} />
+          Anterior
+        </span>{' '}
+        <span class="pager__kicker">{prev.kicker}</span>{' '}
+        <span class="pager__title">{prev.title}</span>
+      </a>
+    ) : (
+      <span />
+    )}
+    {next && (
+      <a href={next.href} class="card pager__link pager__link--next" rel="next">
+        <span class="pager__dir">
+          Próxima
+          <Icon name="seta-direita" size={16} />
+        </span>{' '}
+        <span class="pager__kicker">{next.kicker}</span>{' '}
+        <span class="pager__title">{next.title}</span>
+      </a>
+    )}
+  </nav>
+)}
+
+<style>
+  .pager {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 40rem) {
+    .pager {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .pager__link {
+    display: grid;
+    gap: 0.2rem;
+    padding: 1rem 1.125rem;
+  }
+
+  .pager__link--next {
+    text-align: right;
+  }
+
+  .pager__dir {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--accent);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  .pager__link--next .pager__dir {
+    justify-content: flex-end;
+  }
+
+  .pager__kicker {
+    color: var(--fg-subtle);
+    font-size: 0.8125rem;
+  }
+
+  .pager__title {
+    color: var(--fg);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+</style>

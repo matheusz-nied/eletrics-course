@@ -1,0 +1,70 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<div class="real-case" role="note" aria-label={`Na prática: ${title}`}>
+  <p class="real-case__head">
+    <span class="real-case__icon">
+      <Icon name="ferramenta" size={18} />
+    </span>
+    <span>
+      <span class="eyebrow">Na prática</span>
+      <span class="real-case__title">{title}</span>
+    </span>
+  </p>
+  <div class="real-case__body">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .real-case {
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background:
+      linear-gradient(135deg, color-mix(in oklab, var(--copper) 9%, transparent), transparent 55%),
+      var(--surface);
+  }
+
+  .real-case__head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .real-case__head > span:last-child {
+    display: grid;
+  }
+
+  .real-case__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.625rem;
+    background: color-mix(in oklab, var(--copper) 16%, transparent);
+    color: var(--copper);
+  }
+
+  .real-case__title {
+    font-weight: 650;
+    line-height: 1.35;
+  }
+
+  .real-case__body {
+    margin-top: 0.875rem;
+  }
+
+  .real-case__body > :global(* + *) {
+    margin-top: 0.875em;
+  }
+</style>

@@ -1,0 +1,23 @@
+---
+/*
+ * Placeholder created by the Fundação. The Kit 3D front replaces this file
+ * with the real 3D viewer; the props are the public API used by lessons
+ * (docs/plano/02-arquitetura.md, sections 4.3 and 7.3).
+ */
+import UnderConstruction from '../components/UnderConstruction.astro';
+
+export interface Props {
+  /** Part id from src/three/parts: "resistor". */
+  part: string;
+  /** Part parameters: `{ ohms: 4700 }`. */
+  props?: Record<string, unknown>;
+  explode?: boolean;
+  cutaway?: boolean;
+  annotations?: boolean;
+  height?: number;
+}
+
+const { part, height = 360 } = Astro.props;
+---
+
+<UnderConstruction component="Model3D" label="Modelo 3D" detail={part} height={height} />

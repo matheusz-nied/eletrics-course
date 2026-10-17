@@ -1,0 +1,74 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<details class="deep-dive">
+  <summary>
+    <Icon name="aprofundar" size={20} />
+    <span class="deep-dive__text">
+      <span class="eyebrow">Aprofundamento</span>
+      <span class="deep-dive__title">{title}</span>
+    </span>
+    <Icon name="seta-direita" size={18} class="deep-dive__chevron" />
+  </summary>
+  <div class="deep-dive__body">
+    <slot />
+  </div>
+</details>
+
+<style>
+  .deep-dive {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    cursor: pointer;
+    list-style: none;
+    color: var(--fg-muted);
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .deep-dive__text {
+    display: grid;
+    flex: 1;
+    gap: 0.1rem;
+  }
+
+  .deep-dive__title {
+    color: var(--fg);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  summary :global(.deep-dive__chevron) {
+    flex: none;
+    transition: transform 150ms;
+  }
+
+  .deep-dive[open] summary :global(.deep-dive__chevron) {
+    transform: rotate(90deg);
+  }
+
+  .deep-dive__body {
+    padding: 0.25rem 1.25rem 1.25rem;
+  }
+
+  .deep-dive__body > :global(* + *) {
+    margin-top: 1em;
+  }
+</style>

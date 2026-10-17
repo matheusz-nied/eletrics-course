@@ -1,0 +1,35 @@
+---
+/*
+ * Placeholder created by the Fundação. The Esquemático front replaces this file
+ * with the real chart; the props are the public API used by lessons
+ * (docs/plano/02-arquitetura.md, section 4.3).
+ */
+import UnderConstruction from '../components/UnderConstruction.astro';
+
+export interface PlotSeries {
+  label: string;
+  unit?: string;
+  points: [number, number][];
+}
+
+export interface Props {
+  /** Chart of a simulation run until `until` seconds… */
+  circuit?: string;
+  until?: number;
+  /** …showing these readouts ("R1.current", "C1.voltage"). */
+  series?: string[];
+  /** Or a chart of fixed points. */
+  data?: PlotSeries[];
+  title?: string;
+  height?: number;
+}
+
+const { circuit, title, height = 280 } = Astro.props;
+---
+
+<UnderConstruction
+  component="Plot"
+  label={title ? `Gráfico: ${title}` : 'Gráfico'}
+  detail={circuit}
+  height={height}
+/>

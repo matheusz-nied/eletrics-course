@@ -1,0 +1,148 @@
+---
+titulo: Aula de exemplo
+modulo: m00-comece-aqui
+ordem: 0
+nivel: B
+duracaoMin: 5
+objetivos:
+  - Ver todos os componentes de aula funcionando juntos
+  - Conferir fórmulas, tabelas, figuras e avisos no estilo do curso
+prerequisitos: []
+tags: [exemplo]
+seguranca: rede
+rascunho: true
+---
+
+Esta é uma aula de demonstração para quem escreve o curso. Ela usa todos os componentes disponíveis nas aulas e serve de referência visual. Como está marcada como rascunho, ela não aparece na navegação do site publicado.
+
+Repare que o aviso de segurança no topo apareceu sozinho: a aula declara `seguranca: rede` no frontmatter.
+
+## Texto e fórmulas
+
+A <Term id="tensao">tensão</Term> empurra a corrente pelo circuito. A relação entre tensão, corrente e resistência é a Lei de Ohm, $V = R \cdot I$, em que $V$ é a tensão em volts, $R$ é a resistência em ohms e $I$ é a corrente em ampères.
+
+Com uma bateria de 12 V e um resistor de 4,7 kΩ, a corrente fica assim:
+
+$$
+I = \frac{V}{R} = \frac{12\,\text{V}}{4{,}7\,\text{k}\Omega} \approx 2{,}55\,\text{mA}
+$$
+
+| Grandeza | Símbolo | Unidade | Exemplo típico |
+|----------|---------|---------|----------------|
+| Tensão | $V$ | volt (V) | 127 V numa tomada |
+| Corrente | $I$ | ampère (A) | 20 mA num LED |
+| Resistência | $R$ | ohm (Ω) | 4,7 kΩ |
+| Potência | $P$ | watt (W) | 5.500 W num chuveiro |
+
+### Listas
+
+- Vírgula decimal e ponto de milhar: `1,5 V`, `1.000 W`.
+- Espaço entre número e unidade: `10 mA`.
+- Prefixos do SI: µ, m, k, M.
+
+## Avisos
+
+<Callout type="nota">
+Uma nota acrescenta uma informação útil que não é essencial para seguir a aula.
+</Callout>
+
+<Callout type="dica" title="Dica de bancada">
+Antes de medir, encoste as pontas do multímetro uma na outra na escala de resistência. O visor deve mostrar quase zero.
+</Callout>
+
+<Callout type="atencao">
+Um multímetro na escala de corrente funciona como um fio. Ligado em paralelo com a tomada, ele provoca um curto.
+</Callout>
+
+<Callout type="perigo">
+Capacitores grandes guardam carga mesmo com o aparelho desligado. Descarregue antes de tocar nos terminais.
+</Callout>
+
+<Callout type="seguranca-rede" title="Antes de abrir a central do portão">
+Além das regras acima, desligue também o disjuntor do motor, se ele for separado.
+</Callout>
+
+## Figura
+
+<Figure alt="Circuito com uma bateria de 12 volts ligada a um resistor de 4,7 quilo-ohms" caption="Figura 1. Bateria e resistor formam o circuito mais simples possível.">
+  <svg viewBox="0 0 320 160" width="320" height="160" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <path d="M60 30h80M180 30h80v100H60V100M60 30v40" />
+    <path d="M140 30l5-12 10 24 10-24 10 24 5-12" />
+    <path d="M40 70h40M50 82h20M60 82v18" />
+    <text x="160" y="62" fill="currentColor" stroke="none" font-size="14" text-anchor="middle">4,7 kΩ</text>
+    <text x="96" y="84" fill="currentColor" stroke="none" font-size="14">12 V</text>
+  </svg>
+</Figure>
+
+## Passo a passo
+
+<Steps>
+  <Step title="Desligue o disjuntor">
+    Desligue o disjuntor do circuito e sinalize o quadro.
+  </Step>
+  <Step title="Teste a ausência de tensão">
+    Teste o detector numa tomada energizada e depois nos fios em que vai mexer.
+  </Step>
+  <Step title="Faça a ligação">
+    Só agora solte e ligue os fios, apertando bem os bornes.
+  </Step>
+</Steps>
+
+<DeepDive title="De onde vem a Lei de Ohm">
+Num condutor, a densidade de corrente é proporcional ao campo elétrico: $J = \sigma E$. Para um fio de comprimento $L$ e seção $A$, isso leva a $R = \rho L / A$, e daí a $V = R \cdot I$.
+</DeepDive>
+
+<RealCase title="A extensão que esquenta">
+Uma extensão de fio fino tem resistência maior. Com um aquecedor de 1.500 W ligado nela, a corrente passa de 11 A em 127 V, e o fio esquenta. Por isso a bitola do fio precisa combinar com a carga.
+</RealCase>
+
+## Componentes interativos
+
+Os componentes abaixo ainda estão em construção pelas outras frentes do curso. Cada um mostra o que vai aparecer no lugar.
+
+<Simulation circuit="m00/exemplo" />
+
+<Plot circuit="m00/exemplo" until={0.05} series={['R1.current']} title="corrente no resistor" />
+
+<Model3D part="resistor" props={{ ohms: 4700 }} />
+
+<Scene3D scene="portao-deslizante" props={{ gatePosition: 0.5 }} />
+
+<WiringExercise scenario="m00/exemplo" />
+
+<Workshop id="exemplo" />
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Uma lâmpada de 127 V tem resistência de 254 Ω acesa. Qual a corrente?',
+      answer: 0.5,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation: 'I = V/R = 127/254 = 0,5 A.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Como o voltímetro é ligado ao circuito?',
+      options: [
+        { text: 'Em paralelo com o que se quer medir', correct: true },
+        { text: 'Em série com o circuito', feedback: 'Em série se liga o amperímetro.' },
+      ],
+    },
+    { type: 'vf', prompt: 'Tensão é medida entre dois pontos.', answer: true },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque os passos na ordem segura.',
+      items: ['Desligar o disjuntor', 'Testar a ausência de tensão', 'Mexer nos fios'],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe a grandeza à unidade.',
+      pairs: [
+        ['Tensão', 'volt'],
+        ['Corrente', 'ampère'],
+      ],
+    },
+  ]}
+/>

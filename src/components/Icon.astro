@@ -1,0 +1,31 @@
+---
+import { ICONS, type IconName } from './icons';
+
+interface Props {
+  name: IconName;
+  /** Accessible name. Without it the icon is decorative and hidden from screen readers. */
+  label?: string;
+  size?: number;
+  class?: string;
+}
+
+const { name, label, size = 20, class: className } = Astro.props;
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 24 24"
+  width={size}
+  height={size}
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.75"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class={className}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+  set:html={ICONS[name]}
+/>

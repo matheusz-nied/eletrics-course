@@ -23,4 +23,24 @@ pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:e2e
 
 ## Comandos
 
-A Fundação preenche esta seção quando o projeto existir.
+Node 22 e pnpm 10 (`packageManager` no `package.json`).
+
+```
+pnpm install      # dependências
+pnpm dev          # servidor local: http://localhost:4321/eletrics-course/
+pnpm build        # site em dist/ + índice de busca (Pagefind)
+pnpm preview      # serve dist/ com o mesmo base do GitHub Pages
+pnpm lint         # ESLint + Prettier (só verifica)
+pnpm format       # corrige formatação e o que o ESLint consegue
+pnpm typecheck    # astro check (cobre .astro, .ts e .tsx)
+pnpm test         # Vitest: src/**/*.test.ts(x) e tools/**/*.test.ts
+pnpm test:e2e     # Playwright contra dist/ (rode pnpm build antes)
+```
+
+- `astro dev` e `astro preview` percebem que rodam num agente e sobem em segundo plano; pare com `pnpm astro dev stop` (ou `preview stop`). O Playwright sobe o próprio preview com `--ignore-lock`.
+- O Playwright está fixado em 1.56.1 para usar o Chromium já instalado em `/opt/pw-browsers`; no CI ele é baixado.
+- Links e caminhos internos: `withBase()`, `lessonUrl()` e `moduleUrl()` de `src/lib/url.ts`. Ordem do curso, rascunhos e vizinhos: `getCourse()` de `src/lib/content.ts`.
+- Aulas com `rascunho: true` aparecem na navegação só no `pnpm dev`. No build a página existe (com aviso e `noindex`), mas nada aponta para ela.
+- Componentes das aulas: mapa fixo em `src/components/mdx.ts`. Cada frente substitui o próprio stub (`src/circuit/Simulation.astro` etc.) mantendo as props. A Experiência também tem stubs para encaixar o progresso e a busca sem editar layouts: `src/course/LessonProgress.astro`, `ModuleProgress.astro` e `HeaderActions.astro`.
+- Testes e2e de cada frente em `tests/e2e/<frente>-*.spec.ts`, com os helpers de `tests/e2e/helpers.ts` (`watchErrors`, `expectAccessible`, `expectNoHorizontalOverflow`).
+- Fórmulas: `remark-math` + `rehype-katex` no processador `unified()` (o padrão do Astro 7, Sätteri, não roda plugins remark/rehype).
