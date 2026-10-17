@@ -69,6 +69,17 @@ import ThemeToggle from './ThemeToggle.astro';
     margin-left: auto;
   }
 
+  /* Below 48rem the links move to the menu in HeaderActions (src/course/). */
+  @media (max-width: 47.99rem) {
+    .site-nav {
+      display: none;
+    }
+
+    .site-header__actions {
+      margin-left: auto;
+    }
+  }
+
   .site-nav ul {
     display: flex;
     gap: 0.25rem;

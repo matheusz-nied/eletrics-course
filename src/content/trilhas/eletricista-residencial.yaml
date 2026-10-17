@@ -1,0 +1,23 @@
+titulo: Eletricista residencial
+paraQuem: Quem quer ligar tomadas, interruptores e chuveiro e entender o quadro de distribuição.
+resumo: >-
+  Da segurança e das grandezas básicas até a instalação da casa: fase, neutro e terra, disjuntores
+  e DR, bitola dos fios, tomadas, interruptor paralelo, chuveiro e ventilador de teto.
+ordem: 2
+icone: casa
+itens:
+  - m00-comece-aqui
+  - m01-eletricidade-do-zero
+  - m02-circuitos-cc/01-o-circuito-eletrico
+  - m02-circuitos-cc/02-associacao-em-serie
+  - m02-circuitos-cc/03-associacao-em-paralelo
+  - m03-medicoes/01-multimetro
+  - m03-medicoes/02-medindo-tensao
+  - m03-medicoes/03-medindo-corrente
+  - m03-medicoes/04-resistencia-continuidade-e-diodo
+  - m06-corrente-alternada/01-da-cc-a-ca
+  - m06-corrente-alternada/02-pico-eficaz-e-medio
+  - m06-corrente-alternada/07-monofasico-bifasico-e-trifasico
+  - m07-instalacoes
+  - m17-projetos/01-ventilador-de-teto
+  - m17-projetos/02-escada-interruptor-paralelo

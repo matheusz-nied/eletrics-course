@@ -1,0 +1,215 @@
+---
+/* One track: who it is for, progress and its lessons grouped by module. */
+import type { GetStaticPaths } from 'astro';
+import { available, formatDuration, minutesOf, plural, type CatalogTrack } from '../../course/catalog';
+import { getCourseData } from '../../course/data';
+import CourseIcon from '../../course/ui/CourseIcon.astro';
+import CoursePage from '../../course/ui/CoursePage.astro';
+import LessonList from '../../course/ui/LessonList.astro';
+import ProgressBar from '../../course/ui/ProgressBar.astro';
+import { withBase } from '../../lib/url';
+
+export const getStaticPaths = (async () => {
+  const { tracks } = await getCourseData();
+  return tracks.map((track) => ({ params: { trilha: track.id }, props: { track } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  track: CatalogTrack;
+}
+
+const { track } = Astro.props;
+const ready = available(track.lessons);
+const minutes = minutesOf(ready);
+const first = ready[0];
+---
+
+<CoursePage title={track.titulo} eyebrow="Trilha" icon={track.icone} lead={track.resumo} width="narrow">
+  <Fragment slot="header">
+    <p class="track__who">
+      <strong>Para quem:</strong>
+      {track.paraQuem}
+    </p>
+    <ul class="track__facts" aria-label="Sobre a trilha">
+      <li class="chip">
+        <CourseIcon name="livro" />
+        <span>{plural(track.lessons.length, 'aula', 'aulas')}</span>
+      </li>
+      <li class="chip">
+        <CourseIcon name="lista" />
+        <span>{plural(track.steps.length, 'módulo', 'módulos')}</span>
+      </li>
+      {minutes > 0 && (
+        <li class="chip">
+          <CourseIcon name="relogio" />
+          <span class="num">{formatDuration(minutes)}</span>
+        </li>
+      )}
+    </ul>
+  </Fragment>
+
+  <section class="track__progress" aria-label="Seu progresso na trilha">
+    {ready.length > 0 ? (
+      <>
+        <ProgressBar lessons={ready.map((l) => l.id)} label={`Progresso na trilha ${track.titulo}`} />
+        <a href={first!.href} class="btn btn--primary track__cta" data-track-next>
+          <span data-track-next-label>Começar a trilha</span>
+          <CourseIcon name="seta-direita" size={18} />
+        </a>
+        <script is:inline type="application/json" data-track-lessons set:html={JSON.stringify(ready.map((l) => ({ id: l.id, href: l.href, titulo: l.titulo })))} />
+      </>
+    ) : (
+      <p class="track__soon">
+        <CourseIcon name="construcao" />
+        <span>
+          As aulas desta trilha estão em produção e aparecem aqui assim que forem publicadas. Enquanto isso,
+          veja o <a href={withBase('glossario/')}>glossário</a> ou a lista completa de <a href={withBase('modulos/')}>módulos e aulas</a>.
+        </span>
+      </p>
+    )}
+  </section>
+
+  <ol class="track__steps">
+    {track.steps.map((step, i) => (
+      <li class="track__step">
+        <div class="track__step-head">
+          <span class="track__step-index num">{String(i + 1).padStart(2, '0')}</span>
+          <h2 class="track__step-title">
+            {step.module.href ? (
+              <a href={step.module.href}>{step.module.titulo}</a>
+            ) : (
+              step.module.titulo
+            )}
+          </h2>
+          <span class="track__step-meta">
+            Módulo {step.module.numero}
+            {step.lessons.length < step.module.lessons.length
+              ? ` · ${step.lessons.length} de ${step.module.lessons.length} aulas`
+              : ' · módulo inteiro'}
+          </span>
+        </div>
+        <LessonList lessons={step.lessons} label={`Aulas de ${step.module.titulo} nesta trilha`} />
+      </li>
+    ))}
+  </ol>
+</CoursePage>
+
+<script>
+  import { getProgress } from '../../course/progress/store';
+
+  // The button goes to the first lesson of the track not done yet.
+  const button = document.querySelector<HTMLAnchorElement>('[data-track-next]');
+  const data = document.querySelector('[data-track-lessons]')?.textContent;
+  if (button && data) {
+    const lessons = JSON.parse(data) as { id: string; href: string; titulo: string }[];
+    const store = getProgress();
+    const label = button.querySelector('[data-track-next-label]')!;
+    const update = () => {
+      const anyDone = lessons.some((l) => store.lesson(l.id).visitada || store.isRead(l.id));
+      const next = lessons.find((l) => !store.isRead(l.id));
+      if (!next) {
+        label.textContent = 'Trilha concluída: rever do início';
+        button.href = lessons[0]!.href;
+        return;
+      }
+      button.href = next.href;
+      label.textContent = anyDone ? `Continuar: ${next.titulo}` : 'Começar a trilha';
+    };
+    update();
+    store.subscribe(update);
+  }
+</script>
+
+<style>
+  .track__who {
+    max-width: 44rem;
+    color: var(--fg);
+    line-height: 1.6;
+  }
+
+  .track__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .track__progress {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .track__cta {
+    justify-self: start;
+    max-width: 100%;
+  }
+
+  .track__cta span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .track__soon {
+    display: flex;
+    gap: 0.75rem;
+    color: var(--fg-muted);
+    line-height: 1.6;
+  }
+
+  .track__soon :global(svg) {
+    flex: none;
+    margin-top: 0.2rem;
+  }
+
+  .track__soon a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .track__steps {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .track__step {
+    display: grid;
+    gap: 0.875rem;
+  }
+
+  .track__step-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.875rem;
+    align-items: baseline;
+  }
+
+  .track__step-index {
+    grid-row: span 2;
+    color: var(--copper);
+    font-size: 0.9375rem;
+    font-weight: 700;
+  }
+
+  .track__step-title {
+    font-size: 1.25rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  .track__step-title a:hover {
+    color: var(--accent);
+  }
+
+  .track__step-meta {
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+  }
+</style>

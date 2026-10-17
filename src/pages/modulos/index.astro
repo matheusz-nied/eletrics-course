@@ -1,0 +1,288 @@
+---
+/* Module catalog: every module of the curriculum with its lessons, published or planned. */
+import { available, formatDuration, minutesOf, plural, type CatalogModule } from '../../course/catalog';
+import { getCourseData } from '../../course/data';
+import CourseIcon from '../../course/ui/CourseIcon.astro';
+import CoursePage from '../../course/ui/CoursePage.astro';
+import LessonList from '../../course/ui/LessonList.astro';
+import ProgressBar from '../../course/ui/ProgressBar.astro';
+import { PARTS } from '../../lib/site';
+
+const { modules, lessons } = await getCourseData();
+const parts = new Map<number, CatalogModule[]>();
+for (const m of modules) parts.set(m.parte, [...(parts.get(m.parte) ?? []), m]);
+const readyCount = available(lessons).length;
+---
+
+<CoursePage
+  title="Módulos e aulas"
+  eyebrow="Currículo"
+  icon="lista"
+  lead={`O currículo completo: ${plural(modules.length, 'módulo', 'módulos')} e ${plural(lessons.length, 'aula', 'aulas')}, dos princípios da eletricidade aos projetos reais. Os módulos abrem à medida que ficam prontos.`}
+>
+  <p class="catalog__status" slot="header">
+    <span class="chip">
+      <CourseIcon name="livro" />
+      <span><span class="num">{readyCount}</span> {readyCount === 1 ? 'aula publicada' : 'aulas publicadas'}</span>
+    </span>
+    <span class="chip">
+      <CourseIcon name="construcao" />
+      <span><span class="num">{lessons.length - readyCount}</span> em produção</span>
+    </span>
+  </p>
+
+  <nav class="catalog__toc" aria-label="Partes do curso">
+    {[...parts.keys()].map((p) => (
+      <a href={`#parte-${p}`} class="catalog__toc-link">
+        <span class="num">Parte {p}</span> {PARTS[p]}
+      </a>
+    ))}
+  </nav>
+
+  {
+    [...parts.entries()].map(([parte, mods]) => (
+      <section id={`parte-${parte}`} class="catalog__part" aria-labelledby={`parte-${parte}-titulo`}>
+        <h2 id={`parte-${parte}-titulo`} class="catalog__part-title">
+          <span class="num">Parte {parte}</span> {PARTS[parte]}
+        </h2>
+        <div class="catalog__modules">
+          {mods.map((m) => {
+            const ready = available(m.lessons);
+            const minutes = minutesOf(ready);
+            return (
+              <details id={m.id} class="mrow" data-module-row open={m.published ? true : undefined}>
+                <summary class="mrow__summary">
+                  <span class:list={['mrow__icon', { 'mrow__icon--soon': !m.published }]}>
+                    <CourseIcon name={m.icone} size={22} />
+                  </span>
+                  <span class="mrow__main">
+                    <span class="mrow__number num">Módulo {m.numero}</span>
+                    <h3 class="mrow__title">{m.titulo}</h3>
+                    <span class="mrow__summary-text">{m.resumo}</span>
+                    <span class="mrow__meta">
+                      {m.published ? (
+                        <>
+                          {plural(ready.length, 'aula', 'aulas')}
+                          {minutes > 0 && <> · {formatDuration(minutes)}</>}
+                        </>
+                      ) : (
+                        <>
+                          <span class="mrow__soon">Em breve</span> · {plural(m.lessons.length, 'aula planejada', 'aulas planejadas')}
+                        </>
+                      )}
+                    </span>
+                  </span>
+                  <CourseIcon name="baixo" size={20} class="mrow__chevron" />
+                </summary>
+                <div class="mrow__body">
+                  {ready.length > 0 && (
+                    <ProgressBar lessons={ready.map((l) => l.id)} label={`Progresso no módulo ${m.numero}`} />
+                  )}
+                  <LessonList lessons={m.lessons} label={`Aulas do módulo ${m.numero}`} />
+                  {m.href && (
+                    <a href={m.href} class="mrow__open">
+                      Abrir a página do módulo
+                      <CourseIcon name="seta-direita" size={16} />
+                    </a>
+                  )}
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      </section>
+    ))
+  }
+</CoursePage>
+
+<script>
+  // Opens the module named in the address (/modulos/#m04-passivos).
+  function openFromHash() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const target = id ? document.getElementById(id) : null;
+    if (target instanceof HTMLDetailsElement) {
+      target.open = true;
+      target.scrollIntoView({ block: 'start' });
+    }
+  }
+  openFromHash();
+  window.addEventListener('hashchange', openFromHash);
+</script>
+
+<style>
+  .catalog__status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .catalog__toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .catalog__toc-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .catalog__toc-link:hover {
+    border-color: var(--border-strong);
+    color: var(--fg);
+  }
+
+  .catalog__toc-link .num {
+    color: var(--copper);
+    font-size: 0.8125rem;
+  }
+
+  .catalog__part {
+    padding-top: 2.5rem;
+  }
+
+  .catalog__part-title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+  }
+
+  .catalog__part-title .num {
+    color: var(--copper);
+    font-size: 0.9375rem;
+  }
+
+  .catalog__modules {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .mrow {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    box-shadow: var(--shadow-sm);
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+
+  .mrow__summary {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.125rem 1.25rem;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .mrow__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .mrow__summary:focus-visible {
+    border-radius: var(--radius);
+  }
+
+  .mrow__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .mrow__icon--soon {
+    background: var(--surface-2);
+    color: var(--fg-muted);
+  }
+
+  .mrow__main {
+    display: grid;
+    flex: 1;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  .mrow__number {
+    color: var(--fg-subtle);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  .mrow__title {
+    font-size: 1.125rem;
+    font-weight: 650;
+    line-height: 1.3;
+  }
+
+  .mrow__summary-text {
+    color: var(--fg-muted);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  .mrow__meta {
+    margin-top: 0.25rem;
+    color: var(--accent);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  .mrow__soon {
+    color: var(--fg-muted);
+  }
+
+  .mrow :global(.mrow__chevron) {
+    flex: none;
+    margin-top: 0.75rem;
+    color: var(--fg-subtle);
+    transition: transform 200ms;
+  }
+
+  .mrow[open] :global(.mrow__chevron) {
+    transform: rotate(180deg);
+  }
+
+  .mrow__body {
+    display: grid;
+    gap: 1rem;
+    padding: 0 1.25rem 1.25rem;
+  }
+
+  @media (min-width: 48rem) {
+    .mrow__body {
+      padding-left: 5rem;
+    }
+  }
+
+  .mrow__open {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    justify-self: start;
+    color: var(--accent);
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .mrow__open:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+</style>

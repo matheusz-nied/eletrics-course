@@ -1,17 +1,848 @@
 ---
 /*
- * Placeholder created by the Fundação. The Experiência front replaces this file
- * with the real workshop mode; the props are the public API used by lessons
- * (docs/plano/02-arquitetura.md, section 4.3).
+ * Workshop mode ("modo oficina"): a procedure from src/lessons/**\/oficinas/<id>.ts.
+ * In the lesson it reads as a checklist; "Abrir modo oficina" turns it into a
+ * full-screen, one-step-at-a-time guide with large type, a "Feito" button,
+ * the screen kept awake, and the place remembered (src/course/workshop/client.ts).
+ * Pages with a workshop are kept for offline use (src/course/pwa/).
  */
-import UnderConstruction from '../components/UnderConstruction.astro';
+import Callout from '../components/Callout.astro';
+import Figure from '../components/Figure.astro';
+import Scene3D from '../scenes/Scene3D.astro';
+import Model3D from '../three/Model3D.astro';
+import { inlineMarkup } from './workshop/format';
+import { getWorkshop } from './workshop/registry';
+import CourseIcon from './ui/CourseIcon.astro';
 
 export interface Props {
-  /** Workshop id: "trocar-motor-portao". */
+  /** Workshop id: "trocar-motor-portao" (file src/lessons/mNN/oficinas/trocar-motor-portao.ts). */
   id: string;
 }
 
 const { id } = Astro.props;
+const workshop = getWorkshop(id);
+const total = workshop.steps.length;
+const dom = `oficina-${id}`;
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<UnderConstruction component="Workshop" label="Modo oficina" detail={id} />
+<section
+  class="wshop breakout"
+  id={dom}
+  aria-labelledby={`${dom}-titulo`}
+  data-workshop={id}
+  data-mode="lista"
+>
+  <header class="wshop__head">
+    <p class="wshop__kicker">
+      <CourseIcon name="ferramenta" size={16} />
+      Modo oficina
+    </p>
+    <h3 id={`${dom}-titulo`} class="wshop__title">{workshop.title}</h3>
+    <p class="wshop__summary">{workshop.summary}</p>
+    <ul class="wshop__facts" aria-label="Sobre o procedimento">
+      <li class="chip">
+        <CourseIcon name="lista" />
+        <span><span class="num">{total}</span> {total === 1 ? 'passo' : 'passos'}</span>
+      </li>
+      {
+        workshop.duration && (
+          <li class="chip">
+            <CourseIcon name="relogio" />
+            {workshop.duration}
+          </li>
+        )
+      }
+      {
+        workshop.safety === 'rede' && (
+          <li class="chip chip--danger">
+            <CourseIcon name="raio" />
+            Rede elétrica
+          </li>
+        )
+      }
+      <li class="chip wshop__offline" hidden data-workshop-offline>
+        <CourseIcon name="offline" />
+        Disponível sem internet
+      </li>
+    </ul>
+    <div class="wshop__progress" data-pagefind-ignore>
+      <div
+        class="wshop__meter"
+        role="progressbar"
+        aria-label="Passos feitos"
+        aria-valuemin="0"
+        aria-valuemax={total}
+        aria-valuenow="0"
+        data-workshop-meter
+      >
+        <span></span>
+      </div>
+      <p class="wshop__count" data-workshop-count>
+        0 de {total} passos feitos
+      </p>
+    </div>
+    <div class="wshop__actions" data-pagefind-ignore>
+      <button type="button" class="btn btn--primary" data-workshop-open hidden>
+        <CourseIcon name="expandir" size={18} />
+        <span data-workshop-open-label>Abrir modo oficina</span>
+      </button>
+      <button type="button" class="wshop__reset" data-workshop-reset hidden>
+        <CourseIcon name="refazer" size={16} />
+        <span data-workshop-reset-label>Recomeçar</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="wshop__stage" data-workshop-stage>
+    <div class="wshop__bar" data-pagefind-ignore>
+      <span class="wshop__bar-title">
+        <span class="wshop__bar-kicker">Modo oficina</span>
+        <span class="wshop__bar-name">{workshop.title}</span>
+      </span>
+      <span class="wshop__bar-pos num" data-workshop-position></span>
+      <button type="button" class="wshop__bar-btn" data-workshop-fullscreen hidden>
+        <CourseIcon name="expandir" />
+        <span class="sr-only">Tela cheia</span>
+      </button>
+      <button type="button" class="wshop__bar-btn" data-workshop-close>
+        <CourseIcon name="x" />
+        <span class="sr-only">Sair do modo oficina</span>
+      </button>
+      <div class="wshop__bar-meter" aria-hidden="true"><span></span></div>
+    </div>
+
+    <div class="wshop__scroll" data-workshop-scroll>
+      <div class="wshop__intro" data-step="inicio" tabindex="-1">
+        <p class="wshop__intro-kicker">Antes de começar</p>
+        {workshop.safety === 'rede' && <Callout type="seguranca-rede" />}
+        {
+          (workshop.tools?.length || workshop.materials?.length) && (
+            <div class="wshop__lists">
+              {workshop.tools?.length ? (
+                <div>
+                  <p class="wshop__list-title">Ferramentas</p>
+                  <ul>
+                    {workshop.tools.map((t) => (
+                      <li>{t}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {workshop.materials?.length ? (
+                <div>
+                  <p class="wshop__list-title">Materiais</p>
+                  <ul>
+                    {workshop.materials.map((t) => (
+                      <li>{t}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
+          )
+        }
+      </div>
+
+      <ol class="wshop__sections">
+        {
+          workshop.sections.map((section) => (
+            <li class="wshop__section">
+              <p class="wshop__section-title">{section.title}</p>
+              <ol class="wshop__steps">
+                {section.steps.map((step) => (
+                  <li
+                    class="wshop__step"
+                    id={`${dom}-${step.id}`}
+                    data-step={step.id}
+                    data-number={step.number}
+                    data-section={section.title}
+                  >
+                    <div class="wshop__step-head">
+                      <label class="wshop__check" data-pagefind-ignore>
+                        <input type="checkbox" data-step-done />
+                        <span class="sr-only">
+                          Passo {step.number} feito: {step.title}
+                        </span>
+                      </label>
+                      <span class="wshop__num num" aria-hidden="true">
+                        {pad(step.number)}
+                      </span>
+                      <h4 class="wshop__step-title" tabindex="-1" data-step-title>
+                        <span class="sr-only">Passo {step.number}: </span>
+                        {step.title}
+                      </h4>
+                    </div>
+                    <div class="wshop__step-body">
+                      {step.warning && (
+                        <p class="wshop__warning">
+                          <CourseIcon name="perigo" size={20} />
+                          <span set:html={inlineMarkup(step.warning)} />
+                        </p>
+                      )}
+                      {step.paragraphs.map((p) => (
+                        <p set:html={inlineMarkup(p)} />
+                      ))}
+                      {step.items && (
+                        <ul class="wshop__items">
+                          {step.items.map((item) => (
+                            <li set:html={inlineMarkup(item)} />
+                          ))}
+                        </ul>
+                      )}
+                      {step.measure && (
+                        <div class="wshop__measure">
+                          <p class="wshop__measure-title">
+                            <CourseIcon name="multimetro" size={18} />
+                            Medir: {step.measure.what}
+                          </p>
+                          {step.measure.how && <p set:html={inlineMarkup(step.measure.how)} />}
+                          <p>
+                            <strong>Esperado:</strong> <span set:html={inlineMarkup(step.measure.expected)} />
+                          </p>
+                        </div>
+                      )}
+                      {step.tip && (
+                        <p class="wshop__tip">
+                          <CourseIcon name="dica" size={18} />
+                          <span set:html={inlineMarkup(step.tip)} />
+                        </p>
+                      )}
+                      {(step.image || step.scene || step.model) && (
+                        <div class="wshop__media">
+                          {step.image && (
+                            <Figure src={step.image.src} alt={step.image.alt} caption={step.image.caption} />
+                          )}
+                          {step.scene && <Scene3D {...step.scene} height={360} />}
+                          {step.model && <Model3D {...step.model} height={320} />}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="wshop__done" data-step="fim" tabindex="-1">
+        <CourseIcon name="check" size={32} />
+        <p class="wshop__done-title">Todos os passos feitos</p>
+        <p>Confira o resultado com calma antes de guardar as ferramentas.</p>
+      </div>
+    </div>
+
+    <nav class="wshop__nav" aria-label="Passos" data-pagefind-ignore>
+      <button type="button" class="wshop__nav-btn" data-workshop-prev>
+        <CourseIcon name="seta-esquerda" size={22} />
+        <span>Anterior</span>
+      </button>
+      <button type="button" class="wshop__nav-done" data-workshop-done>
+        <CourseIcon name="check" size={22} />
+        <span data-workshop-done-label>Feito</span>
+      </button>
+      <button type="button" class="wshop__nav-btn" data-workshop-next>
+        <span>Próximo</span>
+        <CourseIcon name="seta-direita" size={22} />
+      </button>
+    </nav>
+  </div>
+  <p class="sr-only" aria-live="polite" data-workshop-live></p>
+</section>
+
+<script>
+  import { initWorkshops } from './workshop/client';
+  initWorkshops();
+</script>
+
+<style>
+  .wshop {
+    --ws-pad: 1.25rem;
+    margin: 2.25em 0;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--bg);
+    box-shadow: var(--shadow-sm);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .wshop :global(p) {
+    margin: 0;
+  }
+
+  /* Header */
+
+  .wshop__head {
+    display: grid;
+    gap: 0.75rem;
+    padding: var(--ws-pad);
+    border-bottom: 1px solid var(--border);
+    border-radius: 1rem 1rem 0 0;
+    background:
+      repeating-linear-gradient(-45deg, transparent 0 10px, color-mix(in oklab, var(--copper) 6%, transparent) 10px 20px),
+      var(--surface);
+  }
+
+  .wshop__kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--copper);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .wshop__title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+
+  .wshop__summary {
+    color: var(--fg-muted);
+  }
+
+  .wshop__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .wshop__facts [hidden] {
+    display: none;
+  }
+
+  .wshop__offline {
+    border-color: var(--success-border);
+    background: var(--success-soft);
+    color: var(--success);
+  }
+
+  .wshop__progress {
+    display: grid;
+    gap: 0.375rem;
+  }
+
+  .wshop__meter,
+  .wshop__bar-meter {
+    position: relative;
+    height: 0.5rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--surface-2);
+  }
+
+  .wshop__meter span,
+  .wshop__bar-meter span {
+    position: absolute;
+    inset: 0;
+    background: var(--success);
+    transform: scaleX(var(--ws-progress, 0));
+    transform-origin: left;
+    transition: transform 300ms;
+  }
+
+  .wshop__count {
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+  }
+
+  .wshop__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .wshop__actions [hidden] {
+    display: none;
+  }
+
+  .wshop__reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 2.75rem;
+    padding: 0 0.75rem;
+    border-radius: 0.625rem;
+    color: var(--fg-muted);
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  .wshop__reset:hover {
+    background: var(--surface-2);
+    color: var(--fg);
+  }
+
+  .wshop__reset[data-confirm] {
+    color: var(--danger);
+    font-weight: 600;
+  }
+
+  /* Steps (list mode) */
+
+  .wshop__bar,
+  .wshop__nav,
+  .wshop__done {
+    display: none;
+  }
+
+  .wshop__scroll {
+    padding: var(--ws-pad);
+  }
+
+  .wshop__intro {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .wshop__intro:not(:has(.callout, .wshop__lists)) {
+    display: none;
+  }
+
+  .wshop__intro-kicker,
+  .wshop__section-title {
+    color: var(--fg-subtle);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .wshop__intro :global(.callout) {
+    margin: 0;
+  }
+
+  .wshop__lists {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 40rem) {
+    .wshop__lists {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .wshop__list-title {
+    font-weight: 650;
+  }
+
+  .wshop__lists ul,
+  .wshop__items {
+    margin-top: 0.375rem;
+    padding-left: 1.25rem;
+    list-style: disc;
+  }
+
+  .wshop__sections {
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .wshop__section {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .wshop__steps {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .wshop__step {
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+
+  .wshop__step[data-done] {
+    border-color: var(--success-border);
+    background: color-mix(in oklab, var(--success-soft) 60%, transparent);
+  }
+
+  .wshop__step-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .wshop__check {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin: -0.05rem 0 0;
+    cursor: pointer;
+  }
+
+  .wshop__check input {
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: var(--success);
+    cursor: pointer;
+  }
+
+  .wshop__num {
+    flex: none;
+    padding-top: 0.05rem;
+    color: var(--fg-subtle);
+    font-weight: 600;
+  }
+
+  .wshop__step-title {
+    font-size: 1.0625rem;
+    font-weight: 650;
+    line-height: 1.4;
+  }
+
+  .wshop__step-title:focus {
+    outline: none;
+  }
+
+  .wshop__step[data-done] .wshop__step-title {
+    color: var(--fg-muted);
+  }
+
+  .wshop__step-body {
+    display: grid;
+    gap: 0.625rem;
+    margin-top: 0.5rem;
+    padding-left: 4.25rem;
+  }
+
+  .wshop__step-body:empty {
+    display: none;
+  }
+
+  @media (max-width: 30rem) {
+    .wshop__step-body {
+      padding-left: 0;
+    }
+  }
+
+  .wshop__warning,
+  .wshop__tip {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.5rem;
+  }
+
+  .wshop__warning {
+    border: 1px solid var(--danger-border);
+    background: var(--danger-soft);
+    color: var(--fg);
+  }
+
+  .wshop__warning :global(svg) {
+    flex: none;
+    margin-top: 0.15rem;
+    color: var(--danger);
+  }
+
+  .wshop__tip {
+    background: var(--info-soft);
+  }
+
+  .wshop__tip :global(svg) {
+    flex: none;
+    margin-top: 0.15rem;
+    color: var(--info);
+  }
+
+  .wshop__measure {
+    display: grid;
+    gap: 0.375rem;
+    padding: 0.75rem 0.875rem;
+    border: 1px solid var(--border-strong);
+    border-left: 4px solid var(--accent);
+    border-radius: 0.5rem;
+    background: var(--surface);
+  }
+
+  .wshop__measure-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 650;
+  }
+
+  .wshop__media :global(.figure),
+  .wshop__media :global(.wip) {
+    margin: 0.5rem 0 0;
+  }
+
+  /* With JavaScript, 3D scenes and models open only in workshop mode (one at a time). */
+  .wshop[data-ready]:not([data-mode='oficina']) .wshop__media:has(:global([data-stub]), :global(astro-island)) {
+    display: none;
+  }
+
+  /* Workshop mode: full screen, one step at a time. */
+
+  .wshop[data-mode='oficina'] {
+    --ws-pad: clamp(1rem, 3vw, 2rem);
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: clamp(1.125rem, 1rem + 0.6vw, 1.3rem);
+    line-height: 1.55;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__head {
+    display: none;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__stage {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem var(--ws-pad) 0.875rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 0.9375rem;
+  }
+
+  .wshop__bar-title {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .wshop__bar-kicker {
+    color: var(--copper);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .wshop__bar-name {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wshop__bar-pos {
+    flex: none;
+    color: var(--fg-muted);
+  }
+
+  .wshop__bar-btn {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.625rem;
+    color: var(--fg-muted);
+  }
+
+  .wshop__bar-btn:hover {
+    background: var(--surface-2);
+    color: var(--fg);
+  }
+
+  .wshop__bar-btn[hidden] {
+    display: none;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__bar-meter {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: block;
+    height: 0.25rem;
+    border-radius: 0;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__scroll {
+    flex: 1;
+    width: 100%;
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: var(--ws-pad);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .wshop[data-mode='oficina'] :is(.wshop__intro, .wshop__step, .wshop__done):not([data-current]),
+  .wshop[data-mode='oficina'] .wshop__section:not(:has([data-current])) {
+    display: none;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__sections,
+  .wshop[data-mode='oficina'] .wshop__section,
+  .wshop[data-mode='oficina'] .wshop__steps {
+    display: block;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__intro[data-current] {
+    display: grid;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__section-title {
+    margin-bottom: 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__step {
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__step-head {
+    align-items: center;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__check {
+    display: none;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__num {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    border-radius: 0.75rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__step[data-done] .wshop__num {
+    background: var(--success-soft);
+    color: var(--success);
+  }
+
+  .wshop[data-mode='oficina'] .wshop__step-title {
+    color: var(--fg);
+    font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.125rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__step-body {
+    gap: 1rem;
+    margin-top: 1.25rem;
+    padding-left: 0;
+  }
+
+  .wshop[data-mode='oficina'] .wshop__done[data-current] {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    padding: 3rem 0;
+    color: var(--success);
+    text-align: center;
+  }
+
+  .wshop__done-title {
+    color: var(--fg);
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  .wshop__done p:last-child {
+    color: var(--fg-muted);
+  }
+
+  .wshop[data-mode='oficina'] .wshop__nav {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem var(--ws-pad) max(0.75rem, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .wshop__nav-btn,
+  .wshop__nav-done {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 3.5rem;
+    border-radius: 0.875rem;
+    font-size: 1.0625rem;
+    font-weight: 650;
+  }
+
+  .wshop__nav-btn {
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--fg);
+  }
+
+  .wshop__nav-btn:disabled {
+    opacity: 0.4;
+  }
+
+  .wshop__nav-done {
+    background: var(--success);
+    color: light-dark(#fff, #0b0e13);
+  }
+
+  .wshop__nav-done[aria-pressed='true'] {
+    border: 2px solid var(--success);
+    background: var(--success-soft);
+    color: var(--success);
+  }
+
+  @media (max-width: 26rem) {
+    .wshop__nav-btn span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+    .wshop[data-mode='oficina'] .wshop__nav {
+      grid-template-columns: 1fr 2.2fr 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wshop__meter span,
+    .wshop__bar-meter span {
+      transition: none;
+    }
+  }
+
+  @media print {
+    .wshop__actions,
+    .wshop__check {
+      display: none;
+    }
+  }
+</style>

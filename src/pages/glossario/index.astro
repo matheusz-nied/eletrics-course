@@ -1,0 +1,286 @@
+---
+/* Glossary: every term in alphabetical order, with a filter. */
+import { getCourseData, termUrl } from '../../course/data';
+import { groupByInitial, searchable } from '../../course/glossary';
+import CourseIcon from '../../course/ui/CourseIcon.astro';
+import CoursePage from '../../course/ui/CoursePage.astro';
+import { withBase } from '../../lib/url';
+
+const { terms } = await getCourseData();
+const groups = groupByInitial(terms);
+const present = new Set(groups.map((g) => g.letter));
+const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+---
+
+<CoursePage
+  title="Glossário"
+  eyebrow="Consulta rápida"
+  icon="livro"
+  lead="Os termos do curso explicados em poucas palavras, com o nome de loja e de técnico ao lado do nome formal. Nas aulas, toque num termo sublinhado para ver a definição sem sair da página."
+>
+  <div class="gloss__tools">
+    <label class="gloss__filter">
+      <span class="sr-only">Filtrar termos</span>
+      <CourseIcon name="buscar" size={18} />
+      <input
+        type="search"
+        placeholder="Filtrar termos: disjuntor, NA, capacitor…"
+        autocomplete="off"
+        spellcheck="false"
+        data-gloss-filter
+      />
+    </label>
+    <p class="gloss__count" aria-live="polite" data-gloss-count>
+      {terms.length} termos
+    </p>
+  </div>
+
+  <nav class="gloss__letters" aria-label="Letras">
+    {
+      alphabet.map((letter) =>
+        present.has(letter) ? (
+          <a href={`#letra-${letter}`} class="gloss__letter" data-gloss-letter={letter}>
+            {letter}
+          </a>
+        ) : (
+          <span class="gloss__letter gloss__letter--off" aria-hidden="true">
+            {letter}
+          </span>
+        ),
+      )
+    }
+  </nav>
+
+  <div class="gloss__groups">
+    {
+      groups.map((group) => (
+        <section
+          id={`letra-${group.letter}`}
+          class="gloss__group"
+          aria-labelledby={`letra-${group.letter}-titulo`}
+          data-gloss-group={group.letter}
+        >
+          <h2 id={`letra-${group.letter}-titulo`} class="gloss__group-letter">
+            {group.letter}
+          </h2>
+          <ul class="gloss__list">
+            {group.terms.map((term) => (
+              <li
+                class="gloss__item"
+                data-gloss-item
+                data-text={searchable(term.data.termo, ...term.data.sinonimos, term.data.resumo)}
+              >
+                <a href={termUrl(term.id)} class="gloss__term">
+                  {term.data.termo}
+                </a>
+                {term.data.sinonimos.length > 0 && (
+                  <p class="gloss__syn">{term.data.sinonimos.join(' · ')}</p>
+                )}
+                <p class="gloss__summary">{term.data.resumo}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+  <p class="gloss__empty" hidden data-gloss-empty>
+    Nenhum termo encontrado. Tente outra palavra ou use a <a href={withBase('busca/')} data-gloss-search>busca do curso</a>.
+  </p>
+</CoursePage>
+
+<script>
+  import { searchable } from '../../course/glossary';
+
+  const input = document.querySelector<HTMLInputElement>('[data-gloss-filter]');
+  const count = document.querySelector<HTMLElement>('[data-gloss-count]');
+  const empty = document.querySelector<HTMLElement>('[data-gloss-empty]');
+  const items = [...document.querySelectorAll<HTMLElement>('[data-gloss-item]')];
+  const groups = [...document.querySelectorAll<HTMLElement>('[data-gloss-group]')];
+  const searchLink = document.querySelector<HTMLAnchorElement>('[data-gloss-search]');
+
+  function apply() {
+    const query = searchable(input?.value ?? '').trim();
+    let shown = 0;
+    for (const item of items) {
+      const match = query === '' || (item.dataset.text ?? '').includes(query);
+      item.hidden = !match;
+      if (match) shown++;
+    }
+    for (const group of groups) {
+      const visible = group.querySelector('[data-gloss-item]:not([hidden])') !== null;
+      group.hidden = !visible;
+      const letter = document.querySelector<HTMLElement>(`[data-gloss-letter="${group.dataset.glossGroup}"]`);
+      letter?.toggleAttribute('data-off', !visible);
+    }
+    if (count) count.textContent = `${shown} ${shown === 1 ? 'termo' : 'termos'}`;
+    if (empty) empty.hidden = shown > 0;
+    if (searchLink) {
+      const url = new URL(searchLink.href);
+      url.search = input?.value ? `?q=${encodeURIComponent(input.value)}` : '';
+      searchLink.href = url.toString();
+    }
+  }
+
+  input?.addEventListener('input', apply);
+</script>
+
+<style>
+  .gloss__tools {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+    margin: 0 -1rem;
+    padding: 0.75rem 1rem;
+    background: color-mix(in oklab, var(--bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  .gloss__filter {
+    display: flex;
+    flex: 1 1 18rem;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.875rem;
+    padding: 0 0.875rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.625rem;
+    background: var(--bg);
+    color: var(--fg-muted);
+  }
+
+  .gloss__filter:focus-within {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .gloss__filter input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--fg);
+    font-size: 1rem;
+    outline: none;
+  }
+
+  .gloss__count {
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+  }
+
+  .gloss__letters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 1rem 0 1.5rem;
+  }
+
+  .gloss__letter {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  a.gloss__letter:hover {
+    background: var(--surface-2);
+  }
+
+  .gloss__letter--off,
+  .gloss__letter[data-off] {
+    color: var(--fg-subtle);
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  .gloss__groups {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .gloss__group {
+    display: grid;
+    gap: 0.75rem;
+    scroll-margin-top: calc(var(--header-h) + 5rem);
+  }
+
+  @media (min-width: 48rem) {
+    .gloss__group {
+      grid-template-columns: 4rem minmax(0, 1fr);
+    }
+  }
+
+  .gloss__group-letter {
+    color: var(--copper);
+    font-family: var(--font-mono);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .gloss__list {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 64rem) {
+    .gloss__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .gloss__item {
+    display: grid;
+    align-content: start;
+    gap: 0.3rem;
+    padding: 1rem 1.125rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+  }
+
+  .gloss__term {
+    justify-self: start;
+    color: var(--fg);
+    font-size: 1.0625rem;
+    font-weight: 650;
+  }
+
+  .gloss__term:hover {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .gloss__syn {
+    color: var(--fg-subtle);
+    font-size: 0.8125rem;
+  }
+
+  .gloss__summary {
+    color: var(--fg-muted);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  .gloss__empty {
+    margin-top: 1rem;
+    color: var(--fg-muted);
+  }
+
+  .gloss__empty a {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+</style>

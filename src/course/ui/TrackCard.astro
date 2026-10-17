@@ -1,0 +1,136 @@
+---
+import { available, plural, type CatalogTrack } from '../catalog';
+import { trackUrl } from '../data';
+import CourseIcon from './CourseIcon.astro';
+import ProgressBar from './ProgressBar.astro';
+
+interface Props {
+  track: CatalogTrack;
+  headingLevel?: 2 | 3;
+  /** Larger card, for the reference track. */
+  featured?: boolean;
+}
+
+const { track, headingLevel = 3, featured = false } = Astro.props;
+const ready = available(track.lessons);
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+---
+
+<a href={trackUrl(track.id)} class:list={['card', 'tcard', { 'tcard--featured': featured }]}>
+  <span class="tcard__icon">
+    <CourseIcon name={track.icone} size={featured ? 26 : 22} />
+  </span>
+  <span class="tcard__kicker eyebrow">Trilha</span>
+  <Heading class="tcard__title">{track.titulo}</Heading>
+  <span class="tcard__who">{track.paraQuem}</span>
+  {featured && <span class="tcard__summary">{track.resumo}</span>}
+  <span class="tcard__foot">
+    <span class="tcard__meta">
+      {plural(track.lessons.length, 'aula', 'aulas')}
+      <span class="tcard__ready">
+        {' · '}
+        {ready.length === 0 ? 'em produção' : `${ready.length.toLocaleString('pt-BR')} ${ready.length === 1 ? 'disponível' : 'disponíveis'}`}
+      </span>
+    </span>
+    {ready.length > 0 && <ProgressBar lessons={ready.map((l) => l.id)} label={`Progresso na trilha ${track.titulo}`} variant="compact" />}
+  </span>
+  <span class="tcard__cta" aria-hidden="true">
+    Ver a trilha
+    <CourseIcon name="seta-direita" size={16} />
+  </span>
+</a>
+
+<style>
+  .tcard {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    height: 100%;
+    padding: 1.25rem;
+    overflow: hidden;
+  }
+
+  .tcard__icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: 0.375rem;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    background: var(--surface);
+    color: var(--copper);
+  }
+
+  .tcard__title {
+    font-size: 1.1875rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+
+  .tcard__who {
+    color: var(--fg-muted);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  .tcard__summary {
+    max-width: 36rem;
+    color: var(--fg);
+    line-height: 1.6;
+  }
+
+  .tcard__foot {
+    display: grid;
+    gap: 0.625rem;
+    margin-top: 0.5rem;
+  }
+
+  .tcard__meta {
+    color: var(--fg);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .tcard__ready {
+    color: var(--fg-muted);
+    font-weight: 500;
+  }
+
+  .tcard__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+    color: var(--accent);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .tcard--featured {
+    gap: 0.625rem;
+    padding: 1.5rem;
+    background:
+      radial-gradient(120% 90% at 100% 0%, color-mix(in oklab, var(--copper) 14%, transparent), transparent 60%),
+      var(--bg);
+  }
+
+  @media (min-width: 48rem) {
+    .tcard--featured {
+      padding: 2rem;
+    }
+  }
+
+  .tcard--featured .tcard__icon {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-color: color-mix(in oklab, var(--copper) 35%, var(--border));
+    background: color-mix(in oklab, var(--copper) 10%, var(--bg));
+  }
+
+  .tcard--featured .tcard__title {
+    font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
+  }
+</style>

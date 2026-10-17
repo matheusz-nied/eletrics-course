@@ -1,0 +1,19 @@
+titulo: Eletrônica maker
+paraQuem: Quem quer montar projetos com Arduino ou ESP32, LEDs, sensores e motores.
+resumo: >-
+  Circuitos, componentes, semicondutores, eletrônica digital e microcontroladores, com protoboard
+  e osciloscópio, até automatizar uma lâmpada com ESP32 e controlar uma fita de LED.
+ordem: 3
+icone: chip
+itens:
+  - m00-comece-aqui
+  - m01-eletricidade-do-zero
+  - m02-circuitos-cc
+  - m03-medicoes/05-osciloscopio
+  - m03-medicoes/06-protoboard-e-fonte-de-bancada
+  - m04-passivos
+  - m09-semicondutores
+  - m11-digital
+  - m12-microcontroladores
+  - m17-projetos/03-fita-de-led
+  - m17-projetos/07-lampada-com-esp32

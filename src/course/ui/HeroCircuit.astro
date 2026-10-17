@@ -1,0 +1,269 @@
+---
+/*
+ * Home page illustration: a battery, a switch, a resistor and a lit LED with
+ * the current flowing (conventional direction). The readouts are the real
+ * values of this circuit: (9 − 2,01) V / 390 Ω ≈ 17,9 mA; 6,99 V × 17,9 mA ≈ 125 mW.
+ */
+---
+
+<figure class="hero-circuit">
+  <div class="hero-circuit__screen">
+    <svg viewBox="0 0 440 290" class="hero-circuit__svg" aria-hidden="true" focusable="false">
+      <defs>
+        <pattern id="hc-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="1" class="hc-grid-dot"></circle>
+        </pattern>
+        <radialGradient id="hc-glow">
+          <stop offset="0" stop-color="#ff4d3d" stop-opacity="0.75"></stop>
+          <stop offset="0.45" stop-color="#ff4d3d" stop-opacity="0.22"></stop>
+          <stop offset="1" stop-color="#ff4d3d" stop-opacity="0"></stop>
+        </radialGradient>
+      </defs>
+      <rect width="440" height="290" fill="url(#hc-grid)"></rect>
+
+      <!-- Wires -->
+      <path class="hc-wire" d="M70 126V50h100M230 50h140v36M370 146v30M370 202v48H70v-110"></path>
+      <!-- Current, + to − -->
+      <path class="hc-flow" d="M70 126V50h300v200H70v-110"></path>
+
+      <!-- B1: battery -->
+      <g class="hc-part">
+        <rect x="58" y="127.5" width="24" height="11" class="hc-mask"></rect>
+        <path d="M50 126h40" style="stroke-width: 2.5px"></path>
+        <path d="M60 140h20" style="stroke-width: 5px"></path>
+      </g>
+      <text x="96" y="122" class="hc-sign">+</text>
+      <text x="16" y="128" class="hc-label">B1</text>
+      <text x="16" y="144" class="hc-value">9 V</text>
+
+      <!-- S1: switch (closed) -->
+      <g class="hc-part">
+        <rect x="171" y="38" width="58" height="16" class="hc-mask"></rect>
+        <path d="M170 50l58-5"></path>
+        <circle cx="170" cy="50" r="3.5" class="hc-node"></circle>
+        <circle cx="230" cy="50" r="3.5" class="hc-node"></circle>
+      </g>
+      <text x="190" y="30" class="hc-label">S1</text>
+
+      <!-- R1: resistor (IEC) -->
+      <g class="hc-part">
+        <rect x="358" y="86" width="24" height="60" rx="2" class="hc-mask"></rect>
+        <rect x="358" y="86" width="24" height="60" rx="2"></rect>
+      </g>
+      <text x="392" y="112" class="hc-label">R1</text>
+      <text x="392" y="128" class="hc-value">390 Ω</text>
+
+      <!-- D1: red LED -->
+      <circle cx="370" cy="189" r="34" fill="url(#hc-glow)" class="hc-glow"></circle>
+      <g class="hc-part">
+        <path d="M355 176h30l-15 26z" class="hc-led"></path>
+        <path d="M355 202h30"></path>
+        <path d="M390 180l13-9M398 171h5v5M393 192l13-9M401 183h5v5" style="stroke-width: 1.5px"></path>
+      </g>
+      <text x="392" y="222" class="hc-label">D1</text>
+
+      <!-- Probe points -->
+      <circle cx="370" cy="50" r="3" class="hc-node"></circle>
+      <circle cx="370" cy="250" r="3" class="hc-node"></circle>
+    </svg>
+
+    <dl class="hero-circuit__readouts">
+      <div>
+        <dt>Corrente</dt>
+        <dd class="num">17,9 mA</dd>
+      </div>
+      <div>
+        <dt>Tensão no LED</dt>
+        <dd class="num">2,01 V</dd>
+      </div>
+      <div>
+        <dt>Calor no R1</dt>
+        <dd class="num">125 mW</dd>
+      </div>
+    </dl>
+  </div>
+  <figcaption class="hero-circuit__caption">
+    <span class="hero-circuit__live" aria-hidden="true"></span>
+    Bateria de 9 V, resistor de 390 Ω e LED vermelho. Nas simulações você muda os valores e vê o
+    circuito reagir; sem o resistor, o LED queima.
+  </figcaption>
+</figure>
+
+<style>
+  .hero-circuit {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .hero-circuit__screen {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background:
+      radial-gradient(90% 70% at 85% 65%, rgb(255 77 61 / 0.08), transparent 60%),
+      linear-gradient(180deg, var(--surface), var(--bg));
+    box-shadow: var(--shadow-md);
+  }
+
+  .hero-circuit__svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    padding: 0.75rem 0.75rem 0;
+  }
+
+  .hc-grid-dot {
+    fill: var(--border-strong);
+    opacity: 0.55;
+  }
+
+  .hc-wire {
+    fill: none;
+    stroke: var(--fg-subtle);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .hc-flow {
+    fill: none;
+    stroke: var(--copper);
+    stroke-width: 4.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 0 18;
+    animation: hc-flow 0.9s linear infinite;
+  }
+
+  @keyframes hc-flow {
+    to {
+      stroke-dashoffset: -18;
+    }
+  }
+
+  .hc-part :is(path, rect, circle) {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .hc-part .hc-mask {
+    fill: var(--surface);
+    stroke: none;
+  }
+
+  .hc-part .hc-led {
+    fill: #ff4d3d;
+    stroke: var(--fg);
+  }
+
+  .hc-node {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.75;
+  }
+
+  .hc-glow {
+    animation: hc-glow 2.4s ease-in-out infinite alternate;
+  }
+
+  @keyframes hc-glow {
+    from {
+      opacity: 0.75;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .hc-label,
+  .hc-value,
+  .hc-sign {
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  .hc-label {
+    fill: var(--fg);
+    font-weight: 600;
+  }
+
+  .hc-value {
+    fill: var(--fg-muted);
+  }
+
+  .hc-sign {
+    fill: var(--fg-muted);
+    font-size: 14px;
+  }
+
+  .hero-circuit__readouts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--border);
+    background: color-mix(in oklab, var(--bg) 70%, transparent);
+  }
+
+  .hero-circuit__readouts div {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .hero-circuit__readouts div + div {
+    border-left: 1px solid var(--border);
+  }
+
+  .hero-circuit__readouts dt {
+    color: var(--fg-subtle);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .hero-circuit__readouts dd {
+    color: var(--fg);
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+
+  @media (max-width: 26rem) {
+    .hero-circuit__readouts div {
+      padding: 0.625rem;
+    }
+
+    .hero-circuit__readouts dd {
+      font-size: 0.9375rem;
+    }
+  }
+
+  .hero-circuit__caption {
+    display: flex;
+    gap: 0.625rem;
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .hero-circuit__live {
+    flex: none;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-top: 0.4rem;
+    border-radius: 999px;
+    background: var(--success);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--success) 20%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hc-flow,
+    .hc-glow {
+      animation: none;
+    }
+  }
+</style>
