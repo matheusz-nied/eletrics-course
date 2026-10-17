@@ -20,16 +20,15 @@ export function mosfetDevice(type: 'nmos' | 'pmos'): DeviceDefinition {
   const p = type === 'nmos' ? 1 : -1;
   const label = type === 'nmos' ? 'MOSFET canal N' : 'MOSFET canal P';
   // P-channel: source on top (towards the positive supply), as usually drawn.
-  const [dy, sy] = p > 0 ? [-4, 4] : [4, -4];
   return defineDevice({
     info: {
       type,
       label,
       terminals: 'fixed',
       pins: [
-        { name: 'g', offset: [-4, 0], label: 'gate' },
-        { name: 'd', offset: [2, dy], label: 'dreno' },
-        { name: 's', offset: [2, sy], label: 'fonte (source)' },
+        { name: 'g', offset: [-2, 0], label: 'gate' },
+        { name: 'd', offset: [1, -2], label: 'dreno' },
+        { name: 's', offset: [1, 2], label: 'fonte (source)' },
       ],
       params: {
         vth: { default: 2.5, label: 'Tensão de limiar |Vth|', unit: 'V', min: 0.1, max: 10 },

@@ -26,10 +26,10 @@ export default defineDevice({
     label: 'Interruptor diferencial residual (DR)',
     terminals: 'fixed',
     pins: [
-      { name: 'l1', offset: [-4, -3], label: 'fase (entrada)' },
-      { name: 'n1', offset: [-4, 3], label: 'neutro (entrada)' },
-      { name: 'l2', offset: [4, -3], label: 'fase (saída)' },
-      { name: 'n2', offset: [4, 3], label: 'neutro (saída)' },
+      { name: 'l1', offset: [-3, -1], label: 'fase (entrada)' },
+      { name: 'n1', offset: [-3, 1], label: 'neutro (entrada)' },
+      { name: 'l2', offset: [3, -1], label: 'fase (saída)' },
+      { name: 'n2', offset: [3, 1], label: 'neutro (saída)' },
     ],
     params: {
       sensitivity: {

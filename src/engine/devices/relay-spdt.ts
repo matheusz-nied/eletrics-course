@@ -32,11 +32,11 @@ export default defineDevice({
     label: 'Relé (1 contato reversível)',
     terminals: 'fixed',
     pins: [
-      { name: 'coil1', offset: [-4, -4], label: 'bobina' },
-      { name: 'coil2', offset: [-4, 4], label: 'bobina' },
-      { name: 'com', offset: [2, 4], label: 'comum (C)' },
-      { name: 'nc', offset: [0, -4], label: 'normalmente fechado (NF)' },
-      { name: 'no', offset: [4, -4], label: 'normalmente aberto (NA)' },
+      { name: 'coil1', offset: [-2, -2], label: 'bobina' },
+      { name: 'coil2', offset: [-2, 2], label: 'bobina' },
+      { name: 'com', offset: [2, 2], label: 'comum (C)' },
+      { name: 'nc', offset: [1, -2], label: 'normalmente fechado (NF)' },
+      { name: 'no', offset: [3, -2], label: 'normalmente aberto (NA)' },
     ],
     params: {
       coilVoltage: { default: 12, label: 'Tensão nominal da bobina', unit: 'V', min: 1 },

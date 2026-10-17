@@ -20,10 +20,10 @@ export default defineDevice({
     label: 'Transformador',
     terminals: 'fixed',
     pins: [
-      { name: 'p1', offset: [-4, -4], label: 'primário (ponto)' },
-      { name: 'p2', offset: [-4, 4], label: 'primário' },
-      { name: 's1', offset: [4, -4], label: 'secundário (ponto)' },
-      { name: 's2', offset: [4, 4], label: 'secundário' },
+      { name: 'p1', offset: [-2, -2], label: 'primário (ponto)' },
+      { name: 'p2', offset: [-2, 2], label: 'primário' },
+      { name: 's1', offset: [2, -2], label: 'secundário (ponto)' },
+      { name: 's2', offset: [2, 2], label: 'secundário' },
     ],
     params: {
       ratio: { default: 10, label: 'Relação de espiras (primário : secundário)', min: 0.01 },

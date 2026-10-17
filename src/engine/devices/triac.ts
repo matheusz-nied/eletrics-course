@@ -13,9 +13,9 @@ export default defineDevice({
     label: 'TRIAC',
     terminals: 'fixed',
     pins: [
-      { name: 'mt2', offset: [-4, 0], label: 'terminal principal 2 (MT2/A2)' },
-      { name: 'mt1', offset: [4, 0], label: 'terminal principal 1 (MT1/A1)' },
-      { name: 'g', offset: [2, 4], label: 'gatilho (G)' },
+      { name: 'mt2', offset: [-2, 0], label: 'terminal principal 2 (MT2/A2)' },
+      { name: 'mt1', offset: [2, 0], label: 'terminal principal 1 (MT1/A1)' },
+      { name: 'g', offset: [1, 2], label: 'gatilho (G)' },
     ],
     params: {
       igt: { default: 0.01, label: 'Corrente de disparo do gatilho Igt', unit: 'A', min: 1e-6 },

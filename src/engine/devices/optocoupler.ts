@@ -25,10 +25,10 @@ export default defineDevice({
     label: 'Optoacoplador',
     terminals: 'fixed',
     pins: [
-      { name: 'a', offset: [-4, -2], label: 'ânodo do LED' },
-      { name: 'k', offset: [-4, 2], label: 'cátodo do LED' },
-      { name: 'c', offset: [4, -2], label: 'coletor' },
-      { name: 'e', offset: [4, 2], label: 'emissor' },
+      { name: 'a', offset: [-3, -1], label: 'ânodo do LED' },
+      { name: 'k', offset: [-3, 1], label: 'cátodo do LED' },
+      { name: 'c', offset: [3, -1], label: 'coletor' },
+      { name: 'e', offset: [3, 1], label: 'emissor' },
     ],
     params: {
       ctr: { default: 1, label: 'Razão de transferência de corrente (CTR, 1 = 100 %)', min: 0.01 },

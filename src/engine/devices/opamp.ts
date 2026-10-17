@@ -27,9 +27,9 @@ export default defineDevice({
     label: 'Amplificador operacional',
     terminals: 'fixed',
     pins: [
-      { name: 'plus', offset: [-4, 2], label: 'entrada não inversora (+)' },
-      { name: 'minus', offset: [-4, -2], label: 'entrada inversora (−)' },
-      { name: 'out', offset: [4, 0], label: 'saída' },
+      { name: 'inn', offset: [-3, -1], label: 'entrada inversora (−)' },
+      { name: 'inp', offset: [-3, 1], label: 'entrada não inversora (+)' },
+      { name: 'out', offset: [3, 0], label: 'saída' },
     ],
     params: {
       gain: { default: 1e5, label: 'Ganho em malha aberta', min: 10 },
@@ -50,7 +50,7 @@ export default defineDevice({
       saturated: { label: 'Saturado' },
     },
   },
-  create({ params, pins: [plus, minus, output], node, branch }) {
+  create({ params, pins: [minus, plus, output], node, branch }) {
     const n1 = node();
     const br = branch();
     const design = () => {

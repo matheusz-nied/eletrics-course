@@ -13,9 +13,9 @@ export default defineDevice({
     label: 'SCR (tiristor)',
     terminals: 'fixed',
     pins: [
-      { name: 'a', offset: [-4, 0], label: 'ânodo (A)' },
-      { name: 'k', offset: [4, 0], label: 'cátodo (K)' },
-      { name: 'g', offset: [2, 4], label: 'gatilho (G)' },
+      { name: 'a', offset: [-2, 0], label: 'ânodo (A)' },
+      { name: 'k', offset: [2, 0], label: 'cátodo (K)' },
+      { name: 'g', offset: [1, 2], label: 'gatilho (G)' },
     ],
     params: {
       igt: { default: 0.005, label: 'Corrente de disparo do gatilho Igt', unit: 'A', min: 1e-6 },

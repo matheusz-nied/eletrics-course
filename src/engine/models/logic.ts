@@ -28,17 +28,17 @@ export function gateDevice(
 ): DeviceDefinition {
   const single = type === 'not';
   const inputs = single
-    ? [{ name: 'a', offset: [-4, 0] as [number, number], label: 'entrada A' }]
+    ? [{ name: 'a', offset: [-2, 0] as [number, number], label: 'entrada A' }]
     : [
-        { name: 'a', offset: [-4, -1] as [number, number], label: 'entrada A' },
-        { name: 'b', offset: [-4, 1] as [number, number], label: 'entrada B' },
+        { name: 'a', offset: [-3, -1] as [number, number], label: 'entrada A' },
+        { name: 'b', offset: [-3, 1] as [number, number], label: 'entrada B' },
       ];
   return defineDevice({
     info: {
       type,
       label: LABELS[type],
       terminals: 'fixed',
-      pins: [...inputs, { name: 'y', offset: [4, 0], label: 'saída Y' }],
+      pins: [...inputs, { name: 'y', offset: [single ? 2 : 3, 0], label: 'saída Y' }],
       params: {
         vcc: { default: 5, label: 'Tensão de alimentação (nível alto)', unit: 'V', min: 1 },
       },

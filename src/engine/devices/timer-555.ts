@@ -30,14 +30,14 @@ export default defineDevice({
     label: 'Temporizador 555',
     terminals: 'fixed',
     pins: [
-      { name: 'gnd', offset: [0, 5], label: '1 · terra (GND)' },
-      { name: 'trig', offset: [-5, -2], label: '2 · disparo (TRIG)' },
-      { name: 'out', offset: [5, -1], label: '3 · saída (OUT)' },
-      { name: 'reset', offset: [2, -5], label: '4 · reset (RST)' },
-      { name: 'ctrl', offset: [5, 2], label: '5 · controle (CTRL)' },
-      { name: 'thr', offset: [-5, 0], label: '6 · limiar (THR)' },
-      { name: 'dis', offset: [-5, 2], label: '7 · descarga (DIS)' },
-      { name: 'vcc', offset: [-2, -5], label: '8 · alimentação (VCC)' },
+      { name: 'gnd', offset: [-1, 5], label: '1 · terra (GND)' },
+      { name: 'trig', offset: [-4, 2], label: '2 · disparo (TRIG)' },
+      { name: 'out', offset: [4, 0], label: '3 · saída (OUT)' },
+      { name: 'reset', offset: [-1, -5], label: '4 · reset (RST)' },
+      { name: 'ctrl', offset: [1, 5], label: '5 · controle (CTRL)' },
+      { name: 'thres', offset: [-4, 0], label: '6 · limiar (THR)' },
+      { name: 'dis', offset: [-4, -2], label: '7 · descarga (DIS)' },
+      { name: 'vcc', offset: [1, -5], label: '8 · alimentação (VCC)' },
     ],
     params: {},
     readouts: ['high', 'discharging', 'vout'],
@@ -47,7 +47,7 @@ export default defineDevice({
       vout: { label: 'Tensão de saída', unit: 'V' },
     },
   },
-  create({ pins: [gnd, trig, output, reset, ctrl, thr, dis, vcc], node, branch }) {
+  create({ pins: [gnd, trig, output, reset, ctrl, thres, dis, vcc], node, branch }) {
     const third = node(); // 1/3 VCC: the trigger comparator's reference
     const br = branch(); // output stage current, into the out pin
     let high = false;
@@ -83,7 +83,7 @@ export default defineDevice({
         supplied = rel(x, vcc) >= V_MIN_SUPPLY;
         if (rel(x, reset) < V_RESET) high = false;
         else if (rel(x, trig) < rel(x, third)) high = true;
-        else if (rel(x, thr) > rel(x, ctrl)) high = false;
+        else if (rel(x, thres) > rel(x, ctrl)) high = false;
         if (driving() !== was) ctx.discontinuity();
       },
       pinCurrents(x, out) {

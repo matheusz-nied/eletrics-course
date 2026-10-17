@@ -144,7 +144,7 @@ describe('course circuits', () => {
     const doc = netlist(
       'oscilador',
       [
-        { id: 'U1', type: 'opamp', nodes: { plus: '2', minus: '3', out: '1' } },
+        { id: 'U1', type: 'opamp', nodes: { inp: '2', inn: '3', out: '1' } },
         { id: 'R1', type: 'resistor', nodes: ['2', '0'], params: { resistance: 10000 } },
         { id: 'R2', type: 'resistor', nodes: ['1', '2'], params: { resistance: 10000 } },
         { id: 'R', type: 'resistor', nodes: ['1', '3'], params: { resistance: 10000 } },
@@ -232,7 +232,7 @@ describe('course circuits', () => {
             out: '3',
             reset: '8',
             ctrl: '5',
-            thr: '6',
+            thres: '6',
             dis: '7',
             vcc: '8',
           },

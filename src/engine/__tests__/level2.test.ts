@@ -267,7 +267,7 @@ describe('opamp', () => {
       { id: 'V1', type: 'dc-voltage', nodes: ['1', '0'], params: { voltage: vin } },
       { id: 'R1', type: 'resistor', nodes: ['1', '2'], params: { resistance: 1000 } },
       { id: 'RF', type: 'resistor', nodes: ['2', '3'], params: { resistance: 10000 } },
-      { id: 'U1', type: 'opamp', nodes: { plus: '0', minus: '2', out: '3' }, params: { offset } },
+      { id: 'U1', type: 'opamp', nodes: { inp: '0', inn: '2', out: '3' }, params: { offset } },
     ]);
 
   it('inverting amplifier: gain −Rf/R1 with a virtual ground', () => {
@@ -301,7 +301,7 @@ describe('opamp', () => {
           nodes: ['1', '0'],
           params: { amplitude: 1, frequency: 100 },
         },
-        { id: 'U1', type: 'opamp', nodes: { plus: '1', minus: '0', out: '2' } },
+        { id: 'U1', type: 'opamp', nodes: { inp: '1', inn: '0', out: '2' } },
         { id: 'RL', type: 'resistor', nodes: ['2', '0'], params: { resistance: 10000 } },
       ],
       tran(1e-5),
@@ -323,7 +323,7 @@ describe('opamp', () => {
         { id: 'V1', type: 'dc-voltage', nodes: ['1', '0'], params: { voltage: 0 } },
         { id: 'R1', type: 'resistor', nodes: ['1', '2'], params: { resistance: 1000 } },
         { id: 'RF', type: 'resistor', nodes: ['2', '3'], params: { resistance: 9000 } },
-        { id: 'U1', type: 'opamp', nodes: { plus: '0', minus: '2', out: '3' } },
+        { id: 'U1', type: 'opamp', nodes: { inp: '0', inn: '2', out: '3' } },
       ]),
       analysis: { kind: 'ac-sweep', source: 'V1', fStart: 100, fStop: 1e6, points: 81 },
     };
@@ -358,7 +358,7 @@ describe('timer-555', () => {
             out: '3',
             reset: '8',
             ctrl: '5',
-            thr: '6',
+            thres: '6',
             dis: '7',
             vcc: '8',
           },

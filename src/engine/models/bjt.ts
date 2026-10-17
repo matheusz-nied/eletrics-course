@@ -31,16 +31,15 @@ export function bjtDevice(type: 'npn' | 'pnp'): DeviceDefinition {
   const p = type === 'npn' ? 1 : -1;
   const label = type === 'npn' ? 'Transistor NPN' : 'Transistor PNP';
   // PNP: emitter on top (towards the positive supply), as usually drawn.
-  const [cy, ey] = p > 0 ? [-4, 4] : [4, -4];
   return defineDevice({
     info: {
       type,
       label,
       terminals: 'fixed',
       pins: [
-        { name: 'b', offset: [-4, 0], label: 'base' },
-        { name: 'c', offset: [2, cy], label: 'coletor' },
-        { name: 'e', offset: [2, ey], label: 'emissor (seta)' },
+        { name: 'b', offset: [-2, 0], label: 'base' },
+        { name: 'c', offset: [1, -2], label: 'coletor' },
+        { name: 'e', offset: [1, 2], label: 'emissor (seta)' },
       ],
       params: {
         beta: { default: 200, label: 'Ganho de corrente β (hFE)', min: 1, max: 2000 },

@@ -61,7 +61,7 @@ Chave das leituras: `"<elemento>.<leitura>"`. Unidades SI; temperaturas em °C.
 - **Todo elemento:** `pin.<nome>` é a corrente que **entra** no componente por aquele pino (serve para animar a corrente dentro do símbolo).
 - **Fios:** `current.<k>` é a corrente no segmento k, de `points[k]` para `points[k+1]`; `current` é o segmento 0. Num laço só de fios ideais a divisão não é única: um ramo leva a corrente e o segmento que fecha o laço mostra zero.
 - **Diodos** (`diode`, `led`, `zener`): `a` é o anodo, `b` o catodo. `current` positiva conduzindo direto; o zener regula com `current` negativa (catodo no lado positivo).
-- **Transistores:** as leituras usam a polaridade do próprio dispositivo, positivas em operação normal tanto no NPN quanto no PNP: `ic`, `ib`, `vbe`, `vce` (no PNP, `vbe` = V(e) − V(b) e `ic` sai pelo coletor). O mesmo para MOSFET: `id`, `vgs`, `vds` positivas no canal N e no canal P. Já `pin.<nome>` é sempre a corrente real que entra pelo pino. No símbolo do PNP e do canal P o emissor (ou a fonte) fica em cima.
+- **Transistores:** as leituras usam a polaridade do próprio dispositivo, positivas em operação normal tanto no NPN quanto no PNP: `ic`, `ib`, `vbe`, `vce` (no PNP, `vbe` = V(e) − V(b) e `ic` sai pelo coletor). O mesmo para MOSFET: `id`, `vgs`, `vds` positivas no canal N e no canal P. Já `pin.<nome>` é sempre a corrente real que entra pelo pino.
 - **Danificado:** qualquer elemento que emitiu um evento `damaged` ganha a leitura `damaged: true` até o `reset()` (sem ela, não está danificado). Leituras próprias continuam valendo: `burned`, `blown`, `bulged`, `welded`.
 - `nodeVoltages` traz `GND` e `n1`, `n2`… (os ids de `buildNetlist`, para colorir fios).
 
