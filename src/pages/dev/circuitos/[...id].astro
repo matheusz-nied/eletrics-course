@@ -1,0 +1,145 @@
+---
+/*
+ * One circuit of the gallery: the live simulation (with the 3D layout when the
+ * circuit declares a scene), its static chart and its parts. Not linked from
+ * the course.
+ */
+import {
+  ANALYSIS_LABELS,
+  galleryEntries,
+  plotUntil,
+  type GalleryEntry,
+} from '../../../circuit/dev/catalog';
+import { deviceInfo } from '../../../circuit/engine';
+import Plot from '../../../circuit/Plot.astro';
+import Simulation from '../../../circuit/Simulation.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { withBase } from '../../../lib/url';
+
+export async function getStaticPaths() {
+  const entries = await galleryEntries();
+  return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: GalleryEntry };
+const { doc } = entry;
+const until = plotUntil(doc);
+const parts = doc.elements.filter((e) => e.type !== 'wire');
+const showParams = (params: Record<string, unknown> | undefined) =>
+  Object.entries(params ?? {})
+    .map(([k, v]) => `${k}: ${String(v)}`)
+    .join(', ');
+---
+
+<BaseLayout title={`Circuito: ${doc.title}`} noindex>
+  <main id="conteudo" tabindex="-1" class="circuit">
+    <p class="eyebrow">
+      <a href={withBase('dev/circuitos/')}>Circuitos</a>
+    </p>
+    <h1>{doc.title}</h1>
+    <p class="lead">{doc.description}</p>
+    <ul class="facts">
+      <li class="num">{entry.id}</li>
+      <li>{ANALYSIS_LABELS[doc.analysis.kind]}</li>
+      <li>
+        {entry.realEngine
+          ? 'Motor de simulação'
+          : 'Motor provisório (níveis 2 e 3 ainda não entregues)'}
+      </li>
+    </ul>
+
+    <Simulation circuit={entry.id} layout={doc.scene3d ? 'esquema+3d' : 'esquema'} />
+    {until !== null && (doc.probes?.length ?? 0) > 0 && (
+      <Plot circuit={entry.id} until={until} title="saídas do circuito (calculado no build)" />
+    )}
+
+    <h2>Componentes</h2>
+    <div class="table">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Parâmetros</th>
+          </tr>
+        </thead>
+        <tbody>
+          {parts.map((el) => (
+            <tr>
+              <td class="num">{el.id}</td>
+              <td>{deviceInfo(el.type, el.params)?.label ?? el.type}</td>
+              <td class="num">{showParams(el.params)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .circuit {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 3rem 1rem 4rem;
+  }
+
+  .circuit:focus {
+    outline: none;
+  }
+
+  .eyebrow a {
+    color: var(--accent);
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    margin: 2.5rem 0 0.75rem;
+    font-size: 1.375rem;
+    font-weight: 650;
+  }
+
+  .lead {
+    margin: 0.5rem 0 0.75rem;
+    color: var(--fg-muted);
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+  }
+
+  .facts li {
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: var(--surface-2);
+  }
+
+  .table {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  th,
+  td {
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+</style>
