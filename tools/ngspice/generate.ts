@@ -1,12 +1,12 @@
 /**
  * Runs every reference circuit in this folder through native ngspice and
- * writes src/engine/__golden__/<name>.csv (time or a single row, then one
- * column per vector). The CSVs are versioned, so CI never needs ngspice.
+ * writes src/engine/__golden__/<name>.csv (time, frequency or a single row,
+ * then one column per vector). The CSVs are versioned, so CI never needs ngspice.
  *
  *   sudo apt install ngspice
  *   node tools/ngspice/generate.ts
  */
-import { execFileSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import {
   copyFileSync,
   mkdtempSync,
@@ -28,7 +28,12 @@ for (const file of readdirSync(here)
   const work = mkdtempSync(join(tmpdir(), 'ngspice-'));
   try {
     copyFileSync(join(here, file), join(work, file));
-    execFileSync('ngspice', ['-b', file], { cwd: work, stdio: 'pipe' });
+    const run = spawnSync('ngspice', ['-b', file], { cwd: work, encoding: 'utf8' });
+    const log = `${run.stdout ?? ''}${run.stderr ?? ''}`;
+    // ngspice exits normally even when an analysis aborts (and leaves zeros in the output).
+    if (run.status !== 0 || /aborted|timestep too small/i.test(log)) {
+      throw new Error(`${file}: o ngspice falhou\n${log}`);
+    }
     const rows = readFileSync(join(work, 'out.txt'), 'utf8')
       .trim()
       .split('\n')
@@ -36,7 +41,7 @@ for (const file of readdirSync(here)
     let [header, ...data] = rows;
     header = header.map((h) => h.toLowerCase());
     // An operating point has no scale: wrdata puts an arbitrary vector in its place.
-    if (header[0] !== 'time') {
+    if (header[0] !== 'time' && header[0] !== 'frequency') {
       header = ['op', ...header.slice(1)];
       data = data.map((row) => ['0', ...row.slice(1)]);
     }

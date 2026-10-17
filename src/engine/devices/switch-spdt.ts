@@ -30,6 +30,10 @@ export default defineDevice({
         m.conductance(com, nc, gNc());
         m.conductance(com, no, gNo());
       },
+      stampAc(m) {
+        m.admittance(com, nc, gNc());
+        m.admittance(com, no, gNo());
+      },
       pinCurrents(x, out) {
         const iNc = gNc() * (x.v(com) - x.v(nc));
         const iNo = gNo() * (x.v(com) - x.v(no));

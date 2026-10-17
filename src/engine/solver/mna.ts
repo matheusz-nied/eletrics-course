@@ -78,6 +78,26 @@ export class MnaSystem {
     this.b[branch] += v;
   }
 
+  /**
+   * Linearized controlled current g·(V(cp) − V(cn)) flowing from node i to
+   * node j (a transconductance, as in transistor models).
+   */
+  transconductance(i: number, j: number, cp: number, cn: number, g: number): void {
+    this.add(i, cp, g);
+    this.add(i, cn, -g);
+    this.add(j, cp, -g);
+    this.add(j, cn, g);
+  }
+
+  /**
+   * Nonlinear current i(v) from node i to node j, linearized at v0 where it is
+   * i0 with slope g: i ≈ i0 + g·(v − v0), as a conductance plus a source.
+   */
+  linearized(i: number, j: number, v0: number, i0: number, g: number): void {
+    this.conductance(i, j, g);
+    this.current(i, j, i0 - g * v0);
+  }
+
   /** Solves the assembled system into `x`. Throws SingularMatrixError. */
   solve(): Float64Array {
     const { a, factored } = this;

@@ -1,0 +1,19 @@
+* Diodo retificador em série com resistor, e regulador zener de 5,1 V com carga
+V1 1 0 5
+R1 1 2 1k
+D1 2 0 DRET
+V2 3 0 12
+R2 3 4 470
+D2 0 4 DZ
+R3 4 0 1k
+.model DRET D(IS=7.03n N=1.808 RS=0.0342 BV=1000 IBV=5u)
+.model DZ D(IS=1e-14 N=1 RS=2 BV=5.1 IBV=5m)
+.options reltol=1e-7 abstol=1e-14 vntol=1e-10
+.control
+set wr_singlescale
+set wr_vecnames
+op
+wrdata out.txt v(2) i(V1) v(4) i(V2)
+quit
+.endc
+.end
