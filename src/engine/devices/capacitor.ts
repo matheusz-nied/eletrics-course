@@ -52,6 +52,9 @@ export default defineDevice({
         m.conductance(a, b, g);
         m.current(b, a, h);
       },
+      stampAc(m, { omega }) {
+        m.admittance(a, b, 0, omega * num(params, 'capacitance'));
+      },
       update(step, x, ctx) {
         v = x.v(a) - x.v(b);
         const { g, h } = companion(step);

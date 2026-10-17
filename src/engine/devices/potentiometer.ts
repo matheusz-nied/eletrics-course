@@ -63,6 +63,10 @@ export default defineDevice({
         m.conductance(a, w, 1 / rAw());
         m.conductance(w, b, 1 / rWb());
       },
+      stampAc(m) {
+        m.admittance(a, w, 1 / rAw());
+        m.admittance(w, b, 1 / rWb());
+      },
       update(step, x, ctx) {
         iAw = (x.v(a) - x.v(w)) / rAw();
         iWb = (x.v(w) - x.v(b)) / rWb();

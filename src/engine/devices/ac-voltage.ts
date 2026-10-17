@@ -44,9 +44,13 @@ export default defineDevice({
           br,
           a,
           b,
-          step.mode === 'dc' ? num(params, 'offset') : value(step.t),
+          (step.mode === 'dc' ? num(params, 'offset') : value(step.t)) * step.nl.sourceScale,
           R_SERIES_MIN,
         );
+      },
+      // In a sweep, the source under test carries 1 V at phase 0; any other is a short.
+      stampAc(m, ctx) {
+        m.branch(br, a, b, ctx.source === ctx.id ? 1 : 0, 0, R_SERIES_MIN);
       },
       pinCurrents(x, out) {
         out[0] = x.x[br];

@@ -10,5 +10,5 @@ export default defineDevice({
     params: {},
     readouts: [],
   },
-  create: () => ({ stamp() {}, pinCurrents() {} }),
+  create: () => ({ stamp() {}, stampAc() {}, pinCurrents() {} }),
 });

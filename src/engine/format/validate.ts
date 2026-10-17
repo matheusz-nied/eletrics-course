@@ -178,8 +178,19 @@ export function validateCircuit(doc: unknown): ValidationResult {
   }
   for (const [prop, key] of Object.entries(circuit.scene3d?.bindings ?? {}))
     checkReadout(key, `scene3d.bindings["${prop}"]`);
-  if (circuit.analysis.kind === 'ac-sweep' && !byId.has(circuit.analysis.source))
-    errors.push(`análise: fonte "${circuit.analysis.source}" não existe`);
+  if (circuit.analysis.kind === 'ac-sweep') {
+    const { source, fStart, fStop } = circuit.analysis;
+    const el = byId.get(source);
+    if (!el) errors.push(`análise: fonte "${source}" não existe`);
+    else if (!findDevice(el.type)?.source)
+      errors.push(
+        `análise: "${source}" não é uma fonte (a varredura precisa de uma fonte de sinal)`,
+      );
+    if (fStop <= fStart) errors.push('análise: fStop precisa ser maior que fStart');
+    for (const probe of circuit.probes ?? [])
+      if (probe.kind !== 'voltage')
+        warnings.push(`medidor ${probe.id}: a varredura CA só traça medidores de tensão`);
+  }
   if (errors.length) return { errors, warnings };
 
   warnings.push(...connectionWarnings(circuit, infos));

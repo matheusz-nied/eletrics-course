@@ -60,3 +60,68 @@ export class ResistiveHeating {
     this.avg.reset();
   }
 }
+
+/** Highest junction temperature in normal use (°C): above it the part is overloaded. */
+const TJ_MAX = 150;
+/** Junction temperature at which the die fails (°C). */
+const TJ_BURN = 300;
+
+/**
+ * Junction temperature of a semiconductor as two thermal time constants in
+ * series: the die (fast, 30 % of the thermal resistance) and the package
+ * (slow). The thermal resistance is set so that the rated power gives 150 °C,
+ * so the part warns above its rating and fails at about 2,2× sustained, or
+ * sooner under short heavy pulses. Typical, not a datasheet.
+ */
+export class JunctionHeating {
+  private die = 0;
+  private body = 0;
+  private warned = false;
+  private readonly avg = new Average(0.01);
+  burned = false;
+
+  constructor(
+    private readonly rating: () => number,
+    private readonly tauDie = 0.05,
+    private readonly tauBody = 5,
+  ) {}
+
+  step(power: number, dt: number): 'ok' | 'hot' | 'burned' {
+    if (dt <= 0) return 'ok';
+    const rth = (TJ_MAX - AMBIENT_C) / this.rating();
+    const p = this.burned ? 0 : Math.abs(power);
+    this.avg.update(p, dt);
+    this.die = relax(this.die, 0.3 * rth * p, dt, this.tauDie);
+    this.body = relax(this.body, 0.7 * rth * p, dt, this.tauBody);
+    if (this.burned) return 'ok';
+    const tj = this.temperature;
+    if (tj >= TJ_BURN) {
+      this.burned = true;
+      return 'burned';
+    }
+    if (!this.warned && tj > TJ_MAX + 5) {
+      this.warned = true;
+      return 'hot';
+    }
+    if (this.warned && tj < TJ_MAX - 20) this.warned = false;
+    return 'ok';
+  }
+
+  /** Junction temperature (°C). */
+  get temperature(): number {
+    return AMBIENT_C + this.die + this.body;
+  }
+
+  /** Average dissipated power over the last few milliseconds (W). */
+  get power(): number {
+    return this.avg.value;
+  }
+
+  reset(): void {
+    this.die = 0;
+    this.body = 0;
+    this.warned = false;
+    this.burned = false;
+    this.avg.reset();
+  }
+}
