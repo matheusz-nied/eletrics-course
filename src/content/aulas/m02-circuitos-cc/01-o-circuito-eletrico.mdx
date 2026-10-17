@@ -1,0 +1,246 @@
+---
+titulo: O circuito elétrico
+modulo: m02-circuitos-cc
+ordem: 1
+nivel: B
+duracaoMin: 20
+objetivos:
+  - Reconhecer as partes de um circuito (fonte, condutores, carga e chave) e a função de cada uma
+  - Diferenciar circuito fechado, circuito aberto e curto-circuito
+  - Explicar por que a tensão inteira da fonte aparece numa chave aberta ou num fio partido
+  - Entender por que o fusível fica em série e logo depois da fonte
+prerequisitos:
+  - m01-eletricidade-do-zero/02-corrente-eletrica
+  - m01-eletricidade-do-zero/03-tensao
+  - m01-eletricidade-do-zero/04-lei-de-ohm
+tags: [circuito, curto-circuito, circuito aberto, fusível, chave]
+seguranca: baixa-tensao
+rascunho: true
+---
+
+import Flashlight from '../../../lessons/m02/figures/Flashlight.astro';
+
+Você aperta o botão da lanterna e a luz acende na hora. Numa lanterna velha, às vezes a luz só volta depois de uma batida na mão. E quem já guardou uma bateria de 9 V no bolso junto com as moedas talvez tenha sentido a bateria esquentar sozinha. As três situações têm a mesma explicação: o caminho que a corrente percorre, chamado de **circuito elétrico**.
+
+Nesta aula você vai conhecer as peças que todo circuito tem, aprender a diferença entre um circuito fechado, um aberto e um em curto, e ver na simulação um fusível romper para salvar os fios.
+
+## O caminho fechado
+
+A <Term id="corrente-eletrica">corrente elétrica</Term> só existe quando há um caminho completo: ela sai de um polo da fonte, passa pelo aparelho e volta para o outro polo. Se o caminho for interrompido em qualquer ponto, a corrente para em todo lugar ao mesmo tempo. Não existe "corrente esperando" antes da interrupção.
+
+Esse caminho fechado é o <Term id="circuito-eletrico">circuito elétrico</Term>. Uma lanterna é um circuito completo e pequeno:
+
+<Figure caption="Figura 1. Uma lanterna em corte e o mesmo circuito desenhado como esquema. As cores marcam as quatro partes de qualquer circuito.">
+  <Flashlight />
+</Figure>
+
+Repare como a corrente faz a volta inteira: sai do polo positivo da pilha da frente, entra na base da lâmpada, atravessa o filamento, sai pela lateral da base, segue pela lâmina de metal, passa pela chave e chega à mola, que encosta no polo negativo da pilha de trás. Dentro das pilhas, a corrente continua o caminho de um polo ao outro. Uma volta completa.
+
+## As quatro partes de um circuito
+
+**Fonte.** É o que empurra a corrente: pilhas, baterias, a fonte do celular, o painel solar, a tomada. A fonte mantém uma <Term id="tensao">tensão</Term> entre os seus dois terminais. Ela não "fabrica" elétrons; ela dá energia para os elétrons que já estão nos fios.
+
+**Condutores.** É o caminho por onde a corrente passa: fios de cobre, as trilhas de uma placa, a mola e a lâmina da lanterna, até a lataria do carro, que serve de retorno para quase todos os circuitos do veículo. Um bom <Term id="condutor">condutor</Term> tem resistência baixa, para não desperdiçar energia no caminho.
+
+**Carga.** É o aparelho que usa a energia: a lâmpada, o motor do portão, a resistência do chuveiro, o carregador do celular. No vocabulário de eletricista, "carga" é tudo que consome energia do circuito (não confunda com a <Term id="carga-eletrica">carga elétrica</Term> dos elétrons, em coulombs). A carga transforma energia elétrica em luz, movimento ou calor.
+
+**Chave.** É o que abre e fecha o caminho quando você quer: o interruptor da parede, o botão da lanterna, o contato de um relé. Com a chave fechada (ligada), o caminho está completo. Com a chave aberta (desligada), há uma separação de ar entre os contatos, e o ar é um <Term id="isolante">isolante</Term>.
+
+Quase todo circuito real tem uma quinta peça: a **proteção**. O <Term id="fusivel">fusível</Term> e o <Term id="disjuntor">disjuntor</Term> abrem o circuito sozinhos quando a corrente passa do limite, antes que os fios esquentem demais. Você vai ver um fusível trabalhar daqui a pouco.
+
+<Callout type="nota" title="Desenhando circuitos">
+Ninguém desenha a lanterna inteira para explicar um circuito. Usa-se o **esquema**: cada peça vira um símbolo e os fios viram linhas retas. Nas simulações do curso, os símbolos seguem o padrão usado no Brasil (IEC/ABNT). Bateria são traços paralelos, o comprido é o positivo; lâmpada é um círculo com um X; chave é um traço que se levanta; fusível é um retângulo pequeno atravessado pelo fio.
+</Callout>
+
+## Fechado, aberto e em curto
+
+Pela <Term id="lei-de-ohm">Lei de Ohm</Term>, a corrente num circuito simples depende da tensão da fonte e da resistência total do caminho:
+
+$$
+I = \frac{V}{R_\text{total}} = \frac{V}{R_\text{carga} + R_\text{fios} + r}
+$$
+
+em que $I$ é a corrente em ampères (A), $V$ é a tensão da fonte em volts (V), $R_\text{carga}$ é a resistência da carga, $R_\text{fios}$ é a resistência dos condutores e $r$ é a resistência interna da própria fonte, todas em ohms (Ω). Num circuito bem feito, a carga tem quase toda a resistência; fios e fonte têm muito pouca. Com essa fórmula dá para entender os três estados de um circuito.
+
+**Circuito fechado.** O caminho está completo e a resistência total é praticamente a da carga. A corrente é a "corrente de trabalho" do aparelho: a lâmpada acende, o motor gira.
+
+**<Term id="circuito-aberto">Circuito aberto</Term>.** Em algum ponto o caminho foi interrompido: chave desligada, fio partido, fusível rompido, mau contato. É como se aparecesse uma resistência enorme no caminho, a do ar. A corrente cai a zero no circuito inteiro.
+
+**<Term id="curto-circuito">Curto-circuito</Term>.** Um condutor liga os dois lados da fonte sem passar pela carga: um fio descascado encostando no outro, uma chave de boca tocando o polo da bateria e a lataria do carro. A resistência total despenca para a dos fios e da fonte, e a corrente sobe dezenas ou centenas de vezes.
+
+<Callout type="dica" title="Onde vai parar a tensão num circuito aberto">
+Com a chave aberta não passa corrente, então a lâmpada não "gasta" nenhuma tensão (pela Lei de Ohm, $V = R \cdot 0 = 0$). Resultado: a tensão inteira da fonte aparece entre os dois contatos da chave aberta. O mesmo vale para um fio partido ou um fusível rompido. Técnicos usam isso o tempo todo: com o circuito ligado, o ponto do defeito é onde o voltímetro mostra a tensão da fonte "sobrando".
+</Callout>
+
+## Explore: abra e feche o circuito
+
+O circuito abaixo tem uma bateria de 12 V, uma chave e uma lâmpada de 12 V e 5 W, como a lâmpada de placa de um carro. Ele começa com a chave aberta.
+
+<Simulation circuit="m02/circuito-basico" instruments={['multimetro']} />
+
+1. Com a chave **aberta**, leia o multímetro "Tensão entre os contatos da chave". Quanto ele marca? E a corrente?
+2. Feche a chave S1. O que acontece com a tensão entre os contatos? E com a tensão na lâmpada?
+3. Com a chave fechada, a corrente é de quantos ampères? Ela é diferente perto da bateria e perto da lâmpada?
+
+Com a chave aberta você deve ter visto 12 V entre os contatos e corrente zero. Fechando a chave, a tensão entre os contatos cai para praticamente zero, os 12 V passam a aparecer na lâmpada e a corrente fica em cerca de 0,42 A. Como o circuito é um caminho único, a corrente é a mesma em todos os pontos dele.
+
+## Explore: provoque um curto
+
+Agora o mesmo circuito ganhou um fusível de 2 A logo depois da bateria. O botão "Curto" representa um fio descascado que encosta nos dois lados da lâmpada, criando um caminho quase sem resistência.
+
+<Simulation circuit="m02/curto-fusivel" instruments={['multimetro']} />
+
+1. Com a lâmpada acesa, leia a corrente no fusível. Ela está bem abaixo dos 2 A do fusível?
+2. Segure o botão **Encostar o fio (curto)**. Que mensagem aparece? Qual foi a corrente no curto?
+3. Solte o botão. Por que a lâmpada continua apagada, mesmo sem nada de errado com ela?
+4. Use **Reiniciar** para trocar o fusível (virtualmente) e acender a lâmpada de novo.
+
+O fusível rompe em cerca de um milésimo de segundo, com uma corrente de mais de 170 A. Depois disso o circuito fica aberto no fusível, e nada mais funciona até ele ser trocado. É exatamente o que acontece no carro quando o farol para de funcionar depois de um curto: o defeito pode estar no chicote, mas quem "apaga" o circuito é o fusível.
+
+O fusível fica **em série** com o circuito (toda a corrente passa por ele) e **logo depois da fonte**. Se ele ficasse depois da lâmpada, um curto entre o fio da bateria e a lataria antes dele passaria sem nenhuma proteção.
+
+## Exemplo resolvido: a corrente normal e a corrente de curto
+
+**Corrente normal.** Uma lâmpada de 12 V e 5 W, acesa, tem resistência de
+
+$$
+R = \frac{V^2}{P} = \frac{(12\,\text{V})^2}{5\,\text{W}} = 28{,}8\,\Omega
+$$
+
+Com a bateria de 12 V, a corrente é
+
+$$
+I = \frac{12\,\text{V}}{28{,}8\,\Omega} \approx 0{,}42\,\text{A}
+$$
+
+A resistência interna da bateria (0,02 Ω) e a do fusível (cerca de 0,05 Ω) quase não mudam esse valor, porque são centenas de vezes menores que os 28,8 Ω da lâmpada.
+
+**Corrente de curto.** Quando o fio encosta, a lâmpada sai do caminho. Sobram a resistência interna da bateria e a do fusível:
+
+$$
+I_\text{curto} = \frac{12\,\text{V}}{0{,}02\,\Omega + 0{,}05\,\Omega} = \frac{12}{0{,}07} \approx 171\,\text{A}
+$$
+
+São cerca de 400 vezes a corrente normal, e foi esse o valor que a simulação mostrou na mensagem do fusível. Sem o fusível, essa corrente esquentaria o fio fino do circuito até derreter o isolamento em segundos.
+
+<RealCase title="A bateria de 9 V que esquentou no bolso">
+
+Uma bateria de 9 V tem os dois polos lado a lado, no mesmo topo. Solta numa gaveta ou num bolso com moedas, chaves ou clipes, basta um objeto de metal encostar nos dois polos para fechar um curto. Na simulação abaixo, a bateria tem uma resistência interna típica de 1,7 Ω, e as moedas, 0,05 Ω.
+
+<Simulation circuit="m02/pilha-moedas" instruments={['multimetro']} />
+
+Ligue a chave "Moedas encostando nos dois polos". A corrente passa de 5 A e a tensão nos polos cai para cerca de 0,26 V. A conta da energia mostra o problema: a bateria produz $9\,\text{V} \times 5{,}1\,\text{A} \approx 46\,\text{W}$, e só 1,3 W chegam às moedas. Os outros 45 W viram calor **dentro da bateria**, mais ou menos a potência de um ferro de solda. Ela esquenta rápido, pode vazar e, em casos extremos, começar um incêndio.
+
+Por isso a recomendação de fabricantes e de bombeiros é guardar baterias na embalagem e cobrir os polos com fita isolante antes de guardar soltas ou de levar para o descarte. Baterias de lítio, como as de celular e de power bank, guardam muito mais energia e são ainda mais perigosas em curto.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+<Callout type="perigo" title="Curto em bateria de carro">
+Uma bateria de carro entrega centenas de ampères num curto. Uma chave de boca que encosta no polo positivo e na lataria ao mesmo tempo fica vermelha em segundos, solta faíscas, pode soldar na bateria e causar queimaduras graves. A bateria também libera hidrogênio, um gás que explode com uma faísca. Ao mexer nela, tire sempre o cabo **negativo primeiro** e ligue-o **por último**, e não use anel, pulseira ou relógio de metal.
+</Callout>
+
+- **Achar que chave aberta é circuito sem tensão.** Com a chave aberta, um dos contatos continua ligado à fonte. Na instalação da casa é por isso que o interruptor precisa cortar a fase (você verá isso no módulo de instalações). Antes de mexer, desligue a fonte de verdade: tire a bateria ou desligue o disjuntor.
+- **Trocar o fusível por um maior "porque vive queimando".** O fusível protege o **fio**. Um fusível de 20 A num circuito feito para 2 A deixa o fio pegar fogo antes de romper. Se o fusível rompe sempre, existe um defeito (um curto, uma carga travada) que precisa ser encontrado.
+- **Usar um pedaço de fio no lugar do fusível.** É a mesma coisa que não ter proteção nenhuma. Nunca faça isso, nem "só para testar".
+- **Confundir mau contato com defeito da carga.** A lanterna que só acende batendo não tem a lâmpada ruim: há uma mola oxidada ou uma lâmina frouxa abrindo o circuito. Limpar os contatos resolve.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'associar',
+      prompt: 'Associe cada peça da lanterna à parte do circuito que ela representa.',
+      pairs: [
+        ['Pilhas', 'Fonte'],
+        ['Lâmpada', 'Carga'],
+        ['Botão deslizante', 'Chave'],
+        ['Mola e lâmina de metal', 'Condutores'],
+      ],
+      explanation:
+        'A fonte empurra a corrente, a carga usa a energia, a chave abre e fecha o caminho e os condutores levam a corrente de um ponto a outro.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um circuito com bateria de 12 V, chave e lâmpada está com a chave aberta. Quanto um voltímetro marca entre os dois contatos da chave?',
+      options: [
+        {
+          text: '12 V',
+          correct: true,
+          feedback:
+            'Sem corrente, a lâmpada não tem queda de tensão; a tensão inteira da bateria aparece na abertura.',
+        },
+        {
+          text: '0 V',
+          feedback:
+            'Zero é a corrente, não a tensão. Como a lâmpada não tem corrente, ela não "gasta" tensão, e os 12 V ficam na chave aberta.',
+        },
+        {
+          text: '6 V',
+          feedback: 'A tensão não se divide ao meio: com corrente zero, a lâmpada fica com 0 V e a chave com 12 V.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'A lâmpada de freio de um carro é de 12 V e 21 W. Ligada a 12 V, qual é a corrente que ela puxa?',
+      answer: 1.75,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation: 'I = P / V = 21 W ÷ 12 V = 1,75 A.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um fio encosta direto nos polos de uma bateria de 12 V. A resistência interna da bateria é 0,02 Ω e a do fio é 0,04 Ω. Qual é a corrente de curto?',
+      answer: 200,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation: 'I = 12 V ÷ (0,02 Ω + 0,04 Ω) = 12 ÷ 0,06 = 200 A. É por isso que um curto em bateria de carro solta faíscas e derrete metal.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que o fusível do circuito fica logo depois da fonte, e não depois da carga?',
+      options: [
+        {
+          text: 'Para proteger também o trecho de fio entre a fonte e a carga',
+          correct: true,
+          feedback:
+            'Um curto pode acontecer em qualquer ponto do fio. Com o fusível logo na saída da fonte, toda a fiação depois dele fica protegida.',
+        },
+        {
+          text: 'Porque a corrente é maior perto da fonte',
+          feedback:
+            'Num caminho único, a corrente é a mesma em todos os pontos. A posição importa por causa do trecho de fio que fica protegido.',
+        },
+        {
+          text: 'Tanto faz a posição; o importante é a corrente nominal',
+          feedback:
+            'A corrente nominal importa, mas a posição também: um curto antes do fusível não passa por ele e não é interrompido.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Se o fusível de um circuito vive rompendo, a solução é colocar um fusível de corrente maior.',
+      answer: false,
+      explanation:
+        'O fusível protege o fio. Um fusível maior deixa o fio esquentar além do limite. Fusível que rompe sempre indica um defeito, como um curto ou uma carga travada, que precisa ser encontrado.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Corrente só existe num **caminho fechado**: da fonte, pela carga, de volta à fonte. Interrompido em um ponto, ela para no circuito inteiro.
+- Todo circuito tem **fonte**, **condutores**, **carga** e **chave**; quase todos têm também uma **proteção** (fusível ou disjuntor).
+- **Circuito aberto:** corrente zero, e a tensão inteira da fonte aparece na abertura (chave aberta, fio partido, fusível rompido).
+- **Curto-circuito:** a carga sai do caminho, a resistência total vira só a dos fios e da fonte, e a corrente sobe centenas de vezes.
+- O fusível fica **em série** e **logo depois da fonte**, e protege o fio. Nunca troque por um maior nem por um pedaço de fio.
+
+Na próxima aula você vai ligar várias cargas num caminho só: a [associação em série](../02-associacao-em-serie/), que explica por que o pisca-pisca antigo apagava inteiro quando uma lâmpada queimava.
