@@ -9,7 +9,15 @@ import { ContactShadows, Environment, OrbitControls } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Bloom, EffectComposer, N8AO, SMAA, ToneMapping } from '@react-three/postprocessing';
 import { ToneMappingMode } from 'postprocessing';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import {
   ACESFilmicToneMapping,
   AgXToneMapping,
@@ -28,6 +36,7 @@ import { QUALITY, useQuality } from './quality';
 import type { Vec3 } from '../types';
 import type { OrbitControlsLike } from './controls';
 import { fitDistance } from './framing';
+import { renderStats } from './stats';
 
 export { fitDistance };
 
@@ -159,6 +168,7 @@ export function Stage({
       <directionalLight position={[extent * 2, extent * 4, extent * 3]} intensity={0.6} />
 
       <group ref={content}>{children}</group>
+      {debug.includes('stats') && <StatsProbe content={content} />}
 
       <FitCamera
         content={content}
@@ -228,6 +238,23 @@ export function Stage({
   );
 }
 
+/**
+ * `?efeitos=stats`: writes the cost of the content (draw calls, triangles,
+ * texture memory) to `data-stats` on the canvas, for the performance check.
+ */
+function StatsProbe({ content }: { content: RefObject<Group | null> }) {
+  const canvas = useThree((s) => s.gl.domElement);
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      if (!content.current) return;
+      const stats = renderStats(content.current);
+      canvas.dataset.stats = JSON.stringify(stats);
+    }, 400);
+    return () => window.clearInterval(id);
+  }, [canvas, content]);
+  return null;
+}
+
 /** Soft vertical gradient in the site's light or dark palette. */
 function StageBackground({ kind }: { kind: string }) {
   const scene = useThree((s) => s.scene);
@@ -289,7 +316,7 @@ export function useSiteTheme(): 'light' | 'dark' {
 }
 
 interface FitCameraProps {
-  content: React.RefObject<Group | null>;
+  content: RefObject<Group | null>;
   view: Vec3;
   margin: number;
   fitKey?: string | number;
