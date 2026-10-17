@@ -1,0 +1,156 @@
+---
+/* 02.7: a real source drawn as an ideal source E in series with its internal resistance r. */
+---
+
+<svg viewBox="0 0 560 240" width="560" height="240" class="fig" aria-hidden="true">
+  <rect x="24" y="24" width="250" height="186" rx="14" class="box" />
+  <text x="40" y="46" class="boxlbl start">
+    Bateria real
+  </text>
+
+  <g class="wire">
+    <path d="M90 104 V70 H140 M210 70 H300 M90 146 V180 H300" />
+    <path d="M300 70 H420 V96 M420 154 V180 H300" />
+  </g>
+  <g class="src">
+    <path d="M70 110 H110 M80 120 H100 M70 130 H110 M80 140 H100" />
+    <path d="M90 104 V110 M90 140 V146" />
+    <text x="98" y="103" class="sign start">
+      +
+    </text>
+  </g>
+  <g class="res">
+    <rect x="140" y="58" width="70" height="24" rx="2" />
+  </g>
+  <circle cx="300" cy="70" r="6" class="term" />
+  <circle cx="300" cy="180" r="6" class="term" />
+  <g class="load">
+    <rect x="408" y="96" width="24" height="58" rx="2" />
+  </g>
+
+  <text x="56" y="128" class="lbl end">
+    E
+  </text>
+  <text x="175" y="104" class="lbl">
+    r
+  </text>
+  <text x="175" y="122" class="small">
+    resistência interna
+  </text>
+  <text x="60" y="196" class="small start">
+    fonte ideal (fem)
+  </text>
+  <text x="300" y="52" class="lbl">
+    +
+  </text>
+  <text x="300" y="204" class="lbl">
+    −
+  </text>
+  <text x="444" y="124" class="lbl start">
+    R
+  </text>
+  <text x="444" y="142" class="small start">
+    carga
+  </text>
+
+  <g class="arrow">
+    <path d="M330 62 H380" />
+    <path d="M372 56 L382 62 L372 68" />
+  </g>
+  <text x="356" y="50" class="cur">
+    I
+  </text>
+
+  <g class="vt">
+    <path d="M330 84 V166" />
+    <path d="M324 92 L330 82 L336 92" />
+  </g>
+  <text x="342" y="122" class="vtl start">
+    V nos
+  </text>
+  <text x="342" y="138" class="vtl start">
+    terminais
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .box {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 5;
+    fill: var(--surface);
+  }
+  .wire {
+    stroke: var(--fg-muted);
+  }
+  .src {
+    stroke: var(--accent);
+  }
+  .res {
+    stroke: var(--danger);
+  }
+  .res rect {
+    fill: var(--danger-soft);
+  }
+  .load {
+    stroke: var(--copper);
+  }
+  .load rect {
+    fill: color-mix(in oklab, var(--copper) 18%, transparent);
+  }
+  .term {
+    fill: var(--bg);
+    stroke: var(--fg);
+  }
+  .arrow {
+    stroke: var(--warning);
+  }
+  .vt {
+    stroke: var(--success);
+    stroke-width: 1.8;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .boxlbl {
+    font-weight: 600;
+    fill: var(--fg-muted);
+  }
+  .lbl {
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .small {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .sign {
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .cur {
+    font-weight: 700;
+    fill: var(--warning);
+  }
+  .vtl {
+    font-size: 13px;
+    font-weight: 600;
+    fill: var(--success);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>
