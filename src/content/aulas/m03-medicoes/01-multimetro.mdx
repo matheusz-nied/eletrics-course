@@ -1,0 +1,338 @@
+---
+titulo: O multímetro por dentro e por fora
+modulo: m03-medicoes
+ordem: 1
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Reconhecer as partes de um multímetro digital (visor, seletor, bornes e pontas de prova) e para que serve cada uma
+  - Escolher a função e o borne certos para medir tensão, corrente, resistência e continuidade
+  - Entender o que acontece por dentro do aparelho em cada função e por que o borne de corrente é perigoso
+  - Ler a categoria de medição (CAT II, III e IV) e escolher um multímetro adequado para a instalação elétrica de casa
+prerequisitos:
+  - m02-circuitos-cc/01-o-circuito-eletrico
+  - m02-circuitos-cc/02-associacao-em-serie
+  - m02-circuitos-cc/03-associacao-em-paralelo
+tags: [multímetro, voltímetro, amperímetro, ohmímetro, CAT, fusível]
+seguranca: rede
+rascunho: true
+---
+
+import MultimeterTrainer from '../../../lessons/m03/MultimeterTrainer';
+import MeterModes from '../../../lessons/m03/figures/MeterModes.astro';
+
+O motor do portão parou, e você quer saber se o problema é a placa, o motor ou a fiação. Sem instrumento, sobra adivinhar e trocar peça até acertar. Com um <Term id="multimetro">multímetro</Term> de R$ 60 na mão, dá para responder em minutos se chega energia na placa, se o fio do motor está inteiro e se o fusível queimou.
+
+O multímetro é o primeiro instrumento de qualquer eletricista ou técnico. Nesta aula você vai conhecer cada parte dele, entender o que acontece lá dentro quando você gira o seletor e treinar num multímetro virtual, onde errar o borne queima só um fusível de mentira.
+
+<Callout type="atencao" title="Antes de encostar o multímetro na rede">
+Nesta aula você ainda não vai medir a rede de verdade. Quando for medir, o multímetro precisa estar na função certa, com as pontas nos bornes certos, **antes** de as pontas encostarem em qualquer coisa energizada. Para saber se um circuito está desligado, teste o multímetro primeiro numa tomada que você sabe que está ligada.
+</Callout>
+
+## Três instrumentos num só
+
+O nome já diz: o multímetro junta vários medidores numa caixa só. Os três principais são o **voltímetro** (mede tensão), o **amperímetro** (mede corrente) e o **ohmímetro** (mede resistência). Cada um é ligado ao circuito de um jeito diferente, e essa é a ideia mais importante da aula:
+
+<Figure caption="Figura 1. O voltímetro fica em paralelo com o que você mede; o amperímetro entra em série, no lugar de um pedaço de fio; o ohmímetro só mede com o circuito desligado, porque ele mesmo alimenta o que está medindo.">
+  <MeterModes />
+</Figure>
+
+- **Tensão** é a diferença entre dois pontos. Por isso o voltímetro encosta uma ponta em cada ponto, **em paralelo**, sem abrir nada no circuito.
+- **Corrente** é o que passa por dentro do fio. Para medir, você precisa **abrir o circuito** e fazer a corrente atravessar o multímetro, **em série**, como se ele fosse mais um pedaço de fio.
+- **Resistência** se mede com o componente sem energia. O multímetro manda uma corrente pequena e vê quanta tensão aparece. Se já houver tensão de outra fonte ali, a medida sai errada, e o aparelho pode ser danificado.
+
+Guarde isso: **tensão em paralelo, corrente em série, resistência sem energia.** Quase todos os acidentes com multímetro vêm de esquecer uma dessas três regras.
+
+## Por fora: as partes do multímetro
+
+### O visor
+
+O visor mostra o número, a unidade e alguns avisos. A unidade vem com prefixo: **mV** (milivolt, um milésimo de volt), **kΩ** (quilo-ohm, mil ohms), **MΩ** (mega-ohm, um milhão de ohms), **mA** (miliampère, um milésimo de ampère).
+
+| No visor | O que significa |
+|----------|-----------------|
+| `1.580 V` | 1,58 volt. O aparelho usa ponto como separador decimal, à moda americana. |
+| `4.700 kΩ` | 4,7 kΩ, ou seja, 4.700 Ω |
+| `OL` | *Overload*: o valor passou do que a escala mostra. Em resistência, quer dizer "aberto", resistência altíssima. |
+| `-1.580 V` | O sinal de menos diz que as pontas estão invertidas: a preta está no ponto mais positivo. Não estraga nada. |
+| `AUTO` | Escala automática: o aparelho escolhe sozinho entre mV, V, kΩ, MΩ. |
+| `AC` ou `~` | Medindo grandeza alternada (a tomada) |
+| `DC` ou `⎓` | Medindo grandeza contínua (pilhas, baterias, fontes) |
+| `HOLD` | O número está congelado. Aperte HOLD de novo para voltar a medir. |
+| Pilha desenhada | A bateria interna do multímetro está fraca, e as medidas podem sair erradas. Troque antes de confiar no que o visor mostra. |
+
+Os multímetros são vendidos pela quantidade de **contagens**: um de 2.000 contagens mostra até `1999` (o famoso "3½ dígitos"); um de 6.000 mostra até `5999`. Mais contagens dão mais resolução: num de 6.000, a tomada aparece como `127.4 V`; num de 2.000, na escala de 600 V, como `127 V`.
+
+### O seletor
+
+A chave giratória do meio escolhe **o que** medir. Os símbolos mudam pouco de marca para marca:
+
+| Símbolo | Função | Também aparece como |
+|---------|--------|---------------------|
+| **V⎓** | Tensão contínua: pilhas, baterias, fontes, a placa do portão | DCV, VDC, V com traço reto |
+| **V~** | Tensão alternada: tomada, quadro de luz, transformador | ACV, VAC, V com ondinha |
+| **Ω** | Resistência | OHM |
+| **·)))** | Continuidade (apita quando há caminho), muitas vezes junto com o teste de diodo (➝\|) | Desenho de alto-falante |
+| **mA** | Corrente pequena, até algumas centenas de miliampères | µA/mA |
+| **A** | Corrente grande, até 10 A | 10A, 20A |
+| **OFF** | Desligado | |
+
+Multímetros manuais (sem AUTO) têm várias posições para cada função: 200 mV, 2 V, 20 V, 200 V, 600 V. Nesses, você escolhe uma escala **maior** que o valor esperado. Se não souber quanto vai medir, comece pela maior e vá descendo. Muitos aparelhos ainda trazem capacitância (F), frequência (Hz), temperatura (°C) e teste de transistor (hFE). Você vai usar algumas delas nos próximos módulos.
+
+### Os bornes
+
+Embaixo ficam os **bornes**, os furos onde entram os pinos das pontas de prova. São três ou quatro:
+
+- **COM** (comum): a ponta **preta** fica sempre aqui, em qualquer medida.
+- **VΩ** (às vezes VΩmA ou V·Ω·Hz): a ponta **vermelha** fica aqui para medir tensão, resistência, continuidade e diodo. É onde ela deve ficar quase sempre.
+- **mA** (ou µA mA): a vermelha só vai aqui para medir corrente pequena. Esse borne tem um fusível interno, tipicamente de 200 mA a 500 mA.
+- **10A** (ou 20A, A): a vermelha só vai aqui para medir corrente grande. Também tem fusível, tipicamente de 10 A. Ao lado costuma vir escrito um limite de tempo, como "10 A máx. 10 s": a corrente máxima só pode passar por poucos segundos, porque a peça interna que mede a corrente esquenta.
+
+Do lado dos bornes vem impresso o limite de cada um, e quase sempre um triângulo de alerta. Leia o que está escrito no seu aparelho: os números variam de um modelo para outro.
+
+### As pontas de prova
+
+As **pontas de prova** são os dois cabos com uma agulha de metal na ponta e um pino que entra no borne. Uma boa ponta tem:
+
+- capa de borracha que cobre o pino inteiro dentro do borne, para nenhum dedo encostar em metal;
+- um ressalto na empunhadura (a "trava de dedo"), que impede o dedo de escorregar até a agulha;
+- uma capinha plástica que deixa só 4 mm de agulha exposta, exigida nas medições em quadros de luz;
+- o mesmo número de CAT do multímetro, ou maior, impresso na empunhadura.
+
+Cabo rachado, ressecado ou com o cobre aparecendo vai para o lixo. Ponta de prova custa pouco perto de um choque.
+
+## Por dentro: o que o multímetro faz em cada função
+
+Lá dentro, o multímetro digital mede uma coisa só: **tensão**, numa faixa pequena, por exemplo até 200 mV. Um circuito chamado conversor analógico-digital transforma essa tensão em número. Todas as outras funções são truques para transformar o que você quer medir numa tensão pequena.
+
+### Voltímetro: um divisor de resistência muito alta
+
+Na função de tensão, entre os bornes VΩ e COM fica uma sequência de resistores que soma, tipicamente, **10 MΩ**. Essa sequência funciona como o <Term id="divisor-de-tensao">divisor de tensão</Term> que você viu no módulo 2: o conversor lê só uma fração da tensão, e o aparelho multiplica de volta. Como 10 MΩ é uma resistência enorme, a corrente que o voltímetro puxa é minúscula. Na tomada de 127 V:
+
+$$
+I = \frac{V}{R} = \frac{127\,\text{V}}{10\,000\,000\,\Omega} \approx 0{,}000\,013\,\text{A} = 13\,\mu\text{A}
+$$
+
+Nada esquenta e nada queima. É por isso que encostar as pontas em paralelo com qualquer coisa, na função de tensão, é seguro para o aparelho (sempre respeitando a categoria e a tensão máxima, como você vai ver mais adiante).
+
+### Amperímetro: um fio quase perfeito
+
+Na função de corrente, a ponta vermelha entra no borne mA ou 10A. Entre esse borne e o COM existe um **resistor de derivação** (o *shunt*), de resistência muito baixa: tipicamente cerca de 1 Ω no borne mA e 0,01 Ω no borne 10A. A corrente atravessa o shunt e cria nele uma tensão pequena, que o conversor lê. Pela Lei de Ohm:
+
+$$
+I = \frac{V_\text{shunt}}{R_\text{shunt}}
+$$
+
+- $I$: a corrente que você quer medir, em ampères (A);
+- $V_\text{shunt}$: a tensão que aparece no shunt, em volts (V);
+- $R_\text{shunt}$: a resistência do shunt, em ohms (Ω).
+
+Por exemplo, 5 A passando por 0,01 Ω criam 0,05 V, e o visor mostra `5.00 A`. O shunt precisa ser baixo para quase não atrapalhar o circuito: um amperímetro ideal seria um fio perfeito. Esse fio quase perfeito é exatamente o problema quando a ponta vermelha fica no borne de corrente e você encosta numa fonte: o multímetro vira um **curto-circuito**. É para isso que existe o fusível interno.
+
+<Callout type="perigo" title="O borne de corrente é um curto">
+Com a ponta vermelha no borne mA ou 10A, o multímetro tem resistência de uma fração de ohm, **qualquer que seja a posição do seletor**. Encostar as pontas numa bateria ou numa tomada desse jeito é o mesmo que encostar um fio nos dois polos. No borne mA, o fusível rompe na hora. No borne 10A, numa tomada, a corrente de curto pode chegar a centenas de ampères: um fusível de boa qualidade, feito para isso, interrompe com segurança; um fusível de vidro barato, ou a falta de fusível, pode fazer o multímetro explodir na sua mão.
+</Callout>
+
+### Ohmímetro: o aparelho é a fonte
+
+Na função Ω, o multímetro usa a própria bateria para empurrar uma corrente pequena e conhecida pelo componente, e mede a tensão que aparece nele. Com a corrente fixa, a resistência sai da Lei de Ohm: $R = V / I$. A tensão nas pontas é baixa, tipicamente menor que 3 V.
+
+Como o ohmímetro conta com a própria corrente, qualquer outra fonte no circuito estraga a conta. Por isso **resistência e continuidade só se medem com o circuito desligado**. Em circuitos com capacitores grandes, como a placa do portão ou uma fonte de computador, espere eles descarregarem antes.
+
+A continuidade é o ohmímetro com um apito: abaixo de uma resistência pequena (tipicamente algumas dezenas de ohms, varia de modelo para modelo), o aparelho apita. É a função para descobrir, sem olhar para o visor, se um fio está inteiro de ponta a ponta.
+
+## O voltímetro também mexe no circuito
+
+Nenhum instrumento é perfeito. Os 10 MΩ do voltímetro ficam **em paralelo** com o que você mede e, quando o circuito tem resistências muito altas, eles mudam a tensão. Na simulação abaixo, uma fonte de 10 V alimenta dois resistores de 1 MΩ em série. Pela conta do divisor, cada um tem 5 V.
+
+<Simulation
+  circuit="m03/carga-voltimetro"
+  instruments={['multimetro']}
+/>
+
+**Tarefa:** com a chave "Pontas" aberta, veja a tensão em R2. Depois feche a chave, que encosta o multímetro (o resistor RM de 10 MΩ) em paralelo com R2. Quanto o visor mostra agora?
+
+Com o medidor encostado, R2 passa a ser R2 em paralelo com 10 MΩ:
+
+$$
+R_{2} \parallel R_M = \frac{1 \cdot 10}{1 + 10}\,\text{M}\Omega \approx 0{,}909\,\text{M}\Omega
+\qquad
+V = 10\,\text{V} \cdot \frac{0{,}909}{1 + 0{,}909} \approx 4{,}76\,\text{V}
+$$
+
+O multímetro mostra 4,76 V, e não 5 V: um erro de quase 5 %, causado por ele mesmo. Em instalações elétricas e na maioria dos circuitos, as resistências são muito menores que 10 MΩ e esse efeito some. Ele aparece em circuitos de resistência muito alta, como a entrada de sensores. O amperímetro tem o efeito parecido, ao contrário: o shunt "rouba" um pouquinho de tensão do circuito. A 5 A, o shunt de 0,01 Ω fica com 0,05 V e dissipa $P = I^2 R = 25 \cdot 0{,}01 = 0{,}25\,\text{W}$.
+
+## Explore: o multímetro virtual
+
+Aqui você pode errar à vontade. Gire o seletor (clique no símbolo, ou use os botões ao lado), troque a ponta vermelha de borne e escolha onde encostar as pontas. A ponta preta fica sempre no COM.
+
+<MultimeterTrainer client:visible />
+
+Tente estas tarefas, nesta ordem:
+
+1. **Uma pilha.** Seletor em V⎓, vermelha em VΩ, pontas na pilha AA. Uma pilha alcalina nova mostra pouco mais de 1,5 V.
+2. **A tomada.** Encoste as pontas na tomada ainda em V⎓. O visor mostra quase zero, e isso **não** quer dizer que a tomada está desligada. Agora passe para V~: 127 V.
+3. **A corrente da lâmpada.** Escolha "Em série com uma lâmpada de 12 V e 5 W", seletor em A e vermelha no 10A. A lâmpada acende e o visor mostra cerca de 0,42 A. Passe a vermelha para o mA: a corrente passa do limite desse borne e o visor mostra `OL`.
+4. **O erro clássico.** Deixe a vermelha no mA (ou no 10A), gire para V⎓ e encoste na bateria de 9 V, como se fosse medir tensão. O que aconteceu com o fusível? Troque o fusível e tente de novo com a vermelha em VΩ.
+5. **Continuidade.** Função ·))) e vermelha em VΩ. Encoste nas pontas de um fio: apita. Agora no resistor de 4,7 kΩ: não apita. Mude para Ω e leia o valor do resistor.
+6. **O voltímetro em série.** Com a vermelha em VΩ e o seletor em V⎓, escolha "Em série com uma lâmpada". A lâmpada apaga e o visor mostra a tensão da fonte. Por quê? (Pense nos 10 MΩ.)
+7. **Ohmímetro na rede.** Coloque o seletor em Ω e escolha a tomada. Leia o aviso.
+
+Na tarefa 6, os 10 MΩ do voltímetro ficam no caminho da corrente e ela praticamente para. A lâmpada apaga, e o voltímetro mostra a tensão inteira da fonte, como a chave aberta da aula sobre o circuito elétrico. Esse erro não estraga nada, ao contrário do erro da tarefa 4.
+
+## Categoria de medição: CAT II, CAT III e CAT IV
+
+Na rede elétrica aparecem, de vez em quando, picos de tensão de milhares de volts que duram milionésimos de segundo: um raio que cai perto, um motor grande que desliga. Um multímetro malfeito, atingido por um pico desses no meio de uma medição, pode formar um arco elétrico por dentro e explodir. A norma internacional IEC 61010 divide a instalação em **categorias de medição**, de acordo com a energia que um pico pode ter em cada ponto: quanto mais perto da entrada de energia, maior a categoria exigida.
+
+| Categoria | Onde se aplica | Exemplos |
+|-----------|----------------|----------|
+| **CAT II** | Aparelhos ligados na tomada, e a própria tomada | Eletrodomésticos, ferramentas, a tomada da sala |
+| **CAT III** | A instalação fixa do prédio | Quadro de disjuntores, fiação dentro da parede, chuveiro, motor do portão ligado direto na rede |
+| **CAT IV** | A origem da instalação | Padrão de entrada, medidor de energia, ramal que vem do poste |
+
+A marcação aparece perto dos bornes com a tensão máxima de cada categoria, por exemplo **CAT III 600 V** ou **CAT IV 300 V**. Um multímetro CAT III 600 V serve para medir com segurança tudo dentro de uma casa com rede de 127 V ou 220 V, inclusive o quadro. A categoria dos cabos também conta: o conjunto vale a categoria **menor** entre o aparelho e as pontas.
+
+Desconfie de multímetros muito baratos com marcações altas: um aparelho que custa o preço de um lanche e diz "CAT IV 1000 V" provavelmente não passou por nenhum ensaio. Sinais de um aparelho sério: fusíveis grandes de cerâmica (e não de vidro) nos bornes de corrente, proteção também no borne 10A, pontas com capa e trava de dedo.
+
+<RealCase title="Preparando o multímetro para trocar o motor do portão">
+Antes de abrir a caixa da central do portão, prepare o instrumento em casa, com calma:
+
+1. **Confira a categoria.** A central do portão fica ligada direto na rede, então ela é instalação fixa: o multímetro e as pontas devem ser no mínimo CAT III, com tensão máxima acima da sua rede.
+2. **Examine as pontas.** Cabo sem rachaduras, capa inteira nos pinos e nas agulhas.
+3. **Olhe a bateria do multímetro.** Com o desenho da pilha no visor, as medidas não são confiáveis. Troque antes.
+4. **Teste os fusíveis internos.** Seletor em Ω, ponta vermelha em VΩ, e encoste a agulha da vermelha **dentro** do borne mA. Com o fusível bom, o visor mostra poucos ohms (o fusível mais o shunt). Com o fusível rompido, mostra `OL`. Repita no borne 10A, que deve mostrar menos de 1 Ω. Muitos manuais de fabricante ensinam esse teste.
+5. **Teste o multímetro numa tomada que você sabe que está ligada.** V~, vermelha em VΩ: deve mostrar 127 V ou 220 V. Só depois desse teste o aparelho serve para provar que um circuito está **desligado**.
+6. **Deixe a ponta vermelha em VΩ.** No portão, você vai medir tensão, continuidade e resistência. Nenhuma dessas medidas usa o borne de corrente.
+
+Com o instrumento pronto, você mede a chegada da rede na central (aula 3.2), confere se os fios do motor estão inteiros e descobre qual fio é qual (aula 3.4).
+</RealCase>
+
+## Erros comuns e segurança
+
+<Callout type="perigo" title="O erro número um">
+Medir corrente e, minutos depois, encostar na tomada para medir tensão **com a ponta vermelha ainda no borne de corrente**. Crie o hábito: terminou de medir corrente, a ponta vermelha volta para o VΩ antes de qualquer outra coisa. Muitos multímetros apitam quando a ponta está no borne de corrente e o seletor está em outra função; não conte com isso.
+</Callout>
+
+- **Girar o seletor com as pontas encostadas no circuito.** Ao passar por outras posições, o aparelho mede por um instante uma coisa para a qual não está preparado. Tire as pontas, gire, encoste de novo.
+- **Medir tensão alternada em V⎓.** O visor mostra perto de zero numa tomada ligada, e a pessoa conclui que está desligada. Na rede, use sempre V~.
+- **Medir resistência num circuito ligado.** A leitura não faz sentido e o multímetro pode ser danificado. Desligue e espere os capacitores descarregarem.
+- **Segurar as duas pontas metálicas com os dedos ao medir resistência.** A resistência do seu corpo, de algumas dezenas a centenas de quilo-ohms, entra em paralelo com o componente e muda a leitura.
+- **Trocar o fusível queimado por qualquer um.** O fusível do multímetro é especial: suporta a tensão da rede e interrompe correntes de curto muito grandes. Um fusível de vidro comum, ou um pedaço de fio no lugar, tira a proteção que impede o aparelho de explodir. Compre o fusível indicado no manual, com a mesma corrente, tensão e capacidade de interrupção.
+- **Deixar o multímetro ligado.** Desligue depois de usar. Muitos desligam sozinhos, mas a bateria descarregada é a causa mais comum de medida errada.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'associar',
+      prompt: 'Associe cada medida ao jeito certo de ligar o multímetro.',
+      pairs: [
+        ['Tensão', 'Em paralelo, uma ponta em cada ponto'],
+        ['Corrente', 'Em série, com o circuito aberto'],
+        ['Resistência', 'Com o circuito desligado'],
+      ],
+      explanation:
+        'Tensão em paralelo, corrente em série, resistência sem energia. Essas três regras evitam a maioria dos acidentes com multímetro.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você acabou de medir a corrente de um LED. Agora quer medir a tensão da tomada. O que precisa fazer antes de encostar as pontas?',
+      options: [
+        {
+          text: 'Passar a ponta vermelha para o borne VΩ e girar o seletor para V~',
+          correct: true,
+          feedback:
+            'Isso. Com a vermelha no borne de corrente, o multímetro é um curto, qualquer que seja a posição do seletor.',
+        },
+        {
+          text: 'Só girar o seletor para V~',
+          feedback:
+            'Esse é o erro número um. O que decide se o multímetro vira um curto é o borne da ponta vermelha, não o seletor.',
+        },
+        {
+          text: 'Girar o seletor para V⎓, que é a função de tensão',
+          feedback:
+            'A tomada tem tensão alternada, então a função é V~. E a ponta vermelha ainda precisa sair do borne de corrente.',
+        },
+        {
+          text: 'Inverter as pontas, porque a tomada é alternada',
+          feedback:
+            'Em tensão alternada a posição das pontas não importa para a leitura. O perigo está no borne da ponta vermelha.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Com o seletor em V⎓, você encosta as pontas numa tomada e o visor mostra 0.2 V. O que dá para concluir?',
+      options: [
+        {
+          text: 'Nada sobre a tomada: a função está errada para tensão alternada',
+          correct: true,
+          feedback:
+            'Em V⎓, o multímetro mostra a média da tensão, e a média de uma senoide é zero. Meça em V~.',
+        },
+        {
+          text: 'A tomada está desligada',
+          feedback:
+            'Perigoso concluir isso. Em V⎓, uma tomada de 127 V ligada mostra perto de zero. Só a função V~ diz se há tensão.',
+        },
+        {
+          text: 'A tomada está com defeito e dá só 0,2 V',
+          feedback: 'A tomada não foi medida do jeito certo. Em V~ ela mostraria cerca de 127 V ou 220 V.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um circuito tem dois resistores de 1 MΩ em série numa fonte de 12 V. Você mede a tensão num deles com um multímetro de 10 MΩ. Quanto o visor mostra?',
+      answer: 5.71,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        'O resistor medido fica em paralelo com o multímetro: 1 × 10 ÷ 11 ≈ 0,909 MΩ. A tensão nele é 12 × 0,909 ÷ (1 + 0,909) ≈ 5,71 V, em vez dos 6 V esperados.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'No borne mA, o shunt de um multímetro tem 1 Ω. Qual é a tensão que fica no shunt quando ele mede 160 mA?',
+      answer: 160,
+      tolerance: 0.02,
+      unit: 'mV',
+      explanation:
+        'V = R × I = 1 Ω × 0,16 A = 0,16 V = 160 mV. Essa tensão "some" do circuito medido, e por isso o amperímetro também interfere um pouco.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Com a ponta vermelha no borne VΩ e o seletor em Ω, encostar as pontas numa tomada pode danificar o multímetro.',
+      answer: true,
+      explanation:
+        'Os multímetros bons têm proteção nessa situação, mas o ohmímetro não foi feito para medir em circuito energizado. A leitura não vale nada e o aparelho pode ser danificado. Resistência só sem energia.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada ponto da instalação à categoria de medição mínima.',
+      pairs: [
+        ['Tomada da sala', 'CAT II'],
+        ['Quadro de disjuntores da casa', 'CAT III'],
+        ['Medidor de energia no padrão de entrada', 'CAT IV'],
+      ],
+      explanation:
+        'Quanto mais perto da entrada de energia, maior a energia que um pico pode ter, e maior a categoria exigida do multímetro e das pontas.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O multímetro reúne voltímetro, amperímetro e ohmímetro. **Tensão em paralelo, corrente em série, resistência sem energia.**
+- A ponta preta fica sempre no COM. A vermelha fica no VΩ para quase tudo e só vai para o mA ou o 10A para medir corrente.
+- Com a vermelha no borne de corrente, o multímetro é um curto, em qualquer posição do seletor. O fusível interno existe para esse erro, e só deve ser trocado pelo modelo indicado no manual.
+- O voltímetro tem resistência alta (tipicamente 10 MΩ) e o amperímetro tem resistência baixa (o shunt). Os dois mexem um pouco no circuito.
+- Para a instalação de casa, use multímetro e pontas no mínimo CAT III, com tensão máxima acima da sua rede, e teste o aparelho numa tomada ligada antes de confiar nele para dizer que algo está desligado.
+
+Na próxima aula, você vai usar o multímetro para [medir tensão contínua e alternada com segurança](../02-medindo-tensao/), incluindo a tomada de casa.
