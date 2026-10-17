@@ -74,19 +74,20 @@ export default defineDevice({
         if (!ctx.commit || led.failure) return;
         const i = led.current;
         heat = relax(heat, i * i, step.dt, TAU);
-        const max = formatSI(imax(), 'A');
+        // Messages are only formatted when emitted: this runs every step.
+        const max = () => formatSI(imax(), 'A');
         if (heat >= (K_BURN * imax()) ** 2) {
           led.failure = 'open';
           ctx.emit(
             'damaged',
-            `O LED ${id} queimou: corrente de ${formatSI(Math.abs(i), 'A')}, máximo ${max}.`,
+            `O LED ${id} queimou: corrente de ${formatSI(Math.abs(i), 'A')}, máximo ${max()}.`,
           );
           ctx.discontinuity();
         } else if (!warned && heat > imax() ** 2) {
           warned = true;
           ctx.emit(
             'warning',
-            `O LED ${id} está com corrente acima do máximo: ${formatSI(Math.sqrt(heat), 'A')}, máximo ${max}.`,
+            `O LED ${id} está com corrente acima do máximo: ${formatSI(Math.sqrt(heat), 'A')}, máximo ${max()}.`,
           );
         } else if (warned && heat < (0.8 * imax()) ** 2) {
           warned = false;

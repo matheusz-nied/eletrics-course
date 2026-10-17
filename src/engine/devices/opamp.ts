@@ -18,7 +18,8 @@ function softplus(x: number): { value: number; slope: number } {
  * (which sets the slew rate) drives an internal node with the open-loop gain
  * and one pole (from the gain-bandwidth product); the output follows that
  * node through its output resistance and saturates 1,5 V (`headroom`) inside
- * the supply rails, which are parameters (no supply pins).
+ * the supply rails, which are parameters (no supply pins). An input offset
+ * voltage adds to the differential input.
  */
 export default defineDevice({
   info: {
@@ -38,6 +39,8 @@ export default defineDevice({
       vee: { default: -12, label: 'Alimentação negativa', unit: 'V' },
       headroom: { default: 1.5, label: 'Distância da saída até os trilhos', unit: 'V', min: 0 },
       rout: { default: 75, label: 'Resistência de saída', unit: 'Ω', min: 0.01 },
+      // A real input stage is never balanced: this is also what starts an oscillator.
+      offset: { default: 0.001, label: 'Tensão de offset na entrada', unit: 'V' },
     },
     readouts: ['vout', 'vd', 'iout', 'saturated'],
     readoutInfo: {
@@ -88,7 +91,7 @@ export default defineDevice({
       stamp(m, step, x) {
         const d = design();
         const vd = x.v(plus) - x.v(minus);
-        const inp = input(vd, d);
+        const inp = input(vd + num(params, 'offset'), d);
         m.transconductance(-1, n1, plus, minus, inp.g);
         m.current(-1, n1, inp.i - inp.g * vd);
         // Gain node: G1 to the middle of the rails, the pole capacitor, the clamp.
@@ -112,7 +115,7 @@ export default defineDevice({
       },
       stampAc(m, { omega }, op) {
         const d = design();
-        const inp = input(op.v(plus) - op.v(minus), d);
+        const inp = input(op.v(plus) - op.v(minus) + num(params, 'offset'), d);
         m.transconductance(-1, n1, plus, minus, inp.g);
         const cl = clamp(op.v(n1) - d.mid, d.half);
         m.admittance(n1, -1, G1 + cl.g, omega * d.c1);

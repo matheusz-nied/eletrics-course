@@ -262,12 +262,12 @@ describe('sensors and buzzer', () => {
 });
 
 describe('opamp', () => {
-  const inverting = (vin: number, rf = 10000) =>
+  const inverting = (vin: number, offset = 0) =>
     netlist('inversor', [
       { id: 'V1', type: 'dc-voltage', nodes: ['1', '0'], params: { voltage: vin } },
       { id: 'R1', type: 'resistor', nodes: ['1', '2'], params: { resistance: 1000 } },
-      { id: 'RF', type: 'resistor', nodes: ['2', '3'], params: { resistance: rf } },
-      { id: 'U1', type: 'opamp', nodes: { plus: '0', minus: '2', out: '3' } },
+      { id: 'RF', type: 'resistor', nodes: ['2', '3'], params: { resistance: 10000 } },
+      { id: 'U1', type: 'opamp', nodes: { plus: '0', minus: '2', out: '3' }, params: { offset } },
     ]);
 
   it('inverting amplifier: gain −Rf/R1 with a virtual ground', () => {
@@ -276,6 +276,12 @@ describe('opamp', () => {
     expect(r(frame, 'v3')).toBeCloseTo(-5 / (1 + 11 / 1e5), 5);
     expect(Math.abs(r(frame, 'v2'))).toBeLessThan(1e-3);
     expect(frame.readouts['U1.saturated']).toBe(false);
+  });
+
+  it('input offset appears at the output times the noise gain', () => {
+    const { frame } = runFor(inverting(0, 0.002));
+    // The offset acts on the + input: non-inverting gain 1 + Rf/R1.
+    expect(r(frame, 'v3')).toBeCloseTo(0.002 * 11, 3);
   });
 
   it('saturates 1,5 V inside the rails', () => {

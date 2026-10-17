@@ -94,7 +94,8 @@ export default defineDevice({
         iPrev = i;
         if (failed || step.dt <= 0) return;
         const { s, reverse } = severity(v);
-        const rated = formatSI(num(params, 'voltage'), 'V');
+        // Messages are only formatted when emitted: this runs every step.
+        const rated = () => formatSI(num(params, 'voltage'), 'V');
         if (s > 0) {
           stress += s * s * step.dt;
           if (!warned) {
@@ -103,7 +104,7 @@ export default defineDevice({
               'warning',
               reverse
                 ? `O capacitor ${id} está com a polaridade invertida (${formatSI(v, 'V')}): um eletrolítico ao contrário esquenta e estufa.`
-                : `O capacitor ${id} está acima da tensão nominal: ${formatSI(Math.abs(v), 'V')}, nominal ${rated}.`,
+                : `O capacitor ${id} está acima da tensão nominal: ${formatSI(Math.abs(v), 'V')}, nominal ${rated()}.`,
             );
           }
         } else {
@@ -117,7 +118,7 @@ export default defineDevice({
             : 'teve o dielétrico perfurado e entrou em curto';
           ctx.emit(
             'damaged',
-            `O capacitor ${id} ${what}: tensão de ${formatSI(v, 'V')}, nominal ${rated}${reverse ? ' (polaridade invertida)' : ''}.`,
+            `O capacitor ${id} ${what}: tensão de ${formatSI(v, 'V')}, nominal ${rated()}${reverse ? ' (polaridade invertida)' : ''}.`,
           );
           ctx.discontinuity();
         }

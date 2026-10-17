@@ -35,9 +35,22 @@ const MAX_NEWTON_DC = 100;
 const MAX_NEWTON_TRAN = 30;
 /** A step that does not converge is split down to this many pieces. */
 const MAX_PIECES = 1024;
+/**
+ * From this many pieces on, a piece that still fails gets gmin stepping: a
+ * circuit with positive feedback (a multivibrator, a Schmitt trigger) reaches
+ * points where its solution jumps, and no step is short enough for Newton
+ * alone to follow the jump.
+ */
+const HOMOTOPY_PIECES = 8;
 const RELTOL = 1e-6;
 const VNTOL = 1e-6;
 const ABSTOL = 1e-12;
+/**
+ * Residual, relative to the size of a row's terms, below which a guess
+ * satisfies its equations: a few orders above rounding, far below RELTOL
+ * (a looser value lets companion-model errors pile up step after step).
+ */
+const RESIDUAL_RELTOL = 1e-10;
 
 const NO_CONVERGENCE = 'A simulação parou: o circuito não convergiu neste instante.';
 const SINGULAR =
@@ -65,6 +78,8 @@ interface Element {
   pins: number[];
   currents: Float64Array;
   twoTerminal: boolean;
+  /** It emitted a 'damaged' event since the last reset (readout `X.damaged`). */
+  damaged: boolean;
 }
 
 /** UpdateContext with the fields the simulator rewrites for each device. */
@@ -174,6 +189,7 @@ export class Simulator {
         pins,
         currents: new Float64Array(info.pins.length),
         twoTerminal: info.terminals === 'two',
+        damaged: false,
       };
       this.elements.push(element);
       this.byId.set(el.id, element);
@@ -221,17 +237,20 @@ export class Simulator {
 
   /**
    * Advances one fixed step. When Newton-Raphson does not converge, the step
-   * is done in smaller pieces (down to 1/1024). Throws SimulationError when
-   * the circuit has no solution.
+   * is done in smaller pieces (down to 1/1024), with gmin stepping for the
+   * pieces that still fail. Throws SimulationError when the circuit has no
+   * solution.
    */
   step(): void {
     const end = this.t + this.dt;
-    if (!this.tryAdvance(this.dt, this.restart ? 'be' : 'trap', MAX_NEWTON_TRAN)) {
+    if (!this.tryAdvance(this.dt, this.restart ? 'be' : 'trap')) {
       let pieces = 2;
       while (this.t < end - this.dt * 1e-9) {
-        if (pieces > MAX_PIECES) throw new SimulationError(NO_CONVERGENCE);
         const h = Math.min(this.dt / pieces, end - this.t);
-        if (!this.tryAdvance(h, 'be', MAX_NEWTON_TRAN)) pieces *= 2;
+        if (this.tryAdvance(h, 'be')) continue;
+        if (pieces >= HOMOTOPY_PIECES && this.tryAdvance(h, 'be', true)) continue;
+        if (pieces >= MAX_PIECES) throw new SimulationError(NO_CONVERGENCE);
+        pieces *= 2;
       }
     }
     this.t = end;
@@ -279,7 +298,10 @@ export class Simulator {
     this.accepted.fill(0);
     this.pendingEvents = [];
     this.clearSamples();
-    for (const el of this.elements) el.model.reset?.();
+    for (const el of this.elements) {
+      el.damaged = false;
+      el.model.reset?.();
+    }
   }
 
   /** Parameters as the document defines them (for "restore defaults"). */
@@ -325,15 +347,23 @@ export class Simulator {
     return { x, v: (i: number) => (i < 0 ? 0 : x[i]) };
   }
 
-  /** One step of length h; false when Newton-Raphson did not converge (nothing committed). */
-  private tryAdvance(h: number, method: Method, maxIter: number): boolean {
+  /**
+   * One step of length h; false when it did not converge (nothing committed).
+   * `homotopy` solves it by gmin stepping instead of plain Newton-Raphson.
+   */
+  private tryAdvance(h: number, method: Method, homotopy = false): boolean {
     const step: StepInfo = { mode: this.mode, t: this.t + h, dt: h, method, nl: newtonState() };
     for (const el of this.elements) el.model.beginSolve?.();
     // DC steps and the first step from rest get the full set of fallbacks.
     const x =
-      this.mode === 'dc' || this.steps === 0 ? this.solveRobust(step) : this.newton(step, maxIter);
+      this.mode === 'dc' || this.steps === 0
+        ? this.solveRobust(step)
+        : homotopy
+          ? this.gminStepping(step, this.accepted, false)
+          : this.newton(step, MAX_NEWTON_TRAN);
     if (!x) return false;
-    this.restart = false;
+    // After a jump the trapezoidal rule would ring: the next step restarts with backward Euler.
+    this.restart = homotopy;
     this.solved = true;
     this.update(step, x, true);
     this.accepted.set(x);
@@ -345,27 +375,38 @@ export class Simulator {
   private solveRobust(step: StepInfo): Float64Array {
     for (const el of this.elements) el.model.beginSolve?.();
     const start = new Float64Array(this.accepted);
-    let x = this.newton(step, MAX_NEWTON_DC, start, !this.solved);
+    const x = this.newton(step, MAX_NEWTON_DC, start, !this.solved);
     if (x || !this.nonlinear) return x ?? this.fail();
+    return this.gminStepping(step, start, !this.solved) ?? this.sourceStepping(step);
+  }
 
-    // gmin stepping: a large conductance across every junction, reduced decade by decade.
-    let from = start;
-    let ok = true;
+  /**
+   * gmin stepping: a large conductance from every node to ground (and across
+   * every junction), reduced decade by decade, each solution starting the next.
+   */
+  private gminStepping(
+    step: StepInfo,
+    start: Float64Array,
+    init: boolean,
+  ): Float64Array | undefined {
+    let from = new Float64Array(start);
     for (let gmin = 1e-2; gmin >= 1e-12; gmin /= 10) {
       step.nl.gmin = gmin;
-      const xi = this.newton(step, MAX_NEWTON_DC, from, from === start && !this.solved);
+      const xi = this.newton(step, MAX_NEWTON_DC, from, init && gmin === 1e-2);
       if (!xi) {
-        ok = false;
-        break;
+        step.nl.gmin = 0;
+        return undefined;
       }
       from = new Float64Array(xi);
     }
     step.nl.gmin = 0;
-    if (ok && (x = this.newton(step, MAX_NEWTON_DC, from))) return x;
+    return this.newton(step, MAX_NEWTON_DC, from);
+  }
 
-    // Source stepping: sources ramp from zero to their value.
+  /** Source stepping: sources ramp from zero to their value. */
+  private sourceStepping(step: StepInfo): Float64Array {
     for (const el of this.elements) el.model.beginSolve?.();
-    from = new Float64Array(this.accepted.length);
+    let from = new Float64Array(this.accepted.length);
     let scale = 0;
     let delta = 0.1;
     while (scale < 1) {
@@ -461,6 +502,11 @@ export class Simulator {
       sys.clear();
       for (let i = 0; i < this.isNode.length; i++) if (this.isNode[i]) sys.add(i, i, gmin);
       for (const el of this.elements) el.model.stamp(sys, step, view);
+      // A slow convergence may only be rounding noise in a badly conditioned
+      // unknown (a floating winding, a node held only by reverse-biased
+      // junctions): when the guess already satisfies every equation, this
+      // solve only polishes it and ends the iteration.
+      const settled = iter >= 2 && !step.nl.limited && this.satisfies(guess);
       let x: Float64Array;
       try {
         x = sys.solve();
@@ -477,7 +523,7 @@ export class Simulator {
       }
       if (!this.nonlinear) return x;
       let converged = !step.nl.limited;
-      for (let i = 0; converged && i < x.length; i++) {
+      for (let i = 0; converged && !settled && i < x.length; i++) {
         const tol =
           RELTOL * Math.max(Math.abs(x[i]), Math.abs(guess[i])) + (this.isNode[i] ? VNTOL : ABSTOL);
         if (Math.abs(x[i] - guess[i]) > tol) converged = false;
@@ -486,6 +532,27 @@ export class Simulator {
       if (converged && iter > 0) return guess;
     }
     return undefined;
+  }
+
+  /**
+   * Whether `x` satisfies the system just stamped at it: every row's residual
+   * within RESIDUAL_RELTOL of the size of its terms (or an absolute floor).
+   */
+  private satisfies(x: Float64Array): boolean {
+    const { a, b, size: n } = this.system;
+    for (let i = 0; i < n; i++) {
+      let residual = -b[i];
+      let scale = Math.abs(b[i]);
+      for (let j = 0, k = i * n; j < n; j++, k++) {
+        if (a[k] === 0) continue;
+        const term = a[k] * x[j];
+        residual += term;
+        scale += Math.abs(term);
+      }
+      const floor = this.isNode[i] ? ABSTOL : VNTOL;
+      if (Math.abs(residual) > RESIDUAL_RELTOL * scale + floor) return false;
+    }
+    return true;
   }
 
   private update(step: StepInfo, x: Float64Array, commit: boolean): void {
@@ -509,6 +576,7 @@ export class Simulator {
     emit: (kind: SimEvent['kind'], message: string) => {
       const ctx = this.updateContext;
       this.pendingEvents.push({ t: ctx.t, element: ctx.element, kind, message });
+      if (kind === 'damaged') this.byId.get(ctx.element)!.damaged = true;
     },
     discontinuity: () => {
       this.restart = true;
@@ -526,6 +594,7 @@ export class Simulator {
       out[`${prefix}power`] = v * i;
     }
     el.model.readouts?.(x, (name, value) => (out[prefix + name] = value));
+    if (el.damaged) out[`${prefix}damaged`] = true;
   }
 
   private probeValue(p: ResolvedProbe, x: SolutionView, readouts?: SimFrame['readouts']): number {

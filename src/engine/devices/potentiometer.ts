@@ -73,15 +73,17 @@ export default defineDevice({
         if (!ctx.commit) return;
         const pAw = iAw * iAw * rAw();
         const pWb = iWb * iWb * rWb();
-        const results = [heatAw.step(pAw, step.dt), heatWb.step(pWb, step.dt)];
+        const rAwResult = heatAw.step(pAw, step.dt);
+        const rWbResult = heatWb.step(pWb, step.dt);
+        if (rAwResult === 'ok' && rWbResult === 'ok') return;
         const power = formatSI(heatAw.power + heatWb.power, 'W');
-        if (results.includes('burned')) {
+        if (rAwResult === 'burned' || rWbResult === 'burned') {
           ctx.emit(
             'damaged',
             `O potenciômetro ${id} queimou: a pista dissipava ${power} num trecho curto. Use um resistor em série com o cursor.`,
           );
           ctx.discontinuity();
-        } else if (results.includes('hot')) {
+        } else if (rAwResult === 'hot' || rWbResult === 'hot') {
           ctx.emit('warning', `O potenciômetro ${id} está esquentando demais (${power}).`);
         }
       },
