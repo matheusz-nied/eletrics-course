@@ -3,8 +3,8 @@
  * list is rendered as an ordered list next to the canvas (screen readers and
  * small screens), so the numbers match.
  *
- * Labels point away from the middle of the model and are nudged apart
- * vertically when two of them would overlap on screen.
+ * Labels point away from the middle of the model (or to the side where they
+ * fit) and are nudged apart vertically when two of them would overlap.
  */
 import { Html } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
@@ -51,6 +51,28 @@ export function spreadLabels(
     placed.push({ x: item.x, y, side: item.side });
   }
   return offsets;
+}
+
+/** Radius of the number disc (px): the label starts there. */
+const PIN_RADIUS = 10;
+
+/**
+ * Side a label goes to: the preferred one (away from the middle of the
+ * model), unless the label would run off the view there and fits better on
+ * the other side. Pure, unit-tested.
+ */
+export function labelSide(
+  x: number,
+  preferred: 'left' | 'right',
+  width: number,
+  viewport: number,
+  pad = 4,
+): 'left' | 'right' {
+  const overflowRight = Math.max(0, x - PIN_RADIUS + width - (viewport - pad));
+  const overflowLeft = Math.max(0, pad - (x + PIN_RADIUS - width));
+  if (preferred === 'right' && overflowRight > 0 && overflowLeft < overflowRight) return 'left';
+  if (preferred === 'left' && overflowLeft > 0 && overflowRight < overflowLeft) return 'right';
+  return preferred;
 }
 
 export function Annotations({ items }: { items: PartAnnotation[] }) {
@@ -111,11 +133,13 @@ function Marker({
     if (!pin.current || !g.parent) return;
     g.getWorldPosition(world.current).project(camera);
     g.parent.getWorldPosition(origin.current).project(camera);
-    const side = world.current.x < origin.current.x - 0.02 ? 'left' : 'right';
+    const x = ((world.current.x + 1) / 2) * size.width;
+    const preferred = world.current.x < origin.current.x - 0.02 ? 'left' : 'right';
+    const side = labelSide(x, preferred, pin.current.offsetWidth, size.width);
     if (pin.current.dataset.side !== side) pin.current.dataset.side = side;
     // The placement object is shared with <Annotations>, which spreads the labels.
     Object.assign(placement, {
-      x: ((world.current.x + 1) / 2) * size.width,
+      x,
       y: ((1 - world.current.y) / 2) * size.height,
       side,
       pin: pin.current,

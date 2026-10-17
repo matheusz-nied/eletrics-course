@@ -1,6 +1,6 @@
 import { Box3, Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
-import { spreadLabels } from '../core/Annotations';
+import { labelSide, spreadLabels } from '../core/Annotations';
 import { resistorBands } from '../core/colorCode';
 import { fitDistance } from '../core/framing';
 import {
@@ -218,6 +218,14 @@ describe('annotation labels', () => {
       24,
     );
     expect(offsets).toEqual([0, 20]);
+  });
+
+  it('flips a label that would run off the view', () => {
+    expect(labelSide(40, 'left', 200, 800)).toBe('right');
+    expect(labelSide(760, 'right', 200, 800)).toBe('left');
+    expect(labelSide(400, 'left', 200, 800)).toBe('left');
+    // Too wide for either side: keep the side with less overflow.
+    expect(labelSide(100, 'right', 790, 800)).toBe('right');
   });
 
   it('keeps a chain of close labels in order', () => {
