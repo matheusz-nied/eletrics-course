@@ -62,6 +62,7 @@ export const meta: PartMeta = {
   annotations: [{ at: [0, 3, 0], text: 'Faixas de cor: valor e tolerância' }],
   explode: true,               // usa <Explode>
   cutaway: true,               // usa <Material clip>
+  cut: { normal: [0, 0, -1], through: [0, 0, 0] },  // onde corta (opcional; pode ser função das props)
   describe: (p) => `Resistor de ${formatOhms(Number(p.ohms))}.`,
   view: [0.6, 0.9, 1.5],       // direção da câmera
   animated: false,             // true (ou função das props) se algo se move sozinho
