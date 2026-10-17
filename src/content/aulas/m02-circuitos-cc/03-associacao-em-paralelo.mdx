@@ -1,0 +1,280 @@
+---
+titulo: Associação em paralelo
+modulo: m02-circuitos-cc
+ordem: 3
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Reconhecer componentes ligados em paralelo num circuito e num esquema
+  - Explicar por que todos os componentes em paralelo recebem a mesma tensão
+  - Calcular as correntes dos ramos, a corrente total e a resistência equivalente
+  - Entender por que ligar aparelhos demais num mesmo circuito desarma o disjuntor
+prerequisitos:
+  - m02-circuitos-cc/02-associacao-em-serie
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+tags: [paralelo, resistência equivalente, tomadas, disjuntor, sobrecarga]
+seguranca: baixa-tensao
+rascunho: true
+---
+
+import ParallelSplit from '../../../lessons/m02/figures/ParallelSplit.astro';
+import KitchenCircuit from '../../../lessons/m02/figures/KitchenCircuit.astro';
+
+Você apaga a luz do quarto e a televisão continua ligada. Liga o micro-ondas e a geladeira não percebe nada. Mas, numa manhã apressada, liga a air fryer e o micro-ondas ao mesmo tempo, na mesma bancada, e o disjuntor da cozinha desarma. Separados, os dois funcionam sem problema.
+
+Tudo isso acontece porque os aparelhos da casa estão ligados **em paralelo**. Nesta aula você vai ver o que muda em relação à série, por que cada aparelho funciona de forma independente e por que, mesmo assim, eles "somam" no fio e no disjuntor.
+
+## Cada um no seu caminho
+
+Na <Term id="associacao-em-paralelo">associação em paralelo</Term>, todos os componentes ficam ligados aos mesmos dois pontos do circuito. Cada um tem o seu próprio caminho, chamado de **ramo**, entre esses dois pontos. Os pontos onde os ramos se separam e se juntam de novo são os <Term id="no-de-circuito">nós</Term>.
+
+Daí vêm as duas regras do paralelo:
+
+- **A tensão é a mesma em todos.** Os dois terminais de cada ramo estão ligados direto aos dois polos da fonte, só com fio no meio. Então todos recebem a tensão inteira da fonte, seja uma lâmpada de 5 W ou de 21 W.
+- **As correntes se somam.** A corrente que sai da fonte chega ao primeiro nó e se divide entre os ramos. Na volta, os ramos se juntam e as correntes se somam de novo. A fonte, o fio principal e o fusível carregam a soma de todas.
+
+E uma consequência prática: **cada ramo é independente**. Abrir um ramo (desligar uma lâmpada, tirar um aparelho da tomada) não interrompe os outros, porque eles têm o próprio caminho até a fonte.
+
+<Figure caption="Figura 1. Três resistores em paralelo numa fonte de 12 V. Cada um recebe os 12 V; a corrente de 20 mA se divide nos nós e se junta de novo na volta.">
+  <ParallelSplit />
+</Figure>
+
+Siga as setas da figura. Saem 20 mA da fonte. No primeiro nó, 12 mA descem por R1 e 8 mA seguem em frente. No segundo nó, 5,45 mA descem por R2 e 2,55 mA seguem para R3. Na volta, tudo se junta e os mesmos 20 mA chegam ao negativo da fonte. Nenhum elétron se perde no caminho: o que entra num nó é igual ao que sai. Essa ideia vai virar a lei dos nós na aula de Kirchhoff.
+
+<Callout type="nota" title="Onde a analogia da água ajuda (e onde para)">
+Pense num cano principal que se divide em três torneiras abertas. Cada torneira recebe a pressão inteira da rede, e a vazão do cano principal é a soma das vazões das torneiras. A analogia funciona bem para o paralelo, mas não leve longe demais: um cano aberto derrama água, enquanto um fio interrompido simplesmente para a corrente.
+</Callout>
+
+## As fórmulas do paralelo
+
+A tensão $V$ é a mesma em todos os ramos:
+
+$$
+V = V_1 = V_2 = V_3
+$$
+
+A corrente total $I_T$, que sai da fonte, é a soma das correntes dos ramos:
+
+$$
+I_T = I_1 + I_2 + I_3
+$$
+
+Cada corrente de ramo vem da Lei de Ohm com a tensão inteira: $I_1 = V/R_1$, $I_2 = V/R_2$, $I_3 = V/R_3$. Juntando tudo, $I_T = V \cdot (1/R_1 + 1/R_2 + 1/R_3)$. Para a fonte, os três resistores valem um só, cuja <Term id="resistencia-equivalente">resistência equivalente</Term> é:
+
+$$
+\frac{1}{R_\text{eq}} = \frac{1}{R_1} + \frac{1}{R_2} + \frac{1}{R_3}
+$$
+
+Dois atalhos úteis. Para **dois** resistores, a fórmula vira "produto pela soma":
+
+$$
+R_\text{eq} = \frac{R_1 \cdot R_2}{R_1 + R_2}
+$$
+
+E para $n$ resistores **iguais**, de valor $R$ cada, $R_\text{eq} = R/n$. Dois resistores de 1 kΩ em paralelo valem 500 Ω; quatro valem 250 Ω.
+
+<Callout type="dica" title="Duas conclusões para guardar">
+Em paralelo, a resistência equivalente é sempre **menor** que a menor das resistências: cada ramo novo é mais um caminho para a corrente passar. E, ao contrário da série, aqui o componente de **menor** resistência é o que puxa mais corrente e dissipa mais potência ($P = V^2/R$, com o mesmo $V$ para todos). É por isso que o aparelho "mais forte" de uma casa é o de menor resistência.
+</Callout>
+
+<DeepDive title="Condutância: somar em vez de inverter">
+O inverso da resistência tem nome: **condutância**, $G = 1/R$, medida em siemens (S). Ela diz o quanto um componente deixa a corrente passar. Em paralelo, as condutâncias simplesmente se somam: $G_\text{eq} = G_1 + G_2 + G_3$. No exemplo da figura, $1\,\text{mS} + 0{,}455\,\text{mS} + 0{,}213\,\text{mS} = 1{,}668\,\text{mS}$, e $1 / 1{,}668\,\text{mS} \approx 600\,\Omega$. Série soma resistências; paralelo soma condutâncias.
+</DeepDive>
+
+## Explore: resistores em paralelo
+
+O circuito da figura, montado no simulador: 12 V em três resistores de 1 kΩ, 2,2 kΩ e 4,7 kΩ em paralelo. O controle muda o valor de R3.
+
+<Simulation circuit="m02/paralelo-resistores" instruments={['multimetro']} />
+
+1. Some as correntes dos três ramos. O resultado bate com a corrente total?
+2. Diminua R3 até 1 kΩ. O que acontece com a corrente de R1 e de R2, que você não mexeu? E com a corrente total?
+3. Agora ajuste R3 para a corrente total chegar a 25 mA. Antes de mexer, calcule: quanto R3 precisa conduzir sozinho?
+
+No passo 2, as correntes de R1 e R2 não mudam nada: cada ramo recebe os mesmos 12 V e não "sabe" o que acontece nos outros. Só a corrente total muda. Compare com a série, em que mexer num componente mudava todos. No passo 3, R1 e R2 já somam 17,45 mA, então R3 precisa conduzir $25 - 17{,}45 = 7{,}55\,\text{mA}$, e $R_3 = 12\,\text{V} / 7{,}55\,\text{mA} \approx 1{,}6\,\text{k}\Omega$.
+
+## Exemplo resolvido: o circuito da figura
+
+**Dados:** fonte de 12 V; $R_1 = 1\,\text{k}\Omega$, $R_2 = 2{,}2\,\text{k}\Omega$, $R_3 = 4{,}7\,\text{k}\Omega$, em paralelo.
+
+**1. Correntes dos ramos**, cada uma com os 12 V inteiros:
+
+$$
+I_1 = \frac{12}{1.000} = 12\,\text{mA} \qquad
+I_2 = \frac{12}{2.200} \approx 5{,}45\,\text{mA} \qquad
+I_3 = \frac{12}{4.700} \approx 2{,}55\,\text{mA}
+$$
+
+**2. Corrente total:**
+
+$$
+I_T = 12 + 5{,}45 + 2{,}55 = 20{,}0\,\text{mA}
+$$
+
+**3. Resistência equivalente.** Pela fórmula dos inversos:
+
+$$
+\frac{1}{R_\text{eq}} = \frac{1}{1.000} + \frac{1}{2.200} + \frac{1}{4.700} \approx 0{,}001668 \quad\Rightarrow\quad R_\text{eq} \approx 600\,\Omega
+$$
+
+**4. Conferência:** $12\,\text{V} / 600\,\Omega = 20\,\text{mA}$, a mesma corrente total. E 600 Ω é menor que o menor resistor (1 kΩ), como tinha de ser. São os valores que o simulador mostra.
+
+## Explore: lâmpadas do carro e um fusível
+
+No carro, quase tudo está em paralelo na bateria: faróis, lanternas, rádio, ventilador. Cada circuito tem o seu fusível, que carrega a soma das correntes do que está ligado nele. No circuito abaixo, três lâmpadas de carro dividem um único fusível de 2 A: L1 de 5 W (lâmpada de lanterna) e L2 e L3 de 21 W (lâmpadas de freio). L1 e L2 começam acesas.
+
+<Simulation circuit="m02/paralelo-lampadas" instruments={['multimetro']} />
+
+1. Confira as correntes: L1 puxa cerca de 0,41 A e L2 cerca de 1,74 A. Quanto passa no fusível? Bate com a soma?
+2. Abra a "Tabela de valores" e compare a tensão em L1 e em L2. Elas são diferentes por terem potências diferentes?
+3. Ligue também L3. Quanto passa no fusível agora? Espere alguns segundos e observe.
+4. Use **Reiniciar**, desligue L1 e ligue só L2 e L3. O fusível aguenta?
+
+Com L1 e L2 acesas, o fusível conduz cerca de 2,15 A: um pouco acima dos 2 A nominais, o que um fusível aguenta indefinidamente. As duas lâmpadas recebem a mesma tensão, quase 12 V. Ligando L3, a corrente sobe para cerca de 3,9 A, quase o dobro do valor do fusível, e ele rompe depois de uns 6 segundos, apagando as três lâmpadas de uma vez. Só com L2 e L3 (cerca de 3,5 A), ele demora mais, uns 10 segundos, mas rompe do mesmo jeito.
+
+<Callout type="nota" title="Por que um fusível retardado">
+Uma lâmpada incandescente fria tem resistência cerca de 14 vezes menor que acesa. No instante em que liga, ela puxa um pico de corrente que dura uma fração de segundo. Um fusível rápido de 2 A romperia nesse pico, toda vez que alguém acendesse uma lâmpada de 21 W. Por isso o circuito usa um fusível **retardado**, que tolera picos curtos e rompe quando o excesso de corrente dura. Você vai ver os tipos de fusível no módulo de componentes passivos.
+</Callout>
+
+## Série ou paralelo?
+
+| | Série | Paralelo |
+|---|---|---|
+| Caminhos para a corrente | Um só | Um por componente (ramos) |
+| Corrente | A mesma em todos | Se divide; a total é a soma |
+| Tensão | Se divide; a soma é a da fonte | A mesma em todos (a da fonte) |
+| Resistência equivalente | $R_1 + R_2 + \dots$ (maior que a maior) | $1/R_\text{eq} = 1/R_1 + 1/R_2 + \dots$ (menor que a menor) |
+| Um componente abre | Tudo para | Só aquele ramo para |
+| Quem dissipa mais potência | O de maior resistência | O de menor resistência |
+| Onde se usa | Fusível, chave, amperímetro, pilhas da lanterna | Tomadas e lâmpadas da casa, circuitos do carro, voltímetro |
+
+<RealCase title="As tomadas da sua casa estão em paralelo">
+
+Todas as tomadas e lâmpadas de um circuito da casa estão em paralelo entre a <Term id="fase">fase</Term> e o <Term id="neutro">neutro</Term>. É por isso que todo aparelho recebe os mesmos 127 V (ou 220 V, dependendo da região), não importa quantos outros estejam ligados, e por isso você pode desligar um sem afetar os outros. Se a casa fosse ligada em série, apagar a luz da sala desligaria a geladeira.
+
+O preço do paralelo aparece no fio e no <Term id="disjuntor">disjuntor</Term>: eles carregam a **soma** das correntes de tudo o que está ligado naquele circuito. Na bancada da cozinha da figura, três aparelhos comuns estão no mesmo circuito de tomadas, protegido por um disjuntor de 20 A (valores típicos):
+
+<Figure caption="Figura 2. Três aparelhos ligados em tomadas do mesmo circuito de 127 V. Cada um recebe 127 V; no fio e no disjuntor passa a soma das correntes.">
+  <KitchenCircuit />
+</Figure>
+
+Pela relação $I = P / V$, com 127 V:
+
+- micro-ondas de 1.200 W: $1.200 / 127 \approx 9{,}45\,\text{A}$;
+- air fryer de 1.500 W: $1.500 / 127 \approx 11{,}81\,\text{A}$;
+- cafeteira de 800 W: $800 / 127 \approx 6{,}30\,\text{A}$.
+
+Sozinho, qualquer um deles fica abaixo de 20 A. O micro-ondas e a cafeteira juntos dão 15,75 A, e também passam. Mas o micro-ondas e a air fryer juntos já são 21,26 A, e os três chegam a 27,56 A. O disjuntor desarma, exatamente como o fusível da simulação. Ele não está com defeito: está fazendo o trabalho dele, que é proteger o fio contra o aquecimento.
+
+O que fazer: espalhar os aparelhos de potência alta entre circuitos diferentes (o quadro mostra quais tomadas são de cada disjuntor), não usar todos ao mesmo tempo e, se o problema for frequente, chamar um eletricista para avaliar a criação de um circuito separado. Aparelhos de potência muito alta, como chuveiro, forno elétrico e ar-condicionado, normalmente têm um circuito só para eles.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+<Callout type="perigo" title="Nunca troque o disjuntor por um maior">
+Se o disjuntor desarma com frequência, a tentação é trocar o de 20 A por um de 32 A. O disjuntor protege o **fio** da parede, que foi escolhido para aquela corrente. Com um disjuntor maior, o fio passa a esquentar além do limite sem que nada desligue, e o isolamento pode derreter dentro da parede. A solução é dividir as cargas ou refazer o circuito com fio adequado, com um eletricista habilitado.
+</Callout>
+
+- **Benjamim e extensão com aparelhos de aquecimento.** Um benjamim (adaptador T) ou uma régua de tomadas coloca vários aparelhos em paralelo num único plugue. Todas as correntes passam pelos contatos daquele plugue e pelo fio da extensão. Os adaptadores e extensões têm a corrente máxima marcada no corpo (10 A é comum). Um aquecedor e uma air fryer juntos passam disso com folga: o plugue esquenta, escurece e pode derreter.
+- **Achar que ligar mais um aparelho "divide" a tensão.** Em paralelo, cada aparelho recebe a tensão inteira. O que aumenta é a corrente total no fio. Se a luz pisca quando o chuveiro liga, a causa é a queda de tensão nos fios e na rede, que você vai entender na aula de fontes reais.
+- **Mexer em tomada "porque é só desligar o aparelho".** Tirar o aparelho da tomada abre apenas aquele ramo; a tomada continua com 127 V. Para mexer na tomada, desligue o disjuntor do circuito e teste a ausência de tensão antes.
+- **Confundir "mais potente" com "mais resistência".** Em paralelo, o aparelho mais potente é o de **menor** resistência, e é ele que puxa mais corrente.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Dois resistores de 1 kΩ e 4 kΩ estão em paralelo. Qual é a resistência equivalente?',
+      answer: 800,
+      tolerance: 0.01,
+      unit: 'Ω',
+      explanation: 'Produto pela soma: (1.000 × 4.000) ÷ (1.000 + 4.000) = 4.000.000 ÷ 5.000 = 800 Ω.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Num carro (12 V), estão acesos ao mesmo tempo dois faróis de 55 W cada e duas lanternas de 5 W cada, todos em paralelo. Qual é a corrente total que sai da bateria para eles?',
+      answer: 10,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation:
+        'A potência total é 2 × 55 + 2 × 5 = 120 W. Em paralelo, as correntes se somam: I = 120 W ÷ 12 V = 10 A.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Três lâmpadas, de 5 W, 21 W e 55 W, todas de 12 V, estão em paralelo numa bateria de 12 V. Qual delas recebe a maior tensão?',
+      options: [
+        {
+          text: 'As três recebem a mesma tensão, 12 V',
+          correct: true,
+          feedback: 'Em paralelo, todos os ramos estão ligados aos mesmos dois pontos e recebem a tensão inteira da fonte.',
+        },
+        {
+          text: 'A de 55 W, porque é a mais forte',
+          feedback:
+            'A de 55 W puxa mais corrente, mas a tensão é a mesma para todas. No paralelo, o que muda de ramo para ramo é a corrente.',
+        },
+        {
+          text: 'A de 5 W, porque tem mais resistência',
+          feedback:
+            'Isso valeria em série. Em paralelo, a tensão é a mesma em todos os ramos, qualquer que seja a resistência.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Num circuito de tomadas com disjuntor de 20 A, em 127 V, já estão ligados um micro-ondas de 1.200 W e uma cafeteira de 800 W. Quais destes aparelhos ainda dá para ligar sem passar de 20 A?',
+      options: [
+        {
+          text: 'Um liquidificador de 500 W',
+          correct: true,
+          feedback:
+            'O total fica em 2.500 W, ou cerca de 19,7 A. Abaixo de 20 A, mas com pouca folga.',
+        },
+        {
+          text: 'Uma air fryer de 1.500 W',
+          feedback: 'O total iria a 3.500 W, cerca de 27,6 A. O disjuntor desarma.',
+        },
+        {
+          text: 'Um aquecedor de 1.000 W',
+          feedback: 'O total iria a 3.000 W, cerca de 23,6 A, acima dos 20 A do disjuntor.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Em paralelo, ligar mais um resistor sempre diminui a resistência equivalente, mesmo que o resistor novo seja enorme.',
+      answer: true,
+      explanation:
+        'Cada ramo novo é mais um caminho para a corrente, por menor que seja a corrente nele. A corrente total aumenta e a resistência equivalente diminui.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada situação ao tipo de ligação.',
+      pairs: [
+        ['As tomadas de um cômodo', 'Paralelo'],
+        ['O fusível e o circuito que ele protege', 'Série'],
+        ['As lâmpadas de um pisca-pisca antigo', 'Série'],
+        ['Os faróis e o rádio do carro na bateria', 'Paralelo'],
+      ],
+      explanation:
+        'Fusível e pisca-pisca antigo têm um caminho único (série). Tomadas e os circuitos do carro recebem a tensão inteira da fonte, cada um no seu ramo (paralelo).',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Em **paralelo**, todos os componentes ficam ligados aos mesmos dois pontos; cada um tem o seu ramo.
+- A **tensão é a mesma** em todos os ramos; as **correntes se somam** na fonte, no fio principal e no fusível ou disjuntor.
+- A **resistência equivalente** vem da soma dos inversos e é sempre **menor que a menor** delas. Para dois resistores, produto pela soma; para $n$ iguais, $R/n$.
+- Cada ramo é **independente**: abrir um não apaga os outros. O de **menor resistência** puxa mais corrente e mais potência.
+- As tomadas da casa estão em paralelo. Muitos aparelhos no mesmo circuito somam corrente até o disjuntor desarmar, e a solução nunca é trocar por um disjuntor maior.
+
+Na próxima aula você vai juntar as duas ideias num mesmo circuito, com partes em série e partes em paralelo, e aprender a simplificar passo a passo: os [circuitos mistos](../04-circuitos-mistos/).

@@ -1,0 +1,283 @@
+---
+titulo: Associação em série
+modulo: m02-circuitos-cc
+ordem: 2
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Reconhecer componentes ligados em série num circuito e num esquema
+  - Explicar por que a corrente é a mesma em todos os componentes em série
+  - Calcular a resistência equivalente e a tensão em cada resistor em série
+  - Prever o que acontece quando um componente em série abre ou é trocado por outro diferente
+prerequisitos:
+  - m02-circuitos-cc/01-o-circuito-eletrico
+  - m01-eletricidade-do-zero/04-lei-de-ohm
+tags: [série, resistência equivalente, queda de tensão, pisca-pisca]
+seguranca: baixa-tensao
+rascunho: true
+---
+
+import SeriesVoltageSteps from '../../../lessons/m02/figures/SeriesVoltageSteps.astro';
+
+Todo fim de ano a cena se repetia: o pisca-pisca antigo, de lampadinhas incandescentes, saía da caixa e não acendia. Nem uma lâmpada. Bastava uma única lampadinha queimada, em algum lugar entre as cinquenta, para apagar o conjunto inteiro. E a única saída era testar uma por uma.
+
+Esse comportamento tem nome: as lâmpadas estavam ligadas **em série**. Nesta aula você vai ver por que um componente em série derruba todos os outros, como a tensão se divide entre eles e como calcular tudo isso com uma conta de somar.
+
+## Um caminho só
+
+Na <Term id="associacao-em-serie">associação em série</Term>, os componentes ficam um depois do outro, como vagões de um trem. A saída de um está ligada à entrada do próximo, e não existe nenhum desvio no meio. A corrente que sai da fonte tem um único caminho: atravessar todos, em fila, e voltar.
+
+Duas consequências aparecem na hora:
+
+- **A corrente é a mesma em todos.** Os elétrons não têm para onde ir a não ser seguir em frente. A corrente que entra no primeiro componente é a mesma que sai do último. Não existe "a lâmpada do começo pegar mais corrente".
+- **Se um abrir, todos param.** Uma lâmpada queimada é um filamento partido, ou seja, um <Term id="circuito-aberto">circuito aberto</Term>. Como o caminho é único, a corrente cai a zero no circuito inteiro.
+
+Você já usa série sem perceber. As duas pilhas da lanterna da aula anterior estão em série: o positivo de uma encosta no negativo da outra, e as tensões se somam (1,5 V + 1,5 V = 3 V). O fusível, a chave e o amperímetro também entram sempre em série com o que eles protegem, comandam ou medem, justamente porque precisam que toda a corrente passe por eles.
+
+## A tensão se divide
+
+Se a corrente é a mesma, o que muda de um componente para o outro? A **tensão**. Cada resistor "usa" uma parte da tensão da fonte, chamada <Term id="queda-de-tensao">queda de tensão</Term>. Pela <Term id="lei-de-ohm">Lei de Ohm</Term>, essa parte é proporcional à resistência: quem tem mais resistência fica com mais tensão.
+
+A figura mostra três resistores em série numa fonte de 12 V e, embaixo, a tensão em cada ponto do caminho. Ela começa em 12 V no positivo da bateria, desce um degrau em cada resistor e chega a 0 V no negativo. Nos fios, que quase não têm resistência, a tensão fica parada.
+
+<Figure caption="Figura 1. Três resistores em série. A corrente é a mesma em todo o caminho; a tensão desce um degrau em cada resistor, e o degrau maior fica no resistor maior.">
+  <SeriesVoltageSteps />
+</Figure>
+
+Repare na soma dos degraus: 1,52 V + 3,34 V + 7,14 V = 12 V. Toda a tensão que a fonte dá é "gasta" ao longo do caminho, nem mais nem menos.
+
+## As fórmulas da série
+
+Para componentes em série, valem três regras. A primeira diz que a corrente $I$ é a mesma em todos:
+
+$$
+I = I_1 = I_2 = I_3
+$$
+
+A segunda diz que a tensão da fonte $V$ é a soma das tensões $V_1$, $V_2$ e $V_3$ em cada componente:
+
+$$
+V = V_1 + V_2 + V_3
+$$
+
+A terceira junta as duas com a Lei de Ohm. Como $V_1 = R_1 \cdot I$, $V_2 = R_2 \cdot I$ e $V_3 = R_3 \cdot I$, a soma fica $V = (R_1 + R_2 + R_3) \cdot I$. Ou seja, para a fonte, os três resistores se comportam como um só, com a soma das resistências. Essa é a <Term id="resistencia-equivalente">resistência equivalente</Term>:
+
+$$
+R_\text{eq} = R_1 + R_2 + R_3
+$$
+
+Com $R_\text{eq}$ em mãos, a corrente sai direto: $I = V / R_\text{eq}$. E a tensão em cada resistor é a corrente vezes a resistência dele:
+
+$$
+V_k = R_k \cdot I = V \cdot \frac{R_k}{R_\text{eq}}
+$$
+
+em que $R_k$ é qualquer um dos resistores. Essa última forma diz que cada resistor fica com a **fração** da tensão igual à fração que ele tem da resistência total. Ela é a base do divisor de tensão, que você vai usar muito daqui a algumas aulas.
+
+<Callout type="dica" title="Duas conclusões para guardar">
+A resistência equivalente em série é sempre **maior** que a maior das resistências: somar resistores só aumenta a dificuldade para a corrente passar. E, em série, o componente com **maior** resistência é o que fica com mais tensão e dissipa mais potência ($P = R \cdot I^2$, com o mesmo $I$ para todos).
+</Callout>
+
+## Explore: resistores em série
+
+O circuito abaixo é o da figura: 12 V e três resistores de 1 kΩ, 2,2 kΩ e 4,7 kΩ. O controle muda o valor de R2.
+
+<Simulation circuit="m02/serie-resistores" instruments={['multimetro']} />
+
+1. Some as três tensões do multímetro. O resultado bate com a tensão da fonte?
+2. Aumente R2 até 10 kΩ. O que acontece com a corrente? E com a tensão em R1 e em R3, que você não mexeu?
+3. Agora diminua R2 até a corrente chegar a 2 mA (o desafio no topo marca quando você conseguir). Antes de mexer, tente prever: qual valor de R2 dá 2 mA?
+
+No passo 2, aumentar R2 aumenta a resistência total, a corrente cai, e por isso R1 e R3 ficam com **menos** tensão, mesmo sem ninguém mexer neles. Em série, mexer num componente muda todos os outros. No passo 3, a conta é: para ter 2 mA com 12 V, a resistência total precisa ser $12 / 0{,}002 = 6.000\,\Omega$. Como R1 e R3 já somam 5,7 kΩ, sobram 300 Ω para R2.
+
+## Exemplo resolvido: o circuito da figura
+
+**Dados:** fonte de 12 V; $R_1 = 1\,\text{k}\Omega$, $R_2 = 2{,}2\,\text{k}\Omega$, $R_3 = 4{,}7\,\text{k}\Omega$, em série.
+
+**1. Resistência equivalente.**
+
+$$
+R_\text{eq} = 1\,\text{k}\Omega + 2{,}2\,\text{k}\Omega + 4{,}7\,\text{k}\Omega = 7{,}9\,\text{k}\Omega
+$$
+
+**2. Corrente**, a mesma nos três:
+
+$$
+I = \frac{12\,\text{V}}{7.900\,\Omega} \approx 1{,}52\,\text{mA}
+$$
+
+**3. Tensão em cada resistor:**
+
+$$
+V_1 = 1.000 \cdot 0{,}001519 \approx 1{,}52\,\text{V} \qquad
+V_2 = 2.200 \cdot 0{,}001519 \approx 3{,}34\,\text{V} \qquad
+V_3 = 4.700 \cdot 0{,}001519 \approx 7{,}14\,\text{V}
+$$
+
+**4. Conferência:** $1{,}52 + 3{,}34 + 7{,}14 = 12{,}00\,\text{V}$. A soma das quedas é a tensão da fonte, como devia ser. São os mesmos números que o multímetro da simulação mostra.
+
+## Explore: lâmpadas em série
+
+Lâmpadas são um caso mais interessante, porque a resistência do filamento muda com a temperatura e porque você **vê** o resultado. Aqui, três lâmpadas iguais de 4 V e 1 W estão em série numa bateria de 12 V. Cada uma foi feita para receber um terço da tensão. A chave "Soquete de L2" representa a lâmpada L2 encaixada no soquete, e o controle de L3 deixa você trocar L3 por uma lâmpada de outra potência.
+
+<Simulation circuit="m02/serie-lampadas" instruments={['multimetro']} />
+
+1. Confira que a corrente e as três tensões batem com a ideia da série: a mesma corrente nas três, 4 V em cada.
+2. Tire L2 do soquete. O que acontece com L1 e L3, que continuam perfeitas? Quanto mede a tensão entre os contatos do soquete vazio?
+3. Coloque L2 de volta. Agora troque L3 por uma lâmpada de **4 W**. Qual lâmpada brilha mais? Era o que você esperava?
+4. Troque L3 por uma de **0,5 W**. O que acontece com ela?
+
+As respostas surpreendem muita gente. Sem L2, as outras apagam, e os 12 V inteiros aparecem entre os contatos do soquete vazio, como na chave aberta da aula anterior. Com a lâmpada de 4 W, ela quase não acende, e L1 e L2 ficam muito mais fortes que o normal. Com a de 0,5 W, ela recebe tensão demais e queima, e o circuito apaga de novo.
+
+A explicação está na resistência. Uma lâmpada "mais forte" foi feita para puxar mais corrente, então tem resistência **menor**: $R = V^2/P$ dá 16 Ω para a de 1 W, 4 Ω para a de 4 W e 32 Ω para a de 0,5 W. Em série, resistência menor significa uma fatia menor da tensão. A lâmpada de 4 W fica com quase nada e as outras duas dividem quase toda a tensão. A de 0,5 W, com a maior resistência, fica com a maior parte dos 12 V, muito acima dos 4 V que ela aguenta. Os valores exatos da simulação diferem um pouco dessas contas porque o filamento frio tem resistência bem menor que o quente, mas a tendência é exatamente essa.
+
+<RealCase title="O pisca-pisca que apaga inteiro">
+
+Os pisca-piscas antigos de lâmpadas incandescentes são exatamente o circuito da simulação, só que maior. Um conjunto típico tem 50 lampadinhas em série ligadas direto na tomada de 127 V, então cada uma recebe cerca de
+
+$$
+\frac{127\,\text{V}}{50} \approx 2{,}5\,\text{V}
+$$
+
+É por isso que as lampadinhas são de 2,5 V: sozinhas, ligadas na tomada, elas queimariam na hora. Muitos conjuntos de 100 lâmpadas são, na verdade, dois conjuntos de 50 em série, ligados em paralelo. Quando uma lâmpada queima, só a metade dela apaga.
+
+Daí vêm três lições práticas:
+
+- **Uma queimada apaga todas.** O filamento partido abre o caminho único. Para achar a culpada, o jeito seguro é desligar o pisca-pisca da tomada, tirar as lâmpadas e testar uma por uma com o multímetro na escala de continuidade (você vai aprender a fazer isso no módulo de medições).
+- **Troque pela lâmpada certa.** Uma lâmpada de outro conjunto, de tensão ou potência diferente, muda a divisão da tensão. Se ela for "mais fraca", queima logo; se for "mais forte", fica apagada e sobrecarrega as outras, que passam a queimar mais rápido. É o que a simulação mostrou.
+- **Cada lâmpada a menos sobrecarrega as outras.** Se alguém tira uma lâmpada e liga o soquete direto com um fio, as 49 restantes dividem os 127 V e cada uma recebe um pouco mais que o normal. Com várias "pontes" assim, as lâmpadas passam a queimar uma atrás da outra.
+
+Os pisca-piscas de LED atuais também usam LEDs em série, com um pequeno circuito que limita a corrente. O princípio é o mesmo.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+<Callout type="atencao" title="Pisca-pisca e enfeites ligados na tomada">
+Um pisca-pisca está ligado em 127 V ou 220 V, e os contatos dos soquetes ficam expostos quando a lâmpada sai. Com uma lâmpada fora, os 127 V inteiros aparecem entre os contatos daquele soquete vazio, exatamente como na simulação. **Tire o plugue da tomada antes de trocar ou procurar lâmpadas**, e não encoste nos contatos do soquete.
+</Callout>
+
+- **Achar que a primeira lâmpada "gasta" a corrente.** A corrente não diminui ao longo do caminho. Ela é a mesma em todos os pontos de um circuito em série. O que diminui, de componente em componente, é a tensão em relação ao negativo da fonte.
+- **Ligar dois aparelhos de 127 V em série num circuito de 220 V "para dividir a tensão".** Só funcionaria se os dois tivessem exatamente a mesma resistência o tempo todo. Com aparelhos diferentes, um fica com tensão demais e queima, como a lâmpada de 0,5 W da simulação. Nunca faça isso.
+- **Esquecer que mexer num componente muda os outros.** Em série, trocar um resistor muda a corrente e, portanto, a tensão em todos os outros.
+- **Confundir "mais forte" com "mais resistência".** Em série, a lâmpada de maior potência nominal é a que brilha menos.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Três resistores de 330 Ω, 470 Ω e 1,2 kΩ estão em série. Qual é a resistência equivalente?',
+      answer: 2000,
+      tolerance: 0.01,
+      unit: 'Ω',
+      explanation: 'Em série, as resistências se somam: 330 + 470 + 1.200 = 2.000 Ω = 2 kΩ.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Esses mesmos três resistores (330 Ω, 470 Ω e 1,2 kΩ) são ligados numa fonte de 10 V. Qual é a tensão no resistor de 1,2 kΩ?',
+      answer: 6,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        'A corrente é 10 V ÷ 2.000 Ω = 5 mA, igual nos três. No resistor de 1,2 kΩ: V = 1.200 × 0,005 = 6 V.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Num circuito com três lâmpadas iguais em série, a corrente na primeira lâmpada é 0,25 A. Qual é a corrente na terceira?',
+      options: [
+        {
+          text: '0,25 A',
+          correct: true,
+          feedback: 'Em série há um caminho só, então a corrente é a mesma em todos os pontos.',
+        },
+        {
+          text: 'Menos de 0,25 A, porque as duas primeiras lâmpadas já gastaram parte da corrente',
+          feedback:
+            'Lâmpadas gastam energia, não corrente. A corrente que entra numa lâmpada é a mesma que sai.',
+        },
+        {
+          text: '0,75 A, porque as correntes se somam',
+          feedback: 'Correntes se somam quando os caminhos se juntam, o que acontece no paralelo, não na série.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Num pisca-pisca de 50 lâmpadas em série, uma lâmpada queima. Com o pisca-pisca ligado, onde aparecem os 127 V da tomada?',
+      options: [
+        {
+          text: 'Entre os dois contatos da lâmpada queimada',
+          correct: true,
+          feedback:
+            'Sem corrente, as lâmpadas boas não têm queda de tensão. A tensão inteira fica na abertura, que é a lâmpada queimada. Por isso não se mexe nos soquetes com o plugue na tomada.',
+        },
+        {
+          text: 'Divididos igualmente, cerca de 2,5 V em cada lâmpada',
+          feedback:
+            'Isso só vale com corrente passando. Com o caminho aberto, a corrente é zero e nenhuma lâmpada boa fica com tensão.',
+        },
+        {
+          text: 'Em lugar nenhum: com uma lâmpada queimada não há tensão no circuito',
+          feedback:
+            'Não há corrente, mas a tensão da tomada continua ligada nas pontas do conjunto e aparece inteira na abertura.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Duas lâmpadas de 127 V, uma de 100 W e outra de 25 W, são ligadas em série numa tomada de 220 V. O que acontece?',
+      options: [
+        {
+          text: 'A de 25 W fica com a maior parte da tensão e pode queimar; a de 100 W quase não acende',
+          correct: true,
+          feedback:
+            'A de 25 W tem resistência quatro vezes maior (R = V²/P), então fica com cerca de quatro quintos da tensão: bem mais que os 127 V para que foi feita.',
+        },
+        {
+          text: 'As duas acendem normalmente, cada uma com 110 V',
+          feedback:
+            'A tensão só se divide igualmente quando as resistências são iguais. Aqui uma tem quatro vezes a resistência da outra.',
+        },
+        {
+          text: 'A de 100 W brilha mais, porque é a mais forte',
+          feedback:
+            'Em série, a lâmpada "mais forte" tem resistência menor e fica com a menor parte da tensão. Ela é a que brilha menos.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Em série, a resistência equivalente é sempre maior que a maior das resistências do circuito.',
+      answer: true,
+      explanation:
+        'A resistência equivalente é a soma de todas, então é maior que qualquer uma delas sozinha.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um pisca-pisca de 220 V tem lâmpadas iguais em série, cada uma de 2,5 V. Se alguém usar só 50 delas nesse pisca-pisca, qual será a tensão em cada lâmpada?',
+      answer: 4.4,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        '220 V ÷ 50 = 4,4 V em cada lâmpada, quase o dobro dos 2,5 V para que foram feitas. Elas queimam logo. Um conjunto de 220 V precisa de mais lâmpadas em série (cerca de 88) para dividir a tensão.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Em **série**, os componentes ficam um depois do outro, num caminho único.
+- A **corrente é a mesma** em todos; a **tensão da fonte se divide** entre eles e as quedas somam a tensão da fonte.
+- A **resistência equivalente** é a soma: $R_\text{eq} = R_1 + R_2 + \dots$, sempre maior que a maior delas.
+- Cada componente fica com a fração da tensão igual à sua fração da resistência: quem tem **mais resistência fica com mais tensão**.
+- Se um componente em série **abre**, a corrente para no circuito inteiro, e a tensão da fonte aparece inteira na abertura.
+
+Na próxima aula você vai ver o outro jeito de ligar componentes, em que cada um tem o seu próprio caminho: a [associação em paralelo](../03-associacao-em-paralelo/), que é como estão ligadas as tomadas da sua casa.
