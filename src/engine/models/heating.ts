@@ -1,0 +1,62 @@
+import { AMBIENT_C } from './constants';
+import { Average, relax } from './filters';
+
+/** Temperature rise of a resistor body at its rated power (K). Typical film resistor. */
+const RISE_AT_RATING = 80;
+/** Rise at which the body chars and the film opens: about 5× the rated power, sustained. */
+const RISE_BURN = 5 * RISE_AT_RATING;
+
+/**
+ * Body temperature of a resistive part as a first-order thermal model:
+ * the steady rise is proportional to power (80 K at the rating) and the time
+ * constant grows with size (about 8 s for a 1/4 W resistor). A typical model
+ * for teaching, not a datasheet.
+ */
+export class ResistiveHeating {
+  private rise = 0;
+  private warned = false;
+  private readonly avg = new Average(0.01);
+  burned = false;
+
+  constructor(private readonly rating: () => number) {}
+
+  /** Advances by dt with the dissipated power; reports a new warning or burn. */
+  step(power: number, dt: number): 'ok' | 'hot' | 'burned' {
+    if (dt <= 0) return 'ok';
+    const watts = this.rating();
+    const tau = 8 * Math.sqrt(watts / 0.25);
+    if (this.burned) {
+      this.rise = relax(this.rise, 0, dt, tau);
+      return 'ok';
+    }
+    this.avg.update(power, dt);
+    this.rise = relax(this.rise, (Math.abs(power) / watts) * RISE_AT_RATING, dt, tau);
+    if (this.rise >= RISE_BURN) {
+      this.burned = true;
+      return 'burned';
+    }
+    if (!this.warned && this.rise > 1.05 * RISE_AT_RATING) {
+      this.warned = true;
+      return 'hot';
+    }
+    if (this.warned && this.rise < 0.8 * RISE_AT_RATING) this.warned = false;
+    return 'ok';
+  }
+
+  /** Body temperature (°C). */
+  get temperature(): number {
+    return AMBIENT_C + this.rise;
+  }
+
+  /** Average dissipated power over the last few milliseconds (W). */
+  get power(): number {
+    return Math.abs(this.avg.value);
+  }
+
+  reset(): void {
+    this.rise = 0;
+    this.warned = false;
+    this.burned = false;
+    this.avg.reset();
+  }
+}

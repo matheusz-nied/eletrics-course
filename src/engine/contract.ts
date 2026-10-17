@@ -54,6 +54,14 @@ export interface GoalDoc {
     op: '<' | '<=' | '>' | '>=' | '==' | 'between';
     value: ParamValue | [number, number];
   };
+  /** Instante (s) em que o teste automático confere a meta. Padrão: `tStop` da análise ou 1 s. */
+  at?: number;
+  /**
+   * Para desafios: valores que resolvem a meta ("R1.resistance": 220). O teste
+   * automático aplica esses valores antes de conferir; sem `solution`, a meta
+   * precisa valer no circuito como está.
+   */
+  solution?: Record<string, ParamValue>;
 }
 
 export interface CircuitDoc {
@@ -80,11 +88,17 @@ export interface SimFrame {
   nodeVoltages: Record<string, number>;
   readouts: Record<string, number | boolean | string>; // "R1.current", "L1.brightness", "K1.closed", "M1.rpm", "F1.blown"
   events: SimEvent[]; // eventos novos desde o último quadro
+  /**
+   * Amostras de cada passo desde o último quadro, para osciloscópio e gráficos
+   * (só quando o circuito tem `probes`): `t[k]` e `values[probeId][k]`.
+   */
+  samples?: { t: number[]; values: Record<string, number[]> };
 }
 
 export interface PinInfo {
   name: string;
   offset: Vec2;
+  label?: string; // pt-BR: "positivo (+)", "cursor"
 } // relativo a `at`, rotação 0
 export interface ParamInfo {
   default: ParamValue;
@@ -92,6 +106,11 @@ export interface ParamInfo {
   unit?: string;
   min?: number;
   max?: number;
+  options?: { value: ParamValue; label: string }[]; // valores aceitos (parâmetros de escolha)
+}
+export interface ReadoutInfo {
+  label: string; // pt-BR
+  unit?: string; // SI: "A", "V", "W", "°C"; sem unidade para fração ou booleano
 }
 export interface DeviceInfo {
   type: string;
@@ -100,6 +119,7 @@ export interface DeviceInfo {
   pins: PinInfo[]; // para 'two': [{name:'a'},{name:'b'}] (offset ignorado)
   params: Record<string, ParamInfo>;
   readouts: string[];
+  readoutInfo?: Record<string, ReadoutInfo>; // rótulo e unidade de cada leitura
 }
 
 export interface Netlist {
@@ -115,7 +135,7 @@ export interface SimHandle {
   reset(): void;
   setSpeed(factor: number): void;
   subscribe(listener: (frame: SimFrame) => void): () => void;
-  runUntil(t: number): Promise<SimFrame[]>; // gráficos estáticos e testes
+  runUntil(t: number, opts?: { maxFrames?: number }): Promise<SimFrame[]>; // gráficos estáticos e testes
   dispose(): void;
 }
 
@@ -125,3 +145,7 @@ export interface SimHandle {
 // getDeviceInfo(type: string): DeviceInfo
 // listDevices(): DeviceInfo[]
 // defineCircuit(doc: CircuitDoc): CircuitDoc   (identidade tipada + validação zod em dev)
+// Acréscimos da Simulação (ver src/engine/README.md):
+// getPinPositions(el: ElementDoc): Record<string, Vec2>   (onde fica cada pino na grade)
+// validateCircuit(doc: unknown): { errors: string[]; warnings: string[] }
+// checkGoal(goal: GoalDoc, frame: SimFrame): boolean
