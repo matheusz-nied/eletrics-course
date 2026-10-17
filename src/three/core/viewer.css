@@ -264,14 +264,15 @@
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  transform: translateX(calc(50% - 0.625rem));
+  /* --m3d-dy is set by <Annotations> to keep labels on the same side apart. */
+  transform: translate(calc(50% - 0.625rem), var(--m3d-dy, 0px));
   font-family: var(--font-sans);
   white-space: nowrap;
 }
 
 .m3d-pin[data-side='left'] {
   flex-direction: row-reverse;
-  transform: translateX(calc(-50% + 0.625rem));
+  transform: translate(calc(-50% + 0.625rem), var(--m3d-dy, 0px));
 }
 
 .m3d-pin__number {

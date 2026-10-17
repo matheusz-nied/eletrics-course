@@ -1,5 +1,6 @@
 import { Box3, Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
+import { spreadLabels } from '../core/Annotations';
 import { resistorBands } from '../core/colorCode';
 import { fitDistance } from '../core/framing';
 import {
@@ -191,5 +192,39 @@ describe('printed circuit board layouts', () => {
       }
     }
     expect(perfBoard().pads).toHaveLength(18 * 24);
+  });
+});
+
+describe('annotation labels', () => {
+  it('pushes overlapping labels on the same side apart', () => {
+    const offsets = spreadLabels(
+      [
+        { x: 100, y: 50, side: 'right' },
+        { x: 120, y: 40, side: 'right' },
+        { x: 10, y: 45, side: 'left' },
+        { x: 130, y: 200, side: 'right' },
+      ],
+      24,
+    );
+    expect(offsets).toEqual([14, 0, 0, 0]);
+  });
+
+  it('separates markers on opposite sides that sit on the same spot', () => {
+    const offsets = spreadLabels(
+      [
+        { x: 200, y: 100, side: 'right' },
+        { x: 204, y: 104, side: 'left' },
+      ],
+      24,
+    );
+    expect(offsets).toEqual([0, 20]);
+  });
+
+  it('keeps a chain of close labels in order', () => {
+    const offsets = spreadLabels(
+      [0, 1, 2].map((i) => ({ x: 0, y: 100 + i, side: 'left' as const })),
+      20,
+    );
+    expect(offsets).toEqual([0, 19, 38]);
   });
 });
