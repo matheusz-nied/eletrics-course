@@ -1,0 +1,14 @@
+* Filtro RC passa-baixas (fc = 1,59 kHz) com senoide de 1 kHz, 10 V de pico, fase 30 graus
+V1 1 0 SIN(0 10 1k 0 0 30)
+R1 1 2 1k
+C1 2 0 0.1u ic=0
+.options reltol=1e-7 abstol=1e-14 vntol=1e-10
+.control
+set wr_singlescale
+set wr_vecnames
+tran 5u 5m 0 0.2u uic
+linearize v(2) i(V1)
+wrdata out.txt v(2) i(V1)
+quit
+.endc
+.end

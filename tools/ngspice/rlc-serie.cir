@@ -1,0 +1,15 @@
+* RLC série subamortecido (f0 = 1,59 kHz, zeta = 0,1): degrau de 10 V
+V1 1 0 DC 10
+R1 1 2 20
+L1 2 3 10m ic=0
+C1 3 0 1u ic=0
+.options reltol=1e-7 abstol=1e-14 vntol=1e-10
+.control
+set wr_singlescale
+set wr_vecnames
+tran 5u 5m 0 0.2u uic
+linearize v(3) i(V1)
+wrdata out.txt v(3) i(V1)
+quit
+.endc
+.end
