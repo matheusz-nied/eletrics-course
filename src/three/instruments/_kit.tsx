@@ -459,7 +459,13 @@ export function Knob({
             ],
             48,
           )
-        : latheZ([[0, 0]], 3),
+        : latheZ(
+            [
+              [0, 0],
+              [0.01, 0],
+            ],
+            3,
+          ),
     [skirtRadius],
   );
   const noise = getNoiseTexture();

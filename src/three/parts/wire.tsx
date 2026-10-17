@@ -399,6 +399,8 @@ export function WireRun({
       from: s0 + 1,
       to: s1 - 1,
       seed: 17,
+      radial: 5,
+      maxStep: lay / 6,
     }).build();
     const core = new MeshBuilder()
       .sweep(frames, rodProfile(s0 + 0.5, s1 - 0.5, coreD / 2 - spec.strandD * 0.6), {

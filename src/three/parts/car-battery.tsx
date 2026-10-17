@@ -467,16 +467,16 @@ function TerminalCover({ position, color, sign }: { position: Vec3; color: strin
     () =>
       lathe(
         [
-          [0, 21.5],
-          [6, 21.5],
-          [10.6, 20.2],
-          [12.4, 17.5],
-          [13.4, 4],
-          [14.2, 0.4],
-          [14.4, 0],
-          [12.6, 0],
-          [12.6, 3],
           [0, 19],
+          [12.6, 3],
+          [12.6, 0],
+          [14.4, 0],
+          [14.2, 0.4],
+          [13.4, 4],
+          [12.4, 17.5],
+          [10.6, 20.2],
+          [6, 21.5],
+          [0, 21.5],
         ],
         40,
         { angle: 35 },
@@ -771,14 +771,11 @@ function useBatteryMaps(capacity: number, cca: number, capped: boolean) {
       );
       // Safety pictograms.
       const icons = [drawGoggles, drawNoFlame, drawAcid, drawChild, drawManual, drawExplosion];
-      const size = h * 0.17;
-      icons.forEach((draw, i) => {
-        const cx = w * 0.07 + i * size * 1.25;
-        const cy = h * 0.77;
-        draw(ctx, cx, cy, size / 2);
-      });
-      drawRecycle(ctx, w * 0.07 + 6 * size * 1.25 + size * 0.2, h * 0.77, size / 2);
-      drawBin(ctx, w * 0.07 + 7 * size * 1.25 + size * 0.2, h * 0.77, size / 2);
+      const size = h * 0.14;
+      const stepX = size * 1.22;
+      icons.forEach((draw, i) => draw(ctx, w * 0.07 + i * stepX, h * 0.77, size / 2));
+      drawRecycle(ctx, w * 0.07 + 6 * stepX + size * 0.2, h * 0.77, size / 2);
+      drawBin(ctx, w * 0.07 + 7 * stepX + size * 0.2, h * 0.77, size / 2);
       ctx.fillStyle = '#30343a';
       fitText(
         ctx,

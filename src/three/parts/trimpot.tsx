@@ -17,7 +17,7 @@ import { Material } from '../materials/Material';
 import { FONT_SANS, fitText, getNoiseTexture, useCanvasTexture } from '../materials/textures';
 import { roundedPath, tube } from '../shapes/geometry';
 import { useDisposable } from '../shapes/Wire';
-import type { PartAnnotation, PartMeta, PartProps } from '../types';
+import type { PartAnnotation, PartMeta } from '../types';
 import { roundedBoxGeometry } from './_passive-common';
 
 export type TrimpotVariant = 'multivoltas' | 'aberto';

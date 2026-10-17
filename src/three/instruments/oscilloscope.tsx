@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/immutability -- React Three Fiber mutates three.js objects every frame; this React Compiler rule does not apply here (the compiler is not used). */
 /**
  * Two-channel benchtop digital oscilloscope (100 MHz class): 7" screen
  * (800 × 480, 154 × 86 mm active area) with a 10 × 8 division graticule,
@@ -14,11 +13,18 @@
  */
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
+import { DoubleSide } from 'three';
 import { Anchor, Explode } from '../core/view';
 import { Material } from '../materials/Material';
-import { FONT_MONO, FONT_SANS, fitText, getNoiseTexture, useCanvasTexture } from '../materials/textures';
+import {
+  FONT_MONO,
+  FONT_SANS,
+  fitText,
+  getNoiseTexture,
+  useCanvasTexture,
+} from '../materials/textures';
 import { useDisposable } from '../shapes/Wire';
-import type { PartMeta, PartProps } from '../types';
+import type { PartMeta } from '../types';
 import { useLiveCanvasTexture } from './_display';
 import { Bnc, Decal, decalGeometry, Knob, PanelLed, roundedSlab, RubberFoot } from './_kit';
 
@@ -44,7 +50,7 @@ const TIME_PER_DIV = [
   1e-6, 2e-6, 5e-6, 1e-5, 2e-5, 5e-5, 1e-4, 2e-4, 5e-4, 1e-3, 2e-3, 5e-3, 1e-2, 2e-2, 5e-2, 0.1,
 ];
 
-/** Device-style number with SI prefix: `5.00ms`, `2.00V`, `60.00Hz`. */
+/** Screen-style number with SI prefix and decimal comma: `5,00ms`, `2,00V`, `60,00Hz`. */
 export function scopeValue(value: number, unit: string): string {
   if (!Number.isFinite(value)) return `---${unit}`;
   const abs = Math.abs(value);
@@ -59,15 +65,15 @@ export function scopeValue(value: number, unit: string): string {
   const [f, p] = prefixes.find(([k]) => abs >= k * 0.9995) ?? [1e-9, 'n'];
   const v = value / f;
   const digits = Math.abs(v) >= 100 ? 1 : 2;
-  return `${v.toFixed(digits)}${p}${unit}`;
+  return `${v.toFixed(digits).replace('.', ',')}${p}${unit}`;
 }
 
 /** Brazilian format for the description: `5 ms`, `2 V`, `60 Hz`. */
 function words(value: number, unit: string): string {
   const s = scopeValue(value, unit);
-  const m = /^(-?[\d.]+)(\D*)$/.exec(s);
+  const m = /^(-?[\d,]+)(\D*)$/.exec(s);
   if (!m) return s;
-  const n = Number(m[1]);
+  const n = Number(m[1]!.replace(',', '.'));
   return `${new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 }).format(n)} ${m[2]}`;
 }
 
@@ -104,8 +110,22 @@ export const meta: PartMeta = {
         { value: 'nenhuma', label: 'Sem sinal' },
       ],
     },
-    frequency: { kind: 'number', label: 'Frequência', min: 1, max: 1_000_000, log: true, unit: 'Hz' },
-    amplitude: { kind: 'number', label: 'Amplitude (pico)', min: 0, max: 400, step: 0.1, unit: 'V' },
+    frequency: {
+      kind: 'number',
+      label: 'Frequência',
+      min: 1,
+      max: 1_000_000,
+      log: true,
+      unit: 'Hz',
+    },
+    amplitude: {
+      kind: 'number',
+      label: 'Amplitude (pico)',
+      min: 0,
+      max: 400,
+      step: 0.1,
+      unit: 'V',
+    },
     voltsPerDiv: {
       kind: 'select',
       label: 'Volts/div',
@@ -190,11 +210,7 @@ function noise(i: number, t: number): number {
   return x - Math.floor(x) - 0.5;
 }
 
-function drawScreen(
-  ctx: CanvasRenderingContext2D,
-  p: Required<OscilloscopeProps>,
-  time: number,
-) {
+function drawScreen(ctx: CanvasRenderingContext2D, p: Required<OscilloscopeProps>, time: number) {
   ctx.fillStyle = '#04060a';
   ctx.fillRect(0, 0, SCR_W, SCR_H);
   const gw = GRID.div * GRID.nx;
@@ -233,13 +249,7 @@ function drawScreen(
   const ch1Pos = p.ch2 ? 1.5 * div : 0;
   const ch2Pos = -2 * div;
 
-  const trace = (
-    color: string,
-    amplitude: number,
-    lag: number,
-    offset: number,
-    seed: number,
-  ) => {
+  const trace = (color: string, amplitude: number, lag: number, offset: number, seed: number) => {
     const center = gy + gh / 2 - offset;
     const samples = 700;
     const pts: [number, number][] = [];
@@ -311,7 +321,7 @@ function drawScreen(
   ctx.font = `500 20px ${FONT_MONO}`;
   ctx.fillText('1.00GSa/s  14k pts', gx + 128, 23);
   ctx.fillStyle = '#ff9a2e';
-  ctx.fillText(`T ↑ CH1 0.00V`, gx + 420, 23);
+  ctx.fillText(`T ↑ CH1 0,00V`, gx + 420, 23);
 
   // Bottom bar: channel scales and time base.
   const by = gy + gh + 14;
@@ -332,7 +342,11 @@ function drawScreen(
   ctx.fillStyle = '#e8edf3';
   ctx.font = `600 22px ${FONT_MONO}`;
   ctx.fillText(`H ${scopeValue(p.timePerDiv, 's')}/`, gx + 380, by + 16);
-  ctx.fillText(`f=${p.waveform === 'nenhuma' ? '----' : scopeValue(p.frequency, 'Hz')}`, gx + 520, by + 16);
+  ctx.fillText(
+    `f=${p.waveform === 'nenhuma' ? '----' : scopeValue(p.frequency, 'Hz')}`,
+    gx + 520,
+    by + 16,
+  );
 
   // Right panel: measurements and soft-key menu.
   const rx = gx + gw + 30;
@@ -353,8 +367,8 @@ function drawScreen(
   const rows: [string, string][] = [
     ['Freq', has ? scopeValue(p.frequency, 'Hz') : '----'],
     ['Período', has ? scopeValue(1 / p.frequency, 's') : '----'],
-    ['Vpp', has ? scopeValue(p.amplitude * 2, 'V') : '0.00V'],
-    ['Vrms', has ? scopeValue(rms, 'V') : '0.00V'],
+    ['Vpp', has ? scopeValue(p.amplitude * 2, 'V') : '0,00V'],
+    ['Vrms', has ? scopeValue(rms, 'V') : '0,00V'],
   ];
   rows.forEach(([k, v], i) => {
     const y = gy + 58 + i * 36;
@@ -401,7 +415,7 @@ const KNOBS = {
   hpos: { x: 115, y: 104, r: 6.5 },
   tdiv: { x: 115, y: 78, r: 10 },
   level: { x: 145, y: 104, r: 6.5 },
-  multi: { x: 145, y: 130, r: 8 },
+  multi: { x: 145, y: 133, r: 8 },
 };
 
 const BUTTONS: { x: number; y: number; w: number; label: string; color?: string }[] = [
@@ -433,7 +447,13 @@ function drawPanel(ctx: CanvasRenderingContext2D, w: number, h: number) {
   // Screen surround.
   ctx.fillStyle = '#16181b';
   ctx.beginPath();
-  ctx.roundRect(px(SCREEN.x - WINDOW.w / 2 - 3), py(SCREEN.y + WINDOW.h / 2 + 3), s(WINDOW.w + 6), s(WINDOW.h + 6), s(3));
+  ctx.roundRect(
+    px(SCREEN.x - WINDOW.w / 2 - 3),
+    py(SCREEN.y + WINDOW.h / 2 + 3),
+    s(WINDOW.w + 6),
+    s(WINDOW.h + 6),
+    s(3),
+  );
   ctx.fill();
 
   ctx.fillStyle = '#eef1f4';
@@ -461,9 +481,9 @@ function drawPanel(ctx: CanvasRenderingContext2D, w: number, h: number) {
     ctx.fillRect(px((x0 + x1) / 2 - tw / 2), py(y1) - s(1.6), s(tw), s(3.2));
     text(title, (x0 + x1) / 2, y1, 2.6, '#aab3bd', 700);
   };
-  frame(32, 46, 96, 116, 'VERTICAL');
-  frame(100, 46, 130, 116, 'HORIZONTAL');
-  frame(134, 46, 156, 116, 'GATILHO');
+  frame(32, 46, 96, 120, 'VERTICAL');
+  frame(100, 46, 130, 120, 'HORIZONTAL');
+  frame(134, 46, 156, 120, 'GATILHO');
 
   for (const k of [KNOBS.pos1, KNOBS.pos2, KNOBS.hpos, KNOBS.level])
     text(k === KNOBS.level ? 'NÍVEL' : 'POSIÇÃO', k.x, k.y + 10.2, 2.1, '#aab3bd');
@@ -484,7 +504,7 @@ function drawPanel(ctx: CanvasRenderingContext2D, w: number, h: number) {
   }
   for (const b of BUTTONS) {
     const color = b.color === 'ch1' ? CH_COLORS.ch1 : b.color === 'ch2' ? CH_COLORS.ch2 : '#c3cad2';
-    text(b.label, b.x, b.y + 6.2, b.label.length > 6 ? 1.9 : 2.2, color, 700);
+    text(b.label, b.x, b.y + (b.y < 70 ? -6.6 : 6.2), b.label.length > 6 ? 1.9 : 2.2, color, 700);
   }
   for (const [label, x] of Object.entries(BNCS)) {
     const color = label === 'CH1' ? CH_COLORS.ch1 : label === 'CH2' ? CH_COLORS.ch2 : '#c3cad2';
@@ -560,7 +580,13 @@ export default function Oscilloscope(props: OscilloscopeProps) {
   });
 
   const housing = useDisposable(() => {
-    const g = roundedSlab({ width: W - 6, height: BODY_H - 6, depth: D - BEZEL_T + 4, radius: 10, bevel: 4 });
+    const g = roundedSlab({
+      width: W - 6,
+      height: BODY_H - 6,
+      depth: D - BEZEL_T + 4,
+      radius: 10,
+      bevel: 4,
+    });
     g.translate(0, CY, -FRONT_Z);
     return g;
   }, []);
@@ -611,15 +637,17 @@ export default function Oscilloscope(props: OscilloscopeProps) {
       )}
 
       {/* Housing (lifts off in the exploded view). */}
-      <Explode offset={[0, 110, -40]}>
+      <Explode offset={[0, 215, -90]}>
         <mesh geometry={housing}>
           <Material preset="absGray" color="#cfd3d8" roughness={0.55} roughnessMap={noiseMap} />
         </mesh>
         <SideVents />
       </Explode>
 
-      {/* Internals. */}
-      <Internals />
+      {/* Internals (rise above the panel in the exploded view). */}
+      <Explode offset={[0, 150, -40]} delay={0.15}>
+        <Internals />
+      </Explode>
 
       {/* LCD module behind the window. */}
       <Explode offset={[0, 0, 46]}>
@@ -666,10 +694,7 @@ export default function Oscilloscope(props: OscilloscopeProps) {
           </mesh>
         ))}
         {BUTTONS.map((b, i) => {
-          const lit =
-            b.color === 'run' ||
-            b.color === 'ch1' ||
-            (b.color === 'ch2' && params.ch2);
+          const lit = b.color === 'run' || b.color === 'ch1' || (b.color === 'ch2' && params.ch2);
           const color =
             b.color === 'run'
               ? params.running
@@ -697,11 +722,42 @@ export default function Oscilloscope(props: OscilloscopeProps) {
             </mesh>
           );
         })}
-        <Knob {...KNOBS.pos1} height={9} ribs={18} position={[KNOBS.pos1.x, KNOBS.pos1.y, FRONT_Z]} color="#3a3d42" />
-        <Knob {...KNOBS.pos2} height={9} ribs={18} position={[KNOBS.pos2.x, KNOBS.pos2.y, FRONT_Z]} color="#3a3d42" />
-        <Knob {...KNOBS.hpos} height={9} ribs={18} position={[KNOBS.hpos.x, KNOBS.hpos.y, FRONT_Z]} color="#3a3d42" />
-        <Knob {...KNOBS.level} height={9} ribs={18} position={[KNOBS.level.x, KNOBS.level.y, FRONT_Z]} color="#3a3d42" />
-        <Knob {...KNOBS.multi} height={10} ribs={22} position={[KNOBS.multi.x, KNOBS.multi.y, FRONT_Z]} color="#3a3d42" capMetal />
+        <Knob
+          radius={KNOBS.pos1.r}
+          height={9}
+          ribs={18}
+          position={[KNOBS.pos1.x, KNOBS.pos1.y, FRONT_Z]}
+          color="#3a3d42"
+        />
+        <Knob
+          radius={KNOBS.pos2.r}
+          height={9}
+          ribs={18}
+          position={[KNOBS.pos2.x, KNOBS.pos2.y, FRONT_Z]}
+          color="#3a3d42"
+        />
+        <Knob
+          radius={KNOBS.hpos.r}
+          height={9}
+          ribs={18}
+          position={[KNOBS.hpos.x, KNOBS.hpos.y, FRONT_Z]}
+          color="#3a3d42"
+        />
+        <Knob
+          radius={KNOBS.level.r}
+          height={9}
+          ribs={18}
+          position={[KNOBS.level.x, KNOBS.level.y, FRONT_Z]}
+          color="#3a3d42"
+        />
+        <Knob
+          radius={KNOBS.multi.r}
+          height={10}
+          ribs={22}
+          position={[KNOBS.multi.x, KNOBS.multi.y, FRONT_Z]}
+          color="#3a3d42"
+          capMetal
+        />
         <Knob
           radius={KNOBS.vdiv1.r}
           height={13}
@@ -801,16 +857,16 @@ function Internals() {
   return (
     <group>
       {/* Acquisition board: front end, A/D converter, processor, memory. */}
-      <group position={[20, FEET + 8, -6]}>
+      <group position={[45, FEET + 8, -6]}>
         <mesh>
-          <boxGeometry args={[250, 1.6, 96]} />
-          <Material preset="solderMask" color="#1f4f8a" roughness={0.45} />
+          <boxGeometry args={[200, 1.6, 96]} />
+          <Material preset="solderMask" color="#1d4a35" roughness={0.45} />
         </mesh>
         {[
-          { x: 40, z: 30, w: 26, d: 26, h: 2.2, c: '#1a1a1c' },
-          { x: 0, z: 10, w: 17, d: 17, h: 2, c: '#1a1a1c' },
-          { x: -30, z: 6, w: 12, d: 10, h: 1.4, c: '#1a1a1c' },
-          { x: -48, z: 6, w: 12, d: 10, h: 1.4, c: '#1a1a1c' },
+          { x: 58, z: -16, w: 26, d: 26, h: 2.2, c: '#1a1a1c' },
+          { x: 16, z: -12, w: 17, d: 17, h: 2, c: '#1a1a1c' },
+          { x: -28, z: -22, w: 12, d: 10, h: 1.4, c: '#1a1a1c' },
+          { x: -28, z: -4, w: 12, d: 10, h: 1.4, c: '#1a1a1c' },
         ].map((chip, i) => (
           <mesh key={i} position={[chip.x, chip.h / 2 + 0.8, chip.z]}>
             <boxGeometry args={[chip.w, chip.h, chip.d]} />
@@ -818,16 +874,45 @@ function Internals() {
           </mesh>
         ))}
         {/* Shield cans over the analogue front end, behind the BNCs. */}
-        {[28, 60].map((x) => (
+        {[3, 35].map((x) => (
           <mesh key={x} position={[x, 5, 40]}>
             <boxGeometry args={[24, 9, 22]} />
             <Material preset="tin" roughness={0.35} />
           </mesh>
         ))}
-        <Anchor name="adc" position={[40, 4, 30]} />
+        {/* Electrolytic capacitors, crystal and the LCD ribbon connector. */}
+        {[
+          [-48, -30],
+          [-48, -16],
+          [-48, -2],
+        ].map(([x, z], i) => (
+          <mesh key={`c${i}`} position={[x!, 5.3, z!]}>
+            <cylinderGeometry args={[3.2, 3.2, 9, 20]} />
+            <Material preset="sleeve" color="#24252a" />
+          </mesh>
+        ))}
+        <mesh position={[36, 2, -38]}>
+          <boxGeometry args={[11, 2.5, 4.5]} />
+          <Material preset="steel" roughness={0.3} />
+        </mesh>
+        <mesh position={[-2, 3.3, -40]}>
+          <boxGeometry args={[34, 5, 6]} />
+          <Material preset="absWhite" color="#e8e2d2" roughness={0.6} />
+        </mesh>
+        <mesh position={[-2, 5.95, -26]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[30, 26]} />
+          <Material color="#c9842f" roughness={0.45} metalness={0.2} side={DoubleSide} />
+        </mesh>
+        {Array.from({ length: 14 }, (_, i) => (
+          <mesh key={`r${i}`} position={[-40 + (i % 7) * 7, 1.2, 18 + Math.floor(i / 7) * 6]}>
+            <boxGeometry args={[3.2, 0.8, 1.6]} />
+            <Material preset="epoxyBlack" color={i % 3 ? '#2a2a2c' : '#b8a888'} roughness={0.6} />
+          </mesh>
+        ))}
+        <Anchor name="adc" position={[16, 3, -12]} />
       </group>
       {/* Power supply board with transformer and capacitors. */}
-      <group position={[-110, FEET + 8, -20]}>
+      <group position={[-106, FEET + 8, -20]}>
         <mesh>
           <boxGeometry args={[80, 1.6, 70]} />
           <Material preset="fr4" color="#c8b886" roughness={0.6} />
@@ -845,10 +930,17 @@ function Internals() {
             <Material preset="sleeve" color="#1d2a6e" />
           </mesh>
         ))}
+        {/* Switching transistor on an aluminium heatsink. */}
+        <mesh position={[20, 13, -26]}>
+          <boxGeometry args={[30, 24, 3]} />
+          <Material preset="aluminum" roughness={0.5} />
+        </mesh>
+        <mesh position={[20, 9, -23.5]}>
+          <boxGeometry args={[10, 15, 2]} />
+          <Material preset="epoxyBlack" />
+        </mesh>
         <Anchor name="psu" position={[-10, 20, -6]} />
       </group>
     </group>
   );
 }
-
-export type { PartProps };
