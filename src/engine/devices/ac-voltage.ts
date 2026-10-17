@@ -1,0 +1,57 @@
+import { defineDevice, num } from '../device';
+import { R_SERIES_MIN } from '../models/constants';
+
+/**
+ * Sinusoidal voltage source: v(t) = offset + amplitude·sin(2π·f·t + phase).
+ * `amplitude` is the peak value (127 V rms mains ≈ 179,6 V peak). In a DC
+ * analysis it holds its offset. Pin a is the reference "+" terminal.
+ */
+export default defineDevice({
+  info: {
+    type: 'ac-voltage',
+    label: 'Fonte de tensão alternada',
+    terminals: 'two',
+    pins: [
+      { name: 'a', offset: [0, 0], label: 'terminal de referência (+)' },
+      { name: 'b', offset: [0, 0], label: 'terminal (−)' },
+    ],
+    params: {
+      amplitude: { default: 10, label: 'Amplitude (pico)', unit: 'V', min: 0 },
+      frequency: { default: 60, label: 'Frequência', unit: 'Hz', min: 0 },
+      phase: { default: 0, label: 'Fase', unit: '°' },
+      offset: { default: 0, label: 'Nível contínuo', unit: 'V' },
+    },
+    readouts: ['current', 'voltage', 'power'],
+    readoutInfo: {
+      current: { label: 'Corrente fornecida', unit: 'A' },
+      voltage: { label: 'Tensão instantânea', unit: 'V' },
+      power: { label: 'Potência fornecida', unit: 'W' },
+    },
+  },
+  referencePin: 'b',
+  source: true,
+  create({ params, pins: [a, b], branch }) {
+    const br = branch();
+    const value = (t: number) =>
+      num(params, 'offset') +
+      num(params, 'amplitude') *
+        Math.sin(
+          2 * Math.PI * num(params, 'frequency') * t + (num(params, 'phase') * Math.PI) / 180,
+        );
+    return {
+      stamp(m, step) {
+        m.branch(
+          br,
+          a,
+          b,
+          step.mode === 'dc' ? num(params, 'offset') : value(step.t),
+          R_SERIES_MIN,
+        );
+      },
+      pinCurrents(x, out) {
+        out[0] = x.x[br];
+        out[1] = -x.x[br];
+      },
+    };
+  },
+});

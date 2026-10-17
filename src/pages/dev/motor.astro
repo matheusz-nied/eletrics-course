@@ -1,0 +1,345 @@
+---
+/*
+ * Internal page of the simulation engine (Simulação front): device catalog,
+ * a live circuit running in the Web Worker, and the performance measurement
+ * of docs/plano/02-arquitetura.md, section 5.4. Not linked from the course.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { listDevices } from '../../engine';
+
+const devices = listDevices();
+const number = new Intl.NumberFormat('pt-BR', { maximumSignificantDigits: 4 });
+const show = (v: number | boolean | string) =>
+  typeof v === 'number' ? number.format(v) : typeof v === 'boolean' ? (v ? 'sim' : 'não') : v;
+---
+
+<BaseLayout title="Motor de simulação" noindex>
+  <main id="conteudo" tabindex="-1" class="motor">
+    <p class="eyebrow">Interno</p>
+    <h1>Motor de simulação</h1>
+    <p class="lead">
+      Catálogo dos dispositivos, um circuito rodando no worker e a medição de desempenho do motor.
+    </p>
+
+    <section aria-labelledby="demo-titulo">
+      <h2 id="demo-titulo">Circuito ao vivo</h2>
+      <p>Bateria de 12 V, chave e lâmpada de 12 V / 5 W, simulados em tempo real no worker.</p>
+      <button type="button" class="btn btn--primary" id="demo-chave" aria-pressed="false" disabled>
+        Ligar a chave
+      </button>
+      <dl class="readouts" id="demo-leituras">
+        <div>
+          <dt>Tempo</dt>
+          <dd data-readout="t">—</dd>
+        </div>
+        <div>
+          <dt>Corrente</dt>
+          <dd data-readout="L1.current">—</dd>
+        </div>
+        <div>
+          <dt>Brilho</dt>
+          <dd data-readout="L1.brightness">—</dd>
+        </div>
+        <div>
+          <dt>Filamento</dt>
+          <dd data-readout="L1.temperature">—</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section aria-labelledby="desempenho-titulo">
+      <h2 id="desempenho-titulo">Desempenho</h2>
+      <p>
+        Circuito de 50 nós com passo de 10 µs. Meta do plano: 1.000 passos por segundo a 60 quadros
+        por segundo num celular intermediário.
+      </p>
+      <button type="button" class="btn" id="medir" disabled>
+        Medir desempenho
+      </button>
+      <p id="resultado" role="status" aria-live="polite"></p>
+    </section>
+
+    <section aria-labelledby="catalogo-titulo">
+      <h2 id="catalogo-titulo">Catálogo de dispositivos</h2>
+      <p>{devices.length} tipos. Pinos, parâmetros (com o valor padrão) e leituras de cada um.</p>
+      <div class="catalog">
+        {devices.map((d) => (
+          <article class="device" id={`tipo-${d.type}`}>
+            <h3>
+              {d.label} <code>{d.type}</code>
+            </h3>
+            <p class="pins">
+              <strong>Pinos:</strong>{' '}
+              {d.pins.map((p, i) => (
+                <>
+                  {i > 0 && ', '}
+                  <code>{p.name}</code>
+                  {d.terminals === 'fixed' && ` (${p.offset.join(', ')})`}
+                  {p.label && ` ${p.label}`}
+                </>
+              ))}
+            </p>
+            {Object.keys(d.params).length > 0 && (
+              <table>
+                <caption class="sr-only">Parâmetros de {d.label}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Parâmetro</th>
+                    <th scope="col">Descrição</th>
+                    <th scope="col">Padrão</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(d.params).map(([name, p]) => (
+                    <tr>
+                      <td>
+                        <code>{name}</code>
+                      </td>
+                      <td>{p.label}</td>
+                      <td>
+                        {show(p.default)}
+                        {p.unit && ` ${p.unit}`}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+            {d.readouts.length > 0 && (
+              <p class="readout-list">
+                <strong>Leituras:</strong>{' '}
+                {d.readouts.map((r, i) => (
+                  <>
+                    {i > 0 && ', '}
+                    <code>{r}</code>
+                    {d.readoutInfo?.[r] &&
+                      ` ${d.readoutInfo[r].label}${d.readoutInfo[r].unit ? ` (${d.readoutInfo[r].unit})` : ''}`}
+                  </>
+                ))}
+              </p>
+            )}
+          </article>
+        ))}
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<script>
+  import { createSimulation, type CircuitDoc, type SimFrame } from '../../engine';
+  import { ladderCircuit } from '../../engine/benchmark';
+
+  const fmt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 3 });
+  const units: Record<string, string> = {
+    t: ' s',
+    'L1.current': ' A',
+    'L1.brightness': '',
+    'L1.temperature': ' °C',
+  };
+
+  const lamp: CircuitDoc = {
+    id: 'dev/lampada',
+    title: 'Lâmpada com chave',
+    description: 'Bateria de 12 V, chave e lâmpada de 12 V e 5 W.',
+    analysis: { kind: 'dc' },
+    elements: [
+      {
+        id: 'B1',
+        type: 'battery',
+        a: [0, 0],
+        b: [0, 10],
+        params: { voltage: 12, resistance: 0.05 },
+      },
+      { id: 'S1', type: 'switch', a: [0, 0], b: [10, 0] },
+      { id: 'L1', type: 'lamp', a: [10, 0], b: [10, 10] },
+      {
+        id: 'W1',
+        type: 'wire',
+        points: [
+          [10, 10],
+          [0, 10],
+        ],
+      },
+      { id: 'G', type: 'ground', at: [0, 10] },
+    ],
+  };
+
+  async function demo() {
+    const button = document.querySelector<HTMLButtonElement>('#demo-chave')!;
+    const sim = createSimulation();
+    sim.subscribe((frame: SimFrame) => {
+      for (const dd of document.querySelectorAll<HTMLElement>('#demo-leituras [data-readout]')) {
+        const key = dd.dataset.readout!;
+        const value = key === 't' ? frame.t : frame.readouts[key];
+        if (typeof value === 'number') dd.textContent = `${fmt.format(value)}${units[key]}`;
+      }
+    });
+    await sim.load(lamp);
+    sim.play();
+    button.disabled = false;
+    button.addEventListener('click', () => {
+      const on = button.getAttribute('aria-pressed') !== 'true';
+      button.setAttribute('aria-pressed', String(on));
+      button.textContent = on ? 'Desligar a chave' : 'Ligar a chave';
+      sim.setParam('S1', 'closed', on);
+    });
+  }
+
+  /** Steps per second on this thread, then the real-time rate in the worker. */
+  async function measure(): Promise<{ raw: number; worker: number; fps: number }> {
+    const doc = ladderCircuit(50);
+    const local = createSimulation({ worker: false });
+    await local.load(doc);
+    await local.runUntil(0.002, { maxFrames: 1 });
+    const steps = 5000;
+    const start = performance.now();
+    await local.runUntil(0.002 + steps * 1e-5, { maxFrames: 1 });
+    const raw = steps / ((performance.now() - start) / 1000);
+    local.dispose();
+
+    const sim = createSimulation();
+    await sim.load(doc);
+    let frames = 0;
+    let first: SimFrame | undefined;
+    let last: SimFrame | undefined;
+    let firstAt = 0;
+    let lastAt = 0;
+    sim.subscribe((frame) => {
+      const now = performance.now();
+      if (!first) {
+        first = frame;
+        firstAt = now;
+      }
+      last = frame;
+      lastAt = now;
+      frames++;
+    });
+    sim.play();
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    sim.dispose();
+    const seconds = (lastAt - firstAt) / 1000;
+    const simulated = (last?.t ?? 0) - (first?.t ?? 0);
+    return { raw, worker: simulated / 1e-5 / seconds, fps: (frames - 1) / seconds };
+  }
+
+  function setupBenchmark() {
+    const button = document.querySelector<HTMLButtonElement>('#medir')!;
+    const out = document.querySelector<HTMLElement>('#resultado')!;
+    button.disabled = false;
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      out.textContent = 'Medindo…';
+      const { raw, worker, fps } = await measure();
+      const n = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
+      out.dataset.raw = String(Math.round(raw));
+      out.dataset.worker = String(Math.round(worker));
+      out.dataset.fps = String(Math.round(fps));
+      out.textContent = `Página: ${n.format(raw)} passos/s. Worker em tempo real: ${n.format(worker)} passos/s a ${n.format(fps)} quadros/s.`;
+      button.disabled = false;
+    });
+  }
+
+  demo();
+  setupBenchmark();
+</script>
+
+<style>
+  .motor {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 3rem 1rem 4rem;
+  }
+
+  .motor:focus {
+    outline: none;
+  }
+
+  h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 650;
+    margin: 2.5rem 0 0.5rem;
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 650;
+  }
+
+  .lead,
+  section > p {
+    color: var(--fg-muted);
+    margin: 0.5rem 0 1rem;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+
+  .readouts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .readouts div {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+  }
+
+  .readouts dt {
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+  }
+
+  .readouts dd {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+  }
+
+  #resultado {
+    font-family: var(--font-mono);
+    margin-top: 1rem;
+  }
+
+  .catalog {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .device {
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    overflow-x: auto;
+  }
+
+  .device p {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .device table {
+    margin-top: 0.75rem;
+    width: 100%;
+    font-size: 0.9rem;
+    border-collapse: collapse;
+  }
+
+  .device th,
+  .device td {
+    text-align: left;
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+</style>

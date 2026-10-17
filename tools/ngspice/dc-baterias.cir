@@ -1,0 +1,18 @@
+* Duas baterias com resistência interna em paralelo, carga e potenciômetro (CC)
+VB1 5 0 DC 9
+RB1 5 1 0.5
+VB2 6 0 DC 8.5
+RB2 6 1 0.8
+R1 1 2 47
+RAW 2 3 3k
+RWB 3 0 7k
+R2 3 0 1k
+.options reltol=1e-9 abstol=1e-15 vntol=1e-12
+.control
+set wr_singlescale
+set wr_vecnames
+op
+wrdata out.txt v(1) v(2) v(3) i(VB1)
+quit
+.endc
+.end
