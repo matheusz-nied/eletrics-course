@@ -1,0 +1,17 @@
+---
+/*
+ * Placeholder created by the Fundação. The Experiência front replaces this file
+ * with the real workshop mode; the props are the public API used by lessons
+ * (docs/plano/02-arquitetura.md, section 4.3).
+ */
+import UnderConstruction from '../components/UnderConstruction.astro';
+
+export interface Props {
+  /** Workshop id: "trocar-motor-portao". */
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<UnderConstruction component="Workshop" label="Modo oficina" detail={id} />

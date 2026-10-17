@@ -1,0 +1,25 @@
+---
+/*
+ * Placeholder created by the Fundação. The Experiência front replaces this file
+ * with the real glossary popover; the props are the public API used by lessons
+ * (docs/plano/02-arquitetura.md, section 4.3). Usage: <Term id="borne">borne</Term>.
+ */
+export interface Props {
+  /** Glossary entry id, the file name in src/content/glossario without `.md`. */
+  id: string;
+}
+
+const { id } = Astro.props;
+---
+
+<span class="term" data-term={id}>
+  <slot />
+</span>
+
+<style>
+  .term {
+    text-decoration: underline dotted;
+    text-decoration-color: var(--fg-subtle);
+    text-underline-offset: 0.22em;
+  }
+</style>

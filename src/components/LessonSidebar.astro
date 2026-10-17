@@ -1,0 +1,144 @@
+---
+import type { MarkdownHeading } from 'astro';
+import type { Lesson, Module } from '../lib/content';
+import { lessonUrl, moduleUrl } from '../lib/url';
+
+interface Props {
+  module: Module;
+  lessons: Lesson[];
+  currentId: string;
+  headings: MarkdownHeading[];
+}
+
+const { module, lessons, currentId, headings } = Astro.props;
+
+interface TocItem {
+  slug: string;
+  text: string;
+  children: { slug: string; text: string }[];
+}
+
+// h2 entries with their h3 children.
+const toc: TocItem[] = [];
+for (const h of headings) {
+  if (h.depth === 2) toc.push({ slug: h.slug, text: h.text, children: [] });
+  else if (h.depth === 3 && toc.length > 0) toc.at(-1)?.children.push(h);
+}
+---
+
+<div class="sidebar">
+  {toc.length > 0 && (
+    <nav aria-label="Nesta aula" class="sidebar__section" data-toc>
+      <p class="eyebrow">Nesta aula</p>
+      <ol class="toc">
+        {toc.map((item) => (
+          <li>
+            <a href={`#${item.slug}`}>{item.text}</a>
+            {item.children.length > 0 && (
+              <ol>
+                {item.children.map((child) => (
+                  <li>
+                    <a href={`#${child.slug}`}>{child.text}</a>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )}
+  <nav aria-label="Aulas do módulo" class="sidebar__section">
+    <p class="eyebrow">Módulo {module.data.numero}</p>
+    <a href={moduleUrl(module.id)} class="sidebar__module">
+      {module.data.titulo}
+    </a>
+    <ol class="module-lessons">
+      {lessons.map((lesson) => (
+        <li>
+          <a
+            href={lessonUrl(lesson.id)}
+            aria-current={lesson.id === currentId ? 'page' : undefined}
+          >
+            <span class="num">
+              {module.data.numero}.{lesson.data.ordem}
+            </span>{' '}
+            <span>{lesson.data.titulo}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+</div>
+
+<style>
+  .sidebar {
+    display: grid;
+    gap: 2rem;
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+
+  .sidebar__section {
+    display: grid;
+    gap: 0.625rem;
+  }
+
+  .toc,
+  .toc ol {
+    display: grid;
+    gap: 0.125rem;
+  }
+
+  .toc ol {
+    margin: 0.125rem 0 0.25rem;
+    padding-left: 0.75rem;
+  }
+
+  .toc a,
+  .module-lessons a {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.35rem 0.625rem;
+    border-left: 2px solid var(--border);
+    color: var(--fg-muted);
+  }
+
+  .toc a:hover,
+  .module-lessons a:hover {
+    color: var(--fg);
+    border-left-color: var(--border-strong);
+  }
+
+  .toc a[aria-current],
+  .module-lessons a[aria-current] {
+    border-left-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .sidebar__module {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .sidebar__module:hover {
+    color: var(--accent);
+  }
+
+  .module-lessons {
+    display: grid;
+    gap: 0.125rem;
+  }
+
+  .module-lessons .num {
+    flex: none;
+    min-width: 2.25rem;
+    color: var(--fg-subtle);
+    font-size: 0.8125rem;
+  }
+
+  .module-lessons a[aria-current] .num {
+    color: inherit;
+  }
+</style>

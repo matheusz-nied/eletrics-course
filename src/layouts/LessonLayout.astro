@@ -1,0 +1,473 @@
+---
+import 'katex/dist/katex.min.css';
+import type { MarkdownHeading } from 'astro';
+import Callout from '../components/Callout.astro';
+import Icon from '../components/Icon.astro';
+import LessonSidebar from '../components/LessonSidebar.astro';
+import Pager, { type PagerLink } from '../components/Pager.astro';
+import LessonProgress from '../course/LessonProgress.astro';
+import type { Lesson, Module } from '../lib/content';
+import { LEVEL_LABELS, SAFETY_LABELS } from '../lib/site';
+import { moduleUrl } from '../lib/url';
+import BaseLayout from './BaseLayout.astro';
+
+export interface Prerequisite {
+  id: string;
+  title?: string | undefined;
+  /** Missing while the lesson is not published yet. */
+  href?: string | undefined;
+}
+
+interface Props {
+  lesson: Lesson;
+  module: Module;
+  /** "4.2" */
+  number: string;
+  headings: MarkdownHeading[];
+  /** Lessons of the module shown in the sidebar, in order. */
+  moduleLessons: Lesson[];
+  prerequisites: Prerequisite[];
+  prev?: PagerLink | undefined;
+  next?: PagerLink | undefined;
+}
+
+const { lesson, module, number, headings, moduleLessons, prerequisites, prev, next } = Astro.props;
+const data = lesson.data;
+const draft = data.rascunho;
+---
+
+<BaseLayout title={data.titulo} description={data.objetivos[0]} noindex={draft}>
+  <div class="lesson-shell">
+    <div class="lesson-bar">
+      <button
+        type="button"
+        class="lesson-bar__toggle"
+        aria-controls="sumario"
+        aria-expanded="false"
+        data-sidebar-toggle
+      >
+        <Icon name="lista" size={18} />
+        Sumário
+      </button>
+      <span class="lesson-bar__module">
+        Módulo {module.data.numero} · {module.data.titulo}
+      </span>
+    </div>
+    <div class="lesson-backdrop" data-sidebar-backdrop hidden></div>
+    <aside id="sumario" class="lesson-sidebar" aria-label="Sumário" tabindex="-1">
+      <LessonSidebar
+        module={module}
+        lessons={moduleLessons}
+        currentId={lesson.id}
+        headings={headings}
+      />
+    </aside>
+
+    <main id="conteudo" class="lesson-main" tabindex="-1">
+      <article
+        data-pagefind-body={draft ? undefined : ''}
+        data-pagefind-ignore={draft ? 'all' : undefined}
+      >
+        <header class="lesson-header">
+          {draft && (
+            <p class="draft-banner">
+              <Icon name="rascunho" size={18} />
+              Rascunho: esta aula não aparece na navegação do site publicado.
+            </p>
+          )}
+          <a href={moduleUrl(module.id)} class="lesson-header__module">
+            Módulo {module.data.numero} · {module.data.titulo}
+          </a>
+          <h1>{data.titulo}</h1>
+          <ul class="lesson-meta" aria-label="Sobre a aula">
+            <li class="chip">
+              <span class="num">Aula {number}</span>
+            </li>
+            <li class="chip">
+              <Icon name="nivel" />
+              {LEVEL_LABELS[data.nivel]}
+            </li>
+            <li class="chip">
+              <Icon name="relogio" />
+              <span>
+                <span class="num">{data.duracaoMin}</span> min
+              </span>
+            </li>
+            {data.seguranca !== 'nenhum' && (
+              <li class:list={['chip', { 'chip--danger': data.seguranca === 'rede' }]}>
+                <Icon name={data.seguranca === 'rede' ? 'raio' : 'bateria'} />
+                {SAFETY_LABELS[data.seguranca]}
+              </li>
+            )}
+          </ul>
+        </header>
+
+        <section class="objectives" aria-labelledby="objetivos">
+          <h2 id="objetivos" class="objectives__title">
+            <Icon name="alvo" size={18} />
+            Nesta aula você vai
+          </h2>
+          <ul>
+            {data.objetivos.map((objetivo) => (
+              <li>
+                <Icon name="check" size={18} />
+                <span>{objetivo}</span>
+              </li>
+            ))}
+          </ul>
+          {prerequisites.length > 0 && (
+            <div class="objectives__prereq">
+              <p class="eyebrow">Antes desta aula</p>
+              <ul>
+                {prerequisites.map((p) => (
+                  <li>
+                    {p.href ? (
+                      <a href={p.href}>{p.title}</a>
+                    ) : (
+                      <span>
+                        <span class="num">{p.id}</span> (em breve)
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+
+        {data.seguranca === 'rede' && <Callout type="seguranca-rede" />}
+
+        <div class="prose lesson-body">
+          <slot />
+        </div>
+
+        <footer class="lesson-footer">
+          <LessonProgress lessonId={lesson.id} moduleId={module.id} />
+          <Pager label="Navegação entre aulas" prev={prev} next={next} />
+        </footer>
+      </article>
+    </main>
+  </div>
+</BaseLayout>
+
+<script>
+  // Mobile table of contents (a panel over the page) and the current section
+  // highlight in the table of contents.
+  const toggle = document.querySelector<HTMLButtonElement>('[data-sidebar-toggle]');
+  const sidebar = document.getElementById('sumario');
+  const backdrop = document.querySelector<HTMLElement>('[data-sidebar-backdrop]');
+
+  function setOpen(open: boolean, returnFocus = true) {
+    if (!toggle || !sidebar || !backdrop) return;
+    toggle.setAttribute('aria-expanded', String(open));
+    sidebar.dataset.open = String(open);
+    backdrop.hidden = !open;
+    if (open) sidebar.focus();
+    else if (returnFocus) toggle.focus();
+  }
+
+  toggle?.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+  backdrop?.addEventListener('click', () => setOpen(false));
+  sidebar?.addEventListener('click', (event) => {
+    if ((event.target as Element).closest('a')) setOpen(false, false);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && sidebar?.dataset.open === 'true') setOpen(false);
+  });
+
+  const links = new Map<string, HTMLAnchorElement>();
+  document.querySelectorAll<HTMLAnchorElement>('[data-toc] a').forEach((a) => {
+    links.set(decodeURIComponent(a.hash.slice(1)), a);
+  });
+  const headings = [...document.querySelectorAll<HTMLElement>('.lesson-body :is(h2, h3)[id]')];
+
+  if (links.size > 0 && headings.length > 0) {
+    let current: HTMLAnchorElement | undefined;
+    const update = () => {
+      const offset = window.innerHeight * 0.25;
+      let active = headings[0];
+      for (const h of headings) {
+        if (h.getBoundingClientRect().top - offset <= 0) active = h;
+        else break;
+      }
+      const link = active ? links.get(active.id) : undefined;
+      if (link === current) return;
+      current?.removeAttribute('aria-current');
+      link?.setAttribute('aria-current', 'location');
+      current = link;
+    };
+    let frame = 0;
+    window.addEventListener(
+      'scroll',
+      () => {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(update);
+      },
+      { passive: true },
+    );
+    update();
+  }
+</script>
+
+<style>
+  .lesson-shell {
+    max-width: 88rem;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  @media (min-width: 48rem) {
+    .lesson-shell {
+      padding: 0 1.5rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .lesson-shell {
+      display: grid;
+      grid-template-columns: 16.5rem minmax(0, 1fr);
+      gap: 3rem;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .lesson-shell {
+      grid-template-columns: 17.5rem minmax(0, 1fr);
+      gap: 4.5rem;
+    }
+  }
+
+  /* Mobile bar with the table-of-contents button. */
+  .lesson-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 -1rem;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+  }
+
+  @media (min-width: 48rem) {
+    .lesson-bar {
+      margin: 0 -1.5rem;
+      padding: 0.5rem 1.5rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .lesson-bar {
+      display: none;
+    }
+  }
+
+  .lesson-bar__toggle {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.375rem;
+    height: 2.25rem;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--bg);
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .lesson-bar__module {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lesson-sidebar {
+    display: none;
+  }
+
+  .lesson-sidebar[data-open='true'] {
+    position: fixed;
+    top: var(--header-h);
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    display: block;
+    width: min(21rem, 88vw);
+    padding: 1.5rem 1.25rem;
+    overflow-y: auto;
+    border-right: 1px solid var(--border);
+    background: var(--bg);
+    box-shadow: var(--shadow-md);
+  }
+
+  .lesson-backdrop {
+    position: fixed;
+    inset: var(--header-h) 0 0 0;
+    z-index: 45;
+    background: rgb(0 0 0 / 0.35);
+  }
+
+  .lesson-backdrop[hidden] {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .lesson-sidebar,
+    .lesson-sidebar[data-open='true'] {
+      position: sticky;
+      top: calc(var(--header-h) + 2rem);
+      z-index: auto;
+      display: block;
+      width: auto;
+      max-height: calc(100dvh - var(--header-h) - 3rem);
+      margin-top: 2.5rem;
+      padding: 0 0.25rem 2rem 0;
+      overflow-y: auto;
+      border: 0;
+      background: none;
+      box-shadow: none;
+      scrollbar-width: thin;
+    }
+
+    .lesson-backdrop {
+      display: none;
+    }
+  }
+
+  .lesson-main {
+    min-width: 0;
+    padding-top: 2rem;
+  }
+
+  .lesson-main:focus {
+    outline: none;
+  }
+
+  @media (min-width: 64rem) {
+    .lesson-main {
+      padding-top: 2.5rem;
+    }
+  }
+
+  .lesson-main article {
+    max-width: 52rem;
+  }
+
+  .draft-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    padding: 0.625rem 0.875rem;
+    border: 1px dashed var(--warning-border);
+    border-radius: 0.5rem;
+    background: var(--warning-soft);
+    color: var(--warning);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .lesson-header__module {
+    color: var(--accent);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .lesson-header__module:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .lesson-header h1 {
+    margin-top: 0.5rem;
+    font-size: clamp(1.875rem, 1.4rem + 2.2vw, 2.75rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+
+  .lesson-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .objectives {
+    margin-top: 2rem;
+    padding: 1.25rem 1.25rem 1.375rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .objectives__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--fg);
+    font-size: 1rem;
+    font-weight: 650;
+  }
+
+  .objectives__title :global(svg) {
+    color: var(--accent);
+  }
+
+  .objectives > ul {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 0.875rem;
+  }
+
+  .objectives > ul li {
+    display: flex;
+    gap: 0.625rem;
+    line-height: 1.5;
+  }
+
+  .objectives > ul li :global(svg) {
+    flex: none;
+    margin-top: 0.15rem;
+    color: var(--success);
+  }
+
+  .objectives__prereq {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.9375rem;
+  }
+
+  .objectives__prereq ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+  }
+
+  .objectives__prereq a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .objectives + :global(.callout) {
+    margin-top: 1.25rem;
+  }
+
+  .lesson-body {
+    margin-top: 2rem;
+  }
+
+  .lesson-footer {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+</style>

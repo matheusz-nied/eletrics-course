@@ -1,0 +1,23 @@
+---
+/*
+ * Placeholder created by the Fundação. The Bancada front replaces this file
+ * with the real wiring exercise; the props are the public API used by lessons
+ * (docs/plano/02-arquitetura.md, section 4.3).
+ */
+import UnderConstruction from '../components/UnderConstruction.astro';
+
+export interface Props {
+  /** Scenario id, the path under src/lessons without `.ts`: "m16/troca-central". */
+  scenario: string;
+  height?: number;
+}
+
+const { scenario, height = 480 } = Astro.props;
+---
+
+<UnderConstruction
+  component="WiringExercise"
+  label="Exercício de ligação"
+  detail={scenario}
+  height={height}
+/>

@@ -1,0 +1,12 @@
+dist/
+.astro/
+node_modules/
+playwright-report/
+test-results/
+coverage/
+public/
+pnpm-lock.yaml
+# Plan, notes and lesson content are prose: keep the authors' formatting.
+docs/
+**/*.md
+**/*.mdx

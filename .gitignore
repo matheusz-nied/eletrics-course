@@ -1,0 +1,24 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# tests
+playwright-report/
+test-results/
+blob-report/
+coverage/
+
+# logs
+*.log
+
+# environment
+.env
+.env.*
+
+# editors and OS
+.DS_Store
+.idea/
+.vscode/

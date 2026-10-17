@@ -1,0 +1,247 @@
+---
+import Icon from '../components/Icon.astro';
+import Pager, { type PagerLink } from '../components/Pager.astro';
+import ModuleProgress from '../course/ModuleProgress.astro';
+import type { Lesson, Module } from '../lib/content';
+import { totalMinutes } from '../lib/course';
+import { LEVEL_LABELS, PARTS } from '../lib/site';
+import { lessonUrl } from '../lib/url';
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  module: Module;
+  /** Listed lessons of the module, in order. */
+  lessons: Lesson[];
+  prev?: PagerLink | undefined;
+  next?: PagerLink | undefined;
+}
+
+const { module, lessons, prev, next } = Astro.props;
+const data = module.data;
+const minutes = totalMinutes(lessons);
+const duration =
+  minutes >= 60 ? `${Math.floor(minutes / 60)} h ${minutes % 60} min` : `${minutes} min`;
+---
+
+<BaseLayout title={`Módulo ${data.numero}: ${data.titulo}`} description={data.resumo}>
+  <main id="conteudo" class="module" tabindex="-1">
+    <header class="module__header">
+      <div class="module__icon">
+        <Icon name={data.icone} size={28} />
+      </div>
+      <p class="eyebrow">
+        Parte {data.parte} · {PARTS[data.parte]}
+      </p>
+      <h1>
+        <span class="module__number">Módulo {data.numero}</span> {data.titulo}
+      </h1>
+      <p class="module__summary">{data.resumo}</p>
+      {lessons.length > 0 && (
+        <ul class="module__stats" aria-label="Sobre o módulo">
+          <li class="chip">
+            <Icon name="livro" />
+            <span>
+              <span class="num">{lessons.length}</span> {lessons.length === 1 ? 'aula' : 'aulas'}
+            </span>
+          </li>
+          <li class="chip">
+            <Icon name="relogio" />
+            <span class="num">{duration}</span>
+          </li>
+        </ul>
+      )}
+    </header>
+
+    <ModuleProgress moduleId={module.id} lessonIds={lessons.map((l) => l.id)} />
+
+    <section class="module__lessons" aria-labelledby="aulas">
+      <h2 id="aulas" class="eyebrow">
+        Aulas
+      </h2>
+      {lessons.length > 0 ? (
+        <ol>
+          {lessons.map((lesson) => (
+            <li>
+              <a href={lessonUrl(lesson.id)} class="lesson-row">
+                <span class="lesson-row__number num">
+                  {data.numero}.{lesson.data.ordem}
+                </span>{' '}
+                <span class="lesson-row__main">
+                  <span class="lesson-row__title">{lesson.data.titulo}</span>{' '}
+                  <span class="lesson-row__meta">
+                    {LEVEL_LABELS[lesson.data.nivel]} ·{' '}
+                    <span class="num">{lesson.data.duracaoMin}</span> min
+                    {lesson.data.seguranca === 'rede' && (
+                      <span class="lesson-row__danger"> · Rede elétrica</span>
+                    )}
+                    {lesson.data.rascunho && <span class="lesson-row__draft"> · Rascunho</span>}
+                  </span>
+                </span>
+                <Icon name="seta-direita" size={18} class="lesson-row__arrow" />
+              </a>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p class="module__empty">
+          <Icon name="construcao" />
+          As aulas deste módulo estão sendo escritas e aparecem aqui assim que ficarem prontas.
+        </p>
+      )}
+    </section>
+
+    <div class="module__pager">
+      <Pager label="Navegação entre módulos" prev={prev} next={next} />
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .module {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 2.5rem 1rem 0;
+  }
+
+  .module:focus {
+    outline: none;
+  }
+
+  @media (min-width: 48rem) {
+    .module {
+      padding: 3.5rem 1.5rem 0;
+    }
+  }
+
+  .module__header {
+    display: grid;
+    justify-items: start;
+    gap: 0.75rem;
+  }
+
+  .module__icon {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 0.875rem;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  h1 {
+    display: grid;
+    gap: 0.25rem;
+    font-size: clamp(2rem, 1.5rem + 2.4vw, 3rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  .module__number {
+    color: var(--fg-subtle);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .module__summary {
+    max-width: 40rem;
+    color: var(--fg-muted);
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+
+  .module__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .module__lessons {
+    margin-top: 3rem;
+  }
+
+  .module__lessons ol {
+    display: grid;
+    margin-top: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .module__lessons li + li {
+    border-top: 1px solid var(--border);
+  }
+
+  .lesson-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.125rem;
+    background: var(--bg);
+    transition: background-color 150ms;
+  }
+
+  .lesson-row:hover {
+    background: var(--surface);
+  }
+
+  .lesson-row__number {
+    flex: none;
+    min-width: 2.5rem;
+    color: var(--fg-subtle);
+  }
+
+  .lesson-row__main {
+    display: grid;
+    flex: 1;
+    gap: 0.15rem;
+  }
+
+  .lesson-row__title {
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .lesson-row__meta {
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+  }
+
+  .lesson-row__danger {
+    color: var(--danger);
+  }
+
+  .lesson-row__draft {
+    color: var(--warning);
+  }
+
+  .lesson-row :global(.lesson-row__arrow) {
+    flex: none;
+    color: var(--fg-subtle);
+  }
+
+  .module__empty {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding: 1.25rem;
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--fg-muted);
+  }
+
+  .module__empty :global(svg) {
+    flex: none;
+  }
+
+  .module__pager {
+    margin-top: 3rem;
+  }
+</style>

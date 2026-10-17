@@ -1,0 +1,56 @@
+---
+import { SITE } from '../lib/site';
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <p class="site-footer__name">{SITE.fullName}</p>
+    <p>
+      Conteúdo educativo. Em instalações elétricas, siga a NBR 5410 e, na dúvida, chame um
+      eletricista habilitado.
+    </p>
+    <p>
+      <a href={SITE.repository}>Código-fonte no GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 5rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  .site-footer__inner {
+    display: grid;
+    gap: 0.5rem;
+    max-width: 88rem;
+    margin: 0 auto;
+    padding: 2rem 1rem 2.5rem;
+  }
+
+  @media (min-width: 48rem) {
+    .site-footer__inner {
+      padding: 2.5rem 1.5rem 3rem;
+    }
+  }
+
+  .site-footer__name {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .site-footer a {
+    color: var(--fg-muted);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .site-footer a:hover {
+    color: var(--fg);
+  }
+</style>

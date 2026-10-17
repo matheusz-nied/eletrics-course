@@ -1,0 +1,42 @@
+---
+import Icon from '../components/Icon.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/url';
+---
+
+<BaseLayout title="Página não encontrada" noindex>
+  <main id="conteudo" tabindex="-1" class="not-found">
+    <p class="eyebrow">Erro 404</p>
+    <h1>Página não encontrada</h1>
+    <p>O endereço pode ter mudado, ou esta aula ainda não foi publicada.</p>
+    <a href={withBase()} class="btn btn--primary">
+      <Icon name="seta-esquerda" size={18} />
+      Voltar ao início
+    </a>
+  </main>
+</BaseLayout>
+
+<style>
+  .not-found {
+    display: grid;
+    justify-items: start;
+    gap: 1rem;
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: 5rem 1rem 0;
+  }
+
+  .not-found:focus {
+    outline: none;
+  }
+
+  h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  p:not(.eyebrow) {
+    color: var(--fg-muted);
+  }
+</style>

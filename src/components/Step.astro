@@ -1,0 +1,67 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<li class="step">
+  <p class="step__title">{title}</p>
+  {Astro.slots.has('default') && (
+    <div class="step__body">
+      <slot />
+    </div>
+  )}
+</li>
+
+<style>
+  .step {
+    counter-increment: step;
+    position: relative;
+    padding: 0 0 1.5rem 3rem;
+  }
+
+  .step::before {
+    content: counter(step);
+    position: absolute;
+    top: -0.1rem;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 2.15rem;
+    bottom: 0.25rem;
+    left: calc(1rem - 0.5px);
+    width: 1px;
+    background: var(--border);
+  }
+
+  .step__title {
+    margin: 0;
+    font-weight: 650;
+    line-height: 1.4;
+  }
+
+  .step__body {
+    margin-top: 0.35rem;
+    color: var(--fg);
+  }
+
+  .step__body > :global(* + *) {
+    margin-top: 0.75em;
+  }
+</style>

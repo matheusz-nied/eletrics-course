@@ -1,0 +1,22 @@
+---
+import type { GetStaticPaths } from 'astro';
+import ModuleLayout from '../../layouts/ModuleLayout.astro';
+import { getCourse, lessonsOf } from '../../lib/content';
+import { neighbors } from '../../lib/course';
+import { moduleUrl } from '../../lib/url';
+
+export const getStaticPaths = (async () => {
+  const { modules, listed } = await getCourse();
+  return modules.map((module) => {
+    const { prev, next } = neighbors(modules, module.id);
+    const link = (m: typeof prev) =>
+      m && { href: moduleUrl(m.id), kicker: `Módulo ${m.data.numero}`, title: m.data.titulo };
+    return {
+      params: { modulo: module.id },
+      props: { module, lessons: lessonsOf(listed, module.id), prev: link(prev), next: link(next) },
+    };
+  });
+}) satisfies GetStaticPaths;
+---
+
+<ModuleLayout {...Astro.props} />
