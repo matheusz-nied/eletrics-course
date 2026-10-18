@@ -180,6 +180,9 @@ export default function Solenoid(props: SolenoidProps) {
   // One layer with few turns: spread them over the whole length.
   const helixLength = single ? L - wire : outerLength - wire;
   const helixTurns = single ? turns : outerTurns;
+  // Wire thinner than this would only shimmer on screen: the outer layer is
+  // then a textured shell like the inner ones.
+  const drawn = wire >= 0.45;
   const xStop = -L / 2 + 2;
   const plungerLength = L + FLANGE_T - 2 + 11.5;
   // The spring runs from the flange to the washer: 5,3 mm when fully compressed.
@@ -259,9 +262,26 @@ export default function Solenoid(props: SolenoidProps) {
       Math.PI,
     );
     const perTurn = helixTurns > 60 ? 12 : 24;
-    const helix = new TubeGeometry(curve, Math.ceil(helixTurns * perTurn), wire * 0.48, 6, false);
-    helix.rotateZ(-Math.PI / 2);
-    helix.translate(-L / 2 + wire / 2, axis, 0);
+    const helix = drawn
+      ? new TubeGeometry(curve, Math.ceil(helixTurns * perTurn), wire * 0.48, 6, false)
+          .rotateZ(-Math.PI / 2)
+          .translate(-L / 2 + wire / 2, axis, 0)
+      : alongX(
+          scaleUv(
+            lathe(
+              [
+                [inner, -L / 2],
+                [inner + wire, -L / 2],
+                [inner + wire, -L / 2 + outerLength],
+                [inner, -L / 2 + outerLength],
+                [inner, -L / 2],
+              ],
+              48,
+            ),
+            1,
+            outerLength / (wire * 8),
+          ),
+        );
 
     // Plunger along +X from its inner end, with a groove for the E-clip.
     const Lp = plungerLength;
@@ -320,6 +340,8 @@ export default function Solenoid(props: SolenoidProps) {
     wire,
     helixLength,
     helixTurns,
+    drawn,
+    outerLength,
     rp,
     plungerLength,
     springRest,
@@ -369,6 +391,17 @@ export default function Solenoid(props: SolenoidProps) {
     <Material preset="nylonNatural" roughness={0.55} roughnessMap={noise} clip cutColor="#d9d2bf" />
   );
   const wireMaterial = <Material preset="magnetWire" clip cutColor="#c4703d" />;
+  const turnsMaterial = (
+    <Material
+      preset="magnetWire"
+      color="#ffffff"
+      map={turnsMap}
+      bumpMap={turnsBump}
+      bumpScale={0.5}
+      clip
+      cutColor="#9c4a22"
+    />
+  );
 
   return (
     <group>
@@ -384,20 +417,18 @@ export default function Solenoid(props: SolenoidProps) {
 
       {/* Winding and its leads. */}
       <Explode offset={[0, half * 2.6, 0]}>
-        {layers > 1 && (
-          <mesh geometry={geo.layers}>
-            <Material
-              preset="magnetWire"
-              color="#ffffff"
-              map={turnsMap}
-              bumpMap={turnsBump}
-              bumpScale={0.5}
-              clip
-              cutColor="#9c4a22"
+        {layers > 1 && <mesh geometry={geo.layers}>{turnsMaterial}</mesh>}
+        <mesh geometry={geo.helix}>{drawn ? wireMaterial : turnsMaterial}</mesh>
+        {!drawn &&
+          ([1, -1] as const).map((s) => (
+            <WireSection
+              key={s}
+              width={outerLength}
+              height={wire}
+              wire={wire}
+              position={[-L / 2 + outerLength / 2, axis + s * (inner + wire / 2), 0.02]}
             />
-          </mesh>
-        )}
-        <mesh geometry={geo.helix}>{wireMaterial}</mesh>
+          ))}
         {layers > 1 &&
           ([1, -1] as const).map((s) => (
             <WireSection
