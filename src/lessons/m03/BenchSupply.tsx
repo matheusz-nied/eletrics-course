@@ -377,7 +377,6 @@ export default function BenchSupply() {
           <button
             type="button"
             className={state.on ? 'bs-btn is-on' : 'bs-btn'}
-            aria-pressed={state.on}
             onClick={() => apply({ on: !state.on })}
           >
             {state.on ? 'Desligar a saída (OUTPUT)' : 'Ligar a saída (OUTPUT)'}
