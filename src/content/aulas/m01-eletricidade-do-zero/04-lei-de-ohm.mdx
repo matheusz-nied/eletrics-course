@@ -1,0 +1,337 @@
+---
+titulo: Resistência e Lei de Ohm
+modulo: m01-eletricidade-do-zero
+ordem: 4
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Explicar como o material, o comprimento, a seção e a temperatura mudam a resistência de um fio
+  - Calcular a resistência de um fio de cobre com R = ρ·L/A
+  - Usar a Lei de Ohm para achar a tensão, a corrente ou a resistência
+  - Ler uma curva I×V e reconhecer um componente que não segue a Lei de Ohm
+  - Explicar por que uma extensão fina esquenta com um aparelho potente
+prerequisitos: [m01-eletricidade-do-zero/03-tensao]
+tags: [resistência, lei de ohm, resistividade, bitola, ohm, curva I×V, extensão]
+seguranca: baixa-tensao
+---
+
+import BitolasFios from '../../../lessons/m01/figuras/BitolasFios.astro';
+import CalculadoraExtensao from '../../../lessons/m01/CalculadoraExtensao';
+import CurvaIV from '../../../lessons/m01/CurvaIV';
+
+Você liga um aquecedor numa extensão fina e, depois de meia hora, o fio está morno e o plugue, quente. O mesmo aquecedor, ligado direto na tomada, não esquenta fio nenhum. A explicação começa numa grandeza que você já encontrou de passagem, a resistência, e numa relação simples entre três grandezas que você vai usar no curso inteiro.
+
+## A ideia: o que dificulta a corrente
+
+Na aula <LinkAula id="m01-eletricidade-do-zero/03-tensao" /> você viu que a <Term id="tensao">tensão</Term> empurra as cargas. Mas quanta <Term id="corrente-eletrica">corrente</Term> passa com um certo empurrão? Depende do caminho. Dentro de um fio de cobre, um <Term id="condutor">condutor</Term>, os elétrons livres não andam em linha reta: eles esbarram o tempo todo nos átomos do metal, que vibram. A cada esbarrão, um pouco da energia que o elétron recebeu da fonte vira vibração dos átomos, ou seja, calor. A <Term id="resistencia-eletrica">resistência elétrica</Term> mede o quanto um caminho dificulta a passagem da corrente.
+
+Pense num corredor por onde passa uma multidão. Um corredor mais comprido tem mais obstáculos no caminho. Um corredor mais largo deixa passar mais gente ao mesmo tempo. E se o chão estiver cheio de móveis, passa menos gente que num corredor vazio. Com a resistência de um fio é igual, como você vai ver logo abaixo. A analogia do corredor ajuda a lembrar o que aumenta e o que diminui a resistência, mas não diga mais que isso: as pessoas não se empurram como os elétrons.
+
+A unidade de resistência é o <Term id="ohm">ohm</Term>, cujo símbolo é a letra grega ômega (Ω). Valores típicos: um pedaço de 1 m de fio de 2,5 mm² tem cerca de 0,007 Ω; o filamento de uma lâmpada incandescente acesa tem dezenas a centenas de ohms; a resistência de um chuveiro tem poucos ohms; os resistores de uma placa eletrônica vão de alguns ohms a milhões de ohms (MΩ).
+
+## Do que depende a resistência de um fio
+
+Quatro coisas decidem a resistência de um fio:
+
+- **O material.** Cada material tem sua <Term id="resistividade">resistividade</Term>, o símbolo ρ (a letra grega rô): o quanto ele dificulta a corrente, independentemente do formato. O cobre tem resistividade baixa, por isso é usado nos fios. O níquel-cromo tem resistividade cerca de 60 vezes maior, por isso é usado nas resistências de aquecimento. Plásticos como o PVC têm resistividade enorme e são <Term id="isolante">isolantes</Term>.
+- **O comprimento.** Um fio duas vezes mais comprido tem o dobro da resistência: é como ligar dois fios iguais em sequência.
+- **A seção.** A seção é a área do corte do fio, a <Term id="bitola">bitola</Term>, medida em milímetros quadrados (mm²). Um fio com o dobro da seção tem metade da resistência: é como ter dois fios lado a lado dividindo a corrente.
+- **A temperatura.** Nos metais, a resistência aumenta quando eles esquentam. No cobre, o aumento é de cerca de 0,4 % por grau. No filamento de uma lâmpada, que vai de 25 °C a mais de 2.000 °C, a resistência quente chega a ser umas 14 vezes a fria.
+
+As três primeiras cabem numa fórmula:
+
+$$
+R = \rho \cdot \frac{L}{A}
+$$
+
+Aqui, $R$ é a resistência em ohms (Ω), $\rho$ é a resistividade do material em ohm-metro (Ω·m), $L$ é o comprimento em metros (m) e $A$ é a área da seção em metros quadrados (m²). A resistividade do cobre a 20 °C é $\rho = 1{,}72 \times 10^{-8}\,\Omega\cdot\text{m}$, um número muito pequeno que só fica "visível" em fios compridos.
+
+**Cuidado com a seção:** a bitola vem em mm², mas a fórmula pede m². Como 1 mm é a milésima parte do metro, 1 mm² é a milionésima parte do metro quadrado: $1\,\text{mm}^2 = 10^{-6}\,\text{m}^2$. Então 2,5 mm² entram na conta como $2{,}5 \times 10^{-6}\,\text{m}^2$.
+
+### Exemplo: 100 metros de fio de 2,5 mm²
+
+$$
+R = 1{,}72 \times 10^{-8} \times \frac{100}{2{,}5 \times 10^{-6}} = 0{,}688\,\Omega
+$$
+
+Menos de 1 Ω em 100 metros. Parece nada, e para correntes pequenas é mesmo. Mas você vai ver no fim da aula que, com 10 A passando, alguns décimos de ohm fazem diferença.
+
+<BitolasFios />
+
+<DeepDive title="Quanto o fio quente resiste a mais">
+Nos metais, a resistência cresce quase em linha reta com a temperatura:
+
+$$
+R_T = R_{20} \cdot [1 + \alpha \cdot (T - 20)]
+$$
+
+$R_{20}$ é a resistência a 20 °C, $T$ é a temperatura em °C e $\alpha$ é o coeficiente de temperatura do material. Para o cobre, $\alpha \approx 0{,}0039$ por °C. Um fio que trabalha a 70 °C tem:
+
+$$
+R_{70} = R_{20} \cdot (1 + 0{,}0039 \times 50) \approx 1{,}2 \cdot R_{20}
+$$
+
+Cerca de 20 % a mais que frio. Alguns materiais fazem o contrário: no termistor NTC, a resistência cai quando ele esquenta, e é assim que muitos sensores de temperatura funcionam. Ele aparece na aula <LinkAula id="m04-passivos/02-resistores-variaveis" />.
+</DeepDive>
+
+## A Lei de Ohm
+
+Em 1827, o alemão Georg Simon Ohm publicou o resultado de um experimento paciente: aplicava tensões diferentes num mesmo fio e media a corrente. Dobrava a tensão, a corrente dobrava. Triplicava, triplicava. A razão entre tensão e corrente ficava sempre igual, e esse número constante é a resistência do fio. Hoje escrevemos a <Term id="lei-de-ohm">Lei de Ohm</Term> assim:
+
+$$
+V = R \cdot I
+$$
+
+$V$ é a tensão entre os terminais, em volts (V); $R$ é a resistência, em ohms (Ω); $I$ é a corrente que atravessa, em ampères (A). A mesma relação pode ser virada para achar qualquer uma das três:
+
+$$
+I = \frac{V}{R} \qquad R = \frac{V}{I}
+$$
+
+Dá para ler cada forma em palavras:
+
+- $I = V/R$: **mais tensão, mais corrente; mais resistência, menos corrente.**
+- $V = R \cdot I$: para empurrar uma corrente por uma resistência, é preciso uma tensão. Por isso todo fio "come" um pouco de tensão quando há corrente nele.
+- $R = V/I$: medindo tensão e corrente, você descobre a resistência.
+
+**Dica das unidades.** Em eletrônica, as correntes são de miliampères e as resistências de quilo-ohms. As contas ficam fáceis se você usar os dois juntos: volts divididos por quilo-ohms dão miliampères. Por exemplo, $9\,\text{V} \div 1\,\text{k}\Omega = 9\,\text{mA}$.
+
+## Explore: a Lei de Ohm no simulador
+
+O circuito abaixo tem uma fonte de tensão ajustável e um <Term id="resistor">resistor</Term> ajustável: um componente feito para ter uma resistência certa. Ele começa com 9 V e 100 Ω.
+
+<Simulation circuit="m01/lei-de-ohm" />
+
+Faça nesta ordem e anote a corrente de cada passo:
+
+1. Como está, 9 V e 100 Ω: a corrente é 90 mA. Confira: $9 \div 100 = 0{,}09\,\text{A}$.
+2. Mude a resistência para 1 kΩ (1.000 Ω), deixando os 9 V. A corrente cai para 9 mA: dez vezes mais resistência, dez vezes menos corrente.
+3. Agora 2 kΩ. A corrente cai pela metade, para 4,5 mA.
+4. Volte para 1 kΩ e mude só a tensão: 3 V, 6 V, 12 V. A corrente acompanha: 3 mA, 6 mA, 12 mA. É a proporção que Ohm encontrou.
+5. Resolva os desafios abaixo da simulação. O último pede 50 mA com só 5 V: qual resistência faz isso?
+
+Os resistores de verdade são assim:
+
+<Model3D part="resistor" props={{ ohms: 1000 }} />
+
+Este é um resistor de 1 kΩ, como o do passo 2. As faixas coloridas indicam o valor; ler esse código é assunto da aula <LinkAula id="m04-passivos/01-resistores" />.
+
+## Exemplos resolvidos
+
+**1. Achar a corrente.** Um resistor de 4,7 kΩ está ligado nos 12 V de uma central de portão. Qual é a corrente?
+
+$$
+I = \frac{V}{R} = \frac{12\,\text{V}}{4.700\,\Omega} \approx 0{,}00255\,\text{A} = 2{,}55\,\text{mA}
+$$
+
+Com a dica das unidades: $12 \div 4{,}7 \approx 2{,}55\,\text{mA}$. Confira no simulador: 12 V e 4,7 kΩ (é um dos desafios).
+
+**2. Achar a tensão.** Um sensor tem 2 kΩ e, funcionando, passam 6 mA por ele. Qual tensão ele recebe?
+
+$$
+V = R \cdot I = 2.000\,\Omega \times 0{,}006\,\text{A} = 12\,\text{V}
+$$
+
+Ou, direto: $2\,\text{k}\Omega \times 6\,\text{mA} = 12\,\text{V}$.
+
+**3. Achar a resistência.** Uma lâmpada incandescente de 127 V acesa puxa 0,5 A. Qual é a resistência do filamento nessa situação?
+
+$$
+R = \frac{V}{I} = \frac{127\,\text{V}}{0{,}5\,\text{A}} = 254\,\Omega
+$$
+
+Repare no "nessa situação". Com a lâmpada apagada e fria, um multímetro mediria bem menos que isso, como você vai ver agora.
+
+## A curva I×V
+
+Se você anotar as medidas do passo 4 num gráfico, com a tensão no eixo horizontal e a corrente no vertical, os pontos caem numa reta que sai do zero. Esse gráfico se chama **curva I×V** (corrente em função da tensão), e é o "retrato" elétrico de um componente. Num resistor, a curva é uma reta, e a inclinação dela diz a resistência: quanto mais em pé a reta, **menor** a resistência, porque a corrente sobe mais para a mesma tensão.
+
+<CurvaIV client:visible />
+
+No gráfico acima:
+
+1. Com 6 V, compare o resistor de 15 Ω com o de 120 Ω. Qual reta é mais inclinada? Qual corrente é maior?
+2. Escolha 30 Ω e marque **Comparar com uma lâmpada**. A lâmpada de 12 V e 5 W tem cerca de 29 Ω acesa, então a curva dela encosta na reta de 30 Ω perto de 12 V.
+3. Desça a tensão para 6 V. O resistor fica com metade da corrente; a lâmpada, não. A curva da lâmpada não é reta.
+
+### Uma lâmpada não segue a Lei de Ohm
+
+O filamento da lâmpada é de tungstênio, um metal. Com mais tensão, passa mais corrente, ele esquenta mais e a resistência dele sobe. Com menos tensão, ele esfria e a resistência cai. A Lei de Ohm, como relação de proporção, só vale quando a resistência fica constante, e no filamento ela não fica. Componentes assim são chamados de **não ôhmicos**.
+
+<Simulation circuit="m01/lampada-nao-ohmica" />
+
+1. Com 12 V, a lâmpada puxa cerca de 417 mA. Passe o dedo ou o mouse sobre ela: a resistência do filamento é de cerca de 29 Ω.
+2. Baixe para 6 V, metade da tensão. Se a lâmpada fosse um resistor de 29 Ω, a corrente cairia para 208 mA. Ela cai só para cerca de 287 mA, e o filamento, mais frio, tem uns 21 Ω.
+3. Desça até 1 V. O filamento leva alguns segundos para esfriar; quando a leitura parar de mudar, a resistência estará em cerca de 9 Ω, um terço do valor aceso.
+
+Apagado, na temperatura ambiente, o filamento dessa lâmpada tem só uns 2 Ω, cerca de 14 vezes menos que aceso. Por isso, no instante em que você liga, passa uma corrente muitas vezes maior que a normal, até o filamento esquentar. É nesse instante que as lâmpadas incandescentes costumam queimar.
+
+O <Term id="led">LED</Term> e o diodo também são não ôhmicos, e de um jeito ainda mais radical: quase não conduzem até certa tensão e, a partir dela, a corrente dispara. Por isso um LED sempre precisa de um resistor em série, assunto da aula <LinkAula id="m09-semicondutores/04-leds" />. A Lei de Ohm continua útil nesses casos, mas aplicada ao resistor, não ao LED.
+
+## Na prática: fios também têm resistência
+
+<RealCase title="A extensão que esquenta">
+Volte ao aquecedor do começo da aula. Ele é um aparelho resistivo: em 127 V, puxa 10 A, então pela Lei de Ohm tem $127 \div 10 = 12{,}7\,\Omega$ (e uma potência de 1.270 W). A extensão tem 20 m. A corrente vai por um fio e volta pelo outro, então ela atravessa **40 m de cobre**, e esse cobre está em série com o aquecedor.
+
+**Com uma extensão fina, de 0,75 mm²:**
+
+$$
+R_{\text{fios}} = 1{,}72 \times 10^{-8} \times \frac{40}{0{,}75 \times 10^{-6}} \approx 0{,}92\,\Omega
+$$
+
+A resistência total é $12{,}7 + 0{,}92 = 13{,}62\,\Omega$, e a corrente fica:
+
+$$
+I = \frac{127\,\text{V}}{13{,}62\,\Omega} \approx 9{,}33\,\text{A}
+$$
+
+A tensão que fica nos fios é $V = R \cdot I = 0{,}92 \times 9{,}33 \approx 8{,}6\,\text{V}$. O aquecedor recebe só uns 118 V. E essa tensão "perdida" não some: cada carga que passa pelos fios deixa neles a energia correspondente, em forma de calor. Multiplicando a tensão nos fios pela corrente, você tem quanta energia vira calor por segundo, a potência, assunto da aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />:
+
+$$
+P = 8{,}56\,\text{V} \times 9{,}33\,\text{A} \approx 80\,\text{W}
+$$
+
+São 80 W espalhados ao longo da extensão, como uma lâmpada antiga acesa dentro do fio. Esticada, ela fica morna. Enrolada no carretel, as voltas aquecem umas às outras, o calor não tem por onde sair e o plástico pode amolecer e derreter.
+
+**Com uma extensão de 2,5 mm²,** os fios têm 0,28 Ω, ficam com 2,7 V e transformam só uns 26 W em calor: um terço.
+
+O que fazer com isso: para aparelhos de corrente alta (aquecedor, ferro de passar, forno elétrico, ar-condicionado portátil), use a tomada direto ou uma extensão de bitola compatível, desenrolada por inteiro. Não ligue uma extensão na outra e não use benjamins para juntar vários aparelhos potentes. E repare no plugue: um contato frouxo também é uma resistência, só que concentrada num ponto pequeno, e esquenta mais ainda que o fio. A escolha dos fios da instalação é o assunto da aula <LinkAula id="m07-instalacoes/04-fios-e-cabos" />.
+</RealCase>
+
+### Explore: a extensão no simulador
+
+<Simulation circuit="m01/extensao" />
+
+Na simulação, a tomada aparece como uma fonte contínua de 127 V, o valor eficaz da tensão alternada: para aparelhos resistivos, como o aquecedor, o resultado é o mesmo (veja a aula <LinkAula id="m06-corrente-alternada/02-pico-eficaz-e-medio" />). Cada resistor de fio representa os dois condutores da extensão juntos.
+
+1. Com a extensão fina, passe o dedo ou o mouse sobre o aquecedor e sobre os fios de 0,75 mm². Confira os cerca de 118 V no aquecedor e os 8,6 V nos fios.
+2. Acione a chave para trocar pela extensão de 2,5 mm². O aquecedor sobe para cerca de 124 V e o calor nos fios cai para uns 26 W.
+
+Agora faça a conta para a sua extensão. A bitola costuma vir impressa no cabo, como "2 x 1,5 mm²":
+
+<CalculadoraExtensao client:visible />
+
+## Erros comuns e segurança
+
+- **Medir resistência com o circuito ligado.** O multímetro mede resistência injetando uma corrente pequena; com o circuito energizado, a leitura sai errada e o instrumento pode ser danificado. Desligue e, se possível, solte a peça.
+- **Esquecer de converter as unidades.** 4,7 kΩ são 4.700 Ω, 20 mA são 0,02 A e 2,5 mm² são $2{,}5 \times 10^{-6}$ m². A maioria dos erros de conta está aqui.
+- **Achar que a Lei de Ohm vale para tudo.** Lâmpadas, LEDs e diodos não seguem a proporção. A relação $R = V/I$ continua dando a resistência naquele ponto, mas ela muda com a tensão.
+- **Achar que fio não tem resistência.** Em fios curtos com pouca corrente, quase não tem. Em fios longos ou com muita corrente, tem: é o que derruba a tensão no fim de um cabo comprido, como o da fotocélula do portão, e o que esquenta a extensão fina.
+- **Emendar fios com torção e fita.** Uma emenda mal feita tem resistência maior e esquenta. Emendas e conectores são assunto da aula <LinkAula id="m14-placas/06-bornes-conectores-e-emendas" />.
+- **Escolher um resistor só pelo valor em ohms.** Ele também precisa aguentar o calor que vai produzir, a potência, que é o tema da próxima aula.
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Uma lâmpada de 127 V tem resistência de 254 Ω acesa. Qual é a corrente?',
+      answer: 0.5,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation: 'I = V/R = 127/254 = 0,5 A.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um resistor de 4,7 kΩ é ligado nos 12 V de uma central de portão. Qual é a corrente, em mA?',
+      answer: 2.55,
+      tolerance: 0.02,
+      unit: 'mA',
+      explanation:
+        'I = 12 V ÷ 4.700 Ω ≈ 0,00255 A = 2,55 mA. Com a dica das unidades: 12 V ÷ 4,7 kΩ ≈ 2,55 mA.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Qual é a resistência de um único fio de cobre de 1,5 mm² com 50 m de comprimento? Use ρ = 1,72×10⁻⁸ Ω·m.',
+      answer: 0.573,
+      tolerance: 0.03,
+      unit: 'Ω',
+      explanation:
+        'R = ρ·L/A = 1,72×10⁻⁸ × 50 ÷ 1,5×10⁻⁶ ≈ 0,573 Ω. Lembre de converter 1,5 mm² para 1,5×10⁻⁶ m².',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você troca um fio por outro do mesmo material, com o dobro do comprimento e o dobro da seção. O que acontece com a resistência?',
+      options: [
+        {
+          text: 'Fica igual',
+          correct: true,
+          feedback:
+            'Isso. O dobro do comprimento dobra a resistência, e o dobro da seção corta pela metade. Um efeito anula o outro.',
+        },
+        {
+          text: 'Dobra',
+          feedback:
+            'O comprimento maior dobraria a resistência, mas a seção maior a divide por dois. No total, ela não muda.',
+        },
+        {
+          text: 'Fica quatro vezes maior',
+          feedback:
+            'Seção maior diminui a resistência, não aumenta. Os dois efeitos se compensam.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Uma lâmpada incandescente de 12 V puxa 417 mA. Ligada em 6 V, ela vai puxar exatamente metade, cerca de 208 mA.',
+      answer: false,
+      explanation:
+        'Com menos tensão o filamento esfria e a resistência cai, então a corrente fica bem acima da metade: cerca de 287 mA no simulador. A lâmpada não é ôhmica.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Num gráfico I×V com as retas de dois resistores, a reta mais inclinada (mais em pé) é a do resistor:',
+      options: [
+        {
+          text: 'De menor resistência',
+          correct: true,
+          feedback:
+            'Isso. Para a mesma tensão, ele deixa passar mais corrente, então a reta sobe mais depressa.',
+        },
+        {
+          text: 'De maior resistência',
+          feedback:
+            'Resistência maior deixa passar menos corrente para a mesma tensão: a reta fica mais deitada.',
+        },
+        {
+          text: 'Não dá para saber pelo gráfico',
+          feedback:
+            'Dá sim: a inclinação é a corrente dividida pela tensão, ou seja, 1/R. Mais inclinada, menor R.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que uma extensão fina esquenta quando alimenta um aquecedor?',
+      options: [
+        {
+          text: 'Porque os fios dela têm resistência, e a corrente alta transforma parte da energia em calor neles',
+          correct: true,
+          feedback:
+            'Isso. Fio fino tem mais resistência; com 9 a 10 A passando, dezenas de watts viram calor ao longo da extensão.',
+        },
+        {
+          text: 'Porque a tensão da tomada aumenta quando o aquecedor liga',
+          feedback:
+            'A tensão da tomada não aumenta. O que acontece é o contrário: parte dela fica nos fios, e o aquecedor recebe um pouco menos.',
+        },
+        {
+          text: 'Porque o aquecedor manda calor pelo fio',
+          feedback:
+            'O calor do aquecedor não viaja pelo cobre até a extensão. O fio esquenta sozinho, por causa da própria resistência.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- A resistência mede o quanto um caminho dificulta a corrente; a unidade é o ohm (Ω).
+- A resistência de um fio cresce com o comprimento, cai com a seção e depende do material: $R = \rho \cdot L / A$. Nos metais, ela também sobe com a temperatura.
+- Lei de Ohm: $V = R \cdot I$. Mais tensão, mais corrente; mais resistência, menos corrente. Volts divididos por quilo-ohms dão miliampères.
+- Num resistor, a curva I×V é uma reta que sai do zero. Lâmpadas, LEDs e diodos não seguem essa reta.
+- Fio também tem resistência: com corrente alta, uma extensão fina fica com parte da tensão e transforma parte da energia em calor.

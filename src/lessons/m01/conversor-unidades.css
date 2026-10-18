@@ -1,0 +1,79 @@
+/* ConversorUnidades.tsx: lesson 1.6, prefixes, notation and component codes. */
+
+.conv-un__inputs {
+  display: grid;
+  gap: 0.9rem;
+}
+
+@media (min-width: 36rem) {
+  .conv-un__inputs {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.conv-un input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.conv-un__code input {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+
+.conv-un__forms {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.conv-un__forms dt {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.conv-un__forms dd {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.conv-un__calc {
+  letter-spacing: 0.04em;
+}
+
+.conv-un .conv-un__table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.conv-un__table :where(th, td) {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.conv-un__table thead th {
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.conv-un__table tbody th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.conv-un__table td {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.conv-un__best :where(th, td) {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 700;
+}

@@ -1,0 +1,80 @@
+---
+/*
+ * Lesson 1.4: cross-sections of the common building-wire gauges, drawn to the
+ * same scale (copper diameter 2·√(A/π)), with the resistance of 100 m of each
+ * at 20 °C (ρ = 1,72×10⁻⁸ Ω·m). Insulation thickness is typical.
+ */
+import Figure from '../../../components/Figure.astro';
+
+const SCALE = 28; // px per mm
+const WIRES = [
+  { mm2: 1.5, label: '1,5 mm²', ohms: '1,15 Ω', use: 'iluminação', insulation: 0.7 },
+  { mm2: 2.5, label: '2,5 mm²', ohms: '0,69 Ω', use: 'tomadas', insulation: 0.8 },
+  { mm2: 4, label: '4 mm²', ohms: '0,43 Ω', use: 'corrente alta', insulation: 0.8 },
+  { mm2: 6, label: '6 mm²', ohms: '0,29 Ω', use: 'corrente alta', insulation: 0.8 },
+].map((w, i) => {
+  const r = Math.sqrt(w.mm2 / Math.PI) * SCALE;
+  return { ...w, x: 90 + i * 155, r, outer: r + w.insulation * SCALE };
+});
+---
+
+<Figure
+  wide
+  alt="Quatro fios cortados, vistos de frente, na mesma escala: 1,5, 2,5, 4 e 6 milímetros quadrados. O círculo de cobre cresce de um para o outro. Embaixo de cada um, a resistência de 100 metros de fio: 1,15 ohm, 0,69 ohm, 0,43 ohm e 0,29 ohm."
+  caption="Fios de instalação vistos em corte, na mesma escala, com a resistência de 100 m de cada um (cobre a 20 °C). Quanto maior a seção de cobre, menor a resistência. Os usos são os típicos numa casa; o eletricista escolhe a bitola pela corrente do circuito."
+>
+  <svg
+    class="fig-bitola"
+    viewBox="0 0 640 250"
+    width="640"
+    height="250"
+    font-family="var(--font-sans)"
+    font-size="13"
+  >
+    {WIRES.map((w) => (
+      <g>
+        <circle cx={w.x} cy="92" r={w.outer} class="fig-bitola__insulation" />
+        <circle cx={w.x} cy="92" r={w.r} class="fig-bitola__copper" />
+        <text x={w.x} y="188" text-anchor="middle" class="fig-bitola__label">
+          {w.label}
+        </text>
+        <text x={w.x} y="207" text-anchor="middle" class="fig-bitola__ohms">
+          {w.ohms} em 100 m
+        </text>
+        <text x={w.x} y="225" text-anchor="middle" class="fig-bitola__small">
+          {w.use}
+        </text>
+      </g>
+    ))}
+  </svg>
+</Figure>
+
+<style>
+  .fig-bitola text {
+    fill: var(--fg);
+  }
+
+  .fig-bitola__label {
+    font-weight: 700;
+  }
+
+  .fig-bitola .fig-bitola__ohms {
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+
+  .fig-bitola .fig-bitola__small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+
+  .fig-bitola__insulation {
+    fill: color-mix(in oklab, var(--accent) 22%, var(--bg));
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+
+  .fig-bitola__copper {
+    fill: var(--copper);
+  }
+</style>

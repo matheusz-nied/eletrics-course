@@ -1,0 +1,101 @@
+/* JogoGrandezas.tsx: lesson 1.6, put real-world values in order. */
+
+.jogo-gr__round {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.jogo-gr__question {
+  font-weight: 650;
+}
+
+.jogo-gr .jogo-gr__list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jogo-gr__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.6rem 0.6rem 0.6rem 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.75rem;
+  background: var(--bg);
+}
+
+.jogo-gr__item--ok {
+  border-color: var(--success-border);
+  background: var(--success-soft);
+}
+
+.jogo-gr__item--bad {
+  border-color: var(--warning-border);
+  background: var(--warning-soft);
+}
+
+.jogo-gr__pos {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.jogo-gr__text {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.jogo-gr__label {
+  font-size: 0.9375rem;
+  line-height: 1.35;
+}
+
+.jogo-gr__value {
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.jogo-gr__moves {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.jogo-gr .jogo-gr__move {
+  width: 2.5rem;
+  padding: 0;
+}
+
+.jogo-gr__move svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.jogo-gr__move:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.jogo-gr__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.jogo-gr__score {
+  margin-top: 0.75rem;
+}

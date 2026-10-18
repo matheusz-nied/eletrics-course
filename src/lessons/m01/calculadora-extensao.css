@@ -1,0 +1,66 @@
+/* CalculadoraExtensao.tsx: heat in an extension cord, lesson 1.4. */
+
+.calc-extensao__facts {
+  display: grid;
+  gap: 0.6rem 1.25rem;
+  margin: 0;
+}
+
+@media (min-width: 36rem) {
+  .calc-extensao__facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.calc-extensao__facts dt {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+
+.calc-extensao__facts dd {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.calc-extensao__bars {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.calc-extensao__bar {
+  display: grid;
+  grid-template-columns: 5.25rem minmax(0, 1fr) 4.75rem;
+  gap: 0.6rem;
+  align-items: center;
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+}
+
+.calc-extensao__bar.is-current {
+  color: var(--fg);
+  font-weight: 650;
+}
+
+.calc-extensao__bar-track {
+  height: 0.6rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.calc-extensao__bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--fg-subtle);
+}
+
+.calc-extensao__bar.is-current .calc-extensao__bar-fill {
+  background: var(--copper);
+}
+
+.calc-extensao__bar-value {
+  text-align: right;
+}
