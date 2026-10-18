@@ -1,0 +1,165 @@
+---
+/*
+ * 04.2: a rotary potentiometer with the cover off, seen from the shaft with
+ * the terminals down: horseshoe track between A (1, left) and B (3, right),
+ * the wiper on the shaft and the collector ring that takes it to the middle
+ * terminal. Same convention as the 3D kit (rotation 0 at terminal 1).
+ * Generic drawing, no brand.
+ */
+const CX = 300;
+const CY = 140;
+const R = 95;
+const at = (deg: number, r: number): [number, number] => {
+  const a = (deg * Math.PI) / 180;
+  return [CX + r * Math.cos(a), CY + r * Math.sin(a)];
+};
+/** The track runs clockwise from 120° (A) to 60° (B): 300° of travel. */
+const [ax, ay] = at(120, R);
+const [bx, by] = at(60, R);
+const track = `M${ax} ${ay} A${R} ${R} 0 1 1 ${bx} ${by}`;
+/** Wiper at 60 % of the travel from A. */
+const wiperDeg = 120 + 0.6 * 300;
+const [tx, ty] = at(wiperDeg, R);
+const [l1x, l1y] = at(wiperDeg - 90, 9);
+const [l2x, l2y] = at(wiperDeg + 90, 9);
+const [trackLx, trackLy] = at(200, R + 10);
+const [ringLx, ringLy] = at(150, 30);
+---
+
+<svg viewBox="0 0 600 330" width="600" height="330" class="fig" aria-hidden="true">
+  <circle cx={CX} cy={CY} r="125" class="base" />
+
+  <!-- Terminal strips: A and B from the ends of the track, the wiper from the ring -->
+  <path d={`M${ax} ${ay} L240 262`} class="strip" />
+  <path d={`M${bx} ${by} L360 262`} class="strip" />
+  <path d={`M${CX} ${CY + 30} V262`} class="strip" />
+  <rect x="233" y="255" width="14" height="50" rx="2" class="pin" />
+  <rect x="293" y="255" width="14" height="50" rx="2" class="pin" />
+  <rect x="353" y="255" width="14" height="50" rx="2" class="pin" />
+
+  <path d={track} class="track" />
+  <circle cx={CX} cy={CY} r="30" class="ring" />
+  <path d={`M${l1x} ${l1y} L${tx} ${ty} L${l2x} ${l2y} Z`} class="wiper" />
+  <circle cx={tx} cy={ty} r="7" class="contact" />
+  <circle cx={CX} cy={CY} r="14" class="shaft" />
+
+  <!-- Leaders -->
+  <g class="leader">
+    <path d={`M${trackLx} ${trackLy} L168 96`} />
+    <path d={`M${ringLx} ${ringLy} L168 196`} />
+    <path d={`M${tx + 8} ${ty} L432 58`} />
+    <path d={`M${CX + 14} ${CY} L432 150`} />
+  </g>
+
+  <text x="162" y="92" class="lbl end">
+    Pista resistiva
+  </text>
+  <text x="162" y="110" class="small end">
+    (carbono)
+  </text>
+  <text x="162" y="192" class="lbl end">
+    Anel coletor
+  </text>
+  <text x="162" y="210" class="small end">
+    leva o cursor ao
+  </text>
+  <text x="162" y="226" class="small end">
+    terminal do meio
+  </text>
+  <text x="438" y="54" class="lbl">
+    Cursor (escova)
+  </text>
+  <text x="438" y="72" class="small">
+    desliza sobre a pista
+  </text>
+  <text x="438" y="146" class="lbl">
+    Eixo
+  </text>
+  <text x="438" y="164" class="small">
+    gira cerca de 300°
+  </text>
+
+  <text x="240" y="324" class="pinlbl">
+    A (1)
+  </text>
+  <text x="300" y="324" class="pinlbl">
+    cursor (2)
+  </text>
+  <text x="360" y="324" class="pinlbl">
+    B (3)
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .base {
+    fill: color-mix(in oklab, #8a5a2b 55%, var(--bg));
+    stroke: color-mix(in oklab, #8a5a2b 70%, var(--fg));
+    stroke-width: 1.5;
+  }
+  .track {
+    fill: none;
+    stroke: #2a2422;
+    stroke-width: 20;
+    stroke-linecap: butt;
+  }
+  .ring {
+    fill: #c9cbce;
+    stroke: #8d9196;
+    stroke-width: 2;
+  }
+  .strip {
+    stroke: #c9cbce;
+    stroke-width: 10;
+    fill: none;
+  }
+  .pin {
+    fill: #b9bcc0;
+    stroke: #7d8186;
+    stroke-width: 1;
+  }
+  .wiper {
+    fill: #d8b25a;
+    stroke: #9b7a2c;
+    stroke-width: 1.5;
+  }
+  .contact {
+    fill: #d8b25a;
+    stroke: #9b7a2c;
+    stroke-width: 1.5;
+  }
+  .shaft {
+    fill: #6e7277;
+    stroke: #45484c;
+    stroke-width: 2;
+  }
+  .leader {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  text {
+    fill: var(--fg);
+    font-size: 15px;
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .pinlbl {
+    font-size: 14px;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+</style>

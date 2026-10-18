@@ -1,0 +1,142 @@
+---
+/*
+ * 04.1: a through-hole resistor with the colour bands of a value, drawn from
+ * the same logic as the colour code game (../color-code.ts). Used as the
+ * illustration of <Part3D part="resistor"> until the 3D part is available,
+ * and on its own (legend={false}) in the drawing of the resistor types.
+ */
+import {
+  BAND_HEX,
+  bandLayout,
+  bandMeaning,
+  bodyHex,
+  colorLabel,
+  decode,
+  encode,
+} from '../color-code';
+import type { BandCount } from '../color-code';
+
+export interface Props {
+  ohms: number;
+  /** Tolerance in % (5 → gold, 1 → brown). */
+  tolerance?: number;
+  /** 4 or 5 bands. */
+  count?: BandCount;
+  /** Lists the meaning of each band under the drawing. */
+  legend?: boolean;
+}
+
+const { ohms, tolerance = 5, count = 4, legend = true } = Astro.props;
+const bands = encode(ohms, tolerance, count);
+const decoded = decode(bands)!;
+const X0 = 70;
+const WIDTH = 220;
+const shapes = bandLayout(bands, WIDTH);
+const ordinal = ['1ª', '2ª', '3ª', '4ª', '5ª'];
+const role = (i: number) =>
+  i < count - 2 ? 'algarismo' : i === count - 2 ? 'multiplicador' : 'tolerância';
+const digits = bands
+  .slice(0, count - 2)
+  .map((_, i) => bandMeaning(bands, i))
+  .join('');
+const total = new Intl.NumberFormat('pt-BR').format(decoded.ohms);
+const valueText = `${digits} ${bandMeaning(bands, count - 2).replace('×', '× ')} = ${total} Ω`;
+---
+
+<div class="rb">
+  <svg viewBox="0 0 360 110" width="360" height="110" class="rb__svg" aria-hidden="true">
+    <path d="M6 55H80M280 55H354" class="rb__lead" />
+    <rect x={X0} y="30" width={WIDTH} height="50" rx="20" fill={bodyHex(count)} />
+    {/* The bands sit on the straight part of the body, clear of the rounded ends. */}
+    {shapes.map((s) => (
+      <rect x={X0 + s.x} y="30" width={s.width} height="50" fill={BAND_HEX[s.color]} />
+    ))}
+    <rect x={X0 + 16} y="35" width={WIDTH - 32} height="9" rx="4.5" class="rb__shine" />
+    <rect x={X0} y="30" width={WIDTH} height="50" rx="20" class="rb__outline" />
+  </svg>
+  {legend && (
+    <>
+      <ol class="rb__legend">
+        {bands.map((band, i) => (
+          <li>
+            <span class="rb__swatch" style={`background:${BAND_HEX[band]}`} />
+            <span>
+              {ordinal[i]} faixa, {role(i)}: <strong>{colorLabel(band)}</strong>
+            </span>
+            <span class="rb__meaning">{bandMeaning(bands, i)}</span>
+          </li>
+        ))}
+      </ol>
+      <p class="rb__value">{valueText}</p>
+    </>
+  )}
+</div>
+
+<style>
+  .rb {
+    display: grid;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 26rem;
+    font-family: var(--font-sans);
+  }
+
+  .rb__svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .rb__lead {
+    fill: none;
+    stroke: color-mix(in oklab, var(--fg-subtle) 70%, var(--bg));
+    stroke-width: 5;
+    stroke-linecap: round;
+  }
+
+  .rb__shine {
+    fill: #fff;
+    opacity: 0.18;
+  }
+
+  .rb__outline {
+    fill: none;
+    stroke: color-mix(in oklab, var(--fg) 35%, transparent);
+    stroke-width: 1.5;
+  }
+
+  .rb__legend {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9rem;
+  }
+
+  .rb__legend li {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0;
+  }
+
+  .rb__swatch {
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid color-mix(in oklab, var(--fg) 40%, transparent);
+    border-radius: 0.2rem;
+  }
+
+  .rb__meaning,
+  .rb__value {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+
+  .rb__value {
+    margin: 0;
+    color: var(--accent);
+  }
+</style>

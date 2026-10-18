@@ -1,0 +1,148 @@
+---
+/*
+ * 04.2: the two ways to wire a potentiometer. Left, a voltage divider (three
+ * terminals: the ends on the supply, the output on the wiper). Right, a
+ * rheostat (two wires: end A and the wiper, with B tied to the wiper).
+ */
+---
+
+<svg viewBox="0 0 640 280" width="640" height="280" class="fig" aria-hidden="true">
+  <!-- Divider -->
+  <text x="150" y="24" class="title">
+    Divisor de tensão
+  </text>
+  <text x="150" y="44" class="small mid">
+    os 3 terminais
+  </text>
+  <path d="M132 64V90M132 190V216" class="wire" />
+  <rect x="120" y="90" width="24" height="100" rx="2" class="body" />
+  <path d="M220 130H156" class="wire" />
+  <path d="M158 130l12 -7v14z" class="arrow" />
+  <circle cx="132" cy="64" r="4" class="dot" />
+  <text x="142" y="68" class="lbl">
+    +5 V
+  </text>
+  <text x="112" y="104" class="tag end">
+    A
+  </text>
+  <text x="112" y="186" class="tag end">
+    B
+  </text>
+  <text x="112" y="145" class="small end">
+    10 kΩ
+  </text>
+  <path d="M116 216H148M122 224H142M128 232H136" class="wire" />
+  <text x="162" y="228" class="lbl">
+    0 V
+  </text>
+  <circle cx="220" cy="130" r="4" class="dot" />
+  <text x="228" y="126" class="lbl">
+    saída
+  </text>
+  <text x="228" y="144" class="small">
+    0 a 5 V
+  </text>
+  <text x="150" y="266" class="note">
+    A tensão no cursor segue a posição.
+  </text>
+
+  <path d="M320 20V266" class="sep" />
+
+  <!-- Rheostat -->
+  <text x="480" y="24" class="title">
+    Reostato
+  </text>
+  <text x="480" y="44" class="small mid">
+    só 2 fios: A e o cursor
+  </text>
+  <path d="M462 64V90M462 190V214H540V130" class="wire" />
+  <rect x="450" y="90" width="24" height="100" rx="2" class="body" />
+  <path d="M600 130H486" class="wire" />
+  <path d="M488 130l12 -7v14z" class="arrow" />
+  <circle cx="540" cy="130" r="4" class="dot" />
+  <circle cx="462" cy="64" r="4" class="dot" />
+  <circle cx="600" cy="130" r="4" class="dot" />
+  <text x="472" y="68" class="lbl">
+    fio 1
+  </text>
+  <text x="442" y="104" class="tag end">
+    A
+  </text>
+  <text x="442" y="186" class="tag end">
+    B
+  </text>
+  <text x="442" y="145" class="small end">
+    10 kΩ
+  </text>
+  <text x="600" y="116" class="lbl mid">
+    fio 2
+  </text>
+  <text x="500" y="236" class="small mid">
+    B ligado ao cursor
+  </text>
+  <text x="480" y="266" class="note">
+    Entre os fios: de 0 a 10 kΩ.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2.5;
+  }
+  .body {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 2.5;
+  }
+  .arrow {
+    fill: var(--accent);
+    stroke: var(--accent);
+    stroke-width: 1;
+  }
+  .dot {
+    fill: var(--fg);
+  }
+  .sep {
+    stroke: var(--border-strong);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+  }
+  text {
+    fill: var(--fg);
+    font-size: 15px;
+  }
+  .title {
+    font-size: 17px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .tag {
+    fill: var(--accent);
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>
