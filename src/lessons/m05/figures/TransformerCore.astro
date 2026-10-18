@@ -1,0 +1,136 @@
+---
+/*
+ * 05.4: the idea of a transformer. Two windings on one iron core: the mains
+ * drives the primary, the flux goes round the core and induces the voltage
+ * in the secondary. No wire joins the two sides.
+ */
+const turns = (x: number, y0: number, y1: number, step: number) =>
+  Array.from(
+    { length: Math.round((y1 - y0) / step) + 1 },
+    (_, i) => `M${x - 34} ${y0 + i * step} H${x + 34}`,
+  ).join(' ');
+---
+
+<svg viewBox="0 0 560 300" width="560" height="300" class="fig" aria-hidden="true">
+  <path d="M180 50 H380 V250 H180 Z M220 90 V210 H340 V90 Z" class="core" fill-rule="evenodd" />
+  <text x="280" y="36" class="lbl">
+    núcleo de ferro
+  </text>
+
+  <rect x="200" y="62" width="160" height="176" rx="20" class="flux" />
+  <path d="M280 62 l-9 -5 v10 z" class="flux-head" />
+  <path d="M280 238 l9 -5 v10 z" class="flux-head" />
+  <text x="280" y="146" class="muted">
+    o fluxo
+  </text>
+  <text x="280" y="163" class="muted">
+    dá a volta
+  </text>
+
+  <rect x="166" y="100" width="68" height="100" rx="6" class="coil" />
+  <path d={turns(200, 108, 192, 7)} class="turn" />
+  <rect x="326" y="122" width="68" height="56" rx="6" class="coil" />
+  <path d={turns(360, 132, 168, 12)} class="turn thick" />
+
+  <circle cx="70" cy="150" r="18" class="source" />
+  <path d="M60 150 q5 -9 10 0 t10 0" class="sine" />
+  <path d="M70 132 V120 H166 M70 168 V180 H166" class="wire" />
+  <text x="70" y="208" class="lbl">
+    rede
+  </text>
+  <text x="70" y="225" class="lbl strong">
+    220 V~
+  </text>
+
+  <path d="M394 135 H480 V138 M394 165 H480 V162" class="wire" />
+  <rect x="470" y="138" width="20" height="24" rx="2" class="load" />
+  <text x="436" y="155" class="lbl strong">
+    12 V~
+  </text>
+  <text x="480" y="186" class="lbl">
+    carga
+  </text>
+
+  <text x="200" y="274" class="lbl strong">
+    primário
+  </text>
+  <text x="200" y="291" class="muted">
+    muitas espiras
+  </text>
+  <text x="360" y="274" class="lbl strong">
+    secundário
+  </text>
+  <text x="360" y="291" class="muted">
+    poucas espiras
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .core {
+    fill: color-mix(in oklab, var(--fg-subtle) 35%, transparent);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .flux {
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-dasharray: 7 5;
+  }
+  .flux-head {
+    fill: var(--accent);
+    stroke: none;
+  }
+  .coil {
+    fill: color-mix(in oklab, var(--copper) 45%, var(--surface));
+    stroke: var(--copper);
+    stroke-width: 2;
+  }
+  .turn {
+    stroke: var(--copper);
+    stroke-width: 1;
+  }
+  .turn.thick {
+    stroke-width: 3;
+  }
+  .source {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .sine {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .wire {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .load {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+  }
+  .strong {
+    fill: var(--fg);
+    font-weight: 700;
+  }
+  .muted {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+</style>
