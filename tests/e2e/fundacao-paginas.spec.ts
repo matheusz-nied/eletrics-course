@@ -14,6 +14,8 @@ async function crawl(page: Page): Promise<string[]> {
   const queue = [...seen];
   while (queue.length > 0) {
     const path = queue.shift()!;
+    // The site grows with every module: the crawl itself gets about a second per page.
+    test.setTimeout(test.info().timeout + 1_000);
     await page.goto(path);
     const hrefs = await page.$$eval('a[href]', (links) =>
       links.map((a) => (a as HTMLAnchorElement).href),
@@ -39,8 +41,8 @@ test.describe('every page', () => {
   }) => {
     const paths = await crawl(page);
     expect(paths).toContain(BASE);
-    // The site grows with every module: allow about a second per page.
-    test.setTimeout(30_000 + paths.length * 1_000);
+    // And the checks get about another second per page.
+    test.setTimeout(test.info().timeout + paths.length * 1_000);
 
     for (const path of paths) {
       await test.step(path, async () => {
