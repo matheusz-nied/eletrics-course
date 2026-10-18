@@ -53,6 +53,7 @@ test.describe('circuit gallery', () => {
       'filtro-rc-bode',
       'rele-motor',
       'fim-de-curso',
+      'motor-capacitor',
     ]) {
       await expect(page.locator(`[data-circuit="demo/${name}"]`)).toBeVisible();
     }
@@ -286,6 +287,18 @@ test.describe('instruments', () => {
     errors.expectClean();
   });
 
+  test('the AC meter reads the current of a 3-pin motor', async ({ page }) => {
+    const errors = watchErrors(page);
+    const sim = await openSimulation(page, demo('motor-capacitor'));
+    await sim.getByRole('button', { name: 'Iniciar simulação', exact: true }).click();
+    await sim.getByRole('tab', { name: 'Multímetro' }).click();
+    // About 0,94 A at full speed; the common carries the same current as the fuse.
+    await expect.poll(() => meter(page, 'IF', 'A'), { timeout: 10_000 }).toBeGreaterThan(0.8);
+    const motor = await meter(page, 'IM', 'A');
+    expect(motor).toBeCloseTo(await meter(page, 'IF', 'A'), 1);
+    errors.expectClean();
+  });
+
   test('the Bode plot finds the cut-off frequency', async ({ page }) => {
     const errors = watchErrors(page);
     const sim = await openSimulation(page, demo('filtro-rc-bode'));
@@ -324,6 +337,22 @@ test.describe('performance', () => {
     });
     expect(1000 / median).toBeGreaterThan(55);
     errors.expectClean();
+  });
+});
+
+test.describe('layout', () => {
+  test('the head is drawn and the 3D view sits beside the schematic on a wide screen', async ({
+    page,
+    isMobile,
+  }) => {
+    const sim = await openSimulation(page, demo('lampada-3d'));
+    const head = sim.locator('.sim-head');
+    await expect(head).toBeVisible();
+    expect(await head.evaluate((el) => el.getClientRects().length)).toBe(1);
+    const columns = await sim
+      .locator('.sim-stage')
+      .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+    expect(columns).toBe(isMobile ? 1 : 2);
   });
 });
 
