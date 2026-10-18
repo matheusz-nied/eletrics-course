@@ -54,12 +54,7 @@ export function ratingFor(watts: number): number {
  * Current through `count` LEDs and a resistor in series on `supply` volts,
  * solving count·V_LED(I) + I·R = supply by bisection.
  */
-export function stringCurrent(
-  supply: number,
-  ohms: number,
-  color: LedColor,
-  count = 1,
-): number {
+export function stringCurrent(supply: number, ohms: number, color: LedColor, count = 1): number {
   const d = ledModel(color);
   if (supply <= 0) return 0;
   let lo = 0;
@@ -75,6 +70,11 @@ export function stringCurrent(
 export interface LedDesign {
   /** Voltage left for the resistor, with the table forward voltage (V). */
   headroom: number;
+  /**
+   * Less than a quarter of the supply is left for the resistor: a small change
+   * of the supply or of the LEDs changes the current a lot.
+   */
+  tight: boolean;
   /** The calculated resistance (Ω), or undefined when the supply is too low. */
   ideal?: number;
   /** The E12 value chosen (Ω). */
@@ -102,12 +102,21 @@ export function designResistor(
   const vf = LEDS[color].vf;
   const headroom = supply - count * vf;
   if (headroom <= 0) {
-    return { headroom, current: 0, ledVoltage: 0, power: 0, rating: RATINGS[0]! };
+    return { headroom, tight: true, current: 0, ledVoltage: 0, power: 0, rating: RATINGS[0]! };
   }
   const ideal = headroom / target;
   const chosen = nextE12(ideal);
   const current = stringCurrent(supply, chosen, color, count);
   const ledVoltage = diodeVoltage(current, ledModel(color));
   const power = current * current * chosen;
-  return { headroom, ideal, chosen, current, ledVoltage, power, rating: ratingFor(power) };
+  return {
+    headroom,
+    tight: headroom < 0.25 * supply,
+    ideal,
+    chosen,
+    current,
+    ledVoltage,
+    power,
+    rating: ratingFor(power),
+  };
 }

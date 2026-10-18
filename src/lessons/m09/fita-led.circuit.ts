@@ -6,7 +6,7 @@ import { defineCircuit } from '../../engine';
  * The supply slider goes up to the 14,4 V of a car with the engine running.
  */
 const SEGMENTS = [4, 14];
-const LED_X = [14, 20, 26, 32];
+const LED_X = [14, 23, 32, 41];
 
 export default defineCircuit({
   id: 'm09/fita-led',
@@ -61,10 +61,10 @@ export default defineCircuit({
       id: 'W2',
       type: 'wire',
       points: [
-        [32, 4],
-        [38, 4],
-        [38, 14],
-        [38, 24],
+        [41, 4],
+        [47, 4],
+        [47, 14],
+        [47, 24],
         [0, 24],
       ],
     },
@@ -72,8 +72,8 @@ export default defineCircuit({
       id: 'W3',
       type: 'wire',
       points: [
-        [32, 14],
-        [38, 14],
+        [41, 14],
+        [47, 14],
       ],
     },
     { id: 'G', type: 'ground', at: [0, 24] },

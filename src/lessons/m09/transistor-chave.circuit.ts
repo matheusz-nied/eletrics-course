@@ -121,4 +121,26 @@ export default defineCircuit({
     { id: 'VCE', kind: 'voltage', plus: 'Q1.c', minus: 'Q1.e', label: 'Tensão coletor-emissor' },
     { id: 'PQ', kind: 'power', element: 'Q1', label: 'Potência no transistor' },
   ],
+  goals: [
+    {
+      id: 'saturado',
+      description:
+        'Com o pino em 5 V e RB = 1 kΩ, o transistor satura: a lâmpada acende e sobram menos de 0,2 V entre coletor e emissor.',
+      check: { readout: 'VCE', op: '<', value: 0.2 },
+    },
+    {
+      id: 'corte',
+      description: 'Coloque o pino em 0 V: o transistor corta e a lâmpada apaga.',
+      check: { readout: 'IC', op: '<', value: 1e-6 },
+      solution: { 'V2.voltage': 0 },
+    },
+    {
+      id: 'meio-termo',
+      description:
+        'Aumente RB até o transistor sair da saturação: a lâmpada quase apaga e o transistor passa de 80 °C.',
+      check: { readout: 'Q1.temperature', op: '>', value: 80 },
+      at: 5,
+      solution: { 'RB.resistance': 22000 },
+    },
+  ],
 });

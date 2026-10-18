@@ -11,6 +11,9 @@ import '../m00/widget.css';
 import './led-calculadora.css';
 
 const SUPPLIES = [3.3, 5, 9, 12, 24];
+
+/** "2,0 V": forward voltages always with one decimal. */
+const volts1 = (v: number) => `${v.toFixed(1).replace('.', ',')} V`;
 const COLORS = Object.keys(LEDS) as LedColor[];
 
 /** "1/4 W", "1 W". */
@@ -29,14 +32,14 @@ export default function LedCalculadora() {
   const led = LEDS[color];
   const design = designResistor(supply, color, count, milliamps / 1000);
   const lit = design.chosen !== undefined;
-  const tight = lit && design.headroom < 0.2 * supply;
+  const tight = lit && design.tight;
 
   let status: { tone: 'ok' | 'warn' | 'danger'; label: string; note: string };
   if (!lit) {
     status = {
       tone: 'danger',
       label: 'A fonte não dá conta',
-      note: `${count} ${count > 1 ? 'LEDs pedem' : 'LED pede'} cerca de ${formatSI(count * led.vf, 'V')}, e a fonte tem ${formatSI(supply, 'V')}. Use menos LEDs em série ou uma fonte maior.`,
+      note: `${count} ${count > 1 ? 'LEDs pedem' : 'LED pede'} cerca de ${volts1(count * led.vf)}, e a fonte tem ${formatSI(supply, 'V')}. Use menos LEDs em série ou uma fonte maior.`,
     };
   } else if (tight) {
     status = {
@@ -89,7 +92,7 @@ export default function LedCalculadora() {
             <select value={color} onChange={(e) => setColor(e.target.value as LedColor)}>
               {COLORS.map((c) => (
                 <option key={c} value={c}>
-                  {LEDS[c].label} (cerca de {formatSI(LEDS[c].vf, 'V')})
+                  {LEDS[c].label} (cerca de {volts1(LEDS[c].vf)})
                 </option>
               ))}
             </select>
@@ -142,8 +145,8 @@ export default function LedCalculadora() {
           {lit && (
             <>
               <p className="lw__formula">
-                R = ({formatNumber(supply, 1)} V − {count > 1 ? `${count} × ` : ''}
-                {formatNumber(led.vf, 1)} V) ÷ {milliamps} mA = {formatSI(design.ideal!, 'Ω')}
+                R = ({formatSI(supply, 'V')} − {count > 1 ? `${count} × ` : ''}
+                {volts1(led.vf)}) ÷ {milliamps} mA = {formatSI(design.ideal!, 'Ω')}
               </p>
               <dl className="ledcalc__facts">
                 <div>

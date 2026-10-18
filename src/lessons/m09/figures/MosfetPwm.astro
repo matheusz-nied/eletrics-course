@@ -1,0 +1,90 @@
+---
+/* 9.8: three PWM signals with the same period and different duty cycles.
+   The dashed line is the average: the duty cycle times the "on" level. */
+const X0 = 150;
+const PERIOD = 100;
+const CYCLES = 4;
+const HIGH = 40;
+const rows = [
+  { duty: 0.25, y: 70, label: '25 %' },
+  { duty: 0.5, y: 150, label: '50 %' },
+  { duty: 0.75, y: 230, label: '75 %' },
+];
+const wave = (duty: number, y: number) => {
+  let d = `M${X0} ${y}`;
+  for (let k = 0; k < CYCLES; k++) {
+    const x = X0 + k * PERIOD;
+    d += `V${y - HIGH}H${x + duty * PERIOD}V${y}H${x + PERIOD}`;
+  }
+  return d;
+};
+const END = X0 + CYCLES * PERIOD;
+---
+
+<svg viewBox="0 0 640 262" width="640" height="262" class="fig" aria-hidden="true">
+  <text x={X0} y="16" class="head">ligado (5 V no gate)</text>
+  {
+    rows.map((r) => (
+      <g>
+        <text x="20" y={r.y - 22} class="duty">
+          {r.label}
+        </text>
+        <text x="20" y={r.y - 4} class="sub">
+          de ciclo de trabalho
+        </text>
+        <path d={`M${X0} ${r.y}H${END}`} class="axis" />
+        <path d={wave(r.duty, r.y)} class="wave" />
+        <path d={`M${X0} ${r.y - r.duty * HIGH}H${END}`} class="avg" />
+        <text x={END + 8} y={r.y - r.duty * HIGH + 4} class="avg-label">
+          média {r.label}
+        </text>
+      </g>
+    ))
+  }
+  <path d={`M${X0} 248V256M${X0 + PERIOD} 248V256M${X0} 252H${X0 + PERIOD}`} class="dim" />
+  <text x={X0 + PERIOD + 8} y="257" class="sub">
+    um período (2 ms em 500 Hz)
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .axis {
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+  }
+  .wave {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+  }
+  .avg {
+    stroke: var(--danger);
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+  }
+  .avg-label {
+    fill: var(--danger);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .duty {
+    fill: var(--fg);
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .head,
+  .sub {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .dim {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+</style>

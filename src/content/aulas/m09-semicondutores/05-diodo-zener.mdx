@@ -5,7 +5,308 @@ ordem: 5
 nivel: I
 duracaoMin: 25
 objetivos:
-  - Em preparação
+  - Explicar a ruptura reversa e como o diodo zener trabalha nela sem se danificar
+  - Reconhecer o zener pelo símbolo e pela marcação, e ligá-lo no sentido certo
+  - Calcular o resistor em série e as potências de um regulador com zener
+  - Prever quando o regulador deixa de regular, pela tensão de entrada e pela carga
+  - Usar um zener para proteger uma entrada contra tensão alta demais
+prerequisitos:
+  - m09-semicondutores/04-leds
+  - m02-circuitos-cc/06-divisores-de-tensao-e-corrente
+tags: [zener, regulador de tensão, ruptura, tensão de zener, proteção, carro]
+seguranca: baixa-tensao
 ---
 
-Em preparação.
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import ZenerCurva from '../../../lessons/m09/figures/ZenerCurva.astro';
+import ZenerPeca from '../../../lessons/m09/figures/ZenerPeca.astro';
+
+Você quer ligar no carro um módulo que funciona com 5 V. A bateria tem 12,6 V com o carro desligado, o alternador leva a tensão para perto de 14 V com o motor ligado, e na partida ela pode cair para perto de 10 V. Um divisor de tensão não resolve: a saída dele sobe e desce junto com a entrada, e cai quando o módulo puxa corrente. Uma peça de poucos centavos, ajudada por um resistor, segura os 5 V no lugar.
+
+Nesta aula você vai conhecer o diodo zener, entender por que ele segura a tensão e calcular um regulador simples, sabendo até onde ele vai e quando ele deixa de funcionar.
+
+## Quando o diodo rompe
+
+Na [primeira aula do módulo](../01-juncao-pn/) você viu que, em polarização reversa, a junção PN bloqueia, mas só até certo ponto: com tensão reversa grande demais, ela **rompe** e passa a conduzir. Num diodo retificador comum, isso acontece com centenas de volts. A corrente dispara com a tensão alta em cima, a potência é enorme, e o diodo se destrói.
+
+O que destrói o diodo não é a ruptura em si, é o calor. A ruptura é reversível: se a corrente for limitada para a potência ficar baixa, a junção volta ao normal quando a tensão cai.
+
+O <Term id="diodo-zener">diodo zener</Term> é feito para trabalhar justamente aí. O fabricante dopa a junção bem mais forte, o que deixa a camada de depleção fininha, e com isso a ruptura acontece numa tensão baixa e precisa, de alguns volts a algumas dezenas de volts. Essa tensão é a <Term id="tensao-zener">tensão de zener</Term>, escrita $V_Z$. O zener é construído para ficar nessa região o tempo todo, desde que a potência fique dentro do limite dele.
+
+<Figure caption="Figura 1. Curva de um zener de 5,1 V. À direita, em polarização direta, ele conduz como um diodo comum, a partir de uns 0,7 V. À esquerda, em polarização reversa, quase não passa corrente até −5,1 V; ali a curva vira uma parede quase vertical: a corrente pode variar muito, e a tensão quase não sai do lugar." alt="Gráfico de corrente por tensão. No lado positivo, a corrente sobe de repente perto de 0,7 V. No lado negativo, a corrente fica em zero até −5,1 V e então desce quase na vertical, com a tensão parada perto de −5,1 V.">
+  <ZenerCurva />
+</Figure>
+
+É essa parede que interessa. Com a corrente indo de poucos miliampères até dezenas de miliampères, a tensão no zener muda só alguns centésimos ou décimos de volt. Ligado do jeito certo, o zener se comporta como uma referência de tensão.
+
+Pense no ladrão de uma caixa d'água, o cano de saída que fica perto da borda. Entre a água que entrar, o nível não passa da altura do ladrão: o excesso escorre por ele. O zener faz o mesmo com a tensão: ele desvia a corrente que sobra e não deixa a tensão passar de $V_Z$. A analogia também mostra o limite do zener. O ladrão não enche a caixa: se o consumo for maior que a água que entra, o nível cai abaixo do ladrão. O zener também não cria tensão; ele só absorve o excesso.
+
+<DeepDive title="Efeito zener, avalanche e temperatura">
+Há dois mecanismos de ruptura, e os dois aparecem nos diodos vendidos como "zener":
+
+- **Efeito zener**, nos de tensão baixa, até uns 5 V: a camada de depleção é tão fina e o campo elétrico tão forte que elétrons das ligações são arrancados direto para o outro lado.
+- **Avalanche**, nos de tensão maior: os poucos portadores que atravessam ganham tanta energia no campo que, ao bater nos átomos, soltam outros elétrons, que soltam outros, numa cascata.
+
+Os dois reagem ao calor em sentidos opostos: com a temperatura subindo, a tensão de ruptura cai no efeito zener e sobe na avalanche. Perto de 5 V a 6 V os dois efeitos se compensam, e a tensão quase não muda com a temperatura. É um dos motivos de os zeners de 5,1 V e 5,6 V serem tão usados como referência.
+</DeepDive>
+
+## Como reconhecer e como ligar
+
+O símbolo do zener é o de um diodo com a barra do catodo dobrada nas pontas, lembrando um Z. O componente mais comum é um cilindro de vidro do tamanho de um grão de arroz, com uma **faixa preta no catodo**, como no diodo comum.
+
+<Part3D
+  part="diode"
+  props={{ variant: 'zener', zenerVoltage: 5.1 }}
+  annotations
+  alt="Diodo zener de 5,1 V em corpo de vidro, ampliado. Dentro do vidro, o chip de silício fica entre duas peças de metal. Uma faixa preta marca o catodo, e o corpo traz impresso 5V1."
+  caption="Diodo zener de 5,1 V no encapsulamento de vidro mais comum, ampliado cerca de 30 vezes."
+>
+  <ZenerPeca />
+</Part3D>
+
+A tensão vem impressa no corpo. "5V1" quer dizer 5,1 V, com o V no lugar da vírgula; "12" ou "C12", 12 V. Os códigos completos mais vendidos são das famílias **BZX55** e **BZX79**, de 0,5 W (o BZX55C5V1 é o de 5,1 V), e **1N47xx**, de 1 W (o 1N4733A é o de 5,1 V). As tensões seguem a mesma série de valores dos resistores: 3,3 V, 3,9 V, 4,7 V, 5,1 V, 5,6 V, 6,8 V, 9,1 V, 12 V e assim por diante.
+
+Para regular, o zener trabalha em **polarização reversa**: o catodo, o lado da faixa, vai para o positivo. Ligado ao contrário, ele conduz como um diodo comum e segura uns 0,7 V em vez da tensão de zener.
+
+## O regulador com zener
+
+O circuito tem duas peças. Um resistor $R_S$ vai da entrada até a saída, e o zener fica entre a saída e o 0 V, com o catodo para cima. A carga, o aparelho que você quer alimentar, fica em paralelo com o zener.
+
+Enquanto o zener conduz, a saída fica em $V_Z$. O resto da conta é lei de Ohm. A corrente que atravessa o resistor é:
+
+$$
+I_S = \frac{V_\text{entrada} - V_Z}{R_S}
+$$
+
+A carga, com resistência $R_L$, puxa $I_L = V_Z / R_L$. O zener fica com o que sobra:
+
+$$
+I_Z = I_S - I_L
+$$
+
+O zener esquenta com a potência $P_Z = V_Z \cdot I_Z$, e o resistor, com $P_{R_S} = (V_\text{entrada} - V_Z) \cdot I_S$. Para o regulador funcionar, duas condições valem o tempo todo:
+
+1. **Sempre sobra corrente para o zener.** Ele precisa de alguns miliampères para ficar na parede da curva; a folha de dados informa a tensão de zener numa corrente de teste, muitas vezes 5 mA. Se $I_Z$ chegar a zero, ele para de regular.
+2. **O zener não passa da potência máxima.** A folha de dados dá o máximo; trabalhar com uns 50% dele é uma boa margem.
+
+Repare que $I_S$ não depende da carga: o resistor fixa quanta corrente chega, e o zener e a carga dividem essa corrente. Esse tipo de regulador, que absorve a sobra, é chamado de regulador **paralelo**, e é o <Term id="regulador-de-tensao">regulador de tensão</Term> mais simples que existe.
+
+## Explore: o regulador com entrada e carga variáveis
+
+No circuito abaixo, uma fonte ajustável de 9 V a 15 V alimenta um regulador com $R_S$ de 220 Ω e um zener de 5,1 V e 0,5 W. A carga RL vai de 100 Ω a 10 kΩ, e a chave S1 desliga a carga.
+
+<Simulation circuit="m09/zener-regulador" />
+
+1. Com 12 V na entrada e a carga de 1 kΩ, quanto marcam a saída, a corrente em $R_S$ e a corrente na carga? Quanto sobra para o zener?
+2. Leve a entrada de 9 V a 15 V. Quanto a saída muda?
+3. Volte para 12 V e abaixe a resistência da carga devagar, de 1 kΩ até 100 Ω. Em que ponto a saída começa a cair?
+4. Desligue a carga e suba a entrada para 15 V. Quanto o zener dissipa? E o resistor?
+
+Com 12 V e 1 kΩ, a saída fica em 5,19 V. Passam 30,9 mA por $R_S$ e 5,2 mA pela carga; o zener fica com a diferença, 25,7 mA, e dissipa 0,13 W. A saída está um pouco acima de 5,1 V porque a tensão nominal vale com 5 mA, e aqui o zener conduz mais.
+
+De 9 V a 15 V na entrada, a saída vai de 5,15 V a 5,23 V: a entrada mudou 6 V e a saída, menos de um décimo de volt. Um zener real varia um pouco mais que o da simulação, alguns décimos de volt numa faixa dessas (valor típico; a folha de dados chama isso de resistência dinâmica), mas a ideia é a mesma.
+
+Baixando a resistência da carga, a saída fica firme até uns 200 Ω (5,11 V), começa a ceder perto de 160 Ω (5,03 V) e despenca com 100 Ω, para 3,75 V. Com 12 V na entrada, o resistor só deixa passar uns 31 mA. Quando a carga quer mais do que isso, não sobra nada para o zener, ele para de conduzir, e o circuito vira um divisor de tensão comum: $12 \times 100 / (220 + 100) = 3{,}75\ \text{V}$. A menor resistência de carga que o regulador aguenta é $R_L = V_Z / I_S = 5{,}1 \times 220 / 6{,}9 \approx 163\ \Omega$.
+
+Sem carga e com 15 V, toda a corrente do resistor, 44 mA, passa pelo zener, que dissipa 0,23 W, quase metade do seu máximo. O resistor dissipa 0,43 W. Esse é o **pior caso** do zener: entrada máxima e carga desligada. Se o projeto não aguentar essa situação, ele queima no dia em que alguém desconectar o aparelho.
+
+## Exemplo resolvido: 5 V no carro
+
+Um módulo de 5 V consome 20 mA e vai ser ligado no carro. Fora da partida, a tensão vai de 11 V a 14,4 V; na partida ela cai mais, e o módulo pode desligar por um instante. Use um zener de 5,1 V.
+
+**Passo 1: o pior caso para a corrente do zener.** É com a menor entrada e a maior carga: 11 V e 20 mA. Para garantir pelo menos 5 mA no zener, o resistor precisa entregar $20 + 5 = 25\ \text{mA}$:
+
+$$
+R_S \le \frac{11 - 5{,}1}{0{,}025} = \frac{5{,}9}{0{,}025} = 236\ \Omega
+$$
+
+O valor comercial logo abaixo é **220 Ω**. Aqui se arredonda para baixo, porque um resistor maior entregaria menos corrente que o necessário.
+
+**Passo 2: conferir com 11 V.**
+
+$$
+I_S = \frac{11 - 5{,}1}{220} \approx 26{,}8\ \text{mA}
+$$
+
+$$
+I_Z \approx 26{,}8 - 20 = 6{,}8\ \text{mA}
+$$
+
+Na simulação, com a carga ajustada para 20 mA (255 Ω), dá 26,7 mA no resistor, 6,6 mA no zener e 5,12 V na saída.
+
+**Passo 3: o pior caso para a potência.** É com a maior entrada e sem carga: 14,4 V e o módulo desconectado.
+
+$$
+I_S = \frac{14{,}4 - 5{,}1}{220} \approx 42\ \text{mA}
+$$
+
+$$
+P_Z = 5{,}1 \times 0{,}042 \approx 0{,}22\ \text{W}
+$$
+
+Um zener de 0,5 W aguenta, com folga de pouco mais de duas vezes. Dentro de um carro, que esquenta muito no sol, vale usar um de 1 W, como o 1N4733A.
+
+**Passo 4: a potência do resistor.**
+
+$$
+P_{R_S} = \frac{(14{,}4 - 5{,}1)^2}{220} \approx 0{,}39\ \text{W}
+$$
+
+Um resistor de 1/4 W esquentaria demais. Use um de 1 W.
+
+**Passo 5: a eficiência.** Com 14,4 V e o módulo ligado, a entrada fornece $14{,}4 \times 0{,}042 \approx 0{,}6\ \text{W}$, e o módulo recebe $5{,}1 \times 0{,}020 \approx 0{,}1\ \text{W}$. Cinco sextos da energia viram calor no resistor e no zener. Para 20 mA, tudo bem. Para centenas de miliampères, esse calor fica inaceitável: aí entram os reguladores integrados da <LinkAula id="m10-fontes/01-fonte-linear">fonte linear</LinkAula>, que por dentro usam uma referência do mesmo tipo, e os reguladores chaveados das <LinkAula id="m10-fontes/02-fontes-chaveadas">fontes chaveadas</LinkAula>, muito mais eficientes.
+
+Confira no simulador: entrada em 11 V, carga ajustada até a corrente na carga marcar 20 mA; depois entrada em 14,4 V e a carga desligada.
+
+## Zener como proteção
+
+O zener também serve para **limitar** uma tensão, sem regular nada no dia a dia. Ligado em paralelo com uma entrada sensível, com um resistor antes, ele fica parado enquanto a tensão é normal e só conduz quando ela passa de $V_Z$. O resistor limita a corrente nesse momento, e o zener desvia o excesso.
+
+É assim que muitas entradas de microcontroladores são protegidas contra picos e contra alguém que ligou o fio errado. E existe uma família de diodos feitos só para isso, os supressores de tensão transitória (TVS, na sigla em inglês): zeners robustos, capazes de absorver por instantes picos de corrente bem grandes.
+
+<RealCase title="O microcontrolador que sabe quando o carro foi ligado">
+
+Rastreadores, alarmes e muitos projetos com microcontrolador precisam saber se a ignição do carro está ligada. O fio da ignição tem 0 V com a chave desligada e algo entre 12 V e 14,4 V com ela ligada. A entrada de um microcontrolador de 5 V, como a de um Arduino, aguenta no máximo uns 5 V.
+
+A solução clássica é um resistor de 10 kΩ em série com a entrada e um zener de 5,1 V da entrada para o 0 V, com o catodo do lado da entrada. Com a ignição ligada, o zener segura a entrada perto de 5 V (um pouco abaixo, na prática, porque a corrente é pequena), e a corrente fica em:
+
+$$
+I = \frac{14{,}4 - 5{,}1}{10\,000} \approx 0{,}93\ \text{mA}
+$$
+
+O zener dissipa menos de 5 mW, e o resistor, menos de 9 mW: componentes de 1/4 W sobram. Com a ignição desligada, o zener não conduz e a entrada fica em 0 V. Um pico de 40 V no fio, que pode aparecer no sistema elétrico do carro, faz passar só uns 3,5 mA, que o zener absorve sem esforço.
+
+Para microcontroladores de 3,3 V, como o ESP32, o mais comum é um divisor de tensão para baixar o sinal e um zener de 3,3 V só como proteção, porque os zeners de tensão muito baixa têm a curva mais "mole" e começam a conduzir antes da tensão nominal. Esses detalhes de entrada aparecem de novo na aula sobre <LinkAula id="m12-microcontroladores/03-sensores">sensores</LinkAula>.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Ligar o zener ao contrário.** Com a faixa para o 0 V, ele conduz como um diodo comum, e a saída fica em uns 0,7 V.
+- **Ligar o zener sem resistor.** Nada limita a corrente: ele conduz tudo o que a fonte entregar e queima. Ao queimar, o zener costuma entrar em **curto**, e aí é a fonte que fica em curto.
+- **Calcular só o caso normal.** O zener sofre mais com a **entrada máxima e a carga desligada**; a regulação falha com a **entrada mínima e a carga máxima**. Confira os dois.
+- **Esquecer a potência do resistor.** No exemplo do carro, o resistor dissipa quase 0,4 W. Um de 1/4 W esquenta até escurecer a placa.
+- **Usar zener para cargas grandes.** Motores, fitas de LED e qualquer coisa que puxe centenas de miliampères pedem um regulador de verdade.
+- **Tentar medir a tensão de zener no multímetro.** Na escala de teste de diodo, o zener aparece como um diodo comum: uns 0,7 V num sentido e aberto no outro. O multímetro aplica só 2 V a 3 V, o que não chega à tensão de zener (a não ser nos zeners de tensão muito baixa). Para medir $V_Z$, monte o zener com um resistor numa fonte de tensão maior e meça com o voltímetro.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Num regulador com zener, como o zener é ligado?',
+      options: [
+        {
+          text: 'Em polarização reversa: o catodo, do lado da faixa, no lado positivo',
+          correct: true,
+          feedback: 'Isso. Ele trabalha na ruptura reversa, segurando a tensão de zener.',
+        },
+        {
+          text: 'Em polarização direta: o anodo no lado positivo',
+          feedback:
+            'Assim ele conduz como um diodo comum e segura só uns 0,7 V, não a tensão de zener.',
+        },
+        {
+          text: 'Em série com a carga, para limitar a corrente',
+          feedback:
+            'Quem fica em série é o resistor. O zener fica em paralelo com a carga, desviando a corrente que sobra.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um regulador vai tirar 5,1 V de uma entrada fixa de 12 V para uma carga de 10 mA, deixando 5 mA para o zener. Qual o valor de Rs, em ohms?',
+      answer: 460,
+      tolerance: 0.03,
+      unit: 'Ω',
+      explanation:
+        'O resistor precisa entregar 10 + 5 = 15 mA. Rs = (12 − 5,1) ÷ 0,015 = 6,9 ÷ 0,015 = 460 Ω. Na série comercial, o valor logo abaixo é 390 Ω ou 430 Ω, dependendo da série.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Um zener de 9,1 V conduz 30 mA. Quanta potência ele dissipa, em watts?',
+      answer: 0.273,
+      tolerance: 0.03,
+      unit: 'W',
+      explanation:
+        'P = Vz × Iz = 9,1 × 0,030 = 0,273 W. Um zener de 0,5 W aguenta, com pouca folga; um de 1 W fica tranquilo.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Em que situação o zener de um regulador dissipa mais potência?',
+      options: [
+        {
+          text: 'Com a maior tensão de entrada e a carga desligada',
+          correct: true,
+          feedback:
+            'Isso. A corrente do resistor é a maior possível e vai inteira para o zener.',
+        },
+        {
+          text: 'Com a menor tensão de entrada e a carga máxima',
+          feedback:
+            'Esse é o pior caso para a regulação, quando pode faltar corrente para o zener. Para a potência, é o contrário.',
+        },
+        {
+          text: 'A potência é sempre a mesma, porque a tensão do zener não muda',
+          feedback:
+            'A tensão quase não muda, mas a corrente no zener muda muito, e a potência é tensão vezes corrente.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Num regulador com 12 V de entrada, Rs de 220 Ω e zener de 5,1 V, a carga foi trocada por uma de 100 Ω. O que acontece?',
+      options: [
+        {
+          text: 'A carga quer mais corrente do que o resistor entrega, o zener para de conduzir e a saída cai',
+          correct: true,
+          feedback:
+            'Isso. O resistor entrega uns 31 mA; a carga de 100 Ω pediria 51 mA com 5,1 V. O circuito vira um divisor comum, e a saída cai para 3,75 V.',
+        },
+        {
+          text: 'O zener queima, porque passa corrente demais por ele',
+          feedback:
+            'É o contrário: com carga pesada, sobra menos corrente para o zener, até não sobrar nenhuma.',
+        },
+        {
+          text: 'Nada muda, porque o zener segura os 5,1 V',
+          feedback:
+            'O zener só consegue tirar corrente, não fornecer. Se a carga pede mais do que o resistor entrega, a tensão cai.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Na escala de teste de diodo do multímetro, dá para ler a tensão de um zener de 12 V.',
+      answer: false,
+      explanation:
+        'Essa escala aplica só 2 V a 3 V. O zener aparece como um diodo comum, com uns 0,7 V num sentido. Para ver os 12 V, é preciso uma fonte maior com um resistor em série.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem os passos para projetar um regulador com zener.',
+      items: [
+        'Escolher o zener pela tensão de saída',
+        'Calcular Rs com a menor entrada e a maior carga, deixando alguns miliampères para o zener',
+        'Arredondar Rs para o valor comercial abaixo',
+        'Calcular a potência do zener com a maior entrada e sem carga',
+        'Calcular a potência do resistor e escolher os dois com folga',
+      ],
+      explanation:
+        'Primeiro a tensão; depois o resistor, pelo pior caso da regulação; por último as potências, pelo pior caso do calor.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Na **ruptura reversa**, a junção conduz com a tensão quase parada. Ela só destrói o diodo se a potência for grande demais.
+- O **diodo zener** é feito para trabalhar na ruptura, numa **tensão de zener** precisa, impressa no corpo ("5V1" = 5,1 V). Ele é ligado com o **catodo, o lado da faixa, no positivo**.
+- No **regulador com zener**, o resistor fixa a corrente $I_S = (V_\text{entrada} - V_Z)/R_S$, a carga leva a dela, e o zener absorve a sobra, segurando a saída perto de $V_Z$.
+- O regulador **deixa de regular** quando a carga pede mais corrente do que o resistor entrega. O **pior caso de potência** do zener é com a entrada máxima e sem carga.
+- É um regulador para **correntes pequenas**: ele desperdiça a energia que sobra. O zener também serve para **proteger entradas**, com um resistor em série.
+
+Na próxima aula começa a eletrônica que controla: o [transistor bipolar como chave](../06-transistor-como-chave/), que liga e desliga cargas grandes a partir de um sinal pequeno.

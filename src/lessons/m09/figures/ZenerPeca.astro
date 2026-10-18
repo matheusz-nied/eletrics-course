@@ -1,0 +1,99 @@
+---
+/* 9.5: a 5,1 V zener in the small glass package (DO-35), enlarged about
+   30 times: the glass body, the chip between two metal slugs, the black band
+   on the cathode and the printed voltage. Stand-in for the 3D kit's zener. */
+---
+
+<svg viewBox="0 0 520 220" width="520" height="220" class="fig" aria-hidden="true">
+  <!-- Leads -->
+  <rect x="20" y="88" width="160" height="10" rx="2" class="lead" />
+  <rect x="340" y="88" width="160" height="10" rx="2" class="lead" />
+
+  <!-- Glass body with the slugs and the chip inside -->
+  <rect x="160" y="62" width="200" height="62" rx="22" class="glass" />
+  <rect x="176" y="80" width="72" height="26" rx="4" class="slug" />
+  <rect x="272" y="80" width="72" height="26" rx="4" class="slug" />
+  <rect x="248" y="84" width="24" height="18" class="chip" />
+  <rect x="318" y="63" width="22" height="60" class="band" />
+  <text x="226" y="74" class="print">
+    5V1
+  </text>
+
+  <!-- Labels -->
+  <path d="M260 102V160H248" class="leader" />
+  <text x="242" y="164" class="lbl end">
+    chip de silício
+  </text>
+  <path d="M176 66V36H164" class="leader" />
+  <text x="158" y="40" class="lbl end">
+    corpo de vidro
+  </text>
+  <path d="M329 124V190H317" class="leader" />
+  <text x="311" y="194" class="lbl strong end">
+    faixa preta: catodo
+  </text>
+  <path d="M226 64V18H238" class="leader" />
+  <text x="244" y="22" class="lbl">
+    "5V1": zener de 5,1 V
+  </text>
+  <text x="40" y="128" class="lbl">
+    anodo
+  </text>
+  <text x="430" y="128" class="lbl">
+    catodo
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .lead {
+    fill: var(--fg-subtle);
+  }
+  .glass {
+    fill: var(--warning-soft);
+    stroke: var(--warning-border);
+    stroke-width: 2;
+  }
+  .slug {
+    fill: var(--fg-subtle);
+    stroke: var(--fg-muted);
+  }
+  .chip {
+    fill: var(--fg-muted);
+  }
+  .band {
+    fill: var(--fg);
+  }
+  .print {
+    fill: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .leader {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .lbl {
+    fill: var(--fg);
+    font-size: 14px;
+  }
+  .strong {
+    font-weight: 650;
+  }
+  .end {
+    text-anchor: end;
+  }
+  /* On a phone the drawing shrinks to about 60 %: larger type keeps it legible. */
+  @media (max-width: 36rem) {
+    .lbl {
+      font-size: 18px;
+    }
+  }
+</style>

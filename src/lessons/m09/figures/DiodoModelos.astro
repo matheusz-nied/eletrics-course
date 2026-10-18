@@ -1,0 +1,136 @@
+---
+/*
+ * 9.2: three models of the same diode, as I×V curves. Ideal: a switch that
+ * conducts at 0 V. Constant drop: conducts at 0,7 V. Real: the exponential
+ * curve of the 1N4007 model (the engine's), whose voltage grows a little with
+ * the current.
+ */
+import { DIODES, diodeVoltage } from '../diodo-modelo';
+
+const PANEL = 220;
+const AXIS_Y = 176;
+const TOP_Y = 40;
+/** Pixels per volt; the plot shows −0,6 V to 1,1 V. */
+const PX_PER_V = 100;
+const xOf = (ox: number, v: number) => ox + 80 + v * PX_PER_V;
+
+/* Real curve: from 0 A to 1 A of the 1N4007, current scaled to the plot height. */
+const I_TOP = 1;
+const real = (ox: number) => {
+  const pts = [`M${xOf(ox, -0.6)} ${AXIS_Y}`, `L${xOf(ox, 0)} ${AXIS_Y}`];
+  for (let k = 1; k <= 60; k++) {
+    const i = (I_TOP * k ** 3) / 60 ** 3;
+    pts.push(`L${xOf(ox, diodeVoltage(i, DIODES.rectifier)).toFixed(1)} ${(AXIS_Y - (i / I_TOP) * (AXIS_Y - TOP_Y)).toFixed(1)}`);
+  }
+  return pts.join('');
+};
+
+const panels = [
+  {
+    ox: 0,
+    title: 'Ideal',
+    path: `M${xOf(0, -0.6)} ${AXIS_Y}H${xOf(0, 0)}V${TOP_Y}`,
+    lines: ['uma chave: conduz', 'com 0 V, bloqueia ao contrário'],
+    tick: false,
+  },
+  {
+    ox: PANEL,
+    title: 'Queda fixa',
+    path: `M${xOf(PANEL, -0.6)} ${AXIS_Y}H${xOf(PANEL, 0.7)}V${TOP_Y}`,
+    lines: ['conduz com 0,7 V,', 'qualquer que seja a corrente'],
+    tick: true,
+  },
+  {
+    ox: 2 * PANEL,
+    title: 'Real (a curva)',
+    path: real(2 * PANEL),
+    lines: ['a tensão sobe um pouco', 'quando a corrente cresce'],
+    tick: true,
+  },
+];
+---
+
+<svg viewBox="0 0 660 252" width="660" height="252" class="fig" aria-hidden="true">
+  {
+    panels.map((p) => (
+      <g>
+        <text x={p.ox + 110} y="22" class="title">
+          {p.title}
+        </text>
+        <line x1={xOf(p.ox, -0.6)} y1={AXIS_Y} x2={xOf(p.ox, 1.15)} y2={AXIS_Y} class="axis" />
+        <line x1={xOf(p.ox, 0)} y1={AXIS_Y + 6} x2={xOf(p.ox, 0)} y2={TOP_Y - 8} class="axis" />
+        <text x={xOf(p.ox, 1.15) - 2} y={AXIS_Y - 8} class="ax">
+          V
+        </text>
+        <text x={xOf(p.ox, 0) - 8} y={TOP_Y - 2} class="ax">
+          I
+        </text>
+        <text x={xOf(p.ox, 0)} y={AXIS_Y + 20} class="tick">
+          0
+        </text>
+        {p.tick && (
+          <>
+            <line
+              x1={xOf(p.ox, 0.7)}
+              y1={AXIS_Y + 6}
+              x2={xOf(p.ox, 0.7)}
+              y2={AXIS_Y - 4}
+              class="axis"
+            />
+            <text x={xOf(p.ox, 0.7)} y={AXIS_Y + 20} class="tick">
+              0,7 V
+            </text>
+          </>
+        )}
+        <path d={p.path} class="curve" />
+        <text x={p.ox + 110} y={AXIS_Y + 46} class="note">
+          {p.lines[0]}
+        </text>
+        <text x={p.ox + 110} y={AXIS_Y + 64} class="note">
+          {p.lines[1]}
+        </text>
+      </g>
+    ))
+  }
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 16px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .axis {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .ax {
+    fill: var(--fg-muted);
+    font-size: 14px;
+    font-style: italic;
+    text-anchor: end;
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .curve {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 13.5px;
+    text-anchor: middle;
+  }
+</style>

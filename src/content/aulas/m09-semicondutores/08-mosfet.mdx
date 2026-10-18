@@ -3,9 +3,321 @@ titulo: MOSFET
 modulo: m09-semicondutores
 ordem: 8
 nivel: I
-duracaoMin: 25
+duracaoMin: 30
 objetivos:
-  - Em preparação
+  - Explicar como a tensão no gate abre e fecha o canal de um MOSFET
+  - Escolher entre um MOSFET comum e um de nível lógico pela tensão de gate disponível
+  - Calcular a potência dissipada na resistência de condução e decidir se o MOSFET precisa de dissipador
+  - Ligar um MOSFET a um microcontrolador com resistor de gate e resistor de pull-down
+  - Controlar o brilho de uma fita de LED com PWM e calcular a corrente média pelo ciclo de trabalho
+prerequisitos:
+  - m09-semicondutores/06-transistor-como-chave
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+tags: [MOSFET, gate, Rds(on), nível lógico, dissipador, PWM, fita de LED, Arduino]
+seguranca: baixa-tensao
 ---
 
-Em preparação.
+import MosfetEstrutura from '../../../lessons/m09/figures/MosfetEstrutura.astro';
+import MosfetPwm from '../../../lessons/m09/figures/MosfetPwm.astro';
+import MosfetTo220 from '../../../lessons/m09/figures/MosfetTo220.astro';
+import Part3D from '../../../lessons/m02/Part3D.astro';
+
+Você comprou um módulo de MOSFET para Arduino, ligou uma fita de LED de 5 metros e escreveu o programa. A fita acende fraca, e em um minuto o componente preto do módulo está quente demais para encostar o dedo. O programa está certo e a fita também. O problema está na tensão que chega ao **gate** do MOSFET.
+
+Nesta aula você vai conhecer o transistor que liga e desliga quase tudo na eletrônica de hoje, das fitas de LED às fontes de celular. Vai ver por que alguns MOSFETs obedecem a um Arduino e outros não, quando ele precisa de dissipador e como o PWM controla o brilho sem desperdiçar energia.
+
+## Uma chave comandada por tensão
+
+Na aula sobre o [transistor como chave](../06-transistor-como-chave/) você viu que o transistor bipolar precisa de **corrente** na base: para ligar um relé de 30 mA, o microcontrolador fornece alguns miliampères o tempo todo. O <Term id="mosfet">MOSFET</Term> funciona de outro jeito. O terminal de comando, o **gate**, é separado do resto por uma camada de óxido de silício, um isolante finíssimo. O que liga o MOSFET é a **tensão** no gate; com a tensão parada, a corrente no gate é praticamente zero.
+
+Os outros dois terminais são o **dreno** (D) e a **fonte** (S, do inglês *source*). No MOSFET canal N, o tipo mais usado como chave, a corrente principal entra pelo dreno e sai pela fonte, e a tensão de comando é medida entre o gate e a fonte, a $V_{GS}$.
+
+<Figure caption="Figura 1. Um MOSFET canal N cortado ao meio, no desenho mais simples. À esquerda, com o gate em 0 V, entre a fonte e o dreno só existe silício tipo P, e a corrente não passa. À direita, o gate positivo atrai elétrons para logo abaixo do óxido, e eles formam um caminho tipo N entre as duas regiões: o canal." alt="Dois cortes de um MOSFET lado a lado. Em cada um, um bloco de silício tipo P tem duas regiões N+ nos cantos de cima, ligadas aos terminais fonte e dreno, e entre elas uma camada fina de óxido com o gate de metal em cima. No corte da esquerda não há nada entre as regiões N+. No da direita, o gate tem sinais de mais e uma faixa de elétrons liga as duas regiões N+.">
+  <MosfetEstrutura />
+</Figure>
+
+Lembre da junção PN da [primeira aula](../01-juncao-pn/): entre a fonte e o dreno há duas junções, N+ com P e P com N+, uma de costas para a outra. Uma delas sempre bloqueia, e nada passa. Quando o gate fica positivo, o campo elétrico atravessa o óxido, empurra as lacunas do silício P para longe e atrai elétrons para a superfície. Com tensão suficiente, os elétrons formam uma faixa fina tipo N, o **canal**, que liga a fonte ao dreno. Quanto mais tensão no gate, mais elétrons no canal e menor a resistência dele.
+
+Pense numa comporta de represa que abre conforme a força com que você empurra a alavanca, mas que, uma vez na posição, fica parada sem você gastar mais força. A analogia tem um limite importante: o gate é um pequeno capacitor. Para **mudar** a tensão dele é preciso carregar ou descarregar esse capacitor, e isso pede picos de corrente a cada vez que o MOSFET liga ou desliga.
+
+Os MOSFETs de potência de verdade são construídos na vertical, com milhares de pequenos canais em paralelo, mas a ideia é a da figura. Existe também o MOSFET canal P, que funciona com as tensões ao contrário e costuma ficar do lado do positivo da carga.
+
+## Tensão de limiar e resistência de condução
+
+O MOSFET tem três situações, conforme a tensão no gate:
+
+- **Cortado:** abaixo da **tensão de limiar**, a $V_{GS(th)}$, não há canal. Entre dreno e fonte só passa uma fuga minúscula.
+- **Conduzindo em parte:** pouco acima do limiar, o canal existe mas é estreito. O MOSFET limita a corrente e fica com boa parte da tensão. É assim que ele esquenta.
+- **Totalmente ligado:** bem acima do limiar, o canal se comporta como um resistor de valor muito baixo, a <Term id="resistencia-de-conducao">resistência de condução</Term>, chamada de $R_{DS(on)}$ nas folhas de dados.
+
+Um detalhe que confunde muita gente: o limiar **não** é a tensão em que o MOSFET liga. A folha de dados mede o limiar com uma corrente minúscula (no IRF520, 250 µA). Para conduzir ampères com pouca perda, o gate precisa de bem mais. O que vale é o $R_{DS(on)}$ e a tensão de gate em que ele foi medido:
+
+| MOSFET | Limiar $V_{GS(th)}$ | $R_{DS(on)}$ máximo da folha de dados | Tipo |
+|--------|---------------------|---------------------------------------|------|
+| IRF520 | 2 a 4 V | 0,27 Ω com 10 V no gate | Comum |
+| IRLZ44N | 1 a 2 V | 0,025 Ω com 5 V no gate | Nível lógico |
+
+O IRF520 é um **MOSFET comum**: a folha de dados só garante a resistência de condução com 10 V no gate. O IRLZ44N é um **MOSFET de nível lógico** (o "L" do nome indica isso, nessa família): ele foi feito para conduzir totalmente com os 5 V da saída de um microcontrolador.
+
+Totalmente ligado, o MOSFET é um resistor de $R_{DS(on)}$, e a potência que vira calor nele vem do <Term id="efeito-joule">efeito Joule</Term>:
+
+$$
+P = I^2 \cdot R_{DS(on)}
+$$
+
+em que $P$ é a potência dissipada no MOSFET (W), $I$ a corrente da carga (A) e $R_{DS(on)}$ a resistência de condução (Ω). Repare no quadrado: com o dobro da corrente, o MOSFET esquenta quatro vezes mais.
+
+## Explore: a tensão no gate
+
+No circuito abaixo, uma fonte de 12 V alimenta duas lâmpadas de 12 V e 21 W, como a lâmpada de freio de um carro, de cerca de 1,75 A cada. Cada uma é ligada ao negativo por um MOSFET sem dissipador: o Q1 é comum, com parâmetros parecidos com os do IRF520, e o Q2 é de nível lógico, parecido com o IRLZ44N. A mesma tensão chega aos dois gates.
+
+<Simulation circuit="m09/mosfet-gate" height={380} />
+
+1. Escolha 3,3 V, a saída de um ESP32. Qual lâmpada acende? Quanto o Q2 dissipa?
+2. Passe para 5 V, a saída de um Arduino Uno, e acompanhe a potência em Q1 e as mensagens da simulação por alguns segundos.
+3. Reinicie a simulação (botão de reiniciar, que restaura o que queimou) e escolha 10 V. Quanto o Q1 dissipa agora?
+
+Com 3,3 V, só a L2 acende. O Q2, de nível lógico, conduz totalmente e dissipa cerca de 0,15 W, nada. O Q1 continua cortado, com os 12 V inteiros entre dreno e fonte. Com 5 V, o Q2 dissipa menos ainda, cerca de 0,08 W. Já o Q1 conduz só em parte: deixa passar uns 0,72 A, fica com cerca de 11,6 V e dissipa perto de 8,3 W. A lâmpada mal esquenta, e o MOSFET vira um aquecedor. Em menos de um décimo de segundo aparece o aviso de excesso de temperatura e, em uns 2 segundos, o Q1 queima. Repare no que acontece depois: a L1 acende de vez e não apaga mais, porque o MOSFET queimado ficou em **curto** entre dreno e fonte. É o defeito típico de um MOSFET de potência.
+
+Com 10 V, o Q1 também conduz totalmente: 1,71 A com só 0,48 V entre dreno e fonte, e 0,82 W de calor. Sem dissipador, ele estabiliza em torno de 76 °C no simulador. Funciona, mas quente.
+
+## Dissipação e dissipador
+
+Todo watt dissipado no MOSFET precisa sair para o ar. Quanto o componente esquenta depende da **resistência térmica**, medida em °C/W: quantos graus ele sobe acima do ambiente para cada watt. Um encapsulamento TO-220, o mais comum nos MOSFETs de potência, tem cerca de 62 °C/W sem dissipador (valor típico das folhas de dados). A temperatura da junção, lá dentro, fica em:
+
+$$
+T_J = T_\text{ambiente} + P \cdot R_{\theta}
+$$
+
+em que $T_J$ é a temperatura da junção (°C) e $R_\theta$ a resistência térmica total entre a junção e o ar (°C/W). O limite da junção costuma ser de 150 °C a 175 °C, conforme a folha de dados.
+
+<Part3D
+  part="transistor-to220"
+  props={{ code: 'IRLZ44N', heatsink: true }}
+  annotations
+  alt="MOSFET no encapsulamento TO-220 preso a um dissipador de alumínio com aletas. O corpo preto tem o código impresso, a aba de metal com o furo do parafuso fica encostada no dissipador, e as três pernas são, da esquerda para a direita, gate, dreno e fonte."
+  caption="MOSFET em TO-220 num dissipador. A aba de metal é a saída de calor e está ligada ao dreno, a perna do meio."
+>
+  <MosfetTo220
+    pins={['G', 'D', 'S']}
+    code="IRLZ44N"
+    heatsink
+    tab={['aba de metal:', 'ligada ao dreno']}
+  />
+</Part3D>
+
+O <Term id="dissipador">dissipador</Term> é uma peça de alumínio com aletas, presa à aba de metal do encapsulamento com pasta térmica entre os dois. Ele baixa a resistência térmica para poucos °C/W, conforme o tamanho. Nos MOSFETs em TO-220, a aba está ligada ao **dreno**: o dissipador fica com a tensão do dreno. Se ele encosta em outra peça ou é compartilhado por dois componentes, vai uma lâmina isolante entre a aba e o dissipador e uma bucha isolante no parafuso.
+
+## Exemplo resolvido: a fita de 5 metros
+
+Uma fita de LED de 12 V e 5 metros consome 60 W. O MOSFET vai ficar numa caixa onde o ar chega a 40 °C. Compare o IRF520 com 10 V no gate e o IRLZ44N com 5 V no gate.
+
+**Passo 1: a corrente.**
+
+$$
+I = \frac{P}{V} = \frac{60\ \text{W}}{12\ \text{V}} = 5\ \text{A}
+$$
+
+**Passo 2: o calor no IRF520**, com o $R_{DS(on)}$ máximo de 0,27 Ω:
+
+$$
+P = 5^2 \times 0{,}27 = 6{,}75\ \text{W}
+$$
+
+Sem dissipador, a junção iria a $40 + 6{,}75 \times 62 \approx 460\ \text{°C}$. Queima. Para ficar abaixo de 150 °C, a resistência térmica total precisa ser no máximo:
+
+$$
+R_\theta \le \frac{150 - 40}{6{,}75} \approx 16\ \text{°C/W}
+$$
+
+E isso inclui a resistência entre a junção e a aba e a da pasta térmica. Na prática, um dissipador de uns 10 °C/W, do tamanho de uma caixa de fósforos (valor típico).
+
+**Passo 3: o calor no IRLZ44N**, com o máximo de 0,025 Ω com 5 V:
+
+$$
+P = 5^2 \times 0{,}025 \approx 0{,}63\ \text{W}
+$$
+
+Sem dissipador: $40 + 0{,}63 \times 62 \approx 79\ \text{°C}$. Funciona sem dissipador, morno. Como o $R_{DS(on)}$ sobe quando o MOSFET esquenta, vale deixar margem: um dissipador pequeno, ou uma placa com uma boa área de cobre em volta, deixa tudo mais folgado.
+
+**Conclusão:** o MOSFET de nível lógico, ligado direto no Arduino, dissipa dez vezes menos que o IRF520 com 10 V. Escolher o MOSFET certo resolve mais que qualquer dissipador.
+
+## Ligando o MOSFET a um microcontrolador
+
+O circuito mais usado para um <Term id="microcontrolador">microcontrolador</Term> acionar uma carga de 12 V tem quatro detalhes, e cada um evita um defeito:
+
+- **MOSFET canal N do lado do negativo:** a carga vai do +12 V ao dreno, e a fonte vai ao negativo. Assim a tensão do gate é medida em relação ao negativo, o mesmo 0 V do microcontrolador.
+- **Negativo comum:** o 0 V da fonte de 12 V e o 0 V do microcontrolador precisam estar ligados. Sem isso, o gate não tem referência e o MOSFET não obedece.
+- **Resistor de gate, de 100 Ω a 220 Ω (típico):** o gate é um capacitor, e a cada troca de nível o pino carrega ou descarrega esse capacitor. O resistor limita o pico de corrente no pino e amortece oscilações nos fios.
+- **Resistor de pull-down, cerca de 10 kΩ, entre o gate e a fonte:** enquanto o microcontrolador liga, reinicia ou recebe um programa novo, os pinos ficam soltos. Um gate solto guarda carga e pode deixar o MOSFET meio ligado, justamente a situação que mais esquenta. O pull-down mantém o gate em 0 V nesses momentos. É a mesma ideia do <Term id="pull-up">pull-up</Term>, só que puxando para o negativo.
+
+Com motor, solenoide, relé ou qualquer bobina, falta um quinto detalhe: o diodo de roda livre em paralelo com a carga, como você viu na aula do [transistor como chave](../06-transistor-como-chave/). O MOSFET tem um diodo interno entre fonte e dreno, mas ele fica no lugar errado para segurar o pico da bobina.
+
+## PWM: brilho sem desperdício
+
+Para controlar o brilho de uma fita, você poderia deixar o MOSFET conduzindo em parte, como o Q1 com 5 V no gate. Só que, como você viu, o MOSFET fica com a tensão que sobra e vira um aquecedor. A saída é nunca deixar o MOSFET no meio do caminho: ligar e desligar a fita muito depressa, centenas de vezes por segundo, e variar a **fração do tempo** em que ela fica ligada. Isso é o <Term id="pwm">PWM</Term>, sigla em inglês para modulação por largura de pulso.
+
+A fração do período em que o sinal fica ligado é o **ciclo de trabalho**, $D$:
+
+$$
+D = \frac{t_\text{ligado}}{T} \qquad I_\text{média} = D \cdot I_\text{ligado}
+$$
+
+em que $t_\text{ligado}$ é o tempo ligado em cada período, $T$ é o período e $I_\text{ligado}$ é a corrente com a carga ligada direto. Com 25 % de ciclo de trabalho, a fita recebe em média um quarto da corrente e da potência.
+
+<Figure caption="Figura 2. Três sinais de PWM com o mesmo período e ciclos de trabalho de 25 %, 50 % e 75 %. A linha tracejada é a média, que acompanha o ciclo de trabalho." alt="Três ondas quadradas, uma embaixo da outra, com quatro períodos cada. Na primeira, o nível alto dura um quarto do período; na segunda, metade; na terceira, três quartos. Uma linha tracejada em cada uma marca a média: um quarto, metade e três quartos do nível alto.">
+  <MosfetPwm />
+</Figure>
+
+O MOSFET passa o tempo todo totalmente ligado, com a pequena perda do $R_{DS(on)}$, ou totalmente desligado, sem corrente nenhuma. Ele quase não esquenta, e a energia vai para a fita. A <Term id="frequencia">frequência</Term> precisa ser alta o bastante para o olho não ver as piscadas: algumas centenas de hertz já bastam para a maioria das pessoas. No Arduino Uno, o `analogWrite` gera cerca de 490 Hz na maioria dos pinos e cerca de 980 Hz nos pinos 5 e 6. A conversão de sinais digitais em "analógicos" é o assunto da aula <LinkAula id="m11-digital/06-conversao-ad-da-e-pwm" />.
+
+## Explore: fita de LED com PWM
+
+O circuito abaixo é a fita de LED controlada por um microcontrolador. O programa lê o potenciômetro na entrada A0 e gera o PWM de 500 Hz no pino D9, que liga o MOSFET de nível lógico pelo resistor de gate de 220 Ω; o resistor de 10 kΩ é o pull-down. A fita é representada por dois segmentos, cada um com um resistor de 150 Ω e três LEDs brancos, como na aula de [LEDs](../04-leds/). A simulação roda 200 vezes mais devagar que o tempo real, e por isso você vê os LEDs piscarem.
+
+<Simulation circuit="m09/pwm-fita" instruments={['osciloscopio', 'multimetro']} height={420} />
+
+1. Com o potenciômetro no meio, rode a simulação e olhe a tensão no gate no osciloscópio (o botão Autoajuste acerta a escala). Quanto dura um período? Quanto tempo o gate fica ligado em cada período?
+2. No multímetro, em CC, leia a corrente média num segmento. Depois gire o potenciômetro para 25 % e leia de novo.
+3. Leve o potenciômetro ao máximo. Quanto passa num segmento? O MOSFET esquenta?
+
+O período é de 2 ms (500 Hz), e com o potenciômetro no meio o gate fica ligado 1 ms em cada período: 50 % de ciclo de trabalho. O gate sobe a cerca de 4,9 V, um pouco menos que 5 V por causa do resistor de gate e do pull-down. Ligado, cada segmento puxa cerca de 18,4 mA; a média com 50 % fica em 9,2 mA e, com 25 %, em 4,6 mA. No máximo, a fita fica ligada direto com os 18,4 mA, e o MOSFET dissipa só uns 35 µW: chaveando, ele trabalha frio.
+
+<RealCase title="O módulo de MOSFET que esquenta">
+
+Os módulos de MOSFET vendidos para Arduino, com um IRF520 numa plaquinha com bornes, são muito populares. Pela folha de dados, como você viu, o IRF520 só tem a resistência de condução garantida com 10 V no gate. Com os 5 V de um Arduino, ele conduz só em parte: dá conta de algumas centenas de miliampères, mas com uma fita de alguns ampères ou um motor ele fica com parte da tensão, esquenta e pode queimar, exatamente como o Q1 da simulação. Com os 3,3 V de um ESP32, pior ainda: muitos nem chegam a ligar.
+
+Há três saídas. A primeira é trocar por um MOSFET de nível lógico, com o $R_{DS(on)}$ especificado com 4,5 V ou 5 V (para 3,3 V, procure um especificado com 2,5 V ou 2,7 V). A segunda é colocar um estágio que leve o gate a 10 V ou 12 V, um transistor ou um circuito integrado próprio para isso, o *gate driver*. A terceira é um módulo pronto que já traga o driver ou um optoacoplador, o assunto da [próxima aula](../09-tiristores-e-isolamento/).
+
+O mesmo componente está em toda parte. Os MOSFETs ligam e desligam dezenas de milhares de vezes por segundo nas fontes chaveadas, como o carregador de celular, assunto da aula <LinkAula id="m10-fontes/02-fontes-chaveadas" />. E a fita de LED com fonte e dimmer, do começo ao fim, é um dos projetos da aula <LinkAula id="m17-projetos/03-fita-de-led" />.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Escolher o MOSFET pelo limiar.** "$V_{GS(th)}$ de 2 V" não quer dizer que ele liga com 3,3 V. Procure o $R_{DS(on)}$ com a tensão de gate que você tem.
+- **Deixar o gate solto.** Sem o pull-down, o MOSFET pode ficar meio ligado enquanto o microcontrolador reinicia, ou quando você encosta a mão no fio, e esquentar sem ninguém perceber.
+- **Esquecer o negativo comum** entre a fonte da carga e o microcontrolador. O gate fica sem referência.
+- **Passar do máximo do gate**, tipicamente 20 V entre gate e fonte (16 V em muitos de nível lógico, como o IRLZ44N; confira a folha de dados). O óxido do gate rompe, e o MOSFET queima em curto. Num carro, onde a tensão passa de 14 V com picos maiores, o gate precisa de proteção.
+- **Ligar bobina sem diodo de roda livre.** O pico de tensão ao desligar um motor ou um relé pode romper o MOSFET.
+- **Esquecer que a aba e o dissipador estão no dreno.** Encostados no chassi de metal, eles fazem um curto.
+- **Trocar o MOSFET queimado e ligar de novo.** Como ele costuma queimar em curto, a carga fica ligada direto. Antes de trocar, descubra o que o queimou: gate com pouca tensão, falta de dissipador, falta do diodo, carga em curto.
+- **Pegar o MOSFET sem cuidado com a eletricidade estática.** O óxido do gate é uma das camadas mais finas da eletrônica, e uma <Term id="descarga-eletrostatica">descarga eletrostática</Term> que você nem sente pode furá-lo.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'O que liga um MOSFET canal N?',
+      options: [
+        {
+          text: 'Uma tensão entre o gate e a fonte acima do limiar',
+          correct: true,
+          feedback:
+            'Isso. A tensão no gate atrai elétrons e forma o canal. Parado, o gate praticamente não puxa corrente.',
+        },
+        {
+          text: 'Uma corrente constante entrando no gate',
+          feedback:
+            'Esse é o transistor bipolar, comandado pela corrente na base. O gate do MOSFET é isolado por óxido.',
+        },
+        {
+          text: 'Uma tensão entre o dreno e a fonte',
+          feedback:
+            'A tensão entre dreno e fonte é a da carga. Quem comanda é a tensão entre o gate e a fonte.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Um MOSFET com tensão de limiar de 2 V conduz totalmente, com sua menor resistência, quando recebe 3,3 V no gate.',
+      answer: false,
+      explanation:
+        'O limiar é medido com uma corrente minúscula. Para saber se ele conduz bem com 3,3 V, procure na folha de dados o Rds(on) especificado com essa tensão de gate (ou menor).',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um MOSFET com Rds(on) de 0,04 Ω liga um motor de 4 A. Quantos watts ele dissipa? (Responda em W.)',
+      answer: 0.64,
+      tolerance: 0.02,
+      unit: 'W',
+      explanation: 'P = I² × Rds(on) = 4² × 0,04 = 16 × 0,04 = 0,64 W.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma fita de LED consome 2 A ligada direto. Com PWM de 25 % de ciclo de trabalho, qual é a corrente média? (Responda em A.)',
+      answer: 0.5,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation: 'A média é o ciclo de trabalho vezes a corrente ligada: 0,25 × 2 A = 0,5 A.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Para que serve o resistor de 10 kΩ entre o gate e a fonte do MOSFET?',
+      options: [
+        {
+          text: 'Manter o MOSFET desligado enquanto o pino do microcontrolador está solto',
+          correct: true,
+          feedback:
+            'Isso. Ao ligar, reiniciar ou gravar o programa, o pino fica solto, e o pull-down segura o gate em 0 V.',
+        },
+        {
+          text: 'Limitar a corrente da carga',
+          feedback:
+            'A corrente da carga passa entre dreno e fonte. O resistor de 10 kΩ só mexe com o gate.',
+        },
+        {
+          text: 'Aumentar a tensão no gate',
+          feedback: 'Ele puxa o gate para 0 V quando ninguém está comandando.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que o MOSFET quase não esquenta quando controla o brilho de uma fita com PWM?',
+      options: [
+        {
+          text: 'Porque ele fica sempre totalmente ligado ou totalmente desligado',
+          correct: true,
+          feedback:
+            'Isso. Ligado, a perda é só a do Rds(on), pequena; desligado, não passa corrente. Ele nunca fica no meio do caminho.',
+        },
+        {
+          text: 'Porque a frequência alta resfria o componente',
+          feedback: 'A frequência não resfria nada. O que importa é ele não ficar conduzindo em parte.',
+        },
+        {
+          text: 'Porque a fita consome menos energia com PWM',
+          feedback:
+            'A fita consome menos na média, sim, mas o motivo de o MOSFET ficar frio é ele trabalhar como chave.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada termo ao que ele significa.',
+      pairs: [
+        ['Gate', 'Terminal de comando, isolado por óxido'],
+        ['Rds(on)', 'Resistência entre dreno e fonte com o MOSFET totalmente ligado'],
+        ['Ciclo de trabalho', 'Fração de cada período em que o sinal fica ligado'],
+        ['Dissipador', 'Peça de alumínio que tira o calor do componente'],
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **MOSFET** é uma chave comandada pela **tensão** entre gate e fonte. O gate é isolado por óxido: parado, não puxa corrente, mas é um pequeno capacitor que precisa ser carregado a cada troca.
+- Abaixo do **limiar**, ele fica cortado; bem acima, conduz como um resistor de valor muito baixo, o **Rds(on)**. No meio do caminho, ele limita a corrente e esquenta.
+- **MOSFETs comuns** pedem cerca de 10 V no gate; os de **nível lógico** conduzem totalmente com 5 V ou menos. Escolha pelo Rds(on) especificado com a tensão que você tem.
+- O calor é $P = I^2 \cdot R_{DS(on)}$, e a temperatura sobe $P \cdot R_\theta$ acima do ambiente. Sem dissipador, um TO-220 aguenta só um ou dois watts.
+- Ligado a um microcontrolador: canal N do lado do negativo, negativo comum, resistor de gate, pull-down de 10 kΩ e, com bobinas, diodo de roda livre.
+- O **PWM** liga e desliga a carga depressa: a média acompanha o ciclo de trabalho, e o MOSFET, sempre ligado ou desligado, trabalha frio.
+
+Na próxima aula, a eletrônica chega à rede elétrica: os tiristores que controlam lâmpadas e motores de 127 V e 220 V, e os optoacopladores que separam a rede do microcontrolador, na aula [Tiristores e isolamento](../09-tiristores-e-isolamento/).

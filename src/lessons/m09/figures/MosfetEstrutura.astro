@@ -1,0 +1,174 @@
+---
+/* 9.8: an N-channel MOSFET cut open, drawn as the simple lateral device.
+   Left, gate at 0 V: between source and drain there is only P silicon, and
+   nothing passes. Right, gate above the threshold: the positive gate pulls
+   electrons to the surface under the oxide and they form the channel. */
+const W = 300;
+const panels = [
+  { ox: 10, on: false, title: 'Gate em 0 V: sem canal' },
+  { ox: 330, on: true, title: 'Gate acima do limiar: canal formado' },
+];
+const TOP = 112;
+const BODY_H = 128;
+/* Free electrons in the channel and in the N regions. */
+const channelDots = Array.from({ length: 9 }, (_, k) => 92 + k * 15);
+const wellDots = [
+  [22, 150],
+  [40, 160],
+  [60, 150],
+  [74, 140],
+];
+---
+
+<svg viewBox="0 0 640 300" width="640" height="300" class="fig" aria-hidden="true">
+  {
+    panels.map((p) => (
+      <g transform={`translate(${p.ox} 0)`}>
+        <text x={W / 2} y="20" class="title">
+          {p.title}
+        </text>
+
+        {/* Silicon: P body with the two N+ regions of source and drain */}
+        <rect x="0" y={TOP} width={W} height={BODY_H} rx="6" class="p" />
+        <path d={`M8 ${TOP}H92V${TOP + 44}Q92 ${TOP + 58} 78 ${TOP + 58}H8Z`} class="n" />
+        <path
+          d={`M${W - 8} ${TOP}H${W - 92}V${TOP + 44}Q${W - 92} ${TOP + 58} ${W - 78} ${TOP + 58}H${W - 8}Z`}
+          class="n"
+        />
+        <text x="50" y={TOP + 22} class="region">
+          N+
+        </text>
+        <text x={W - 50} y={TOP + 22} class="region">
+          N+
+        </text>
+        <text x={W / 2} y={TOP + 112} class="region">
+          substrato tipo P
+        </text>
+
+        {/* Oxide and gate */}
+        <rect x="84" y={TOP - 12} width={W - 168} height="12" class="oxide" />
+        <rect x="84" y={TOP - 34} width={W - 168} height="22" rx="2" class="gate" />
+
+        {/* Terminals */}
+        <path d={`M50 ${TOP}V58M${W / 2} ${TOP - 34}V58M${W - 50} ${TOP}V58`} class="lead" />
+        <circle cx="50" cy="58" r="4" class="pin" />
+        <circle cx={W / 2} cy="58" r="4" class="pin" />
+        <circle cx={W - 50} cy="58" r="4" class="pin" />
+        <text x="50" y="46" class="label">
+          fonte (S)
+        </text>
+        <text x={W / 2} y="46" class="label">
+          gate (G)
+        </text>
+        <text x={W - 50} y="46" class="label">
+          dreno (D)
+        </text>
+
+        {wellDots.map(([x, y]) => (
+          <>
+            <circle cx={x} cy={y} r="3.5" class="electron" />
+            <circle cx={W - x!} cy={y} r="3.5" class="electron" />
+          </>
+        ))}
+
+        {p.on ? (
+          <>
+            <text x={W / 2} y={TOP - 18} class="charge">
+              + + + + + +
+            </text>
+            <rect x="84" y={TOP} width={W - 168} height="12" class="channel" />
+            {channelDots.map((x) => (
+              <circle cx={x} cy={TOP + 6} r="3.5" class="electron" />
+            ))}
+            <text x={W / 2} y={TOP + 84} class="note">
+              canal N: elétrons atraídos pelo gate
+            </text>
+          </>
+        ) : (
+          <text x={W / 2} y={TOP + 84} class="note">
+            entre fonte e dreno, só silício P
+          </text>
+        )}
+      </g>
+    ))
+  }
+  <text x="320" y="284" class="foot">
+    O óxido (cinza) isola o gate: nenhuma corrente entra por ele com a tensão parada.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .p {
+    fill: var(--danger-soft);
+    stroke: var(--danger-border);
+  }
+  .n {
+    fill: var(--info-soft);
+    stroke: var(--info-border);
+  }
+  .oxide {
+    fill: var(--surface-2);
+    stroke: var(--border-strong);
+  }
+  .gate {
+    fill: var(--copper);
+    stroke: var(--fg-muted);
+  }
+  .channel {
+    fill: var(--info-soft);
+    stroke: var(--info);
+    stroke-dasharray: 4 3;
+  }
+  .lead {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 2.5;
+  }
+  .pin {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .electron {
+    fill: var(--info);
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 15px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .label {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+  .region {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+  .charge {
+    fill: var(--on-accent);
+    font-size: 14px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .foot {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+</style>

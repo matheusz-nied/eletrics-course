@@ -1,0 +1,156 @@
+---
+/* 9.5: the I×V curve of a 5,1 V zener, the same model as the simulations
+   (src/engine/devices/zener.ts): a silicon diode forward, a near-vertical
+   wall at −5,1 V in reverse. */
+const VT = 0.025864917;
+const IS = 1e-14;
+const RS = 2;
+const VZ = 5.1;
+const I_TEST = 5e-3;
+
+/* Plot area: −7 V to +1,5 V across, −40 mA to +40 mA up. */
+const X0 = 400;
+const Y0 = 160;
+const PX_PER_V = 50;
+const PX_PER_MA = 2.6;
+const px = (v: number) => X0 + v * PX_PER_V;
+const py = (ma: number) => Y0 - ma * PX_PER_MA;
+
+const currents = Array.from({ length: 41 }, (_, k) => (k === 0 ? 0.01 : k));
+const forward = currents.map((ma) => {
+  const i = ma / 1000;
+  return [VT * Math.log(i / IS + 1) + i * RS, ma] as const;
+});
+const reverse = currents.map((ma) => {
+  const i = ma / 1000;
+  return [-(VZ + VT * Math.log(i / I_TEST) + (i - I_TEST) * RS), -ma] as const;
+});
+const path = (pts: readonly (readonly [number, number])[]) =>
+  pts.map(([v, ma], k) => `${k ? 'L' : 'M'}${px(v).toFixed(1)} ${py(ma).toFixed(1)}`).join('');
+const knee = forward[0]![0];
+const wall = reverse[0]![0];
+const curve = `${path([...reverse].reverse())}L${px(wall)} ${py(0)}H${px(knee)}${path(forward).replace(/^M/, 'L')}`;
+/* −5 is left out: the wall of the curve passes over it, and the −5,1 V mark takes its place. */
+const ticks = [-7, -6, -4, -3, -2, -1, 1];
+---
+
+<svg viewBox="0 0 520 300" width="520" height="300" class="fig" aria-hidden="true">
+  <!-- Axes and ticks -->
+  <path d={`M30 ${Y0}H500M${X0} 40V280`} class="axis" />
+  {ticks.map((v) => (
+    <>
+      <path d={`M${px(v)} ${Y0 - 4}V${Y0 + 4}`} class="axis" />
+      <text x={px(v)} y={Y0 + 20} class="tick">
+        {v > 0 ? `+${v}` : `−${-v}`}
+      </text>
+    </>
+  ))}
+  <text x="500" y={Y0 + 40} class="axis-lbl end">
+    V (anodo − catodo)
+  </text>
+  <text x={X0 + 8} y="50" class="axis-lbl">
+    I (mA)
+  </text>
+  <text x={X0 - 6} y={py(30) + 4} class="tick end">
+    +30
+  </text>
+  <path d={`M${X0 - 4} ${py(30)}H${X0 + 4}`} class="axis" />
+
+  <path d={curve} class="curve" />
+
+  <!-- Callouts -->
+  <path d={`M${px(0.8)} ${py(24)}L448 ${py(34)}`} class="leader" />
+  <text x="452" y={py(34) - 4} class="note">
+    conduz
+  </text>
+  <text x="452" y={py(34) + 14} class="note">
+    como um
+  </text>
+  <text x="452" y={py(34) + 32} class="note">
+    diodo
+  </text>
+
+  <path d={`M${px(-5.12)} ${py(-26)}L186 ${py(-30)}`} class="leader" />
+  <text x="190" y={py(-30) - 6} class="note">
+    ruptura: a tensão fica perto
+  </text>
+  <text x="190" y={py(-30) + 12} class="note">
+    de 5,1 V qualquer que seja
+  </text>
+  <text x="190" y={py(-30) + 30} class="note">
+    a corrente
+  </text>
+
+  <text x={px(-2.6)} y={Y0 - 12} class="note mid">
+    quase nenhuma corrente
+  </text>
+  <path d={`M${px(-5.1)} ${Y0 - 4}V${Y0 + 4}`} class="mark" />
+  <text x={px(-5.1) - 8} y={Y0 + 40} class="mark-lbl">
+    −5,1 V
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .axis {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .axis-lbl {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .curve {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linejoin: round;
+  }
+  .leader {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .note {
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .mark {
+    stroke: var(--danger);
+    stroke-width: 2;
+  }
+  .mark-lbl {
+    fill: var(--danger);
+    font-size: 13px;
+    font-weight: 650;
+    text-anchor: end;
+  }
+  /* On a phone the plot shrinks to about 60 %: larger type keeps it legible. */
+  @media (max-width: 36rem) {
+    .note,
+    .mark-lbl {
+      font-size: 17px;
+    }
+    .tick,
+    .axis-lbl {
+      font-size: 16px;
+    }
+  }
+</style>

@@ -132,7 +132,7 @@ export default defineCircuit({
     {
       id: 'carga-pesada',
       description:
-        'Com 12 V, baixe a carga para 100 Ω: o zener deixa de conduzir e a saída despenca para menos de 4 V.',
+        'Com 12 V, baixe a resistência da carga para 100 Ω: o zener deixa de conduzir e a saída despenca para menos de 4 V.',
       check: { readout: 'VOUT', op: '<', value: 4 },
       solution: { 'RL.resistance': 100 },
     },

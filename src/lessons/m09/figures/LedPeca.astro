@@ -1,0 +1,135 @@
+---
+/* 9.4: a 5 mm red LED seen from the side, drawn to scale (10 px per mm), with
+   what is inside the epoxy lens. `burned` shows it after an overcurrent: the
+   chip blackened and the bond wire melted open. Stand-in for the 3D kit's LED. */
+export interface Props {
+  burned?: boolean;
+}
+const { burned = false } = Astro.props;
+
+const LABELS = burned
+  ? [
+      { x: 136, y: 46, ty: 44, text: 'lente de epóxi, ainda inteira' },
+      { x: 124, y: 84, ty: 92, text: 'chip escurecido pelo calor' },
+      { x: 106, y: 72, ty: 140, text: 'fio de ligação rompido' },
+    ]
+  : [
+      { x: 136, y: 46, ty: 44, text: 'lente de epóxi' },
+      { x: 128, y: 84, ty: 84, text: 'chip: é ele que acende' },
+      { x: 110, y: 70, ty: 116, text: 'fio de ligação' },
+      { x: 133, y: 92, ty: 148, text: 'copo refletor (catodo)' },
+      { x: 135, y: 124, ty: 180, text: 'lado chanfrado: catodo' },
+    ];
+---
+
+<svg viewBox="0 0 440 300" width="616" height="420" class="fig" aria-hidden="true">
+  <!-- Leads: anode long, cathode short -->
+  <rect x="95" y="128" width="5" height="152" class="lead" />
+  <rect x="121" y="128" width="5" height="122" class="lead" />
+
+  <!-- Epoxy lens and flange (flat on the cathode side) -->
+  <path d="M85 118V62A25 25 0 0 1 135 62V118Z" class={burned ? 'lens lens--burned' : 'lens'} />
+  <path d="M81 118H135V128H81Z" class={burned ? 'lens lens--burned' : 'lens'} />
+
+  <!-- Inside: the anode post and the cathode anvil with its reflector cup -->
+  <path d="M94 128V84H101V128Z" class="metal" />
+  <path d="M117 128V96H131V128Z" class="metal" />
+  <path d="M112 84H137L131 96H118Z" class="metal cup" />
+  <rect x="121" y="80" width="7" height="6" class={burned ? 'die die--burned' : 'die'} />
+  {burned ? (
+    <>
+      <ellipse cx="124.5" cy="83" rx="9" ry="4" class="soot" />
+      <path d="M97.5 84Q99 74 105 70" class="bond" />
+      <path d="M113 70Q120 71 124 80" class="bond" />
+    </>
+  ) : (
+    <>
+      <circle cx="124.5" cy="83" r="16" class="glow" />
+      <path d="M97.5 84Q102 64 124 80" class="bond" />
+    </>
+  )}
+
+  <!-- Labels -->
+  {LABELS.map((l) => (
+    <>
+      <path d={`M${l.x} ${l.y}L176 ${l.ty - 4}H184`} class="leader" />
+      <text x="190" y={l.ty} class="lbl">
+        {l.text}
+      </text>
+    </>
+  ))}
+  <path d="M126 240L176 226H184" class="leader" />
+  <text x="190" y="230" class="lbl strong">
+    catodo (−): perna curta
+  </text>
+  <path d="M100 272L176 266H184" class="leader" />
+  <text x="190" y="270" class="lbl strong">
+    anodo (+): perna longa
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .lead {
+    fill: var(--fg-subtle);
+  }
+  .lens {
+    fill: var(--danger-soft);
+    stroke: var(--danger-border);
+    stroke-width: 2;
+    fill-opacity: 0.85;
+  }
+  .lens--burned {
+    fill: var(--surface);
+    stroke: var(--border-strong);
+  }
+  .metal {
+    fill: var(--fg-subtle);
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .cup {
+    fill: var(--surface);
+  }
+  .die {
+    fill: var(--danger);
+  }
+  .die--burned {
+    fill: var(--fg);
+  }
+  .soot {
+    fill: var(--fg);
+    opacity: 0.35;
+  }
+  .glow {
+    fill: var(--danger);
+    opacity: 0.18;
+  }
+  .bond {
+    fill: none;
+    stroke: var(--copper);
+    stroke-width: 1.4;
+  }
+  .leader {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .lbl {
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .strong {
+    font-weight: 650;
+  }
+  /* On a phone the drawing shrinks to about half: larger type keeps it legible. */
+  @media (max-width: 36rem) {
+    .lbl {
+      font-size: 18px;
+    }
+  }
+</style>

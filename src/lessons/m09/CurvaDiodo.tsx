@@ -101,7 +101,9 @@ export default function CurvaDiodo() {
   const ticksI = [0, 1, 2, 3, 4, 5].map((k) => (k * topMa) / 5);
   const line = loadLine(source, ohms, top, py);
   const inside = op.voltage >= V_LO;
-  const labelX = Math.min(px(diodeVoltage(top, part.params)), X1 - 4);
+  // Name of the curve next to where it leaves the top, on the side with room.
+  const curveTop = px(Math.min(V_HI, diodeVoltage(top, part.params)));
+  const labelLeft = curveTop > X1 - 90;
 
   const summary = `Curva de corrente em função da tensão do ${part.label}, com uma fonte de ${volts(source, 1)} e um resistor de ${formatSI(ohms, 'Ω')}. ${state.label}: corrente de ${formatSI(op.current, 'A')} e ${volts(op.voltage)} no diodo.`;
 
@@ -163,7 +165,12 @@ export default function CurvaDiodo() {
             ))}
             {line && <path d={line} className="cdiodo__load" />}
             <path d={curvePath(partId, top, py)} className="cdiodo__curve" />
-            <text x={labelX} y={Y1 + 14} textAnchor="end" className="cdiodo__curve-label">
+            <text
+              x={labelLeft ? curveTop - 7 : curveTop + 7}
+              y={Y1 + 14}
+              textAnchor={labelLeft ? 'end' : 'start'}
+              className="cdiodo__curve-label"
+            >
               {part.short}
             </text>
 
