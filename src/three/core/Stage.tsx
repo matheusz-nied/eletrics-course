@@ -155,6 +155,15 @@ export function Stage({
   const showBloom = (bloom ?? quality.bloom) && usePasses && !debug.includes('sem-bloom');
   const extent = bounds?.radius ?? 10;
   const turn = /giro(-?\d+)/.exec(debug);
+  const shadowY = bounds ? Math.min(bounds.minY, 0) - bounds.radius * 0.002 : 0;
+  const shadowSpan = bounds
+    ? Math.max(
+        Math.abs(bounds.center.x) + bounds.size.x / 2,
+        Math.abs(bounds.center.z) + bounds.size.z / 2,
+      ) *
+        4.4 +
+      bounds.radius
+    : 1;
   const envTurn = turn ? (Number(turn[1]) * Math.PI) / 180 : environmentRotation;
 
   return (
@@ -180,11 +189,14 @@ export function Stage({
       />
 
       {shadows && bounds && (
+        // drei blurs the shadow on a plane fixed at the world origin, so the
+        // catcher must stay at x = z = 0 (and not above y = 0) or the blurred
+        // shadow lands offset from the model.
         <ContactShadows
           key={`${fitKey}-${quality.shadowResolution}`}
-          position={[bounds.center.x, bounds.minY - bounds.radius * 0.002, bounds.center.z]}
-          scale={Math.max(bounds.size.x, bounds.size.z) * 2.2 + bounds.radius}
-          far={Math.max(bounds.size.y, bounds.radius) * 1.2}
+          position={[0, shadowY, 0]}
+          scale={shadowSpan}
+          far={Math.max(bounds.minY + bounds.size.y - shadowY, bounds.radius) * 1.2}
           blur={2.2}
           opacity={0.5}
           resolution={quality.shadowResolution}
