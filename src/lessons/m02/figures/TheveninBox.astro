@@ -1,0 +1,200 @@
+---
+/*
+ * 02.8: a network seen from two terminals (A and B) and its two equivalents:
+ * Thévenin (source in series with a resistor) and Norton (current source in
+ * parallel with a resistor). Values of the lesson: 7,2 V, 2 kΩ, 3,6 mA.
+ */
+---
+
+<svg viewBox="0 0 720 220" width="720" height="220" class="fig" aria-hidden="true">
+  <!-- Original network inside a box -->
+  <text x="123" y="24" class="title">
+    Circuito original
+  </text>
+  <rect x="16" y="38" width="214" height="166" rx="10" class="box" />
+  <g class="src">
+    <path d="M46 70 V112 M46 136 V180" class="wire" />
+    <path d="M34 112 H58 M40 120 H52 M34 128 H58 M40 136 H52" />
+    <text x="64" y="110" class="sign">
+      +
+    </text>
+    <text x="62" y="160" class="val start">
+      12 V
+    </text>
+  </g>
+  <path
+    d="M46 70 H73 M103 70 H158 M188 70 H230 M130 70 V110 M130 140 V180 M46 180 H230"
+    class="wire"
+  />
+  <g class="res">
+    <rect x="73" y="64" width="30" height="12" />
+    <rect x="124" y="110" width="12" height="30" />
+    <rect x="158" y="64" width="30" height="12" />
+  </g>
+  <text x="88" y="56" class="val">
+    2,2 kΩ
+  </text>
+  <text x="144" y="129" class="val start">
+    3,3 kΩ
+  </text>
+  <text x="173" y="56" class="val">
+    680 Ω
+  </text>
+  <circle cx="230" cy="70" r="4.5" class="term" />
+  <circle cx="230" cy="180" r="4.5" class="term" />
+  <text x="243" y="75" class="tlabel start">
+    A
+  </text>
+  <text x="243" y="185" class="tlabel start">
+    B
+  </text>
+
+  <text x="276" y="134" class="eq">
+    =
+  </text>
+
+  <!-- Thévenin -->
+  <text x="390" y="24" class="title">
+    Equivalente de Thévenin
+  </text>
+  <g class="src">
+    <path d="M320 70 V112 M320 136 V180" class="wire" />
+    <path d="M308 112 H332 M314 120 H326 M308 128 H332 M314 136 H326" />
+    <text x="338" y="110" class="sign">
+      +
+    </text>
+    <text x="338" y="146" class="val start">
+      V
+      <tspan class="sub" dy="4">
+        Th
+      </tspan>
+    </text>
+    <text x="338" y="166" class="val start">
+      7,2 V
+    </text>
+  </g>
+  <path d="M320 70 H365 M395 70 H450 M320 180 H450" class="wire" />
+  <g class="res">
+    <rect x="365" y="64" width="30" height="12" />
+  </g>
+  <text x="380" y="56" class="val">
+    R
+    <tspan class="sub" dy="4">
+      Th
+    </tspan>
+    <tspan dy="-4"> 2 kΩ</tspan>
+  </text>
+  <circle cx="450" cy="70" r="4.5" class="term" />
+  <circle cx="450" cy="180" r="4.5" class="term" />
+  <text x="463" y="75" class="tlabel start">
+    A
+  </text>
+  <text x="463" y="185" class="tlabel start">
+    B
+  </text>
+
+  <text x="500" y="134" class="eq">
+    =
+  </text>
+
+  <!-- Norton -->
+  <text x="625" y="24" class="title">
+    Equivalente de Norton
+  </text>
+  <g class="src">
+    <path d="M565 70 V107 M565 143 V180" class="wire" />
+    <circle cx="565" cy="125" r="18" />
+    <path d="M565 136 V114 M558 121 L565 113 L572 121" />
+  </g>
+  <path d="M565 70 H690 M565 180 H690 M640 70 V110 M640 140 V180" class="wire" />
+  <g class="res">
+    <rect x="634" y="110" width="12" height="30" />
+  </g>
+  <text x="565" y="206" class="val">
+    I
+    <tspan class="sub" dy="4">
+      N
+    </tspan>
+    <tspan dy="-4"> 3,6 mA</tspan>
+  </text>
+  <text x="648" y="206" class="val">
+    R
+    <tspan class="sub" dy="4">
+      N
+    </tspan>
+    <tspan dy="-4"> 2 kΩ</tspan>
+  </text>
+  <circle cx="690" cy="70" r="4.5" class="term" />
+  <circle cx="690" cy="180" r="4.5" class="term" />
+  <text x="703" y="75" class="tlabel start">
+    A
+  </text>
+  <text x="703" y="185" class="tlabel start">
+    B
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    stroke: var(--copper);
+  }
+  .box {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.25;
+    stroke-dasharray: 5 4;
+  }
+  .src {
+    stroke: var(--accent);
+  }
+  .res rect {
+    stroke: var(--fg);
+    fill: var(--surface);
+  }
+  .term {
+    stroke: var(--fg);
+    fill: var(--bg);
+  }
+  text {
+    stroke: none;
+    text-anchor: middle;
+    fill: var(--fg);
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .val {
+    font-size: 12.5px;
+    font-family: var(--font-mono);
+    fill: var(--fg-muted);
+  }
+  .src .val {
+    fill: var(--accent);
+  }
+  .sub {
+    font-size: 9.5px;
+  }
+  .sign {
+    font-size: 14px;
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .tlabel {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .eq {
+    font-size: 30px;
+    fill: var(--fg-subtle);
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>

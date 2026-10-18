@@ -1,0 +1,176 @@
+---
+/*
+ * 02.6: two voltage dividers on 12 V with a voltage ruler next to each, showing
+ * that the output is the fraction of the source set by the ratio R2 / (R1 + R2).
+ */
+
+/** Ruler y for a voltage between 0 V (y = 240) and 12 V (y = 40). */
+const y = (v: number) => 240 - (v / 12) * 200;
+
+const dividers = [
+  { x: 0, r1: '10 kΩ', r2: '10 kΩ', out: 6, title: 'R1 = R2: metade' },
+  { x: 330, r1: '10 kΩ', r2: '20 kΩ', out: 8, title: 'R2 = 2 × R1: dois terços' },
+];
+---
+
+<svg viewBox="0 0 680 290" width="680" height="290" class="fig" aria-hidden="true">
+  {dividers.map((d) => (
+    <g transform={`translate(${d.x} 0)`}>
+      <text x="150" y="20" class="title">
+        {d.title}
+      </text>
+      <g class="wire">
+        <path d="M60 120 V40 H180 V62 M180 118 V162 M180 218 V240 H60 V160" />
+        <path d="M180 140 H236" />
+      </g>
+      <circle cx="180" cy="140" r="4" class="dot" />
+      <circle cx="240" cy="140" r="4" class="tap" />
+      <g class="src">
+        <path d="M44 126 H76 M52 136 H68 M44 146 H76 M52 156 H68" />
+        <path d="M60 120 V126 M60 156 V160" />
+        <text x="86" y="128" class="sign">
+          +
+        </text>
+        <text x="36" y="146" class="val end">
+          12 V
+        </text>
+      </g>
+      <g class="r1">
+        <rect x="168" y="62" width="24" height="56" rx="2" />
+      </g>
+      <g class="r2">
+        <rect x="168" y="162" width="24" height="56" rx="2" />
+      </g>
+      <text x="160" y="86" class="lbl end">
+        R1
+      </text>
+      <text x="160" y="102" class="val end">
+        {d.r1}
+      </text>
+      <text x="160" y="186" class="lbl end">
+        R2
+      </text>
+      <text x="160" y="202" class="val end">
+        {d.r2}
+      </text>
+      <text x="240" y="128" class="out">
+        saída
+      </text>
+
+      <g class="ruler">
+        <rect x="280" y={y(12)} width="14" height={y(d.out) - y(12)} class="seg1" />
+        <rect x="280" y={y(d.out)} width="14" height={y(0) - y(d.out)} class="seg2" />
+        <path d={`M276 ${y(12)} H298 M276 ${y(0)} H298`} class="tick" />
+        <path d={`M244 140 L276 ${y(d.out)} H298`} class="lead" />
+      </g>
+      <text x="302" y={y(12) + 4} class="val start">
+        12 V
+      </text>
+      <text x="302" y={y(0) + 4} class="val start">
+        0 V
+      </text>
+      <text x="302" y={y(d.out) + 5} class="out start">
+        {d.out} V
+      </text>
+      <text x="270" y={(y(12) + y(d.out)) / 2 + 4} class="small end r1-t">
+        {12 - d.out} V em R1
+      </text>
+      <text x="270" y={(y(d.out) + y(0)) / 2 + 4} class="small end r2-t">
+        {d.out} V em R2
+      </text>
+    </g>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    stroke: var(--fg-muted);
+  }
+  .dot {
+    fill: var(--fg-muted);
+    stroke: none;
+  }
+  .tap {
+    fill: var(--bg);
+    stroke: var(--success);
+  }
+  .src {
+    stroke: var(--accent);
+  }
+  .r1 {
+    stroke: var(--copper);
+  }
+  .r1 rect {
+    fill: color-mix(in oklab, var(--copper) 18%, transparent);
+  }
+  .r2 {
+    stroke: var(--accent);
+  }
+  .r2 rect {
+    fill: var(--accent-soft);
+  }
+  .ruler .seg1 {
+    fill: color-mix(in oklab, var(--copper) 55%, transparent);
+    stroke: none;
+  }
+  .ruler .seg2 {
+    fill: color-mix(in oklab, var(--accent) 55%, transparent);
+    stroke: none;
+  }
+  .ruler .tick {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .ruler .lead {
+    stroke: var(--success);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .title {
+    font-weight: 600;
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .val {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    fill: var(--fg-muted);
+  }
+  .sign {
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .out {
+    font-weight: 700;
+    fill: var(--success);
+  }
+  .small {
+    font-size: 12px;
+  }
+  .r1-t {
+    fill: var(--copper);
+  }
+  .r2-t {
+    fill: var(--accent);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

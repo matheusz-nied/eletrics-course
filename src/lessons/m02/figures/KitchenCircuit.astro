@@ -1,0 +1,170 @@
+---
+/*
+ * 02.3: one 127 V outlet circuit in a kitchen. Three appliances in parallel;
+ * their currents add up in the circuit's wires and breaker.
+ */
+---
+
+<svg viewBox="0 0 680 306" width="680" height="306" class="fig" aria-hidden="true">
+  <!-- Panel with the breaker -->
+  <rect x="20" y="40" width="110" height="150" rx="8" class="panel" />
+  <text x="75" y="62" class="sub">
+    Quadro
+  </text>
+  <rect x="55" y="78" width="40" height="64" rx="4" class="breaker" />
+  <path d="M75 92 V112" class="lever" />
+  <text x="75" y="162" class="label">
+    20 A
+  </text>
+  <text x="75" y="178" class="sub">
+    disjuntor
+  </text>
+
+  <!-- Conductors -->
+  <path d="M95 100 H600" class="phase" />
+  <path d="M130 124 H600" class="neutral" />
+  <path d="M130 148 H600" class="earth" />
+  <text x="606" y="104" class="tag start ph">
+    fase
+  </text>
+  <text x="606" y="128" class="tag start ne">
+    neutro
+  </text>
+  <text x="606" y="152" class="tag start ea">
+    terra
+  </text>
+
+  <!-- Outlets: each one takes the three conductors -->
+  {[
+    { x: 230, name: 'Micro-ondas', w: '1.200 W', a: '9,45 A' },
+    { x: 380, name: 'Air fryer', w: '1.500 W', a: '11,81 A' },
+    { x: 530, name: 'Cafeteira', w: '800 W', a: '6,30 A' },
+  ].map((o) => (
+    <g>
+      <path d={`M${o.x - 14} 100 V196`} class="phase" />
+      <path d={`M${o.x} 124 V196`} class="neutral" />
+      <path d={`M${o.x + 14} 148 V196`} class="earth" />
+      <circle cx={o.x - 14} cy="100" r="3.5" class="dot" />
+      <circle cx={o.x} cy="124" r="3.5" class="dot" />
+      <circle cx={o.x + 14} cy="148" r="3.5" class="dot" />
+      <rect x={o.x - 32} y="196" width="64" height="40" rx="8" class="outlet" />
+      <circle cx={o.x - 12} cy="216" r="4" class="hole" />
+      <circle cx={o.x + 12} cy="216" r="4" class="hole" />
+      <circle cx={o.x} cy="226" r="4" class="hole" />
+      <text x={o.x} y="256" class="label">
+        {o.name}
+      </text>
+      <text x={o.x} y="274" class="val">
+        {o.w} · {o.a}
+      </text>
+    </g>
+  ))}
+
+  <!-- Total current in the circuit -->
+  <path d="M146 88 H196 M190 83 L196 88 L190 93" class="arrow" />
+  <text x="150" y="30" class="cur start">
+    27,56 A no fio e no disjuntor
+  </text>
+  <text x="150" y="48" class="sub start">
+    9,45 + 11,81 + 6,30
+  </text>
+  <path d="M171 56 V80" class="lead" />
+  <text x="340" y="298" class="sub">
+    Valores típicos em 127 V. Cada tomada recebe os mesmos 127 V.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .panel {
+    stroke: var(--fg-subtle);
+    fill: var(--surface);
+    stroke-width: 1.5;
+  }
+  .breaker {
+    stroke: var(--fg);
+    fill: var(--bg);
+    stroke-width: 1.5;
+  }
+  .lever {
+    stroke: var(--fg);
+    stroke-width: 6;
+  }
+  .phase {
+    stroke: var(--danger);
+  }
+  .neutral {
+    stroke: var(--info);
+  }
+  .earth {
+    stroke: var(--success);
+    stroke-dasharray: 8 4;
+  }
+  .dot {
+    fill: var(--fg);
+    stroke: none;
+  }
+  .outlet {
+    stroke: var(--fg-subtle);
+    fill: var(--surface);
+    stroke-width: 1.5;
+  }
+  .hole {
+    fill: var(--fg-subtle);
+    stroke: none;
+  }
+  .arrow {
+    stroke: var(--danger);
+    stroke-width: 2;
+  }
+  .lead {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  text {
+    stroke: none;
+    font-size: 14px;
+    text-anchor: middle;
+    fill: var(--fg);
+  }
+  .label {
+    font-weight: 600;
+  }
+  .val {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .cur {
+    font-weight: 600;
+    font-size: 13.5px;
+    fill: var(--danger);
+  }
+  .tag {
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .ph {
+    fill: var(--danger);
+  }
+  .ne {
+    fill: var(--info);
+  }
+  .ea {
+    fill: var(--success);
+  }
+  .sub {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>

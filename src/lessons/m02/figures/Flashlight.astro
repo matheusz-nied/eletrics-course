@@ -1,0 +1,201 @@
+---
+/* 02.1: a flashlight in section next to its schematic, with the four parts of a circuit. */
+---
+
+<svg viewBox="0 0 680 330" width="680" height="330" class="fig" aria-hidden="true">
+  <!-- Flashlight in section -->
+  <g class="body">
+    <rect x="40" y="60" width="400" height="70" rx="14" />
+    <path d="M440 56 L520 36 L520 154 L440 134" />
+    <path d="M520 36 V154" class="lens" />
+    <path d="M426 72 Q470 52 516 42 M426 118 Q470 138 516 148" class="thin" />
+  </g>
+  <g class="cond">
+    <path d="M52 95 l6 -14 l8 28 l8 -28 l8 28 l8 -28 l8 28 l8 -28 l8 28 l6 -14" />
+    <path d="M52 95 V66 H300 M350 66 H409 V84" />
+    <rect x="396" y="84" width="26" height="22" rx="3" class="metal" />
+  </g>
+  <g class="src">
+    <rect x="120" y="74" width="130" height="42" rx="6" />
+    <rect x="250" y="88" width="6" height="14" rx="1" />
+    <rect x="258" y="74" width="130" height="42" rx="6" />
+    <rect x="388" y="88" width="6" height="14" rx="1" />
+    <text x="185" y="100" class="in">
+      1,5 V
+    </text>
+    <text x="323" y="100" class="in">
+      1,5 V
+    </text>
+    <text x="236" y="86" class="sign">
+      +
+    </text>
+    <text x="134" y="86" class="sign">
+      −
+    </text>
+    <text x="374" y="86" class="sign">
+      +
+    </text>
+    <text x="272" y="86" class="sign">
+      −
+    </text>
+  </g>
+  <g class="sw">
+    <rect x="305" y="46" width="40" height="14" rx="4" />
+    <path d="M300 66 L344 60" />
+  </g>
+  <g class="load">
+    <circle cx="440" cy="95" r="16" class="glass" />
+    <path d="M432 100 q2 -12 4 0 q2 -12 4 0 q2 -12 4 0 q2 -12 4 0" />
+  </g>
+
+  <!-- Callouts -->
+  <g class="lead">
+    <path d="M254 116 V148" />
+    <path d="M80 109 L80 148" />
+    <path d="M325 46 V28" />
+    <path d="M452 82 L478 28" />
+  </g>
+  <text x="254" y="164" class="label src-t">
+    Fonte: duas pilhas de 1,5 V
+  </text>
+  <text x="80" y="164" class="label cond-t">
+    Condutores
+  </text>
+  <text x="80" y="180" class="sub">
+    mola e lâmina de metal
+  </text>
+  <text x="325" y="22" class="label sw-t">
+    Chave
+  </text>
+  <text x="500" y="22" class="label load-t">
+    Carga: lâmpada
+  </text>
+
+  <!-- Schematic -->
+  <text x="40" y="214" class="sub start">
+    O mesmo circuito no esquema:
+  </text>
+  <g class="cond">
+    <path d="M200 236 V226 H300 M352 226 H500 V258 M500 290 V306 H200 V276" />
+  </g>
+  <g class="src">
+    <path d="M184 240 H216 M192 250 H208 M184 260 H216 M192 270 H208" />
+    <path d="M200 236 V240 M200 270 V276" />
+    <text x="228" y="245" class="sign">
+      +
+    </text>
+    <text x="170" y="262" class="in end">
+      3 V
+    </text>
+  </g>
+  <g class="sw">
+    <circle cx="300" cy="226" r="3" />
+    <circle cx="352" cy="226" r="3" />
+    <path d="M300 226 L348 214" />
+  </g>
+  <g class="load">
+    <circle cx="500" cy="274" r="16" />
+    <path d="M489 263 L511 285 M511 263 L489 285" />
+  </g>
+  <text x="140" y="300" class="label src-t end">
+    Fonte
+  </text>
+  <text x="326" y="206" class="label sw-t">
+    Chave aberta
+  </text>
+  <text x="526" y="279" class="label load-t start">
+    Carga
+  </text>
+  <text x="380" y="324" class="label cond-t">
+    Condutores (fios)
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .body {
+    stroke: var(--fg-subtle);
+  }
+  .body .thin {
+    stroke-width: 1.5;
+  }
+  .lens {
+    stroke-width: 4;
+  }
+  .cond {
+    stroke: var(--copper);
+  }
+  .cond .metal {
+    fill: color-mix(in oklab, var(--copper) 25%, transparent);
+  }
+  .src {
+    stroke: var(--accent);
+  }
+  .src rect {
+    fill: var(--accent-soft);
+  }
+  .sw {
+    stroke: var(--warning);
+  }
+  .sw rect {
+    fill: var(--warning-soft);
+  }
+  .load {
+    stroke: var(--danger);
+  }
+  .load .glass {
+    fill: var(--warning-soft);
+  }
+  .lead {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  text {
+    stroke: none;
+    font-size: 14px;
+    text-anchor: middle;
+    fill: var(--fg);
+  }
+  .in {
+    font-size: 13px;
+    font-family: var(--font-mono);
+    fill: var(--accent);
+  }
+  .sign {
+    font-size: 14px;
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .label {
+    font-weight: 600;
+  }
+  .sub {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .src-t {
+    fill: var(--accent);
+  }
+  .cond-t {
+    fill: var(--copper);
+  }
+  .sw-t {
+    fill: var(--warning);
+  }
+  .load-t {
+    fill: var(--danger);
+  }
+</style>

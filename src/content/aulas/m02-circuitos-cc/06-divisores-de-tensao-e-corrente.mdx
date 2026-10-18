@@ -1,0 +1,302 @@
+---
+titulo: Divisores de tensão e de corrente
+modulo: m02-circuitos-cc
+ordem: 6
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Calcular a tensão de saída de um divisor de tensão com dois resistores
+  - Prever quanto a saída cai quando uma carga é ligada ao divisor
+  - Usar um potenciômetro como divisor ajustável
+  - Calcular como a corrente se divide entre dois ramos em paralelo
+  - Entender como um LDR num divisor faz uma luz acender sozinha quando escurece
+prerequisitos:
+  - m02-circuitos-cc/02-associacao-em-serie
+  - m02-circuitos-cc/03-associacao-em-paralelo
+tags: [divisor de tensão, divisor de corrente, potenciômetro, LDR, sensor]
+seguranca: baixa-tensao
+---
+
+import DividerLadder from '../../../lessons/m02/figures/DividerLadder.astro';
+
+A luz do poste acende sozinha quando escurece. O volume do rádio sobe quando você gira o botão. O sensor de temperatura do motor do carro avisa a central de injeção se o motor está frio ou quente. Os três usam o mesmo circuito de dois resistores, um dos mais úteis da eletrônica: o **divisor de tensão**.
+
+Nesta aula você vai calcular um divisor, ver o que acontece quando liga alguma coisa na saída dele, usar um potenciômetro como divisor ajustável e montar a parte "sensora" de uma luz noturna automática.
+
+## A ideia: fatiar a tensão
+
+Na [associação em série](../02-associacao-em-serie/) você viu que dois resistores em série dividem a tensão da fonte entre eles, na proporção das resistências. Quem tem mais resistência fica com a fatia maior.
+
+O <Term id="divisor-de-tensao">divisor de tensão</Term> só acrescenta uma coisa: um fio tirado do **ponto do meio**, entre os dois resistores. Entre esse ponto e o negativo da fonte aparece uma fração da tensão total. Mudando a proporção entre os resistores, você escolhe a fração.
+
+<Figure caption="Figura 1. Dois divisores ligados em 12 V. À direita de cada um, uma régua de tensão: a fonte vai de 0 V a 12 V e o ponto do meio fica na altura da fração escolhida.">
+  <DividerLadder />
+</Figure>
+
+Uma imagem ajuda: pense na tensão como a altura de uma escada que vai de 0 V (o chão) a 12 V (o topo). Cada resistor em série é um lance da escada, com altura proporcional à sua resistência. O ponto do meio é o patamar entre os dois lances. Com dois resistores iguais, o patamar fica na metade da altura; com o de baixo duas vezes maior, fica a dois terços.
+
+## A fórmula do divisor
+
+Sem nada ligado na saída, a mesma corrente passa pelos dois resistores. Pela Lei de Ohm:
+
+$$
+I = \frac{V}{R_1 + R_2}
+$$
+
+A tensão no resistor de baixo, $R_2$, é a tensão de saída:
+
+$$
+V_S = I \cdot R_2 = V \cdot \frac{R_2}{R_1 + R_2}
+$$
+
+em que $V$ é a tensão da fonte (V), $R_1$ é o resistor entre o positivo e a saída, $R_2$ é o resistor entre a saída e o negativo (Ω), e $V_S$ é a tensão de saída, medida entre a saída e o negativo (V).
+
+Repare que só a **proporção** importa para a tensão: 1 kΩ com 1 kΩ dá os mesmos 6 V que 1 MΩ com 1 MΩ, numa fonte de 12 V. O que muda é a corrente que o divisor puxa da fonte (6 mA no primeiro caso, 6 µA no segundo) e, como você vai ver agora, o quanto ele aguenta uma carga na saída.
+
+## Explore: ligue uma carga no divisor
+
+O circuito abaixo é um divisor de 10 kΩ com 10 kΩ numa fonte de 12 V. A chave S1 liga uma carga RL na saída, em paralelo com $R_2$. A carga representa qualquer coisa que você queira alimentar ou medir naquele ponto.
+
+<Simulation circuit="m02/divisor-carga" instruments={['multimetro']} />
+
+1. Com a carga desligada, leia a tensão na saída e as correntes em R1 e R2. Elas são iguais?
+2. Ligue a carga com RL = 10 kΩ. Quanto vale a saída agora? O que aconteceu com as correntes de R1 e de R2?
+3. Baixe RL para 1 kΩ. Para quanto vai a saída?
+4. Suba RL para 1 MΩ. A saída volta perto de 6 V?
+
+Sem carga, a saída fica em 6 V e as duas correntes valem 0,6 mA. Com a carga de 10 kΩ, a saída cai para **4 V**. Com 1 kΩ, despenca para **1 V**. Com 1 MΩ, quase não muda: 5,97 V.
+
+A explicação está na [associação em paralelo](../03-associacao-em-paralelo/): a carga fica em paralelo com $R_2$, e a resistência equivalente do "lance de baixo" diminui. Com RL = 10 kΩ, o lance de baixo vira $10\,\text{k}\Omega \parallel 10\,\text{k}\Omega = 5\,\text{k}\Omega$, e o divisor passa a ser 10 kΩ com 5 kΩ:
+
+$$
+V_S = 12\,\text{V} \cdot \frac{5\,\text{k}\Omega}{10\,\text{k}\Omega + 5\,\text{k}\Omega} = 4\,\text{V}
+$$
+
+<Callout type="dica" title="A regra das dez vezes">
+Para a carga quase não mexer no divisor, a resistência dela precisa ser muito maior que a de $R_2$. Com RL dez vezes maior (100 kΩ), o lance de baixo vira 9,09 kΩ e a saída cai de 6 V para $12 \cdot 9{,}09 / 19{,}09 \approx 5{,}71\,\text{V}$, um erro de cerca de 5 %. Com RL cem vezes maior (1 MΩ), a saída fica em 5,97 V, erro de 0,5 %.
+</Callout>
+
+### Por que não se alimenta um aparelho com um divisor
+
+Imagine que você tem uma bateria de 12 V e um aparelho de 6 V que puxa 100 mA. Para a Lei de Ohm, esse aparelho se comporta como uma resistência de $6\,\text{V} / 0{,}1\,\text{A} = 60\,\Omega$. Coloque RL em 60 Ω na simulação: a saída do divisor de 10 kΩ cai para cerca de **0,07 V**. O aparelho nem liga.
+
+E se você usar resistores pequenos, de 60 Ω, para o divisor "aguentar" a carga? Sem o aparelho, a saída fica nos 6 V certos. Com o aparelho, o lance de baixo vira 30 Ω e a saída cai para $12 \cdot 30 / 90 = 4\,\text{V}$. Pior: o divisor passa a gastar sozinho mais energia que o aparelho, transformada em calor nos resistores, e a tensão muda toda vez que o aparelho puxa mais ou menos corrente.
+
+Por isso divisores servem para **sinais**: ajustes, sensores, a entrada de um microcontrolador, que puxam correntes minúsculas. Para alimentar um aparelho com uma tensão menor que a da fonte, usa-se um regulador ou uma fonte, assunto do módulo de fontes de alimentação.
+
+## Potenciômetro: o divisor ajustável
+
+O <Term id="potenciometro">potenciômetro</Term> é um divisor de tensão em uma peça só. Ele tem uma pista de material resistivo com um terminal em cada ponta e um **cursor** que desliza sobre ela. Os dois pedaços da pista, de cada lado do cursor, fazem o papel de $R_1$ e $R_2$. Girar o eixo muda a proporção entre eles.
+
+Com as pontas ligadas na fonte, a tensão no cursor vai de 0 V até a tensão da fonte. Num potenciômetro linear, ela é proporcional à posição:
+
+$$
+V_\text{cursor} = V \cdot p
+$$
+
+em que $p$ é a posição do cursor, de 0 (encostado na ponta ligada ao negativo) a 1 (encostado na ponta ligada ao positivo).
+
+<Simulation circuit="m02/divisor-potenciometro" instruments={['multimetro']} />
+
+1. Com o cursor no meio, quanto vale a tensão no cursor?
+2. Ajuste o cursor até a saída ficar em 3,3 V, a tensão de muitos microcontroladores. Em que posição ele ficou?
+3. Leve o cursor até as duas pontas. Quais são os valores mínimo e máximo?
+
+No meio você leu 2,5 V. Os 3,3 V aparecem com o cursor em 0,66 da pista ($5 \times 0{,}66 = 3{,}3$). Nas pontas, 0 V e 5 V.
+
+É exatamente o que acontece no botão de volume de um rádio antigo, no pedal do acelerador eletrônico de muitos carros (que tem potenciômetros ou sensores parecidos dentro) e nos joysticks. Os potenciômetros vêm marcados com a curva e o valor: em muitos modelos, **B10K** é linear de 10 kΩ e **A10K** é logarítmico, usado em volume, porque o ouvido percebe o som de forma logarítmica.
+
+<Callout type="nota" title="Trimpot: o potenciômetro de ajuste">
+Numa placa, o potenciômetro pequeno ajustado com chave de fenda é o **trimpot**. Ele é regulado uma vez e fica parado. A central do portão eletrônico usa trimpots para ajustar a força do motor e os tempos de pausa; dentro, cada trimpot é um divisor de tensão lido pelo microcontrolador. Você vai mexer neles no módulo do portão.
+</Callout>
+
+## O divisor de corrente
+
+Agora olhe para o ponto do meio do divisor com a carga ligada. A corrente que desce por $R_1$ chega ao nó e se divide em dois caminhos: parte vai por $R_2$, parte vai pela carga. Esse é o **divisor de corrente**, e a regra é a inversa da do divisor de tensão: **o ramo de menor resistência leva a maior corrente**.
+
+Para dois ramos em paralelo, $R_a$ e $R_b$, que recebem juntos a corrente $I$:
+
+$$
+\begin{aligned}
+I_a &= I \cdot \frac{R_b}{R_a + R_b} \\[4pt]
+I_b &= I \cdot \frac{R_a}{R_a + R_b}
+\end{aligned}
+$$
+
+Cuidado com a troca: a corrente em $R_a$ usa $R_b$ em cima da fração. Faz sentido: se $R_b$ for enorme, quase toda a corrente vai por $R_a$.
+
+Volte à primeira simulação, ligue a carga e ponha RL em 1 kΩ. A corrente em R1 é 1,1 mA. Ela se divide entre R2 (10 kΩ) e RL (1 kΩ):
+
+$$
+\begin{aligned}
+I_\text{RL} &= 1{,}1\,\text{mA} \cdot \frac{10}{10 + 1} = 1{,}0\,\text{mA} \\[4pt]
+I_\text{R2} &= 1{,}1\,\text{mA} \cdot \frac{1}{11} = 0{,}1\,\text{mA}
+\end{aligned}
+$$
+
+Confira nos multímetros: a carga leva dez vezes mais corrente que R2, porque tem um décimo da resistência.
+
+## Exemplo resolvido: ler a tensão de uma bateria de carro com um microcontrolador
+
+Você quer que um Arduino mostre a tensão da bateria do carro. A entrada analógica dele aceita no máximo 5 V, e a bateria pode chegar a uns 14,4 V com o motor ligado (é a tensão de carga típica do alternador). Ligar a bateria direto na entrada queimaria o microcontrolador.
+
+**Passo 1: escolher a proporção.** É preciso reduzir a tensão pelo menos três vezes. Com folga, vamos dividir por 5: $R_2 / (R_1 + R_2) = 1/5$, ou seja, $R_1 = 4 \cdot R_2$. Uma escolha comum é $R_1 = 30\,\text{k}\Omega$ e $R_2 = 7{,}5\,\text{k}\Omega$, que são valores encontrados em loja. (O "módulo sensor de tensão de 0 a 25 V", vendido em lojas de eletrônica, costuma ser exatamente esse divisor.)
+
+**Passo 2: conferir as tensões.**
+
+$$
+\begin{aligned}
+V_S &= 14{,}4\,\text{V} \cdot \frac{7{,}5}{30 + 7{,}5} \\[4pt]
+&= 14{,}4 \cdot 0{,}2 = 2{,}88\,\text{V} \\[4pt]
+\text{com } 12{,}6\,\text{V}\text{: } V_S &= 12{,}6 \cdot 0{,}2 = 2{,}52\,\text{V}
+\end{aligned}
+$$
+
+Até 25 V na bateria, a entrada não passa de 5 V.
+
+**Passo 3: conferir a carga.** A entrada analógica de um microcontrolador tem resistência muito alta (da ordem de megaohms), centenas de vezes maior que os 7,5 kΩ de $R_2$. A regra das dez vezes está cumprida com folga.
+
+**Passo 4: conferir o consumo.** O divisor puxa da bateria $12{,}6\,\text{V} / 37{,}5\,\text{k}\Omega \approx 0{,}34\,\text{mA}$, o tempo todo. Para uma bateria de carro, é desprezível.
+
+No programa, o microcontrolador lê a tensão na entrada e multiplica por 5 para mostrar a tensão da bateria.
+
+<RealCase title="Luz noturna automática">
+
+A luz de jardim que acende sozinha ao anoitecer, e o relé fotoelétrico vendido em loja de material elétrico para postes e fachadas, têm um sensor de luz. O mais simples é o <Term id="ldr">LDR</Term>, um resistor cuja resistência cai quando recebe luz: algumas centenas de ohms sob luz forte, centenas de quilo-ohms ou mais no escuro (valores típicos; mudam bastante de um modelo para outro).
+
+Sozinho, o LDR só muda de resistência. Para virar um sinal que um circuito consegue usar, ele entra num divisor de tensão. Na simulação, o LDR está embaixo, entre a saída e o negativo, com um resistor fixo de 10 kΩ em cima, tudo em 5 V. O controle muda a quantidade de luz que chega ao LDR, em lux (lx): cerca de 2.000 lx num dia nublado, algumas dezenas no fim da tarde, menos de 1 lx numa noite de lua.
+
+<Simulation circuit="m02/luz-noturna" instruments={['multimetro']} />
+
+1. Com 2.000 lx (dia), leia a tensão no ponto do meio. Abra a "Tabela de valores" e veja a resistência do LDR.
+2. Arraste a luz para baixo, como se estivesse escurecendo. Com quanta luz a saída chega a 2,5 V? Quanto vale o LDR nesse ponto?
+3. Leve a luz ao mínimo (noite escura). Quanto vale a saída?
+
+De dia, o LDR fica perto de 490 Ω e a saída em cerca de 0,23 V. A saída chega a 2,5 V por volta de 27 lx, a luz do fim da tarde, quando o LDR vale 10 kΩ, igual ao resistor de cima (metade da tensão para cada um). No escuro, o LDR chega a 1 MΩ e a saída passa de 4,9 V. O LDR da simulação segue uma curva típica; o de verdade muda bastante de um modelo para outro, e é por isso que os circuitos reais têm um ajuste.
+
+O resto da luz noturna é um circuito de comando: um transistor ou um comparador "olha" essa tensão e, quando ela passa de um limite (2,5 V no nosso exemplo), liga um relé que acende a lâmpada. Você vai montar essa parte nos módulos de semicondutores. Os circuitos reais têm também uma pequena folga (a luz acende com uma tensão e só apaga com outra um pouco diferente) para não ficar piscando no lusco-fusco.
+
+Trocando o resistor fixo por um trimpot, você ajusta o ponto de acender. E trocando o LDR por um <Term id="ntc">NTC</Term>, que muda de resistência com a temperatura, o mesmo divisor vira um termômetro: é assim que o sensor de temperatura do motor do carro, o da geladeira e o do carregador do celular conversam com as suas centrais.
+
+Um detalhe de instalação: o sensor não pode "ver" a própria lâmpada. Se a luz que ele acende bater nele, o circuito pensa que amanheceu, apaga a lâmpada, escurece, acende de novo, e fica piscando a noite inteira.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Alimentar um aparelho com um divisor.** A tensão cai assim que o aparelho puxa corrente e muda junto com o consumo dele. Use um regulador ou uma fonte.
+- **Esquecer que quem mede também é carga.** Um multímetro digital comum se comporta, na escala de tensão, como uma resistência de cerca de 10 MΩ entre as pontas (valor típico). Num divisor de 1 MΩ com 1 MΩ em 10 V, ligar o multímetro no ponto do meio já tira a leitura do lugar: em vez de 5 V, ele marca cerca de 4,76 V. Em divisores de resistores menores, o efeito some. Você vai ver isso de perto no módulo de medições.
+- **Usar resistores baixos demais.** Divisor de resistores pequenos puxa muita corrente da fonte e esquenta os resistores à toa. Confira a potência: $P = V^2 / R$ em cada um.
+- **Potenciômetro como reostato com o cursor na ponta.** Ligado só por uma ponta e pelo cursor, com o cursor quase encostado nessa ponta, toda a corrente passa por um pedacinho da pista e ele queima. Um resistor em série limita a corrente nesse caso.
+
+<Callout type="perigo" title="Nunca faça um divisor na tomada">
+Pode parecer uma forma esperta de tirar "uns 5 volts" dos 127 V da tomada, mas um divisor de resistores **não isola** o circuito da rede. Qualquer ponto dele, inclusive o "negativo", pode estar na tensão da fase e dar choque, e um resistor que abrir joga a tensão inteira na saída. Para tirar tensão baixa da rede, só com uma fonte própria, com transformador ou isolação, assunto do módulo de fontes.
+</Callout>
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Um divisor tem R1 = 10 kΩ (em cima) e R2 = 20 kΩ (embaixo), ligado numa fonte de 12 V. Qual é a tensão de saída, sem carga?',
+      answer: 8,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation: 'V saída = 12 × 20 ÷ (10 + 20) = 12 × 2/3 = 8 V.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'O módulo sensor de tensão tem R1 = 30 kΩ e R2 = 7,5 kΩ. Se a entrada estiver em 20 V, quanto aparece na saída do módulo?',
+      answer: 4,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation: 'A fração é 7,5 ÷ (30 + 7,5) = 0,2. Então 20 V × 0,2 = 4 V.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um divisor de 10 kΩ com 10 kΩ em 12 V dá 6 V na saída. Você liga uma carga de 10 kΩ na saída. O que acontece?',
+      options: [
+        {
+          text: 'A saída cai para 4 V',
+          correct: true,
+          feedback:
+            'A carga fica em paralelo com R2: 10 kΩ ∥ 10 kΩ = 5 kΩ. O divisor vira 10 kΩ com 5 kΩ, e 12 × 5 ÷ 15 = 4 V.',
+        },
+        {
+          text: 'A saída continua em 6 V',
+          feedback:
+            'Só continuaria se a carga tivesse resistência muito maior que a de R2. Uma carga igual a R2 muda bastante o divisor.',
+        },
+        {
+          text: 'A saída sobe para 8 V',
+          feedback:
+            'Ligar uma resistência em paralelo com R2 diminui a resistência do lance de baixo, e a saída cai, não sobe.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Um divisor de tensão é uma boa forma de alimentar um aparelho de 6 V a partir de uma bateria de 12 V.',
+      answer: false,
+      explanation:
+        'A corrente do aparelho muda o divisor: a tensão cai e varia com o consumo, e os resistores desperdiçam energia em calor. Para alimentar aparelhos, use um regulador ou uma fonte.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Num divisor com um resistor fixo em cima e um LDR embaixo (entre a saída e o negativo), o que acontece com a tensão de saída quando escurece?',
+      options: [
+        {
+          text: 'Sobe, porque a resistência do LDR aumenta no escuro',
+          correct: true,
+          feedback:
+            'No escuro o LDR tem resistência alta e fica com a fatia maior da tensão; como a saída é a tensão nele, ela sobe.',
+        },
+        {
+          text: 'Desce, porque o LDR conduz mais no escuro',
+          feedback: 'É o contrário: o LDR conduz mais (tem menos resistência) quando recebe luz.',
+        },
+        {
+          text: 'Não muda, porque o resistor de cima é fixo',
+          feedback:
+            'A saída depende da proporção entre os dois resistores. Se um deles muda, a proporção muda.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma corrente de 3 mA chega a um nó e se divide entre dois resistores em paralelo, de 1 kΩ e de 2 kΩ. Qual é a corrente no resistor de 2 kΩ?',
+      answer: 1,
+      tolerance: 0.02,
+      unit: 'mA',
+      explanation:
+        'I(2 kΩ) = 3 mA × 1 kΩ ÷ (1 kΩ + 2 kΩ) = 1 mA. O resistor de 1 kΩ, com metade da resistência, leva o dobro: 2 mA.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um potenciômetro linear de 10 kΩ tem as pontas ligadas em 5 V e 0 V. O cursor está a um quarto da pista, a partir da ponta ligada ao negativo. Qual é a tensão no cursor?',
+      answer: 1.25,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation: 'V cursor = 5 V × 0,25 = 1,25 V. O valor total do potenciômetro não muda a tensão, só a corrente.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Um **divisor de tensão** são dois resistores em série com uma saída no ponto do meio: $V_S = V \cdot R_2 / (R_1 + R_2)$. Só a proporção define a tensão.
+- Uma **carga na saída** fica em paralelo com $R_2$ e derruba a tensão. Para quase não mudar, a carga precisa ter resistência pelo menos dez vezes maior que $R_2$.
+- Divisor serve para **sinais** (sensores, ajustes, entradas de microcontrolador), nunca para alimentar aparelhos.
+- O **potenciômetro** é um divisor ajustável; o trimpot é a versão de ajuste fixo usada em placas.
+- No **divisor de corrente**, o ramo de menor resistência leva a maior corrente: $I_a = I \cdot R_b / (R_a + R_b)$.
+- Com um **LDR** ou um **NTC** no lugar de um dos resistores, o divisor transforma luz ou temperatura em tensão.
+
+Na próxima aula, você vai descobrir que toda pilha e toda bateria esconde um resistor dentro dela, e por que isso faz o carro não pegar numa manhã fria: [fontes reais e baterias](../07-fontes-reais-e-baterias/).

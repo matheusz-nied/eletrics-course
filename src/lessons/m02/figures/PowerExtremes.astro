@@ -1,0 +1,152 @@
+---
+/*
+ * 02.9: a 12 V source with r = 4 Ω in three situations: load shorted, load
+ * equal to r, load open. Power in the load is zero at both extremes and
+ * maximum in between.
+ */
+const panels = [
+  {
+    x: 0,
+    title: 'Curto (RL = 0)',
+    load: 'short',
+    lines: ['I = 3 A', 'V na carga = 0 V', 'P na carga = 0 W'],
+    bar: 0,
+  },
+  {
+    x: 235,
+    title: 'Carga igual a r (RL = 4 Ω)',
+    load: 'matched',
+    lines: ['I = 1,5 A', 'V na carga = 6 V', 'P na carga = 9 W'],
+    bar: 1,
+  },
+  {
+    x: 470,
+    title: 'Aberto (RL enorme)',
+    load: 'open',
+    lines: ['I = 0 A', 'V na carga = 12 V', 'P na carga = 0 W'],
+    bar: 0,
+  },
+] as const;
+---
+
+<svg viewBox="0 0 690 236" width="690" height="236" class="fig" aria-hidden="true">
+  {panels.map((p) => (
+    <g transform={`translate(${p.x} 0)`}>
+      <text x="110" y="20" class="title">
+        {p.title}
+      </text>
+      <g class="src">
+        <path d="M30 50 V72 M30 96 V126" class="wire" />
+        <path d="M18 72 H42 M24 80 H36 M18 88 H42 M24 96 H36" />
+        <text x="46" y="70" class="sign">
+          +
+        </text>
+        <text x="46" y="104" class="val start">
+          12 V
+        </text>
+      </g>
+      <path d="M30 50 H70 M100 50 H170 M30 126 H170" class="wire" />
+      <rect x="70" y="44" width="30" height="12" class="res" />
+      <text x="85" y="38" class="val">
+        r = 4 Ω
+      </text>
+      {p.load === 'short' && <path d="M170 50 V126" class="short" />}
+      {p.load === 'matched' && (
+        <>
+          <path d="M170 50 V73 M170 103 V126" class="wire" />
+          <rect x="164" y="73" width="12" height="30" class="res load" />
+        </>
+      )}
+      {p.load === 'open' && (
+        <>
+          <path d="M170 50 V78 M170 98 V126" class="wire" />
+          <circle cx="170" cy="78" r="3.5" class="term" />
+          <circle cx="170" cy="98" r="3.5" class="term" />
+        </>
+      )}
+      <text x="182" y="92" class="val start">
+        RL
+      </text>
+      {p.lines.map((line, i) => (
+        <text x="110" y={156 + i * 19} class:list={['line', { strong: i === 2 }]}>
+          {line}
+        </text>
+      ))}
+      <rect x="30" y="212" width="160" height="12" rx="6" class="bar-bg" />
+      {p.bar > 0 && <rect x="30" y="212" width={160 * p.bar} height="12" rx="6" class="bar" />}
+    </g>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    stroke: var(--copper);
+  }
+  .short {
+    stroke: var(--danger);
+    stroke-width: 3;
+  }
+  .src {
+    stroke: var(--accent);
+  }
+  .res {
+    stroke: var(--fg);
+    fill: var(--surface);
+  }
+  .res.load {
+    stroke: var(--success);
+    fill: var(--success-soft);
+  }
+  .term {
+    stroke: var(--fg);
+    fill: var(--bg);
+  }
+  .bar-bg {
+    stroke: none;
+    fill: var(--border);
+  }
+  .bar {
+    stroke: none;
+    fill: var(--success);
+  }
+  text {
+    stroke: none;
+    text-anchor: middle;
+    fill: var(--fg);
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .val {
+    font-size: 12.5px;
+    font-family: var(--font-mono);
+    fill: var(--fg-muted);
+  }
+  .src .val,
+  .sign {
+    fill: var(--accent);
+  }
+  .sign {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .line {
+    font-size: 13.5px;
+    fill: var(--fg-muted);
+  }
+  .line.strong {
+    font-weight: 700;
+    fill: var(--fg);
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>

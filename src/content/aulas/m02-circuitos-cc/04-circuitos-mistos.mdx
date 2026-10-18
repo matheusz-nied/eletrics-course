@@ -1,0 +1,265 @@
+---
+titulo: Circuitos mistos
+modulo: m02-circuitos-cc
+ordem: 4
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Reconhecer, num circuito misto, quais componentes estão em série e quais estão em paralelo
+  - Calcular a resistência equivalente reduzindo o circuito passo a passo
+  - Voltar ao circuito original para achar a corrente e a tensão em cada componente
+  - Explicar por que um terra ruim faz as lâmpadas de um carro enfraquecerem juntas
+prerequisitos:
+  - m02-circuitos-cc/02-associacao-em-serie
+  - m02-circuitos-cc/03-associacao-em-paralelo
+tags: [circuito misto, resistência equivalente, série, paralelo, terra]
+seguranca: baixa-tensao
+---
+
+import ReductionSteps from '../../../lessons/m02/ReductionSteps';
+import { MIXED_STAGES } from '../../../lessons/m02/reduction-data';
+import SeriesOrParallel from '../../../lessons/m02/figures/SeriesOrParallel.astro';
+
+Você pisa no freio do carro e repara, pelo reflexo na parede da garagem, que a luz da placa enfraquece um pouco. A lâmpada da placa não tem nada a ver com o freio: elas ficam em interruptores diferentes. Mesmo assim, uma afeta a outra.
+
+A explicação está no jeito como os circuitos reais são montados. Quase nenhum é só série ou só paralelo. Eles misturam os dois, e saber separar uma coisa da outra é o que permite prever, e consertar, o que acontece.
+
+## Série e paralelo no mesmo circuito
+
+Nas duas aulas anteriores você viu cada ligação isolada. Na <Term id="associacao-em-serie">associação em série</Term>, os componentes ficam um depois do outro, num caminho único, e a mesma corrente atravessa todos. Na <Term id="associacao-em-paralelo">associação em paralelo</Term>, eles ligam os mesmos dois pontos e recebem a mesma tensão.
+
+Num **circuito misto**, as duas coisas aparecem juntas. O truque é olhar para os pontos de ligação, os <Term id="no-de-circuito">nós</Term>, e não para o desenho:
+
+<Figure caption="Figura 1. Como reconhecer as ligações. Em série, nada sai do ponto entre os componentes. Em paralelo, os dois ligam os mesmos nós A e B. No terceiro caso, Ra e Rb parecem em série, mas o ramo de Rc sai do meio, e a corrente se divide ali.">
+  <SeriesOrParallel />
+</Figure>
+
+Duas regras resolvem quase todos os casos:
+
+- **Série:** dois componentes estão em série quando o ponto entre eles não se liga a mais nada. Se um terceiro fio sai desse ponto, a corrente pode se dividir, e eles deixam de estar em série.
+- **Paralelo:** dois componentes estão em paralelo quando as duas pontas de um estão ligadas às duas pontas do outro, pelos mesmos dois nós.
+
+<Callout type="dica" title="Dê nome aos nós">
+Todo pedaço de fio sem componente no meio é um nó só, por mais comprido ou torto que seja. Marque cada nó com uma letra (A, B, C…). Componentes entre as mesmas duas letras estão em paralelo. Isso evita a armadilha de achar que dois resistores estão em paralelo só porque foram desenhados lado a lado.
+</Callout>
+
+## A estratégia: reduzir e depois voltar
+
+O método tem duas metades.
+
+**Ida: reduzir.** Procure um grupo simples (dois resistores claramente em série ou claramente em paralelo) e troque esse grupo por um único resistor com o mesmo efeito, a <Term id="resistencia-equivalente">resistência equivalente</Term>. Repita até sobrar um resistor só ligado à fonte. Para isso você usa duas fórmulas.
+
+Em série, as resistências se somam:
+
+$$
+R_\text{eq} = R_1 + R_2 + R_3 + \dots
+$$
+
+Em paralelo, soma-se o inverso de cada uma:
+
+$$
+\frac{1}{R_\text{eq}} = \frac{1}{R_1} + \frac{1}{R_2} + \frac{1}{R_3} + \dots
+$$
+
+Para **dois** resistores em paralelo existe um atalho, o produto dividido pela soma:
+
+$$
+R_\text{eq} = \frac{R_1 \cdot R_2}{R_1 + R_2}
+$$
+
+Em todas as fórmulas, $R_1$, $R_2$ e $R_3$ são as resistências de cada componente, e $R_\text{eq}$ é a resistência equivalente, todas em ohms (Ω). Dois atalhos ajudam a conferir as contas: dois resistores **iguais** em paralelo dão a metade do valor de um deles, e o paralelo dá sempre um valor **menor que o menor** dos resistores do grupo.
+
+**Volta: expandir.** Com a resistência equivalente, a <Term id="lei-de-ohm">Lei de Ohm</Term> dá a corrente total que sai da fonte ($I = V / R_\text{eq}$). Depois você refaz o caminho ao contrário, etapa por etapa: num grupo em série, a corrente é a mesma e cada resistor fica com $V = R \cdot I$; num grupo em paralelo, a tensão é a mesma e cada ramo puxa $I = V / R$.
+
+## Explore: a redução passo a passo
+
+O circuito abaixo tem uma fonte de 12 V e quatro resistores: R1 = 150 Ω, R2 = 300 Ω, R3 = 100 Ω e R4 = 200 Ω. Use os botões para avançar uma etapa de cada vez. Antes de cada clique, tente adivinhar qual grupo vai ser combinado.
+
+<ReductionSteps client:visible title="Fonte de 12 V com quatro resistores" stages={MIXED_STAGES} />
+
+Repare na ordem: a redução começa pelo grupo **mais longe da fonte** (R3 e R4) e vai se aproximando dela. Começar por R1 não funcionaria, porque R1 não está em série com nenhum resistor sozinho: logo depois dele, no ponto A, a corrente se divide.
+
+## Explore: confira no simulador
+
+Este é o mesmo circuito, agora simulado. Os multímetros mostram a corrente total, a tensão no grupo paralelo (entre A e B), a corrente em R2 e a tensão em R4.
+
+<Simulation circuit="m02/circuito-misto" instruments={['multimetro']} />
+
+1. Confira os valores calculados na redução: 40 mA de corrente total, 6 V no grupo paralelo, 20 mA em R2 e 4 V em R4.
+2. Antes de mexer, faça a conta: se R1 passar de 150 Ω para 450 Ω, qual será a nova resistência equivalente? E a corrente total?
+3. Agora mude R1 para 450 Ω no controle. A corrente total caiu para 20 mA, como você previu? O que aconteceu com a tensão no grupo paralelo?
+4. Leve R1 até 50 Ω. Por que a tensão entre A e B sobe quando R1 diminui?
+
+Com R1 = 450 Ω, a resistência equivalente vira 450 + 150 = 600 Ω, e a corrente total cai para 12 V ÷ 600 Ω = 20 mA. O grupo paralelo continua com 150 Ω, então fica com só 150 Ω × 20 mA = 3 V. R1 passou a "ficar" com 9 V. Quanto maior a parte de R1 na resistência total, maior a parte dele na tensão. Você vai ver essa ideia de novo na aula de divisores de tensão.
+
+## Exemplo resolvido
+
+Uma fonte de 24 V alimenta R1 = 2 kΩ em série com um grupo paralelo de R2 = 6 kΩ e R3 = 3 kΩ. Quanto vale a corrente em cada resistor?
+
+**1. Reduzir o paralelo.** R2 e R3 ligam os mesmos dois nós:
+
+$$
+R_P = \frac{6\,\text{k}\Omega \cdot 3\,\text{k}\Omega}{6\,\text{k}\Omega + 3\,\text{k}\Omega} = \frac{18}{9}\,\text{k}\Omega = 2\,\text{k}\Omega
+$$
+
+Confira o atalho: 2 kΩ é menor que o menor dos dois (3 kΩ).
+
+**2. Reduzir a série.** R1 e $R_P$ estão em série:
+
+$$
+R_\text{eq} = 2\,\text{k}\Omega + 2\,\text{k}\Omega = 4\,\text{k}\Omega
+$$
+
+**3. Corrente total.**
+
+$$
+I = \frac{24\,\text{V}}{4\,\text{k}\Omega} = 6\,\text{mA}
+$$
+
+**4. Voltar: tensões.** A corrente de 6 mA passa por R1 e pelo grupo paralelo. R1 fica com $2\,\text{k}\Omega \times 6\,\text{mA} = 12\,\text{V}$ e o grupo paralelo também, $2\,\text{k}\Omega \times 6\,\text{mA} = 12\,\text{V}$. As duas somam os 24 V da fonte.
+
+**5. Voltar: correntes no paralelo.** Cada ramo recebe os 12 V:
+
+$$
+\begin{aligned}
+I_2 &= \frac{12\,\text{V}}{6\,\text{k}\Omega} = 2\,\text{mA} \\[4pt]
+I_3 &= \frac{12\,\text{V}}{3\,\text{k}\Omega} = 4\,\text{mA}
+\end{aligned}
+$$
+
+E $2\,\text{mA} + 4\,\text{mA} = 6\,\text{mA}$, a corrente total. O ramo de menor resistência leva a maior parte da corrente: R3 tem metade da resistência de R2 e conduz o dobro.
+
+<Simulation circuit="m02/misto-exemplo" instruments={['multimetro']} height={280} />
+
+## Na prática
+
+<RealCase title="A luz da placa que enfraquece quando você pisa no freio">
+
+Num carro, cada lâmpada recebe o positivo por um fio e volta para a bateria pela própria lataria, que funciona como o fio de retorno. Da lataria até o polo negativo da bateria há uma ligação só, o **terra** (muita gente chama de "massa"). Essa ligação é comum a todas as lâmpadas.
+
+Desenhado como esquema, isso é um circuito misto: as lâmpadas ficam em paralelo entre si, e o grupo inteiro fica em série com a resistência do terra. Quando o terra está limpo e bem apertado, essa resistência é quase zero e não faz diferença. Quando o parafuso oxida, ela sobe, e a <Term id="queda-de-tensao">queda de tensão</Term> nesse ponto passa a roubar tensão de todas as lâmpadas ao mesmo tempo.
+
+<Simulation circuit="m02/terra-oxidado" instruments={['multimetro']} />
+
+1. Com o terra bom (0,01 Ω) e as lanternas ligadas, ligue o pedal do freio. A tensão na lâmpada da placa quase não muda.
+2. Suba a resistência do terra para 0,4 Ω, como num contato oxidado. Sem o freio, a placa fica com cerca de 11,8 V.
+3. Pise no freio. A placa cai para cerca de 10,5 V e o brilho dela despenca para perto de 63 % do normal. O terra agora conduz cerca de 3,6 A e "perde" quase 1,5 V.
+
+O que mudou foi a corrente no trecho comum. As duas lâmpadas de freio puxam juntas mais de 3 A, e essa corrente atravessa o terra ruim. Pela Lei de Ohm, $0{,}4\,\Omega \times 3{,}6\,\text{A} \approx 1{,}5\,\text{V}$ ficam no parafuso oxidado, e todas as lâmpadas do grupo recebem menos. Sintomas típicos de terra ruim no carro: luzes que mudam de brilho quando outra coisa liga, a seta que pisca mais devagar, o ponteiro do painel que oscila.
+
+Para achar o defeito, eletricistas de automóveis medem a queda de tensão no próprio terra, com as luzes acesas: uma ponta do multímetro no polo negativo da bateria e a outra na lataria perto da lâmpada. Num terra bom a leitura fica perto de zero; alguns décimos de volt já indicam um contato ruim. A solução é soltar o terminal, lixar até o metal brilhar e apertar de novo.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Somar resistores que só parecem estar em série.** Se um ramo sai do ponto entre eles, a corrente se divide ali (o terceiro desenho da Figura 1). Dê nome aos nós antes de somar.
+- **Usar o produto pela soma com três resistores de uma vez.** O atalho vale só para dois. Com três em paralelo, combine dois, depois o resultado com o terceiro, ou use a soma dos inversos.
+- **Esquecer de conferir o paralelo.** Se a sua resistência equivalente de um paralelo deu maior que o menor dos resistores, há um erro na conta.
+- **Arredondar cedo demais.** Guarde os valores com folga durante a redução e arredonde só no resultado final. Arredondamentos na ida viram erros maiores na volta.
+- **Medir um resistor ainda ligado na placa.** O ohmímetro mede o equivalente de tudo o que está em paralelo com o resistor, não só ele. Para medir um componente sozinho, solte pelo menos uma das pernas dele (você verá isso no módulo de medições).
+
+<Callout type="atencao" title="Ao mexer no terra do carro">
+Antes de soltar e limpar um terminal de terra ou de bateria, desligue a ignição e solte o cabo **negativo** da bateria. Assim, se a chave encostar na lataria, não há curto. Reaperte tudo e ligue o negativo por último.
+</Callout>
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Dois resistores de 100 Ω estão em paralelo, e esse grupo está em série com um resistor de 50 Ω. Qual é a resistência equivalente do conjunto?',
+      answer: 100,
+      tolerance: 0.01,
+      unit: 'Ω',
+      explanation:
+        'Dois iguais em paralelo dão a metade: 100 ÷ 2 = 50 Ω. Em série com 50 Ω: 50 + 50 = 100 Ω.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Num circuito, R1 e R2 estão ligados entre os nós A e B. R3 está ligado entre os nós B e C. Qual afirmação está certa?',
+      options: [
+        {
+          text: 'R1 e R2 estão em paralelo',
+          correct: true,
+          feedback: 'Os dois ligam os mesmos nós, A e B: estão em paralelo.',
+        },
+        {
+          text: 'R1, R2 e R3 estão todos em série',
+          feedback:
+            'R1 e R2 começam e terminam nos mesmos nós, então formam um paralelo. O grupo é que pode estar em série com R3, se nada mais sair do nó B.',
+        },
+        {
+          text: 'R2 e R3 estão em paralelo',
+          feedback: 'R2 liga A e B; R3 liga B e C. Eles não têm os mesmos dois nós.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma fonte de 12 V alimenta um resistor de 1 kΩ em série com dois resistores de 2 kΩ em paralelo. Qual é a corrente total?',
+      answer: 6,
+      tolerance: 0.02,
+      unit: 'mA',
+      explanation:
+        'O paralelo de dois resistores de 2 kΩ dá 1 kΩ. Em série com 1 kΩ: 2 kΩ. Corrente: 12 V ÷ 2 kΩ = 6 mA.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'A resistência equivalente de resistores em paralelo é sempre menor que a do menor resistor do grupo.',
+      answer: true,
+      explanation:
+        'Cada ramo novo abre mais um caminho para a corrente. Com mais caminhos, a corrente total sobe para a mesma tensão, então a resistência equivalente cai, ficando abaixo da menor de todas.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'No carro com o terra oxidado, por que a luz da placa enfraquece quando você pisa no freio?',
+      options: [
+        {
+          text: 'A corrente das lâmpadas de freio passa pelo terra ruim, que fica com mais tensão, e sobra menos tensão para todas as lâmpadas',
+          correct: true,
+          feedback:
+            'O terra está em série com o grupo de lâmpadas. Mais corrente nele significa mais queda de tensão ali, e menos tensão no grupo inteiro.',
+        },
+        {
+          text: 'A lâmpada da placa está em série com as lâmpadas de freio',
+          feedback:
+            'Elas estão em paralelo entre si. O que elas têm em comum é o trecho de retorno, o terra, que fica em série com o grupo.',
+        },
+        {
+          text: 'A bateria fica descarregada na hora',
+          feedback:
+            'A bateria quase não muda. A tensão perdida está no contato oxidado do terra, que conduz a soma das correntes de todas as lâmpadas.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem as etapas para resolver um circuito misto.',
+      items: [
+        'Dar nome aos nós e achar um grupo simples em série ou em paralelo',
+        'Trocar o grupo pela resistência equivalente e repetir até sobrar um resistor',
+        'Calcular a corrente total com a Lei de Ohm',
+        'Voltar ao circuito original calculando a tensão e a corrente de cada parte',
+      ],
+      explanation:
+        'Primeiro reduzir (ida), depois achar a corrente total e por fim expandir (volta) para chegar a cada componente.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Circuitos reais misturam **série** e **paralelo**. Olhe para os nós: série quando nada sai do ponto entre os componentes; paralelo quando eles ligam os mesmos dois nós.
+- **Ida:** troque grupos simples pela resistência equivalente, começando longe da fonte, até sobrar um resistor. Série soma; paralelo de dois é o produto pela soma.
+- **Volta:** com a corrente total, refaça o caminho ao contrário. Em série a corrente é a mesma; em paralelo a tensão é a mesma.
+- O paralelo dá sempre menos que o menor resistor; use isso para conferir as contas.
+- Um trecho em série com um grupo inteiro, como o terra do carro, afeta todos os componentes do grupo ao mesmo tempo.
+
+Na próxima aula, as [Leis de Kirchhoff](../05-leis-de-kirchhoff/) resolvem os circuitos que não dá para reduzir assim, como os que têm duas fontes.

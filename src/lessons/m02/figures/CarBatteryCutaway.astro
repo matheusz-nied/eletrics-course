@@ -1,0 +1,252 @@
+---
+/*
+ * 02.7: a 12 V lead-acid car battery in section: six cells in series, each with
+ * alternating positive and negative plates, separators and electrolyte.
+ * Generic drawing, no brand.
+ */
+const CELL_X0 = 70;
+const CELL_W = 500 / 6;
+const cells = Array.from({ length: 6 }, (_, i) => CELL_X0 + i * CELL_W);
+/** Plates inside a cell: alternating negative / positive, starting and ending with negative. */
+const plates = (x: number) =>
+  Array.from({ length: 7 }, (_, k) => ({ x: x + 11 + k * 9.6, positive: k % 2 === 1 }));
+
+/* Callout anchors: a negative plate in cell 1, a positive plate in cell 2, a separator in cell 3. */
+const negX = CELL_X0 + 11 + 3;
+const posX = CELL_X0 + CELL_W + 11 + 9.6 + 3;
+const sepX = CELL_X0 + 2 * CELL_W + 11 + 6 + 1.8;
+/* Straps sit on the cell walls; the bracket marks the fifth cell. */
+const strapX = CELL_X0 + 4 * CELL_W;
+const cellL = CELL_X0 + 4 * CELL_W;
+const cellR = CELL_X0 + 5 * CELL_W;
+---
+
+<svg viewBox="0 0 750 440" width="750" height="440" class="fig" aria-hidden="true">
+  <!-- Terminals -->
+  <g class="post-pos">
+    <rect x="96" y="30" width="38" height="40" rx="3" />
+    <ellipse cx="115" cy="30" rx="19" ry="6" />
+  </g>
+  <g class="post-neg">
+    <rect x="512" y="33" width="32" height="37" rx="3" />
+    <ellipse cx="528" cy="33" rx="16" ry="5" />
+  </g>
+  <text x="115" y="56" class="sign pos">
+    +
+  </text>
+  <text x="528" y="58" class="sign">
+    −
+  </text>
+
+  <!-- Lid and vent caps -->
+  <rect x="50" y="66" width="540" height="30" rx="6" class="lid" />
+  {cells.map((x) => (
+    <rect x={x + CELL_W / 2 - 9} y="72" width="18" height="10" rx="3" class="cap" />
+  ))}
+
+  <!-- Case -->
+  <rect x="60" y="96" width="520" height="210" rx="8" class="case" />
+  <rect x="70" y="116" width="500" height="182" class="electrolyte" />
+  <path
+    d="M70 116 q 10 -4 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0 t 20 0"
+    class="surface"
+  />
+
+  <!-- Cells: plates and separators -->
+  {cells.map((x) => (
+    <g>
+      {plates(x).map((p, k) =>
+        k < 6 ? <rect x={p.x + 6} y="128" width="3.6" height="160" class="sep" /> : null,
+      )}
+      {plates(x).map((p) => (
+        <rect
+          x={p.x}
+          y="124"
+          width="6"
+          height="168"
+          class={p.positive ? 'plate-pos' : 'plate-neg'}
+        />
+      ))}
+    </g>
+  ))}
+
+  <!-- Cell walls -->
+  {cells.slice(1).map((x) => (
+    <path d={`M${x} 104 V298`} class="wall" />
+  ))}
+
+  <!-- Straps joining the cells in series, and the posts to the end cells -->
+  {cells.slice(1).map((x) => (
+    <rect x={x - 18} y="104" width="36" height="9" rx="2" class="strap" />
+  ))}
+  <path d="M115 70 V104 H96" class="strap-line" />
+  <path d="M528 70 V104 H546" class="strap-line" />
+
+  <!-- Callout leaders -->
+  <g class="lead">
+    <path d={`M${strapX} 24 V104`} />
+    <path d="M538 77 H602" />
+    <path d="M566 196 H602" />
+    <path d={`M${sepX} 288 V334`} />
+    <path d={`M${posX} 292 V356`} />
+    <path d={`M${negX} 292 V378`} />
+  </g>
+
+  <!-- Top -->
+  <text x={strapX} y="18" class="lbl strap-t">
+    Ligação entre células (em série)
+  </text>
+  <text x="144" y="48" class="lbl start">
+    Terminal positivo, mais grosso
+  </text>
+  <text x="554" y="48" class="lbl start">
+    Terminal negativo
+  </text>
+
+  <!-- Right -->
+  <text x="608" y="82" class="lbl start">
+    Tampas de respiro
+  </text>
+  <text x="608" y="200" class="lbl start el-t">
+    Eletrólito:
+  </text>
+  <text x="608" y="216" class="small start">
+    ácido sulfúrico
+  </text>
+  <text x="608" y="232" class="small start">
+    diluído em água
+  </text>
+
+  <!-- Bottom -->
+  <text x={sepX + 6} y="340" class="lbl start sep-t">
+    Separador poroso
+  </text>
+  <text x={posX + 6} y="362" class="lbl start pos-t">
+    Placa positiva (dióxido de chumbo)
+  </text>
+  <text x={negX + 6} y="384" class="lbl start">
+    Placa negativa (chumbo esponjoso)
+  </text>
+
+  <path d={`M${cellL + 4} 316 V324 H${cellR - 4} V316`} class="bracket" />
+  <text x={(cellL + cellR) / 2} y="340" class="small">
+    uma célula ≈ 2,1 V
+  </text>
+  <text x="340" y="422" class="total">
+    6 células em série × 2,1 V ≈ 12,6 V
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .post-pos {
+    fill: color-mix(in oklab, var(--fg-subtle) 55%, var(--bg));
+    stroke: var(--danger);
+  }
+  .post-neg {
+    fill: color-mix(in oklab, var(--fg-subtle) 55%, var(--bg));
+    stroke: var(--fg);
+  }
+  .lid {
+    fill: color-mix(in oklab, var(--fg-subtle) 30%, var(--bg));
+    stroke: var(--fg-subtle);
+  }
+  .cap {
+    fill: color-mix(in oklab, var(--fg-subtle) 60%, var(--bg));
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+  }
+  .case {
+    fill: var(--surface);
+    stroke: var(--fg-subtle);
+  }
+  .electrolyte {
+    fill: color-mix(in oklab, var(--info) 14%, transparent);
+    stroke: none;
+  }
+  .surface {
+    stroke: var(--info);
+    stroke-width: 1.2;
+  }
+  .plate-neg {
+    fill: color-mix(in oklab, var(--fg-subtle) 75%, var(--bg));
+    stroke: none;
+  }
+  .plate-pos {
+    fill: color-mix(in oklab, var(--copper) 70%, #3a1f12);
+    stroke: none;
+  }
+  .sep {
+    fill: color-mix(in oklab, var(--warning) 22%, var(--bg));
+    stroke: none;
+  }
+  .wall {
+    stroke: var(--fg-subtle);
+    stroke-width: 3;
+  }
+  .strap {
+    fill: color-mix(in oklab, var(--fg-subtle) 80%, var(--bg));
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .strap-line {
+    stroke: var(--fg-muted);
+    stroke-width: 5;
+  }
+  .lead {
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  .bracket {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .sign {
+    font-size: 20px;
+    font-weight: 700;
+    fill: var(--fg);
+  }
+  .pos {
+    fill: var(--danger);
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .small {
+    font-size: 12px;
+    fill: var(--fg-muted);
+  }
+  .total {
+    font-size: 14px;
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .pos-t {
+    fill: var(--copper);
+  }
+  .sep-t {
+    fill: var(--warning);
+  }
+  .strap-t {
+    fill: var(--fg-muted);
+  }
+  .el-t {
+    fill: var(--info);
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>
