@@ -1,0 +1,179 @@
+---
+/*
+ * 04.4: the universal RC curves. Charge, 1 − e^(−t/τ), and discharge,
+ * e^(−t/τ), from 0 to 5τ, with the percentages at each τ and the initial
+ * tangent of the charge, which would reach 100 % at t = τ.
+ */
+const X0 = 60;
+const Y0 = 250;
+const W = 100; // px per τ
+const H = 220; // px for 100 %
+const x = (t: number) => X0 + t * W;
+const y = (f: number) => Y0 - H * f;
+
+const curve = (f: (t: number) => number) =>
+  'M' +
+  Array.from({ length: 101 }, (_, i) => {
+    const t = i / 20;
+    return `${x(t).toFixed(1)} ${y(f(t)).toFixed(1)}`;
+  }).join(' L');
+
+const charge = curve((t) => 1 - Math.exp(-t));
+const discharge = curve((t) => Math.exp(-t));
+
+const marks = [1, 2, 3, 4, 5].map((n) => ({
+  n,
+  x: x(n),
+  y: y(1 - Math.exp(-n)),
+  label: ['63 %', '86 %', '95 %', '98 %', '99 %'][n - 1]!,
+  tick: n === 1 ? 'τ' : `${n}τ`,
+}));
+const tau37 = y(Math.exp(-1));
+---
+
+<svg viewBox="0 0 600 300" width="600" height="300" class="fig" aria-hidden="true">
+  {marks.map((m) => (
+    <path d={`M${m.x} ${y(1)} V${Y0}`} class="grid" />
+  ))}
+  <path d={`M${X0} ${y(1)} H${x(5)}`} class="grid" />
+  <path d={`M${X0} ${marks[0]!.y} H${x(1)}`} class="guide" />
+  <path d={`M${X0} ${tau37} H${x(1)}`} class="guide" />
+  <path d={`M${X0} ${Y0} L${x(1)} ${y(1)}`} class="tangent" />
+
+  <path d={`M${X0} ${y(1) - 6} V${Y0} H${x(5) + 10}`} class="axis" />
+
+  <path d={charge} class="charge" />
+  <path d={discharge} class="discharge" />
+
+  {marks.map((m) => (
+    <>
+      <circle cx={m.x} cy={m.y} r="4" class="dot-charge" />
+      {m.n > 1 && (
+        <text x={m.x} y={m.y - 10} class="pct">
+          {m.label}
+        </text>
+      )}
+      <text x={m.x} y={Y0 + 20} class="tick">
+        {m.tick}
+      </text>
+    </>
+  ))}
+  <circle cx={x(1)} cy={tau37} r="4" class="dot-discharge" />
+
+  <text x={X0 - 8} y={y(1) + 4} class="axis-lbl end">
+    100 %
+  </text>
+  <text x={X0 - 8} y={marks[0]!.y + 4} class="axis-lbl end charge-t">
+    63 %
+  </text>
+  <text x={X0 - 8} y={tau37 + 4} class="axis-lbl end discharge-t">
+    37 %
+  </text>
+  <text x={X0 - 8} y={Y0 + 4} class="axis-lbl end">
+    0
+  </text>
+  <text x={X0} y={Y0 + 20} class="tick">
+    0
+  </text>
+  <text x={x(5)} y={Y0 + 40} class="axis-lbl end">
+    tempo
+  </text>
+  <text x={X0} y="14" class="axis-lbl start">
+    tensão no capacitor (% da tensão final ou inicial)
+  </text>
+
+  <path d="M410 128 H440" class="charge" />
+  <text x="448" y="132" class="legend start">
+    carga
+  </text>
+  <path d="M410 154 H440" class="discharge" />
+  <text x="448" y="158" class="legend start">
+    descarga
+  </text>
+  <path d="M410 180 H440" class="tangent" />
+  <text x="448" y="184" class="legend start">
+    reta do começo
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .grid {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 3 5;
+  }
+  .guide {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+    stroke-dasharray: 6 4;
+  }
+  .axis {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .charge {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  .discharge {
+    stroke: var(--copper);
+    stroke-width: 3;
+  }
+  .tangent {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+    stroke-dasharray: 8 5;
+  }
+  .dot-charge {
+    fill: var(--accent);
+    stroke: var(--bg);
+    stroke-width: 1.5;
+  }
+  .dot-discharge {
+    fill: var(--copper);
+    stroke: var(--bg);
+    stroke-width: 1.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .pct {
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .tick {
+    font-weight: 600;
+    fill: var(--fg-muted);
+  }
+  .axis-lbl {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .charge-t {
+    fill: var(--accent);
+    font-weight: 700;
+  }
+  .discharge-t {
+    fill: var(--copper);
+    font-weight: 700;
+  }
+  .legend {
+    font-size: 13.5px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

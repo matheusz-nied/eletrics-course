@@ -1,0 +1,420 @@
+---
+titulo: Capacitores
+modulo: m04-passivos
+ordem: 3
+nivel: B
+duracaoMin: 35
+objetivos:
+  - Explicar como um capacitor guarda carga e energia entre duas placas separadas por um isolante
+  - Calcular a carga (Q = C · V) e a energia (E = ½ · C · V²) guardadas num capacitor
+  - Reconhecer os tipos mais comuns e ler os códigos impressos neles, como 104 e 2A473K
+  - Ligar um eletrolítico na polaridade certa e escolher a tensão nominal com folga
+  - Medir a capacitância com o multímetro e descarregar um capacitor com segurança
+prerequisitos:
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+  - m01-eletricidade-do-zero/06-unidades-e-ordens-de-grandeza
+  - m03-medicoes/04-resistencia-continuidade-e-diodo
+tags: [capacitor, capacitância, eletrolítico, capacitor de motor, código 104, polaridade, descarga]
+seguranca: rede
+rascunho: true
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import CapacitorPlates from '../../../lessons/m04/figures/CapacitorPlates.astro';
+import CeramicCapacitors from '../../../lessons/m04/figures/CeramicCapacitors.astro';
+import DischargeSetup from '../../../lessons/m04/figures/DischargeSetup.astro';
+import ElectrolyticCapacitor from '../../../lessons/m04/figures/ElectrolyticCapacitor.astro';
+import FilmCapacitor from '../../../lessons/m04/figures/FilmCapacitor.astro';
+import MotorCapacitor from '../../../lessons/m04/figures/MotorCapacitor.astro';
+
+O portão não abre: o motor só zumbe e esquenta. O técnico chega, mede, troca um cilindro cinza do tamanho de um copinho de café, e o portão volta a andar. Antes de soltar os fios da peça velha, ele encosta um resistor nos terminais dela. "Mesmo com tudo desligado, isso aqui pode dar choque", ele avisa.
+
+A peça é um **capacitor**, e o resistor serve para esvaziá-lo. Nesta aula você vai ver como ele guarda carga e energia, conhecer os tipos mais comuns, ler o que vem escrito neles, medi-los e descarregá-los do jeito certo.
+
+## Duas placas e um isolante
+
+Um <Term id="capacitor">capacitor</Term> é, por dentro, muito simples: duas superfícies condutoras, as **placas**, separadas por um isolante, o <Term id="dieletrico">dielétrico</Term>. Pode ser ar, papel, plástico, cerâmica ou uma camada finíssima de óxido. Não existe caminho para a corrente atravessar de uma placa para a outra.
+
+Ligue as placas a uma bateria. A bateria puxa elétrons da placa ligada ao positivo e empurra a mesma quantidade para a placa ligada ao negativo, pelos fios. Uma placa fica com falta de elétrons (carga $+Q$), a outra com excesso ($-Q$), e aparece uma tensão entre elas. Quanto mais carga, maior essa tensão. O movimento para quando a tensão do capacitor fica igual à da bateria.
+
+<Figure caption="Figura 1. Um capacitor ligado a uma bateria. Os elétrons saem da placa da esquerda e chegam à da direita pelos fios, passando pela bateria; nenhum atravessa o dielétrico. As placas ficam com cargas iguais e opostas, e o campo elétrico entre elas guarda a energia.">
+  <CapacitorPlates />
+</Figure>
+
+Desligue a bateria: as cargas não têm por onde voltar, e a tensão continua entre os terminais. O capacitor **guardou carga**. Ligue um LED entre os terminais e os elétrons voltam por fora, até o capacitor esvaziar.
+
+Pense num tanque de água dividido por uma membrana de borracha. Uma bomba passa água de um lado para o outro; a membrana estica e empurra de volta, até empatar com a bomba. Feche os registros e ela fica esticada, com a energia guardada.
+
+A comparação tem limites. No capacitor, a energia fica no **campo elétrico** do dielétrico, não numa borracha. E nenhum isolante é perfeito: um pouco de carga vaza por dentro, e o capacitor esquecido perde a tensão em minutos, horas ou dias, conforme o tipo. É devagar o bastante para o capacitor de uma fonte dar choque bem depois de o aparelho sair da tomada. Onde ela acerta é no limite: estique demais e a membrana rasga; tensão demais e o dielétrico rompe.
+
+## Capacitância: quanta carga por volt
+
+Alguns capacitores guardam muita carga com pouca tensão; outros, pouquíssima. Essa medida é a <Term id="capacitancia">capacitância</Term> ($C$):
+
+$$
+Q = C \cdot V
+$$
+
+Aqui $Q$ é a carga em coulombs (C), $V$ a tensão entre as placas em volts (V) e $C$ a capacitância em <Term id="farad">farads</Term> (F). Um farad é a capacitância que guarda 1 coulomb com 1 volt.
+
+O farad é uma unidade enorme. Os capacitores do dia a dia ficam em frações bem pequenas dele:
+
+| Unidade | Em farads | Exemplo típico |
+| --- | --- | --- |
+| picofarad (pF) | 0,000 000 000 001 F | 22 pF ao lado do cristal de um microcontrolador |
+| nanofarad (nF) | 0,000 000 001 F | 100 nF junto de cada circuito integrado |
+| microfarad (µF) | 0,000 001 F | 1.000 µF na fonte de 12 V; dezenas de µF no motor do portão |
+| farad (F) | 1 F | supercapacitores que mantêm um relógio funcionando |
+
+Na prática, 1 µF = 1.000 nF = 1.000.000 pF. O mesmo capacitor pode ser "100 nF" na lista de peças, "0,1 µF" na loja e "104" no corpo dele.
+
+A capacitância cresce com a **área** das placas, diminui com a **distância** entre elas e depende do **material** do dielétrico. É por isso que os <Term id="capacitor-eletrolitico">eletrolíticos</Term> guardam tanta carga num corpo pequeno: o dielétrico deles é uma camada de óxido finíssima, sobre uma folha de alumínio cheia de microrrugas que multiplicam a área.
+
+## A energia guardada
+
+Encher o capacitor dá trabalho, e esse trabalho fica guardado:
+
+$$
+E = \tfrac{1}{2} \cdot C \cdot V^2
+$$
+
+com $E$ em joules (J), $C$ em farads e $V$ em volts. De onde vem o ½? A primeira carga entra fácil, com o capacitor vazio, e a última entra contra a tensão cheia $V$. Na média, cada coulomb subiu $V/2$, então $E = Q \cdot V/2 = \tfrac{1}{2} \cdot C \cdot V^2$.
+
+**Exemplo.** Um eletrolítico de 1.000 µF carregado com 9 V guarda
+
+$$
+\begin{aligned}
+Q &= 0{,}001\,\text{F} \times 9\,\text{V} = 0{,}009\,\text{C} = 9\,\text{mC} \\[4pt]
+E &= \tfrac{1}{2} \times 0{,}001 \times 9^2 = 0{,}0405\,\text{J} = 40{,}5\,\text{mJ}
+\end{aligned}
+$$
+
+É pouco: uma bateria alcalina de 9 V nova guarda uns 15.000 J (típico). O capacitor não substitui bateria; ele é bom em entregar ou absorver energia **rápido**.
+
+Repare no $V^2$: dobrar a tensão quadruplica a energia. Um capacitor de 100 µF, dez vezes menor que o do exemplo, carregado com os 311 V de pico da rede de 220 V (como os da entrada de uma fonte chaveada), guarda $\tfrac{1}{2} \times 0{,}0001 \times 311^2 \approx 4{,}8\,\text{J}$: mais de cem vezes a energia do primeiro. É o suficiente para um choque forte e uma faísca que derrete a ponta de uma chave de fenda.
+
+## Explore: o capacitor guarda carga
+
+Na simulação, uma bateria de 9 V carrega um eletrolítico de 1.000 µF enquanto você segura **Carregar**. O botão **Descarregar no LED** liga o capacitor a um LED vermelho com um resistor de 470 Ω, sem bateria nenhuma no caminho.
+
+<Simulation circuit="m04/guardar-carga" instruments={['multimetro', 'grafico']} />
+
+1. Aperte o play, segure **Carregar** por um segundo e leia a tensão no capacitor.
+2. Solte o botão. A tensão cai? Abra a **Tabela de valores** e procure a carga e a energia armazenada no capacitor.
+3. Segure **Descarregar no LED**. Acompanhe a corrente no LED pela aba **Gráfico**.
+4. Quando o LED apagar, olhe de novo a tensão no capacitor. Chegou a zero?
+
+O capacitor chega a 9 V e fica lá depois que você solta o botão (o da simulação não tem vazamento): guarda 9 mC e cerca de 40 mJ, como na conta acima. Na descarga, o LED acende com uns 15 mA, que caem junto com a tensão, e em cerca de um segundo e meio ele apaga.
+
+O mais importante está no passo 4: com o LED apagado, o capacitor ainda tem cerca de 1,7 V. O LED só conduz acima dessa tensão, então parou de puxar corrente antes de o capacitor esvaziar. **Apagou não quer dizer descarregado.** Numa fonte de 311 V, o LED indicador de uma placa apaga muito antes de os capacitores ficarem seguros.
+
+## Os tipos mais comuns
+
+Valores típicos, só para você se orientar:
+
+| Tipo | Faixa típica | Tensão típica | Polaridade | Onde aparece |
+| --- | --- | --- | --- | --- |
+| Cerâmico | 1 pF a alguns µF | 16 V a 1.000 V | não tem | junto dos CIs |
+| Poliéster e outros filmes | 1 nF a alguns µF | 50 V a 630 V | não tem | filtros, temporizadores |
+| Eletrolítico de alumínio | 0,1 µF a dezenas de milhares de µF | 6,3 V a 450 V | **tem** | filtro de fontes |
+| Capacitor de motor (filme) | 1 µF a algumas dezenas de µF | 250 a 450 VCA | não tem | portão, ventilador de teto |
+| Supercapacitor | frações de F a milhares de F | cerca de 2,7 V por célula | tem | manter o relógio |
+
+**Cerâmicos** são pequenos, baratos e rápidos. O tipo disco traz um código; os multicamada SMD (de montagem em superfície) não trazem nada escrito. Alguns tipos de cerâmica perdem boa parte da capacitância com o calor ou com a tensão; onde o valor precisa ser estável, usa-se filme ou cerâmica C0G (também chamada NP0).
+
+<Part3D
+  part="ceramic-capacitor"
+  props={{ farads: 1e-7, variant: 'disco' }}
+  annotations
+  alt="Capacitores cerâmicos: um disco cor de terra com 104 gravado e duas pernas; um multicamada encapsulado amarelo, com pernas; e um multicamada SMD, um retângulo pequeno com as pontas metálicas e nada escrito."
+  caption="Capacitores cerâmicos."
+>
+  <CeramicCapacitors />
+</Part3D>
+
+**Filme** (poliéster, polipropileno) é uma tira de plástico metalizada e enrolada. São estáveis, não têm polaridade e aguentam tensões altas. Quando o isolante fura num ponto, o metal em volta queima e o capacitor continua funcionando, com um pouco menos de capacitância. Essa "autocura" explica por que um capacitor de motor vai perdendo µF com os anos.
+
+<Part3D
+  part="film-capacitor"
+  props={{ farads: 1e-7, voltage: 100, variant: 'verde' }}
+  annotations
+  alt="Dois capacitores de filme: um verde, achatado, com 2A104J gravado; e um em caixa retangular vermelha com 104K e 250 V gravados. Os dois têm duas pernas."
+  caption="Capacitores de poliéster."
+>
+  <FilmCapacitor />
+</Part3D>
+
+**Eletrolíticos de alumínio** são os cilindros com capa plástica colorida. Dentro há duas folhas de alumínio e um papel encharcado de eletrólito, tudo enrolado. O dielétrico é uma camada de óxido sobre uma das folhas, o **anodo**, e é por isso que o eletrolítico tem polaridade: o óxido só se mantém com o anodo no positivo. No topo, um vinco em cruz ou em K é o **respiro**: se a pressão interna subir, ele abre ali em vez de a lata estourar.
+
+<Part3D
+  part="electrolytic-capacitor"
+  props={{ farads: 0.001, voltage: 16 }}
+  cutaway
+  annotations
+  alt="Capacitor eletrolítico de 1.000 µF e 16 V: lata cilíndrica com capa azul, faixa clara com sinais de menos do lado do negativo, perna positiva mais longa e respiro em cruz no topo. Ao lado, as camadas de dentro desenroladas: papel com eletrólito, folha de alumínio do anodo coberta de óxido, papel com eletrólito e folha de alumínio do catodo, que são enroladas juntas e fechadas na lata."
+  caption="Capacitor eletrolítico por fora e por dentro."
+>
+  <ElectrolyticCapacitor />
+</Part3D>
+
+O <Term id="capacitor-de-motor">capacitor de motor</Term> é de filme, num corpo plástico ou metálico, feito para trabalhar o tempo todo em **CA**. A etiqueta traz a capacitância com tolerância (por exemplo, 35 µF ±5 %) e a tensão em VCA. Ele não tem polaridade. No motor do portão e no ventilador de teto, é ele que cria a "segunda fase" que faz o motor partir para um lado; sem ele, o motor só zumbe. Isso fica para as aulas <LinkAula id="m08-motores/04-motor-monofasico-capacitor" /> e <LinkAula id="m16-portao/02-o-motor-do-portao" />.
+
+<Part3D
+  part="motor-capacitor"
+  props={{ microfarads: 35, voltage: 250 }}
+  annotations
+  alt="Capacitor de motor: cilindro cinza com dois fios saindo do topo e uma etiqueta com 35 µF ±5 %, 250 VCA e 60 Hz."
+  caption="Capacitor de motor. Os valores são de exemplo: use sempre os da etiqueta do motor."
+>
+  <MotorCapacitor />
+</Part3D>
+
+**Supercapacitores** chegam a farads, mas só aguentam uns 2,7 V por célula (típico). Mantêm o relógio de um aparelho quando falta energia.
+
+## Lendo o que vem escrito
+
+Eletrolíticos e capacitores de motor trazem o valor por extenso: "1000µF 16V 105°C", "35µF ±5% 250VAC". Cerâmicos e de filme, pequenos demais, usam códigos:
+
+- **Três algarismos:** os dois primeiros são o valor e o terceiro é quantos zeros acrescentar, sempre em **picofarads**. 104 = 10 e mais 4 zeros = 100.000 pF = 100 nF = 0,1 µF. 472 = 4.700 pF = 4,7 nF.
+- **Dois algarismos ou menos:** o valor direto em pF. "22" é 22 pF.
+- **Letra no lugar da vírgula:** 4n7 = 4,7 nF; 2p2 = 2,2 pF; µ47 (ou u47) = 0,47 µF.
+- **Letra depois do código:** a tolerância. J = ±5 %, K = ±10 %, M = ±20 %.
+- **Algarismo e letra antes do código**, comum nos de filme: a tensão máxima. 1H = 50 V, 2A = 100 V, 2E = 250 V, 2G = 400 V, 2J = 630 V.
+
+### Exemplo resolvido: 2A473K
+
+1. **2A** → tensão máxima de 100 V.
+2. **473** → 47 e mais 3 zeros: 47.000 pF = 47 nF.
+3. **K** → ±10 %: o valor real pode ir de 42,3 nF a 51,7 nF.
+
+É um capacitor de 47 nF, ±10 %, para até 100 V.
+
+## Polaridade
+
+Num eletrolítico de alumínio:
+
+- a **faixa** na capa, com sinais de menos, marca o **negativo**;
+- a **perna mais longa** é o **positivo** (só vale para peça nova, antes de cortar as pernas);
+- na placa, a serigrafia mostra um **+** num dos furos, ou pinta metade do círculo; a metade pintada costuma marcar o negativo.
+
+Nos eletrolíticos SMD, a parte pintada de preto no topo é o negativo. Cuidado com os de **tântalo**, em forma de gota ou pastilha: neles, a faixa costuma marcar o **positivo**. Na dúvida, procure o + gravado.
+
+Ligado ao contrário, o eletrolítico desfaz o próprio óxido. A corrente passa por dentro, o eletrólito esquenta e solta gás, a lata estufa e o respiro abre, às vezes com um estalo e um jato de vapor quente. O mesmo acontece com tensão acima da nominal.
+
+## Explore: o eletrolítico invertido
+
+Na simulação, uma fonte alimenta um eletrolítico de 1.000 µF e 16 V através de um resistor de 100 Ω. A lista **Ligação do capacitor** escolhe o que a fonte faz com ele.
+
+<Simulation circuit="m04/eletrolitico-invertido" />
+
+1. Com **12 V, polaridade certa**, leia a corrente no capacitor depois que ele carrega.
+2. Escolha **25 V, acima da nominal (16 V)**. O que as mensagens da simulação avisam? E a corrente?
+3. Aperte o botão de reiniciar (↻), que põe um capacitor novo, e escolha **12 V invertidos**.
+
+Na polaridade certa, a corrente é praticamente zero: o capacitor carregado bloqueia a corrente contínua. Com 25 V, a simulação avisa que a tensão passou da nominal e, em menos de meio segundo, que o capacitor estufou e entrou em curto: a corrente vai a cerca de 0,25 A, limitada só pelo resistor. Invertido, o mesmo acontece com só 12 V, ainda mais rápido, e a corrente fica em cerca de 0,12 A no sentido contrário (o sinal de menos).
+
+<Part3D
+  part="electrolytic-capacitor"
+  props={{ farads: 0.001, voltage: 16, bulged: true }}
+  annotations
+  alt="Dois eletrolíticos lado a lado. O bom tem o topo reto, com o respiro em cruz fechado. O estufado tem o topo abaulado, o respiro aberto e uma crosta marrom de eletrólito seco em volta."
+  caption="Um eletrolítico bom e um estufado."
+>
+  <ElectrolyticCapacitor bulged />
+</Part3D>
+
+## Tensão nominal e temperatura
+
+A tensão escrita no capacitor é a **máxima** que ele aguenta continuamente. Uma regra prática comum é deixar uns 20 % a 50 % de folga sobre a maior tensão do circuito: numa fonte de 12 V, um de 16 V fica no limite e um de 25 V fica folgado. Na troca, use a **mesma capacitância com tensão igual ou maior**, nunca menor.
+
+Os eletrolíticos trazem também a temperatura máxima, 85 °C ou 105 °C, e o fabricante informa a vida útil nela, como 2.000 horas a 105 °C (típico). Pela regra prática, cada 10 °C mais frio dobra mais ou menos a vida; encostado num dissipador quente, o capacitor morre cedo.
+
+Com o tempo, o eletrólito evapora devagar pela vedação e o capacitor **resseca**. A capacitância cai e cresce a resistência interna dele, a **ESR** (do inglês *equivalent series resistance*). Numa fonte, o capacitor ressecado deixa de filtrar e a ondulação aumenta, como você viu na aula <LinkAula id="m03-medicoes/05-osciloscopio" />. Sintomas: aparelhos que reiniciam e fontes que chiam.
+
+## Descarregar com segurança
+
+Antes de encostar, soldar ou medir um capacitor grande, descarregue-o. A ferramenta é um resistor, nunca um curto.
+
+<Figure
+  caption="Figura 2. Primeiro, um resistor de 10 kΩ e 5 W com garras isoladas entre os terminais. Depois, o multímetro confirma que a tensão caiu perto de zero."
+  alt="Dois quadros. No primeiro, um capacitor eletrolítico com uma garra jacaré de capa preta no terminal negativo e uma de capa vermelha no positivo, ligadas às duas pontas de um resistor de 10 kΩ e 5 W. No segundo, o mesmo capacitor com as pontas do multímetro nos terminais, e o visor marcando 0,2 V."
+>
+  <DischargeSetup />
+</Figure>
+
+<Steps>
+  <Step title="Desligue e tire da tomada">
+    Desligue o disjuntor ou tire o aparelho da tomada e espere um ou dois minutos. Muitas placas têm <Term id="resistor-de-descarga">resistores de descarga</Term> que esvaziam os capacitores sozinhos, mas eles podem estar abertos.
+  </Step>
+  <Step title="Meça a tensão no capacitor">
+    Multímetro em V⎓, com os dedos atrás das proteções das pontas. No capacitor de motor, meça também em V~: assim você confirma que a rede está mesmo desligada (em V⎓ aparece a carga que sobrou).
+  </Step>
+  <Step title="Prenda o resistor de descarga">
+    Um resistor de uns 10 kΩ e 5 W (típico, desses cimentados), com garras jacaré de capa isolante. Prenda uma garra em cada terminal, segurando só pela capa, e espere pelo menos meio minuto.
+  </Step>
+  <Step title="Meça de novo">
+    A tensão deve estar perto de zero, abaixo de 1 V. Se não estiver, repita. Só então mexa no capacitor.
+  </Step>
+</Steps>
+
+### Exemplo resolvido: quanto tempo esperar
+
+A fonte chaveada de um aparelho de 220 V tem um eletrolítico de 220 µF e 400 V, carregado com cerca de 311 V. Com o resistor de 10 kΩ:
+
+$$
+\begin{aligned}
+I_\text{início} &= \frac{311\,\text{V}}{10.000\,\Omega} \approx 31\,\text{mA} \\[4pt]
+\tau &= R \cdot C = 10.000\,\Omega \times 0{,}000\,22\,\text{F} = 2{,}2\,\text{s} \\[4pt]
+5\tau &= 11\,\text{s}
+\end{aligned}
+$$
+
+O $\tau$ (tau) é a **constante de tempo**, assunto da próxima aula: a cada $\tau$, a tensão cai para 37 % do que era, e depois de $5\tau$ sobra menos de 1 %. Os cerca de 10,6 J guardados viram calor no resistor; ele recebe uns 9,7 W no primeiro instante, mas a potência cai rápido, e um resistor de 5 W só fica morno.
+
+Com 100 Ω, a corrente começaria em 3,1 A e o resistor receberia quase 1.000 W: faísca e resistor queimado. Com 1 MΩ, $5\tau$ levaria uns 18 minutos. Para dezenas a centenas de µF, 10 kΩ é um bom meio-termo.
+
+<Callout type="perigo" title="Nunca descarregue com chave de fenda">
+Encostar uma chave de fenda nos dois terminais é um curto: a faísca derrete a ponta da ferramenta e o terminal, pode espirrar metal nos olhos e danifica o capacitor por dentro, com a sua mão a centímetros dali. Capacitores grandes também podem "recuperar" um pouco de tensão minutos depois de descarregados: meça de novo antes de mexer outra vez. E não abra um forno de micro-ondas: o capacitor dele trabalha com milhares de volts.
+</Callout>
+
+## Medindo a capacitância
+
+Muitos multímetros têm uma posição de capacitância, marcada com F ou com o símbolo do capacitor.
+
+1. **Descarregue antes**, como acima. Um capacitor carregado pode danificar o multímetro.
+2. **Tire o capacitor da placa**, ou solte pelo menos uma perna. Outras peças ligadas em paralelo mudam a leitura.
+3. **Ponta vermelha no positivo** do eletrolítico; os grandes levam alguns segundos para estabilizar.
+4. **Compare com a etiqueta e a tolerância.**
+
+Volte ao portão do começo. O capacitor do motor diz 35 µF ±5 %, então um bom deve medir entre $35 \times 0{,}95 = 33{,}25\,\mu\text{F}$ e $35 \times 1{,}05 = 36{,}75\,\mu\text{F}$. O multímetro mostra 12 µF: o capacitor perdeu dois terços da capacitância e já não cria a defasagem que o motor precisa para partir. É o zumbido. A troca é por outro de 35 µF com a mesma tensão em VCA ou maior.
+
+O multímetro não mede a ESR: um eletrolítico ressecado pode mostrar capacitância razoável e ainda assim não filtrar. Aí, um medidor de ESR ou a ondulação no osciloscópio contam a verdade.
+
+<RealCase title="A central que reinicia sozinha">
+
+A central do portão reinicia quando o motor parte, e às vezes o receptor esquece o controle. Na placa, perto da fonte de 12 V, um eletrolítico de 1.000 µF e 16 V está com o topo abaulado e uma crosta marrom no respiro.
+
+1. **Desligue o disjuntor da central**, confirme a ausência de tensão na entrada e meça a tensão no capacitor antes de tocar em qualquer coisa. Descarregue se precisar.
+2. **Anote a polaridade** pela serigrafia e pela faixa do capacitor velho. Tire uma foto.
+3. **Troque por um de 1.000 µF e 25 V, de 105 °C**, com a faixa do mesmo lado: mesma capacitância, mais folga. Se o original for de baixa ESR, como é comum em fontes chaveadas, o novo também deve ser.
+4. **Ligue e confira:** em V⎓, a saída deve marcar uns 12 V; em V~, a ondulação deve ficar em algumas dezenas de milivolts, não em centenas.
+
+Um capacitor estufado sempre vai para a troca, mesmo que o aparelho ainda funcione. O passo a passo de solda fica para a aula <LinkAula id="m14-placas/05-soldagem-e-dessoldagem" />.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Achar que desligado é descarregado.** O capacitor guarda carga sem a tomada. O LED da placa apagado também não prova nada.
+- **Descarregar com curto.** Chave de fenda, alicate, fio direto: sempre um resistor.
+- **Inverter o eletrolítico.** Confira a faixa, a perna longa e a serigrafia. No tântalo, a faixa é o positivo.
+- **Trocar por tensão menor.** A capacitância deve ser a mesma; a tensão, igual ou maior.
+- **Pôr um eletrolítico comum no lugar do capacitor de motor.** Ele é polarizado e não aguenta CA: estoura. Use capacitor de motor com os mesmos µF e a tensão em VCA igual ou maior. µF diferentes fazem o motor perder força ou esquentar.
+- **Confundir o código.** 104 é 100 nF, não 104 µF.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Um capacitor de 470 µF está carregado com 12 V. Quanta carga ele guarda, em milicoulombs?',
+      answer: 5.64,
+      tolerance: 0.02,
+      unit: 'mC',
+      explanation: 'Q = C · V = 0,000 47 F × 12 V = 0,005 64 C = 5,64 mC.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Quanta energia guarda um capacitor de 2.200 µF carregado com 12 V?',
+      answer: 158.4,
+      tolerance: 0.02,
+      unit: 'mJ',
+      explanation: 'E = ½ · C · V² = 0,5 × 0,0022 × 144 = 0,1584 J, ou 158,4 mJ.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Um capacitor cerâmico tem "104" gravado. Qual é o valor dele?',
+      options: [
+        {
+          text: '100 nF',
+          correct: true,
+          feedback: '10 e mais 4 zeros: 100.000 pF, que é 100 nF ou 0,1 µF.',
+        },
+        {
+          text: '104 pF',
+          feedback: 'O último algarismo não faz parte do valor: é o número de zeros. 104 é 10 seguido de 4 zeros, em pF.',
+        },
+        {
+          text: '104 µF',
+          feedback: 'Os códigos de três algarismos são sempre em picofarads. Um cerâmico desse tamanho não chega a 104 µF.',
+        },
+        {
+          text: '10 nF',
+          feedback: '10 nF seria 10.000 pF, o código 103. No 104 são quatro zeros: 100.000 pF.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Você vai soldar um eletrolítico de alumínio novo. Qual perna vai no furo marcado com +?',
+      options: [
+        {
+          text: 'A perna mais longa, do lado oposto à faixa com sinais de menos',
+          correct: true,
+          feedback: 'No eletrolítico de alumínio, a faixa marca o negativo e a perna longa é o positivo.',
+        },
+        {
+          text: 'A perna do lado da faixa',
+          feedback: 'A faixa com sinais de menos marca o negativo. É no tântalo que a faixa costuma indicar o positivo.',
+        },
+        {
+          text: 'Tanto faz: capacitor não tem polaridade',
+          feedback: 'Cerâmicos e de filme não têm, mas o eletrolítico tem. Invertido, ele estufa e pode estourar.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Encostar uma chave de fenda nos dois terminais é um jeito seguro de descarregar um capacitor grande.',
+      answer: false,
+      explanation:
+        'É um curto: a corrente é enorme, a faísca derrete metal e pode danificar o capacitor. Use um resistor (por exemplo, 10 kΩ e 5 W) com garras isoladas e confira com o multímetro.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem segura os passos para descarregar o capacitor de uma fonte.',
+      items: [
+        'Desligar o disjuntor ou tirar o aparelho da tomada',
+        'Medir a tensão nos terminais do capacitor',
+        'Prender o resistor de descarga com as garras isoladas e esperar',
+        'Medir de novo e confirmar a tensão perto de zero',
+      ],
+      explanation:
+        'Primeiro tirar a energia, depois saber quanto sobrou, descarregar por um resistor e só confiar depois de medir de novo.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada capacitor ao lugar onde ele costuma aparecer.',
+      pairs: [
+        ['Capacitor de motor, 35 µF 250 VCA', 'Motor do portão'],
+        ['Eletrolítico de 1.000 µF 25 V', 'Filtro na saída de uma fonte de 12 V'],
+        ['Cerâmico de 100 nF', 'Ao lado de um circuito integrado'],
+        ['Supercapacitor de 1 F', 'Mantendo o relógio sem energia'],
+      ],
+      explanation:
+        'O de motor trabalha em CA e cria a defasagem do motor; o eletrolítico guarda muita carga para filtrar a fonte; o cerâmico pequeno e rápido segura a tensão junto do CI; o supercapacitor guarda energia por horas para um consumo minúsculo.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Um capacitor são duas placas separadas por um isolante, o dielétrico. Carregado, guarda carga e energia mesmo desligado.
+- $Q = C \cdot V$ e $E = \tfrac{1}{2} \cdot C \cdot V^2$: a energia cresce com o quadrado da tensão.
+- Código 104 = 100 nF; J, K e M dão a tolerância; 2A = 100 V.
+- O eletrolítico tem polaridade (faixa no negativo) e tensão máxima; invertido ou com tensão demais, estufa. O capacitor de motor é de filme, sem polaridade, para CA.
+- Descarregue com um resistor (uns 10 kΩ e 5 W) em garras isoladas, nunca com chave de fenda, e confirme com o multímetro.
+- Para medir, descarregue, tire da placa e compare com a etiqueta e a tolerância.
+
+Na próxima aula, você vai ver quanto tempo um capacitor leva para encher e esvaziar por um resistor, e como isso vira um temporizador: <LinkAula id="m04-passivos/04-circuito-rc" />.

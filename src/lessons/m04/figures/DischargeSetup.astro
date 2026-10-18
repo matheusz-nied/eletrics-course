@@ -1,0 +1,187 @@
+---
+/*
+ * 04.3: discharging a capacitor safely. First a 10 kΩ, 5 W resistor on
+ * insulated clips across the terminals; then the multimeter confirms it is
+ * close to 0 V.
+ */
+---
+
+<svg viewBox="0 0 600 310" width="600" height="310" class="fig" aria-hidden="true">
+  <text x="150" y="22" class="lbl">
+    1. Descarregar
+  </text>
+  <path d="M125 180 V200 L105 214 V232 M175 180 V200 L195 214 V232" class="lead" />
+  <path d="M100 50 V170 A50 12 0 0 0 200 170 V50 Z" class="sleeve" />
+  <path d="M100 50 V170 Q112 178 130 181 V50 Z" class="stripe" />
+  <text x="115" y="100" class="minus">
+    −
+  </text>
+  <text x="115" y="140" class="minus">
+    −
+  </text>
+  <ellipse cx="150" cy="50" rx="50" ry="12" class="top" />
+  <rect x="97" y="208" width="16" height="30" rx="4" class="boot-black" />
+  <rect x="187" y="208" width="16" height="30" rx="4" class="boot-red" />
+  <path d="M105 238 V262 H122 M195 238 V262 H178" class="wire" />
+  <rect x="122" y="252" width="56" height="20" rx="2" class="res" />
+  <text x="150" y="294" class="small">
+    resistor de 10 kΩ, 5 W
+  </text>
+  <text x="88" y="218" class="small end">
+    garras
+  </text>
+  <text x="88" y="234" class="small end">
+    isoladas
+  </text>
+
+  <path d="M300 10 V300" class="divider" />
+
+  <text x="450" y="22" class="lbl">
+    2. Conferir
+  </text>
+  <path d="M355 180 V236 M405 180 V236" class="lead" />
+  <path d="M330 50 V170 A50 12 0 0 0 430 170 V50 Z" class="sleeve" />
+  <path d="M330 50 V170 Q342 178 360 181 V50 Z" class="stripe" />
+  <text x="345" y="100" class="minus">
+    −
+  </text>
+  <text x="345" y="140" class="minus">
+    −
+  </text>
+  <ellipse cx="380" cy="50" rx="50" ry="12" class="top" />
+
+  <path d="M500 218 V252 H405 V246" class="probe-red" />
+  <path d="M550 218 V276 H355 V246" class="probe-black" />
+  <rect x="401" y="236" width="8" height="14" rx="2" class="tip-red" />
+  <rect x="351" y="236" width="8" height="14" rx="2" class="tip-black" />
+
+  <rect x="470" y="60" width="110" height="172" rx="10" class="meter" />
+  <rect x="482" y="76" width="86" height="40" rx="3" class="display" />
+  <text x="525" y="103" class="reading">
+    0,2 V
+  </text>
+  <circle cx="525" cy="165" r="24" class="dial" />
+  <path d="M525 165 L525 145" class="pointer" />
+  <circle cx="500" cy="212" r="6" class="jack-red" />
+  <circle cx="550" cy="212" r="6" class="jack-black" />
+  <text x="450" y="300" class="small">
+    perto de 0 V: só então mexa
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .lead {
+    stroke: var(--fg-subtle);
+    stroke-width: 3;
+  }
+  .sleeve {
+    fill: color-mix(in oklab, var(--accent) 45%, var(--surface));
+    stroke: var(--accent);
+  }
+  .stripe {
+    fill: color-mix(in oklab, var(--accent) 12%, var(--surface));
+    stroke: none;
+  }
+  .top {
+    fill: color-mix(in oklab, var(--fg-subtle) 35%, var(--surface));
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .boot-black {
+    fill: color-mix(in oklab, var(--fg) 70%, var(--surface));
+    stroke: var(--fg);
+    stroke-width: 1.2;
+  }
+  .boot-red {
+    fill: color-mix(in oklab, var(--danger) 60%, var(--surface));
+    stroke: var(--danger);
+    stroke-width: 1.2;
+  }
+  .wire {
+    stroke: var(--fg-muted);
+    stroke-width: 2.5;
+  }
+  .res {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .divider {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+    stroke-dasharray: 5 5;
+  }
+  .probe-red {
+    stroke: var(--danger);
+    stroke-width: 2.5;
+  }
+  .probe-black {
+    stroke: var(--fg);
+    stroke-width: 2.5;
+  }
+  .tip-red {
+    fill: var(--danger);
+    stroke: none;
+  }
+  .tip-black {
+    fill: var(--fg);
+    stroke: none;
+  }
+  .meter {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+  }
+  .display {
+    fill: var(--bg);
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+  }
+  .dial {
+    stroke: var(--fg-muted);
+  }
+  .pointer {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .jack-red {
+    fill: var(--danger);
+    stroke: none;
+  }
+  .jack-black {
+    fill: var(--fg);
+    stroke: none;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .lbl {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .minus {
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .reading {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .small {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

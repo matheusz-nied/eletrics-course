@@ -1,0 +1,168 @@
+---
+/* 04.3: two plates and a dielectric. The battery moves electrons from one plate to the other through the wires; none crosses the insulator. */
+const charges = [62, 90, 118, 146, 174];
+const field = [76, 104, 132, 160];
+---
+
+<svg viewBox="0 0 600 300" width="600" height="300" class="fig" aria-hidden="true">
+  <rect x="242" y="40" width="76" height="150" class="diel" />
+
+  <g class="wire">
+    <path d="M230 115 H130 V255 H268 M292 255 H430 V115 H330" />
+  </g>
+  <rect x="230" y="40" width="12" height="150" class="plate pos" />
+  <rect x="318" y="40" width="12" height="150" class="plate neg" />
+
+  <g class="bat">
+    <path d="M268 237 V273" />
+    <path d="M292 245 V265" />
+  </g>
+  <text x="256" y="236" class="sign pos-t">
+    +
+  </text>
+  <text x="305" y="242" class="sign neg-t">
+    −
+  </text>
+  <text x="280" y="294" class="small">
+    bateria
+  </text>
+
+  {charges.map((y) => (
+    <>
+      <text x="252" y={y + 5} class="q pos-t">
+        +
+      </text>
+      <text x="308" y={y + 5} class="q neg-t">
+        −
+      </text>
+    </>
+  ))}
+  <g class="field">
+    {field.map((y) => (
+      <>
+        <path d={`M262 ${y} H296`} />
+        <path d={`M290 ${y - 4} L297 ${y} L290 ${y + 4}`} />
+      </>
+    ))}
+  </g>
+
+  <text x="236" y="30" class="lbl pos-t">
+    +Q
+  </text>
+  <text x="324" y="30" class="lbl neg-t">
+    −Q
+  </text>
+  <text x="280" y="210" class="small">
+    campo elétrico
+  </text>
+  <text x="280" y="228" class="small">
+    dielétrico (isolante)
+  </text>
+
+  <g class="elec">
+    <path d="M205 115 H160" />
+    <path d="M168 109 L159 115 L168 121" />
+    <path d="M410 115 H365" />
+    <path d="M373 109 L364 115 L373 121" />
+  </g>
+  <text x="182" y="104" class="e">
+    e⁻
+  </text>
+  <text x="387" y="104" class="e">
+    e⁻
+  </text>
+
+  <text x="448" y="150" class="note start">
+    Os elétrons não
+  </text>
+  <text x="448" y="168" class="note start">
+    atravessam o isolante:
+  </text>
+  <text x="448" y="186" class="note start">
+    saem de uma placa
+  </text>
+  <text x="448" y="204" class="note start">
+    e chegam à outra
+  </text>
+  <text x="448" y="222" class="note start">
+    pelos fios.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .diel {
+    fill: color-mix(in oklab, var(--warning) 16%, transparent);
+    stroke: none;
+  }
+  .wire {
+    stroke: var(--fg-muted);
+  }
+  .plate {
+    stroke-width: 1.5;
+  }
+  .plate.pos {
+    fill: color-mix(in oklab, var(--danger) 30%, var(--surface));
+    stroke: var(--danger);
+  }
+  .plate.neg {
+    fill: color-mix(in oklab, var(--accent) 30%, var(--surface));
+    stroke: var(--accent);
+  }
+  .bat {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .field {
+    stroke: var(--warning);
+    stroke-width: 1.8;
+  }
+  .elec {
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .lbl {
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .q {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .sign {
+    font-weight: 700;
+  }
+  .pos-t {
+    fill: var(--danger);
+  }
+  .neg-t {
+    fill: var(--accent);
+  }
+  .e {
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .small {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .note {
+    font-size: 13px;
+    fill: var(--fg-muted);
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>
