@@ -1,0 +1,254 @@
+---
+titulo: Ferramentas essenciais
+modulo: m00-comece-aqui
+ordem: 3
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Reconhecer as ferramentas básicas de eletricidade e eletrônica e para que cada uma serve
+  - Escolher a posição do multímetro e os bornes certos para cada medição
+  - Entender como funciona a chave de teste e quais são os limites dela
+  - Conferir as ferramentas antes de um serviço
+prerequisitos: [m00-comece-aqui/02-seguranca-em-eletricidade]
+tags: [ferramentas, multímetro, chave de teste, alicate, conectores, ferro de solda]
+seguranca: rede
+---
+
+import ChaveDeTeste from '../../../lessons/m00/figuras/ChaveDeTeste.astro';
+import MultimetroInterativo from '../../../lessons/m00/MultimetroInterativo';
+
+A chave de fenda grande demais escorrega e espana o parafuso do borne. O alicate comum, usado para desencapar, corta junto alguns fios de cobre, e a emenda esquenta meses depois. A chave de teste que "não acendeu" estava com defeito, e o fio estava ligado.
+
+Em eletricidade, a ferramenta certa não é luxo: ela decide se o serviço fica bem feito e se você sai dele sem um choque. Esta aula apresenta o kit básico que o curso usa do começo ao fim, do multímetro ao ferro de solda, e o que observar em cada peça.
+
+## O multímetro
+
+O <Term id="multimetro">multímetro</Term> é o instrumento mais importante do curso. É ele que diz se um fio está com tensão, se um fusível está inteiro, qual dos três fios do motor do portão é o comum, se a fonte da central está entregando 12 V. Um multímetro digital simples mede:
+
+- **Tensão** contínua (pilhas, baterias, fontes) e alternada (tomadas, rede elétrica).
+- **Resistência** (resistores, enrolamentos de motor, resistência do chuveiro).
+- **Continuidade**: apita quando existe ligação entre as pontas.
+- **Corrente**, em escalas de miliampères e de até 10 A.
+
+Ele tem um visor, um **seletor** rotativo que escolhe o que medir e os **bornes**, os furos onde entram as pontas de prova. A ponta preta vai sempre no borne **COM** (comum). A vermelha muda de borne conforme a medição, e é aí que mora o erro mais perigoso.
+
+<MultimetroInterativo client:visible />
+
+Faça este roteiro:
+
+1. Escolha **V⎓** (tensão contínua) e depois **V~** (tensão alternada). Repare que as pontas ficam nos mesmos bornes.
+2. Escolha **mA**. Em que borne a ponta vermelha foi parar? Leia o aviso.
+3. Escolha **Ω** e **continuidade**. O que essas duas posições têm em comum sobre o circuito?
+4. Volte para **OFF**. Esse é o último passo de toda medição.
+
+O que dá para tirar daí: tensão se mede **em paralelo**, com o circuito ligado; resistência e continuidade, **com o circuito desligado**; corrente, **em série**, com a ponta vermelha no borne de corrente. Medir tensão com a ponta no borne de corrente transforma o multímetro num fio e provoca um curto-circuito ali mesmo, na sua mão.
+
+### Como escolher um multímetro
+
+Três coisas importam mais que a marca:
+
+- **Categoria de medição.** Perto dos bornes vem escrito algo como "CAT III 600 V". A <Term id="categoria-de-medicao">categoria</Term> diz em que ponto da instalação o multímetro pode medir com segurança, inclusive quando surge um pico de tensão (um raio na rede, um motor desligando). CAT II serve para aparelhos ligados em tomadas; CAT III, para a instalação da casa (quadro, disjuntores, fiação); CAT IV, para a entrada de energia. Para trabalhar em tomadas e quadros, use **pelo menos CAT III**, com tensão acima da da instalação.
+- **Pontas de prova boas**, com proteção para os dedos, cabo flexível e marcação da mesma categoria do multímetro.
+- **Fusível interno nas escalas de corrente.** Ele protege o instrumento (e você) quando alguém erra o borne.
+
+Multímetros "True RMS" medem corretamente tensões e correntes alternadas que não são senoides perfeitas, comuns em aparelhos eletrônicos. Para começar, não é obrigatório.
+
+O multímetro por dentro, as escalas e a leitura do visor são assunto da aula <LinkAula id="m03-medicoes/01-multimetro" />, e o jeito seguro de medir a tomada, da aula <LinkAula id="m03-medicoes/02-medindo-tensao" />.
+
+## A chave de teste e o detector de tensão
+
+A <Term id="chave-de-teste">chave de teste</Term> (ou caneta neon) parece uma chave de fenda com o cabo transparente. Você encosta a ponta no fio e o dedo na tampa metálica do outro lado. Se o fio for uma fase, uma pequena lâmpada neon acende dentro do cabo.
+
+<ChaveDeTeste />
+
+Mas espere: se a corrente passa pelo seu corpo, por que não dá choque? Por causa do resistor de valor muito alto que fica dentro dela, tipicamente perto de 1 MΩ (um milhão de ohms). Com 127 V, a corrente fica perto de 0,13 mA, abaixo do que alguém consegue sentir, como você viu na aula de segurança. É pouco, mas basta para a neon brilhar.
+
+A chave de teste é útil para achar a fase rapidamente, mas tem limites que você precisa conhecer:
+
+- **Ela não mostra o valor da tensão.** Acende do mesmo jeito em 127 V e em 220 V.
+- **Ela pode não acender mesmo com tensão**: com a lâmpada queimada, sob sol forte (o brilho é fraco), ou quando você está bem isolado do chão, com bota de borracha em piso seco.
+- **Ela não acende em tensões baixas.** A neon precisa de várias dezenas de volts para acender, então não serve para baterias e fontes de 12 V ou 24 V.
+
+O **detector de tensão sem contato** é uma caneta com bateria que apita ou acende quando chega perto de um fio energizado, sem encostar no cobre. É prático para descobrir se uma tomada ou um cabo está ligado, mas também erra: bateria fraca, cabo dentro de eletroduto metálico ou fio blindado escondem a tensão, e fios vizinhos podem fazer ele apitar sem motivo.
+
+<Callout type="atencao" title="Teste, meça e teste de novo">
+Nenhum detector prova sozinho que um fio está sem tensão. Antes de confiar na leitura "desligado", confira o instrumento numa tomada que você sabe que está funcionando, teste o fio, e confira o instrumento de novo. Se o instrumento não acender na tomada boa, ele está com defeito, e a leitura do fio não vale nada. Para confirmar a ausência de tensão antes de mexer, use o multímetro.
+</Callout>
+
+## Alicates
+
+| Alicate | Para que serve | Cuidado |
+|---------|----------------|---------|
+| Universal | Segurar, torcer e dobrar fios; cortar fios finos | Não é desencapador: ao "desencapar com o alicate", ele marca e corta fios de cobre |
+| De corte diagonal | Cortar fios rente, aparar pontas e abraçadeiras | Proteja os olhos: a ponta cortada voa |
+| De bico (meia-cana) | Alcançar lugares apertados e fazer olhais na ponta do fio | O bico fino entorta se usado como alavanca |
+| Desencapador | Tirar o isolamento sem ferir o cobre, com furos ou ajuste para cada bitola | Use o furo da bitola certa; o automático se ajusta sozinho |
+| Crimpador | Prender terminais e ponteiras na ponta dos fios | Cada tipo de terminal pede a matriz certa |
+
+Para quem vai mexer em quadro, tomada ou central de portão, os alicates precisam ser **isolados para 1.000 V**: o cabo tem uma capa grossa e a marcação "1000 V" com um símbolo de dois triângulos. Capa de plástico fina, de alicate comum, só serve para conforto, não isola.
+
+<Callout type="dica" title="Ponteiras nos fios flexíveis">
+Fio flexível (feito de muitos fios finos) apertado direto num borne de parafuso se espalha e afrouxa com o tempo. Uma **ponteira** (um tubinho de metal crimpado na ponta) deixa o fio firme. Bornes de centrais de portão, de disjuntores e de fontes agradecem.
+</Callout>
+
+## Chaves de fenda e Phillips
+
+Use a ponta que encaixa **inteira** na fenda do parafuso: nem mais larga, nem mais estreita. Ponta pequena demais escorrega e espana a cabeça; ponta grande demais não entra até o fundo e também escorrega. Os bornes de placas eletrônicas, como os da central do portão, costumam pedir uma chave de fenda pequena; os disjuntores e as tomadas, uma média. Muitos disjuntores têm parafusos que aceitam tanto a chave de fenda quanto a Phillips.
+
+Para serviço elétrico, as chaves também devem ser **isoladas para 1.000 V**. Cabo rachado ou lascado é motivo para trocar a chave.
+
+## Fita isolante e conectores
+
+A **fita isolante** de PVC isola emendas e pontas de fio. Para isolar direito: estique a fita enquanto enrola, sobreponha cada volta em metade da largura, passe um pouco além da parte descascada e dê mais de uma camada. Prefira fitas antichama de boa qualidade. A **fita de autofusão**, de borracha, se funde com ela mesma e veda contra umidade; costuma ser usada por baixo da fita de PVC em emendas expostas ao tempo.
+
+Hoje, porém, a maior parte das emendas pode ser feita sem fita:
+
+- O <Term id="conector-de-alavanca">conector de alavanca</Term>: você levanta a alavanca, enfia a ponta descascada até o fundo e baixa a alavanca. O comprimento a descascar vem gravado no próprio conector, e o corpo transparente mostra se o fio entrou até o fim. Confira no corpo a corrente máxima e as bitolas aceitas: aparelhos que puxam muita corrente, como chuveiros, precisam de conectores à altura.
+- O **conector tipo sindal** (uma barra de plástico com bornes de parafuso) e os <Term id="borne">bornes</Term> de placas e equipamentos, que prendem o fio com um parafuso.
+
+Emendas e conexões ficam sempre dentro de caixas, nunca soltas dentro da parede ou do forro. O assunto volta em detalhe na aula <LinkAula id="m14-placas/06-bornes-conectores-e-emendas" />.
+
+## Ferro de solda
+
+O ferro de solda une fios e componentes eletrônicos com uma liga metálica que derrete a uns poucos centenas de graus, a **solda** (o "estanho"). Para eletrônica, um ferro de 30 W a 60 W ou uma estação com temperatura ajustável resolve. Você vai precisar também de:
+
+- **Solda com fluxo** (o fio de solda tem um núcleo de resina que limpa o metal na hora de soldar).
+- **Suporte** para apoiar o ferro quente, e uma **esponja úmida** ou palha de latão para limpar a ponta.
+- **Sugador de solda** ou malha dessoldadora, para desfazer soldas.
+
+A ponta trabalha tipicamente entre 300 °C e 400 °C. Nunca pegue o ferro pela haste, nunca solde um circuito ligado na energia e trabalhe num lugar ventilado: a fumaça do fluxo irrita. Muitas soldas têm chumbo, por isso lave as mãos depois e não coma na bancada. A técnica de soldar e dessoldar está na aula <LinkAula id="m14-placas/05-soldagem-e-dessoldagem" />.
+
+## O resto do kit
+
+- **Lanterna**, de preferência de cabeça, para ter as duas mãos livres. Com o disjuntor desligado, a luz do cômodo também pode estar desligada.
+- **Fita crepe e caneta**, para etiquetar cada fio antes de soltar ("motor comum", "fotocélula +").
+- **Celular**, para fotografar as ligações antes de mexer. É a melhor ferramenta de desmontagem que existe.
+- **Escada de fibra de vidro ou madeira**, nunca de alumínio, para serviços elétricos.
+- **Óculos de proteção**, para cortar fios, soldar e trabalhar acima da cabeça.
+
+<RealCase title="O kit para trocar a central do portão">
+Para trocar o motor e a central de um portão eletrônico, junte antes de começar: multímetro (CAT III), chave de teste ou detector de tensão, chave de fenda pequena e média isoladas, chave Phillips, alicate universal, alicate de corte, desencapador, conectores de alavanca ou bornes, fita isolante, fita crepe e caneta para etiquetar, lanterna de cabeça e o celular para fotografar a ligação antiga. As chaves de boca para soltar o motor da base dependem do modelo. Com o kit completo na mão, você não fica tentado a improvisar com o portão desmontado e o disjuntor desligado. O passo a passo completo está na aula <LinkAula id="m16-portao/07-trocar-motor-e-central" />.
+</RealCase>
+
+## Confira antes de usar
+
+Ferramenta com defeito é pior que ferramenta nenhuma, porque passa uma falsa segurança. Antes de cada serviço, gaste dez minutos com o procedimento abaixo. Abra no modo oficina e siga com as ferramentas na mão.
+
+<Workshop id="conferir-ferramentas" />
+
+## Erros comuns
+
+- **Medir tensão com a ponta vermelha no borne de corrente.** É o erro que mais queima multímetros, e o curto acontece perto da sua mão. Antes de encostar, olhe o seletor e os bornes.
+- **Medir a tomada na escala de tensão contínua.** Em V⎓, a tensão alternada da tomada aparece perto de zero, e você pode concluir que ela está desligada.
+- **Confiar na chave de teste sozinha.** Ela pode não acender com tensão. Confirme com o multímetro, conferido antes numa tomada boa.
+- **Usar a chave de teste como chave de fenda.** Ela não foi feita para forçar parafusos, e uma chave de teste rachada expõe a parte de dentro.
+- **Desencapar fio com faca ou alicate comum.** O corte no cobre esquenta com o tempo e pode romper.
+- **Remendar ponta de prova ou cabo de ferramenta com fita.** Isolamento danificado se troca, não se remenda.
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Você vai medir a tensão de uma tomada com o multímetro. Como prepara o instrumento?',
+      options: [
+        {
+          text: 'Seletor em V~, ponta preta no COM e vermelha no VΩ',
+          correct: true,
+          feedback: 'Isso. A tomada é de corrente alternada, e tensão se mede com a ponta vermelha no VΩ.',
+        },
+        {
+          text: 'Seletor em V⎓, ponta preta no COM e vermelha no VΩ',
+          feedback:
+            'Em tensão contínua, a tensão alternada da tomada aparece perto de zero, e você pode achar que ela está desligada.',
+        },
+        {
+          text: 'Seletor em 10A, ponta preta no COM e vermelha no 10A',
+          feedback:
+            'Na escala de corrente o multímetro é praticamente um fio: encostar na tomada assim provoca um curto-circuito.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma chave de teste tem um resistor de 1 MΩ (1.000.000 Ω). Encostada numa fase de 127 V, qual é a corrente máxima que passa pelo seu corpo, em mA?',
+      answer: 0.127,
+      tolerance: 0.03,
+      unit: 'mA',
+      explanation:
+        'I = V ÷ R = 127 V ÷ 1.000.000 Ω = 0,000127 A, ou 0,127 mA. Fica abaixo de 0,5 mA, a faixa em que em geral não se sente nada.',
+    },
+    {
+      type: 'vf',
+      prompt: 'A chave de teste neon serve para saber se uma bateria de carro de 12 V está carregada.',
+      answer: false,
+      explanation:
+        'A neon precisa de várias dezenas de volts para acender. Para baterias e fontes de baixa tensão, use o multímetro em V⎓.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'A chave de teste não acendeu ao encostar num fio. O que você faz antes de mexer nele?',
+      options: [
+        {
+          text: 'Confere a chave de teste numa tomada que está funcionando e confirma com o multímetro',
+          correct: true,
+          feedback: 'Isso. Ela pode estar com defeito ou você pode estar isolado do chão.',
+        },
+        {
+          text: 'Mexe no fio, porque ele está desligado',
+          feedback: 'A chave de teste pode falhar. Nenhum detector prova sozinho que um fio está sem tensão.',
+        },
+        {
+          text: 'Encosta o dedo rapidamente para confirmar',
+          feedback: 'Nunca use o corpo como instrumento.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Qual categoria de medição, no mínimo, um multímetro deve ter para medir dentro de um quadro de distribuição?',
+      options: [
+        {
+          text: 'CAT III',
+          correct: true,
+          feedback: 'Isso. CAT III cobre a instalação fixa: quadro, disjuntores e fiação.',
+        },
+        {
+          text: 'CAT II',
+          feedback: 'CAT II é para aparelhos ligados em tomadas, não para o quadro.',
+        },
+        {
+          text: 'Qualquer uma, a categoria só indica a marca',
+          feedback:
+            'A categoria diz quanto pico de tensão o instrumento aguenta com segurança em cada ponto da instalação.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada ferramenta ao uso certo.',
+      pairs: [
+        ['Desencapador', 'Tirar o isolamento sem ferir o cobre'],
+        ['Conector de alavanca', 'Emendar fios sem fita, numa caixa'],
+        ['Crimpador', 'Prender ponteiras e terminais nos fios'],
+        ['Ferro de solda', 'Unir componentes eletrônicos à placa'],
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Uma ponta de prova com o isolamento rachado pode continuar em uso depois de um remendo com fita isolante.',
+      answer: false,
+      explanation:
+        'É pela ponta de prova que a sua mão fica perto da tensão. Isolamento danificado se troca.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **multímetro** mede tensão (em paralelo, ligado), resistência e continuidade (com o circuito desligado) e corrente (em série). A ponta preta fica no COM; a vermelha muda de borne, e errar o borne provoca curto.
+- Para tomadas e quadros, use multímetro e pontas de **CAT III** ou superior.
+- A **chave de teste** acende com uma corrente minúscula, limitada por um resistor de cerca de 1 MΩ. Ela não mede o valor da tensão, pode falhar e não funciona em baixa tensão. Confira o instrumento antes e depois, e confirme com o multímetro.
+- Alicates e chaves para serviço elétrico devem ser **isolados para 1.000 V**. Use o desencapador para desencapar, ponteiras em fios flexíveis e conectores próprios para emendas.
+- Antes de cada serviço, **confira as ferramentas**: pontas inteiras, continuidade, uma medição conhecida.

@@ -1,0 +1,78 @@
+/* CalculadoraChoque.tsx: the logarithmic scale of typical effects. */
+
+.choque__scale {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.5rem 0 1.25rem;
+}
+
+.choque__bands {
+  position: relative;
+  height: 0.875rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.choque__band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.choque__band--0 {
+  border-radius: 999px 0 0 999px;
+  background: color-mix(in oklab, var(--success) 45%, transparent);
+}
+
+.choque__band--1 {
+  background: color-mix(in oklab, var(--warning) 45%, transparent);
+}
+
+.choque__band--2 {
+  background: color-mix(in oklab, var(--danger) 45%, transparent);
+}
+
+.choque__band--3 {
+  border-radius: 0 999px 999px 0;
+  background: color-mix(in oklab, var(--danger) 80%, transparent);
+}
+
+.choque__marker {
+  position: absolute;
+  top: -0.35rem;
+  width: 0.25rem;
+  height: 1.575rem;
+  margin-left: -0.125rem;
+  border-radius: 999px;
+  background: var(--fg);
+  box-shadow: 0 0 0 2px var(--bg);
+  transition: left 250ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .choque__marker {
+    transition: none;
+  }
+}
+
+.choque__ticks {
+  position: relative;
+  height: 1rem;
+  color: var(--fg-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+}
+
+.choque__ticks span {
+  position: absolute;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.choque__ticks span:first-child {
+  transform: none;
+}
+
+.choque__ticks span:last-child {
+  transform: translateX(-100%);
+}

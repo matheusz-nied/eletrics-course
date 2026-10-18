@@ -1,0 +1,194 @@
+---
+/*
+ * Lesson 0.2: a person touching a faucet that has voltage because of a fault,
+ * and the same situation as a circuit: three resistances in series between
+ * the faulty part and the earth.
+ */
+import Figure from '../../../components/Figure.astro';
+---
+
+<Figure
+  wide
+  alt="À esquerda, uma pessoa descalça no piso molhado encosta a mão num registro que está com tensão por causa de um defeito. À direita, o mesmo caminho desenhado como circuito: a tensão de 127 V, a resistência do contato da mão, a resistência do interior do corpo e a resistência dos pés no chão, em série, até a terra."
+  caption="O corpo vira parte do circuito. A corrente entra pela mão, atravessa o corpo e sai pelos pés. Cada trecho tem uma resistência; somadas, elas decidem quanta corrente passa."
+>
+  <svg
+    class="fig-corpo"
+    viewBox="0 0 620 330"
+    width="620"
+    height="330"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    font-family="var(--font-sans)"
+    font-size="13"
+  >
+    <!-- Wall pipe and faucet -->
+    <path d="M30 20v100h50" class="fig-corpo__pipe" stroke-width="10"></path>
+    <rect
+      x="80"
+      y="104"
+      width="34"
+      height="32"
+      rx="6"
+      class="fig-corpo__metal"
+      stroke-width="2.5"
+    ></rect>
+    <path d="M97 104V88M84 88h26" class="fig-corpo__metal" stroke-width="4"></path>
+    <path
+      d="M60 150l6-12 5 8 6-14"
+      class="fig-corpo__fase"
+      stroke-width="2.5"
+      aria-hidden="true"
+    ></path>
+    <text x="20" y="176" class="fig-corpo__small fig-corpo__fase-t">
+      registro com tensão
+    </text>
+    <text x="20" y="192" class="fig-corpo__small fig-corpo__fase-t">
+      (defeito no chuveiro)
+    </text>
+
+    <!-- Person -->
+    <circle cx="230" cy="62" r="18" stroke="currentColor" stroke-width="2.5"></circle>
+    <path
+      d="M230 80v110M230 102l-110 18M230 102l34 58M230 190l-22 86M230 190l22 86"
+      stroke="currentColor"
+      stroke-width="5"
+    ></path>
+    <path d="M196 280h24M240 280h24" stroke="currentColor" stroke-width="5"></path>
+
+    <!-- Wet floor -->
+    <path d="M70 290H330" stroke="currentColor" stroke-width="2"></path>
+    <path
+      d="M90 302c10-6 20 6 30 0s20 6 30 0M180 302c10-6 20 6 30 0s20 6 30 0M270 302c10-6 20 6 30 0"
+      class="fig-corpo__agua"
+      stroke-width="2"
+    ></path>
+    <text x="200" y="324" text-anchor="middle" class="fig-corpo__small">
+      piso molhado
+    </text>
+
+    <!-- Current path -->
+    <path
+      d="M126 112L218 98M240 112v74M238 196l14 74"
+      class="fig-corpo__corrente"
+      stroke-width="2.5"
+      stroke-dasharray="2 7"
+    ></path>
+
+    <!-- Equivalent circuit -->
+    <path d="M420 24v24" stroke="currentColor" stroke-width="2"></path>
+    <circle cx="420" cy="20" r="4" class="fig-corpo__fase-fill"></circle>
+    <text x="432" y="24" class="fig-corpo__label fig-corpo__fase-t">
+      127 V
+    </text>
+
+    <path
+      d="M420 48l10 6-20 8 20 8-20 8 20 8-20 8 10 6v20"
+      stroke="currentColor"
+      stroke-width="2"
+    ></path>
+    <text x="440" y="78" class="fig-corpo__label">
+      Contato da mão
+    </text>
+    <text x="440" y="94" class="fig-corpo__small">
+      seca: 100 kΩ · molhada: 1 kΩ
+    </text>
+
+    <path
+      d="M420 120l10 6-20 8 20 8-20 8 20 8-20 8 10 6v20"
+      stroke="currentColor"
+      stroke-width="2"
+    ></path>
+    <text x="440" y="150" class="fig-corpo__label">
+      Interior do corpo
+    </text>
+    <text x="440" y="166" class="fig-corpo__small">
+      cerca de 500 Ω
+    </text>
+
+    <path
+      d="M420 192l10 6-20 8 20 8-20 8 20 8-20 8 10 6v20"
+      stroke="currentColor"
+      stroke-width="2"
+    ></path>
+    <text x="440" y="222" class="fig-corpo__label">
+      Pés no chão
+    </text>
+    <text x="440" y="238" class="fig-corpo__small">
+      descalço, molhado: ~100 Ω
+    </text>
+
+    <path d="M400 264h40M407 271h26M414 278h12" class="fig-corpo__terra" stroke-width="2"></path>
+    <text x="420" y="300" text-anchor="middle" class="fig-corpo__small">
+      terra
+    </text>
+
+    <!-- Leaders from the body to the resistances -->
+    <path
+      d="M170 106C250 40 340 60 404 80M248 140H404M252 260C320 250 360 230 404 222"
+      class="fig-corpo__leader"
+      stroke-width="1"
+      stroke-dasharray="3 4"
+    ></path>
+  </svg>
+</Figure>
+
+<style>
+  .fig-corpo {
+    color: var(--fg);
+  }
+
+  .fig-corpo text {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .fig-corpo__label {
+    font-weight: 600;
+  }
+
+  .fig-corpo__small {
+    font-size: 12px;
+  }
+
+  .fig-corpo text.fig-corpo__small {
+    fill: var(--fg-muted);
+  }
+
+  .fig-corpo text.fig-corpo__fase-t {
+    fill: var(--danger);
+  }
+
+  .fig-corpo__fase {
+    stroke: var(--danger);
+  }
+
+  .fig-corpo__fase-fill {
+    fill: var(--danger);
+  }
+
+  .fig-corpo__pipe {
+    stroke: color-mix(in oklab, var(--fg-subtle) 60%, transparent);
+  }
+
+  .fig-corpo__metal {
+    stroke: var(--fg-muted);
+  }
+
+  .fig-corpo__agua {
+    stroke: var(--accent);
+  }
+
+  .fig-corpo__corrente {
+    stroke: var(--warning);
+  }
+
+  .fig-corpo__terra {
+    stroke: var(--success);
+  }
+
+  .fig-corpo__leader {
+    stroke: var(--fg-subtle);
+  }
+</style>
