@@ -1,4 +1,4 @@
-import { defineDevice, num } from '../device';
+import { defineDevice, num, rms, type PhasorView } from '../device';
 import { reportHeating } from '../messages';
 import { R_OPEN } from '../models/constants';
 import { ResistiveHeating } from '../models/heating';
@@ -12,7 +12,8 @@ const THERMAL_TAU = 120;
  * of each winding. The dots are on p1 and s1. The copper losses heat it
  * against its VA rating: overloaded it warns, then burns open (connecting
  * one to DC does that quickly, since only the wire resistance limits the
- * current).
+ * current). In the quasi-static analysis the readouts and the heating use the
+ * true RMS of the DC part and the phasor.
  */
 export default defineDevice({
   info: {
@@ -77,6 +78,13 @@ export default defineDevice({
     let es0 = 0;
     let ip = 0;
     let is = 0;
+    /** Square of the AC current (RMS) in a winding's branch; 0 outside the quasi-static analysis. */
+    const acSquared = (ac: PhasorView | undefined, br: number) =>
+      ac ? ac.re(br) ** 2 + ac.im(br) ** 2 : 0;
+    /** True RMS signed like the DC part (the convention of quasi-static readouts). */
+    const signed = (dc: number, re: number, im: number) => Math.sign(dc || 1) * rms(dc, re, im);
+    const copperLosses = (ac: PhasorView | undefined) =>
+      rp() * (ip * ip + acSquared(ac, bp)) + rs() * (is * is + acSquared(ac, bs));
     return {
       stamp(m, step) {
         const { lp, ls, m: mu } = inductances();
@@ -112,10 +120,9 @@ export default defineDevice({
         ep0 = x.v(p1) - x.v(p2) - rp() * ip;
         es0 = x.v(s1) - x.v(s2) - rs() * is;
         if (step.mode === 'dc') ep0 = es0 = 0;
-        const losses = rp() * ip * ip + rs() * is * is;
         reportHeating(
           ctx,
-          heat.burned ? 'ok' : heat.step(losses, step.dt),
+          heat.burned ? 'ok' : heat.step(copperLosses(step.ac), step.dt),
           `O transformador ${id}`,
           heat.power,
           ratedLosses(),
@@ -128,12 +135,16 @@ export default defineDevice({
         out[2] = is;
         out[3] = -is;
       },
-      readouts(x, out) {
-        out('vPrimary', x.v(p1) - x.v(p2));
-        out('vSecondary', x.v(s1) - x.v(s2));
-        out('iPrimary', ip);
-        out('iSecondary', -is);
-        out('losses', heat.burned ? 0 : rp() * ip * ip + rs() * is * is);
+      readouts(x, out, ac) {
+        const re = (i: number) => (ac ? ac.re(i) : 0);
+        const im = (i: number) => (ac ? ac.im(i) : 0);
+        const across = (a: number, b: number) =>
+          signed(x.v(a) - x.v(b), re(a) - re(b), im(a) - im(b));
+        out('vPrimary', across(p1, p2));
+        out('vSecondary', across(s1, s2));
+        out('iPrimary', signed(ip, re(bp), im(bp)));
+        out('iSecondary', -signed(is, re(bs), im(bs)));
+        out('losses', heat.burned ? 0 : copperLosses(ac));
         out('temperature', heat.temperature);
         out('burned', heat.burned);
       },

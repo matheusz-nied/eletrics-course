@@ -77,9 +77,10 @@ export default defineDevice({
       const lo = softplus((-u - half) / V_SOFT);
       return { i: G_CLAMP * V_SOFT * (hi.value - lo.value), g: G_CLAMP * (hi.slope + lo.slope) };
     };
-    let v1Prev = 0;
+    // The gain node rests at the middle of the rails (0 V only for a split supply).
+    let v1Prev = design().mid;
     let iC1Prev = 0;
-    let v1 = 0;
+    let v1 = v1Prev;
     let iout = 0;
     const capacitor = (step: { mode: string; dt: number; method: string }, c1: number) => {
       if (step.mode === 'dc' || step.dt <= 0) return { g: 0, h: 0 };
@@ -142,8 +143,17 @@ export default defineDevice({
         out('iout', iout);
         out('saturated', Math.abs(v1 - d.mid) > 0.98 * d.half);
       },
+      paramChanged(name) {
+        if (name !== 'vcc' && name !== 'vee' && name !== 'headroom') return;
+        // Keep the stored state inside the new swing: a solve while paused uses
+        // a tiny step, where the pole capacitor would hold it past the clamp.
+        const d = design();
+        v1Prev = v1 = Math.max(d.mid - d.half, Math.min(d.mid + d.half, v1Prev));
+        iC1Prev = 0;
+      },
       reset() {
-        v1Prev = iC1Prev = v1 = iout = 0;
+        v1Prev = v1 = design().mid;
+        iC1Prev = iout = 0;
       },
     };
   },

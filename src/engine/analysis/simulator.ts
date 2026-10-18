@@ -385,6 +385,7 @@ export class Simulator {
     for (const el of this.elements) this.collect(el, x, readouts);
     this.wireCurrents(readouts);
     for (const p of this.probes) readouts[p.id] = this.probeValue(p, x, readouts);
+    if (this.quasiStatic) this.probeParts(x, readouts);
     const frame: SimFrame = { t: this.t, nodeVoltages, readouts, events: this.pendingEvents };
     this.pendingEvents = [];
     if (this.lastSweep) frame.sweep = this.lastSweep;
@@ -849,6 +850,49 @@ export class Simulator {
     const tmp: SimFrame['readouts'] = {};
     this.collect(p.element, x, tmp);
     return tmp[key] as number;
+  }
+
+  /**
+   * Quasi-static analysis: the DC part (`<probe>.dc`) and the RMS of the AC
+   * part (`<probe>.ac`) of each voltage or current probe, which a meter in DC
+   * or AC mode shows. Power probes and currents a device reports itself
+   * have no split.
+   */
+  private probeParts(x: SolutionView, out: SimFrame['readouts']): void {
+    const at = (arr: Float64Array, i: number) => (i < 0 ? 0 : arr[i]);
+    let wires:
+      { dc: SimFrame['readouts']; re: SimFrame['readouts']; im: SimFrame['readouts'] } | undefined;
+    const wire = (key: string) => {
+      if (!wires) {
+        wires = { dc: {}, re: {}, im: {} };
+        const scratch = this.wireScratch;
+        const el = (e: number) => this.elements[e];
+        wireCurrents(this.wires, (e, pin) => el(e).currents[pin], wires.dc, scratch);
+        wireCurrents(this.wires, (e, pin) => el(e).acRe![pin], wires.re, scratch);
+        wireCurrents(this.wires, (e, pin) => el(e).acIm![pin], wires.im, scratch);
+      }
+      const get = (map: SimFrame['readouts']) => (map[key] as number | undefined) ?? 0;
+      return { dc: get(wires.dc), ac: Math.hypot(get(wires.re), get(wires.im)) };
+    };
+    for (const p of this.probes) {
+      let dc: number;
+      let ac: number;
+      if (p.kind === 'voltage') {
+        dc = x.v(p.plus) - x.v(p.minus);
+        ac = Math.hypot(
+          at(this.acRe, p.plus) - at(this.acRe, p.minus),
+          at(this.acIm, p.plus) - at(this.acIm, p.minus),
+        );
+      } else if (p.kind === 'wire') {
+        ({ dc, ac } = wire(p.key));
+      } else if (p.kind === 'current' && p.element.twoTerminal) {
+        const el = p.element;
+        dc = (el.def.source ? -1 : 1) * el.currents[0];
+        ac = Math.hypot(el.acRe![0], el.acIm![0]);
+      } else continue;
+      out[`${p.id}.dc`] = dc;
+      out[`${p.id}.ac`] = ac;
+    }
   }
 
   private recordSamples(): void {

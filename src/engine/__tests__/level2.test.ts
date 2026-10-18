@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { CircuitDoc, SimEvent, SimFrame } from '../contract';
 import { Simulator } from '../analysis/simulator';
+import { checkGoal } from '../analysis/goals';
+import { validateCircuit } from '../format/validate';
 import { netlist, runFor, type NetPart } from './utils';
 
 const r = (frame: SimFrame, key: string) => frame.readouts[key] as number;
@@ -315,6 +317,50 @@ describe('opamp', () => {
     });
     expect(max).toBeCloseTo((10.5 * 10000) / 10075, 1);
     expect(min).toBeCloseTo((-10.5 * 10000) / 10075, 1);
+  });
+
+  describe('single supply (12 V / 0 V) with the default headroom', () => {
+    // Comparator: + at V2, − at half of the 12 V supply.
+    const single = (analysis?: CircuitDoc['analysis']) =>
+      netlist(
+        'fonte-simples',
+        [
+          { id: 'V1', type: 'dc-voltage', nodes: ['1', '0'], params: { voltage: 12 } },
+          { id: 'RA', type: 'resistor', nodes: ['1', '2'], params: { resistance: 10000 } },
+          { id: 'RB', type: 'resistor', nodes: ['2', '0'], params: { resistance: 10000 } },
+          { id: 'V2', type: 'dc-voltage', nodes: ['3', '0'], params: { voltage: 8 } },
+          {
+            id: 'U1',
+            type: 'opamp',
+            nodes: { inp: '3', inn: '2', out: '4' },
+            params: { vcc: 12, vee: 0 },
+          },
+          { id: 'RL', type: 'resistor', nodes: ['4', '0'], params: { resistance: 10000 } },
+        ],
+        analysis,
+      );
+    const high = (10.5 * 10000) / 10075;
+    const low = (1.5 * 10000) / 10075;
+
+    it('converges at t = 0 and switches between 1,5 V and 10,5 V', () => {
+      const bench = new Bench(single(tran(1e-3)));
+      expect(r(bench.run(0.01), 'v4')).toBeCloseTo(high, 1);
+      bench.set('V2', 'voltage', 4);
+      expect(r(bench.run(0.01), 'v4')).toBeCloseTo(low, 1);
+      expect(bench.frame.readouts['U1.saturated']).toBe(true);
+    });
+
+    it('converges in DC', () => {
+      expect(r(runFor(single()).frame, 'v4')).toBeCloseTo(high, 1);
+    });
+
+    it('keeps converging when the rails change while paused', () => {
+      const bench = new Bench(single(tran(1e-3)));
+      bench.run(0.01);
+      bench.set('U1', 'vcc', 5);
+      bench.sim.refresh();
+      expect(r(bench.run(0.01), 'v4')).toBeCloseTo((3.5 * 10000) / 10075, 1);
+    });
   });
 
   it('closed-loop bandwidth is GBW over the noise gain', () => {
@@ -681,5 +727,62 @@ describe('electrolytic capacitor', () => {
     bench.run(2);
     expect(bench.events[0].message).toMatch(/acima da tensão nominal: [\d,]+ V, nominal 25 V/);
     expect(bench.frame.readouts['C1.bulged']).toBe(true);
+  });
+});
+
+describe('initial conditions changed after creation', () => {
+  const rc = (goals?: CircuitDoc['goals']) => ({
+    ...netlist(
+      'descarga',
+      [
+        { id: 'R1', type: 'resistor', nodes: ['1', '0'], params: { resistance: 1000 } },
+        { id: 'C1', type: 'capacitor', nodes: ['1', '0'], params: { capacitance: 1e-3 } },
+      ],
+      tran(1e-3),
+    ),
+    goals,
+  });
+
+  it('a new capacitor ic charges it at once, while paused or running', () => {
+    const bench = new Bench(rc());
+    bench.set('C1', 'ic', 10);
+    bench.sim.refresh();
+    expect(r(bench.frame, 'v1')).toBeCloseTo(10, 3);
+    // One time constant (1 s): 10 V × e⁻¹.
+    expect(r(bench.run(1), 'v1')).toBeCloseTo(10 * Math.exp(-1), 1);
+    bench.set('C1', 'ic', 5);
+    expect(r(bench.run(0.001), 'v1')).toBeCloseTo(5 * Math.exp(-0.001), 2);
+  });
+
+  it('a goal solution can set it', () => {
+    const goal = {
+      id: 'meia-carga',
+      description: 'Depois de uma constante de tempo, o capacitor tem mais de 3 V.',
+      check: { readout: 'v1', op: '>', value: 3 },
+      at: 1,
+      solution: { 'C1.ic': 9 },
+    } satisfies NonNullable<CircuitDoc['goals']>[number];
+    const doc = rc([goal]);
+    expect(validateCircuit(doc).errors).toEqual([]);
+    const sim = new Simulator(doc);
+    sim.setParam('C1', 'ic', 9);
+    sim.refresh();
+    while (sim.t < 1 - sim.dt * 1e-6) sim.step();
+    expect(checkGoal(goal, sim.frame({ samples: false }))).toBe(true);
+  });
+
+  it('a new inductor ic sets its current at once', () => {
+    const doc = netlist(
+      'rl',
+      [
+        { id: 'R1', type: 'resistor', nodes: ['1', '0'], params: { resistance: 10 } },
+        { id: 'L1', type: 'inductor', nodes: ['1', '0'], params: { inductance: 1 } },
+      ],
+      tran(1e-3),
+    );
+    const bench = new Bench(doc);
+    bench.set('L1', 'ic', 2);
+    // τ = L/R = 0,1 s.
+    expect(r(bench.run(0.1), 'L1.current')).toBeCloseTo(2 * Math.exp(-1), 1);
   });
 });

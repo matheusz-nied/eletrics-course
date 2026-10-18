@@ -44,6 +44,8 @@ test.describe('example lesson', () => {
   test('renders formulas with KaTeX at build time', async ({ page }) => {
     await expect(page.locator('.katex').first()).toBeVisible();
     await expect(page.locator('.katex-error')).toHaveCount(0);
+    // The stylesheet matches the renderer's version, so formulas never wrap mid-symbol.
+    await expect(page.locator('.katex-html > *').first()).toHaveCSS('white-space', 'nowrap');
 
     // Display formulas can scroll sideways, so each one takes keyboard focus.
     const formulas = page.locator('.katex-display');
