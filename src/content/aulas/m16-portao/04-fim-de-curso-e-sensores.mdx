@@ -1,0 +1,314 @@
+---
+titulo: Fim de curso e sensores
+modulo: m16-portao
+ordem: 4
+nivel: I
+duracaoMin: 35
+objetivos:
+  - Explicar como o reed switch e os ímãs da cremalheira avisam que o portão chegou ao fim
+  - Calcular a tensão e a corrente numa entrada com resistor de pull-up
+  - Ligar o conector FCA, GND e FCF e reconhecer pelos LEDs um conector invertido
+  - Comparar reed, microchave, sensor Hall e encoder
+  - Explicar o que o tempo máximo de percurso protege
+prerequisitos:
+  - m04-passivos/07-chaves-botoes-e-reles
+  - m05-magnetismo/05-sensores-magneticos
+  - m11-digital/03-pull-up-pull-down-e-debounce
+  - m16-portao/03-a-central-por-dentro
+tags: [portão, fim de curso, reed switch, ímã, pull-up, sensor hall, encoder, cremalheira]
+seguranca: rede
+---
+
+import { lessonUrl } from '../../../lib/url';
+import CentralVirtual from '../../../lessons/m16/ui/CentralVirtual';
+import PlacaCD1 from '../../../lessons/m16/figuras/PlacaCD1.astro';
+import ReedZone from '../../../lessons/m16/figuras/ReedZone.astro';
+
+O portão abre, chega ao fim e o motor continua roncando, empurrando a folha contra o batente. Em outra casa, o portão para dez centímetros antes de fechar e fica ali, com uma fresta. Nos dois casos o motor está bom. Quem falhou foi a pecinha que avisa a central "cheguei": o <Term id="fim-de-curso">fim de curso</Term>.
+
+Nesta aula você vai ver como esse aviso funciona, do ímã preso no portão até o pino do <Term id="microcontrolador">microcontrolador</Term>, e como reconhecer pelos LEDs da placa quando ele está errado.
+
+## A ideia: um ímã que encosta duas lâminas
+
+No portão deslizante, o motor fica parado, preso no chão, e a <Term id="cremalheira">cremalheira</Term> (a barra dentada que o pinhão empurra) anda junto com o portão. Na cremalheira ficam presos dois ímãs, um perto de cada ponta. Dentro da tampa do motor, logo abaixo do caminho dos ímãs, fica o sensor.
+
+O sensor mais comum é o <Term id="reed-switch">reed switch</Term>: uma ampola de vidro, do tamanho de um palito de fósforo, com duas lâminas de metal lá dentro. As lâminas quase se tocam, mas não se encostam. Quando um ímã chega perto, o campo magnético atravessa as lâminas, elas viram dois pequenos ímãs e se atraem: o contato fecha. Quando o ímã vai embora, a mola das próprias lâminas separa os dois lados de novo.
+
+Em repouso, sem ímã, o contato está aberto. Por isso o reed é um contato <Term id="contato-na-nf">NA</Term> (normalmente aberto) acionado por campo magnético.
+
+<ReedZone caption="Figura 1. Com o ímã longe, as lâminas do reed ficam separadas e o pino da central lê 5 V. Com o ímã logo acima, o campo fecha o contato e o pino lê 0 V. Embaixo, a zona do reed: o contato só fica fechado enquanto o ímã está a poucos centímetros dele (na central virtual desta aula, 3 cm para cada lado)." />
+
+Repare em duas coisas na figura.
+
+- **A zona do reed é curta.** O contato fecha só quando o ímã está a poucos centímetros do sensor. Isso é bom: a parada acontece num ponto bem definido do percurso.
+- **A folga entre o ímã e a tampa importa.** Longe demais, o campo fica fraco e o reed não fecha. Cada fabricante diz a distância no manual do motor. O manual do motor Garen KDZ, por exemplo, pede 10 mm entre o ímã e a tampa (15 mm no máximo); o manual dos deslizantes Nice (Peccinin) pede o ímã a no máximo 0,5 cm da carenagem.
+
+### Qual ímã é o de abertura?
+
+Esta parte confunde muita gente. Como o motor fica parado e a cremalheira anda, o ímã que chega ao sensor quando o portão está **aberto** é o que fica perto da ponta que encosta no pilar ao fechar. E o ímã que chega ao sensor quando o portão está **fechado** é o da outra ponta, a "cauda" do portão. Se você ficar na dúvida, não adivinhe: mova o portão à mão (com o desbloqueio, como na <a href={lessonUrl('m16-portao/01-anatomia-do-automatizador')}>aula 16.1</a>) e veja qual ímã para em cima do motor em cada ponta.
+
+E como cada ímã aciona só o seu sinal, FCA (fim de curso de abertura) ou FCF (fim de curso de fechamento)? Depende do sensor. Na central do curso, a CD-1, o módulo de fim de curso tem **dois reeds**, um ligado ao FCA e outro ao FCF. Um arranjo comum é deixar os dois reeds lado a lado: o ímã de abertura chega por um lado e alcança primeiro um dos reeds; o motor desliga ali, antes de o ímã chegar ao outro. No fechamento, o outro ímã chega pelo lado oposto e alcança primeiro o outro reed. Nesse arranjo, um motor instalado do outro lado do portão troca os papéis dos dois reeds. Isso ajuda a entender por que vários manuais mandam inverter o conector do fim de curso em certas situações, como você vai ver mais abaixo. O seu motor pode usar outro arranjo: confira no manual dele.
+
+## Como a central lê o reed: o resistor de pull-up
+
+O reed só abre e fecha um contato. Ele não "fala" nada. Quem transforma esse contato numa informação é o circuito de entrada da central.
+
+Cada entrada de fim de curso da CD-1 tem um resistor de 10 kΩ ligando o pino do microcontrolador aos 5 V da lógica. Esse resistor se chama <Term id="pull-up">resistor de pull-up</Term> ("puxa para cima"). O reed fica entre o pino e o GND (o negativo da lógica).
+
+- **Reed aberto (ímã longe):** não há caminho para a corrente. O resistor não tem queda de tensão, e o pino fica em 5 V. O programa lê nível alto, "1".
+- **Reed fechado (ímã perto):** o reed liga o pino direto ao GND. O pino vai a 0 V, e o programa lê nível baixo, "0". Agora passa uma pequena corrente pelo resistor.
+
+Essa corrente sai da Lei de Ohm, que você viu na <LinkAula id="m01-eletricidade-do-zero/04-lei-de-ohm">aula 1.4</LinkAula>:
+
+$$
+I = \frac{V}{R} = \frac{5\,\text{V}}{10\,\text{k}\Omega} = 0{,}5\,\text{mA}
+$$
+
+em que $I$ é a corrente que passa pelo resistor e pelo reed (em ampères), $V$ é a tensão da lógica (5 V) e $R$ é o resistor de pull-up (10.000 Ω). A potência no resistor é $P = V \cdot I = 5\,\text{V} \cdot 0{,}5\,\text{mA} = 2{,}5\,\text{mW}$, quase nada.
+
+E por que, com o reed aberto, o pino fica mesmo em 5 V? Porque a entrada do microcontrolador quase não puxa corrente. Um valor típico é menos de 1 µA. Com 1 µA, a queda no resistor seria $10\,\text{k}\Omega \cdot 1\,\mu\text{A} = 10\,\text{mV}$: o pino fica em 4,99 V, e o programa lê "1" sem dúvida.
+
+Repare que, nessa ligação, o sinal é **ativo em nível baixo**: "ímã perto" vira 0 V. Parece ao contrário, mas tem vantagens. O fio do sensor só precisa levar o GND, que é comum aos dois reeds (por isso o conector tem três vias e não quatro). E se o fio do sensor encostar na carcaça ou no GND, nada queima: o resistor limita a corrente a 0,5 mA. Sem o resistor, a entrada ficaria "solta" com o reed aberto e poderia ler 0 ou 1 ao acaso, como uma antena. A <LinkAula id="m11-digital/03-pull-up-pull-down-e-debounce">aula 11.3</LinkAula> mostra isso em detalhe.
+
+<Simulation circuit="m16/fim-de-curso" />
+
+A simulação começa com o portão fechado: o ímã de fechamento está no reed FCF, e o pino FCF mostra 0 V. Faça o portão abrir: desligue "Ímã de fechamento perto do reed FCF" e ligue "Ímã de abertura perto do reed FCA". O pino FCA vai a 0 V e o FCF sobe para 5 V. Depois desligue os dois ímãs, como no meio do percurso: os dois pinos ficam em 5 V. Em cada situação, leia os dois pinos no multímetro e diga qual reed está fechado só pela tensão.
+
+## Os LEDs FCA e FCF
+
+Medir o pino com o multímetro funciona, mas é mais prático olhar a placa. A CD-1 tem um LED verde, `FCA`, e um vermelho, `FCF`, ligados no próprio circuito de entrada. Eles mostram o contato: **LED aceso = reed fechado = ímã perto**.
+
+<PlacaCD1
+  destaque={['entradas', 'leds']}
+  caption="Figura 2. Na CD-1, o conector de fim de curso FCA, GND e FCF fica no lado da baixa tensão, perto dos LEDs FCA (verde) e FCF (vermelho)."
+/>
+
+Com o portão fechado e parado, o LED FCF fica aceso. Com o portão no meio, os dois apagam. Com o portão aberto, só o FCA acende. Muitas centrais reais têm LEDs parecidos: a Rossi KXH1024FS tem `FA` (verde, aberto) e `FF` (vermelho, fechado), e a Garen Wave Connect usa verde para FCA e vermelho para FCF. Os LEDs são o primeiro teste depois de ligar uma central nova: se o LED errado acender, alguma coisa está trocada.
+
+## O conector de três vias e o conector invertido
+
+Na CD-1, o fim de curso entra por um conector de três vias: `FCA`, `GND` e `FCF`. O GND do meio é o comum dos dois reeds. Nas centrais reais, a ideia é a mesma, mas a ordem e o número de vias mudam:
+
+| Central | Conector do fim de curso | O que o manual diz |
+|---|---|---|
+| CD-1 (curso) | `FCA` `GND` `FCF` | Ímã perto = contato fechado |
+| Peccinin CP 4010F | `FCA1` `GND` `FCF1` | Só aceita fim de curso NA; se ficar invertido, inverter o conector |
+| Omegasat CT30A | `FCF` `GND` `FCA` | Ordem ao contrário da Peccinin; se ficar invertido, inverter o conector |
+| Intelbras CP-1000 | Conector CN13, 5 pinos | Padrão de 3 fios nos pinos 2, 3 e 4; de 4 fios, pinos 2 a 5 |
+| Rossi KXH1024FS | `FA` `FF` `CM` | Aceita reed ou sensor Hall |
+
+O **conector invertido** é o caso em que FCA e FCF ficam trocados. Ele aparece quando o conector entra ao contrário, quando a ordem dos fios do sensor não bate com a da placa, ou quando o motor é instalado do outro lado do portão. O sintoma é inconfundível: com o portão fechado, acende o LED **FCA**. A central acha que o portão está aberto.
+
+Na Nice Pro S10, a inversão do fim de curso é feita por menu, sem mexer no conector. Na Garen Wave Connect e na Garen TSi Pro, o manual manda inverter o conector do fim de curso junto com os fios do motor quando se inverte o sentido. Por isso a regra é: **depois de qualquer troca, confira os LEDs com o portão parado numa ponta**.
+
+## Explore: os ímãs passando na central virtual
+
+A central virtual abaixo roda o programa da CD-1 contra um portão de 4 m. O desenho mostra os dois ímãs (cores diferentes) presos na cremalheira e o reed no motor. Abaixo do portão ficam os LEDs da placa.
+
+<CentralVirtual client:visible titulo="Central virtual: fim de curso" mostrar={['comandos']} />
+
+Faça assim:
+
+1. **Antes de apertar qualquer coisa**, olhe os LEDs. O portão está fechado: o LED FCF está aceso e o reed, no desenho, está marcado como fechado.
+2. Aperte **Controle remoto**. O portão começa a abrir e, logo no começo, o LED FCF apaga. Quantos centímetros o portão andou até isso acontecer? (Na central virtual, cerca de 5 cm: o ímã está a 2 cm do reed e a zona vai até 3 cm além dele.)
+3. Acompanhe o campo **Percurso** enquanto o portão anda. Perto do fim, o ímã de abertura chega ao reed, o LED FCA acende e o motor desliga no mesmo instante. O registro "O que a central fez" mostra a mensagem do fim de curso. Quanto tempo levou o percurso, contra o limite de 40 s?
+4. Espere: com o fechamento automático ligado, o portão fecha sozinho depois da pausa. Veja o FCA apagar logo na saída e o FCF acender na chegada.
+
+Agora a mesma central com um defeito montado de propósito.
+
+<CentralVirtual
+  client:visible
+  titulo="Central virtual: com um defeito no fim de curso"
+  mostrar={['comandos']}
+  defeitos={{ conectorFcInvertido: true }}
+/>
+
+O portão também começa fechado. **Antes de apertar o controle, olhe os LEDs.** Qual acendeu? Aperte **Controle remoto** e observe o estado da central, o motor, a corrente e o campo Percurso. Deixe passar uns 40 segundos (use a velocidade 5× se quiser).
+
+<DeepDive title="O que aconteceu na segunda central">
+O conector do fim de curso estava invertido. Com o portão fechado, o ímã de fechamento estava no reed, mas o sinal chegava ao pino FCA: acendeu o LED verde, e a central começou o dia achando que o portão estava aberto. O primeiro comando, então, foi **fechar**. O motor empurrou um portão que já estava fechado contra o batente: o campo Motor mostra "zumbindo, sem girar" e a corrente fica perto de 5 A.
+
+Por que a detecção de obstáculo não parou o motor? A CD-1 aprende a corrente normal de trabalho no primeiro meio segundo do movimento e depois vigia se ela sobe muito. Como o portão já começou travado, a corrente alta pareceu "normal". Quem desligou o motor foi a última proteção: o **tempo máximo de 40 s** sem chegar ao fim de curso. A central entrou em erro, com o LED PROG piscando e o buzzer apitando.
+
+A correção, nesta central e nos manuais da Peccinin e da Omegasat, é a mesma: com o disjuntor desligado, inverter o conector do fim de curso. Depois, ligar de novo e conferir os LEDs com o portão parado numa ponta.
+</DeepDive>
+
+## Outros sensores de fim de curso
+
+O reed com ímã é o padrão nos portões deslizantes residenciais, mas não é o único.
+
+| Sensor | Como funciona | O que observar |
+|---|---|---|
+| Reed switch | Ampola com lâminas que se encostam perto do ímã | Simples e sem desgaste mecânico. O vidro é frágil: uma pancada na tampa pode trincar a ampola |
+| Microchave | Contato mecânico (com C, NA e NF) apertado por uma alavanca ou rolete quando o portão chega a um batente ou came | Dá para testar com o multímetro. Tem peças que se desgastam e sofre com água e poeira |
+| Sensor Hall | Circuito eletrônico que sente o campo do ímã. Precisa de alimentação | A Rossi KXH1024FS detecta sozinha se o sensor é reed ou Hall, e o Hall exige o ímã próprio dele |
+| Encoder | Conta pulsos enquanto o motor gira; a central aprende o percurso e sabe onde o portão está a cada instante | Permite desacelerar antes do fim. Aparece nas centrais PPA (o "fim de curso digital") e na Garen TSi Pro, que mesmo assim exige os ímãs |
+
+O sensor Hall e o encoder são assunto da <LinkAula id="m12-microcontroladores/03-sensores">aula 12.3</LinkAula>. Para quem vai trocar uma central, o que importa é: **a central nova precisa aceitar o tipo de sensor que o motor tem**. A Peccinin CP 4010F e a Nice Pro S10, por exemplo, só aceitam fim de curso NA.
+
+## O tempo máximo de percurso: a última proteção
+
+Pense no que acontece se o fim de curso falha e nada mais vigia o motor. O portão chega ao batente e o motor continua ligado, travado. A corrente de motor travado é várias vezes a corrente normal. O enrolamento esquenta até o <Term id="protetor-termico">protetor térmico</Term> desligar (os manuais dos motores citam protetores de 130 °C a 150 °C). Enquanto isso, o redutor, o pinhão, a cremalheira e a estrutura do portão aguentam um esforço para o qual não foram feitos.
+
+Por isso toda central tem um limite de tempo. Na CD-1, se o portão anda **40 s** sem chegar a um fim de curso, a central desliga o motor e entra em erro (LED PROG piscando e buzzer). O valor sai de uma central real, a Omegasat CT30A, que usa 40 s. Outras usam outros critérios: 90 s na Nice Pro S10, 60 s na PPA Facility Connect (120 s enquanto o percurso não foi memorizado) e, na Intelbras CP-1000, um alarme quando o portão passa de 4 vezes o tempo do percurso aprendido.
+
+O tempo máximo não protege pessoas: 40 s é tempo demais para alguém preso. Quem protege as pessoas é a fotocélula e a reversão por obstáculo, assunto da <a href={lessonUrl('m16-portao/05-seguranca-e-acessorios')}>próxima aula</a>. O tempo máximo protege o motor e a mecânica quando todo o resto falhou.
+
+## Exemplo resolvido: o portão da central virtual
+
+O portão da central virtual tem 4 m de percurso e anda a 15 m/min, um valor típico de motores deslizantes de 1/4 a 1/2 CV.
+
+**1. Velocidade em metros por segundo.**
+
+$$
+v = \frac{15\,\text{m}}{60\,\text{s}} = 0{,}25\,\text{m/s}
+$$
+
+**2. Tempo de percurso.** Com $d$ = 4 m de percurso:
+
+$$
+t = \frac{d}{v} = \frac{4\,\text{m}}{0{,}25\,\text{m/s}} = 16\,\text{s}
+$$
+
+Somando cerca de 1 s da partida suave (o motor começa devagar), dá uns 17 s. É o que o campo Percurso mostrou no Explore. O limite de 40 s fica com folga de mais de duas vezes o percurso normal.
+
+**3. Quanto tempo o ímã fica na zona do reed.** Se o portão não parasse, o ímã atravessaria a zona inteira, 3 cm para cada lado do reed, 6 cm no total:
+
+$$
+t_\text{zona} = \frac{0{,}06\,\text{m}}{0{,}25\,\text{m/s}} = 0{,}24\,\text{s}
+$$
+
+O programa da CD-1 lê os pinos a cada 10 ms, ou seja, umas 24 vezes nesse intervalo. Ele percebe o reed fechar no primeiro instante e desliga o motor ali. O portão ainda anda um pouco por inércia depois do corte, por isso o ímã fica um pouco antes do ponto exato em que você quer que o portão pare.
+
+**4. E um portão maior?** Um portão de 7 m num motor de 13 m/min (outro valor típico, dos mais lentos) levaria $7 / (13/60) \approx 32\,\text{s}$, mais a partida. Ainda cabe nos 40 s, mas com pouca folga: um trilho com atrito ou um ajuste de rampa mais lento poderia estourar o limite. É por isso que algumas centrais aprendem o percurso e calculam o próprio limite, como a Intelbras.
+
+<RealCase title="O portão que parava com uma fresta">
+Depois de uma reforma no muro, o portão de uma casa passou a parar uns dez centímetros antes de fechar. O motor estava bom e o LED FCF acendia normalmente quando o portão parava. Ou seja, o fim de curso estava funcionando, só que no lugar errado: o suporte do ímã de fechamento tinha levado uma pancada e escorregado na cremalheira.
+
+O técnico desligou o disjuntor do portão, abriu o desbloqueio e fechou o portão à mão até a posição certa. Soltou o parafuso do suporte, deslizou o ímã até ficar sobre o sensor e conferiu a folga até a tampa no manual do motor. Apertou o parafuso, travou o desbloqueio e só então religou o disjuntor. Testou duas vezes, de longe, com o controle. Como o portão ainda anda um pouco depois do corte, precisou de um segundo ajuste de um centímetro.
+
+Repare na ordem: as mãos só chegaram perto do pinhão e da cremalheira com o disjuntor desligado e o portão destravado.
+</RealCase>
+
+## Erros comuns e segurança
+
+<Callout type="perigo" title="Mãos longe do pinhão">
+O pinhão e a cremalheira esmagam dedos. Para ajustar ímãs, desligue o disjuntor do portão antes de pôr as mãos perto deles e mova o portão à mão pelo desbloqueio. Para conferir os LEDs com a central ligada, aproxime o ímã do sensor sem encostar na placa e mantenha as mãos fora do caminho do portão.
+</Callout>
+
+- **Ímã solto ou fora do lugar.** O portão para cedo, para tarde ou não para. Ajuste com o disjuntor desligado, como no caso acima.
+- **Ímã longe demais da tampa.** O reed não fecha. O sintoma é o mesmo de um reed quebrado. Confira a folga que o manual pede.
+- **Reed quebrado ou fio partido.** Os dois LEDs nunca acendem, e a CD-1 liga "sem saber a posição do portão". Na central virtual, com esse defeito, o portão vai até o batente, a corrente sobe e a central trata isso como obstáculo: na abertura ela para; no fechamento ela reverte, e o portão nunca fica fechado. Repare que, para o fim de curso, um fio partido parece "ímã longe". A central não percebe a falha sozinha; quem segura o motor é a detecção de corrente e o tempo máximo.
+- **Conector invertido.** Acende o LED errado com o portão parado numa ponta. Inverta o conector com o disjuntor desligado.
+- **"Jumpear" o conector para testar.** Ligar FCA ou FCF ao GND com um fio faz a central achar que o portão chegou ao fim, e ela pode partir no sentido que você não espera. Teste com um ímã, não com um fio.
+- **Trocar o motor ou a central sem conferir o tipo de sensor.** Uma central que só aceita reed NA não funciona com um sensor de outro tipo.
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'O portão está no meio do percurso, sem nenhum ímã perto dos reeds. Quanto o pino FCA da CD-1 lê?',
+      options: [
+        { text: '5 V, porque o resistor de pull-up puxa o pino para cima', correct: true },
+        {
+          text: '0 V, porque não passa corrente',
+          feedback:
+            'Sem corrente não há queda de tensão no resistor: o pino fica na tensão de cima, 5 V.',
+        },
+        {
+          text: '2,5 V, metade do caminho',
+          feedback:
+            'Não há divisor de tensão aqui. Com o reed aberto, o resistor não tem para onde levar corrente.',
+        },
+        {
+          text: 'Depende do ímã de fechamento',
+          feedback: 'Cada pino tem o seu reed e o seu pull-up. O FCA não depende do reed FCF.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma central usa pull-up de 4,7 kΩ em 5 V. Com o reed fechado, qual a corrente no resistor, em mA?',
+      answer: 1.06,
+      tolerance: 0.02,
+      unit: 'mA',
+      explanation: 'I = V/R = 5 V / 4.700 Ω ≈ 0,00106 A = 1,06 mA.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você liga a central nova com o portão fechado. O LED FCA (verde) acende e o FCF (vermelho) fica apagado. Qual a causa mais provável?',
+      options: [
+        { text: 'O conector do fim de curso está invertido', correct: true },
+        {
+          text: 'O reed está quebrado',
+          feedback: 'Com o reed quebrado, nenhum dos dois LEDs acenderia.',
+        },
+        {
+          text: 'Os fios ABRE e FECHA do motor estão trocados',
+          feedback:
+            'Isso muda o sentido do motor quando ele gira. Com o portão parado, não muda qual LED acende.',
+        },
+        {
+          text: 'A fotocélula está desalinhada',
+          feedback: 'A fotocélula tem o LED FOTO. Ela não acende FCA nem FCF.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Se o fio entre o reed FCF e a central partir, a central entende que o portão chegou ao fim e desliga o motor.',
+      answer: false,
+      explanation:
+        'Fio partido é igual a reed aberto: o pino fica em 5 V, como se o ímã nunca chegasse. Quem segura o motor nesse caso é a detecção de corrente ou o tempo máximo de 40 s.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um portão de 5 m anda a 15 m/min. Quantos segundos leva o percurso, sem contar a partida suave?',
+      answer: 20,
+      tolerance: 0.02,
+      unit: 's',
+      explanation: 'v = 15/60 = 0,25 m/s; t = 5 / 0,25 = 20 s. Fica dentro do limite de 40 s da CD-1.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada sensor de fim de curso ao jeito como ele funciona.',
+      pairs: [
+        ['Reed switch', 'Ampola de vidro com lâminas que se encostam perto do ímã'],
+        ['Microchave', 'Contato mecânico apertado por uma alavanca'],
+        ['Sensor Hall', 'Circuito eletrônico alimentado que sente o campo do ímã'],
+        ['Encoder', 'Conta pulsos do motor para saber onde o portão está'],
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'O que o tempo máximo de percurso (40 s na CD-1) protege? Marque todas as certas.',
+      options: [
+        { text: 'O motor, que esquentaria empurrando o portão parado', correct: true },
+        { text: 'O redutor, a cremalheira e a estrutura do portão', correct: true },
+        {
+          text: 'Uma pessoa presa pelo portão',
+          feedback:
+            'Quem protege pessoas é a fotocélula e a reversão por obstáculo. 40 s é tempo demais para alguém preso.',
+        },
+        {
+          text: 'A bateria do controle remoto',
+          feedback: 'O controle não tem nada a ver com o tempo de motor ligado.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O fim de curso do portão deslizante é, em geral, um reed switch na tampa do motor acionado por ímãs presos na cremalheira. O reed é um contato NA: fecha com o ímã a poucos centímetros.
+- A central lê o reed com um resistor de pull-up: reed aberto = 5 V; reed fechado = 0 V, com $I = 5\,\text{V} / 10\,\text{k}\Omega = 0{,}5\,\text{mA}$.
+- Os LEDs FCA (verde) e FCF (vermelho) mostram o contato. Com o portão parado numa ponta, o LED errado aceso indica conector invertido.
+- A ordem e o número de vias do conector mudam entre centrais (FCA, GND, FCF; FCF, GND, FCA; 5 pinos). Siga o manual e confira os LEDs depois de qualquer troca.
+- Além do reed, existem microchave, sensor Hall e encoder; a central nova precisa aceitar o sensor do motor.
+- O tempo máximo de percurso (40 s na CD-1) protege o motor e a mecânica quando o fim de curso falha. Pessoas são protegidas pela fotocélula e pela reversão por obstáculo.
