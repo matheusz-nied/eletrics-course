@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Simulator } from '../../engine/analysis/simulator';
 import type { CircuitDoc, ParamValue, SimEvent } from '../../engine/contract';
-import { PWM_FREQUENCY } from './firmware/pwm';
+import firmware, { PWM_FREQUENCY } from './firmware/pwm';
 import gate from './mosfet-gate.circuit';
 import pwm from './pwm-fita.circuit';
 
@@ -135,6 +135,24 @@ describe('lesson 9.8: LED strip dimmed with PWM', () => {
     expect(quarter.readouts['U1.ciclo']).toBeCloseTo(0.25, 2);
     // Off at 0 %
     expect(Math.max(...at(0).samples['R1.current']!)).toBeLessThan(1e-6);
+  });
+
+  it('the pin stays high exactly as many steps as the duty cycle shows', () => {
+    // 7, 14, 28, 55 and 56 % are a hair above the whole number in floating point.
+    for (const percent of [7, 14, 28, 55, 56]) {
+      const pins = { A0: (percent / 100) * 5 };
+      let state = firmware.init();
+      let high = 0;
+      let shown = 0;
+      for (let i = 0; i < 200; i++) {
+        const out = firmware.step(state, { t: 0, dt: 0, pins });
+        state = out.state;
+        if (i >= 100 && out.pins.D9) high++;
+        shown = out.readouts!['ciclo'] as number;
+      }
+      expect(high).toBe(percent);
+      expect(shown * 100).toBeCloseTo(percent, 9);
+    }
   });
 
   it('fully on, the MOSFET dissipates only tens of microwatts', () => {

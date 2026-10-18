@@ -170,7 +170,7 @@ export default defineCircuit({
       id: 'apagada',
       description:
         'Gire o potenciômetro para 25 % ou menos: o capacitor não chega mais aos 32 V do DIAC, e a lâmpada apaga.',
-      check: { readout: 'P1.position', op: '<=', value: 0.25 },
+      check: { readout: 'L1.brightness', op: '<', value: 0.01 },
       solution: { 'P1.position': 0.2 },
       at: 0.3,
     },

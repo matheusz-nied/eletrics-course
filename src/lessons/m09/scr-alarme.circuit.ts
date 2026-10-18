@@ -104,7 +104,7 @@ export default defineCircuit({
       kind: 'voltage',
       plus: 'X1.a',
       minus: 'X1.k',
-      label: 'Tensão no SCR (ânodo − cátodo)',
+      label: 'Tensão no SCR (anodo − catodo)',
     },
     { id: 'IG', kind: 'current', element: 'R1', label: 'Corrente no gatilho' },
   ],

@@ -30,19 +30,20 @@ Nesta aula você vai conhecer a família dos tiristores, as chaves eletrônicas 
 
 ## O SCR: um diodo que espera a ordem
 
-Na aula sobre o [diodo](../02-diodo/) você viu uma junção PN que conduz num sentido só. O <Term id="tiristor">tiristor</Term> empilha **quatro** camadas: P, N, P, N. O mais simples deles é o <Term id="scr">SCR</Term> (do inglês *silicon controlled rectifier*, retificador controlado de silício). Ele tem três terminais: **ânodo** (A), **cátodo** (K) e **gatilho** (G), ligado à camada P do meio.
+Na aula sobre o [diodo](../02-diodo/) você viu uma junção PN que conduz num sentido só. O <Term id="tiristor">tiristor</Term> empilha **quatro** camadas: P, N, P, N. O mais simples deles é o <Term id="scr">SCR</Term> (do inglês *silicon controlled rectifier*, retificador controlado de silício). Ele tem três terminais: **anodo** (A), **catodo** (K) e **gatilho** (G), ligado à camada P do meio.
 
-Com o ânodo mais positivo que o cátodo, o SCR ainda não conduz: uma das junções fica bloqueando. Basta um pulso de corrente no gatilho, de alguns miliampères, para ele ligar. E aqui está a diferença para o transistor: depois de ligado, o SCR **continua conduzindo sozinho**, mesmo sem o pulso. Ele trava ligado.
+Com o anodo mais positivo que o catodo, o SCR ainda não conduz: uma das junções fica bloqueando. Basta um pulso de corrente no gatilho, de alguns miliampères, para ele ligar. E aqui está a diferença para o transistor: depois de ligado, o SCR **continua conduzindo sozinho**, mesmo sem o pulso. Ele trava ligado.
 
-<Figure caption="Figura 1. Primeiro, as quatro camadas do SCR e o símbolo, um diodo com o gatilho no lado do cátodo. Em seguida, o jeito mais usado de entender a trava: as camadas formam um transistor PNP e um NPN, e cada um alimenta a base do outro. Depois que os dois ligam, o pulso no gatilho já não faz falta." alt="Primeiro, um bloco com quatro faixas empilhadas, P, N, P e N, com o ânodo no topo, o cátodo embaixo e o gatilho saindo da faixa P de baixo; ao lado, o símbolo do SCR, um triângulo com uma barra e um fio de gatilho. Em seguida, um transistor PNP em cima e um NPN embaixo: o coletor do PNP vai à base do NPN, que é o gatilho, e o coletor do NPN vai à base do PNP. Três marcas numeradas mostram a sequência: o pulso no gatilho liga o NPN, o NPN liga o PNP, e o PNP mantém o NPN ligado.">
+<Figure caption="Figura 1. Primeiro, as quatro camadas do SCR e o símbolo, um diodo com o gatilho no lado do catodo. Em seguida, o jeito mais usado de entender a trava: as camadas formam um transistor PNP e um NPN, e cada um alimenta a base do outro. Depois que os dois ligam, o pulso no gatilho já não faz falta." alt="Primeiro, um bloco com quatro faixas empilhadas, P, N, P e N, com o anodo no topo, o catodo embaixo e o gatilho saindo da faixa P de baixo; ao lado, o símbolo do SCR, um triângulo com uma barra e um fio de gatilho. Em seguida, um transistor PNP em cima e um NPN embaixo: o coletor do PNP vai à base do NPN, que é o gatilho, e o coletor do NPN vai à base do PNP. Três marcas numeradas mostram a sequência: o pulso no gatilho liga o NPN, o NPN liga o PNP, e o PNP mantém o NPN ligado.">
   <TiristorCamadas />
 </Figure>
 
 A figura mostra por que ele trava. Lembre do [transistor como chave](../06-transistor-como-chave/): corrente na base liga o transistor. Dentro do SCR, o PNP e o NPN estão ligados de um jeito que a corrente de coletor de um é a corrente de base do outro. O pulso no gatilho liga o NPN, o NPN liga o PNP, e o PNP passa a alimentar a base do NPN. Um segura o outro.
 
-Para desligar o SCR, não adianta tirar o pulso. É preciso fazer a corrente entre ânodo e cátodo cair abaixo de um valor mínimo, a **corrente de manutenção** ($I_H$). As folhas de dados trazem dois números principais:
+Para desligar o SCR, não adianta tirar o pulso. É preciso fazer a corrente entre anodo e catodo cair abaixo de um valor mínimo, a **corrente de manutenção** ($I_H$). As folhas de dados trazem três números principais:
 
 - $I_{GT}$, a **corrente de disparo do gatilho**: o mínimo no gatilho para o SCR ligar.
+- $I_L$, a **corrente de travamento**: logo depois do pulso, a corrente principal precisa passar desse valor para a trava se firmar; se a carga puxar menos, o SCR desliga junto com o pulso. Costuma ser um pouco maior que $I_H$.
 - $I_H$, a **corrente de manutenção**: abaixo dela, a trava se desfaz e o SCR desliga.
 
 ## Explore: o alarme que não para de tocar
@@ -223,7 +224,7 @@ Tudo nesta aula envolve a rede elétrica. Monte e teste esses circuitos só no s
         'Um SCR alimentado por uma bateria disparou com um pulso no gatilho. O que faz ele desligar?',
       options: [
         {
-          text: 'Interromper a corrente entre ânodo e cátodo, ou fazê-la cair abaixo da corrente de manutenção',
+          text: 'Interromper a corrente entre anodo e catodo, ou fazê-la cair abaixo da corrente de manutenção',
           correct: true,
           feedback:
             'Isso. Depois de disparado, o SCR trava ligado. Só desliga quando a corrente principal cai abaixo da corrente de manutenção, como no botão de rearme do alarme.',
@@ -234,8 +235,8 @@ Tudo nesta aula envolve a rede elétrica. Monte e teste esses circuitos só no s
             'Essa é a diferença para o transistor. Depois do disparo, o gatilho não comanda mais nada: o SCR continua conduzindo sozinho.',
         },
         {
-          text: 'Aplicar uma tensão maior no ânodo',
-          feedback: 'Mais tensão no ânodo só aumenta a corrente. Para desligar, a corrente precisa cair.',
+          text: 'Aplicar uma tensão maior no anodo',
+          feedback: 'Mais tensão no anodo só aumenta a corrente. Para desligar, a corrente precisa cair.',
         },
       ],
     },

@@ -17,8 +17,8 @@ export const PWM_FREQUENCY = 500;
 interface State {
   /** Step within the period, 0 to STEPS − 1. */
   count: number;
-  /** Duty cycle of the current period (0 to 1). */
-  duty: number;
+  /** Steps the pin stays high in the current period, 0 to STEPS. */
+  onSteps: number;
 }
 
 export default defineFirmware<State>({
@@ -32,15 +32,16 @@ export default defineFirmware<State>({
     { name: 'A0', kind: 'analog-in', label: 'Potenciômetro (entrada analógica A0)' },
     { name: 'D9', kind: 'digital-out', label: 'Saída PWM (pino 9)' },
   ],
-  init: () => ({ count: 0, duty: 0 }),
+  init: () => ({ count: 0, onSteps: 0 }),
   step(state, { pins }) {
     const count = (state.count + 1) % STEPS;
     const reading = typeof pins.A0 === 'number' ? pins.A0 : 0;
-    const duty = count === 0 ? Math.round((reading / VCC) * STEPS) / STEPS : state.duty;
+    // Whole steps, so 7 % stays 7 steps (7 / 100 * 100 is a hair above 7).
+    const onSteps = count === 0 ? Math.round((reading / VCC) * STEPS) : state.onSteps;
     return {
-      state: { count, duty },
-      pins: { D9: count < duty * STEPS },
-      readouts: { ciclo: duty },
+      state: { count, onSteps },
+      pins: { D9: count < onSteps },
+      readouts: { ciclo: onSteps / STEPS },
       events: [],
     };
   },

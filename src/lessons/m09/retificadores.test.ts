@@ -143,9 +143,9 @@ describe('9.3 bridge rectifier', () => {
 describe('9.3 ripple formula against the simulation', () => {
   const formula = (current: number, f: number, c: number) => current / (f * c);
 
-  it('conservative: 1,24 V vs 0,9 V; 4,0 V vs 3,0 V; 2,5 V vs 2,1 V', () => {
+  it('conservative: 1,2 V vs 0,9 V; 4,0 V vs 3,0 V; 2,5 V vs 2,1 V', () => {
     const cases = [
-      { doc: ponte, params: FILTER, f: 120, c: 3300e-6, expected: 1.24 },
+      { doc: ponte, params: FILTER, f: 120, c: 3300e-6, expected: 1.2 },
       {
         doc: ponte,
         params: { ...FILTER, 'C1.capacitance': 1000e-6 },
