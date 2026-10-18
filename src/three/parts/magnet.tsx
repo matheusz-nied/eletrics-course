@@ -543,10 +543,10 @@ function Bar({ size, showPoles, fieldLines }: VariantProps) {
 
   return (
     <group>
-      <Explode offset={[L * 0.3, 0, L * 0.04]} rotate={[0, 0.16, 0]}>
+      <Explode offset={[L * 0.2, 0, L * 0.03]} rotate={[0, 0.1, 0]}>
         {half(true)}
       </Explode>
-      <Explode offset={[-L * 0.3, 0, -L * 0.02]} rotate={[0, 0.1, 0]}>
+      <Explode offset={[-L * 0.2, 0, -L * 0.02]} rotate={[0, 0.07, 0]}>
         {half(false)}
       </Explode>
       {fieldLines && (

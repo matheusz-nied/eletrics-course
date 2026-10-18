@@ -1216,11 +1216,11 @@ export default function BenchPowerSupply(props: BenchPowerSupplyProps) {
       </mesh>
 
       {/* Cover (cut lengthwise in the cutaway, lifted in the exploded view). */}
-      <Explode offset={[0, 175, 0]}>
+      <Explode offset={[0, 135, 0]}>
         <mesh geometry={cover}>
           <Material
             preset="absGray"
-            color="#a7aca8"
+            color="#959891"
             roughness={0.62}
             roughnessMap={noise}
             clip
@@ -1251,15 +1251,15 @@ export default function BenchPowerSupply(props: BenchPowerSupplyProps) {
         </mesh>
       </Explode>
 
-      <Explode offset={[0, 0, 110]}>
+      <Explode offset={[0, 0, 85]}>
         <FrontPanel p={p} />
       </Explode>
 
-      <Explode offset={[0, 0, -95]}>
+      <Explode offset={[0, 0, -75]}>
         <RearPanel />
       </Explode>
 
-      <Explode offset={[0, 62, -40]} delay={0.1}>
+      <Explode offset={[0, 45, -45]} delay={0.1}>
         <Transformer />
       </Explode>
 

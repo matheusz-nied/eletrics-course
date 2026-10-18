@@ -34,7 +34,7 @@ import { tube } from '../shapes/geometry';
 import { useDisposable } from '../shapes/Wire';
 import type { PartAnnotation, PartMeta, Vec3 } from '../types';
 import { addRoundedRect, extrudeAlongX, extrudeAlongZ, extrudeUp, mergeAll } from './_em-geometry';
-import { Decal, Pin, useSmooth } from './_em-kit';
+import { Decal, Pin, shade, useSmooth } from './_em-kit';
 
 type Family = 'kk' | 'jst-xh' | 'jst-ph';
 
@@ -526,6 +526,14 @@ export default function ConnectorKk(props: ConnectorKkProps) {
       }),
     [family],
   );
+  const wireCore = useDisposable(
+    () =>
+      tube(new WireRoute(route.rise, route.radius, route.run), s.core / 2, {
+        radial: 8,
+        segments: 72,
+      }),
+    [family],
+  );
   const endCore = useDisposable(() => new CircleGeometry(s.core / 2, 14), [family]);
   const endRing = useDisposable(() => new RingGeometry(s.core / 2, s.wire / 2, 16), [family]);
 
@@ -566,7 +574,7 @@ export default function ConnectorKk(props: ConnectorKkProps) {
     clip: true,
     cutColor: '#d8d0bb',
   };
-  const tin = { preset: 'tin' as const, roughness: 0.3 };
+  const tin = { preset: 'tin' as const, color: '#e3e6e8', roughness: 0.22 };
   const last = xs[n - 1]!;
   const wireEnd: Vec3 = [0, route.rise + route.radius, -route.radius - route.run];
 
@@ -651,8 +659,11 @@ export default function ConnectorKk(props: ConnectorKkProps) {
                     roughness={0.38}
                     clearcoat={0.25}
                     clip
-                    cutColor="#e8e2d2"
+                    cutColor={shade(wires[i]!.color, -0.2)}
                   />
+                </mesh>
+                <mesh geometry={wireCore}>
+                  <Material preset="copper" roughness={0.4} />
                 </mesh>
                 <mesh geometry={endRing} position={wireEnd} rotation={[0, Math.PI, 0]}>
                   <Material color={wires[i]!.color} roughness={0.6} />
