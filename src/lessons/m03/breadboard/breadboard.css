@@ -1,0 +1,334 @@
+/* Lesson 3.6 breadboard (Breadboard.tsx). Unlayered, like the quiz, so it wins over .prose. */
+
+.bb {
+  display: grid;
+  gap: 1rem;
+  margin: 2em 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.bb :where(p, fieldset, legend) {
+  margin: 0;
+  padding: 0;
+}
+
+.bb-board {
+  min-width: 0;
+}
+
+.bb-board svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+  user-select: none;
+}
+
+.bb-scroll-hint {
+  display: none;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+
+/* The whole board on a phone leaves the holes about 10 px apart: keep them
+   big enough to tap and let the board scroll sideways instead. */
+@media (max-width: 39.99rem) {
+  .bb-board {
+    overflow-x: auto;
+  }
+  .bb-board svg {
+    min-width: 36rem;
+  }
+  .bb-scroll-hint {
+    display: block;
+  }
+}
+
+/* The board is an object with its own colors. */
+.bb-body {
+  fill: #f1efe8;
+  stroke: #d6d2c4;
+  stroke-width: 2;
+}
+.bb-channel {
+  fill: #dedad0;
+}
+.bb-strips rect {
+  fill: #c9a15e;
+  opacity: 0.75;
+}
+.bb-line-pos,
+.bb-line-neg {
+  stroke-width: 2.5;
+}
+.bb-line-pos {
+  stroke: #d63a2c;
+}
+.bb-line-neg {
+  stroke: #2b62c4;
+}
+.bb-rail-sign {
+  font-size: 16px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.bb-rail-sign.pos {
+  fill: #d63a2c;
+}
+.bb-rail-sign.neg {
+  fill: #2b62c4;
+}
+.bb-num {
+  fill: #8a8577;
+  font-size: 10px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.bb-hole {
+  cursor: pointer;
+  outline: none;
+}
+.bb-hit {
+  fill: transparent;
+}
+.bb-dot {
+  fill: #3b3a36;
+}
+.bb-hole:hover .bb-hit {
+  fill: rgb(0 0 0 / 0.06);
+}
+.bb-hole.is-lit .bb-hit {
+  fill: rgb(37 99 235 / 0.22);
+}
+.bb-hole.is-lit .bb-dot {
+  fill: #1d4ed8;
+}
+.bb-hole.is-picked .bb-hit {
+  fill: rgb(37 99 235 / 0.42);
+}
+.bb-hole:focus-visible .bb-hit {
+  stroke: #1d4ed8;
+  stroke-width: 2.5;
+}
+
+.bb-part {
+  pointer-events: none;
+}
+.bb-lead,
+.bb-jumper {
+  fill: none;
+  stroke-width: 4.5;
+  stroke-linecap: round;
+}
+.bb-lead.pos {
+  stroke: #d63a2c;
+}
+.bb-lead.neg {
+  stroke: #1c1f24;
+}
+.bb-pin {
+  fill: #9aa0a6;
+}
+.bb-pin.pos {
+  fill: #d63a2c;
+}
+.bb-pin.neg {
+  fill: #1c1f24;
+}
+.bb-leg {
+  stroke: #9aa0a6;
+  stroke-width: 2;
+}
+.bb-resistor {
+  fill: #d9c29a;
+  stroke: #a88f62;
+  stroke-width: 1;
+}
+.bb-band.orange {
+  fill: #e07a1f;
+}
+.bb-band.brown {
+  fill: #7a4a24;
+}
+.bb-band.gold {
+  fill: #c2a23a;
+}
+.bb-led {
+  fill: rgb(220 38 38 / 0.85);
+  stroke: #8f1d1d;
+  stroke-width: 1;
+}
+
+/* Panel */
+.bb-panel {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (min-width: 40rem) {
+  .bb-panel {
+    grid-template-columns: 1fr 1fr;
+  }
+  .bb-panel > .bb-field:first-child,
+  .bb-switches {
+    grid-column: 1 / -1;
+  }
+}
+
+.bb-field {
+  display: grid;
+  gap: 0.5rem;
+  border: 0;
+  min-width: 0;
+}
+
+.bb-field legend {
+  margin-bottom: 0.5rem;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.bb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.bb-chip {
+  position: relative;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--bg);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.bb-chip input,
+.bb-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bb-chip:has(input:focus-visible),
+.bb-option:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.bb-chip.is-on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.bb-switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.bb-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.bb-check input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--accent);
+}
+
+.bb-status {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--info);
+  border-radius: 0.625rem;
+  background: var(--bg);
+  font-size: 0.875rem;
+}
+
+.bb-status-title {
+  font-weight: 700;
+}
+
+.bb-question {
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  background: var(--bg);
+}
+
+.bb-question legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 0.25rem;
+  color: var(--fg);
+  font-size: 0.9375rem;
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 700;
+}
+
+.bb-symptom {
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+}
+
+.bb-ask {
+  font-weight: 600;
+}
+
+.bb-option {
+  position: relative;
+  display: block;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.bb-option.is-right {
+  border-color: var(--success);
+  background: var(--success-soft);
+}
+
+.bb-option.is-wrong {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.bb-feedback {
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.bb-feedback.is-right {
+  background: var(--success-soft);
+  color: var(--fg);
+  box-shadow: inset 3px 0 0 var(--success);
+}
+
+.bb-feedback.is-wrong {
+  background: var(--danger-soft);
+  color: var(--fg);
+  box-shadow: inset 3px 0 0 var(--danger);
+}

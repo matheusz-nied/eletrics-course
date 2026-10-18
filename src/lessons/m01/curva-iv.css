@@ -1,0 +1,93 @@
+/* CurvaIV.tsx: the I×V graph of lesson 1.4. */
+
+.curva-iv__body {
+  align-items: start;
+}
+
+@media (min-width: 48rem) {
+  .curva-iv__body {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+}
+
+.curva-iv__plot {
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.curva-iv__side {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.curva-iv__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.curva-iv__axis {
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+
+.curva-iv__tick {
+  fill: var(--fg-muted);
+  font-size: 11px;
+}
+
+.curva-iv__axis-label {
+  fill: var(--fg-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.curva-iv__cursor {
+  stroke: var(--fg-subtle);
+  stroke-dasharray: 3 4;
+  stroke-width: 1;
+}
+
+.curva-iv__line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.curva-iv__lamp {
+  fill: none;
+  stroke: var(--copper);
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.curva-iv__dot {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.curva-iv__dot-lamp {
+  fill: var(--copper);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.curva-iv__key {
+  display: inline-block;
+  width: 1.1rem;
+  height: 0.25rem;
+  margin-right: 0.45rem;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+
+.curva-iv__key--line {
+  background: var(--accent);
+}
+
+.curva-iv__key--lamp {
+  background: var(--copper);
+}

@@ -1,0 +1,174 @@
+---
+/*
+ * Lesson 1.2: measuring current. The wire is opened and the multimeter, set
+ * to current, closes the gap: the whole current passes through it.
+ */
+import Figure from '../../../components/Figure.astro';
+---
+
+<Figure
+  alt="Uma bateria ligada a uma lâmpada. O fio de cima foi aberto, e as duas pontas soltas vão para um multímetro: a ponta vermelha no borne de corrente (A) e a preta no COM. A corrente sai da bateria, entra no multímetro pela ponta vermelha, sai pela preta e segue até a lâmpada. O visor mostra 0.50 A."
+  caption="Para medir corrente, o multímetro entra no caminho: abra o circuito e ligue uma ponta em cada lado da abertura. Toda a corrente passa por dentro do instrumento. Por isso ele mede em série, e por isso nunca pode ser ligado direto nos polos de uma bateria ou de uma tomada nessa posição."
+>
+  <svg
+    class="fig-serie"
+    viewBox="0 0 480 270"
+    width="480"
+    height="270"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    font-family="var(--font-sans)"
+    font-size="16"
+  >
+    <!-- Circuit with the top wire opened -->
+    <path
+      d="M60 162V140h130M310 140h110v22M420 198v40H60v-60"
+      class="fig-serie__wire"
+      stroke-width="3"
+    ></path>
+    <path d="M42 162h36" class="fig-serie__wire" stroke-width="3"></path>
+    <path d="M50 178h20" class="fig-serie__wire" stroke-width="7"></path>
+    <text x="24" y="160" text-anchor="middle" class="fig-serie__sign">
+      +
+    </text>
+    <text x="24" y="190" text-anchor="middle" class="fig-serie__sign">
+      −
+    </text>
+    <circle cx="420" cy="180" r="18" class="fig-serie__lamp" stroke-width="3"></circle>
+    <path d="M407 167l26 26M433 167l-26 26" class="fig-serie__wire" stroke-width="2.5"></path>
+    <circle cx="190" cy="140" r="4" class="fig-serie__end"></circle>
+    <circle cx="310" cy="140" r="4" class="fig-serie__end"></circle>
+    <text x="250" y="178" text-anchor="middle" class="fig-serie__small">
+      o fio foi aberto aqui
+    </text>
+    <path d="M200 160h100" class="fig-serie__gap" stroke-width="1.5" stroke-dasharray="3 5"></path>
+
+    <!-- Multimeter -->
+    <rect x="195" y="6" width="110" height="98" rx="12" class="fig-serie__meter"></rect>
+    <rect x="207" y="16" width="86" height="34" rx="4" class="fig-serie__lcd"></rect>
+    <text x="282" y="42" text-anchor="end" class="fig-serie__digits">
+      0.50
+    </text>
+    <text x="288" y="47" class="fig-serie__unit">
+      A
+    </text>
+    <circle cx="225" cy="82" r="8" class="fig-serie__jack"></circle>
+    <circle cx="275" cy="82" r="8" class="fig-serie__jack fig-serie__jack--com"></circle>
+    <text x="225" y="68" text-anchor="middle" class="fig-serie__jack-t">
+      A
+    </text>
+    <text x="275" y="68" text-anchor="middle" class="fig-serie__jack-t">
+      COM
+    </text>
+
+    <!-- Probe leads -->
+    <path d="M190 140c0-30 35-24 35-50" class="fig-serie__lead-red" stroke-width="3.5"></path>
+    <path d="M310 140c0-30-35-24-35-50" class="fig-serie__lead-black" stroke-width="3.5"></path>
+
+    <!-- Labels -->
+    <text x="120" y="40" text-anchor="middle" class="fig-serie__small">
+      ponta vermelha
+    </text>
+    <text x="120" y="58" text-anchor="middle" class="fig-serie__small">
+      no borne A
+    </text>
+    <text x="390" y="40" text-anchor="middle" class="fig-serie__small">
+      ponta preta
+    </text>
+    <text x="390" y="58" text-anchor="middle" class="fig-serie__small">
+      no COM
+    </text>
+    <text x="60" y="262" text-anchor="middle" class="fig-serie__small">
+      bateria
+    </text>
+    <text x="420" y="262" text-anchor="middle" class="fig-serie__small">
+      lâmpada
+    </text>
+  </svg>
+</Figure>
+
+<style>
+  .fig-serie {
+    color: var(--fg);
+  }
+
+  .fig-serie text {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .fig-serie__wire {
+    stroke: var(--fg-muted);
+  }
+
+  .fig-serie__gap {
+    stroke: var(--fg-subtle);
+  }
+
+  .fig-serie__end {
+    fill: var(--fg-muted);
+  }
+
+  .fig-serie text.fig-serie__sign {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .fig-serie text.fig-serie__small {
+    fill: var(--fg-muted);
+    font-size: 14px;
+  }
+
+  .fig-serie__lamp {
+    stroke: var(--fg-muted);
+    fill: color-mix(in oklab, var(--warning) 25%, var(--bg));
+  }
+
+  .fig-serie__meter {
+    fill: #2b3038;
+    stroke: #e0782f;
+    stroke-width: 5;
+  }
+
+  .fig-serie__lcd {
+    fill: #bfcaa6;
+  }
+
+  .fig-serie text.fig-serie__digits {
+    fill: #1d2318;
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .fig-serie text.fig-serie__unit {
+    fill: #1d2318;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .fig-serie text.fig-serie__jack-t {
+    fill: #c9d0da;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .fig-serie__jack {
+    fill: #c0392b;
+  }
+
+  .fig-serie__jack--com {
+    fill: #111418;
+    stroke: #5c6470;
+    stroke-width: 2;
+  }
+
+  .fig-serie__lead-red {
+    stroke: #d64535;
+  }
+
+  .fig-serie__lead-black {
+    stroke: color-mix(in oklab, var(--fg) 85%, transparent);
+  }
+</style>

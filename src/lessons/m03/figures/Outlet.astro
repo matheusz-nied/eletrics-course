@@ -1,0 +1,61 @@
+---
+/* 03.2: a Brazilian three-pin outlet (NBR 14136): two side holes (phase and neutral, in either order) and the earth hole in the middle. */
+---
+
+<svg viewBox="0 0 300 250" width="300" height="250" class="fig" aria-hidden="true">
+  <rect x="40" y="10" width="220" height="230" rx="18" class="plate" />
+  <circle cx="150" cy="112" r="78" class="recess" />
+  <circle cx="110" cy="100" r="11" class="hole" />
+  <circle cx="190" cy="100" r="11" class="hole" />
+  <circle cx="150" cy="140" r="11" class="hole" />
+  <text x="110" y="76" class="h">
+    A
+  </text>
+  <text x="190" y="76" class="h">
+    B
+  </text>
+  <text x="150" y="172" class="h">
+    T
+  </text>
+  <text x="150" y="208" class="cap">
+    A e B: fase e neutro
+  </text>
+  <text x="150" y="226" class="cap">
+    T: terra (o furo do meio)
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2;
+  }
+  .plate {
+    fill: var(--surface);
+    stroke: var(--border-strong);
+  }
+  .recess {
+    fill: var(--bg);
+    stroke: var(--border-strong);
+  }
+  .hole {
+    fill: var(--fg);
+    stroke: none;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .h {
+    font-size: 17px;
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .cap {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+</style>
