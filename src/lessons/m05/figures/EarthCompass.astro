@@ -1,0 +1,175 @@
+---
+/*
+ * 05.1: the Earth as a magnet. Its magnetic south pole sits near the
+ * geographic north; the field lines (those of a dipole, r = L·sin²θ, drawn
+ * outside the globe) leave the southern hemisphere and enter the northern
+ * one, and a compass needle follows them.
+ */
+const C = { x: 190, y: 165 };
+const R = 92;
+const TILT = (11 * Math.PI) / 180;
+// Unit vectors on screen (y down): towards the magnetic south pole (up, tilted) and across.
+const up = { x: Math.sin(TILT), y: -Math.cos(TILT) };
+const across = { x: Math.cos(TILT), y: Math.sin(TILT) };
+
+function dipoleLine(L: number, side: 1 | -1): string {
+  const pts: string[] = [];
+  const t0 = Math.asin(Math.sqrt(R / L));
+  const n = 48;
+  for (let i = 0; i <= n; i++) {
+    const t = t0 + ((Math.PI - 2 * t0) * i) / n;
+    const r = L * Math.sin(t) ** 2;
+    const u = r * Math.cos(t);
+    const v = side * r * Math.sin(t);
+    const x = C.x + u * up.x + v * across.x;
+    const y = C.y + u * up.y + v * across.y;
+    pts.push(`${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`);
+  }
+  return pts.join('');
+}
+
+/** Arrowhead where the line crosses the magnetic equator, pointing towards the magnetic south. */
+function arrowAt(L: number, side: 1 | -1): string {
+  const x = C.x + side * L * across.x;
+  const y = C.y + side * L * across.y;
+  const angle = (Math.atan2(up.y, up.x) * 180) / Math.PI;
+  return `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${angle.toFixed(1)})`;
+}
+
+const LINES = [118, 150, 188];
+const bar = { w: 22, h: 96 };
+const tiltDeg = (TILT * 180) / Math.PI;
+---
+
+<svg viewBox="0 0 560 330" width="560" height="330" class="fig" aria-hidden="true">
+  {LINES.flatMap((L) =>
+    ([1, -1] as const).map((side) => (
+      <g>
+        <path d={dipoleLine(L, side)} class="line" />
+        <path d="M-6 -4L4 0L-6 4Z" transform={arrowAt(L, side)} class="arrow" />
+      </g>
+    )),
+  )}
+  <circle cx={C.x} cy={C.y} r={R} class="earth" />
+  <path d={`M${C.x} ${C.y - R - 34} V${C.y + R + 34}`} class="axis" />
+  <g transform={`translate(${C.x} ${C.y}) rotate(${tiltDeg})`}>
+    <rect x={-bar.w / 2} y={-bar.h / 2} width={bar.w} height={bar.h / 2} class="s" />
+    <rect x={-bar.w / 2} y="0" width={bar.w} height={bar.h / 2} class="n" />
+    <rect x={-bar.w / 2} y={-bar.h / 2} width={bar.w} height={bar.h} rx="3" class="outline" />
+    <text x="0" y={-bar.h / 2 + 18} class="pole">
+      S
+    </text>
+    <text x="0" y={bar.h / 2 - 7} class="pole">
+      N
+    </text>
+  </g>
+
+  <text x={C.x} y={C.y - R - 40} class="label">
+    Norte geográfico
+  </text>
+  <text x={C.x} y={C.y + R + 52} class="label">
+    Sul geográfico
+  </text>
+
+  <text x="402" y="40" class="small start">
+    No norte geográfico fica
+  </text>
+  <text x="402" y="56" class="small start">
+    um polo sul magnético:
+  </text>
+  <text x="402" y="72" class="small start">
+    ele atrai o norte da agulha.
+  </text>
+
+  <g transform="translate(468 170)">
+    <circle r="40" class="dial" />
+    <text x="0" y="-26" class="tiny">
+      N
+    </text>
+    <path d="M0 -30L6 0L-6 0Z" class="needle-n" />
+    <path d="M0 30L6 0L-6 0Z" class="needle-s" />
+    <circle r="3" class="pivot" />
+  </g>
+  <text x="468" y="232" class="small">
+    bússola
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .earth {
+    fill: color-mix(in oklab, var(--success) 14%, var(--surface));
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.4;
+    stroke-dasharray: 5 4;
+  }
+  .line {
+    stroke: var(--accent);
+    stroke-width: 1.6;
+  }
+  .arrow {
+    fill: var(--accent);
+  }
+  .n {
+    fill: color-mix(in oklab, var(--danger) 78%, var(--bg));
+  }
+  .s {
+    fill: color-mix(in oklab, var(--info) 78%, var(--bg));
+  }
+  .outline {
+    stroke: var(--fg);
+    stroke-width: 1.6;
+  }
+  .dial {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .needle-n {
+    fill: var(--danger);
+  }
+  .needle-s {
+    fill: var(--border-strong);
+  }
+  .pivot {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.4;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .pole {
+    fill: var(--bg);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .label {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .tiny {
+    fill: var(--fg-muted);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>

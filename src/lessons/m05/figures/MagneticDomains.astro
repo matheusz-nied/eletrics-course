@@ -1,0 +1,98 @@
+---
+/*
+ * 05.1: magnetic domains in a piece of iron, each an arrow: scattered in plain
+ * iron, lined up near a magnet (or in a permanent magnet).
+ */
+const COLS = 5;
+const ROWS = 4;
+const CELL = 46;
+// Fixed "random" directions, so the build is reproducible.
+const SCATTER = [
+  20, 200, 95, 310, 160, 250, 45, 135, 290, 5, 180, 70, 330, 220, 110, 265, 30, 150, 345, 85,
+];
+
+const panels = [
+  { dx: 20, title: 'Ferro comum', sub: 'cada domínio aponta para um lado', aligned: false },
+  { dx: 300, title: 'Perto de um ímã', sub: 'os domínios se alinham com o campo', aligned: true },
+];
+
+const cells = Array.from({ length: COLS * ROWS }, (_, i) => ({
+  x: (i % COLS) * CELL,
+  y: Math.floor(i / COLS) * CELL,
+  angle: SCATTER[i]!,
+}));
+---
+
+<svg viewBox="0 0 560 290" width="560" height="290" class="fig" aria-hidden="true">
+  {panels.map((p) => (
+    <g transform={`translate(${p.dx} 0)`}>
+      <text x={(COLS * CELL) / 2} y="22" class="title">
+        {p.title}
+      </text>
+      <text x={(COLS * CELL) / 2} y="40" class="small">
+        {p.sub}
+      </text>
+      <g transform="translate(5 56)">
+        <rect width={COLS * CELL} height={ROWS * CELL} rx="8" class="iron" />
+        {cells.map((c) => (
+          <g transform={`translate(${c.x + CELL / 2} ${c.y + CELL / 2})`}>
+            <rect x={-CELL / 2} y={-CELL / 2} width={CELL} height={CELL} class="cell" />
+            <path
+              d="M-13 0H11M5 -6L13 0L5 6"
+              transform={`rotate(${p.aligned ? 0 : -c.angle})`}
+              class={p.aligned ? 'arrow on' : 'arrow'}
+            />
+          </g>
+        ))}
+      </g>
+    </g>
+  ))}
+  <path d="M330 262 H500 M492 256 L502 262 L492 268" class="field" />
+  <text x="420" y="283" class="small">
+    campo do ímã
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .iron {
+    fill: color-mix(in oklab, var(--fg-subtle) 16%, var(--surface));
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .cell {
+    stroke: var(--border-strong);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  .arrow {
+    stroke: var(--fg-muted);
+    stroke-width: 2.4;
+  }
+  .arrow.on {
+    stroke: var(--danger);
+  }
+  .field {
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+</style>
