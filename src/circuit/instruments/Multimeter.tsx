@@ -96,6 +96,10 @@ export function Multimeter({ probe, defaultMode }: { probe: ProbeDoc; defaultMod
     if (sim.isDc || !canAc) return now;
     const part = slow ? quasiStaticReading(slow.readouts, probe.id, mode) : undefined;
     if (part !== undefined) return part;
+    // A current a device reports itself (the common of a 3-pin motor) has no
+    // DC/AC split: it is already the RMS. Its history is flat, so the AC
+    // coupling below would read zero.
+    if (sim.doc.analysis.kind === 'quasi-static') return now;
     const h = sim.history;
     const end = h.lastT();
     if (!Number.isFinite(end)) return now;
