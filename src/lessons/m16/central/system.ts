@@ -42,6 +42,8 @@ export interface SystemOptions {
   params?: Partial<GateParams>;
   /** Initial gate position (m from closed). */
   position?: number;
+  /** EEPROM contents at power-up (learned remotes), as `firmware.persist` returns. */
+  memory?: unknown;
 }
 
 export interface LoggedEvent extends FirmwareEvent {
@@ -73,7 +75,8 @@ export class GateSystem {
       opts.faults ?? {},
       opts.position,
     );
-    this.state = firmware.init();
+    this.memory = opts.memory;
+    this.state = firmware.init(opts.memory);
   }
 
   get faults(): GateFaults {

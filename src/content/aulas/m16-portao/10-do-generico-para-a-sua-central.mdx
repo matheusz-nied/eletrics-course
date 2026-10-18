@@ -1,0 +1,448 @@
+---
+titulo: Do genérico para a sua central
+modulo: m16-portao
+ordem: 10
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Diferenciar uma central para motor com capacitor de uma central inversora antes de trocar qualquer peça
+  - Traduzir os bornes, jumpers e ajustes da CD-1 para os de centrais reais
+  - Reconhecer as pegadinhas de nomes nos manuais (F, U/V/W, Emb, F/N)
+  - Ler o manual da sua central numa ordem que evita erros de ligação
+prerequisitos:
+  - m16-portao/02-o-motor-do-portao
+  - m16-portao/03-a-central-por-dentro
+  - m16-portao/05-seguranca-e-acessorios
+  - m16-portao/07-trocar-motor-e-central
+tags: [portão, central, manual, equivalência, inversor, Intelbras, Peccinin, Nice, Omegasat, Rossi, Garen, PPA]
+seguranca: rede
+---
+
+import { lessonUrl } from '../../../lib/url';
+import CentralVirtual from '../../../lessons/m16/ui/CentralVirtual';
+
+A CD-1, a central deste curso, tem bornes com nomes didáticos: `COM`, `ABRE`, `FECHA`, `FCA`, `FOTO`. Na central que você comprou, os nomes são outros: `C`, `A`, `F`, `U`, `V`, `W`, `BR`, `AZ`, `PT`. As funções são as mesmas, mas cada fabricante escolheu um caminho, e alguns desses caminhos têm pegadinhas. Esta aula é a ponte.
+
+Tudo o que aparece aqui sobre centrais reais saiu dos manuais públicos dos fabricantes, lidos em outubro de 2026 (os links estão em cada central). Quando o manual não traz uma informação, a tabela diz "o manual não informa". E a regra que vale para a aula inteira: **siga sempre o manual do fabricante da sua central**. Se o manual e esta aula discordarem, vale o manual.
+
+## Antes de tudo: que tipo de central é a sua?
+
+Existem dois tipos de central no mercado, e trocar um pelo outro não funciona.
+
+- **Central para motor com capacitor.** É o caso da CD-1 e da maioria das centrais residenciais: o motor de indução monofásico tem três fios (comum, abre e fecha) e um capacitor ligado entre os dois enrolamentos, como você viu na <a href={lessonUrl('m16-portao/02-o-motor-do-portao')}>aula 16.2</a>. A central tem dois bornes para o capacitor e relés que escolhem o sentido.
+- **Central inversora.** Aciona motores de alta rotação, vendidos com nomes como "Jetflex", "TSi" ou "Full Range". Os três fios do motor se chamam `U`, `V` e `W`, **não há capacitor**, e a velocidade é ajustada em hertz. A central gera uma tensão alternada de frequência variável, como um inversor de frequência. Exemplos lidos: Garen TSi Pro e PPA Triflex Full Range.
+
+<Callout type="perigo" title="Confira o tipo antes de comprar">
+Um motor de um sistema não serve na central do outro. O manual da Garen TSi Pro é explícito: "Para central trabalhar em automatizadores monofásicos é obrigatório retirar o capacitor do automatizador", e ainda manda escolher o tipo de motor num jumper. Ligar o motor errado na central errada pode danificar os dois. Na dúvida, procure no motor a etiqueta do capacitor e, na central atual, os bornes `CAP`.
+</Callout>
+
+## A ponte em uma tabela
+
+A visão geral, com o que mais muda de uma central para outra:
+
+| Central | Tipo | Bornes do motor | Fim de curso | Entrada da fotocélula |
+|---|---|---|---|---|
+| CD-1 (curso) | Capacitor | `COM` `ABRE` `FECHA` | `FCA` `GND` `FCF` | NF |
+| Intelbras CP-1000 | Capacitor | `C` `A` `F` | Conector CN13, 3 a 5 fios | NA |
+| Peccinin CP 4010F | Capacitor | `C1` `A1` `F1` | `FCA1` `GND` `FCF1`, só NA | NA |
+| Nice Pro S10 | Capacitor | `COMUM` `ABRE` `FECHA` | Reed, só NA | NA (NF por menu) |
+| Omegasat CT30A | Capacitor | `CM` `AB` `FC` | `FCF` `GND` `FCA` | NA |
+| Rossi KXH1024FS | Capacitor | `U` (comum) `V` `W` | `FA` `FF` `CM`, reed ou Hall | NF com Fail Safe, NA sem |
+| Garen Wave Connect | Capacitor | `BR` `AZ` `PT` | `FCA`/`FCF`, 3 e 5 vias | Comum ou PWM (jumper JP1) |
+| Garen TSi Pro | **Inversora** | `U` `V` `W` | `FCA` `CM` `FCF` e encoder | O manual não informa |
+| PPA Facility Connect | Capacitor | Fios por cor | Reed ou encoder | O manual não informa |
+| PPA Triflex Full Range | **Inversora** | 3 fios por cor | Reed e encoder | NA, NF, resistiva ou pulsante |
+
+## As pegadinhas
+
+Seis armadilhas que aparecem nos manuais lidos:
+
+1. **A letra F da Intelbras.** No manual da CP-1000, `F` é a **fase da rede** num borne e o fio de **fechamento do motor** em outro. Quem lê só a letra pode pôr o fio do motor no borne da rede, ou o contrário. Leia sempre o grupo do borne (rede ou motor), não só a letra.
+2. **U, V e W da Rossi não são de inversor.** A Rossi KXH1024FS chama os bornes do motor de `U`, `V` e `W`, mas é uma central para motor **com capacitor**: `U` é o comum (fio amarelo) e `V` e `W` escolhem o sentido. Numa central inversora, como a Garen TSi Pro, `U`, `V` e `W` são outra coisa, e não há capacitor.
+3. **A embreagem da Intelbras é ao contrário.** No menu `Emb` da CP-1000, "quanto menor o valor da embreagem, maior a força aplicada ao motor". Na CD-1 e na Garen (FORÇA de 0, que é 5 %, a 20, que é 100 %), o número maior dá mais força.
+4. **O borne F/N.** Na Peccinin e na Omegasat, a rede entra em `F` (fase) e `F/N` (fase ou neutro). Em 127 V, o neutro vai no `F/N`. Em 220 V entre duas fases, a segunda fase vai ali. O `N` da CD-1 funciona do mesmo jeito.
+5. **A ordem do conector de fim de curso.** A Peccinin usa `FCA1` `GND` `FCF1`; a Omegasat, `FCF` `GND` `FCA`. É a mesma ideia com a ordem invertida. Depois de ligar, confira os LEDs (<LinkAula id="m16-portao/04-fim-de-curso-e-sensores">aula 16.4</LinkAula>).
+6. **A cor do fio comum.** É amarelo nos motores Intelbras, Rossi e PPA, azul no Omegaport DZ 1000 e preto na ligação da Omegasat CT30A. Cor não é prova: meça, como na <LinkAula id="m16-portao/02-o-motor-do-portao">aula 16.2</LinkAula>.
+
+## Central por central
+
+Para cada central, a tabela segue a mesma ordem da CD-1. Ache a sua e compare com a referência:
+
+| Item | CD-1 (referência) |
+|---|---|
+| Rede | `F`, `N` e `⏚`; em 220 V entre fases, o `N` recebe a segunda fase |
+| Motor | `COM`, `ABRE`, `FECHA` |
+| Capacitor | `CAP` `CAP`, ligados por dentro a ABRE e FECHA |
+| Fim de curso | Conector `FCA` `GND` `FCF`, reed; ímã perto = contato fechado |
+| Fotocélula | `FOTO` (contato NF), `+12V` e `GND`, até 300 mA |
+| Botoeira | `BOT` e `GND`, contato NA |
+| Ajustes | Jumpers J1 FOTO e J2 AUT, DIP INV e LUZ, trimpots PAUSA e FORÇA |
+| Controles | Toque no PROG cadastra; segurar 10 s apaga todos; 32 botões |
+| Inverter o sentido | Trocar ABRE e FECHA, ou ligar o DIP INV |
+| Fusível e tempo máximo | 10 A; 40 s |
+| Sem fotocélula | Jumper J1 FOTO: existe para ser explicado e não deve ser usado (<LinkAula id="m16-portao/05-seguranca-e-acessorios">aula 16.5</LinkAula>) |
+
+### Intelbras CP-1000 e CP-1001 (motor com capacitor)
+
+Manual lido: [CP-1000, firmware 3.5.x ou maior](https://backend.intelbras.com/sites/default/files/2026-08/Manual%20de%20Usu%C3%A1rio%20e%20Programa%C3%A7%C3%A3o%20Central%20Padr%C3%A3o%20Automatizador%20Port%C3%A3o%20CP-1000%20-%20Vers%C3%B5es%20Acima%20de%203.5.x%2008-26_0.pdf). Para versões anteriores do firmware existe outro manual.
+
+| Item | O que o manual diz |
+|---|---|
+| Rede | `F` (fase, 127 ou 220 Vca "conforme a tensão do motor"), `N` (neutro) e terra; fonte de 100 a 240 Vca |
+| Motor | `C` (comum), `A` (abertura), `F` (fechamento); nos motores Intelbras, comum amarelo e abre e fecha em azul e preto; até 1/2 cv |
+| Capacitor | `CAP`: os dois fios do capacitor; conferir o valor no motor |
+| Fim de curso | Reed, `FCA` e `FCF`, conector CN13 de 5 pinos: padrão de 3 fios nos pinos 2, 3 e 4; de 4 fios, nos pinos 2 a 5; de 5 fios, com o pino 3 livre |
+| Fotocélula | `Foto` e `GND`, uma entrada NA; `+12 V` com 300 mA; conferir se a fotocélula é compatível com a fonte auxiliar |
+| Botoeira | `BotA` (abertura), `BotF` (fechamento) e `GND`, entradas NA |
+| Ajustes | Sem trimpot nem DIP: 4 teclas e LEDs, com menus `Emb` (embreagem), `Ace`, `Desa`, `Freio`, `Pausa` (2 a 120 s), `Perc` (aprende o percurso) e outros |
+| Controles | Cadastro rápido pelas teclas `Esc` e `Ok`; apagar tudo pelo menu `Res`, que apaga também as configurações; 800 botões; FSK com AES de 128 bits ou OOK code learning |
+| Inverter o sentido | "inverta os fios preto e azul nos conectores de Abertura e Fechamento" |
+| Fusível e tempo máximo | 10 A, 5 × 20 mm, vidro; alarme quando o portão passa de 4 vezes o percurso calculado |
+| Sem fotocélula | O manual da central não fala. O [manual do motor deslizante Intelbras](https://backend.intelbras.com/sites/default/files/2025-05/Manual_Portao_deslizante_completo_v01_01-25_site%201.pdf) diz que a fotocélula é obrigatória |
+
+### Peccinin CP 4010F e CP 4020F (motor com capacitor)
+
+Manual lido: [CP 4010F / CP 4020F, Rev. 06](https://niceforyou.com/sites/default/files/upload/manuals/30004081-MANUAL-DE-CONFIGURACAO-CP4010F-4020F-Rev-06.pdf) (marca Peccinin, hoje no site da Nice).
+
+| Item | O que o manual diz |
+|---|---|
+| Rede | `F` (fase) e `F/N` (fase/neutro); terra no borne com o símbolo, e "Não conecte o terra ao GND."; fonte de 90 a 240 VAC |
+| Motor | `C1` (comum), `A1` (abre), `F1` (fecha); a CP 4020F tem também `C2`, `A2`, `F2` para um segundo motor; até 1/2 cv (370 W), 4 A |
+| Capacitor | "O capacitor deve ser conectado aos fios marrom e branco" |
+| Fim de curso | Reed, só NA; conector `FCA1` `GND` `FCF1`; instalado invertido, "basta inverter o conector na central" |
+| Fotocélula | `FTC` e `GND`, entrada NA; `+12V` com até 700 mA; cabo de 0,5 mm² no mínimo |
+| Botoeira | `BOT` e `GND`, entrada NA (abre, para, fecha) |
+| Ajustes | Trimpots EMBR. (embreagem eletrônica), DESACEL, FCH.AUTO (0 a 120 s; no zero, sem fechamento automático), RETARDO (CP 4020F) e DIST..FREN; jumpers C (configuração, retirar depois), A, B e MAN/AUTO; botão LEARN |
+| Controles | Toque no LEARN (o LED pisca 1 vez: função normal), aperte o botão do controle e confirme; apagar todos: segurar LEARN até o LED piscar rápido; 250 controles de 2 botões; rolling code Peccinin, 433,92 MHz, antena de 17 cm |
+| Inverter o sentido | "inverta os fios no borne de abre e fecha" |
+| Fusível e tempo máximo | 5 A, vidro, 20 mm; há tempo limite depois do Soft Closing, mas o valor não é informado |
+| Sem fotocélula | "O uso de fotocélula como dispositivo de segurança é obrigatório!" |
+
+### Nice Pro S10 (motor com capacitor)
+
+Manual lido: [Nice Pro S10, Rev. 03](https://www.niceforyou.com/sites/default/files/2026-08/MANUAL-COMPLETO-CENTRAL-NICE-PRO-S10-110826.pdf).
+
+| Item | O que o manual diz |
+|---|---|
+| Rede | `TERRA` e "ALIMENTAÇÃO DA CENTRAL (127v ou 220v)"; fonte de 90 a 240 VCA; o manual recomenda ligar o terra para proteção contra surtos |
+| Motor | `COMUM`, `ABRE`, `FECHA`; cores: o manual não informa |
+| Capacitor | Dois bornes `CAPACITOR` |
+| Fim de curso | Reed, só NA; inversão por menu (PERCURSO, Config 4, "INVERTER FIM-DE-CURSO"); encoder não disponível |
+| Fotocélula | Receptor em `+12V`, `GND` e `N.A.`; transmissor em `+12V` e `GND`; NA de fábrica, NF selecionável (BOTÕES, Config 3); até 700 mA |
+| Botoeira | Entradas `A` e `B`, configuráveis |
+| Ajustes | Grupos de jumpers (SISTEMA, MOTOR, OPER, RELÉ, PERCURSO, BOTÕES), cada um com Config 1 a 5, e botão LEARN; força em 50, 65, 80, 90 ou 100 %; pausa desligada ou de 3 a 60 s |
+| Controles | Retire os jumpers das duas primeiras fileiras, toque no LEARN, aperte o botão do controle e confirme; apagar todos: segurar LEARN 3 s; 250 controles; frequência e tipo de código: o manual não informa |
+| Inverter o sentido | Inverter os fios nos bornes `ABRE` e `FECHA` |
+| Fusível e tempo máximo | O fusível aparece no desenho, sem valor; tempo máximo de 90 s |
+| Sem fotocélula | A fotocélula é declarada obrigatória |
+
+### Omegasat CT30A (motor com capacitor)
+
+Manual lido: [CT30A, Rev. 00](https://niceforyou.com/sites/default/files/upload/manuals/30010120-MANUAL-INST-CENTRAL-CT30A-OMS-Rev-00.pdf) (hospedado no site da Nice; a marca no manual é Omegasat).
+
+| Item | O que o manual diz |
+|---|---|
+| Rede | `F` (fase) e `F/N` (fase/neutro); terra no borne com o símbolo; fonte de 90 a 240 VCA |
+| Motor | `CM` (comum, fio preto), `AB`, `FC`; motor de 1/3 CV, 4 A |
+| Capacitor | Ligado "nos fios conectados aos bornes AB e FC" |
+| Fim de curso | Reed; conector `FCF` `GND` `FCA`; "O FCA é acionado quando o portão está aberto"; invertido, inverter o conector |
+| Fotocélula | `GND`, `+12V` e `N.A.`; até 500 mA; cabo de 0,5 mm² no mínimo |
+| Botoeira | "tipo NA sem retenção"; nomes dos bornes: o manual não informa |
+| Ajustes | Trimpots FORÇA, PAUSA (até 120 s) e DESACEL; jumpers MOD, MAN/AUT e CONF; botão PROG |
+| Controles | Toque no PROG, aperte o botão do transmissor (o LED pisca) e aperte de novo (o LED apaga); apagar todos: segurar PROG até o LED apagar; 39 botões learning code; 433,92 MHz |
+| Inverter o sentido | "inverta os fios no borne de abre e fecha" |
+| Fusível e tempo máximo | Fusível: o manual não informa o valor; tempo máximo de 40 s |
+| Sem fotocélula | "O uso de fotocélula como dispositivo de segurança é obrigatório!" |
+
+### Rossi Bi KXH1024FS Fail Safe (motor com capacitor)
+
+Manual lido: [KXH1024FS, Rev. F](https://www.rossiportoes.com.br/upload/arquivos/Central%20BIKXH_1024%20Rev.F%20-%20PT.pdf).
+
+| Item | O que o manual diz |
+|---|---|
+| Rede | `F` e `N` ("Neutro/Fase 2"); fonte de 90 a 240 VAC; sem borne de terra na placa, mas o aterramento é exigido; pede disjuntor bipolar de 10 A, interruptor bipolar com abertura mínima de 3 mm entre contatos e cabo de 2,5 mm² no mínimo, citando a NBR 5410 |
+| Motor | `U` (comum, fio amarelo), `V` e `W` (sentido); até 520 W. Não é central inversora |
+| Capacitor | `CAP`; "os fios não possuem polaridade"; valor de acordo com a potência do motor |
+| Fim de curso | Reed ou sensor Hall, detectados sozinhos (o Hall exige o ímã próprio); `FA`, `FF` e `CM`; LEDs FA (verde, aberto) e FF (vermelho, fechado) |
+| Fotocélula | `FOTOCÉLULA` (receptor) e `TX(−)`; com Fail Safe (DIP 6 ligado), contato NF e teste da fotocélula; sem Fail Safe, NA; `FTA` para fotocélula de abertura (NA); `12V` com 300 mA |
+| Botoeira | `BOT_A` (abertura) e `BOT_F` (fechamento), com `GND` (o manual cita também `CM`) |
+| Ajustes | DIP 1 a 6 (PREDIAL, PAUSA, FECHADURA, LV/PS, DZ/BV, FS); trimpots ACEL., DESAC., VL.AB e VL.FC; pausa programável de 1 s a 12 h; botão APRENDER |
+| Controles | Toque no APRENDER e aperte o controle com o LED ST aceso; apagar um botão: segurar APRENDER e apertar o botão do controle (até 5 s); apagar todos: segurar APRENDER até o LED ST apagar; 1.024 botões em memória removível; código HCS; antena de fio de 16 cm no borne `ANT` |
+| Inverter o sentido | "Inverter a posição dos fios V e W" |
+| Fusível e tempo máximo | Fusível na placa e tempo máximo: o manual não informa (a proteção indicada é o disjuntor bipolar externo de 10 A) |
+| Sem fotocélula | "É obrigatório o uso do sensor infravermelho Ativo - SIA 30 FS"; com Fail Safe ligado e a fotocélula mal instalada, o sistema não opera |
+
+### Garen Wave Connect (motor com capacitor)
+
+Manual lido: [Central Wave Connect](https://docs.garen.com.br/manuais/MANUAL_CENTRAL_WAVE_CONNECT.pdf). Pelo manual do motor [Garen KDZ](https://garen.com.br/wp-content/uploads/2024/07/Manual_livreto-KDZ-digital-port_esp_mult-rev09.pdf), ela acompanha os KDZ de 1/3 e 1/2 CV.
+
+| Item | O que o manual diz |
+|---|---|
+| Rede | "REDE – Entrada de alimentação 127/220 V"; fase, neutro e terra: o manual não detalha |
+| Motor | `BR`, `AZ`, `PT`; o manual não diz qual é o comum: meça |
+| Capacitor | `CAP` `CAP` |
+| Fim de curso | `FCA`/`FCF`, conectores de 3 e 5 vias; LED FCF vermelho (fechado) e FCA verde (aberto); reed, com o ímã a 10 mm da tampa (15 mm no máximo), segundo o manual do motor KDZ |
+| Fotocélula | Entrada polarizada; jumper JP1 aberto para fotocélula comum ("sinal negativo"), fechado para fotocélula PWM Garen; saída de 12 V (corrente não informada); NA ou NF: o manual não informa |
+| Botoeira | `BOT` (abre, para, fecha), `GND`, `BTA` e `BTF` |
+| Ajustes | Jumpers e os botões TX (−) e CURSO (+): PAUSA de 0 a 120 s em passos de 5 s, FORÇA de 0 (5 %) a 20 (100 %), FREIO, RAMPA AB e RAMPA FC, BV/DZ, REV, FCD, R.AX e JP1; com um jumper de ajuste esquecido fechado, o motor não funciona |
+| Controles | Toque no TX (−) (o LED pisca 3 vezes e fica aceso), aperte o controle e confirme com TX (−); apagar todos: segurar TX (−) 5 s; 512 controles; 433,92 MHz |
+| Inverter o sentido | "inverta o conector do fim de curso e altere as posições entre os fios PT e BR do motor" |
+| Fusível e tempo máximo | 5 A; tempo máximo: o manual não informa |
+| Sem fotocélula | O manual da central não fala; o manual do motor KDZ diz que é obrigatório o sensor anti-esmagamento |
+
+### Garen TSi Pro e TSi Pro Max (inversora)
+
+Manual lido: [Central TSi Pro / TSi Pro Max](https://docs.garen.com.br/manuais/manual_central_tsi_pro.pdf).
+
+| Item | O que o manual diz |
+|---|---|
+| Rede | `AC`/`AC-REDE`, 127 ou 220 V, com chave seletora 127V/220V: o manual manda conferir a posição |
+| Motor | `U`, `V`, `W`; o jumper MONO/ENC OFF escolhe o tipo de motor (fechado: monofásico sem encoder) |
+| Capacitor | Não usa: "é obrigatório retirar o capacitor do automatizador" monofásico |
+| Fim de curso | `FCA`, `CM`, `FCF` e entrada `ENCODER`; os ímãs são obrigatórios ("risco de queima e mal funcionamento do produto") |
+| Fotocélula | `FOTO`, conector polarizado; alimentação de 15 V, e o consumo dos acessórios não pode passar de 60 mA; NA ou NF: o manual não informa |
+| Botoeira | `BTA`, `BTF` e `GND` |
+| Ajustes | Menu F1 a F10 e F0 (versão com display) ou jumpers (versão sem display); velocidade em hertz (de 45 a 210 Hz no menu) |
+| Controles | Botão TX (−) ou menu F1; apagar todos: segurar TX (−) 5 s ou menu F1, opção A; 256 controles na memória interna e 512 na externa (outra página do manual fala em 250); 433,92 MHz |
+| Inverter o sentido | Trocar `U` por `W` e inverter o conector do fim de curso, ou habilitar a função SENTIDO |
+| Fusível e tempo máximo | 10 A; tempo máximo: o manual não informa |
+| Sem fotocélula | "É obrigatório o uso de fotocélula de segurança." |
+
+### PPA Facility Connect (motor com capacitor)
+
+Manual lido: [Central Facility Connect, P04640 Rev. 5](https://media.ppa.com.br/files/P04640_Central_FacilityConnect_REV5_1681484102895.pdf). É um manual com poucos dados elétricos.
+
+| Item | O que o manual diz |
+|---|---|
+| Rede | "REDE ELÉTRICA", 127 V ou 220 V, com "JUMPER SELETOR DE TENSÃO"; nomes dos bornes: o manual não informa |
+| Motor | Fios amarelo e preto/vermelho (220 V) ou amarelo e branco/vermelho (127 V); no desenho, o amarelo é o fio fixo, mas o texto não diz "comum": meça |
+| Capacitor | "CAPACITOR DE PARTIDA DO MOTOR", no desenho |
+| Fim de curso | Reed ("analógico", cabos FCA e FCF) ou encoder ("digital"); jumper de seleção do fim de curso |
+| Fotocélula | Entrada "FOTOCÉLULA"; tipo de contato e alimentação: o manual não informa |
+| Botoeira | Entrada "BOTOEIRA"; aceita também receptor avulso |
+| Ajustes | Jumper PROG, botão GRV e um programador: força em até 14 níveis (de fábrica no máximo, a conferir tentando segurar o portão), pausa de até 4 min, rampas, freio e outros |
+| Controles | Feche o jumper PROG, segure o botão do controle, aperte GRV e abra o jumper; apagar todos: apertar juntos os dois botões de um controle gravado, 3 vezes, e confirmar; 160 transmissores; código fixo ou rolante; 433,92 MHz |
+| Inverter o sentido | Trocar os fios preto e vermelho, e "a central deverá ser desligada"; o encoder não precisa ser invertido |
+| Fusível e tempo máximo | Fusível: o manual não informa; tempo de 60 s (120 s sem o percurso memorizado) |
+| Sem fotocélula | O manual da central não fala; os manuais técnicos dos motores PPA DZ Stark, DZ Hub e DZ Home chamam a fotocélula de "opcional" |
+
+### PPA Triflex Full Range (inversora)
+
+Manual lido: [Triflex Full Range, P30906 Rev. 10](https://media.ppa.com.br/files/P30906_Manual_Triflex_Full_Range_REV10_1770812221431.pdf).
+
+| Item | O que o manual diz |
+|---|---|
+| Rede | `L` e `N`, bivolt automático; terra: o manual não informa |
+| Motor | Três fios, sem capacitor: pretos (motores de saída 127 V) ou amarelos (220 V); "não é necessário obedecer à sequência de cores" |
+| Capacitor | Não usa |
+| Fim de curso | Reed no conector CACF e encoder no conector ENC |
+| Fotocélula | `FOTA` (abertura) e `FOTF` (fechamento); contato NA, NF, resistivo ou pulsante; 15 V CC, até 300 mA |
+| Botoeira | `BOT` (NA), `ABR` (só abre), `FEC` (só fecha) e `GND` |
+| Ajustes | Botões (+) e (−) e jumpers HRF e TX; força de 20 a 100 %; velocidades em hertz; pausa de 0 a 240 s |
+| Controles | Função "Gravar TX" e botão (+); apagar: segurar (−) 10 s em "Apagar TX"; 256 transmissores; código rolante |
+| Inverter o sentido | Não conseguimos ler esta parte do manual: consulte o original |
+| Fusível e tempo máximo | O manual não informa |
+| Sem fotocélula | "é obrigatório o uso de Fotocélulas nos automatizadores" |
+
+## Explore: inverter o sentido
+
+Em todas as centrais com capacitor, o manual manda a mesma coisa quando o primeiro comando fecha o portão em vez de abrir: trocar os dois fios de sentido (A e F, V e W, PT e BR, ABRE e FECHA). Algumas pedem mais: a Garen manda inverter também o conector do fim de curso, a PPA manda desligar a central antes, e a Nice Pro S10 inverte o fim de curso por menu. A CD-1 oferece dois caminhos: trocar `ABRE` e `FECHA` com o disjuntor desligado, ou ligar o DIP `INV`, que troca o papel dos relés pelo programa.
+
+Na central virtual abaixo, alguém acabou de trocar o motor e ligou os fios de sentido trocados. O portão está no meio do percurso.
+
+<CentralVirtual
+  client:visible
+  titulo="Central virtual: motor novo com o sentido trocado"
+  mostrar={['comandos', 'ajustes']}
+  defeitos={{ fiosInvertidos: true }}
+  abertura={0.5}
+/>
+
+1. Aperte **Controle remoto**. A central ligou sem saber a posição e o primeiro comando deveria **abrir**. Para que lado o portão foi? O que acontece quando ele chega ao fim? Leia o registro.
+2. Clique em **Reiniciar**, ligue o **DIP 1 INV** e aperte o controle de novo. Agora o portão abre e para no fim de curso de abertura.
+
+No portão real, o DIP INV é uma alternativa da CD-1. Na sua central, faça o que o manual manda, com o disjuntor desligado e a ausência de tensão confirmada, como na <a href={lessonUrl('m16-portao/07-trocar-motor-e-central')}>aula 16.7</a>.
+
+## Como ler o manual da sua central
+
+O manual de uma central tem de 4 a mais de 70 páginas. Lido na ordem certa, ele vira uma lista de ligação.
+
+<Steps>
+  <Step title="Identifique o modelo e a versão">
+    Copie o modelo da etiqueta da placa e baixe o manual no site do fabricante. Repare na versão: a
+    Intelbras, por exemplo, tem manuais diferentes conforme o firmware da CP-1000.
+  </Step>
+  <Step title="Confira o tipo de central">
+    Procure os bornes de capacitor e a palavra "monofásico". Se a central fala em U, V, W, hertz e
+    "sem capacitor", é inversora, e o motor precisa ser do mesmo sistema.
+  </Step>
+  <Step title="Ache a lista de bornes">
+    Quase todo manual tem uma lista ou um desenho com o nome de cada borne. Anote, lado a lado, o
+    nome da CD-1 e o da sua central: rede, motor, capacitor.
+  </Step>
+  <Step title="Anote os sensores">
+    Fim de curso (tipo aceito, conector, ordem dos fios, como inverter), fotocélula (NA ou NF, tensão
+    e corrente da fonte auxiliar) e botoeira.
+  </Step>
+  <Step title="Anote os ajustes e o cadastro">
+    Como se ajusta a força e em que sentido a escala cresce, a pausa, os jumpers que precisam sair
+    depois da configuração, como cadastrar e como apagar controles.
+  </Step>
+  <Step title="Leia a parte de segurança">
+    Fotocélula, disjuntor, aterramento, cabos e normas citadas. É ali que o fabricante diz o que é
+    obrigatório.
+  </Step>
+  <Step title="Monte a sua cola">
+    Uma folha com a tabela da sua central, para levar ao portão. Não confie na memória com a placa
+    aberta.
+  </Step>
+</Steps>
+
+## Exemplo resolvido: da CD-1 para uma Peccinin CP 4010F
+
+Você aprendeu na CD-1 e vai instalar uma Peccinin CP 4010F. Usando a tabela dela:
+
+**1. Rede.** `F` vai em `F`, o neutro vai em `F/N`, o terra vai no borne com o símbolo de terra. Atenção ao aviso do manual: o terra **não** vai no `GND`.
+
+**2. Motor e capacitor.** `COM` vira `C1`, `ABRE` vira `A1`, `FECHA` vira `F1`. O capacitor fica nos fios dos dois enrolamentos (o manual fala em fios marrom e branco), como na CD-1, onde os bornes `CAP` estão ligados por dentro a ABRE e FECHA.
+
+**3. Fim de curso.** A ordem `FCA1` `GND` `FCF1` é a mesma da CD-1, e a central só aceita reed NA, que é o tipo do sensor da CD-1. Depois de ligar, confira os LEDs com o portão parado numa ponta.
+
+**4. Fotocélula.** Aqui muda de verdade. A CD-1 espera NF; a entrada `FTC` da Peccinin é NA. No receptor da fotocélula, o fio que estava no contato NF passa para o NA (o comum continua no `GND`). Confira também a corrente: a fonte auxiliar da Peccinin dá até 700 mA. Se a fotocélula consome, digamos, 30 mA no transmissor e 40 mA no receptor (valores hipotéticos; confira no manual dela), o total cabe com folga:
+
+$$
+I_\text{total} = I_\text{TX} + I_\text{RX} = 30\,\text{mA} + 40\,\text{mA} = 70\,\text{mA} \le 700\,\text{mA}
+$$
+
+**5. Ajustes.** O trimpot FORÇA da CD-1 corresponde ao EMBR.; o PAUSA, ao FCH.AUTO (0 a 120 s; no zero, sem fechamento automático); o jumper J2 AUT, ao jumper MAN/AUTO. Lembre de tirar o jumper C depois da configuração: com ele, a central não responde a comandos.
+
+**6. Fusível.** O fusível da CP 4010F é de 5 A, e não de 10 A como o da CD-1. Na troca, use sempre o valor do manual.
+
+**7. Controles.** A memória não passa de uma central para outra: cadastre os controles de novo, pelo LEARN. O manual fala em controles Peccinin; confira se os seus servem.
+
+**8. Sentido.** Primeiro comando: deve abrir. Se fechar, desligue o disjuntor, confirme a ausência de tensão e troque os fios de `A1` e `F1`.
+
+<RealCase title="A central mais barata que não serviu">
+A central de um portão rápido queimou, e o dono comprou a central mais barata da loja, para motor com capacitor. Na hora de ligar, o técnico estranhou: o motor tinha três fios, nenhum capacitor, e a central antiga tinha ajustes de velocidade em hertz. Era um motor de sistema inversor, do tipo vendido como "Jetflex". O datasheet do motor PPA DZ Stark, por exemplo, traz o capacitor da versão monofásica (25 µF em 127 V) e, na versão Jetflex, "Não aplicável".
+
+A central nova voltou para a loja sem ser ligada. A troca certa era por uma central inversora compatível com aquele motor. Ou então pela troca do conjunto inteiro, motor e central, por um sistema com capacitor. Tudo começou por não conferir o tipo de central antes de comprar.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Comprar pela aparência.** Duas centrais parecidas podem ser de tipos diferentes. Confira capacitor, bornes e manual antes.
+- **Ler só a letra do borne.** O `F` da Intelbras e o `U` da Rossi mostram que a mesma letra muda de sentido. Leia o grupo e o manual.
+- **Copiar o ajuste da central antiga.** A escala de força pode ser invertida (Intelbras) ou ter outra faixa. Comece pelo que o manual recomenda e ajuste testando.
+- **Esquecer o jumper de configuração.** Na Peccinin, o jumper C deixa a central sem responder a comandos; na Garen Wave Connect, um jumper de ajuste fechado impede o motor de funcionar.
+- **Ligar a fotocélula no contato de antes.** Ao passar de uma central NF para uma NA, ou o contrário, mude o fio no receptor.
+- **Trocar o fusível por um maior "porque queimou".** Fusível que queima avisa um defeito. Use o valor do manual e procure a causa (<LinkAula id="m16-portao/09-diagnostico-do-portao">aula 16.9</LinkAula>).
+- **Pular a segurança porque "a central nova não reclama".** Numa entrada NA, a central funciona sem fotocélula. Os manuais dizem que ela é obrigatória.
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'No manual da Intelbras CP-1000, a letra F aparece em dois bornes diferentes. Quais?',
+      options: [
+        { text: 'A fase da rede e o fio de fechamento do motor', correct: true },
+        {
+          text: 'A fase da rede e o fim de curso de fechamento',
+          feedback: 'O fim de curso de fechamento é o FCF, no conector CN13.',
+        },
+        {
+          text: 'O fio de fechamento e o fusível',
+          feedback: 'O fusível não é um borne. O outro F é o da fase da rede.',
+        },
+        {
+          text: 'A fotocélula e a botoeira de fechamento',
+          feedback: 'Esses bornes se chamam Foto e BotF.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'A Rossi KXH1024FS tem bornes U, V e W para o motor, então ela é uma central inversora e o motor não leva capacitor.',
+      answer: false,
+      explanation:
+        'Na Rossi KXH1024FS, U é o comum (fio amarelo), V e W dão o sentido, e o capacitor vai no borne CAP. É uma central para motor com capacitor.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Você quer MENOS força no motor numa Intelbras CP-1000. O que faz no menu Emb?',
+      options: [
+        { text: 'Aumenta o valor da embreagem', correct: true },
+        {
+          text: 'Diminui o valor da embreagem',
+          feedback: 'Na Intelbras a escala é invertida: quanto menor o valor, maior a força.',
+        },
+        {
+          text: 'Gira o trimpot FORÇA para a esquerda',
+          feedback: 'A CP-1000 não tem trimpot: o ajuste é pelo menu, com as teclas.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Você vai usar um motor monofásico numa Garen TSi Pro. O que o manual manda fazer com o capacitor?',
+      options: [
+        { text: 'Retirar o capacitor do motor', correct: true },
+        {
+          text: 'Ligar o capacitor nos bornes CAP da central',
+          feedback: 'A TSi Pro é inversora e não tem bornes de capacitor.',
+        },
+        {
+          text: 'Trocar por um capacitor maior',
+          feedback: 'O manual é explícito: para motor monofásico, é obrigatório retirar o capacitor.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'A fotocélula estava ligada no contato NF do receptor, numa CD-1. A central nova é uma Omegasat CT30A, com entrada N.A. O que muda?',
+      options: [
+        { text: 'O fio do receptor passa do contato NF para o NA', correct: true },
+        {
+          text: 'Nada: a central entende os dois contatos',
+          feedback: 'A CT30A tem entrada N.A. Com o NF, ela leria "alguém no caminho" com o feixe livre e não fecharia.',
+        },
+        {
+          text: 'Coloca-se um jumper na entrada da fotocélula',
+          feedback: 'Isso anula a segurança. Nenhum manual descreve um jumper para dispensar a fotocélula.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem a leitura do manual de uma central nova.',
+      items: [
+        'Identificar o modelo e a versão',
+        'Conferir se é central para motor com capacitor ou inversora',
+        'Achar a lista de bornes',
+        'Anotar fim de curso, fotocélula e botoeira',
+        'Anotar ajustes e cadastro de controles',
+        'Ler a parte de segurança',
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Na Garen TSi Pro, o consumo dos acessórios não pode passar de 60 mA. Uma fotocélula consome 25 mA no transmissor e 30 mA no receptor (valores hipotéticos). Quantos mA sobram?',
+      answer: 5,
+      tolerance: 0.02,
+      unit: 'mA',
+      explanation:
+        'I_total = 25 + 30 = 55 mA; sobram 60 − 55 = 5 mA. Quase no limite: um receptor avulso a mais já passaria.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Antes de trocar qualquer peça, confira o tipo de central: para motor com capacitor (a maioria, como a CD-1) ou inversora (U, V, W, sem capacitor, velocidade em hertz).
+- As funções são as mesmas da CD-1; mudam os nomes, a ordem dos conectores, o tipo de entrada da fotocélula e o jeito de ajustar.
+- Pegadinhas: o `F` duplo da Intelbras, o `U` comum da Rossi, a embreagem invertida da Intelbras, o borne `F/N`, a ordem do conector de fim de curso e a cor do comum.
+- Leia o manual numa ordem fixa (modelo, tipo, bornes, sensores, ajustes, segurança) e monte uma cola antes de abrir a placa.
+- Ao trocar de central, revise fotocélula (NA ou NF), fusível, jumpers de configuração e controles, que precisam ser cadastrados de novo.
+- Os manuais declaram a fotocélula obrigatória. Siga sempre o manual do fabricante da sua central.

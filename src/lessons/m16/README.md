@@ -8,7 +8,13 @@ Arquivos de apoio das aulas do M16 (`src/content/aulas/m16-portao/`). Especifica
 | `central/controller.ts` | A lógica da central: máquina de estados, acionamento do motor (relés + TRIAC com partida suave), detecção de obstáculo, fechamento automático, cadastro de controles, LEDs e buzzer |
 | `central/firmware-api.ts` | Formato de firmware proposto para o `mcu` (função pura de estado, entradas e tempo) |
 | `central/plant.ts`, `central/system.ts` | Modelo comportamental do portão (motor, fim de curso, fotocélula, defeitos) e o sistema completo sem o simulador de circuitos, para os testes e os widgets das aulas |
-| `__tests__/` | Testes do firmware: abre, para no fim de curso, pausa, fecha, fotocélula reverte, obstáculo, tempo de 40 s, comando durante o movimento, cadastro, rolling code |
+| `FONTES.md` | Pesquisa dos manuais reais (centrais, motores, normas) e os valores típicos que as aulas usam. Fonte única para produtos, valores e normas citados no módulo |
+| `PESQUISA.md` | As notas completas da leitura dos manuais, com página e citação, de onde sai o resumo em `FONTES.md` |
+| `*.circuit.ts` | Circuitos das aulas no simulador: `motor-capacitor` (16.2), `descarga-capacitor`, `fim-de-curso`, `fotocelula-nf`, `trimpot-pausa` |
+| `ui/` | Widgets das aulas: `CentralVirtual` (a CD-1 rodando o firmware contra o modelo do portão, com defeitos para diagnóstico), `MedirFios` (achar o fio comum com o ohmímetro), `DiagnosticoPortao` (casos de defeito) e `EmBreve` (marcador das partes 3D e da bancada que ainda não chegaram) |
+| `figuras/` | Figuras SVG das aulas, como `PlacaCD1` (a placa da central com destaque por grupo) |
+| `oficinas/` | Oficina `trocar-motor-portao`, usada por `<Workshop id="trocar-motor-portao" />` |
+| `__tests__/` | Testes do firmware (abre, para no fim de curso, pausa, fecha, fotocélula reverte, obstáculo, tempo de 40 s, comando durante o movimento, cadastro, rolling code), dos circuitos das aulas e dos valores que o texto cita |
 
 ## Formato do firmware
 

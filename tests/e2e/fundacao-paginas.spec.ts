@@ -27,6 +27,8 @@ async function crawl(page: Page): Promise<string[]> {
         queue.push(url.pathname);
       }
     }
+    // The crawl and the check below each open every page: allow about a second per page each.
+    test.setTimeout(30_000 + seen.size * 2_000);
   }
   return [...seen].sort();
 }
@@ -39,8 +41,6 @@ test.describe('every page', () => {
   }) => {
     const paths = await crawl(page);
     expect(paths).toContain(BASE);
-    // The site grows with every module: allow about a second per page.
-    test.setTimeout(30_000 + paths.length * 1_000);
 
     for (const path of paths) {
       await test.step(path, async () => {

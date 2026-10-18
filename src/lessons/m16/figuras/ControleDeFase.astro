@@ -1,0 +1,158 @@
+---
+/**
+ * Lesson 16.3: phase control by the TRIAC. One cycle of the 60 Hz mains in
+ * each panel; the TRIAC fires late in each half-cycle and conducts until
+ * the current crosses zero. Left, the start of the soft start (30 % of each
+ * half-cycle); right, FORÇA in the middle (70 %), as in the CD-1.
+ */
+import Figure from '../../../components/Figure.astro';
+
+interface Props {
+  caption?: string;
+}
+
+const { caption } = Astro.props;
+
+const W = 300;
+const A = 80;
+const Y0 = 150;
+
+const point = (x0: number, deg: number) =>
+  `${(x0 + (W * deg) / 360).toFixed(1)} ${(Y0 - A * Math.sin((deg * Math.PI) / 180)).toFixed(1)}`;
+
+/** The whole cycle, from 0° to 360°. */
+function wave(x0: number): string {
+  const pts: string[] = [];
+  for (let d = 0; d <= 360; d += 3) pts.push(point(x0, d));
+  return `M${pts.join(' L')}`;
+}
+
+/** The part of a half-cycle the TRIAC conducts, from the firing angle to the zero crossing. */
+function conducting(x0: number, from: number, to: number): string {
+  const pts = [`${(x0 + (W * from) / 360).toFixed(1)} ${Y0}`, point(x0, from)];
+  for (let d = Math.ceil(from / 3) * 3; d <= to; d += 3) pts.push(point(x0, d));
+  pts.push(`${(x0 + (W * to) / 360).toFixed(1)} ${Y0}`);
+  return `M${pts.join(' L')}Z`;
+}
+
+const panels = [
+  { x0: 40, nivel: 0.3, titulo: 'Início da partida suave: 30 %' },
+  { x0: 400, nivel: 0.7, titulo: 'FORÇA no meio: 70 %' },
+].map((p) => {
+  const alfa = (1 - p.nivel) * 180;
+  return {
+    ...p,
+    alfa,
+    xa: p.x0 + (W * alfa) / 360,
+    xb: p.x0 + (W * (180 + alfa)) / 360,
+    onda: wave(p.x0),
+    areas: [conducting(p.x0, alfa, 180), conducting(p.x0, 180 + alfa, 360)],
+  };
+});
+
+const nf = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
+
+const alt =
+  'Dois gráficos de um ciclo da rede de 60 hertz, com a tensão da rede tracejada. À esquerda, o início da partida suave: o TRIAC dispara a 126 graus de cada semiciclo e conduz só os 30 % finais, uma fatia estreita perto do zero. À direita, com o trimpot FORÇA no meio: o TRIAC dispara a 54 graus e conduz os 70 % finais de cada semiciclo, uma área bem maior. Em cada semiciclo, o TRIAC desliga sozinho quando a corrente passa por zero.';
+---
+
+<Figure alt={alt} caption={caption}>
+  <svg class="cf" viewBox="0 0 720 290" width="720" height="290">
+    {panels.map((p) => (
+      <g>
+        <text class="cf-title" x={p.x0 + W / 2} y="28" text-anchor="middle">
+          {p.titulo}
+        </text>
+        <line class="cf-axis" x1={p.x0} y1={Y0} x2={p.x0 + W} y2={Y0} />
+        <line class="cf-axis" x1={p.x0} y1={Y0 - A - 12} x2={p.x0} y2={Y0 + A + 12} />
+        {p.areas.map((d) => (
+          <path class="cf-area" d={d} />
+        ))}
+        <path class="cf-wave" d={p.onda} />
+        {[p.xa, p.xb].map((x) => (
+          <line class="cf-fire" x1={x} y1={Y0 - A - 6} x2={x} y2={Y0 + A + 6} />
+        ))}
+        <text class="cf-small" x={p.xa} y={Y0 - A - 14} text-anchor="middle">
+          disparo ({nf.format(p.alfa)}°)
+        </text>
+        <text class="cf-small" x={p.x0 + (W * p.alfa) / 720} y={Y0 + 20} text-anchor="middle">
+          espera
+        </text>
+        <text
+          class="cf-small"
+          x={p.x0 + (W * (p.alfa + 180)) / 720}
+          y={Y0 + 20}
+          text-anchor="middle"
+        >
+          conduz
+        </text>
+        <text class="cf-tick" x={p.x0} y={Y0 + A + 30} text-anchor="middle">
+          0
+        </text>
+        <text class="cf-tick" x={p.x0 + W / 2} y={Y0 + A + 30} text-anchor="middle">
+          8,3 ms
+        </text>
+        <text class="cf-tick" x={p.x0 + W} y={Y0 + A + 30} text-anchor="middle">
+          16,7 ms
+        </text>
+      </g>
+    ))}
+    <rect class="cf-key-area" x="196" y="274" width="16" height="10" rx="2"></rect>
+    <text class="cf-small" x="218" y="283">
+      o que chega ao motor
+    </text>
+    <line class="cf-key-wave" x1="400" y1="279" x2="426" y2="279"></line>
+    <text class="cf-small" x="432" y="283">
+      tensão da rede
+    </text>
+  </svg>
+</Figure>
+
+<style>
+  .cf {
+    width: 100%;
+    min-width: 34rem;
+    height: auto;
+  }
+
+  .cf-title {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .cf-axis {
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+  }
+
+  .cf-area,
+  .cf-key-area {
+    fill: color-mix(in oklab, var(--accent) 45%, transparent);
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+
+  .cf-wave,
+  .cf-key-wave {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+  }
+
+  .cf-fire {
+    stroke: var(--copper);
+    stroke-width: 2;
+  }
+
+  .cf-small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+
+  .cf-tick {
+    fill: var(--fg-subtle);
+    font-size: 11px;
+  }
+</style>

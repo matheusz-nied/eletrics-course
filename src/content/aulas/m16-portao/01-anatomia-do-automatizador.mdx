@@ -1,0 +1,308 @@
+---
+titulo: Anatomia de um automatizador
+modulo: m16-portao
+ordem: 1
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Reconhecer as partes de um automatizador de portão deslizante e o que cada uma faz
+  - Diferenciar portão deslizante, basculante e pivotante
+  - Explicar por que o redutor de rosca sem-fim aumenta a força e segura o portão parado
+  - Calcular o tempo de abertura a partir da velocidade do portão
+  - Saber o que anotar do conjunto atual antes de comprar um motor ou uma central
+prerequisitos:
+  - m04-passivos/07-chaves-botoes-e-reles
+  - m05-magnetismo/05-sensores-magneticos
+  - m08-motores/06-redutores-torque-e-potencia
+tags: [portão, automatizador, redutor, cremalheira, fim de curso, fotocélula]
+seguranca: nenhum
+---
+
+import CentralVirtual from '../../../lessons/m16/ui/CentralVirtual';
+import EmBreve from '../../../lessons/m16/ui/EmBreve.astro';
+import PortaoDeslizante from '../../../lessons/m16/figuras/PortaoDeslizante.astro';
+import { lessonUrl } from '../../../lib/url';
+
+Você aperta o controle, ouve um estalo na caixa ao lado do portão, e uma grade de ferro de 4 metros começa a deslizar. Uns 16 segundos depois, ela para sozinha, no ponto certo. Ninguém empurrou nada: o trabalho foi feito por um conjunto de peças que você vai conhecer agora, uma por uma, porque trocar qualquer uma delas começa por saber o que ela faz.
+
+<Callout type="atencao" title="Nesta aula você só observa">
+Pode olhar o seu portão à vontade, mas não abra a tampa do motor. Nos portões deslizantes, a central costuma ficar ali dentro, com a rede elétrica ligada nos bornes. O jeito seguro de abrir e mexer vem nas próximas aulas.
+</Callout>
+
+## O caminho de um comando
+
+Antes dos nomes, acompanhe o que acontece quando você aperta o botão do controle:
+
+1. O controle remoto envia um sinal de rádio.
+2. O receptor da **central** (a placa de comando) recebe o sinal e confere se aquele controle está cadastrado.
+3. O programa da central decide o que fazer. Se o portão está fechado, a decisão é abrir.
+4. A central liga o motor no sentido de abrir.
+5. O motor gira rápido e com pouca força. O <Term id="redutor">redutor</Term>, um jogo de engrenagens, transforma isso num giro lento e forte.
+6. Uma engrenagem pequena na saída do redutor, o pinhão, empurra uma barra dentada presa ao portão, a <Term id="cremalheira">cremalheira</Term>. O portão anda.
+7. Perto do fim do caminho, um ímã preso à cremalheira passa por um sensor no motor. A central entende que o portão chegou e desliga o motor.
+
+Enquanto o portão se move, a <Term id="fotocelula">fotocélula</Term> vigia a passagem. Se alguém cruzar o feixe dela durante o fechamento, a central manda o portão abrir de novo.
+
+<PortaoDeslizante caption="Figura 1. Um portão deslizante visto de dentro do terreno, fechado. O motor fica no chão, ao lado do vão, e o pinhão engrena na cremalheira presa à folha. Os dois ímãs da cremalheira passam pelo sensor do motor no fim de cada percurso." />
+
+## Três tipos de portão
+
+A eletrônica é parecida em todos os automatizadores. O que muda é o jeito de o portão se mover e, por isso, a mecânica.
+
+| Tipo | Como o portão se move | Onde fica o motor |
+|------|----------------------|-------------------|
+| Deslizante (de correr) | Corre de lado, sobre um trilho no chão | No chão, ao lado do vão, com pinhão e cremalheira |
+| Basculante | Sobe girando e fica deitado no alto, para dentro | No alto; puxa a folha por um braço ou por um trilho, conforme o modelo |
+| Pivotante (de abrir) | Gira nas dobradiças, como uma porta | Em geral um por folha, com braço articulado ou pistão (um braço que estica e encolhe) |
+
+O **deslizante** é o mais comum em casas e é o foco deste módulo. Muitas centrais servem para os três tipos (o manual de cada uma diz quais), e as ligações elétricas que você vai aprender valem para todos. O que muda na instalação do basculante e do pivotante é a fixação, o braço e o ajuste dos pontos de parada.
+
+<EmBreve component="Scene3D" id="portao-deslizante" />
+
+## O motor e o redutor
+
+O motor da maioria dos portões residenciais é um <Term id="motor-de-inducao">motor de indução</Term> monofásico com <Term id="capacitor">capacitor</Term>, de 127 V (a tensão que muita gente chama de 110) ou de 220 V. A potência fica entre 1/4 e 1/2 CV. Um cavalo-vapor (CV) vale cerca de 736 W, então isso dá algo entre 184 W e 368 W no eixo. A aula <a href={lessonUrl('m16-portao/02-o-motor-do-portao')}>16.2</a> mostra por que esse motor tem três fios e como ele gira para um lado ou para o outro.
+
+Sozinho, esse motor não serve para empurrar um portão: ele gira rápido demais e com pouca força. Quem resolve isso é o redutor, que fica na mesma carcaça do motor.
+
+### Rosca sem-fim e coroa
+
+O redutor de portão costuma ser de **rosca sem-fim e coroa**. No eixo do motor há um parafuso, a rosca sem-fim. Ele engrena numa roda dentada maior, a coroa. No sem-fim mais simples (de uma entrada), cada volta completa do parafuso empurra a coroa em um dente só.
+
+Pense numa coroa de 30 dentes, um exemplo para fazer a conta. O motor precisa dar 30 voltas para a coroa dar uma. A rotação cai 30 vezes. Em troca, a força de giro (o **torque**) na coroa fica perto de 30 vezes maior, um pouco menos por causa do atrito entre o parafuso e os dentes. É a mesma troca da marcha leve da bicicleta: você pedala muito, anda pouco e sobe a ladeira. A analogia para por aí: na bicicleta você troca de marcha, e no redutor a relação é fixa.
+
+O redutor de sem-fim tem uma propriedade a mais, muito útil no portão. O parafuso consegue girar a coroa, mas a coroa não consegue girar o parafuso: o ângulo da rosca e o atrito travam o movimento ao contrário. Na prática, empurrar o portão com o motor parado não adianta. O redutor segura o portão no lugar, como uma tranca, sem gastar energia. A <LinkAula id="m08-motores/06-redutores-torque-e-potencia">aula 8.6</LinkAula> explica torque e redução com mais calma.
+
+### Pinhão e cremalheira
+
+Na saída do redutor fica o **pinhão**, uma engrenagem pequena. Ele engrena na cremalheira, uma barra reta com dentes, de náilon ou de aço, presa ao longo da parte de baixo do portão. Quando o pinhão gira, os dentes dele empurram os dentes da barra, e o giro vira movimento em linha reta.
+
+Dois cuidados aparecem na instalação. O pinhão deve engrenar com uma folga pequena entre os dentes, sem que o peso do portão fique apoiado nele (quem segura o peso são as roldanas no trilho). E quem compra um motor novo precisa conferir se o dente do pinhão combina com a cremalheira que já está no portão (o tamanho do dente, que os catálogos chamam de módulo ou passo).
+
+Alguns motores têm ainda uma embreagem mecânica, que patina se o portão travar. Muitas centrais também limitam a força do motor pela eletrônica, o que os manuais chamam de <Term id="embreagem-eletronica">embreagem eletrônica</Term>. Você vai ver como isso funciona na aula <a href={lessonUrl('m16-portao/03-a-central-por-dentro')}>16.3</a> e como ajustar na aula <a href={lessonUrl('m16-portao/08-ajustes-e-testes')}>16.8</a>.
+
+## Como a central sabe que o portão chegou
+
+O motor não para "por tempo". Ele para porque um sensor avisa a central de que o portão chegou ao fim do caminho. Esse sensor se chama <Term id="fim-de-curso">fim de curso</Term>.
+
+O tipo mais comum usa ímã. Dois ímãs ficam presos na cremalheira, um perto de cada ponta. No motor, bem embaixo da cremalheira, há um sensor magnético: o <Term id="reed-switch">reed switch</Term>, uma chavinha dentro de um tubo de vidro que fecha quando um ímã chega perto. Na Figura 1, com o portão fechado, o ímã de fechamento está sobre o sensor. Quando o portão abre, a cremalheira corre e, no fim, é o ímã de abertura que chega ao sensor.
+
+Cada ímã aciona uma entrada da central: FCA (fim de curso de abertura) e FCF (fim de curso de fechamento). Na CD-1, o sensor tem dois reeds, um para cada entrada. Mudar um ímã de lugar muda o ponto em que o portão para. A <LinkAula id="m05-magnetismo/05-sensores-magneticos">aula 5.5</LinkAula> explica o reed switch, e a aula <a href={lessonUrl('m16-portao/04-fim-de-curso-e-sensores')}>16.4</a> mostra como a central lê esse contato.
+
+Existem outros tipos de fim de curso:
+
+- **Microchave**: um interruptor de alavanca que uma peça do portão aperta no fim do curso.
+- **Sensor Hall**: um sensor magnético eletrônico, sem contato que se mexe.
+- **Encoder**: conta as voltas do motor. A central aprende o tamanho do percurso e sabe onde o portão está a cada momento, não só nas pontas.
+
+## A central
+
+A central é a placa de comando. Ela recebe os comandos, decide o que fazer e liga o motor no sentido certo. Num portão deslizante, ela costuma ficar sob a tampa do próprio motor. Em outros tipos, numa caixa na parede.
+
+Dentro dela há uma fonte que transforma a tensão da rede em 12 V, um <Term id="microcontrolador">microcontrolador</Term> (um pequeno computador num chip, que roda o programa), dois <Term id="rele">relés</Term> que escolhem o sentido do motor, um componente que controla a força do motor e o receptor de rádio. Na borda ficam os bornes, onde se ligam a rede, o motor e os acessórios.
+
+Este curso usa uma central genérica, a **CD-1**, desenhada a partir do padrão das centrais vendidas no Brasil. Ela não é de nenhuma marca, e por isso serve para entender todas. A <LinkAula id="m16-portao/03-a-central-por-dentro">aula 16.3</LinkAula> abre a CD-1 bloco por bloco, e a <LinkAula id="m16-portao/10-do-generico-para-a-sua-central">aula 16.10</LinkAula> faz a ponte com as centrais reais.
+
+## Fotocélula, botoeira e controle remoto
+
+A fotocélula é um par de peças nos pilares, uma de cada lado do vão. O emissor lança um feixe infravermelho (invisível). O receptor avisa a central se está enxergando o feixe. Se uma pessoa, um animal ou um carro cortar o feixe enquanto o portão fecha, a central faz o portão voltar e abrir. Os manuais de central consultados para este curso chamam a fotocélula de **obrigatória**. A aula <a href={lessonUrl('m16-portao/05-seguranca-e-acessorios')}>16.5</a> explica por quê.
+
+A <Term id="botoeira">botoeira</Term> é um botão com fio, de pulso: só fecha o contato enquanto está apertado (um contato NA, normalmente aberto). Ela pode ficar dentro de casa, na guarita ou ligada ao interfone. Cada toque vale um comando, igual a apertar o controle.
+
+O **controle remoto** é um transmissor de rádio de 433,92 MHz. A central só obedece aos controles que foram cadastrados nela. Há dois sistemas: o <Term id="code-learning">code learning</Term>, em que o controle manda sempre o mesmo código, e o <Term id="rolling-code">rolling code</Term>, em que o código muda a cada aperto e uma cópia não serve. A aula <a href={lessonUrl('m16-portao/06-controle-remoto-e-receptor')}>16.6</a> mostra como cadastrar e apagar controles.
+
+## O desbloqueio
+
+Se o redutor segura o portão, o que fazer quando falta energia? Para isso existe o **desbloqueio**: uma chave ou alavanca no motor que solta a transmissão. Com o desbloqueio aberto, o portão corre à mão.
+
+Ele serve também para um teste importante. Com o desbloqueio aberto, o portão deve correr livre de uma ponta à outra, sem enroscar. Se ele está pesado ou trava num ponto, o problema é mecânico (trilho torto, roldana gasta, guia apertada), e nenhum motor novo resolve.
+
+Depois de usar, trave de novo. Com o desbloqueio aberto, o motor gira, mas o portão não anda.
+
+## Acessórios
+
+- **Trava elétrica**: alguns portões têm uma fechadura eletromagnética de 12 V. A central dá um pulso nela no começo da abertura, para soltá-la antes de o motor puxar. Na CD-1, o pulso dura 1 s.
+- **Sinaleira**: uma luz que pisca enquanto o portão se move, para avisar quem está na calçada e na rua. As centrais que têm saída para sinaleira cuidam disso sozinhas.
+- **Luz de garagem**: acende enquanto o portão se move e, conforme a configuração, fica acesa por mais um tempo. Na CD-1, mais 60 s.
+- **Módulo de comunicação**: algumas centrais aceitam um módulo para comandar o portão pelo celular.
+
+## Motores rápidos e centrais inversoras
+
+Até aqui você viu o conjunto mais comum: motor de indução com capacitor e uma central com relés. Existe outra família. Muitos automatizadores vendidos como "rápidos" usam uma **central inversora**. Em vez de ligar o motor direto na rede, ela fabrica uma tensão alternada com a frequência que quiser e controla a velocidade em hertz: acelera no começo, corre no meio e desacelera perto do fim. O motor dessas centrais tem três fios e não usa capacitor. Há também automatizadores com motor de corrente contínua de baixa tensão, com outra central.
+
+Isso importa na hora de comprar. Uma central de motor com capacitor não aciona o motor de uma central inversora, e o contrário também não funciona direito. Um motor trocado sem conferir o tipo de central pode não girar, girar mal ou queimar. O nome dos fios não basta para saber o tipo (veja o caso abaixo): quem diz é o manual da central e o do motor.
+
+## Explore: comandos na central virtual
+
+A central virtual abaixo roda o programa da CD-1 ligado a um modelo de portão deslizante de 4 m. Os LEDs e o registro "O que a central fez" mostram o que ela está decidindo. O relógio do registro marca o tempo simulado, que corre 2 vezes mais rápido que o real (dá para mudar em "Velocidade").
+
+<CentralVirtual client:visible mostrar={['comandos']} />
+
+Faça nesta ordem:
+
+1. Aperte **Controle remoto** e acompanhe o portão. Veja o estado mudar para "Abrindo" e a linha "Percurso" contar os segundos. Quanto tempo ele leva para abrir?
+2. Quando o portão abrir, não faça nada. A linha muda para "Fecha sozinho em" e conta 30 s: é o fechamento automático. Espere o portão fechar.
+3. Abra de novo e, com o portão no meio do caminho, aperte **Botoeira**. O portão para.
+4. Aperte **Botoeira** outra vez. Para que lado o portão vai?
+5. Durante o fechamento, aperte o controle. O que acontece?
+
+Repare no que a central fez. Parado no meio, o portão seguiu no sentido oposto ao último: estava abrindo, então fechou. A central guarda o último sentido justamente para isso. Já durante o fechamento, um comando faz o portão voltar a abrir. Fechar é o movimento perigoso (é nele que o portão pode prender alguém), e a regra das centrais é sempre a mesma: na dúvida, abrir. Na <LinkAula id="m16-portao/03-a-central-por-dentro">aula 16.3</LinkAula> você vê essas regras escritas como uma tabela, a máquina de estados.
+
+## Exemplo resolvido: quanto tempo o portão leva
+
+Os manuais de motores deslizantes consultados para o curso indicam velocidades entre 13 e 23 m/min, aproximadamente. Um valor típico é 15 m/min, e é ele que a central virtual usa. Quanto tempo leva para abrir um portão de 4 m?
+
+O tempo é a distância dividida pela velocidade:
+
+$$
+t = \frac{d}{v}
+$$
+
+em que $t$ é o tempo em segundos (s), $d$ é a distância que o portão percorre em metros (m) e $v$ é a velocidade em metros por segundo (m/s).
+
+**Passo 1: passar a velocidade para m/s.** Um minuto tem 60 segundos:
+
+$$
+v = 15\,\frac{\text{m}}{\text{min}} = \frac{15\,\text{m}}{60\,\text{s}} = 0{,}25\,\text{m/s}
+$$
+
+**Passo 2: dividir.**
+
+$$
+t = \frac{4\,\text{m}}{0{,}25\,\text{m/s}} = 16\,\text{s}
+$$
+
+**Passo 3: conferir na central virtual.** Ela leva cerca de 17 s. A diferença vem de três coisas: a central espera uma fração de segundo antes de ligar o motor, o motor parte devagar (a partida suave, que você vê na <LinkAula id="m16-portao/03-a-central-por-dentro">aula 16.3</LinkAula>) e, com a força ajustada no meio, ele anda um pouco abaixo dos 15 m/min.
+
+Com um motor no topo da faixa, a 23 m/min, o mesmo portão abriria em cerca de 10,4 s. E um portão de 6 m a 15 m/min levaria 24 s. Guarde esse número: a CD-1 desiste e acusa erro se o motor ficar 40 s ligado sem chegar ao fim de curso. Para um portão de 4 m, isso é mais que o dobro do tempo normal.
+
+<RealCase title="Antes de comprar o motor ou a central nova">
+O primeiro passo de uma troca acontece com o portão funcionando, ou pelo menos antes de ir à loja. Anote do conjunto atual:
+
+- a tensão do motor (127 V ou 220 V) e a potência (1/4, 1/3 ou 1/2 CV), que ficam na etiqueta;
+- o tipo de portão, o comprimento e o peso aproximado;
+- o tipo de fim de curso (ímãs e reed, microchave ou encoder);
+- o dente da cremalheira, para o pinhão novo combinar;
+- se a central é para motor com capacitor ou inversora.
+
+O último item pega muita gente. Nos manuais lidos para o curso, as centrais Garen TSi Pro e PPA Triflex Full Range são inversoras: acionam motores de três fios sem capacitor, com a velocidade ajustada em hertz. O manual da Garen manda até retirar o capacitor quando se liga um motor monofásico na TSi Pro. Já a Rossi chama os três fios do seu motor com capacitor de U, V e W, os mesmos nomes que aparecem nos motores de inversor. Ou seja, o nome dos fios não diz o tipo. O manual diz.
+
+Confira também o disjuntor que alimenta o portão e se há fio terra chegando até ele. A aula <a href={lessonUrl('m16-portao/07-trocar-motor-e-central')}>16.7</a> faz a troca completa, passo a passo.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Abrir a tampa do motor com o disjuntor ligado.** A central fica ali, com a rede nos bornes. Antes de abrir, siga a ordem segura das aulas seguintes: desligar o disjuntor, testar o instrumento numa tomada energizada, medir a ausência de tensão, testar de novo e sinalizar o quadro.
+- **Esquecer o desbloqueio aberto.** O motor gira, o portão fica parado, e a pessoa conclui que o motor "não tem força". Trave e teste de novo.
+- **Pôr a culpa no motor quando o problema é mecânico.** Com o desbloqueio aberto, o portão precisa correr livre. Se não corre, conserte trilho, roldanas e guia antes de qualquer troca.
+- **Achar que o portão para por tempo.** Ele para pelo fim de curso. O limite de 40 s da CD-1 é só uma proteção para quando o fim de curso falha.
+- **Comprar pelo nome ou pela cor dos fios.** Confira no manual se a central é para motor com capacitor ou inversora, e meça os fios (<LinkAula id="m16-portao/02-o-motor-do-portao">aula 16.2</LinkAula>).
+- **Instalar sem fotocélula.** Os manuais de central chamam a fotocélula de obrigatória. Sem ela, o portão só percebe uma pessoa ou um carro depois de bater neles.
+- **Passar pelo vão com o portão em movimento**, ou deixar crianças brincarem com o controle. O portão pesa dezenas de quilos e o redutor faz muita força.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'Num portão deslizante, qual conjunto transforma o giro do motor no movimento em linha reta do portão?',
+      options: [
+        { text: 'O pinhão e a cremalheira', correct: true },
+        {
+          text: 'A rosca sem-fim e a coroa',
+          feedback:
+            'O sem-fim e a coroa reduzem a rotação e aumentam a força, mas a saída deles ainda gira. Quem transforma giro em linha reta é o pinhão empurrando a cremalheira.',
+        },
+        {
+          text: 'O fim de curso',
+          feedback: 'O fim de curso só avisa a central que o portão chegou à ponta. Ele não move nada.',
+        },
+        {
+          text: 'O capacitor',
+          feedback:
+            'O capacitor ajuda o motor a girar (aula 16.2), mas não tem nada a ver com a transmissão mecânica.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um portão deslizante de 5 m anda a 15 m/min, um valor típico. Quanto tempo ele leva para abrir, em segundos?',
+      answer: 20,
+      tolerance: 0.02,
+      unit: 's',
+      explanation: '15 m/min = 0,25 m/s. t = d/v = 5 m ÷ 0,25 m/s = 20 s.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Com o motor desligado e o desbloqueio travado, dá para abrir um portão com redutor de rosca sem-fim empurrando com a mão.',
+      answer: false,
+      explanation:
+        'A coroa não consegue girar o sem-fim: o redutor segura o portão parado. Para mover à mão, é preciso abrir o desbloqueio.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada peça à sua função.',
+      pairs: [
+        ['Fim de curso', 'Avisa a central que o portão chegou à ponta'],
+        ['Fotocélula', 'Vê se há alguém na passagem durante o fechamento'],
+        ['Botoeira', 'Dá um comando por fio, como o controle'],
+        ['Desbloqueio', 'Solta a transmissão para mover o portão à mão'],
+        ['Redutor', 'Diminui a rotação e aumenta a força do motor'],
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Na central virtual, você deu um comando com o portão abrindo e ele parou no meio. O que o próximo comando faz?',
+      options: [
+        {
+          text: 'Fecha o portão, porque segue no sentido oposto ao último',
+          correct: true,
+        },
+        {
+          text: 'Continua abrindo, de onde parou',
+          feedback:
+            'A CD-1, como muitas centrais, lembra o último sentido e vai no oposto. Como estava abrindo, o próximo comando fecha.',
+        },
+        {
+          text: 'Nada, até o portão voltar ao fim de curso',
+          feedback: 'Parado no meio, o portão aceita comando normalmente.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você vai trocar o motor de um portão "rápido" cuja central é inversora. Qual é o cuidado certo?',
+      options: [
+        {
+          text: 'Conferir no manual da central qual tipo de motor ela aciona',
+          correct: true,
+        },
+        {
+          text: 'Comprar qualquer motor de três fios, porque todos são iguais',
+          feedback:
+            'Motor com capacitor e motor de inversor têm três fios, às vezes com os mesmos nomes (U, V, W). Só o manual diz qual serve.',
+        },
+        {
+          text: 'Pôr um capacitor de 30 µF entre dois fios, para garantir a partida',
+          feedback:
+            'Central inversora não usa capacitor no motor. Um manual de central inversora manda até retirar o capacitor de um motor monofásico.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O comando segue um caminho: controle, receptor, central, relé, motor, redutor, pinhão, cremalheira e portão. O fim de curso manda parar, e a fotocélula vigia o fechamento.
+- O deslizante corre num trilho e usa pinhão e cremalheira. O basculante sobe girando, e o pivotante abre como porta. A eletrônica é parecida nos três.
+- O redutor de rosca sem-fim diminui a rotação, aumenta o torque e segura o portão parado. Por isso existe o desbloqueio.
+- O fim de curso mais comum usa dois ímãs na cremalheira e um reed switch no motor. Também há microchave, sensor Hall e encoder.
+- Tempo de percurso é distância dividida por velocidade: 4 m a 15 m/min levam 16 s.
+- Antes de comprar, anote tensão, potência, tipo de portão, fim de curso, cremalheira e o tipo da central (com capacitor ou inversora).

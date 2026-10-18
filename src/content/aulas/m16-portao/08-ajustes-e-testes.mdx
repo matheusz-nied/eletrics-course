@@ -1,0 +1,324 @@
+---
+titulo: Ajustes e testes finais
+modulo: m16-portao
+ordem: 8
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Explicar o que o ajuste de FORÇA muda no motor e na detecção de obstáculo
+  - Ajustar a FORÇA para o mínimo que move o portão com folga
+  - Relacionar a posição do trimpot PAUSA com a tensão que a central lê e com o tempo de fechamento
+  - Posicionar os ímãs do fim de curso para o portão parar antes do batente
+  - Testar a fotocélula, a reversão por obstáculo e o desbloqueio antes de liberar o portão
+prerequisitos:
+  - m04-passivos/02-resistores-variaveis
+  - m14-placas/04-jumpers-e-dip-switches
+  - m16-portao/04-fim-de-curso-e-sensores
+  - m16-portao/05-seguranca-e-acessorios
+  - m16-portao/07-trocar-motor-e-central
+tags: [portão, ajustes, trimpot, força, pausa, fotocélula, obstáculo, segurança]
+seguranca: rede
+---
+
+import { lessonUrl } from '../../../lib/url';
+import CentralVirtual from '../../../lessons/m16/ui/CentralVirtual';
+import PlacaCD1 from '../../../lessons/m16/figuras/PlacaCD1.astro';
+
+A central nova está ligada, e o portão abre e fecha. Parece pronto, mas ainda não está. Um portão com força demais amassa o para-choque de um carro antes de voltar. Um com força de menos para no meio do caminho quando o trilho junta areia. E uma <Term id="fotocelula">fotocélula</Term> que nunca foi testada é uma aposta.
+
+Esta aula é o ajuste fino e a lista de testes que separa "funciona" de "está pronto para a família usar". Ela continua de onde a aula <a href={lessonUrl('m16-portao/07-trocar-motor-e-central')}>16.7</a> parou: o primeiro comando já abriu o portão.
+
+## O que falta ajustar
+
+Na central CD-1, os ajustes ficam juntos, no lado de baixa tensão da placa. Dois são pecinhas de encaixar, duas são chavinhas e dois são parafusinhos de girar.
+
+<PlacaCD1 destaque={['ajustes']} caption="Figura 1. Os ajustes da CD-1: os jumpers J1 FOTO e J2 AUT, a chave DIP com INV e LUZ, os trimpots PAUSA e FORÇA e o botão PROG. Os bornes da rede ficam a poucos centímetros, do outro lado do rasgo da placa." />
+
+- **J2 AUT**, colocado, liga o fechamento automático: o portão fecha sozinho depois da pausa.
+- **PAUSA** é um <Term id="trimpot">trimpot</Term> (um resistor variável pequeno, ajustado com chave de fenda) que define quanto tempo o portão espera aberto.
+- **FORÇA** é outro trimpot. Ele define quanto o motor empurra e quando a central entende que há um obstáculo.
+- **DIP LUZ** escolhe se a luz de garagem apaga junto com o motor ou 60 s depois.
+- **J1 FOTO** fica **retirado**. Colocado, ele faz a central ignorar a fotocélula; a aula <a href={lessonUrl('m16-portao/05-seguranca-e-acessorios')}>16.5</a> explica por que ele não deve ser usado.
+
+Os ímãs do <Term id="fim-de-curso">fim de curso</Term> também são um ajuste, só que na <Term id="cremalheira">cremalheira</Term>.
+
+<Callout type="atencao" title="Os ajustes ficam perto da rede">
+Os trimpots ficam no lado de baixa tensão, mas a poucos centímetros dos bornes F, N, ABRE e FECHA. Para girar um trimpot com a central ligada, use uma chave de fenda isolada, do tamanho da fenda, segure com uma mão só e mantenha a outra longe da placa. Para mexer em jumper, DIP ou ímã, desligue o disjuntor.
+</Callout>
+
+## A FORÇA: quanto o motor empurra e quando a central desiste
+
+Imagine segurar uma porta pesada que alguém empurra do outro lado. Se a pessoa empurra de leve, você segura com pouco esforço; se empurra forte, você precisa de muito mais. O trimpot FORÇA decide o quanto o motor "empurra". E decide também quanto esforço a central aceita antes de concluir que algo está no caminho.
+
+Os manuais chamam esse conjunto de <Term id="embreagem-eletronica">embreagem eletrônica</Term>: a central faz o papel de uma embreagem que patina quando o esforço passa do limite. Ela tem dois lados.
+
+**O empurrão.** O <Term id="triac">TRIAC</Term> da central (aula <a href={lessonUrl('m16-portao/03-a-central-por-dentro')}>16.3</a>) deixa passar para o motor só uma parte de cada meio ciclo da rede. Quanto maior a parte, mais força o motor tem. Na CD-1, a condução do TRIAC durante o movimento é
+
+$$
+n = 0{,}4 + 0{,}6 \cdot f
+$$
+
+em que $f$ é a posição do trimpot FORÇA, de 0 (mínimo) a 1 (máximo), e $n$ é a fração de cada meio ciclo em que o TRIAC conduz. No mínimo, $n = 0{,}4$ (40 %); no meio, $n = 0{,}7$ (70 %); no máximo, a rede inteira.
+
+**A desistência.** Logo depois da partida, a central mede a corrente do motor andando livre e guarda esse valor, a corrente de referência $I_\text{ref}$. Daí em diante, se a corrente passar de
+
+$$
+I_\text{lim} = I_\text{ref} \cdot (1{,}25 + f)
+$$
+
+por mais de 0,25 s, ela entende que há um obstáculo. Abrindo, o portão para e recua meio segundo. Fechando, ele volta a abrir. Com $f = 0{,}5$, o limite é 1,75 vez a corrente normal.
+
+Repare no que acontece quando você mexe na FORÇA. Para baixo, o motor empurra menos **e** desiste mais cedo: um trecho pesado no trilho já basta para ele parar. Para cima, o motor empurra mais **e** aguenta mais esforço antes de reverter, o que inclui o esforço de prensar uma pessoa ou um carro. Por isso a regra é usar a menor força que move o portão com folga.
+
+<DeepDive title="Por que um pouco menos de TRIAC tira tanta força">
+O torque de um motor de indução cresce com o quadrado da tensão que chega a ele. No modelo da central virtual, a condução do TRIAC faz o papel dessa tensão. Com $n = 0{,}7$, o motor tem $0{,}7^2 \approx 0{,}49$ do torque com a rede inteira; com $n = 0{,}55$, só $0{,}55^2 \approx 0{,}30$. Uma queda de 15 pontos na condução tira quase 40 % do torque que sobrava.
+</DeepDive>
+
+### Como os fabricantes chamam esse ajuste
+
+Cada central dá um nome a ele, e nem sempre o sentido é o mesmo. Na Omegasat CT30A é o trimpot FORÇA; na Peccinin, o trimpot EMBR. (de embreagem). Na Intelbras CP-1000 é o item "Emb" do menu, e lá o valor **menor** dá **mais** força. A Garen usa níveis de 5 % a 100 %, e a PPA, 14 níveis. Os manuais da Peccinin e da PPA mandam conferir o ajuste segurando o portão. Leia o manual da sua central antes de girar qualquer coisa.
+
+## Explore: ache a FORÇA certa
+
+A central virtual abaixo está num portão com um trecho pesado no trilho, entre 2 m e 3 m de abertura, e a FORÇA começou baixa: o TRIAC conduz 55 %.
+
+<CentralVirtual
+  client:visible
+  titulo="Central virtual: portão com um trecho pesado no trilho"
+  mostrar={['comandos', 'seguranca', 'ajustes']}
+  ajustes={{ forca: 0.25 }}
+  defeitos={{ atritoExtra: { de: 2, ate: 3, forca: 80 } }}
+/>
+
+1. Aperte "Controle remoto". O portão começa a abrir e, perto de 2 m, para sozinho e recua um pouco. Leia o registro "O que a central fez": ela achou que era um obstáculo.
+2. Aperte o controle de novo para o portão voltar e fechar. Suba um pouco a FORÇA (o texto ao lado do trimpot mostra a condução do TRIAC) e mande abrir. Repita, subindo aos poucos, até o portão abrir inteiro. Em que condução isso acontece?
+3. Deixe uma folga: suba mais um pouco, até cerca de 64 %. Abra e feche duas vezes para confirmar que ele passa pelo trecho pesado nos dois sentidos.
+4. Agora confira que a segurança continua lá. Com o portão fechando, marque "Obstáculo no caminho do portão": ele tem que voltar a abrir. Desmarque, espere ele abrir, mande fechar e marque "Pessoa no feixe da fotocélula": ele também tem que voltar.
+
+O portão passa a abrir inteiro perto de 58 % de condução. Se você baixar a FORÇA demais com o portão parado dentro do trecho pesado, ele pode nem sair do lugar: o motor zumbe até a central desistir aos 40 s e entrar em ERRO. É mais um sinal de força insuficiente.
+
+Esse exercício tem uma pegadinha. Na vida real, um trecho pesado no trilho é um defeito mecânico. Subir a FORÇA faz o portão passar, mas esconde o defeito, e o portão fica empurrando mais forte em todo o percurso. O certo é consertar o trilho primeiro e depois ajustar a FORÇA ao portão já leve.
+
+## O trimpot PAUSA é um divisor de tensão
+
+O trimpot PAUSA tem três terminais. As duas pontas da pista resistiva vão ao GND e aos 5 V da lógica, e o cursor, a peça que desliza quando você gira o parafuso, vai a uma entrada analógica do microcontrolador. É um divisor de tensão: o cursor entrega de 0 V a 5 V, conforme a posição. O programa lê essa tensão e a transforma em segundos:
+
+$$
+t_\text{pausa} = \frac{V_\text{cursor}}{5\,\text{V}} \cdot 120\,\text{s}
+$$
+
+Aqui $V_\text{cursor}$ é a tensão no cursor, em volts, e $t_\text{pausa}$ é o tempo que o portão fica aberto antes de fechar sozinho. Abaixo de 2 s (menos de 0,08 V no cursor), a CD-1 desliga o fechamento automático. Ele também só funciona com o J2 AUT colocado.
+
+O limite de 120 s não foi inventado para o curso: nos manuais consultados, a pausa vai até 120 s na Peccinin, na Omegasat, na Garen e na Intelbras (que começa em 2 s).
+
+<Simulation circuit="m16/trimpot-pausa" />
+
+A simulação começa com o cursor no meio, 2,5 V, o que dá 60 s de pausa. Faça três ajustes e anote a tensão em cada um:
+
+- ajuste a pausa para 30 s (o cursor deve ir a 1,25 V);
+- leve a pausa ao máximo, 120 s;
+- desligue o fechamento automático pelo trimpot.
+
+Na central virtual da seção anterior, o mesmo trimpot PAUSA mostra o tempo em segundos ao lado do controle. Abra o portão e veja a contagem "Fecha sozinho em".
+
+Para escolher o tempo, pense em quem usa o portão: dá tempo de o carro passar inteiro e de a pessoa entrar? Com a fotocélula funcionando, o portão não fecha enquanto o feixe está interrompido, e a contagem recomeça quando o feixe fica livre. Mas a fotocélula é uma proteção, não um jeito de compensar uma pausa curta demais.
+
+## Exemplo resolvido: a pausa de 45 s e o limite de corrente
+
+**A pausa.** O morador quer 45 s de pausa. Que tensão o cursor deve ter?
+
+1. Isole a tensão na fórmula: $V_\text{cursor} = \dfrac{t_\text{pausa}}{120\,\text{s}} \cdot 5\,\text{V}$.
+2. Substitua: $V_\text{cursor} = \dfrac{45}{120} \cdot 5\,\text{V} = 0{,}375 \cdot 5\,\text{V} = 1{,}875\,\text{V}$.
+3. O cursor fica a 37,5 % do curso, contado a partir do lado do GND. Na simulação, leve o trimpot para perto de 0,38 e confira: perto de 1,9 V.
+
+Na central de verdade, você não mede o cursor: gira o trimpot, abre o portão e cronometra. A conta mostra o que está acontecendo por dentro e por que um trimpot gasto, com mau contato no cursor, faz a pausa "pular" de um valor para outro.
+
+**O limite.** Com a FORÇA no meio ($f = 0{,}5$), a central virtual mostra a corrente do motor andando livre: cerca de 1,4 A.
+
+1. Condução do TRIAC: $n = 0{,}4 + 0{,}6 \cdot 0{,}5 = 0{,}7$, ou 70 %.
+2. Fator do limite: $1{,}25 + 0{,}5 = 1{,}75$.
+3. Limite de corrente: $I_\text{lim} = 1{,}4\,\text{A} \cdot 1{,}75 \approx 2{,}5\,\text{A}$.
+
+Se a corrente passar de cerca de 2,5 A por mais de 0,25 s, a central trata como obstáculo. Com a FORÇA em 25 %, o fator cai para 1,5: basta a corrente subir 50 % para o portão parar.
+
+## Os ímãs do fim de curso
+
+O portão tem que parar pelo fim de curso, e não pelo batente (a peça que segura a folha no fim do caminho). O ímã certo chega ao sensor poucos centímetros antes de o portão encostar no batente, e o LED FCA (ou FCF) acende na hora em que o motor desliga. A aula <a href={lessonUrl('m16-portao/04-fim-de-curso-e-sensores')}>16.4</a> mostra como o sensor lê o ímã.
+
+Dois erros aparecem muito:
+
+- **Ímã cedo demais.** O portão para antes do fim e deixa uma fresta, ou não abre o vão inteiro.
+- **Ímã tarde demais.** O portão bate no batente antes de o ímã chegar ao sensor. A corrente sobe, e a central entende como obstáculo. Abrindo, ele para e recua; fechando, **volta a abrir**. Parece defeito da fotocélula, mas é o ímã.
+
+Para ajustar, desligue o disjuntor, solte o suporte do ímã, mova-o alguns centímetros na cremalheira, aperte de novo, ligue e teste. Faça uma ponta de cada vez.
+
+## Os testes de segurança
+
+Os testes abaixo são o motivo de esta aula existir. Faça todos, nesta ordem, depois de qualquer mudança de FORÇA ou de ímã.
+
+<Steps>
+  <Step title="Fotocélula durante o fechamento">
+    Mande fechar e, no meio do caminho, passe uma caixa pelo feixe, longe da folha do portão. O portão tem que voltar a abrir. Confira também que o LED FOTO apaga com o feixe interrompido e acende com ele livre.
+  </Step>
+  <Step title="Fotocélula com o portão aberto">
+    Com o portão aberto, deixe a caixa no feixe. Ele não pode fechar, nem pelo controle nem pela pausa. Tire a caixa: a pausa começa a contar de novo.
+  </Step>
+  <Step title="Obstáculo no fechamento">
+    Ponha no caminho do portão um objeto macio, como uma almofada dobrada ou um bloco de espuma, e mande fechar. Ao encostar, o portão tem que voltar a abrir.
+  </Step>
+  <Step title="Obstáculo na abertura">
+    Durante a abertura, segure a folha do portão pelo meio, do lado de fora, longe do pilar, do pinhão e da cremalheira. O portão tem que parar. É o "conferir segurando o portão" que alguns manuais pedem.
+  </Step>
+  <Step title="Desbloqueio">
+    Desligue o disjuntor, como numa falta de energia. Abra o desbloqueio, corra o portão à mão e trave de novo. Mostre a quem mora na casa como fazer isso.
+  </Step>
+</Steps>
+
+<Callout type="perigo" title="Nunca ponha o corpo no caminho do portão">
+Não teste a reversão com o pé, com a mão entre o portão e o pilar, com uma criança ou com um animal no caminho. Se um teste falhar, o portão não está pronto: desligue o disjuntor e corrija antes de liberar o uso.
+</Callout>
+
+Se o portão passar em todos, feche as tampas e anote num papel, guardado com o manual, a FORÇA, a PAUSA, a posição do DIP e a data. Na próxima manutenção, quem abrir a central vai saber como ela estava.
+
+<RealCase title="O portão que só fechava com a força no máximo">
+O portão do seu Jorge começou a parar no meio do caminho. O técnico que veio girou o trimpot de força até o fim, o portão voltou a andar, e o serviço levou cinco minutos.
+
+Meses depois, o portão fechou sobre a bicicleta do neto, deitada no chão do vão, abaixo do feixe da fotocélula. Com a força no máximo, o portão entortou a roda antes de a central perceber o esforço e voltar.
+
+O segundo técnico desligou o disjuntor, abriu o desbloqueio e empurrou o portão à mão: ele travava numa roldana gasta. Trocou a roldana, baixou a força até o mínimo que movia o portão com folga e fez o teste com uma almofada no chão do vão. O portão passou a voltar com um toque. O primeiro conserto tinha escondido um defeito mecânico e, de quebra, tirado do portão a sensibilidade que protegia o que a fotocélula não vê.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **FORÇA no máximo "para garantir".** Ela tira o portão do trecho pesado e deixa o portão empurrar mais forte quem estiver no caminho.
+- **Subir a FORÇA em vez de consertar o trilho.** Primeiro o portão tem que correr leve à mão.
+- **Ajustar e não repetir os testes.** Toda mudança de FORÇA ou de ímã pede o teste de obstáculo e o da fotocélula de novo.
+- **Girar o trimpot para o lado errado.** Em algumas centrais o sentido é o contrário (na Intelbras, valor menor de "Emb" é mais força). Leia o manual.
+- **Forçar o trimpot além do fim.** A pista quebra, e o ajuste passa a falhar.
+- **Deixar o J1 colocado ou a fotocélula desligada.** A central fica cega para quem está no vão.
+- **Ímã depois do batente.** O portão bate, a central vê obstáculo e volta a abrir.
+- **Mexer em jumper, DIP ou ímã com o disjuntor ligado.** Desligue antes; para os trimpots, chave isolada e uma mão só.
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Na CD-1, a pausa é (tensão no cursor ÷ 5 V) × 120 s. Que tensão o cursor do trimpot PAUSA deve ter para uma pausa de 90 s, em volts?',
+      answer: 3.75,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation: 'V = (90 ÷ 120) × 5 V = 0,75 × 5 V = 3,75 V.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Na CD-1, a condução do TRIAC é n = 0,4 + 0,6 × f. Com o trimpot FORÇA a 25 % do curso (f = 0,25), quanto o TRIAC conduz, em %?',
+      answer: 55,
+      tolerance: 0.02,
+      unit: '%',
+      explanation: 'n = 0,4 + 0,6 × 0,25 = 0,55, ou 55 % de cada meio ciclo.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'O portão para sempre no mesmo ponto da abertura, e a central registra "obstáculo". Ninguém está no caminho. O que você faz primeiro?',
+      options: [
+        {
+          text: 'Desliga o disjuntor, abre o desbloqueio e empurra o portão à mão para achar o ponto pesado',
+          correct: true,
+          feedback:
+            'Isso. Um ponto fixo onde o portão para indica trilho, roldana ou cremalheira. Conserte e só depois ajuste a FORÇA ao portão leve.',
+        },
+        {
+          text: 'Gira a FORÇA até o máximo',
+          feedback:
+            'O portão até passa, mas o defeito continua escondido, e o portão fica empurrando mais forte quem estiver no caminho.',
+        },
+        {
+          text: 'Coloca o J1 FOTO',
+          feedback:
+            'O J1 só faz a central ignorar a fotocélula, que nem age na abertura. E ele não deve ser usado.',
+        },
+        {
+          text: 'Afasta o ímã de abertura do sensor',
+          feedback:
+            'O ímã define onde o portão para no fim do curso. Aqui ele para no meio, por causa do esforço.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'O portão fecha, bate no batente e volta a abrir sozinho. A fotocélula está alinhada, e o LED FOTO fica aceso. Qual é o ajuste mais provável?',
+      options: [
+        {
+          text: 'Mover o ímã de fechamento para ele chegar ao sensor antes de o portão encostar no batente',
+          correct: true,
+          feedback:
+            'Isso. Batendo no batente, a corrente sobe e a central entende como obstáculo; no fechamento, obstáculo faz o portão voltar.',
+        },
+        {
+          text: 'Aumentar a PAUSA',
+          feedback: 'A pausa só muda quanto tempo o portão espera aberto. Ela não tem a ver com a volta.',
+        },
+        {
+          text: 'Trocar a fotocélula',
+          feedback:
+            'Com a fotocélula com defeito o portão nem começaria a fechar, e o LED FOTO ficaria apagado.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada ajuste da CD-1 ao que ele faz.',
+      pairs: [
+        ['J2 AUT', 'Liga o fechamento automático'],
+        ['Trimpot PAUSA', 'Tempo que o portão espera aberto'],
+        ['Trimpot FORÇA', 'Empurrão do motor e limite de obstáculo'],
+        ['DIP INV', 'Inverte o sentido pelo programa'],
+        ['J1 FOTO', 'Faz a central ignorar a fotocélula (não usar)'],
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'No menu "Emb" da central Intelbras CP-1000, um valor menor dá mais força ao motor.',
+      answer: true,
+      explanation:
+        'Segundo o manual, é o contrário do que muita gente espera. Por isso a regra é ler o manual antes de ajustar a força de qualquer central.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Qual é o jeito certo de testar a reversão por obstáculo no fechamento?',
+      options: [
+        {
+          text: 'Deixar um objeto macio, como uma almofada dobrada, no caminho do portão e mandar fechar',
+          correct: true,
+          feedback: 'Isso. O portão tem que voltar a abrir ao encostar.',
+        },
+        {
+          text: 'Pôr o pé na frente do portão, porque o sapato protege',
+          feedback: 'Nunca teste com o corpo. Se a força estiver alta demais, quem paga é o pé.',
+        },
+        {
+          text: 'Segurar o portão com a mão perto do pilar',
+          feedback:
+            'Entre o portão e o pilar é exatamente onde a mão pode ser prensada. Nunca ponha a mão ali.',
+        },
+        {
+          text: 'Não precisa: se a fotocélula funciona, o portão é seguro',
+          feedback:
+            'A fotocélula só vê o que corta o feixe, numa altura. Um objeto baixo, ou fora do feixe, só é percebido pela reversão por esforço.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- A FORÇA muda duas coisas na CD-1: a condução do TRIAC ($n = 0{,}4 + 0{,}6 f$) e o limite de corrente para obstáculo ($I_\text{lim} = I_\text{ref} \cdot (1{,}25 + f)$). Pouca força para o portão no trecho pesado; muita força empurra mais quem está no caminho.
+- Ajuste a menor FORÇA que move o portão com folga, depois de o portão correr leve à mão. Leia o manual: em algumas centrais o sentido do ajuste é o contrário.
+- O trimpot PAUSA é um divisor de tensão: $t = (V_\text{cursor} / 5\,\text{V}) \cdot 120\,\text{s}$. No mínimo, ou sem o J2, o fechamento automático fica desligado.
+- O ímã certo para o portão poucos centímetros antes do batente. Ímã tarde demais faz o portão bater e voltar.
+- Antes de liberar: fotocélula no fechamento e com o portão aberto, obstáculo macio no fechamento, portão seguro na abertura, desbloqueio. Repita depois de cada ajuste e nunca teste com o corpo.
