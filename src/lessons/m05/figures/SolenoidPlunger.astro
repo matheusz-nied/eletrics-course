@@ -1,0 +1,173 @@
+---
+/*
+ * 05.2: a pull solenoid cut lengthwise, without and with current. The coil
+ * pulls the steel plunger into the bobbin; the spring, between the frame and
+ * the plunger's collar, pushes it back out when the current stops.
+ */
+const BODY = { x: 50, y: 70, w: 110, h: 90 };
+const BORE = { top: 101, bottom: 129 };
+const PLUNGER_LEN = 128;
+
+function spring(x0: number, x1: number) {
+  const n = 8;
+  const step = (x1 - x0) / n;
+  let d = `M${x0} 115`;
+  for (let i = 1; i <= n; i++) d += ` L${x0 + step * (i - 0.5)} ${i % 2 ? 98 : 132}`;
+  return `${d} L${x1} 115`;
+}
+
+const panels = [
+  { dx: 0, on: false, title: 'Sem corrente', shift: 0, note: 'a mola deixa o êmbolo para fora' },
+  {
+    dx: 285,
+    on: true,
+    title: 'Com corrente',
+    shift: -42,
+    note: 'o campo puxa o êmbolo para dentro',
+  },
+];
+---
+
+<svg viewBox="0 0 560 270" width="560" height="270" class="fig" aria-hidden="true">
+  {panels.map((p) => {
+    const px = 118 + p.shift;
+    const collar = px + PLUNGER_LEN - 18;
+    return (
+      <g transform={`translate(${p.dx} 0)`}>
+        <text x="135" y="24" class="title">
+          {p.title}
+        </text>
+        <rect
+          x={BODY.x}
+          y={BODY.y}
+          width={BODY.w}
+          height={BORE.top - BODY.y}
+          class={p.on ? 'coil on' : 'coil'}
+        />
+        <rect
+          x={BODY.x}
+          y={BORE.bottom}
+          width={BODY.w}
+          height={BODY.y + BODY.h - BORE.bottom}
+          class={p.on ? 'coil on' : 'coil'}
+        />
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+          <path
+            d={`M${BODY.x + 6 + i * 12.5} ${BODY.y + 4}V${BORE.top - 4}M${BODY.x + 6 + i * 12.5} ${BORE.bottom + 4}V${BODY.y + BODY.h - 4}`}
+            class="turn"
+          />
+        ))}
+        <path
+          d={`M${BODY.x - 6} ${BODY.y - 8}V${BODY.y + BODY.h + 8}M${BODY.x + BODY.w + 6} ${BODY.y - 8}V${BODY.y + BODY.h + 8}`}
+          class="flange"
+        />
+        <rect
+          x={px}
+          y={BORE.top + 3}
+          width={PLUNGER_LEN}
+          height={BORE.bottom - BORE.top - 6}
+          rx="3"
+          class="plunger"
+        />
+        <rect
+          x={collar}
+          y={BORE.top - 8}
+          width="8"
+          height={BORE.bottom - BORE.top + 16}
+          rx="2"
+          class="collar"
+        />
+        <path d={spring(BODY.x + BODY.w + 7, collar)} class="spring" />
+        <path
+          d={`M${BODY.x + 30} ${BODY.y + BODY.h + 8}V${BODY.y + BODY.h + 30}M${BODY.x + 80} ${BODY.y + BODY.h + 8}V${BODY.y + BODY.h + 30}`}
+          class="lead"
+        />
+        {p.on && (
+          <path
+            d={`M${px + PLUNGER_LEN + 30} 115H${px + PLUNGER_LEN + 6}M${px + PLUNGER_LEN + 14} 108L${px + PLUNGER_LEN + 5} 115L${px + PLUNGER_LEN + 14} 122`}
+            class="pull"
+          />
+        )}
+        <text x="135" y="246" class="note">
+          {p.note}
+        </text>
+      </g>
+    );
+  })}
+  <text x="105" y="60" class="lbl">
+    bobina
+  </text>
+  <text x="105" y="208" class="lbl">
+    terminais
+  </text>
+  <text x="212" y="88" class="lbl">
+    mola
+  </text>
+  <text x="216" y="152" class="lbl">
+    êmbolo de aço
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .coil {
+    fill: color-mix(in oklab, var(--copper) 28%, var(--surface));
+    stroke: var(--copper);
+    stroke-width: 1.5;
+  }
+  .coil.on {
+    fill: color-mix(in oklab, var(--copper) 55%, var(--surface));
+  }
+  .turn {
+    stroke: var(--copper);
+    stroke-width: 1;
+    opacity: 0.6;
+  }
+  .flange {
+    stroke: var(--fg-muted);
+    stroke-width: 4;
+  }
+  .plunger {
+    fill: color-mix(in oklab, var(--fg-subtle) 45%, var(--surface));
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .collar {
+    fill: var(--fg-muted);
+  }
+  .spring {
+    stroke: var(--info);
+    stroke-width: 1.8;
+  }
+  .lead {
+    stroke: var(--copper);
+    stroke-width: 2.2;
+  }
+  .pull {
+    stroke: var(--warning);
+    stroke-width: 2.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+</style>

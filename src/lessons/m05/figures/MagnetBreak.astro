@@ -1,0 +1,142 @@
+---
+/*
+ * 05.1: a bar magnet, whole and broken in two. Each piece is a whole magnet:
+ * the domains inside (small arrows) all point from S to N, so the broken
+ * faces become a new N and a new S.
+ */
+interface Piece {
+  x: number;
+  y: number;
+  w: number;
+  labelS?: string;
+  labelN?: string;
+}
+
+const H = 46;
+const whole: Piece = { x: 130, y: 44, w: 300 };
+const pieces: Piece[] = [
+  { x: 92, y: 172, w: 150, labelN: 'norte novo' },
+  { x: 318, y: 172, w: 150, labelS: 'sul novo' },
+];
+
+/** Domain arrows, leaving room at both ends for the S and N letters. */
+function arrows(p: Piece) {
+  const out: string[] = [];
+  const margin = 34;
+  const inner = p.w - 2 * margin;
+  const n = Math.round(inner / 28);
+  for (let i = 0; i < n; i++) {
+    const cx = p.x + margin + (i + 0.5) * (inner / n);
+    for (const dy of [-11, 11]) {
+      const cy = p.y + H / 2 + dy;
+      out.push(
+        `M${cx - 8} ${cy}H${cx + 6}M${cx + 2} ${cy - 4}L${cx + 7} ${cy}L${cx + 2} ${cy + 4}`,
+      );
+    }
+  }
+  return out.join('');
+}
+---
+
+<svg viewBox="0 0 560 290" width="560" height="290" class="fig" aria-hidden="true">
+  {[whole, ...pieces].map((p) => (
+    <g>
+      <rect x={p.x} y={p.y} width={p.w / 2} height={H} class="s" />
+      <rect x={p.x + p.w / 2} y={p.y} width={p.w / 2} height={H} class="n" />
+      <rect x={p.x} y={p.y} width={p.w} height={H} rx="4" class="outline" />
+      <path d={arrows(p)} class="domain" />
+      <text x={p.x + 18} y={p.y + H / 2 + 6} class="pole">
+        S
+      </text>
+      <text x={p.x + p.w - 18} y={p.y + H / 2 + 6} class="pole">
+        N
+      </text>
+      {p.labelN && (
+        <text x={p.x + p.w} y={p.y + H + 20} class="note end">
+          {p.labelN}
+        </text>
+      )}
+      {p.labelS && (
+        <text x={p.x} y={p.y + H + 20} class="note start">
+          {p.labelS}
+        </text>
+      )}
+    </g>
+  ))}
+  <text x="280" y="26" class="title">
+    Um ímã inteiro
+  </text>
+  <path d="M280 40 l-6 12 l9 10 l-7 12 l8 10 l-4 8" class="crack" />
+  <path d="M280 104 V146 M272 138 L280 148 L288 138" class="push" />
+  <text x="292" y="132" class="note start">
+    quebrado ao meio
+  </text>
+  <text x="280" y="268" class="title">
+    Dois ímãs completos
+  </text>
+  <text x="280" y="284" class="small">
+    as setinhas são os domínios: todos alinhados do S para o N
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .n {
+    fill: color-mix(in oklab, var(--danger) 78%, var(--bg));
+  }
+  .s {
+    fill: color-mix(in oklab, var(--info) 78%, var(--bg));
+  }
+  .outline {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .domain {
+    stroke: var(--bg);
+    stroke-width: 1.6;
+    opacity: 0.85;
+  }
+  .crack {
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-dasharray: 4 3;
+  }
+  .push {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .pole {
+    fill: var(--bg);
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-weight: 600;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

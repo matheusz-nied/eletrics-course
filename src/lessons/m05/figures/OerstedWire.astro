@@ -1,0 +1,143 @@
+---
+/*
+ * 05.2: Ørsted seen from above. A wire crosses the page; without current the
+ * compasses point north, with current coming out of the page they line up
+ * with the counter-clockwise circles of its field.
+ */
+const C = { x: 140, y: 172 };
+const RING = 74;
+const compasses = [
+  { dx: RING, dy: 0, tangent: -90 },
+  { dx: 0, dy: -RING, tangent: 180 },
+  { dx: -RING, dy: 0, tangent: 90 },
+  { dx: 0, dy: RING, tangent: 0 },
+];
+const panels = [
+  { dx: 0, on: false, title: 'Sem corrente', sub: 'todas apontam para o norte' },
+  {
+    dx: 280,
+    on: true,
+    title: 'Com corrente saindo da folha',
+    sub: 'as agulhas seguem os círculos',
+  },
+];
+const CIRCLES = [42, 108];
+
+/** Arrowhead on a circle of radius r at angle a (degrees, screen), pointing counter-clockwise. */
+function arrowOn(r: number, a: number) {
+  const rad = (a * Math.PI) / 180;
+  const x = C.x + r * Math.cos(rad);
+  const y = C.y + r * Math.sin(rad);
+  return `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${a - 90})`;
+}
+---
+
+<svg viewBox="0 0 560 320" width="560" height="320" class="fig" aria-hidden="true">
+  {panels.map((p) => (
+    <g transform={`translate(${p.dx} 0)`}>
+      <text x={C.x} y="22" class="title">
+        {p.title}
+      </text>
+      <text x={C.x} y="40" class="small">
+        {p.sub}
+      </text>
+      {p.on &&
+        CIRCLES.map((r, i) => (
+          <g>
+            <circle cx={C.x} cy={C.y} r={r} class="field" />
+            <path d="M-5 -4L4 0L-5 4Z" transform={arrowOn(r, [-30, 150][i]!)} class="arrow" />
+          </g>
+        ))}
+      <circle cx={C.x} cy={C.y} r="13" class="wire" />
+      {p.on ? (
+        <circle cx={C.x} cy={C.y} r="4" class="dot" />
+      ) : (
+        <circle cx={C.x} cy={C.y} r="4" class="dot off" />
+      )}
+      {compasses.map((c) => (
+        <g transform={`translate(${C.x + c.dx} ${C.y + c.dy})`}>
+          <circle r="17" class="dial" />
+          <g transform={`rotate(${p.on ? c.tangent : -90})`}>
+            <path d="M0 -4L13 0L0 4Z" class="needle-n" />
+            <path d="M0 -4L-13 0L0 4Z" class="needle-s" />
+          </g>
+          <circle r="2" class="pivot" />
+        </g>
+      ))}
+    </g>
+  ))}
+  <g transform="translate(528 92)">
+    <path d="M0 22V-10M-6 -2L0 -12L6 -2" class="north" />
+    <text x="0" y="-18" class="small">
+      N
+    </text>
+  </g>
+  <text x="140" y="306" class="small">
+    fio visto de cima, sem corrente
+  </text>
+  <text x="420" y="306" class="small">
+    o ponto: a corrente vem na sua direção
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    fill: color-mix(in oklab, var(--copper) 35%, var(--surface));
+    stroke: var(--copper);
+    stroke-width: 2.5;
+  }
+  .dot {
+    fill: var(--copper);
+  }
+  .dot.off {
+    fill: none;
+  }
+  .field {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+  }
+  .arrow {
+    fill: var(--accent);
+  }
+  .dial {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .needle-n {
+    fill: var(--danger);
+  }
+  .needle-s {
+    fill: var(--border-strong);
+  }
+  .pivot {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1;
+  }
+  .north {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+</style>

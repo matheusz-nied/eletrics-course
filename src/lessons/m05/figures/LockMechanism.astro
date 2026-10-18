@@ -1,0 +1,186 @@
+---
+/*
+ * 05.2: a simplified electric gate lock. Locked, a latch sits behind the bolt
+ * and it cannot slide back. With current, the electromagnet pulls the latch
+ * down; pushing the gate, the bolt slides back into the case.
+ */
+const panels = [
+  {
+    dx: 0,
+    on: false,
+    title: 'Travada (sem corrente)',
+    note: ['A trava encosta atrás da lingueta:', 'o portão não abre.'],
+  },
+  {
+    dx: 285,
+    on: true,
+    title: 'Destravada (com corrente)',
+    note: ['O eletroímã puxa a trava; empurrando', 'o portão, a lingueta recua.'],
+  },
+];
+
+const ANCHOR = 70;
+
+/** Zigzag spring from the anchor plate to the bolt's tail. */
+function spring(x1: number) {
+  const n = 6;
+  const step = (x1 - ANCHOR) / n;
+  let d = `M${ANCHOR} 121`;
+  for (let i = 1; i <= n; i++) d += ` L${ANCHOR + step * (i - 0.5)} ${i % 2 ? 113 : 129}`;
+  return `${d} L${x1} 121`;
+}
+---
+
+<svg viewBox="0 0 560 300" width="560" height="300" class="fig" aria-hidden="true">
+  {panels.map((p) => {
+    const bolt = p.on ? 140 : 176;
+    const latchY = p.on ? 146 : 104;
+    return (
+      <g transform={`translate(${p.dx} 0)`}>
+        <text x="135" y="24" class="title">
+          {p.title}
+        </text>
+        <rect x="22" y="48" width="196" height="186" rx="6" class="case" />
+        <path d="M232 40 V242" class="post" />
+        <rect x="224" y="98" width="12" height="40" class="strike" />
+        <path d={`M${ANCHOR} 109 V133`} class="plate" />
+        <path d={spring(bolt - 12)} class="spring" />
+        <path
+          d={`M${bolt} 104 H${bolt + 64} L${bolt + 78} 121 L${bolt + 64} 138 H${bolt} Z`}
+          class="bolt"
+        />
+        <rect x={bolt - 12} y="114" width="12" height="14" class="bolt" />
+        <rect
+          x="158"
+          y={latchY}
+          width="16"
+          height="34"
+          rx="2"
+          class={p.on ? 'latch on' : 'latch'}
+        />
+        <path d={`M166 ${latchY + 34} V188`} class="rod" />
+        <rect x="126" y="188" width="70" height="34" rx="3" class={p.on ? 'coil on' : 'coil'} />
+        {[136, 148, 160, 172, 184].map((x) => (
+          <path d={`M${x} 191 V219`} class="turn" />
+        ))}
+        <path d="M140 222 V250 M182 222 V250" class="lead" />
+        {p.on && (
+          <path
+            d={`M${bolt + 50} 121 H${bolt + 28} M${bolt + 36} 115 L${bolt + 28} 121 L${bolt + 36} 127`}
+            class="push"
+          />
+        )}
+        {p.note.map((line, i) => (
+          <text x="135" y={272 + i * 17} class="note">
+            {line}
+          </text>
+        ))}
+      </g>
+    );
+  })}
+  <text x="196" y="94" class="lbl">
+    lingueta
+  </text>
+  <text x="112" y="104" class="lbl">
+    mola
+  </text>
+  <text x="180" y="166" class="lbl start">
+    trava
+  </text>
+  <text x="66" y="210" class="lbl">
+    eletroímã
+  </text>
+  <text x="250" y="60" class="lbl start">
+    batente
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .case {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .post {
+    stroke: var(--border-strong);
+    stroke-width: 10;
+  }
+  .strike {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .plate {
+    stroke: var(--fg-muted);
+    stroke-width: 4;
+  }
+  .bolt {
+    fill: color-mix(in oklab, var(--warning) 35%, var(--surface));
+    stroke: var(--fg);
+    stroke-width: 1.8;
+  }
+  .rod {
+    stroke: var(--fg-muted);
+    stroke-width: 3;
+  }
+  .spring {
+    stroke: var(--info);
+    stroke-width: 1.6;
+  }
+  .latch {
+    fill: color-mix(in oklab, var(--fg-subtle) 45%, var(--surface));
+    stroke: var(--fg);
+    stroke-width: 1.6;
+  }
+  .latch.on {
+    fill: color-mix(in oklab, var(--success) 35%, var(--surface));
+  }
+  .coil {
+    fill: color-mix(in oklab, var(--copper) 28%, var(--surface));
+    stroke: var(--copper);
+    stroke-width: 1.8;
+  }
+  .coil.on {
+    fill: color-mix(in oklab, var(--copper) 55%, var(--surface));
+  }
+  .turn {
+    stroke: var(--copper);
+    stroke-width: 1;
+    opacity: 0.6;
+  }
+  .lead {
+    stroke: var(--copper);
+    stroke-width: 2.2;
+  }
+  .push {
+    stroke: var(--warning);
+    stroke-width: 2.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>
