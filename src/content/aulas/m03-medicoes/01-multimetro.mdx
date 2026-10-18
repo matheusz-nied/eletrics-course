@@ -192,11 +192,11 @@ Na rede elétrica aparecem, de vez em quando, picos de tensão de milhares de vo
 
 | Categoria | Onde se aplica | Exemplos |
 |-----------|----------------|----------|
-| **CAT II** | Aparelhos ligados na tomada, e a própria tomada | Eletrodomésticos, ferramentas, a tomada da sala |
+| **CAT II** | Aparelhos ligados na tomada | Eletrodomésticos, ferramentas, carregadores |
 | **CAT III** | A instalação fixa do prédio | Quadro de disjuntores, fiação dentro da parede, chuveiro, motor do portão ligado direto na rede |
 | **CAT IV** | A origem da instalação | Padrão de entrada, medidor de energia, ramal que vem do poste |
 
-A marcação aparece perto dos bornes com a tensão máxima de cada categoria, por exemplo **CAT III 600 V** ou **CAT IV 300 V**. Um multímetro CAT III 600 V serve para medir com segurança tudo dentro de uma casa com rede de 127 V ou 220 V, inclusive o quadro. A categoria dos cabos também conta: o conjunto vale a categoria **menor** entre o aparelho e as pontas.
+A tomada fica na fronteira: a norma a coloca na CAT II, mas ela está presa à fiação da parede, então meça nela com um multímetro CAT III, como no resto da casa. A marcação aparece perto dos bornes com a tensão máxima de cada categoria, por exemplo **CAT III 600 V** ou **CAT IV 300 V**. Um multímetro CAT III 600 V serve para medir com segurança tudo dentro de uma casa com rede de 127 V ou 220 V, inclusive o quadro. A categoria dos cabos também conta: o conjunto vale a categoria **menor** entre o aparelho e as pontas.
 
 Desconfie de multímetros muito baratos com marcações altas: um aparelho que custa o preço de um lanche e diz "CAT IV 1000 V" provavelmente não passou por nenhum ensaio. Sinais de um aparelho sério: fusíveis grandes de cerâmica (e não de vidro) nos bornes de corrente, proteção também no borne 10A, pontas com capa e trava de dedo.
 
@@ -321,9 +321,9 @@ Medir corrente e, minutos depois, encostar na tomada para medir tensão **com a 
     },
     {
       type: 'associar',
-      prompt: 'Associe cada ponto da instalação à categoria de medição mínima.',
+      prompt: 'Associe cada lugar onde você vai medir à categoria de medição mínima.',
       pairs: [
-        ['Tomada da sala', 'CAT II'],
+        ['Secador de cabelo ligado na tomada', 'CAT II'],
         ['Quadro de disjuntores da casa', 'CAT III'],
         ['Medidor de energia no padrão de entrada', 'CAT IV'],
       ],
