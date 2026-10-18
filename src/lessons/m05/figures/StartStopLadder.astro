@@ -1,0 +1,231 @@
+---
+/*
+ * 05.6: direct-on-line start of a three-phase motor. Power circuit on the
+ * left (fuses, K1 main contacts, overload relay, motor), control circuit on
+ * the right (fuse, 95-96, stop, start with the 13-14 seal in parallel, coil).
+ */
+import { contactNf, contactNo, heater, pushHead, pushRod, thermalHead, thermalRod } from './ladder';
+
+const lines = [
+  { x: 90, t: 'L1' },
+  { x: 135, t: 'L2' },
+  { x: 180, t: 'L3' },
+];
+const C = 380;
+---
+
+<svg viewBox="0 0 560 330" width="560" height="330" class="fig" aria-hidden="true">
+  <!-- Power -->
+  <text x="135" y="18" class="title">
+    Força
+  </text>
+  {lines.map((l) => (
+    <g>
+      <text x={l.x} y="40" class="pin">
+        {l.t}
+      </text>
+      <path d={`M${l.x} 46 V62 M${l.x} 86 V108`} class="wire" />
+      <rect x={l.x - 6} y="62" width="12" height="24" class="fuse" />
+      <path d={`M${l.x} 62 V86`} class="wire thin" />
+      <path d={contactNo(l.x, 108, 144)} class="wire main" />
+      <path d={`M${l.x} 144 V162`} class="wire" />
+      <path d={heater(l.x, 162, 196)} class="wire" />
+    </g>
+  ))}
+  <text x="66" y="78" class="name end">
+    F1–F3
+  </text>
+  <path d="M84 128 H174" class="link" />
+  <text x="66" y="131" class="name end">
+    K1
+  </text>
+  <rect x="72" y="158" width="126" height="42" rx="3" class="box" />
+  <text x="66" y="184" class="name end">
+    FT1
+  </text>
+  <path d="M90 196 V224 L114 243 M135 196 V236 M180 196 V224 L156 243" class="wire" />
+  <circle cx="135" cy="270" r="34" class="motor" />
+  <text x="135" y="268" class="m">
+    M
+  </text>
+  <text x="135" y="290" class="pin">
+    3~
+  </text>
+
+  <!-- Control -->
+  <text x="415" y="18" class="title">
+    Comando
+  </text>
+  <circle cx={C} cy="40" r="3.5" class="term" />
+  <text x={C - 12} y="44" class="name end">
+    F
+  </text>
+  <path d={`M${C} 40 V54 M${C} 78 V90`} class="wire" />
+  <rect x={C - 6} y="54" width="12" height="24" class="fuse" />
+  <path d={`M${C} 54 V78`} class="wire thin" />
+  <text x={C - 14} y="70" class="name end">
+    F4
+  </text>
+
+  <path d={contactNf(C, 90, 120)} class="wire" />
+  <path d={thermalRod(C, 90, 120)} class="link" />
+  <path d={thermalHead(C, 90, 120)} class="wire thin" />
+  <text x={C + 16} y="100" class="pin start">
+    95
+  </text>
+  <text x={C + 16} y="124" class="pin start">
+    96
+  </text>
+  <text x={C - 38} y="110" class="name end">
+    FT1
+  </text>
+
+  <path d={`M${C} 120 V132`} class="wire" />
+  <path d={contactNf(C, 132, 162)} class="wire" />
+  <path d={pushRod(C, 132, 162, true)} class="link" />
+  <path d={pushHead(C, 132, 162)} class="wire" />
+  <text x={C - 32} y="150" class="name end">
+    B0
+  </text>
+  <text x={C - 32} y="164" class="small end">
+    desliga
+  </text>
+
+  <path d={`M${C} 162 V176 H${C + 70}`} class="wire" />
+  <circle cx={C} cy="176" r="3" class="dot" />
+  <path d={contactNo(C, 176, 210)} class="wire" />
+  <path d={pushRod(C, 176, 210, false)} class="link" />
+  <path d={pushHead(C, 176, 210)} class="wire" />
+  <text x={C - 32} y="194" class="name end">
+    B1
+  </text>
+  <text x={C - 32} y="208" class="small end">
+    liga
+  </text>
+  <path d={contactNo(C + 70, 176, 210)} class="wire seal" />
+  <text x={C + 78} y="186" class="pin start seal-text">
+    13
+  </text>
+  <text x={C + 78} y="212" class="pin start seal-text">
+    14
+  </text>
+  <text x={C + 100} y="199" class="name start seal-text">
+    K1 (selo)
+  </text>
+  <path d={`M${C + 70} 210 H${C} V228`} class="wire" />
+  <circle cx={C} cy="210" r="3" class="dot" />
+
+  <rect x={C - 13} y="228" width="26" height="22" class="coil" />
+  <text x={C + 18} y="226" class="pin start">
+    A1
+  </text>
+  <text x={C + 18} y="264" class="pin start">
+    A2
+  </text>
+  <text x={C - 20} y="243" class="name end">
+    K1
+  </text>
+  <path d={`M${C} 250 V272`} class="wire" />
+  <circle cx={C} cy="272" r="3.5" class="term" />
+  <text x={C - 12} y="276" class="name end">
+    N
+  </text>
+  <text x="415" y="310" class="note seal-text">
+    B1 solto: a bobina segue alimentada pelo 13-14.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .wire.thin {
+    stroke-width: 1.2;
+  }
+  .wire.main {
+    stroke-width: 2.6;
+  }
+  .wire.seal {
+    stroke: var(--copper);
+    stroke-width: 2.6;
+  }
+  .fuse {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.6;
+  }
+  .coil {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .box {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+    stroke-dasharray: 4 3;
+  }
+  .link {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+    stroke-dasharray: 4 3;
+  }
+  .motor {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .term {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .dot {
+    fill: var(--fg);
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .pin {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .name {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .small {
+    font-size: 11.5px;
+    fill: var(--fg-muted);
+  }
+  .m {
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .note {
+    font-size: 12.5px;
+  }
+  .seal-text {
+    fill: var(--copper);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

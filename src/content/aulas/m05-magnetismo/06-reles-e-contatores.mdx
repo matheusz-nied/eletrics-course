@@ -1,0 +1,362 @@
+---
+titulo: Relés e contatores em detalhe
+modulo: m05-magnetismo
+ordem: 6
+nivel: I
+duracaoMin: 35
+objetivos:
+  - Diferenciar relé e contator e ler os números dos bornes (A1-A2, 1-2, 3-4, 5-6, 13-14, 21-22, 95-96)
+  - Explicar a diferença entre a bobina de CA e a de CC e por que uma não substitui a outra
+  - Explicar como o contato de selo mantém o motor ligado e por que ele não religa sozinho quando a energia volta
+  - Explicar o intertravamento elétrico e o mecânico numa reversão de motor
+  - Reconhecer o relé térmico, o relé de estado sólido e a proteção da bobina (diodo, varistor e RC)
+prerequisitos:
+  - m04-passivos/07-chaves-botoes-e-reles
+  - m05-magnetismo/02-eletroimas-e-solenoides
+tags: [relé, contator, selo, intertravamento, relé térmico, partida direta, reversão, motor, portão, bomba]
+seguranca: rede
+rascunho: true
+---
+
+import ContactorTerminals from '../../../lessons/m05/figures/ContactorTerminals.astro';
+import StartStopLadder from '../../../lessons/m05/figures/StartStopLadder.astro';
+import ReversingLadder from '../../../lessons/m05/figures/ReversingLadder.astro';
+import RelayAnatomy from '../../../lessons/m04/figures/RelayAnatomy.astro';
+import Part3D from '../../../lessons/m02/Part3D.astro';
+
+Na casa de bombas de um prédio, a bomba que enche a caixa d'água tem dois botões no painel: um verde, de ligar, e um vermelho, de desligar. Você aperta o verde, ouve um estalo seco dentro do painel e a bomba liga. Solta o botão e ela continua ligada. Agora falta energia no bairro e, meia hora depois, a energia volta: a bomba **não** liga sozinha. Isso não é defeito, é projeto.
+
+Quem faz isso é um **contator**, um parente grande do relé, ligado num circuito com dois truques: o **selo** e, quando o motor precisa girar para os dois lados, o **intertravamento**. A central do portão usa a mesma ideia com dois relés, ABRE e FECHA, que nunca podem ligar juntos. Nesta aula você vai entender esses circuitos e por que cada fio está onde está.
+
+## Relé ou contator?
+
+Os dois são a mesma ideia da aula <LinkAula id="m04-passivos/07-chaves-botoes-e-reles" />: uma bobina, um núcleo de ferro que vira eletroímã e uma armadura que move os contatos. A diferença é o tamanho do serviço.
+
+<Part3D
+  part="relay"
+  props={{ coilVoltage: 24, energized: true, transparentCover: true }}
+  cutaway
+  annotations
+  alt="Relé de placa em corte, em repouso e energizado. Em repouso, a mola segura a armadura e o contato comum encosta no NF. Energizado, a bobina puxa a armadura contra o núcleo e o comum passa para o NA."
+  caption="Relé de placa em repouso e energizado: com corrente na bobina, a armadura encosta no núcleo e o comum passa do NF para o NA."
+>
+  <RelayAnatomy />
+</Part3D>
+
+O <Term id="rele">relé</Term> comum tem um ou dois contatos reversíveis pequenos, de até uns 10 A (típico), e fica soldado numa placa ou num soquete. O <Term id="contator">contator</Term> é feito para ligar motores e cargas grandes direto na rede:
+
+- tem **três contatos principais** NA, um para cada fase, robustos e com câmaras que apagam o arco ao abrir;
+- tem **contatos auxiliares** pequenos, NA e NF, para o circuito de comando;
+- a bobina vem em várias tensões, como 24 V, 127 V ou 220 V, em CA ou em CC;
+- é montado em trilho, dentro de um painel.
+
+| | Relé | Contator |
+|---|---|---|
+| Contatos | Um ou dois reversíveis | Três principais NA, mais auxiliares |
+| Corrente nos contatos | Até uns 10 A (típico) | De uns 9 A a centenas de ampères, conforme o tamanho |
+| Bobina | Em geral 5 V, 12 V ou 24 V CC | 24 V, 127 V ou 220 V, CA ou CC |
+| Onde fica | Na placa da central, do carro, do aparelho | No painel, em trilho |
+| O que liga | Sinais, lâmpadas, motores pequenos | Motores, bombas, resistências de aquecimento |
+
+## Os números dos bornes
+
+Todo contator tem os bornes numerados do mesmo jeito, segundo a norma internacional IEC 60947, que os fabricantes seguem. Sabendo a regra, você liga um contator que nunca viu antes.
+
+<Figure
+  caption="Figura 1. Um contator visto de frente (à esquerda) e o símbolo dele (à direita). Os números ímpares dos contatos principais ficam em cima, do lado da rede; os pares, embaixo, do lado do motor. O último algarismo dos auxiliares diz o tipo: 3-4 é NA, 1-2 é NF. A linha tracejada do símbolo indica que a armadura move todos os contatos juntos."
+  alt="Frente de um contator com os bornes A1, 1/L1, 3/L2, 5/L3, 13 e 21 em cima e A2, 2/T1, 4/T2, 6/T3, 14 e 22 embaixo, e o símbolo com a bobina A1-A2, três contatos principais NA, um auxiliar NA 13-14 e um auxiliar NF 21-22."
+  wide
+>
+  <ContactorTerminals />
+</Figure>
+
+- **A1 e A2:** a bobina.
+- **1-2, 3-4 e 5-6:** os contatos principais. Os ímpares (1, 3, 5) também aparecem como L1, L2 e L3 e recebem a rede; os pares (2, 4, 6), como T1, T2 e T3, vão para o motor.
+- **Auxiliares, com dois algarismos:** o primeiro é só o número de ordem do contato; o **último diz o que ele é**. Final **3-4** é <Term id="contato-auxiliar">contato auxiliar</Term> NA; final **1-2** é NF. Então 13-14 é o primeiro contato, NA; 21-22 é o segundo, NF; um 43-44 seria o quarto, NA.
+- **95-96 e 97-98:** finais 5-6 e 7-8 são de funções especiais. No relé térmico, que você vai ver adiante, 95-96 é NF e 97-98 é NA.
+
+## Bobina de CA e bobina de CC
+
+A etiqueta da bobina diz a tensão e o tipo de corrente, por exemplo "220 V 60 Hz" ou "24 V CC". As duas bobinas não são intercambiáveis, e a razão está na física do indutor.
+
+Em **corrente contínua**, quem limita a corrente da bobina é só a resistência do fio, como num relé de placa. Em **corrente alternada**, a bobina também tem **reatância**, que cresce com a frequência (aula <LinkAula id="m06-corrente-alternada/04-reatancia-e-impedancia" />):
+
+$$
+X_L = 2\pi f L \qquad\qquad Z = \sqrt{R^2 + X_L^2} \qquad\qquad I = \frac{V}{Z}
+$$
+
+com $f$ a frequência em hertz (Hz), $L$ a indutância em henrys (H), $R$ a resistência do fio, $X_L$ a reatância e $Z$ a impedância, todas em ohms (Ω). Numa bobina feita para CA, a reatância é muito maior que a resistência: é ela que segura a corrente. Por isso o fio pode ser mais grosso e ter resistência baixa.
+
+Veja com números de exemplo. Uma bobina de 220 V CA com $R = 100\,\Omega$ e $X_L = 5.000\,\Omega$ (valores ilustrativos):
+
+- em 220 V CA: $Z \approx 5.001\,\Omega$, $I \approx 44\,\text{mA}$, e o fio dissipa $I^2 R \approx 0{,}19\,\text{W}$;
+- em 220 V CC: não há reatância ($f = 0$), $I = 220 / 100 = 2{,}2\,\text{A}$, e o fio dissipa $2{,}2^2 \times 100 = 484\,\text{W}$. A bobina queima em segundos.
+
+O contrário também dá errado: uma bobina de CC ligada em CA tem a corrente limitada pela reatância, que ela não esperava; puxa fraco ou não puxa, e trepida.
+
+A bobina de CA tem ainda duas manias:
+
+- **Zumbido.** A corrente passa por zero 120 vezes por segundo, e a força no núcleo também. Sem nada para segurar, a armadura vibraria. Por isso o núcleo tem uma **espira de sombra**: um anel de cobre em curto, encaixado em parte da face do núcleo, que cria um campo atrasado e segura a armadura nos instantes em que o campo principal passa por zero. Espira trincada, sujeira ou ferrugem entre armadura e núcleo dão um zumbido alto e desgastam os contatos.
+- **Corrente de chamada.** Com a armadura aberta, há ar no caminho do campo, a indutância é pequena e a bobina puxa muitas vezes a corrente de quando está fechada. Os catálogos trazem os dois valores, de chamada e de retenção. Se a armadura emperra aberta, a bobina fica puxando a corrente de chamada e queima.
+
+## O selo: o comando que se segura sozinho
+
+O botão de ligar da bomba é um <Term id="pulsador">pulsador</Term>: você solta e ele abre. Quem mantém a bomba ligada é um contato auxiliar NA do próprio contator, ligado **em paralelo** com o botão de ligar. É o <Term id="contato-de-selo">contato de selo</Term> (também chamado de retenção).
+
+<Figure
+  caption="Figura 2. Partida direta de um motor trifásico. À esquerda, a força: fusíveis F1 a F3, os contatos principais de K1, o relé térmico FT1 e o motor. À direita, o comando: fusível F4, o contato 95-96 do térmico, o botão de desligar B0 (NF), o botão de ligar B1 (NA) com o 13-14 de K1 em paralelo (o selo, em cobre) e a bobina de K1."
+  alt="Diagrama de força com três fases passando por fusíveis, contator K1, relé térmico e motor trifásico, e diagrama de comando com fusível, contato 95-96, botão desliga NF, botão liga NA em paralelo com o contato 13-14 de K1 e a bobina de K1 até o neutro."
+  wide
+>
+  <StartStopLadder />
+</Figure>
+
+Siga o comando de cima para baixo:
+
+1. **Apertou B1:** a corrente passa por F4, pelo 95-96, por B0 (fechado em repouso), por B1 e chega à bobina. K1 atrai: os contatos principais ligam o motor e o 13-14 fecha.
+2. **Soltou B1:** B1 abre, mas o 13-14, em paralelo com ele, já está fechado. A bobina continua alimentada pelo próprio contato: K1 se "segura".
+3. **Apertou B0:** o caminho da bobina abre em cima de tudo. K1 solta, o 13-14 abre, e soltar B0 não muda nada: o único caminho de volta seria B1.
+4. **Faltou energia:** a bobina fica sem tensão, K1 solta e o 13-14 abre. Quando a energia volta, nenhum caminho leva corrente à bobina. O motor só liga quando alguém apertar B1 de novo.
+
+O item 4 é uma proteção. Uma serra, um esmeril ou uma bomba ligada por uma chave comum voltariam a funcionar sozinhos quando a energia voltasse, com alguém mexendo na máquina ou com a caixa d'água já cheia. Com o selo, a máquina espera alguém dar a partida.
+
+O circuito de comando pode ser de 220 V, de 127 V ou de 24 V, vindo de um transformador. A bobina de K1 tem que ser da tensão do comando, não necessariamente da tensão do motor.
+
+## Explore: selo e intertravamento
+
+A simulação monta um comando de 24 V CC para um motor que gira para os dois lados. K1 e K2 fazem o papel de dois contatores, e as lâmpadas "Sentido 1" e "Sentido 2" fazem o papel do motor girando para cada lado. B0 é o botão de desligar (NF), B1 e B2 são os botões de ligar (pulsadores NA), e a chave "Energia" simula a falta de energia. Como os relés da simulação têm um contato reversível só, o NA de cada um faz o selo e acende a lâmpada, e o NF faz o intertravamento.
+
+<Simulation circuit="m05/partida-selo-intertravamento" instruments={['multimetro']} />
+
+1. Aperte o play (▶). Aperte e solte **B1**. A lâmpada "Sentido 1" continua acesa depois que você solta? Quanto marca a corrente no comando?
+2. Com K1 ligado, aperte **B2**. O que acontece?
+3. Aperte **B0**. Depois aperte e solte **B2**.
+4. Com K2 ligado, desligue a chave "Energia ligada" e ligue de novo. O motor volta a girar?
+
+Apertando B1, K1 atrai e a lâmpada do sentido 1 acende; soltando, ela continua acesa, porque o NA de K1 sela a própria bobina. A corrente no comando fica em cerca de 225 mA: uns 208 mA da lâmpada e uns 17 mA da bobina. Com K1 ligado, B2 não faz nada: o NF de K1 abriu o caminho da bobina de K2. Depois de B0, B2 liga K2 normalmente. E desligando e religando a energia, tudo fica desligado: ninguém apertou botão.
+
+### Exemplo resolvido: a bobina e o contato de selo
+
+As bobinas de K1 e K2 são de 24 V CC, com 1.440 Ω. Quanto puxa cada uma?
+
+$$
+I_\text{bobina} = \frac{V}{R} = \frac{24\,\text{V}}{1.440\,\Omega} \approx 0{,}0167\,\text{A} \approx 17\,\text{mA}
+$$
+
+e a potência na bobina é $P = V \times I = 24 \times 0{,}0167 \approx 0{,}4\,\text{W}$. Clique em K1 no esquema para conferir a corrente.
+
+No contator de verdade, o selo conduz só a corrente da bobina, porque o motor fica nos contatos principais. Por isso um contato auxiliar, feito para poucos ampères, dá conta. Na simulação, o mesmo contato também acende a lâmpada, e por ele passam uns 225 mA.
+
+## Intertravamento: nunca os dois juntos
+
+Num motor trifásico, **trocar duas fases** inverte o sentido de giro (aula <LinkAula id="m08-motores/03-motor-de-inducao-trifasico" />). A reversão usa dois contatores: K1 liga o motor direto, e K2 liga com L1 e L3 trocadas.
+
+<Figure
+  caption="Figura 3. Reversão de um motor trifásico. Na força, K1 liga L1, L2 e L3 direto ao motor; K2 liga com L1 e L3 trocadas. Se os dois fecharem juntos, L1 fica ligada a L3 pelos contatos: um curto entre fases. No comando, cada botão tem o seu selo (13-14, em cobre) e cada bobina passa pelo 21-22 do outro contator (o intertravamento, em azul)."
+  alt="Diagrama de força com os contatores K1 e K2, K2 trocando as fases L1 e L3, relé térmico e motor, e diagrama de comando com B0, dois ramos com B1 e B2, os selos 13-14 e os contatos 21-22 cruzados entre K1 e K2."
+  wide
+>
+  <ReversingLadder />
+</Figure>
+
+Olhe a força: se K1 e K2 fecharem ao mesmo tempo, L1 passa por K1 e chega a T1, e L3 passa por K2 e chega ao mesmo T1. É um **curto entre fases**, com uma corrente enorme até o disjuntor desarmar, contatos soldados e, às vezes, um contator destruído. O circuito precisa garantir que isso nunca aconteça. Esse cuidado é o <Term id="intertravamento">intertravamento</Term>, e ele vem em duas camadas:
+
+- **Elétrico:** a bobina de K1 passa pelo contato NF 21-22 de K2, e a de K2 pelo 21-22 de K1. Com K1 atraído, o 21-22 dele está aberto, e apertar B2 não leva corrente nenhuma à bobina de K2. É o que você viu na simulação.
+- **Mecânico:** uma peça presa entre os dois contatores, com uma alavanca, impede que as duas armaduras fechem ao mesmo tempo. Ela protege até quando o elétrico falha: um contato 21-22 que não abriu, um contator empurrado com a mão, uma ligação errada.
+
+Painéis de reversão usam os dois. E mesmo com intertravamento, o certo é **parar antes de inverter**: apertar B0, esperar o motor parar e só então ligar o outro sentido. Inverter com o motor girando puxa uma corrente enorme e dá um tranco na máquina.
+
+## O relé térmico
+
+O <Term id="rele-de-sobrecarga">relé térmico</Term> (relé de sobrecarga) fica encaixado embaixo do contator, e a corrente do motor passa por ele. Dentro, cada fase aquece uma lâmina **bimetálica**: duas tiras de metais que dilatam de jeitos diferentes, soldadas uma na outra. Aquecida, a lâmina entorta.
+
+- Com a corrente normal, a lâmina mal se mexe.
+- Se o motor fica sobrecarregado (bomba travada, rolamento pegando, falta de uma fase), a corrente sobe, as lâminas aquecem mais e, depois de um tempo, entortam o bastante para disparar um mecanismo. O contato **95-96 (NF)** abre e o **97-98 (NA)** fecha.
+
+O 95-96 fica em série com a bobina do contator, como na Figura 2: abrindo, ele faz o mesmo que apertar B0. O 97-98 pode acender uma lâmpada de sinalização de "falha".
+
+O térmico é lento de propósito: a corrente alta da partida, que dura alguns segundos, não o dispara. Ele tem um botão de **ajuste**, que se regula na corrente nominal da placa do motor, e um botão de **rearme**. Prefira o rearme manual: assim a máquina não volta sozinha depois que as lâminas esfriam. E repare no que ele **não** faz: o térmico não protege contra curto-circuito, que é rápido demais para uma lâmina aquecer. Quem cuida do curto são os fusíveis ou o disjuntor (aula <LinkAula id="m07-instalacoes/03-disjuntores-dr-e-dps" />).
+
+<RealCase title="Partida direta da bomba d'água">
+
+A bomba da caixa d'água é o exemplo clássico da Figura 2: fusíveis ou disjuntor para o curto, contator para ligar, relé térmico para a sobrecarga, e a botoeira liga e desliga com o selo. Muitos painéis de bomba têm ainda uma **boia** (chave de nível) em série com a bobina: caixa cheia, a boia abre e o contator solta, como se alguém tivesse apertado o desliga.
+
+Dois defeitos aparecem muito nesse painel:
+
+- **Contator que zumbe e trepida:** tensão baixa no comando, espira de sombra trincada ou sujeira entre o núcleo e a armadura. Os contatos faíscam e se gastam rápido.
+- **Térmico que desarma toda hora:** antes de girar o ajuste para cima, meça a corrente do motor com o alicate amperímetro. Se ela está acima da placa, o problema está no motor ou na bomba (rolamento, rotor pegando, falta de fase), e o térmico está fazendo o trabalho dele. Ajustar o térmico acima da corrente do motor "para parar de desarmar" é o caminho mais curto para queimar o motor.
+
+</RealCase>
+
+<RealCase title="Os relés de reversão da central do portão">
+
+A central do portão do curso usa dois relés, K1 (ABRE) e K2 (FECHA), para escolher o sentido do motor monofásico com capacitor. Se os dois ligassem juntos, os dois lados do capacitor ficariam ligados à fase: o capacitor entraria em curto e o motor só roncaria e esquentaria, sem girar. Aqui o intertravamento é feito pelo **programa**: o microcontrolador nunca aciona os dois relés juntos e espera um tempo morto de 300 ms antes de inverter. Algumas centrais reforçam isso no próprio circuito da placa.
+
+Um defeito clássico é o **contato de relé colado**: o microcontrolador desliga a bobina, mas o contato soldado continua ligando o motor. O portão não para no fim do curso, ou abre sozinho. O diagnóstico, ouvindo o relé e medindo a tensão em ABRE e FECHA com o motor parado, está na aula <LinkAula id="m16-portao/09-diagnostico-do-portao" />, e a central por dentro, na aula <LinkAula id="m16-portao/03-a-central-por-dentro" />.
+
+</RealCase>
+
+## A proteção da bobina: diodo, varistor e RC
+
+Quando a corrente da bobina é cortada, o indutor gera um pico de tensão de centenas de volts (aula <LinkAula id="m04-passivos/05-indutores-e-circuito-rl" />). O pico queima o transistor que aciona um relé de placa, desgasta o contato do botão que comanda a bobina e espalha interferência que pode reiniciar um microcontrolador. Por isso a bobina leva um **supressor** em paralelo:
+
+| Supressor | Serve para | Vantagem | Cuidado |
+|---|---|---|---|
+| <Term id="diodo">Diodo</Term> | Só bobina de CC | Simples e barato; corta o pico quase todo | Atrasa o desligamento do relé; tem polaridade |
+| Diodo com zener | Só bobina de CC | Desliga mais rápido que só o diodo | Uma peça a mais |
+| Varistor | CA e CC | Quase não atrasa o desligamento | Deixa passar um pico um pouco maior |
+| RC (resistor com capacitor) | CA, principalmente | Também reduz a interferência | Ocupa mais espaço |
+
+O diodo vai **ao contrário** da tensão da bobina: o catodo no lado positivo. Montado ao contrário disso, ele vira um curto na fonte assim que a bobina é ligada. Muitos contatores aceitam um módulo supressor encaixado nos bornes A1 e A2.
+
+## O relé de estado sólido
+
+O <Term id="rele-de-estado-solido">relé de estado sólido</Term> faz o papel de um relé sem nenhuma peça móvel. Na entrada, a tensão de comando acende um LED dentro dele; a luz do LED dispara um semicondutor na saída: um <Term id="transistor">transistor</Term> (ou MOSFET), nos modelos de saída CC, ou um par de tiristores, nos de saída CA (aula <LinkAula id="m09-semicondutores/09-tiristores-e-isolamento" />). A luz faz o isolamento entre entrada e saída, como a armadura faz num relé comum.
+
+- **Vantagens:** é silencioso, não faísca, não gasta contato e liga e desliga milhares de vezes sem desgaste. Muitos de saída CA ligam só quando a tensão da rede passa por zero, o que reduz a interferência. É comum em resistências de aquecimento que ligam e desligam o tempo todo para controlar a temperatura.
+- **Cuidados:** a saída tem uma queda de 1 V a 2 V (típico), e isso vira calor: com corrente alta, ele precisa de dissipador. Desligado, ele deixa passar uma pequena **corrente de fuga**, que pode fazer uma lâmpada LED brilhar fraco, e os bornes da saída nunca estão "mortos". Quando queima, costuma queimar **em curto**, com a carga ligada. E um modelo de saída CA não desliga carga de CC.
+
+## Erros comuns e segurança
+
+- **Bobina com a tensão ou o tipo errado.** Confira a etiqueta: 220 V CA não é 220 V CC, e a bobina segue a tensão do comando, não a do motor.
+- **Selo no lugar errado.** Ligado em paralelo com o botão de **desligar**, o motor não desliga mais. Ligado num contato NF, a bobina trepida.
+- **Inverter sem parar** ou montar reversão sem intertravamento elétrico e mecânico.
+- **Térmico ajustado acima da corrente do motor,** ou com rearme automático numa máquina que pode ferir alguém ao voltar sozinha.
+- **Ligar carga de força num contato auxiliar.** Os auxiliares são para o comando.
+- **Achar que o painel está desligado porque o motor parou.** O motor para com B0, mas os bornes de cima do contator continuam na rede, e o comando pode vir de outro circuito. Desligue o disjuntor de cada circuito, confirme a ausência de tensão com o instrumento (aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />) e não deixe ninguém religar enquanto você trabalha. Painel de motor em instalação de trabalho é serviço para profissional habilitado, conforme a <Term id="nr-10">NR-10</Term>.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'associar',
+      prompt: 'Associe cada par de bornes de um contator ao que ele é.',
+      pairs: [
+        ['A1-A2', 'A bobina'],
+        ['13-14', 'Contato auxiliar NA'],
+        ['21-22', 'Contato auxiliar NF'],
+        ['95-96', 'Contato NF do relé térmico'],
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Numa partida com selo, por que o motor não volta a ligar sozinho quando a energia volta depois de uma queda?',
+      options: [
+        {
+          text: 'Porque o contato de selo abriu quando o contator soltou, e só o botão de ligar fecha o caminho da bobina de novo',
+          correct: true,
+          feedback:
+            'Sem energia, a bobina solta e o 13-14 abre. Quando a energia volta, nada alimenta a bobina até alguém apertar o liga.',
+        },
+        {
+          text: 'Porque o relé térmico desarma sempre que falta energia',
+          feedback:
+            'O térmico só desarma com sobrecarga. Quem impede a volta sozinha é o selo, que abriu junto com o contator.',
+        },
+        {
+          text: 'Porque o botão de desligar fica apertado depois da queda',
+          feedback:
+            'O botão de desligar é um pulsador: volta sozinho. O que muda é o contato de selo, que abriu.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'A bobina de um relé de 24 V CC tem 1.440 Ω. Quanto ela puxa, em miliampères?',
+      answer: 16.67,
+      tolerance: 0.03,
+      unit: 'mA',
+      explanation: 'I = V/R = 24 V ÷ 1.440 Ω ≈ 0,0167 A, ou cerca de 17 mA.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um eletricista ligou um contator com bobina de 220 V CA numa fonte de 220 V CC. O que acontece?',
+      options: [
+        {
+          text: 'A bobina puxa uma corrente muito maior que a normal e queima',
+          correct: true,
+          feedback:
+            'Em CC não há reatância, e sobra só a resistência do fio, que é baixa. A corrente e o calor sobem muitas vezes.',
+        },
+        {
+          text: 'O contator funciona igual, só sem zumbido',
+          feedback:
+            'Sem a reatância, nada limita a corrente além da resistência do fio. A bobina superaquece.',
+        },
+        {
+          text: 'O contator não atrai, porque CC não magnetiza o núcleo',
+          feedback:
+            'CC magnetiza o núcleo, sim; é assim que funciona o relé de placa. O problema é o excesso de corrente.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Numa reversão com intertravamento elétrico, K1 está ligado e alguém aperta o botão do outro sentido (B2). O que acontece?',
+      options: [
+        {
+          text: 'Nada: o 21-22 de K1 está aberto e não deixa a corrente chegar à bobina de K2',
+          correct: true,
+          feedback:
+            'É o intertravamento. Para inverter, é preciso desligar K1 com B0 primeiro.',
+        },
+        {
+          text: 'K1 desliga e K2 liga na hora',
+          feedback:
+            'Neste circuito, B2 não desliga K1. E inverter com o motor girando seria um tranco e um pico de corrente.',
+        },
+        {
+          text: 'Os dois ligam e o disjuntor desarma',
+          feedback:
+            'É exatamente o que o intertravamento impede: o 21-22 de K1, aberto, corta o caminho da bobina de K2.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'O relé térmico protege o motor contra curto-circuito.',
+      answer: false,
+      explanation:
+        'O térmico protege contra sobrecarga, que é lenta. O curto é rápido demais para a lâmina aquecer; quem protege contra ele são os fusíveis ou o disjuntor.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma lâmpada LED comandada por um relé de estado sólido fica brilhando fraco com o relé desligado. Por quê?',
+      options: [
+        {
+          text: 'O relé de estado sólido deixa passar uma pequena corrente de fuga mesmo desligado',
+          correct: true,
+          feedback:
+            'A saída de semicondutor não abre como um contato de metal. A fuga é pequena, mas basta para um LED.',
+        },
+        {
+          text: 'O relé está com o contato colado',
+          feedback:
+            'Com a saída em curto, a lâmpada acenderia com brilho total. Brilho fraco é a corrente de fuga.',
+        },
+        {
+          text: 'A lâmpada está com defeito',
+          feedback:
+            'O mesmo acontece com uma lâmpada boa. A fuga do relé de estado sólido basta para um LED brilhar.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **contator** é um relé de força: três contatos principais (1-2, 3-4, 5-6), auxiliares para o comando e bobina A1-A2 em CA ou CC. O final do número diz o tipo do auxiliar: **3-4 é NA, 1-2 é NF**.
+- Bobina de **CA** e de **CC** não se trocam: a de CA tem espira de sombra e corrente de chamada, e queima em CC.
+- O **selo** (13-14 em paralelo com o botão de ligar) segura o contator depois que você solta o botão e impede a volta sozinha depois de uma queda de energia.
+- O **intertravamento** elétrico (21-22 do outro contator) e o mecânico impedem que os dois contatores de uma reversão fechem juntos.
+- O **relé térmico** desliga o motor na sobrecarga pelo 95-96; contra curto, valem fusível ou disjuntor.
+- Bobinas levam **supressor** (diodo, varistor ou RC); o **relé de estado sólido** não tem peça móvel, mas esquenta, tem fuga e costuma queimar em curto.
+
+Com esta aula você fecha o módulo de magnetismo. O próximo módulo explica a corrente alternada que alimenta esses contatores: <LinkAula id="m06-corrente-alternada" />.
