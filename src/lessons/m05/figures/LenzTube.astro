@@ -1,0 +1,181 @@
+---
+/*
+ * 05.3: a magnet dropped in a plastic tube and in a copper tube, as a
+ * stroboscopic photo (one ghost per equal time step). In plastic it falls
+ * freely, the gaps grow; in copper it soon reaches a slow, steady speed, and
+ * the eddy currents above and below it circulate in opposite directions.
+ */
+const MAGNET_H = 26;
+const panels = [
+  {
+    dx: 0,
+    title: 'Tubo de plástico',
+    copper: false,
+    // Free fall: the distance grows with the square of the time.
+    tops: [1, 2, 3, 4, 5].map((k) => 46 + (k * k - 1) * 8.8),
+    lines: ['Cai como uma pedra:', 'o plástico não conduz.'],
+  },
+  {
+    dx: 280,
+    title: 'Tubo de cobre',
+    copper: true,
+    // Slow and steady: equal gaps.
+    tops: [0, 1, 2, 3, 4].map((k) => 52 + k * 34),
+    lines: ['Desce devagar: as correntes', 'induzidas no cobre o freiam.'],
+  },
+];
+const CX = 140;
+---
+
+<svg viewBox="0 0 560 372" width="560" height="372" class="fig" aria-hidden="true">
+  {panels.map((p) => {
+    const last = p.tops[p.tops.length - 1]!;
+    const above = last - 10;
+    const below = last + MAGNET_H + 12;
+    return (
+      <g transform={`translate(${p.dx} 0)`}>
+        <text x={CX} y="26" class="title">
+          {p.title}
+        </text>
+        <rect
+          x={CX - 30}
+          y="44"
+          width="60"
+          height="246"
+          rx="3"
+          class={p.copper ? 'tube copper' : 'tube'}
+        />
+
+        {p.tops.map((top, i) => (
+          <g opacity={i === p.tops.length - 1 ? 1 : 0.18 + 0.12 * i}>
+            <rect x={CX - 11} y={top} width="22" height={MAGNET_H / 2} class="pole n" />
+            <rect
+              x={CX - 11}
+              y={top + MAGNET_H / 2}
+              width="22"
+              height={MAGNET_H / 2}
+              class="pole s"
+            />
+          </g>
+        ))}
+        <text x={CX} y={last + 10} class="pole-t">
+          N
+        </text>
+        <text x={CX} y={last + 23} class="pole-t">
+          S
+        </text>
+
+        {p.copper && (
+          <>
+            <ellipse cx={CX} cy={above} rx="40" ry="8" class="eddy" />
+            <ellipse cx={CX} cy={below} rx="40" ry="8" class="eddy" />
+            <path d={`M${CX + 6} ${above + 8} l-8 -4.5 v9 z`} class="eddy-head" />
+            <path d={`M${CX - 6} ${below + 8} l8 -4.5 v9 z`} class="eddy-head" />
+            <path d={`M${CX + 44} ${above} H${CX + 58} V${below} H${CX + 44}`} class="leader" />
+            <text x={CX + 64} y={(above + below) / 2 - 4} class="lbl start">
+              correntes
+            </text>
+            <text x={CX + 64} y={(above + below) / 2 + 12} class="lbl start">
+              parasitas
+            </text>
+            <path d={`M${CX - 52} ${last + 44} V${last - 12}`} class="force" />
+            <path d={`M${CX - 52} ${last - 18} l-5 9 h10 z`} class="force-head" />
+            <text x={CX - 60} y={last + 20} class="lbl end">
+              freio
+            </text>
+          </>
+        )}
+
+        {p.lines.map((line, i) => (
+          <text x={CX} y={318 + i * 17} class="note">
+            {line}
+          </text>
+        ))}
+      </g>
+    );
+  })}
+  <text x="280" y="364" class="small">
+    Cada ímã apagado mostra onde ele estava, em instantes igualmente espaçados.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .tube {
+    fill: color-mix(in oklab, var(--surface-2) 70%, transparent);
+    stroke: var(--border-strong);
+    stroke-width: 2;
+  }
+  .tube.copper {
+    fill: color-mix(in oklab, var(--copper) 18%, transparent);
+    stroke: var(--copper);
+  }
+  .pole {
+    stroke: var(--fg);
+    stroke-width: 1;
+  }
+  .pole.n {
+    fill: var(--danger);
+  }
+  .pole.s {
+    fill: var(--info);
+  }
+  .eddy {
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  .eddy-head,
+  .force-head {
+    fill: var(--accent);
+    stroke: none;
+  }
+  .force-head {
+    fill: var(--success);
+  }
+  .force {
+    stroke: var(--success);
+    stroke-width: 2.5;
+  }
+  .leader {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .pole-t {
+    fill: var(--bg);
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .small {
+    fill: var(--fg-subtle);
+    font-size: 12px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

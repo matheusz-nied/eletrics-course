@@ -1,0 +1,130 @@
+---
+/*
+ * 05.3: the path of the energy in a car alternator, as blocks: the belt turns
+ * the rotor (an electromagnet fed by brushes), the stator gives three-phase
+ * AC, the diodes rectify it, and the regulator measures the output and sets
+ * the rotor current to hold about 14 V.
+ */
+const W = 140;
+const H = 60;
+const blocks = [
+  { x: 10, y: 30, title: 'Motor e correia', sub: 'fazem o rotor girar' },
+  { x: 190, y: 30, title: 'Rotor', sub: 'eletroímã girando' },
+  { x: 370, y: 30, title: 'Estator', sub: '3 bobinas fixas' },
+  { x: 370, y: 190, title: 'Retificador', sub: 'diodos: CA → CC' },
+  { x: 190, y: 190, title: 'Bateria e carro', sub: 'recebem ~14 V' },
+  { x: 10, y: 190, title: 'Regulador', sub: 'mantém ~14 V', accent: true },
+];
+---
+
+<svg viewBox="0 0 520 268" width="520" height="268" class="fig" aria-hidden="true">
+  {blocks.map((b) => (
+    <g>
+      <rect
+        x={b.x}
+        y={b.y}
+        width={W}
+        height={H}
+        rx="8"
+        class={b.accent ? 'block accent' : 'block'}
+      />
+      <text x={b.x + W / 2} y={b.y + 26} class="title">
+        {b.title}
+      </text>
+      <text x={b.x + W / 2} y={b.y + 45} class="sub">
+        {b.sub}
+      </text>
+    </g>
+  ))}
+
+  <path d="M152 60 H186" class="flow" />
+  <path d="M188 60 l-9 -5 v10 z" class="head" />
+  <text x="170" y="50" class="lbl">
+    gira
+  </text>
+
+  <path d="M332 60 H366" class="flow" />
+  <path d="M368 60 l-9 -5 v10 z" class="head" />
+  <text x="350" y="50" class="lbl">
+    campo
+  </text>
+
+  <path d="M440 92 V186" class="flow" />
+  <path d="M440 188 l-5 -9 h10 z" class="head" />
+  <text x="432" y="144" class="lbl end">
+    CA trifásica
+  </text>
+
+  <path d="M368 220 H334" class="flow" />
+  <path d="M332 220 l9 -5 v10 z" class="head" />
+  <text x="350" y="210" class="lbl">
+    CC
+  </text>
+
+  <path d="M188 220 H154" class="feedback" />
+  <path d="M152 220 l9 -5 v10 z" class="head fb" />
+  <text x="170" y="210" class="lbl">
+    mede
+  </text>
+
+  <path d="M80 188 V140 H260 V96" class="feedback" />
+  <path d="M260 94 l-5 9 h10 z" class="head fb" />
+  <text x="170" y="132" class="lbl">
+    corrente das escovas
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .block {
+    fill: var(--surface);
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+  }
+  .block.accent {
+    fill: color-mix(in oklab, var(--success) 12%, var(--surface));
+    stroke: var(--success);
+  }
+  .flow {
+    stroke: var(--copper);
+    stroke-width: 2.5;
+  }
+  .feedback {
+    stroke: var(--success);
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+  }
+  .head {
+    fill: var(--copper);
+    stroke: none;
+  }
+  .head.fb {
+    fill: var(--success);
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .sub {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>
