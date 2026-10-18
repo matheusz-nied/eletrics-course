@@ -51,6 +51,12 @@ const QUANTITIES: Record<string, QuantityMeta> = {
 const FALLBACK: Record<string, QuantityMeta> = {
   energized: { label: 'Bobina', unit: '', words: ['energizada', 'sem corrente'] },
   welded: { label: 'Contatos colados', unit: '', words: ['sim', 'não'] },
+  coilCurrent: { label: 'Corrente na bobina', unit: 'A' },
+  coilVoltage: { label: 'Tensão na bobina', unit: 'V' },
+  bulged: { label: 'Estado', unit: '', words: ['estufado', 'normal'] },
+  saturated: { label: 'Saída saturada', unit: '', words: ['sim', 'não'] },
+  currentRms: { label: 'Corrente eficaz pelo corpo', unit: 'A' },
+  impedance: { label: 'Impedância do corpo', unit: 'Ω' },
   heat: { label: 'Aquecimento (proteção térmica)', unit: '%', scale: 100 },
   residual: { label: 'Corrente de fuga', unit: 'A' },
   speed: { label: 'Velocidade angular', unit: 'rad/s' },

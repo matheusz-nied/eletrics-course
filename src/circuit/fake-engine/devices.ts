@@ -206,7 +206,7 @@ function capacitorFactory(b: Base): Device {
       }
     },
     readouts(out) {
-      out.damaged = damaged;
+      out.bulged = damaged;
     },
     reset() {
       vPrev = 0;
@@ -345,7 +345,7 @@ const BREAKER_CURVE: Record<string, number> = { B: 4, C: 7.5, D: 15 };
 function breakerFactory(b: Base): Device {
   let heat = 0;
   let tripped = false;
-  const limit = () => 20 * num(b.params.rating, 16) ** 2;
+  const limit = () => 20 * num(b.params.rating, 10) ** 2;
   return dev(b, {
     stamp(st) {
       const on = b.params.closed !== false && !tripped;
@@ -353,7 +353,7 @@ function breakerFactory(b: Base): Device {
     },
     accept(c) {
       if (tripped || b.params.closed === false) return;
-      const rating = num(b.params.rating, 16);
+      const rating = num(b.params.rating, 10);
       const i = (v(c, b.pins.a!) - v(c, b.pins.b!)) * G_ON;
       const dt = c.dt || 0.016;
       const magnetic = (BREAKER_CURVE[String(b.params.curve)] ?? 7.5) * rating;
@@ -472,9 +472,6 @@ const LED_VF: Record<string, number> = {
   infrared: 1.2,
 };
 
-/** Current that burns an LED (typical 5 mm LED: 20 mA nominal, 30 mA maximum). */
-const LED_MAX = 0.03;
-
 function diodeFactory(model: (b: Base) => DiodeModel, kind: 'diode' | 'led' | 'zener'): Factory {
   return (b) => {
     let vLast = 0;
@@ -531,7 +528,7 @@ function diodeFactory(model: (b: Base) => DiodeModel, kind: 'diode' | 'led' | 'z
         iLast = id;
         gdOp = gd;
         if (damaged || kind !== 'led') return;
-        const max = LED_MAX;
+        const max = num(b.params.imax, 0.03);
         over = id > 1.5 * max ? over + (c.dt || 0.016) : 0;
         if (over > 0.03) {
           damaged = true;
@@ -608,6 +605,7 @@ function relayFactory(b: Base): Device {
   let energized = false;
   let position = 0; // 0 = at rest (COM–NC), 1 = pulled (COM–NO)
   let iCoil = 0;
+  let vCoil = 0;
   let welded = false;
   let over = 0;
   const rc = () => Math.max(num(b.params.coilResistance, 400), 1e-3);
@@ -616,7 +614,7 @@ function relayFactory(b: Base): Device {
   return dev(b, {
     stamp(st, c) {
       const R = rc();
-      const L = Math.max(num(b.params.coilInductance, 0.1), 0);
+      const L = Math.max(num(b.params.coilInductance, 0.15), 0);
       const [c1, c2] = [b.pins.coil1!, b.pins.coil2!];
       if (c.mode === 'tran' && L > 0) {
         const k = L / c.dt;
@@ -629,8 +627,9 @@ function relayFactory(b: Base): Device {
     },
     accept(c) {
       const R = rc();
-      const L = Math.max(num(b.params.coilInductance, 0.1), 0);
+      const L = Math.max(num(b.params.coilInductance, 0.15), 0);
       const vc = v(c, b.pins.coil1!) - v(c, b.pins.coil2!);
+      vCoil = vc;
       if (c.mode === 'tran' && L > 0) {
         const k = L / c.dt;
         iCoil = (vc + k * iCoil) / (R + k);
@@ -638,7 +637,7 @@ function relayFactory(b: Base): Device {
       const nominal = num(b.params.coilVoltage, 12) / R;
       energized = energized ? Math.abs(iCoil) > 0.3 * nominal : Math.abs(iCoil) > 0.7 * nominal;
       const dt = c.dt || 0.016;
-      const travel = Math.max(num(b.params.travelTime, 0.008), 1e-6);
+      const travel = Math.max(num(b.params.travelTime, 0.004), 1e-6);
       position = Math.min(1, Math.max(0, position + ((energized ? 1 : -1) * dt) / travel));
       if (welded) return;
       // contact current far above its rating for a while welds the contacts
@@ -662,12 +661,15 @@ function relayFactory(b: Base): Device {
       out.closed = no();
       out.energized = energized;
       out.position = welded ? 1 : position;
+      out.coilCurrent = iCoil;
+      out.coilVoltage = vCoil;
       out.welded = welded;
     },
     reset() {
       energized = false;
       position = 0;
       iCoil = 0;
+      vCoil = 0;
       welded = false;
       over = 0;
     },
@@ -766,31 +768,46 @@ function gateFactory(fn: (a: boolean, b: boolean) => boolean, inputs: 1 | 2): Fa
   };
 }
 
-/** Op-amp: high gain between `plus` and `minus`, output clamped to the vcc/vee rails. */
+/**
+ * Op-amp: high gain between `inp` and `inn`, output limited to `headroom`
+ * inside the vcc/vee rails.
+ */
 function opampFactory(b: Base): Device {
   let region = 0; // -1 low rail, 0 linear, 1 high rail
+  let vout = 0;
+  const rails = () => {
+    const h = Math.max(num(b.params.headroom, 1.5), 0);
+    return [num(b.params.vee, -12) + h, num(b.params.vcc, 12) - h] as const;
+  };
   return dev(b, {
     branches: 1,
     nonlinear: true,
     stamp(st, c) {
-      const vcc = num(b.params.vcc, 15);
-      const vee = num(b.params.vee, -15);
+      const [low, high] = rails();
       const gain = 1e5;
       const k = this.branch;
       const out = b.pins.out!;
-      const vo = gain * (v(c, b.pins.plus!) - v(c, b.pins.minus!));
-      const next = vo > vcc ? 1 : vo < vee ? -1 : 0;
+      const vo = gain * (v(c, b.pins.inp!) - v(c, b.pins.inn!));
+      const next = vo > high ? 1 : vo < low ? -1 : 0;
       if (next !== region) c.limited = true;
       region = next;
       st.m(out, k, 1);
       st.m(k, out, 1);
       if (region === 0) {
-        st.m(k, b.pins.plus!, -gain);
-        st.m(k, b.pins.minus!, gain);
-      } else st.rhs(k, c.mode === 'ac' ? 0 : region > 0 ? vcc : vee);
+        st.m(k, b.pins.inp!, -gain);
+        st.m(k, b.pins.inn!, gain);
+      } else st.rhs(k, c.mode === 'ac' ? 0 : region > 0 ? high : low);
+    },
+    accept(c) {
+      vout = v(c, b.pins.out!);
+    },
+    readouts(out) {
+      out.vout = vout;
+      out.saturated = region !== 0;
     },
     reset() {
       region = 0;
+      vout = 0;
     },
   });
 }
@@ -854,7 +871,17 @@ const BODY_EFFECTS = [
   'Risco de fibrilação ventricular e parada cardíaca',
 ];
 
+/**
+ * Body impedance (Ω) hand to hand, about 50 % of people at mains voltage
+ * (IEC 60479-1), and the share left by each current path.
+ */
+const BODY_SKIN: Record<string, number> = { dry: 1500, wet: 1000 };
+const BODY_PATH: Record<string, number> = { 'hand-hand': 1, 'hand-feet': 0.75, 'hands-feet': 0.5 };
+
 function humanFactory(b: Base): Device {
+  const impedance = () =>
+    (BODY_SKIN[String(b.params.skin)] ?? 1500) * (BODY_PATH[String(b.params.path)] ?? 1);
+  let rms = 0;
   let peak = 0;
   let flipT = -1;
   let sign = 0;
@@ -865,10 +892,10 @@ function humanFactory(b: Base): Device {
   const zone = () => `${kind}-${level + 1}`;
   return dev(b, {
     stamp(st) {
-      st.g(b.pins.a!, b.pins.b!, 1 / Math.max(num(b.params.resistance, 1000), 1));
+      st.g(b.pins.a!, b.pins.b!, 1 / impedance());
     },
     accept(c) {
-      const i = (v(c, b.pins.a!) - v(c, b.pins.b!)) / Math.max(num(b.params.resistance, 1000), 1);
+      const i = (v(c, b.pins.a!) - v(c, b.pins.b!)) / impedance();
       const dt = c.dt || 0.016;
       const s = Math.sign(i);
       if (s !== 0 && sign !== 0 && s !== sign) flipT = c.t;
@@ -876,7 +903,7 @@ function humanFactory(b: Base): Device {
       // alternating when the current changed direction in the last 50 ms
       kind = c.mode === 'tran' && flipT >= 0 && c.t - flipT < 0.05 ? 'AC' : 'DC';
       peak = Math.max(Math.abs(i), peak * Math.exp(-dt / 0.05));
-      const rms = kind === 'AC' ? peak / Math.SQRT2 : Math.abs(i);
+      rms = kind === 'AC' ? peak / Math.SQRT2 : Math.abs(i);
       const limits = BODY_ZONES[kind];
       level = limits.filter((x) => rms >= x).length;
       if (level > worstLevel) {
@@ -893,11 +920,14 @@ function humanFactory(b: Base): Device {
       }
     },
     readouts(out) {
+      out.currentRms = rms;
+      out.impedance = impedance();
       out.zone = zone();
       out.effect = BODY_EFFECTS[level]!;
       out.worst = worst || zone();
     },
     reset() {
+      rms = 0;
       peak = 0;
       flipT = -1;
       sign = 0;

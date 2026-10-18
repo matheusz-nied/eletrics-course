@@ -251,19 +251,19 @@ describe('level 2 devices (names shared with the real engine)', () => {
       analysis: { kind: 'transient', dt: 1e-4 },
       elements: [
         { id: 'V1', type: 'dc-voltage', a: [0, 0], b: [0, 14], params: { voltage: 12 } },
-        // coil1 (16,5), coil2 (16,13), com (22,13), nc (20,5), no (24,5)
+        // coil1 (18,7), coil2 (18,11), com (22,11), nc (21,7), no (23,7)
         {
           id: 'K1',
           type: 'relay-spdt',
           at: [20, 9],
           params: { coilInductance: 0, travelTime: 0.01 },
         },
-        wire('W1', [0, 0], [16, 0], [16, 5]),
-        wire('W2', [16, 13], [16, 14], [0, 14]),
+        wire('W1', [0, 0], [18, 0], [18, 7]),
+        wire('W2', [18, 11], [18, 14], [0, 14]),
         // load from + to the NO contact; COM to ground, like the coil's coil2
-        { id: 'R1', type: 'resistor', a: [24, 0], b: [24, 5], params: { resistance: 120 } },
-        wire('W3', [16, 0], [24, 0]),
-        wire('W4', [22, 13], [22, 14], [16, 14]),
+        { id: 'R1', type: 'resistor', a: [23, 0], b: [23, 7], params: { resistance: 120 } },
+        wire('W3', [18, 0], [23, 0]),
+        wire('W4', [22, 11], [22, 14], [18, 14]),
         { id: 'G', type: 'ground', at: [0, 14] },
       ],
     };
@@ -293,12 +293,12 @@ describe('level 2 devices (names shared with the real engine)', () => {
       analysis: { kind: 'dc' },
       elements: [
         { id: 'V1', type: 'dc-voltage', a: [0, 0], b: [0, 14], params: { voltage: 5 } },
-        // a (16,9), b (16,11), y (24,10)
+        // a (17,9), b (17,11), y (23,10)
         { id: 'U1', type: 'or', at: [20, 10] },
-        wire('W1', [0, 0], [16, 0], [16, 9]),
-        wire('W2', [16, 11], [16, 14], [0, 14]),
-        { id: 'R1', type: 'resistor', a: [24, 10], b: [24, 14], params: { resistance: 1000 } },
-        wire('W3', [24, 14], [16, 14]),
+        wire('W1', [0, 0], [17, 0], [17, 9]),
+        wire('W2', [17, 11], [17, 14], [0, 14]),
+        { id: 'R1', type: 'resistor', a: [23, 10], b: [23, 14], params: { resistance: 1000 } },
+        wire('W3', [23, 14], [17, 14]),
         { id: 'G', type: 'ground', at: [0, 14] },
       ],
     };
@@ -324,7 +324,8 @@ describe('level 2 devices (names shared with the real engine)', () => {
           b: [0, 10],
           params: kind === 'dc-voltage' ? { voltage: 100 } : { amplitude: 100, frequency: 60 },
         },
-        { id: 'H1', type: 'human-body', a: [0, 0], b: [10, 0], params: { resistance: 1000 } },
+        // wet skin, hand to hand: about 1 kΩ
+        { id: 'H1', type: 'human-body', a: [0, 0], b: [10, 0], params: { skin: 'wet' } },
         wire('W', [10, 0], [10, 10], [0, 10]),
       ],
     });
@@ -353,19 +354,19 @@ describe('level 2 devices (names shared with the real engine)', () => {
         {
           id: 'V1',
           type: 'ac-voltage',
-          a: [0, 2],
-          b: [0, 8],
+          a: [0, 0],
+          b: [0, 10],
           params: { amplitude: 180, frequency: 60 },
         },
-        // l1 (6,2), n1 (6,8), l2 (14,2), n2 (14,8)
+        // l1 (7,4), n1 (7,6), l2 (13,4), n2 (13,6)
         { id: 'DR1', type: 'rcd', at: [10, 5] },
-        wire('W1', [0, 2], [6, 2]),
-        wire('W2', [0, 8], [6, 8]),
-        { id: 'R1', type: 'resistor', a: [14, 2], b: [14, 8], params: { resistance: 100 } },
-        wire('W3', [14, 2], [18, 2]),
-        { id: 'R2', type: 'resistor', a: [18, 2], b: [18, 10], params: { resistance: 10000 } },
-        wire('W4', [18, 10], [0, 10], [0, 8]),
-        { id: 'G', type: 'ground', at: [0, 8] },
+        wire('W1', [0, 0], [7, 0], [7, 4]),
+        wire('W2', [0, 10], [7, 10], [7, 6]),
+        { id: 'R1', type: 'resistor', a: [13, 4], b: [13, 6], params: { resistance: 100 } },
+        wire('W3', [13, 4], [18, 4]),
+        { id: 'R2', type: 'resistor', a: [18, 4], b: [18, 12], params: { resistance: 10000 } },
+        wire('W4', [18, 12], [0, 12], [0, 10]),
+        { id: 'G', type: 'ground', at: [0, 10] },
       ],
     };
     // 13 mA of leak: below the 30 mA sensitivity

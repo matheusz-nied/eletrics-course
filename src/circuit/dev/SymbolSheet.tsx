@@ -42,6 +42,7 @@ const BROKEN: Record<string, number | boolean | string> = {
   tripped: true,
   closed: false,
   welded: true,
+  bulged: true,
 };
 
 function Glyph({ type, state }: { type: string; state: 'rest' | 'active' | 'broken' }) {

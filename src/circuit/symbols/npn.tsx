@@ -3,16 +3,16 @@ import { Arrow, defineSymbol, isBurned } from './_kit';
 /** NPN bipolar transistor: emitter arrow points out. */
 export default defineSymbol({
   type: 'npn',
-  pins: { b: [-4, 0], c: [2, -4], e: [2, 4] },
-  box: [-40, -40, 62, 80],
+  pins: { b: [-2, 0], c: [1, -2], e: [1, 2] },
+  box: [-20, -20, 34, 40],
   live: ['burned', 'damaged'],
   draw: ({ live }) => (
     <>
-      <circle cx={4} cy={0} r={18} className={isBurned(live) ? 'sym-burned' : 'sym-body'} />
-      <path d="M-40 0H-6" />
-      <path d="M-6 -11V11" strokeWidth={3} />
-      <path d="M-6 -5L20 -16V-40M20 16V40" />
-      <Arrow x1={-6} y1={5} x2={20} y2={16} size={7} />
+      <circle cx={2} cy={0} r={13} className={isBurned(live) ? 'sym-burned' : 'sym-body'} />
+      <path d="M-20 0H-5" />
+      <path d="M-5 -9V9" strokeWidth={3} />
+      <path d="M-5 -4L10 -12V-20M10 12V20" />
+      <Arrow x1={-5} y1={4} x2={10} y2={12} size={6} />
     </>
   ),
 });
