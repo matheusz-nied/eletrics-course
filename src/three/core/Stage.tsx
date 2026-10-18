@@ -35,7 +35,7 @@ import { withBase } from '../../lib/url';
 import { QUALITY, useQuality } from './quality';
 import type { Vec3 } from '../types';
 import type { OrbitControlsLike } from './controls';
-import { fitDistance } from './framing';
+import { fitDistance, visibleBounds } from './framing';
 import { renderStats } from './stats';
 
 export { fitDistance };
@@ -390,7 +390,7 @@ function FitCamera({ content, view, margin, fitKey, followKey, onBounds }: FitCa
     const s = state.current;
     const group = content.current;
     if (s.follow <= 0 || !group) return;
-    tmp.box.setFromObject(group);
+    visibleBounds(group, tmp.box);
     if (tmp.box.isEmpty()) return;
     tmp.box.getBoundingSphere(tmp.sphere);
     const center = tmp.box.getCenter(tmp.center);

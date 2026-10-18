@@ -1,8 +1,8 @@
-import { Box3, Vector3 } from 'three';
+import { Box3, BoxGeometry, Group, Mesh, MeshBasicMaterial, Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
 import { labelSide, spreadLabels } from '../core/Annotations';
 import { resistorBands } from '../core/colorCode';
-import { fitDistance } from '../core/framing';
+import { fitDistance, visibleBounds } from '../core/framing';
 import {
   capacitorCode,
   formatFarads,
@@ -80,6 +80,25 @@ describe('black body', () => {
     expect(glowIntensity(1000)).toBeGreaterThan(0);
     expect(glowIntensity(2700)).toBeCloseTo(1);
     expect(glowIntensity(3000)).toBeGreaterThan(1);
+  });
+});
+
+describe('visible bounds', () => {
+  it('ignores hidden objects and turned-off materials', () => {
+    const root = new Group();
+    const shown = new Mesh(new BoxGeometry(2, 2, 2), new MeshBasicMaterial());
+    const hidden = new Mesh(new BoxGeometry(2, 2, 2), new MeshBasicMaterial());
+    hidden.position.set(50, 0, 0);
+    hidden.visible = false;
+    const off = new Mesh(new BoxGeometry(2, 2, 2), new MeshBasicMaterial({ visible: false }));
+    off.position.set(0, 0, -40);
+    const moved = new Group();
+    moved.position.set(0, 10, 0);
+    moved.add(new Mesh(new BoxGeometry(2, 2, 2), new MeshBasicMaterial()));
+    root.add(shown, hidden, off, moved);
+    const box = visibleBounds(root, new Box3());
+    expect(box.min.toArray()).toEqual([-1, -1, -1]);
+    expect(box.max.toArray()).toEqual([1, 11, 1]);
   });
 });
 

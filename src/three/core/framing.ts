@@ -1,7 +1,7 @@
 /**
  * Camera framing math, kept free of React and WebGL so it can be unit-tested.
  */
-import { Vector3, type Box3 } from 'three';
+import { Box3, InstancedMesh, Mesh, Vector3, type Object3D } from 'three';
 
 const UP = new Vector3(0, 1, 0);
 
@@ -42,4 +42,33 @@ export function fitDistance(
     );
   }
   return Math.max(distance, 1e-3);
+}
+
+const part = new Box3();
+
+/**
+ * Bounding box of the meshes that are drawn: unlike `Box3.setFromObject`, it
+ * skips hidden objects (an inner piece shown only in the exploded view, a
+ * magnet that appears with a prop) and materials turned off.
+ */
+export function visibleBounds(root: Object3D, target: Box3): Box3 {
+  target.makeEmpty();
+  root.updateWorldMatrix(true, true);
+  root.traverseVisible((object) => {
+    if (!(object instanceof Mesh)) return;
+    const materials = Array.isArray(object.material) ? object.material : [object.material];
+    if (!materials.some((m) => m?.visible !== false)) return;
+    if (object instanceof InstancedMesh) {
+      if (object.count === 0) return;
+      object.computeBoundingBox();
+      part.copy(object.boundingBox!);
+    } else {
+      const geometry = object.geometry;
+      if (!geometry.boundingBox) geometry.computeBoundingBox();
+      part.copy(geometry.boundingBox!);
+    }
+    if (part.isEmpty()) return;
+    target.union(part.applyMatrix4(object.matrixWorld));
+  });
+  return target;
 }
