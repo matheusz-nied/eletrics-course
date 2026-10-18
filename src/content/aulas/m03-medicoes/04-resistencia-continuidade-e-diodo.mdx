@@ -1,0 +1,335 @@
+---
+titulo: Resistência, continuidade e teste de diodo
+modulo: m03-medicoes
+ordem: 4
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Medir resistência e continuidade com segurança, sempre com o circuito desligado
+  - Entender por que um componente soldado na placa, ou segurado com os dedos, dá uma leitura errada
+  - Achar um fio rompido ou em curto numa extensão e num fio dentro da parede
+  - Testar fusíveis, interruptores, diodos e LEDs com o multímetro
+  - Identificar o fio comum de um motor de portão de três fios
+prerequisitos:
+  - m03-medicoes/01-multimetro
+  - m02-circuitos-cc/02-associacao-em-serie
+  - m02-circuitos-cc/03-associacao-em-paralelo
+tags: [resistência, continuidade, diodo, LED, fio rompido, fusível, motor de portão]
+seguranca: rede
+rascunho: true
+---
+
+import ProbeBench from '../../../lessons/m03/ProbeBench';
+import MotorWindings from '../../../lessons/m03/figures/MotorWindings.astro';
+
+A tomada da varanda parou de funcionar, mas o disjuntor está ligado e as outras tomadas funcionam. A extensão só liga o aparelho se o cabo ficar dobrado de um certo jeito. Na troca do motor do portão, saem três fios do motor velho e nenhum tem etiqueta. Nos três casos, a resposta está num fio que você não consegue ver por dentro, e o multímetro enxerga por você.
+
+Nesta aula você vai usar as três funções do multímetro que trabalham **sem energia**: resistência (Ω), <Term id="continuidade">continuidade</Term> (·))) e teste de diodo (➝|). Com elas você acha fio rompido, testa fusível e interruptor, confere um diodo e descobre qual é o fio comum do motor do portão.
+
+## Antes de tudo: o circuito desligado
+
+Nas funções de tensão e de corrente, o multímetro mede uma energia que já existe no circuito. Nas funções Ω, ·))) e diodo é ao contrário: **o próprio multímetro é a fonte**. Ele usa a pilha ou bateria dele para empurrar uma corrente pequena pelo que está entre as pontas, e calcula o resultado a partir disso.
+
+Se houver qualquer outra tensão no circuito, a conta perde o sentido: a leitura sai errada e, numa tomada, o multímetro pode ser danificado. Por isso, toda medida desta aula segue a mesma ordem:
+
+<Steps>
+  <Step title="Desligue o disjuntor do circuito">
+    E, se puder, tire o aparelho da tomada ou solte os fios do equipamento.
+  </Step>
+  <Step title="Confirme que não há tensão">
+    Com o multímetro em V~, testado antes numa tomada que você sabe que está ligada, meça entre os fios. Tem que dar perto de zero.
+  </Step>
+  <Step title="Só então mude para Ω, ·))) ou diodo">
+    Com a ponta vermelha no borne VΩ e a preta no COM.
+  </Step>
+</Steps>
+
+Placas com <Term id="capacitor">capacitores</Term> grandes, como a central do portão e as fontes de aparelhos, podem continuar com tensão por algum tempo depois de desligadas. Meça a tensão nos capacitores grandes antes de medir resistência na placa; o jeito seguro de descarregá-los fica para o módulo de componentes passivos.
+
+## Como o ohmímetro mede
+
+O ohmímetro empurra uma corrente pequena e conhecida, mede a tensão que aparece entre as pontas e aplica a <Term id="lei-de-ohm">Lei de Ohm</Term>:
+
+$$
+R = \frac{V}{I}
+$$
+
+- $R$: a resistência mostrada no visor, em ohms (Ω);
+- $V$: a tensão que aparece entre as pontas, em volts (V);
+- $I$: a corrente que o próprio multímetro empurra, em ampères (A).
+
+Com uma corrente de 1 mA (0,001 A), uma tensão de 4,7 V entre as pontas quer dizer $R = 4{,}7 \div 0{,}001 = 4.700\,\Omega = 4{,}7\,\text{k}\Omega$. O valor da corrente muda com a escala e com o modelo; o princípio é sempre esse.
+
+### O ohmímetro mede tudo o que está entre as pontas
+
+O multímetro não sabe qual peça você quer medir. Ele mede o caminho inteiro entre as duas pontas, e qualquer outro caminho ligado aos mesmos dois pontos entra na conta, em <Term id="associacao-em-paralelo">paralelo</Term>. Na simulação abaixo, o ohmímetro está representado por uma fonte de corrente de 1 mA. Ele mede o resistor R1, de 4,7 kΩ, que está soldado numa placa junto com R2 e R3.
+
+<Simulation circuit="m03/ohm-no-circuito" instruments={['multimetro']} />
+
+**Tarefa:** veja a tensão entre as pontas com R1 soldado na placa e calcule a resistência que o ohmímetro mostraria. Depois desligue a chave "Solda", que representa soltar uma perna de R1, e veja a tensão de novo.
+
+Com R1 na placa, a corrente do ohmímetro se divide: uma parte passa por R1 e o resto vai por R2 e R3. O multímetro mede R1 em paralelo com R2 + R3:
+
+$$
+R_\text{lida} = \frac{R_1 \cdot (R_2 + R_3)}{R_1 + R_2 + R_3}
+$$
+
+$$
+R_\text{lida} = \frac{4{,}7 \cdot 12{,}2}{4{,}7 + 12{,}2}\,\text{k}\Omega \approx 3{,}39\,\text{k}\Omega
+$$
+
+A leitura sai 28 % abaixo do valor real, e o resistor parece com defeito sem estar. Solta a perna, a tensão sobe para 4,7 V e o visor mostra 4,7 kΩ. **Para medir um componente com exatidão, solte pelo menos um dos terminais dele do circuito.**
+
+### Seus dedos e as próprias pontas também entram na conta
+
+Seu corpo conduz eletricidade. Se você segurar os dois terminais de um resistor com os dedos, a resistência do seu corpo, de uma mão à outra, fica em paralelo com o resistor. Com a pele seca e a tensão baixa do ohmímetro, ela costuma ficar entre dezenas e centenas de quilo-ohms, e muda muito com suor e umidade. Num resistor de 100 Ω isso não aparece; num de 1 MΩ, a leitura despenca. Segure só um dos lados, ou apoie a peça na mesa.
+
+No outro extremo, as pontas de prova e os contatos têm uma resistência própria, tipicamente uns 0,2 Ω. Encoste uma ponta na outra para ver quanto o seu multímetro mostra e desconte esse valor nas medidas de fios e contatos. Muitos multímetros têm uma tecla REL que zera essa leitura.
+
+## Continuidade: existe um caminho?
+
+Na maior parte das vezes você não quer saber o valor exato, só se **existe** um caminho. É para isso que serve a continuidade: o multímetro apita quando a resistência entre as pontas fica abaixo de um limite pequeno, tipicamente algumas dezenas de ohms (varia de modelo para modelo). Com o apito, você nem precisa olhar o visor.
+
+Num cabo, todo defeito é de um destes dois tipos:
+
+| Medida | Resultado bom | Defeito |
+|--------|---------------|---------|
+| Um fio, de uma ponta à outra do cabo | Apita (resistência quase zero) | `OL`: **fio rompido**, um <Term id="circuito-aberto">circuito aberto</Term> |
+| Entre dois fios diferentes | `OL`: nenhum caminho | Apita: **<Term id="curto-circuito">curto-circuito</Term>**, os fios se encostam |
+
+Um detalhe importante: a continuidade não diferencia 0,3 Ω de 20 Ω, e as duas leituras apitam. Uma emenda oxidada, que tem alguns ohms a mais, também apita, mas esquenta quando passa a corrente de um chuveiro. Quando o valor importa, use a função Ω.
+
+## Explore: a bancada de medição
+
+Aqui tudo está desligado e solto. Escolha o que medir, a função do multímetro, e encoste as pontas: clique em dois pontos do desenho (o primeiro clique é a ponta vermelha, o segundo a preta) ou escolha os pontos nas listas.
+
+<ProbeBench client:visible />
+
+1. **As três extensões.** Uma está boa, outra tem um fio rompido e a outra está em curto. Na continuidade, meça cada fio de ponta a ponta (pino 1 e furo 1, pino 2 e furo 2) e depois entre os fios (pino 1 e pino 2). Qual é qual?
+2. **As próprias pontas.** Encoste as duas pontas no mesmo ponto, na função Ω. Quanto o visor mostra?
+3. **O fio na parede.** Escolha o circuito do quarto e meça entre os dois fios no quadro, sem o jumper. Agora marque o jumper na outra ponta e meça de novo. Repita no circuito da varanda.
+4. **O motor do portão.** Na função Ω, meça os três pares de fios. A tabela de anotações vai se preenchendo. Qual é o comum? Depois tente descobrir o comum só com a continuidade.
+5. **Fusíveis.** Compare o fusível de vidro com o cerâmico. Em qual dá para saber o estado sem o multímetro?
+6. **O interruptor.** Meça com a tecla desligada e ligada.
+7. **O resistor de 1 MΩ.** Meça normalmente e depois segurando os dois terminais com os dedos.
+8. **Diodo e LED.** Na função de diodo, meça nos dois sentidos. Depois tente na função Ω.
+
+<DeepDive title="Respostas da bancada">
+- **Extensões:** a A tem o fio 2 rompido (pino 2 e furo 2 dão `OL`); a B está em curto (pino 1 e pino 2 apitam); a C está boa.
+- **Pontas no mesmo ponto:** 0,2 Ω, a resistência das pontas e dos contatos.
+- **Parede:** sem o jumper, os dois circuitos dão `OL`, e isso não prova nada. Com o jumper, o quarto mostra 0,4 Ω e a varanda continua em `OL`: um dos fios da varanda está rompido.
+- **Motor:** 1 e 2 dão 16,0 Ω, o maior valor; o fio 3 é o comum. A continuidade apita nos três pares e não ajuda.
+- **Fusíveis:** o de vidro está bom e dá para ver o filamento; o cerâmico está rompido, e só o multímetro mostra isso.
+- **Resistor:** 1,000 MΩ sozinho; com os dedos, 130,4 kΩ no exemplo.
+- **Diodo:** 0,562 V com a vermelha no anodo, `OL` ao contrário. O LED vermelho mostra 1,780 V e acende fraquinho. Na função Ω, os dois dão `OL`.
+</DeepDive>
+
+## O fio dentro da parede
+
+Um fio de 15 m que vai do quadro até a tomada da varanda tem as duas pontas longe uma da outra: as pontas de prova não alcançam. A saída é usar outro fio do mesmo circuito como "volta":
+
+1. Com o disjuntor desligado e a ausência de tensão confirmada, vá até a tomada e solte os fios dela.
+2. Ligue os dois fios um no outro com um <Term id="jumper">jumper</Term>: um pedaço de fio bem preso nos dois, ou um conector de emenda.
+3. Volte ao quadro, solte os mesmos dois fios do disjuntor e do barramento, e meça a resistência entre eles.
+
+A corrente do multímetro vai por um fio, passa pelo jumper e volta pelo outro. Se o visor mostrar uma resistência baixa, os dois fios estão inteiros. Se mostrar `OL`, um deles está rompido ou solto em algum borne ou emenda no caminho. Para descobrir qual, refaça o jumper usando um terceiro fio que você sabe que está bom.
+
+### Exemplo resolvido: quanto deveria dar?
+
+A resistência de um fio de cobre depende do comprimento e da seção (a "bitola", em mm²):
+
+$$
+R = \rho \cdot \frac{L}{A}
+$$
+
+- $\rho$: a resistividade do cobre, cerca de 0,0172 Ω·mm²/m;
+- $L$: o comprimento do fio, em metros;
+- $A$: a seção do fio, em mm².
+
+No circuito da varanda, a corrente do multímetro percorre 15 m de ida e 15 m de volta, num fio de 2,5 mm²:
+
+$$
+R = 0{,}0172 \cdot \frac{30}{2{,}5} \approx 0{,}21\,\Omega
+$$
+
+Somando os 0,2 Ω das pontas, o esperado é cerca de **0,4 Ω**, que é o que a bancada mostra no circuito do quarto. Uma leitura de alguns ohms nesse mesmo fio indicaria uma emenda ruim ou um borne mal apertado no caminho, mesmo com o bipe da continuidade tocando.
+
+<Callout type="perigo" title="Tire o jumper antes de religar o disjuntor">
+O jumper liga a fase no neutro. Se o disjuntor for religado com ele no lugar, é um curto-circuito na hora. Antes de religar, retire o jumper e reconecte os fios da tomada. Se outra pessoa estiver por perto, avise que há um jumper instalado.
+</Callout>
+
+## Fusíveis, interruptores e contatos
+
+Para testar um <Term id="fusivel">fusível</Term>, tire-o do porta-fusível e meça na continuidade entre as duas tampas: fusível bom apita, fusível rompido dá `OL`. No fusível de vidro dá para ver o filamento, mas confirme mesmo assim: às vezes ele rompe rente à tampa, onde não se vê. No fusível cerâmico, o corpo é opaco, e só o multímetro diz o estado.
+
+Um interruptor ou um botão bom alterna entre os dois extremos: `OL` desligado e quase zero ligado. Meça sempre nas duas posições. Um contato que fica em `OL` nas duas está quebrado; um que apita nas duas está grudado. Medido no lugar, com o disjuntor desligado, solte pelo menos um dos fios do interruptor: senão, você mede também o resto da instalação pelo outro caminho.
+
+## O teste de diodo
+
+O <Term id="diodo">diodo</Term> deixa a corrente passar num sentido só, do anodo para o catodo (o lado da faixa). No <Term id="teste-de-diodo">teste de diodo</Term>, o multímetro empurra uma corrente pequena, perto de 1 mA (típico), e mostra a **tensão** que aparece entre as pontas, em volts:
+
+- Com a vermelha no anodo e a preta no catodo, o diodo conduz, e o visor mostra a queda de tensão direta dele: num diodo de silício, tipicamente entre 0,5 V e 0,7 V.
+- Ao contrário, o diodo bloqueia, e o visor mostra `OL`.
+
+| Leitura | Diodo |
+|---------|-------|
+| Um valor num sentido, `OL` no outro | Bom |
+| Perto de zero nos dois sentidos | Em curto |
+| `OL` nos dois sentidos | Aberto |
+
+Um <Term id="led">LED</Term> também é um diodo, com uma queda de tensão maior: os vermelhos ficam perto de 1,8 V, e muitas vezes acendem fraquinho durante o teste. Azuis e brancos precisam de cerca de 3 V, e muitos multímetros não conseguem medi-los nessa função. Os diodos e LEDs têm um módulo inteiro mais adiante, no curso; aqui basta saber testar.
+
+## Na prática: os três fios do motor do portão
+
+O motor monofásico de um portão tem dois enrolamentos iguais, que são bobinas de fio de cobre esmaltado. Os dois se encontram num ponto dentro do motor, ligado ao fio **comum**; as outras duas pontas saem como os fios de abrir e de fechar. O capacitor fica ligado entre essas duas pontas, na central ou no próprio motor.
+
+<Figure caption="Figura 1. Os dois enrolamentos do motor (valores de exemplo). Entre um fio de ponta e o comum, o multímetro mede um enrolamento; entre as duas pontas, mede os dois em série, e a leitura é a maior." alt="Esquema com dois enrolamentos de cerca de 8 Ω ligados no fio comum; entre as duas pontas, 16 Ω.">
+  <MotorWindings />
+</Figure>
+
+Como o par das pontas atravessa os dois <Term id="enrolamento">enrolamentos</Term> em série, a resistência dele é a soma das outras duas. A regra prática: **o par de maior resistência são as pontas; o fio que sobra é o comum.** Os valores reais variam muito de um motor para outro; o que importa é a comparação.
+
+<RealCase title="Identificando os fios do motor antes de ligar o motor novo">
+1. **Desligue o disjuntor do portão** e confirme, em V~, que não há tensão entre os fios do motor na central.
+2. **Fotografe as ligações da central** antes de soltar qualquer coisa. A foto vale mais que a memória.
+3. **Solte os três fios do motor** dos bornes da central, para medir só o motor.
+4. **Meça os três pares na função Ω** e anote. No exemplo: 1 e 3 dão 8,0 Ω; 2 e 3 dão 8,2 Ω; 1 e 2 dão 16,0 Ω. O par de maior resistência é o 1 e 2; o fio 3 é o comum.
+5. **Meça cada fio contra a carcaça:** tem que dar `OL`. Uma leitura ali quer dizer isolação danificada, e o motor daria choque ou desarmaria o disjuntor.
+6. **Ligue o comum no borne comum da central** e as duas pontas nos bornes do motor indicados no manual da central.
+
+Se algum par der `OL`, há um enrolamento ou uma ligação aberta. Alguns motores têm um protetor térmico interno em série com o comum, que abre quando o motor esquenta demais: aí os dois pares com o comum dão `OL` e o par das pontas continua normal. Espere o motor esfriar e meça de novo.
+
+Se o portão andar no sentido contrário, troque as duas pontas entre si, nunca o comum. Em muitas centrais, o sentido do motor também precisa combinar com os fins de curso. Isso, o capacitor e a placa ficam para o módulo do portão eletrônico.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Medir resistência com o circuito ligado.** A leitura não vale nada e o multímetro pode ser danificado. Desligue, confirme em V~ e só depois mude para Ω.
+- **Medir a peça ainda soldada na placa.** Outros caminhos ficam em paralelo e a leitura sai menor que o valor real. Solte uma perna antes de condenar a peça.
+- **Segurar os dois terminais com os dedos.** Seu corpo entra em paralelo, e o erro é grande em resistências altas.
+- **Achar que `OL` sem jumper quer dizer fio rompido.** Dois fios separados sempre dão `OL` entre si. Sem fechar a outra ponta, você só testou que eles não estão em curto.
+- **Esquecer um aparelho ligado na outra ponta.** Uma lâmpada ou um carregador na tomada viram um caminho entre os fios, e você mede o aparelho em vez da fiação. Tire tudo das tomadas do circuito.
+- **Confiar só no bipe.** A continuidade apita para 0,3 Ω e para 20 Ω. Emendas e bornes ruins aparecem na função Ω.
+- **Religar o disjuntor com o jumper no lugar.** É um curto entre fase e neutro. O jumper sai antes, sempre.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'Numa extensão, pino 1 e furo 1 apitam, pino 2 e furo 2 dão OL, e pino 1 e pino 2 dão OL. Qual é o defeito?',
+      options: [
+        {
+          text: 'O fio 2 está rompido',
+          correct: true,
+          feedback:
+            'Isso. O fio 2 não tem caminho de uma ponta à outra. Entre os fios, OL é o normal: não há curto.',
+        },
+        {
+          text: 'Os dois fios estão em curto',
+          feedback: 'Num curto, pino 1 e pino 2 apitariam. Eles deram OL: não há caminho entre os fios.',
+        },
+        {
+          text: 'A extensão está boa',
+          feedback: 'Numa extensão boa, cada fio apita de ponta a ponta. O fio 2 deu OL.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um resistor de 4,7 kΩ está soldado na placa, e há um outro caminho de 10 kΩ entre os mesmos dois pontos. Quanto o ohmímetro mostra?',
+      answer: 3.2,
+      tolerance: 0.02,
+      unit: 'kΩ',
+      explanation:
+        'Os dois ficam em paralelo: 4,7 × 10 ÷ (4,7 + 10) ≈ 3,2 kΩ. Para ler os 4,7 kΩ, solte uma perna do resistor.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Você faz o teste do jumper num circuito com dois fios de 2,5 mm² e 20 m cada. Sem contar as pontas, qual é a resistência esperada do laço? Use ρ = 0,0172 Ω·mm²/m.',
+      answer: 0.275,
+      tolerance: 0.03,
+      unit: 'Ω',
+      explanation:
+        'A corrente percorre 40 m de fio: R = 0,0172 × 40 ÷ 2,5 ≈ 0,275 Ω. Uma leitura de vários ohms indicaria uma emenda ou um borne ruim.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Nos três fios de um motor de portão você mede: 1 e 2 dão 9 Ω; 1 e 3 dão 18 Ω; 2 e 3 dão 9 Ω. Qual é o fio comum?',
+      options: [
+        {
+          text: 'O fio 2',
+          correct: true,
+          feedback:
+            'O par de maior resistência (1 e 3) são as pontas dos dois enrolamentos. O fio que sobra, o 2, é o comum.',
+        },
+        {
+          text: 'O fio 1',
+          feedback: 'O fio 1 faz parte do par de maior resistência, 1 e 3: é uma das pontas.',
+        },
+        {
+          text: 'O fio 3',
+          feedback: 'O fio 3 faz parte do par de maior resistência, 1 e 3: é uma das pontas.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Sem nenhum jumper na outra ponta, o multímetro mostrou OL entre os dois fios de um circuito na parede. Isso prova que um dos fios está rompido.',
+      answer: false,
+      explanation:
+        'Dois fios separados sempre dão OL entre si. Essa medida só mostra que eles não estão em curto. Para saber se estão inteiros, ligue um no outro na outra ponta.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'No teste de diodo, um diodo mostra 0,61 V num sentido e OL no outro. Como ele está?',
+      options: [
+        {
+          text: 'Bom',
+          correct: true,
+          feedback: 'Um valor típico de silício num sentido e OL no outro: o diodo conduz só num sentido, como deve.',
+        },
+        {
+          text: 'Em curto',
+          feedback: 'Em curto ele mostraria perto de zero nos dois sentidos.',
+        },
+        {
+          text: 'Aberto',
+          feedback: 'Aberto ele mostraria OL nos dois sentidos.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem o teste de um fio dentro da parede com o jumper.',
+      items: [
+        'Desligar o disjuntor do circuito',
+        'Confirmar em V~ que não há tensão',
+        'Ligar os dois fios um no outro na tomada, com o jumper',
+        'Medir a resistência entre os fios no quadro',
+        'Retirar o jumper e reconectar a tomada',
+        'Religar o disjuntor',
+      ],
+      explanation:
+        'Primeiro sem energia e com a ausência de tensão confirmada; por último, o jumper sai antes de o disjuntor voltar, porque ele liga fase e neutro.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Resistência, continuidade e diodo usam a bateria do próprio multímetro: **só com o circuito desligado** e a ausência de tensão confirmada.
+- O ohmímetro mede tudo o que está entre as pontas. Peças na placa, outros caminhos e seus dedos entram em paralelo; solte uma perna para medir com exatidão.
+- Num fio, `OL` de ponta a ponta é fio rompido; bipe entre fios diferentes é curto. Para fios longos, feche a outra ponta com um jumper e tire o jumper antes de religar.
+- Fusível bom e contato fechado apitam; fusível rompido e contato aberto dão `OL`.
+- No teste de diodo, um diodo bom mostra cerca de 0,5 V a 0,7 V num sentido e `OL` no outro.
+- No motor de portão de três fios, o par de maior resistência são as pontas dos enrolamentos e o fio que sobra é o comum.
+
+Na próxima aula, você conhece o [osciloscópio](../05-osciloscopio/), o instrumento que mostra como a tensão muda com o tempo. Se quiser rever como medir corrente, volte à aula [Medindo corrente](../03-medindo-corrente/).
