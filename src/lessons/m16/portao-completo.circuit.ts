@@ -257,5 +257,5 @@ export default defineCircuit({
       control: { param: 'obstacle', label: 'Obstáculo no caminho do portão', kind: 'toggle' },
     },
   ],
-  probes: [{ id: 'IM', kind: 'current', element: 'M1', label: 'Corrente do motor' }],
+  probes: [{ id: 'IM', kind: 'current', element: 'F1', label: 'Corrente do motor' }],
 });

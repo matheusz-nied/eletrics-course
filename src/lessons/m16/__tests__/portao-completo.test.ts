@@ -150,13 +150,17 @@ describe('m16/portao-completo', () => {
     expect(b.r['FCF.closed']).toBe(true);
     b.press('BOT');
     let peak = 0;
+    let meter = 0;
     const took = b.until((r) => {
       peak = Math.max(peak, num(r, 'M1.current'));
+      meter = Math.max(meter, num(r, 'IM.ac'));
       return r['U1.estado'] === 'ABERTO';
     }, 30);
     expect(took).toBeGreaterThan(15);
     expect(took).toBeLessThan(22);
     expect(peak).toBeGreaterThan(3);
+    // The lesson's meter reads the line current, through the fuse.
+    expect(meter).toBeGreaterThan(3);
     b.run(1);
     expect(num(b.r, 'Q1.conduction')).toBe(0);
     expect(num(b.r, 'G1.distance')).toBeGreaterThan(3.9);

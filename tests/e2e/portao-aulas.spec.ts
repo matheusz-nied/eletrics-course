@@ -106,16 +106,20 @@ test.describe('the full gate circuit', () => {
     await expect(sim).toHaveAttribute('data-ready', '');
     await expect(sim).toHaveAttribute('data-engine', 'motor');
     await sim.getByRole('button', { name: 'Iniciar simulação', exact: true }).click();
+    // The firmware reads the limit switches first: the gate is closed.
+    await expect(sim.locator('.sim-time')).toHaveText(/t\s=\s[1-9]/);
 
     const button = sim.locator('.sim-controls').getByRole('button', { name: /^Botoeira/ });
     await button.hover();
     await page.mouse.down();
     await expect(button).toHaveAttribute('aria-pressed', 'true');
+    await page.waitForTimeout(300);
     await page.mouse.up();
 
-    // The motor current reaches amperes once K1 and the TRIAC are on.
+    // Current flows through the fuse and the motor once K1 and the TRIAC are on.
     const reading = sim.locator('.dmm[data-probe="IM"] [data-reading]');
-    await expect(reading).toHaveText(/Corrente do motor: [1-9][\d,]* A/, { timeout: 15_000 });
+    await expect(reading).toHaveText(/Corrente do motor: [1-9][\d,]*\s(m)?A/, { timeout: 15_000 });
+    await expect(sim.getByText('Comando (botoeira): abrindo.')).toBeVisible();
     errors.expectClean();
   });
 });
