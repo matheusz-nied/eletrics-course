@@ -122,6 +122,28 @@ test.describe('interaction', () => {
     errors.expectClean();
   });
 
+  test('a challenge stays marked until the simulation restarts', async ({ page }) => {
+    const errors = watchErrors(page);
+    const sim = await openSimulation(page, demo('lampada-potenciometro'));
+    const goals = sim.getByRole('region', { name: 'Desafios' });
+    const pot = sim.locator('.sim-schematic').getByRole('slider', { name: /Potenciômetro P1/ });
+    await pot.focus();
+    await page.keyboard.press('Home');
+    await expect(goals).toContainText('(cumprido)');
+
+    // Dimming the lamp afterwards does not take the mark away.
+    await page.keyboard.press('End');
+    await expect.poll(() => meter(page, 'IL', 'A')).toBeLessThan(0.2);
+    await expect(goals).toContainText('(cumprido)');
+    await expect(goals).toContainText('1/1');
+
+    // Restarting clears it, since the lamp is dim now.
+    await sim.getByRole('button', { name: 'Reiniciar simulação' }).click();
+    await expect(goals).toContainText('(pendente)');
+    await expect(goals).toContainText('0/1');
+    errors.expectClean();
+  });
+
   test('a slider on a phone screen is dragged with the finger', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'touch only');
     const sim = await openSimulation(page, demo('led-resistor'));

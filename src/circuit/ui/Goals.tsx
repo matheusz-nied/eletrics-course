@@ -1,12 +1,38 @@
+import { useEffect, useState } from 'react';
+import type { SimController } from '../runtime/controller';
 import { useSim, useSimState } from './context';
 import { Icon } from './icons';
+
+/**
+ * Ids of the challenges met since the simulation started. A mark stays when
+ * the student moves on (the next challenge often undoes the previous one);
+ * "Reiniciar" sends time back to zero and clears them.
+ */
+function useMetGoals(sim: SimController): ReadonlySet<string> {
+  const [met, setMet] = useState<ReadonlySet<string>>(() => new Set());
+  useEffect(() => {
+    const goals = sim.doc.goals ?? [];
+    return sim.store.subscribe((s, prev) => {
+      const restarted = s.t < prev.t;
+      if (!restarted && s.slow === prev.slow) return;
+      setMet((old) => {
+        const base = restarted ? new Set<string>() : old;
+        const added = goals.filter((g) => !base.has(g.id) && sim.goalMet(g, s.slow) === true);
+        if (!restarted && added.length === 0) return old;
+        return new Set([...base, ...added.map((g) => g.id)]);
+      });
+    });
+  }, [sim]);
+  return met;
+}
 
 export function Goals() {
   const sim = useSim();
   const frame = useSimState((s) => s.slow);
+  const met = useMetGoals(sim);
   const goals = sim.doc.goals ?? [];
   if (goals.length === 0) return null;
-  const results = goals.map((g) => sim.goalMet(g, frame) === true);
+  const results = goals.map((g) => met.has(g.id) || sim.goalMet(g, frame) === true);
   const done = results.filter(Boolean).length;
   return (
     <section className="sim-goals" aria-label="Desafios">
