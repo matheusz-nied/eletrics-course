@@ -26,8 +26,11 @@ export default defineDevice({
   create({ params, pins: [a, b], branch }) {
     const br = branch();
     return {
-      stamp(m) {
-        m.branch(br, a, b, num(params, 'voltage'), R_SERIES_MIN);
+      stamp(m, step) {
+        m.branch(br, a, b, num(params, 'voltage') * step.nl.sourceScale, R_SERIES_MIN);
+      },
+      stampAc(m, ctx) {
+        m.branch(br, a, b, ctx.source === ctx.id ? 1 : 0, 0, R_SERIES_MIN);
       },
       pinCurrents(x, out) {
         out[0] = x.x[br];

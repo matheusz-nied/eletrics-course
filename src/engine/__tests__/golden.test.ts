@@ -156,6 +156,131 @@ const cases: Case[] = [
       'i(vl)': { readout: 'L1.current' },
     },
   },
+  {
+    name: 'dc-diodos',
+    doc: netlist('diodos', [
+      { id: 'V1', type: 'dc-voltage', nodes: ['1', '0'], params: { voltage: 5 } },
+      { id: 'R1', type: 'resistor', nodes: ['1', '2'], params: { resistance: 1000 } },
+      { id: 'D1', type: 'diode', nodes: ['2', '0'], params: { model: 'rectifier' } },
+      { id: 'V2', type: 'dc-voltage', nodes: ['3', '0'], params: { voltage: 12 } },
+      { id: 'R2', type: 'resistor', nodes: ['3', '4'], params: { resistance: 470 } },
+      { id: 'D2', type: 'zener', nodes: ['0', '4'], params: { voltage: 5.1 } },
+      { id: 'R3', type: 'resistor', nodes: ['4', '0'], params: { resistance: 1000 } },
+    ]),
+    map: {
+      'v(2)': { readout: 'v2' },
+      'i(v1)': { readout: 'V1.current', sign: -1 },
+      'v(4)': { readout: 'v4' },
+      'i(v2)': { readout: 'V2.current', sign: -1 },
+    },
+  },
+  {
+    name: 'meia-onda',
+    doc: netlist(
+      'meia-onda',
+      [
+        {
+          id: 'V1',
+          type: 'ac-voltage',
+          nodes: ['1', '0'],
+          params: { amplitude: 10, frequency: 60 },
+        },
+        { id: 'D1', type: 'diode', nodes: ['1', '2'], params: { model: 'rectifier' } },
+        { id: 'R1', type: 'resistor', nodes: ['2', '0'], params: { resistance: 1000 } },
+        { id: 'C1', type: 'capacitor', nodes: ['2', '0'], params: { capacitance: 1e-4 } },
+      ],
+      { kind: 'transient', dt: 5e-6 },
+    ),
+    map: { 'v(2)': { readout: 'v2' }, 'i(v1)': { readout: 'V1.current', sign: -1 } },
+  },
+  {
+    name: 'dc-transistores',
+    doc: netlist('transistores', [
+      { id: 'VCC', type: 'dc-voltage', nodes: ['1', '0'], params: { voltage: 12 } },
+      { id: 'R1', type: 'resistor', nodes: ['1', '2'], params: { resistance: 47e3 } },
+      { id: 'R2', type: 'resistor', nodes: ['2', '0'], params: { resistance: 10e3 } },
+      { id: 'RC', type: 'resistor', nodes: ['1', '3'], params: { resistance: 2200 } },
+      { id: 'RE', type: 'resistor', nodes: ['4', '0'], params: { resistance: 1000 } },
+      { id: 'Q1', type: 'npn', nodes: { b: '2', c: '3', e: '4' } },
+      { id: 'VCC2', type: 'dc-voltage', nodes: ['5', '0'], params: { voltage: 9 } },
+      { id: 'RE2', type: 'resistor', nodes: ['5', '6'], params: { resistance: 1000 } },
+      { id: 'Q2', type: 'pnp', nodes: { b: '7', c: '0', e: '6' } },
+      { id: 'RB2', type: 'resistor', nodes: ['7', '0'], params: { resistance: 100e3 } },
+      { id: 'VG', type: 'dc-voltage', nodes: ['8', '0'], params: { voltage: 4 } },
+      { id: 'VDD', type: 'dc-voltage', nodes: ['9', '0'], params: { voltage: 12 } },
+      { id: 'RD', type: 'resistor', nodes: ['9', '10'], params: { resistance: 10 } },
+      { id: 'M1', type: 'nmos', nodes: { g: '8', d: '10', s: '0' } },
+      { id: 'VG2', type: 'dc-voltage', nodes: ['11', '0'], params: { voltage: 2.7 } },
+      { id: 'RD2', type: 'resistor', nodes: ['9', '12'], params: { resistance: 100 } },
+      { id: 'M2', type: 'nmos', nodes: { g: '11', d: '12', s: '0' } },
+    ]),
+    map: {
+      'v(2)': { readout: 'v2' },
+      'v(3)': { readout: 'v3' },
+      'v(4)': { readout: 'v4' },
+      'v(6)': { readout: 'v6' },
+      'v(7)': { readout: 'v7' },
+      'v(10)': { readout: 'v10' },
+      'v(12)': { readout: 'v12' },
+      'i(vcc)': { readout: 'VCC.current', sign: -1 },
+      'i(vdd)': { readout: 'VDD.current', sign: -1 },
+    },
+  },
+  {
+    name: 'ac-filtro-amplificador',
+    doc: {
+      ...netlist('ac', [
+        { id: 'V1', type: 'dc-voltage', nodes: ['1', '0'], params: { voltage: 0 } },
+        { id: 'R1', type: 'resistor', nodes: ['1', '2'], params: { resistance: 1000 } },
+        { id: 'C1', type: 'capacitor', nodes: ['2', '0'], params: { capacitance: 1e-7 } },
+        { id: 'L1', type: 'inductor', nodes: ['2', '8'], params: { inductance: 0.01 } },
+        { id: 'R8', type: 'resistor', nodes: ['8', '0'], params: { resistance: 1000 } },
+        { id: 'C2', type: 'capacitor', nodes: ['1', '3'], params: { capacitance: 1e-5 } },
+        { id: 'R3', type: 'resistor', nodes: ['5', '3'], params: { resistance: 47e3 } },
+        { id: 'R4', type: 'resistor', nodes: ['3', '0'], params: { resistance: 10e3 } },
+        { id: 'RC', type: 'resistor', nodes: ['5', '6'], params: { resistance: 2200 } },
+        { id: 'RE', type: 'resistor', nodes: ['7', '0'], params: { resistance: 1000 } },
+        { id: 'CE', type: 'capacitor', nodes: ['7', '0'], params: { capacitance: 1e-4 } },
+        { id: 'Q1', type: 'npn', nodes: { b: '3', c: '6', e: '7' } },
+        { id: 'VCC', type: 'dc-voltage', nodes: ['5', '0'], params: { voltage: 12 } },
+      ]),
+      analysis: { kind: 'ac-sweep', source: 'V1', fStart: 10, fStop: 1e6, points: 51 },
+    },
+    map: {
+      m2: { readout: 'magnitude.v2' },
+      p2: { readout: 'phase.v2' },
+      m6: { readout: 'magnitude.v6' },
+      p6: { readout: 'phase.v6' },
+      m8: { readout: 'magnitude.v8' },
+      p8: { readout: 'phase.v8' },
+    },
+  },
+  {
+    name: 'chave-bobina',
+    doc: netlist(
+      'chave-bobina',
+      [
+        {
+          id: 'V1',
+          type: 'ac-voltage',
+          nodes: ['1', '0'],
+          params: { amplitude: 5, frequency: 50 },
+        },
+        { id: 'RB', type: 'resistor', nodes: ['1', '2'], params: { resistance: 4700 } },
+        { id: 'Q1', type: 'npn', nodes: { b: '2', c: '3', e: '0' } },
+        { id: 'VCC', type: 'dc-voltage', nodes: ['4', '0'], params: { voltage: 12 } },
+        { id: 'RL', type: 'resistor', nodes: ['4', '5'], params: { resistance: 120 } },
+        { id: 'L1', type: 'inductor', nodes: ['5', '3'], params: { inductance: 0.2 } },
+        { id: 'D1', type: 'diode', nodes: ['3', '4'], params: { model: 'rectifier' } },
+      ],
+      { kind: 'transient', dt: 5e-6 },
+    ),
+    map: {
+      'v(3)': { readout: 'v3' },
+      'i(vcc)': { readout: 'VCC.current', sign: -1 },
+      'i(l1)': { readout: 'L1.current' },
+    },
+  },
 ];
 
 describe('golden tests against ngspice', () => {
@@ -168,6 +293,25 @@ describe('golden tests against ngspice', () => {
         expect(col, `${vec} in ${c.name}.csv`).toBeGreaterThan(0);
         return { vec, col, ...c.map[vec] };
       });
+
+      if (ref.header[0] === 'frequency') {
+        // AC sweep: gain within 0,1 % and phase within 0,1° at every frequency.
+        sim.refresh();
+        const sweep = sim.frame().sweep!;
+        expect(sweep.f.length).toBe(ref.rows.length);
+        for (const { vec, col, readout } of columns) {
+          const [kind, probe] = readout.split('.') as ['magnitude' | 'phase', string];
+          ref.rows.forEach((row, k) => {
+            expect(sweep.f[k] / row[0]).toBeCloseTo(1, 6);
+            const actual = sweep[kind][probe][k];
+            const tol = kind === 'magnitude' ? 1e-3 * Math.abs(row[col]) + 1e-9 : 0.1;
+            expect(Math.abs(actual - row[col]), `${vec} at ${row[0]} Hz: ${actual}`).toBeLessThan(
+              tol,
+            );
+          });
+        }
+        return;
+      }
 
       if (ref.header[0] === 'op') {
         sim.refresh();

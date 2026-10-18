@@ -93,6 +93,11 @@ export interface SimFrame {
    * (só quando o circuito tem `probes`): `t[k]` e `values[probeId][k]`.
    */
   samples?: { t: number[]; values: Record<string, number[]> };
+  /**
+   * Varredura CA (análise `ac-sweep`): para cada medidor de tensão, o ganho
+   * (V por 1 V da fonte, linear) e a fase em graus (contínua) em cada `f[k]` (Hz).
+   */
+  sweep?: { f: number[]; magnitude: Record<string, number[]>; phase: Record<string, number[]> };
 }
 
 export interface PinInfo {

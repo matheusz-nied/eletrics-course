@@ -1,4 +1,5 @@
 import type { DeviceInfo, ParamValue, SimEvent } from './contract';
+import type { ComplexMna } from './solver/complex';
 import type { MnaSystem } from './solver/mna';
 
 /**
@@ -19,6 +20,34 @@ export interface StepInfo {
   dt: number;
   /** Integration rule for reactive elements (backward Euler after discontinuities). */
   method: Method;
+  /** Newton-Raphson state of the solve in progress. */
+  nl: NewtonState;
+}
+
+export interface NewtonState {
+  /** Iteration number within this solve (0 = first). */
+  iteration: number;
+  /** Set by a device that limited its junction voltage this iteration: not converged yet. */
+  limited: boolean;
+  /** Extra conductance across junctions while gmin stepping (S); 0 normally. */
+  gmin: number;
+  /** Scale of independent sources while source stepping (0…1); 1 normally. */
+  sourceScale: number;
+  /**
+   * First iteration from a circuit at rest: junctions start at their critical
+   * voltage instead of the (all-zero) guess, as SPICE does.
+   */
+  initJunctions: boolean;
+}
+
+/** Small-signal (Bode) or phasor (quasi-static) stamping at one angular frequency. */
+export interface AcContext {
+  /** Angular frequency ω = 2πf (rad/s). */
+  omega: number;
+  /** Id of the source that carries the 1 V (or 1 A) test signal in a sweep. */
+  source: string;
+  /** Id of the element being stamped. */
+  id: string;
 }
 
 /** Read access to a solution (the current Newton iterate, or the accepted one). */
@@ -46,6 +75,16 @@ export interface DeviceModel {
   readonly nonlinear?: boolean;
   /** Adds the device to the MNA system. Must not change the device state. */
   stamp(m: MnaSystem, step: StepInfo, x: SolutionView): void;
+  /**
+   * Before each solve attempt: reset per-iteration memory (the last limited
+   * junction voltage) to the accepted state, so a retried step starts clean.
+   */
+  beginSolve?(): void;
+  /**
+   * Small-signal stamp for the AC sweep, linearized at the operating point
+   * `op`. Devices without it cannot take part in a sweep.
+   */
+  stampAc?(m: ComplexMna, ctx: AcContext, op: SolutionView): void;
   /** After every solve: derive currents; when committing, advance states and check limits. */
   update?(step: StepInfo, x: SolutionView, ctx: UpdateContext): void;
   /** Currents entering the device through each pin, in `info.pins` order (A). */

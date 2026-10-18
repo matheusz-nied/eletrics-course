@@ -58,6 +58,10 @@ export default defineDevice({
       stamp(m) {
         m.conductance(a, b, 1 / resistance());
       },
+      // The filament's thermal mass holds its resistance over a signal cycle.
+      stampAc(m) {
+        m.admittance(a, b, 1 / resistance());
+      },
       update(step, x, ctx) {
         const v = x.v(a) - x.v(b);
         current = v / resistance();
