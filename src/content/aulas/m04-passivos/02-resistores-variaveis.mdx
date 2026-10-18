@@ -1,0 +1,388 @@
+---
+titulo: Resistores variáveis
+modulo: m04-passivos
+ordem: 2
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Ligar um potenciômetro como divisor de tensão ou como reostato
+  - Diferenciar a curva linear (B) da logarítmica (A)
+  - Reconhecer os trimpots de uma volta e multivoltas e ajustá-los sem estragar
+  - Entender como NTC, PTC e LDR mudam de resistência e onde cada um é usado
+  - Ler temperatura e luz pela tensão de um divisor com sensor
+prerequisitos:
+  - m04-passivos/01-resistores
+  - m02-circuitos-cc/06-divisores-de-tensao-e-corrente
+tags: [potenciômetro, trimpot, reostato, NTC, PTC, LDR, sensor]
+seguranca: baixa-tensao
+rascunho: true
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import PotentiometerAnatomy from '../../../lessons/m04/figures/PotentiometerAnatomy.astro';
+import PotWiring from '../../../lessons/m04/figures/PotWiring.astro';
+import SensorParts from '../../../lessons/m04/figures/SensorParts.astro';
+import Trimpot from '../../../lessons/m04/figures/Trimpot.astro';
+import { NTC_CURVE, TAPER_CURVES } from '../../../lessons/m04/curves';
+
+Você gira o botão de volume e o som aumenta. O técnico gira um parafusinho na placa da central e o portão passa a esperar mais tempo aberto. O marcador do painel do carro sobe quando o motor esquenta, e a luz do poste acende quando escurece. Em todos esses casos há um resistor que muda de valor: na mão, girando um eixo ou um parafuso, ou sozinho, com o calor ou com a luz.
+
+Nesta aula você vai abrir um potenciômetro, ligá-lo de dois jeitos, conhecer os trimpots de ajuste e os três sensores resistivos mais comuns: NTC, PTC e LDR.
+
+## O potenciômetro por dentro
+
+<Part3D
+  part="potentiometer"
+  props={{ ohms: 10000, taper: 'linear', rotation: 0.6 }}
+  annotations
+  alt="Potenciômetro rotativo sem a tampa, visto do lado do eixo com os terminais para baixo: pista resistiva em forma de ferradura entre o terminal A, à esquerda, e o terminal B, à direita; o cursor, preso ao eixo, desliza sobre a pista; um anel coletor no centro leva o cursor ao terminal do meio."
+  caption="Potenciômetro rotativo sem a tampa."
+>
+  <PotentiometerAnatomy />
+</Part3D>
+
+O <Term id="potenciometro">potenciômetro</Term> que você usou como divisor na aula <LinkAula id="m02-circuitos-cc/06-divisores-de-tensao-e-corrente" /> tem por dentro uma pista de material resistivo, quase sempre carbono, em forma de ferradura. As duas pontas da pista vão aos terminais das pontas, A e B (ou 1 e 3). O eixo gira uma escova de metal, o **cursor**, que desliza sobre a pista e está ligado ao terminal do meio. De um batente ao outro, o eixo gira cerca de 300°.
+
+Entre A e B, a resistência é sempre o valor do potenciômetro, por exemplo 10 kΩ. Entre o cursor e cada ponta, ela muda com a posição, e as duas partes somam o total: se A–cursor vale 3 kΩ, cursor–B vale 7 kΩ.
+
+É assim que se confere um potenciômetro com o multímetro: meça entre as pontas e depois entre o cursor e uma ponta, girando o eixo devagar. A leitura deve variar suave, sem pulos. Pulos e falhas são pista gasta ou suja, a causa do chiado do rádio velho quando se mexe no volume.
+
+## Duas formas de ligar
+
+<Figure caption="Figura 2. À esquerda, o potenciômetro como divisor de tensão, com os três terminais. À direita, como reostato: só dois fios, um no terminal A e outro no cursor, com o terminal B ligado ao cursor.">
+  <PotWiring />
+</Figure>
+
+**Divisor de tensão.** As pontas vão à fonte, e o cursor entrega uma fração da tensão que segue a posição. É o botão de volume, o joystick e o ajuste que um microcontrolador lê.
+
+**Reostato.** Usando só uma ponta e o cursor, o potenciômetro vira um resistor de valor ajustável, de zero até o valor total: um <Term id="reostato">reostato</Term>. Ele controla uma corrente diretamente, como a do LED da simulação abaixo. Um detalhe de quem monta: ligue a ponta que sobra ao cursor. Se o cursor perder o contato com a pista, o defeito mais comum dos potenciômetros, a resistência vai para o valor total em vez de abrir o circuito.
+
+O reostato tem uma armadilha. Com o cursor perto da ponta usada, a resistência é quase zero e toda a corrente passa por um pedacinho da pista. A potência nominal do potenciômetro, por exemplo 0,5 W, vale para a pista inteira; um trecho de 5 % aguenta só uma fração disso e queima. Por isso um reostato quase sempre tem um resistor fixo em série, que limita a corrente quando o cursor chega ao fim.
+
+### Explore: um LED com brilho ajustável
+
+Uma bateria de 9 V acende um LED vermelho através de um resistor fixo de 470 Ω e de um potenciômetro de 10 kΩ ligado como reostato. A chave S1 tira o resistor fixo do circuito.
+
+<Simulation circuit="m04/potenciometro-led" />
+
+1. Com o cursor no meio, quanto vale a corrente no LED?
+2. Leve o cursor até A (0) e depois até B (1). Quais são a maior e a menor corrente?
+3. Pare o cursor em 0,25. A corrente ficou perto da metade entre os dois extremos?
+4. Volte o cursor para o meio e feche S1. Traga o cursor devagar até A: pare em 0,05 e leia o aviso; depois, chegue a 0.
+
+Com o cursor no meio, o LED recebe só cerca de 1,3 mA e brilha fraco. Em A, o potenciômetro não tem resistência, e só o resistor de 470 Ω limita a corrente:
+
+$$
+I = \frac{9\,\text{V} - 1{,}9\,\text{V}}{470\,\Omega} \approx 15\,\text{mA}
+$$
+
+em que 1,9 V é a tensão no LED vermelho aceso. Em B, a corrente cai para cerca de 0,7 mA. Em 0,25, ela já caiu para 2,5 mA, bem abaixo da metade: a corrente depende do **inverso** da resistência, e quase toda a variação de brilho fica no começo do curso.
+
+Com S1 fechada e o cursor em 0,05, o LED recebe cerca de 14 mA, mas toda essa corrente passa por 5 % da pista, e o simulador avisa que o potenciômetro está esquentando demais. Em 0, nada limita a corrente, e o LED queima.
+
+## Linear (B) ou logarítmico (A)
+
+Na pista **linear**, a resistência entre A e o cursor cresce na mesma proporção que o giro: no meio do curso, metade. Na **logarítmica**, ela cresce devagar no começo e depressa no fim: no meio do curso, só cerca de 10 % do total (no modelo do simulador, 9 %).
+
+<Plot
+  data={TAPER_CURVES}
+  xUnit="%"
+  title="parte da pista entre A e o cursor conforme a posição do cursor"
+/>
+
+A curva logarítmica existe por causa do ouvido. Para o som parecer duas vezes mais alto, a potência precisa subir muito mais que duas vezes. Com uma pista linear no volume, quase todo o aumento de volume ficaria no começo do giro; com a logarítmica, cada pedaço do giro parece mudar o som na mesma medida.
+
+Os potenciômetros trazem a curva numa letra antes do valor. Nos vendidos hoje no Brasil, quase sempre **B** é linear e **A** é logarítmico: B10K é linear de 10 kΩ e A10K é logarítmico de 10 kΩ. Peças antigas podem seguir outra convenção. Na dúvida, meça: com o eixo no meio, o linear dá metade da resistência para cada lado; o logarítmico dá perto de 10 % de um lado e 90 % do outro.
+
+## Trimpot: o ajuste de placa
+
+<Part3D
+  part="trimpot"
+  props={{ variant: 'aberto', ohms: 10000, label: 'PAUSA' }}
+  annotations
+  height={300}
+  alt="Trimpot aberto de uma volta, visto de cima: base quadrada, pista de carbono em volta de um rotor branco com fenda em cruz, dois pinos na frente, ligados às pontas da pista, e um atrás, ligado ao cursor. Marcação 103."
+  caption="Trimpot aberto, de uma volta."
+>
+  <Trimpot variant="aberto" />
+</Part3D>
+
+O trimpot é um potenciômetro pequeno, soldado na placa, feito para ser ajustado poucas vezes, com chave de fenda. Ele calibra ou configura um aparelho: o tempo de um temporizador, a tensão de uma fonte, a sensibilidade de um sensor. Os tipos mais comuns:
+
+- **Aberto, de uma volta.** O mais barato: a pista de carbono fica exposta, e um rotor de plástico com fenda leva o cursor. O ajuste inteiro cabe em menos de uma volta.
+- **Fechado, de uma volta.** O mesmo princípio numa caixinha fechada, protegido de poeira e umidade.
+- **Multivoltas.** Uma caixa retangular com um parafuso que move o cursor por meio de um parafuso sem fim e uma engrenagem. Leva cerca de 25 voltas (típico) para percorrer a pista inteira, o que permite um ajuste fino. É o tipo usado para calibrar instrumentos e fontes.
+
+<Part3D
+  part="trimpot"
+  props={{ variant: 'multivoltas', ohms: 10000 }}
+  annotations
+  height={300}
+  alt="Trimpot multivoltas visto de lado: caixa retangular azul com um parafuso de latão em cima e três pinos em linha embaixo. Por dentro, um parafuso sem fim gira uma engrenagem que leva o cursor sobre a pista. Marcação 103."
+  caption="Trimpot multivoltas."
+>
+  <Trimpot variant="multivoltas" />
+</Part3D>
+
+O valor vem no mesmo código dos resistores SMD da aula anterior: 103 é 10 kΩ, 502 é 5 kΩ e 104 é 100 kΩ.
+
+Na central do portão do módulo 16, a CD-1, os trimpots PAUSA e FORÇA são divisores de tensão lidos pelo microcontrolador. O cursor do PAUSA entrega de 0 a 5 V, e o programa transforma essa tensão em segundos de espera, até 120 s: no meio do curso, 2,5 V e 60 s. O FORÇA escolhe o nível do motor, de 40 % a 100 %. Você vai ajustá-los nas aulas <LinkAula id="m16-portao/03-a-central-por-dentro" /> e <LinkAula id="m16-portao/08-ajustes-e-testes" />.
+
+## Resistores que mudam sozinhos
+
+Alguns resistores mudam de valor sem ninguém girar nada, com a temperatura ou com a luz. Ligados num divisor de tensão, eles viram sensores.
+
+<Figure caption="Figura 3. Os sensores resistivos desta aula, fora de escala.">
+  <SensorParts />
+</Figure>
+
+### NTC: menos resistência no calor
+
+O <Term id="ntc">NTC</Term> é um termistor (um resistor térmico) feito de óxidos metálicos: quanto mais quente, menor a resistência. Ele é especificado por dois números, a resistência a 25 °C e a constante B, em kelvin, que diz o quanto ele é sensível. O NTC de medir mais comum em kits e aparelhos é o de 10 kΩ com B = 3950 K (valores típicos).
+
+<Plot
+  data={NTC_CURVE}
+  xUnit="°C"
+  title="resistência de um NTC de 10 kΩ (B = 3950 K) conforme a temperatura"
+/>
+
+A curva não é uma reta. O NTC vale cerca de 33,6 kΩ a 0 °C, 10 kΩ a 25 °C, 3,6 kΩ a 50 °C e só 0,7 kΩ a 100 °C. Perto da temperatura ambiente, a resistência muda cerca de 4 % a cada grau, o que o torna muito sensível nessa faixa.
+
+<DeepDive title="A fórmula do NTC">
+
+O modelo mais usado é o da constante B:
+
+$$
+R(T) = R_{25} \cdot e^{\,B \left( \frac{1}{T} - \frac{1}{T_{25}} \right)}
+$$
+
+em que $R_{25}$ é a resistência a 25 °C (Ω), $B$ é a constante do NTC (K), $T$ é a temperatura em kelvin ($T = t + 273{,}15$, com $t$ em °C) e $T_{25} = 298{,}15\,\text{K}$. A fórmula é boa numa faixa de algumas dezenas de graus em volta de 25 °C. Para medir com precisão numa faixa larga, os fabricantes dão tabelas ou uma equação com mais termos, a de Steinhart-Hart.
+
+</DeepDive>
+
+O NTC está no carregador do celular e na bateria, que param de carregar se esquentarem demais; na geladeira e no ar-condicionado; e no sensor de temperatura do motor do carro, que informa a central de injeção e o marcador do painel.
+
+**NTC de potência.** Um disco maior, marcado com algo como 5D-9 (5 Ω a 25 °C, disco de 9 mm), fica em série com a entrada de muitas fontes. Frio, na hora de ligar, ele segura o pico de corrente que carrega os capacitores da fonte. Depois, a própria corrente o esquenta, a resistência cai e ele quase some do circuito. Ele trabalha quente, e isso é normal. Você vai vê-lo de perto no módulo <LinkAula id="m10-fontes" />.
+
+### PTC: mais resistência no calor
+
+O <Term id="ptc">PTC</Term> faz o contrário: a resistência sobe com a temperatura. Os mais usados mudam pouco até uma certa temperatura e depois disparam: a resistência se multiplica muitas vezes numa faixa de poucos graus. Isso faz deles uma boa proteção.
+
+- **Fusível rearmável.** Em portas USB, baterias e pequenos motores, um PTC fica em série com a alimentação. Numa sobrecarga, ele esquenta, a resistência dispara e a corrente cai a quase nada. Quando o defeito é removido e ele esfria, volta a conduzir sozinho. A aula <LinkAula id="m04-passivos/06-fusiveis-e-protecao" /> compara esse fusível com o comum.
+- **Partida do compressor da geladeira.** Um PTC em série com o enrolamento de partida deixa a corrente passar na hora de ligar. Em poucos segundos ele esquenta, a resistência dispara e o enrolamento de partida praticamente sai do circuito. É um dos motivos para a geladeira desligada precisar de alguns minutos antes de partir de novo: o PTC tem de esfriar.
+- **Aquecedores.** Pequenos aquecedores de ar usam pastilhas cerâmicas PTC. Quando elas esquentam, a resistência sobe e a potência cai sozinha, o que limita a temperatura.
+
+### LDR: menos resistência na luz
+
+O <Term id="ldr">LDR</Term> da luz noturna da aula 2.6 tem, sobre uma base de cerâmica, uma trilha em zigue-zague de sulfeto de cádmio entre dois eletrodos. A luz libera cargas nesse material, e a resistência cai. Ele é lento, leva frações de segundo para responder (típico), o que não atrapalha uma luz de poste mas impede usos rápidos. E o cádmio é tóxico; por isso, muitos produtos novos trocaram o LDR por fotodiodos e fototransistores, do módulo <LinkAula id="m09-semicondutores" />.
+
+### Explore: dois sensores
+
+Uma fonte de 5 V alimenta dois divisores. No da esquerda, o NTC fica em cima de um resistor de 10 kΩ; no da direita, um LDR fica embaixo de outro resistor de 10 kΩ.
+
+<Simulation circuit="m04/sensores" />
+
+1. Com 25 °C, leia a saída do NTC.
+2. Leve a temperatura para 50 °C e espere. Para quanto vai a saída? Por que ela não muda na hora?
+3. Leve para 0 °C e depois para 100 °C.
+4. Ponha 1.000 lx no LDR, a luz de uma sala bem iluminada, e depois 10 lx e 1 lx.
+
+A 25 °C, o NTC vale 10 kΩ, igual ao resistor de baixo, e a saída fica na metade: 2,5 V. A 50 °C, ela sobe para cerca de 3,7 V; a 0 °C, cai para cerca de 1,16 V; a 100 °C, chega a 4,7 V. A saída demora alguns segundos porque o NTC leva um tempo para chegar à temperatura de fora, como um termômetro de febre.
+
+Com o NTC em cima, a saída **sobe** com a temperatura; com ele embaixo, ela desceria. Os dois jeitos são usados, e o programa que lê a tensão precisa saber qual é.
+
+No LDR, com 1.000 lx a resistência fica perto de 800 Ω e a saída em cerca de 0,37 V. Com 10 lx, 20 kΩ e 3,3 V; com 1 lx, 100 kΩ e 4,55 V. O LDR desta simulação é de outro modelo que o da aula 2.6, e os valores mudam: LDRs variam muito, e por isso os circuitos de verdade têm um ajuste, quase sempre um trimpot.
+
+## Exemplo resolvido: o NTC a 50 °C
+
+O divisor tem 5 V, o NTC de 10 kΩ (B = 3950 K) em cima e um resistor de 10 kΩ embaixo. Qual é a saída a 50 °C?
+
+**Passo 1: as temperaturas em kelvin.** $T = 50 + 273{,}15 = 323{,}15\,\text{K}$ e $T_{25} = 298{,}15\,\text{K}$.
+
+**Passo 2: a resistência do NTC.**
+
+$$
+R = 10\,\text{k}\Omega \cdot e^{\,3950 \cdot \left(\frac{1}{323{,}15} - \frac{1}{298{,}15}\right)} = 10\,\text{k}\Omega \cdot e^{-1{,}025} \approx 3{,}59\,\text{k}\Omega
+$$
+
+**Passo 3: o divisor.**
+
+$$
+V_S = 5\,\text{V} \cdot \frac{10\,\text{k}\Omega}{3{,}59\,\text{k}\Omega + 10\,\text{k}\Omega} \approx 3{,}68\,\text{V}
+$$
+
+**Passo 4: confira no simulador.** Ele mostra 3,69 V. A diferença vem do **autoaquecimento**: a corrente do divisor dissipa um pouco de potência no próprio NTC, que fica alguns décimos de grau acima do ambiente. Por isso os divisores de sensor usam correntes pequenas: a medição não pode esquentar o que mede.
+
+<RealCase title="Ajustar o trimpot da central do portão">
+
+O portão fecha rápido demais e o morador quer mais tempo de pausa. O ajuste é um trimpot, numa placa ligada na rede. A aula <LinkAula id="m16-portao/08-ajustes-e-testes" /> traz o procedimento completo; desta aula vem o cuidado com a peça.
+
+- **Leia o manual da central** para saber qual trimpot faz o quê e para que lado aumenta. Nem todas as centrais seguem a mesma convenção.
+- **Marque a posição atual** com uma foto ou um risco de caneta, para poder voltar.
+- **Use uma chave de fenda isolada, do tamanho da fenda.** Chave grande escorrega e pode encostar em outras partes da placa, e os trimpots ficam a poucos centímetros dos bornes da rede. Segure com uma mão só e mantenha a outra longe da placa. Para mexer em qualquer outra coisa (jumpers, chaves, fios), desligue o disjuntor antes.
+- **Gire pouco e teste.** Um trimpot aberto percorre o ajuste inteiro em menos de uma volta, e um quarto de volta já muda bastante o tempo. Não force além do batente: a pista quebra.
+- **Ajuste que pula** de um valor para outro, ou que muda sozinho, é sinal de trimpot gasto, com mau contato no cursor. Ele se troca por outro do mesmo valor, pelo código impresso na peça (103, por exemplo).
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Reostato sem resistor em série.** Com o cursor no fim, toda a corrente passa por um pedacinho da pista, que queima, e o que estiver ligado nele pode ir junto.
+- **Trocar a curva.** Um A no lugar de um B, ou o contrário, funciona, mas o ajuste fica todo concentrado numa ponta do giro.
+- **Forçar o trimpot além do batente** ou usar chave que não encaixa: a pista quebra ou o rotor espana.
+- **Trocar o NTC de potência por um fio porque ele esquenta.** Ele foi feito para trabalhar quente. Sem ele, o pico de corrente de cada partida castiga os diodos, os capacitores e o fusível da fonte.
+- **Esquecer o autoaquecimento.** Um NTC com corrente alta mede o próprio calor, não o do ambiente.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'Você quer usar um potenciômetro como reostato, para controlar a corrente de um LED. Quais terminais você liga ao circuito?',
+      options: [
+        {
+          text: 'Uma ponta e o cursor',
+          correct: true,
+          feedback:
+            'Assim a resistência entre os fios vai de zero ao valor total, conforme o giro. A ponta que sobra pode ser ligada ao cursor.',
+        },
+        {
+          text: 'As duas pontas',
+          feedback:
+            'Entre as pontas a resistência é sempre o valor total, gire o eixo como girar: nada se ajusta.',
+        },
+        {
+          text: 'Os três terminais',
+          feedback:
+            'Com os três terminais, o potenciômetro é um divisor de tensão, não um reostato.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um potenciômetro linear de 10 kΩ está com o cursor a 30 % do curso, contado a partir da ponta A. Qual é a resistência entre A e o cursor, em kΩ?',
+      answer: 3,
+      tolerance: 0.01,
+      unit: 'kΩ',
+      explanation:
+        'Na pista linear, a resistência acompanha o giro: 10 kΩ × 0,3 = 3 kΩ. Entre o cursor e B ficam os outros 7 kΩ.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Qual potenciômetro é o certo para o controle de volume de um amplificador?',
+      options: [
+        {
+          text: 'A10K, logarítmico',
+          correct: true,
+          feedback:
+            'O ouvido percebe o volume de forma logarítmica. Com a pista logarítmica, cada pedaço do giro parece mudar o som na mesma medida.',
+        },
+        {
+          text: 'B10K, linear',
+          feedback:
+            'Funciona, mas quase todo o aumento de volume fica no começo do giro, e o resto do curso parece não fazer nada.',
+        },
+        {
+          text: 'Tanto faz, os dois têm 10 kΩ',
+          feedback:
+            'O valor total é o mesmo, mas a curva muda como o volume responde ao giro.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Um trimpot traz impresso o código 502. Qual é o valor dele?',
+      options: [
+        {
+          text: '5 kΩ',
+          correct: true,
+          feedback: '50 seguido de 2 zeros: 5.000 Ω.',
+        },
+        {
+          text: '502 Ω',
+          feedback: 'O último algarismo não é parte do valor: é o número de zeros.',
+        },
+        {
+          text: '50 kΩ',
+          feedback: '50 kΩ seria 503: 50 seguido de 3 zeros.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'No divisor da simulação, o NTC fica em cima e um resistor de 10 kΩ embaixo, com 5 V. Num dia frio, o NTC vale 15 kΩ. Qual é a tensão de saída, em volts?',
+      answer: 2,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        'V saída = 5 V × 10 kΩ ÷ (15 kΩ + 10 kΩ) = 5 × 10 ÷ 25 = 2 V. Abaixo de 2,5 V, porque o NTC frio tem mais de 10 kΩ.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'A porta USB de um computador tem um fusível rearmável, um PTC. O que acontece quando um pendrive em curto é ligado nela?',
+      options: [
+        {
+          text: 'O PTC esquenta, a resistência dele dispara e a corrente cai; tirando o pendrive, ele esfria e a porta volta a funcionar',
+          correct: true,
+          feedback:
+            'É isso que faz dele um fusível rearmável: ele limita a corrente enquanto o defeito existe e se recupera sozinho depois.',
+        },
+        {
+          text: 'O PTC rompe como um fusível comum e precisa ser trocado',
+          feedback:
+            'O fusível comum derrete e precisa de troca. O PTC só esquenta e volta a conduzir quando esfria.',
+        },
+        {
+          text: 'A resistência do PTC cai, e ele deixa passar mais corrente para alimentar o curto',
+          feedback:
+            'Quem perde resistência no calor é o NTC. No PTC, a resistência sobe com a temperatura.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Num LDR, quanto mais luz, maior a resistência.',
+      answer: false,
+      explanation:
+        'É o contrário: a luz libera cargas no sulfeto de cádmio e a resistência cai. No escuro, o LDR tem a resistência mais alta.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Numa fonte, um NTC de potência marcado 5D-9 está bem quente com a fonte funcionando. O que isso indica?',
+      options: [
+        {
+          text: 'Nada de errado: ele trabalha quente para ter resistência baixa enquanto a fonte funciona',
+          correct: true,
+          feedback:
+            'Frio, ele limita o pico de corrente na hora de ligar. Quente, a resistência cai e ele quase some do circuito.',
+        },
+        {
+          text: 'Que ele está com defeito e deve ser trocado por um fio',
+          feedback:
+            'Sem ele, o pico de corrente de cada partida castiga os diodos, os capacitores e o fusível da fonte. Ele foi feito para trabalhar quente.',
+        },
+        {
+          text: 'Que a fonte está em curto',
+          feedback:
+            'Um NTC de potência morno ou quente em funcionamento é normal. Curto se investiga medindo, não pela temperatura dele.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **potenciômetro** é uma pista resistiva com um cursor. Entre as pontas, a resistência é sempre o valor total; com os três terminais, ele é um **divisor de tensão**; com uma ponta e o cursor, um **reostato**.
+- O reostato precisa de um **resistor em série** para o cursor poder chegar ao fim sem queimar a pista nem a carga.
+- **B** é a curva linear e **A**, a logarítmica, usada no volume.
+- O **trimpot** é o ajuste de placa, de uma volta ou multivoltas, com o valor em código (103 = 10 kΩ). Chave isolada do tamanho certo, giro pequeno e sem forçar.
+- O **NTC** perde resistência no calor, o **PTC** ganha (e protege), e o **LDR** perde com a luz. Num divisor de tensão, eles transformam temperatura e luz em tensão.
+
+Na próxima aula, você vai conhecer o componente que guarda energia e ainda dá choque depois de desligado: <LinkAula id="m04-passivos/03-capacitores" />.

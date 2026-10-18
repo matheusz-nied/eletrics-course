@@ -1,0 +1,96 @@
+/* <ColorCodeGame> (lesson 04.1), on top of ../m00/widget.css. Unlayered, so it wins over .prose. */
+
+.ccg__mode {
+  display: grid;
+  gap: 1rem;
+}
+
+.ccg__resistor {
+  display: block;
+  width: 100%;
+  max-width: 26rem;
+  height: auto;
+  margin: 0 auto;
+}
+
+.ccg__lead {
+  fill: none;
+  stroke: color-mix(in oklab, var(--fg-subtle) 70%, var(--bg));
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.ccg__shine {
+  fill: #fff;
+  opacity: 0.18;
+}
+
+.ccg__outline {
+  stroke: color-mix(in oklab, var(--fg) 35%, transparent);
+  stroke-width: 1.5;
+}
+
+.ccg__answer {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.ccg__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ccg__breakdown {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.ccg__breakdown li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  font-size: 0.9375rem;
+}
+
+.ccg__swatch {
+  display: inline-block;
+  flex: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 1px solid color-mix(in oklab, var(--fg) 40%, transparent);
+  border-radius: 0.25rem;
+  vertical-align: -0.2em;
+}
+
+.ccg__band-meaning {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.ccg__score {
+  font-variant-numeric: tabular-nums;
+}
+
+.ccg__bands {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.75rem;
+}
+
+.ccg__band-label {
+  display: inline-flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.ccg__tol {
+  color: var(--fg-muted);
+  font-size: 1.25rem;
+}

@@ -1,0 +1,143 @@
+---
+/*
+ * 04.2: the resistors that change by themselves: a sensing NTC (epoxy bead),
+ * a power NTC (disc marked 5D-9), a resettable PTC fuse and an LDR with its
+ * zig-zag cadmium sulfide track. Generic drawings, no brand.
+ */
+---
+
+<div class="sp">
+  <div class="sp__item">
+    <svg viewBox="0 0 200 170" width="200" height="170" aria-hidden="true">
+      <path d="M92 60 C90 100 86 130 80 165M108 60 C110 100 114 130 120 165" class="enamel" />
+      <ellipse cx="100" cy="46" rx="16" ry="20" class="bead" />
+      <ellipse cx="94" cy="38" rx="4" ry="6" class="gloss" />
+    </svg>
+    <p class="sp__cap">
+      <strong>NTC de medir</strong> (gota): 10 kΩ a 25 °C é o mais comum.
+    </p>
+  </div>
+
+  <div class="sp__item">
+    <svg viewBox="0 0 200 170" width="200" height="170" aria-hidden="true">
+      <path d="M84 100V165M116 100V165" class="leg" />
+      <circle cx="100" cy="62" r="46" class="power-ntc" />
+      <text x="100" y="69" class="mark">
+        5D-9
+      </text>
+    </svg>
+    <p class="sp__cap">
+      <strong>NTC de potência</strong>: segura o pico de corrente ao ligar uma fonte.
+    </p>
+  </div>
+
+  <div class="sp__item">
+    <svg viewBox="0 0 200 170" width="200" height="170" aria-hidden="true">
+      <path d="M82 104V165M118 104V165" class="leg" />
+      <rect x="58" y="22" width="84" height="86" rx="30" class="ptc" />
+    </svg>
+    <p class="sp__cap">
+      <strong>PTC rearmável</strong>: corta a corrente quando esquenta e volta sozinho.
+    </p>
+  </div>
+
+  <div class="sp__item">
+    <svg viewBox="0 0 200 170" width="200" height="170" aria-hidden="true">
+      <path d="M88 108V165M112 108V165" class="leg" />
+      <circle cx="100" cy="60" r="50" class="ldr-rim" />
+      <circle cx="100" cy="60" r="42" class="ldr-ceramic" />
+      <path d="M70 34H130V44H70V54H130V64H70V74H130V84H70" class="cds" />
+    </svg>
+    <p class="sp__cap">
+      <strong>LDR</strong>: o zigue-zague é a trilha de sulfeto de cádmio.
+    </p>
+  </div>
+</div>
+
+<style>
+  .sp {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 1.25rem;
+    width: 100%;
+  }
+
+  .sp__item {
+    display: grid;
+    gap: 0.5rem;
+    justify-items: center;
+  }
+
+  .sp__item svg {
+    width: 100%;
+    max-width: 10rem;
+    height: auto;
+  }
+
+  .sp__cap {
+    margin: 0;
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  .enamel {
+    fill: none;
+    stroke: #b8733a;
+    stroke-width: 3;
+  }
+
+  .leg {
+    fill: none;
+    stroke: #b9bcc0;
+    stroke-width: 5;
+    stroke-linecap: round;
+  }
+
+  .bead {
+    fill: #1d1d1d;
+  }
+
+  .gloss {
+    fill: #fff;
+    opacity: 0.35;
+  }
+
+  .power-ntc {
+    fill: #2f6b3c;
+    stroke: #1f4a29;
+    stroke-width: 2;
+  }
+
+  .mark {
+    fill: #f2f2f2;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+
+  .ptc {
+    fill: #e8b923;
+    stroke: #a8821a;
+    stroke-width: 2;
+  }
+
+  .ldr-rim {
+    fill: #f0f0ea;
+    stroke: #a9a79c;
+    stroke-width: 2;
+  }
+
+  .ldr-ceramic {
+    fill: #f7f3e8;
+  }
+
+  .cds {
+    fill: none;
+    stroke: #d9632b;
+    stroke-width: 4;
+    stroke-linejoin: round;
+  }
+</style>
