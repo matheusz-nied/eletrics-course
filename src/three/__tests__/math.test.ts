@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { labelSide, spreadLabels } from '../core/Annotations';
 import { resistorBands } from '../core/colorCode';
 import { fitDistance, visibleBounds } from '../core/framing';
+import { transitionStep } from '../core/motion';
 import {
   capacitorCode,
   formatFarads,
@@ -124,6 +125,15 @@ describe('framing', () => {
     expect(b).toBeGreaterThan(a * 4);
     // A 10 mm cube, 30° vertical fov: half-height 5 at depth d − 5 → d ≈ 5 + 5/tan(15°).
     expect(a).toBeCloseTo(5 + 5 / Math.tan(Math.PI / 12), 1);
+  });
+});
+
+describe('transition step', () => {
+  it('takes a nominal first step, then real time up to a quarter second', () => {
+    // The first frame after idle spans the idle time; it must not jump the transition.
+    expect(transitionStep(false, 12)).toBeCloseTo(1 / 60);
+    expect(transitionStep(true, 0.1)).toBe(0.1);
+    expect(transitionStep(true, 3)).toBe(0.25);
   });
 });
 

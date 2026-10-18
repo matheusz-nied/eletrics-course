@@ -29,7 +29,7 @@ import {
   type Mesh,
   type MeshPhysicalMaterial,
 } from 'three';
-import { damp } from '../core/motion';
+import { damp, transitionStep } from '../core/motion';
 import { Anchor, Explode, useView } from '../core/view';
 import { blackbodyColor, celsiusToKelvin, glowIntensity } from '../fx/blackbody';
 import { Material } from '../materials/Material';
@@ -519,12 +519,14 @@ function Iron({ temperature, tip, pose }: { temperature: number; tip: IronTip; p
   const { cutaway, cutPlanes } = useView();
   const invalidate = useThree((s) => s.invalidate);
   useEffect(() => invalidate(), [temperature, invalidate]);
+  const heating = useRef(false);
   useFrame((state, dt) => {
     const from = eased.current ?? temperature;
-    let t = damp(from, temperature, 2.2, Math.min(dt, 0.05));
+    let t = damp(from, temperature, 2.2, transitionStep(heating.current, dt));
     if (Math.abs(t - temperature) < 0.3) t = temperature;
     const changed = t !== eased.current;
     eased.current = t;
+    heating.current = t !== temperature;
     if (!changed) return;
     const melt = Math.min(Math.max((t - 170) / 60, 0), 1);
     const tint = Math.min(Math.max((t - 140) / 280, 0), 1);

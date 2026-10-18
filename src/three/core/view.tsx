@@ -16,7 +16,7 @@ import {
   type RefObject,
 } from 'react';
 import { Euler, Plane, Quaternion, Vector3, type Group, type Object3D } from 'three';
-import { damp, easeInOut } from './motion';
+import { damp, easeInOut, transitionStep } from './motion';
 import type { Vec3 } from '../types';
 
 export interface ViewState {
@@ -79,6 +79,7 @@ export function ViewProvider({
   const cutEnd = -plane.normal.dot(new Vector3(tx, ty, tz));
   const cutStart = cutEnd + extent + Math.abs(cutEnd);
   const cutRef = useRef(cutaway ? 1 : 0);
+  const moving = useRef(false);
   const invalidate = useThree((s) => s.invalidate);
   const anchors = useMemo(() => new Map<string, Object3D>(), []);
 
@@ -86,7 +87,7 @@ export function ViewProvider({
   const cutActive = cutaway || cutRef.current > 0.001;
 
   useFrame((_, dt) => {
-    const step = Math.min(dt, 0.05);
+    const step = transitionStep(moving.current, dt);
     const targetExplode = explode ? 1 : 0;
     const targetCut = cutaway ? 1 : 0;
     explodeRef.current = instant ? targetExplode : damp(explodeRef.current, targetExplode, 6, step);
@@ -94,7 +95,8 @@ export function ViewProvider({
     if (Math.abs(explodeRef.current - targetExplode) < 0.0005) explodeRef.current = targetExplode;
     if (Math.abs(cutRef.current - targetCut) < 0.0005) cutRef.current = targetCut;
     plane.constant = cutEnd + (cutStart - cutEnd) * (1 - easeInOut(cutRef.current));
-    if (explodeRef.current !== targetExplode || cutRef.current !== targetCut) invalidate();
+    moving.current = explodeRef.current !== targetExplode || cutRef.current !== targetCut;
+    if (moving.current) invalidate();
   });
 
   useEffect(() => invalidate(), [explode, cutaway, invalidate]);

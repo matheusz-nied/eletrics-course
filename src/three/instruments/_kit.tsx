@@ -18,7 +18,7 @@ import {
   type Texture,
 } from 'three';
 import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { damp } from '../core/motion';
+import { damp, transitionStep } from '../core/motion';
 import { useView } from '../core/view';
 import { Material, type MaterialProps } from '../materials/Material';
 import { getNoiseTexture } from '../materials/textures';
@@ -244,13 +244,15 @@ export function useSpring(target: number, apply: (value: number) => void, lambda
     applyRef.current = apply;
   });
   useEffect(() => invalidate(), [target, invalidate]);
+  const moving = useRef(false);
   useFrame((_, dt) => {
     const from = current.current ?? target;
-    let next = damp(from, target, lambda, Math.min(dt, 0.05));
+    let next = damp(from, target, lambda, transitionStep(moving.current, dt));
     if (Math.abs(next - target) < 1e-4) next = target;
     current.current = next;
     applyRef.current(next);
-    if (next !== target) invalidate();
+    moving.current = next !== target;
+    if (moving.current) invalidate();
   });
 }
 

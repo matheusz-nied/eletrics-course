@@ -36,6 +36,7 @@ import { QUALITY, useQuality } from './quality';
 import type { Vec3 } from '../types';
 import type { OrbitControlsLike } from './controls';
 import { fitDistance, visibleBounds } from './framing';
+import { transitionStep } from './motion';
 import { renderStats } from './stats';
 
 export { fitDistance };
@@ -348,7 +349,7 @@ function FitCamera({ content, view, margin, fitKey, followKey, onBounds }: FitCa
   const controls = useThree((s) => s.controls) as OrbitControlsLike | null;
   const size = useThree((s) => s.size);
   const invalidate = useThree((s) => s.invalidate);
-  const state = useRef({ follow: 0, jump: true, measured: false });
+  const state = useRef({ follow: 0, jump: true, measured: false, running: false });
   const tmp = useMemo(
     () => ({
       box: new Box3(),
@@ -362,7 +363,7 @@ function FitCamera({ content, view, margin, fitKey, followKey, onBounds }: FitCa
   const [vx, vy, vz] = view;
 
   useEffect(() => {
-    state.current = { follow: FOLLOW_SECONDS, jump: true, measured: false };
+    state.current = { follow: FOLLOW_SECONDS, jump: true, measured: false, running: false };
     invalidate();
   }, [fitKey, vx, vy, vz, invalidate]);
 
@@ -389,7 +390,15 @@ function FitCamera({ content, view, margin, fitKey, followKey, onBounds }: FitCa
   useFrame((_, dt) => {
     const s = state.current;
     const group = content.current;
-    if (s.follow <= 0 || !group) return;
+    if (s.follow <= 0 || !group) {
+      s.running = false;
+      return;
+    }
+    // Real time while following: on a slow device each frame is long, and the
+    // follow must neither keep the canvas rendering for many seconds nor stop
+    // short of the goal.
+    const step = transitionStep(s.running, dt);
+    s.running = true;
     visibleBounds(group, tmp.box);
     if (tmp.box.isEmpty()) return;
     tmp.box.getBoundingSphere(tmp.sphere);
@@ -417,7 +426,7 @@ function FitCamera({ content, view, margin, fitKey, followKey, onBounds }: FitCa
       target.copy(center);
       s.jump = false;
     } else {
-      const k = 1 - Math.exp(-5 * Math.min(dt, 0.05));
+      const k = 1 - Math.exp(-5 * step);
       camera.position.lerp(tmp.goal, k);
       target.lerp(center, k);
     }
@@ -425,7 +434,7 @@ function FitCamera({ content, view, margin, fitKey, followKey, onBounds }: FitCa
     camera.far = distance * 30;
     camera.updateProjectionMatrix();
     controls?.update();
-    s.follow -= Math.min(dt, 0.05);
+    s.follow -= step;
     invalidate();
   });
 

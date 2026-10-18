@@ -7,7 +7,7 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { type ColorRepresentation, type Texture } from 'three';
-import { damp, useReducedMotion } from '../core/motion';
+import { damp, transitionStep, useReducedMotion } from '../core/motion';
 import { Material, type MaterialProps } from '../materials/Material';
 import type { Vec3 } from '../types';
 
@@ -20,6 +20,7 @@ export function useSmooth(targets: number[], apply: (values: number[]) => void, 
   const reduced = useReducedMotion();
   const invalidate = useThree((s) => s.invalidate);
   const values = useRef<number[] | null>(null);
+  const running = useRef(false);
   const applyRef = useRef(apply);
   const targetsRef = useRef(targets);
   useLayoutEffect(() => {
@@ -40,7 +41,7 @@ export function useSmooth(targets: number[], apply: (values: number[]) => void, 
       applyRef.current(values.current);
       return;
     }
-    const step = Math.min(dt, 0.05);
+    const step = transitionStep(running.current, dt);
     let moving = false;
     for (let i = 0; i < goal.length; i++) {
       const target = goal[i]!;
@@ -50,6 +51,7 @@ export function useSmooth(targets: number[], apply: (values: number[]) => void, 
       current[i] = v;
     }
     applyRef.current(current);
+    running.current = moving;
     if (moving) invalidate();
   });
 }

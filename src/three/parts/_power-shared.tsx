@@ -22,7 +22,7 @@ import {
   type ColorRepresentation,
 } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { damp, easeInOut, useReducedMotion } from '../core/motion';
+import { damp, easeInOut, transitionStep, useReducedMotion } from '../core/motion';
 import { useQuality } from '../core/quality';
 import { useView } from '../core/view';
 import { Material, type MaterialProps } from '../materials/Material';
@@ -767,13 +767,16 @@ export function useFollow(target: number, apply: (value: number) => void, lambda
     }
   });
   useEffect(() => invalidate(), [target, invalidate]);
+  const moving = useRef(false);
   useFrame((_, dt) => {
     if (value.current === null) return;
-    let v = reduced ? target : damp(value.current, target, lambda, Math.min(dt, 0.05));
+    const step = transitionStep(moving.current, dt);
+    let v = reduced ? target : damp(value.current, target, lambda, step);
     if (Math.abs(v - target) < 1e-4) v = target;
     value.current = v;
     applyRef.current(v);
-    if (v !== target) invalidate();
+    moving.current = v !== target;
+    if (moving.current) invalidate();
   });
 }
 
