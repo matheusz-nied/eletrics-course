@@ -47,8 +47,10 @@ function Control({ el, c }: { el: ElementDoc; c: ControlDoc }) {
         </span>
         <button
           type="button"
+          id={`${id}-hold`}
           className={`sim-hold${isOn(value) ? ' is-on' : ''}`}
-          aria-labelledby={id}
+          // The visible text must be part of the name (WCAG 2.5.3, axe label-content-name-mismatch).
+          aria-labelledby={`${id} ${id}-hold`}
           aria-pressed={isOn(value)}
           onPointerDown={down}
           onPointerUp={() => set(false)}

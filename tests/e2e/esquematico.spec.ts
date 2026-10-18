@@ -148,6 +148,17 @@ test.describe('interaction', () => {
     await expect.poll(() => meter(page, 'IM', 'A'), { timeout: 10_000 }).toBeLessThan(0.01);
     errors.expectClean();
   });
+
+  test('part labels sit outside the focusable part, so its name matches the screen', async ({
+    page,
+  }) => {
+    const sim = await openSimulation(page, demo('rele-motor'));
+    await expect(sim.locator('.sch-label').first()).toBeAttached();
+    // Text inside a control counts for axe's label-content-name-mismatch,
+    // which a select control ("R1100 kΩ" vs "Resistência: 100 kΩ") can never pass.
+    await expect(sim.locator('.sch-el .sch-label')).toHaveCount(0);
+    await expectAccessible(page);
+  });
 });
 
 test.describe('instruments', () => {
