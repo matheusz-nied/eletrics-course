@@ -182,7 +182,7 @@ A central não tem sensor de toque no portão. Ela "sente" o obstáculo pela **c
 
 A CD-1 faz assim:
 
-1. Depois da partida suave, ela mede a corrente por 0,5 s e guarda essa média como **corrente normal**.
+1. Terminada a partida suave, ela espera 1 s, porque o motor ainda está acelerando o portão e puxa várias vezes a corrente de trabalho. Depois mede a corrente por 0,5 s e guarda essa média como **corrente normal**. Até aí, ela ainda não vigia a corrente.
 2. Enquanto o portão anda, ela compara a corrente com um **limite**: a corrente normal vezes um fator. O fator vai de 1,25 (FORÇA no mínimo) a 2,25 (FORÇA no máximo).
 3. Se a corrente passa do limite por mais de 0,25 s, é obstáculo. Fechando, o portão volta a abrir. Abrindo, ele para e recua 0,5 s.
 
