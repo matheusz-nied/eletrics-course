@@ -4,7 +4,9 @@ import { R_SERIES_MIN } from '../models/constants';
 /**
  * Sinusoidal voltage source: v(t) = offset + amplitude·sin(2π·f·t + phase).
  * `amplitude` is the peak value (127 V rms mains ≈ 179,6 V peak). In a DC
- * analysis it holds its offset. Pin a is the reference "+" terminal.
+ * analysis it holds its offset; in the quasi-static one it is the phasor of
+ * its sine (zero if its frequency is not the analysis frequency). Pin a is
+ * the reference "+" terminal.
  */
 export default defineDevice({
   info: {
@@ -49,8 +51,18 @@ export default defineDevice({
         );
       },
       // In a sweep, the source under test carries 1 V at phase 0; any other is a short.
+      // In the quasi-static analysis, its RMS phasor at the analysis frequency.
       stampAc(m, ctx) {
-        m.branch(br, a, b, ctx.source === ctx.id ? 1 : 0, 0, R_SERIES_MIN);
+        let re = ctx.source === ctx.id ? 1 : 0;
+        let im = 0;
+        if (ctx.phasor) {
+          const omega = 2 * Math.PI * num(params, 'frequency');
+          const rms = Math.abs(omega - ctx.omega) <= 1e-6 * ctx.omega ? num(params, 'amplitude') / Math.SQRT2 : 0;
+          const phase = (num(params, 'phase') * Math.PI) / 180;
+          re = rms * Math.cos(phase);
+          im = rms * Math.sin(phase);
+        }
+        m.branch(br, a, b, re, im, R_SERIES_MIN);
       },
       pinCurrents(x, out) {
         out[0] = x.x[br];

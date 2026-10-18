@@ -7,21 +7,25 @@ import type {
   SimFrame,
   Vec2,
 } from '../contract';
-import type {
-  DeviceDefinition,
-  DeviceModel,
-  Method,
-  NewtonState,
-  StepInfo,
-  SolutionView,
-  UpdateContext,
+import {
+  infoFor,
+  type AcContext,
+  type DeviceDefinition,
+  type DeviceModel,
+  type Method,
+  type NewtonState,
+  type NodeSignal,
+  type PhasorView,
+  type StepInfo,
+  type SolutionView,
+  type UpdateContext,
 } from '../device';
 import { findDevice } from '../devices';
 import { pinPoints } from '../format/geometry';
 import { buildNetlist, GROUND } from '../format/netlist';
 import { checkParam, CircuitError, validateCircuit } from '../format/validate';
 import { AMBIENT_C, GMIN } from '../models/constants';
-import { ComplexMna } from '../solver/complex';
+import { ComplexMna, StampLog } from '../solver/complex';
 import { MnaSystem } from '../solver/mna';
 import { SingularMatrixError } from '../solver/lu';
 import { buildWireGraph, wireCurrents, type WireGraph } from './wires';
@@ -80,6 +84,10 @@ interface Element {
   twoTerminal: boolean;
   /** It emitted a 'damaged' event since the last reset (readout `X.damaged`). */
   damaged: boolean;
+  /** Quasi-static: its stamps in the phasor solve, and the phasor current into each pin. */
+  log?: StampLog;
+  acRe?: Float64Array;
+  acIm?: Float64Array;
 }
 
 /** UpdateContext with the fields the simulator rewrites for each device. */
@@ -91,7 +99,9 @@ interface MutableUpdateContext extends UpdateContext {
 
 type ResolvedProbe =
   | { id: string; kind: 'voltage'; plus: number; minus: number }
-  | { id: string; kind: 'current' | 'power'; element: Element };
+  | { id: string; kind: 'current' | 'power'; element: Element }
+  /** Current in a wire (its first segment), from the wire currents. */
+  | { id: string; kind: 'wire'; key: string };
 
 /**
  * One circuit, ready to step: compiled devices, the MNA system and the
@@ -100,7 +110,10 @@ type ResolvedProbe =
  */
 export class Simulator {
   readonly doc: CircuitDoc;
+  /** Mode of the (real) solve: the quasi-static analysis solves DC, then phasors. */
   readonly mode: 'dc' | 'tran';
+  /** Quasi-static analysis: each step solves DC and the AC steady state at one frequency. */
+  readonly quasiStatic: boolean;
   /** Fixed step of this circuit (s). */
   readonly dt: number;
   /** Simulated time (s). */
@@ -128,18 +141,33 @@ export class Simulator {
   private pendingEvents: SimEvent[] = [];
   private sampleT: number[] = [];
   private sampleValues: Record<string, number[]> = {};
+  /** Elements in update order: coupled devices after the ones they follow. */
+  private readonly order: Element[] = [];
+  private readonly signals = new Map<number, NodeSignal>();
+  // Quasi-static: angular frequency, phasor solution (and the first pass's), element being read.
+  private readonly omega: number = 0;
+  private readonly acRe: Float64Array;
+  private readonly acIm: Float64Array;
+  private readonly firstRe: Float64Array;
+  private readonly firstIm: Float64Array;
+  private acElement?: Element;
+  private readonly phasorView: PhasorView;
+  private readonly firstView: PhasorView;
 
   constructor(doc: CircuitDoc) {
     const { errors } = validateCircuit(doc);
     if (errors.length) throw new CircuitError(doc?.id ?? '?', errors);
-    if (doc.analysis.kind === 'quasi-static') {
-      throw new CircuitError(doc.id, [
-        `a análise "${doc.analysis.kind}" ainda não está disponível no motor`,
-      ]);
-    }
     this.doc = doc;
-    this.mode = doc.analysis.kind === 'transient' ? 'tran' : 'dc';
-    this.dt = doc.analysis.kind === 'transient' ? doc.analysis.dt : DC_STEP;
+    const analysis = doc.analysis;
+    this.mode = analysis.kind === 'transient' ? 'tran' : 'dc';
+    this.quasiStatic = analysis.kind === 'quasi-static';
+    this.dt =
+      analysis.kind === 'transient'
+        ? analysis.dt
+        : analysis.kind === 'quasi-static'
+          ? analysis.dtMech
+          : DC_STEP;
+    if (analysis.kind === 'quasi-static') this.omega = 2 * Math.PI * analysis.frequency;
 
     const netlist = buildNetlist(doc);
     const nodeIndex = new Map<string, number>();
@@ -153,7 +181,7 @@ export class Simulator {
     for (const el of doc.elements) {
       if (el.type === 'wire') continue;
       const def = findDevice(el.type)!;
-      const info = def.info;
+      const info = infoFor(def, el.params);
       const params: Record<string, ParamValue> = {};
       for (const [name, p] of Object.entries(info.params)) params[name] = p.default;
       Object.assign(params, el.params);
@@ -178,6 +206,8 @@ export class Simulator {
           this.isNode.push(true);
           return this.isNode.length - 1;
         },
+        analysis: analysis.kind,
+        signal: (node) => this.signal(node),
       });
       const element: Element = {
         id: el.id,
@@ -195,16 +225,32 @@ export class Simulator {
       this.byId.set(el.id, element);
     }
     this.nonlinear = this.elements.some((e) => e.model.nonlinear);
-    if (doc.analysis.kind === 'ac-sweep') {
+    if (analysis.kind === 'ac-sweep' || this.quasiStatic) {
       const missing = this.elements.filter((e) => !e.model.stampAc).map((e) => e.id);
       if (missing.length)
         throw new CircuitError(doc.id, [
-          `estes componentes não entram na varredura CA: ${missing.join(', ')}`,
+          `estes componentes não entram na ${this.quasiStatic ? 'análise quase-estática' : 'varredura CA'}: ${missing.join(', ')}`,
         ]);
     }
-    this.system = new MnaSystem(this.isNode.length);
-    this.accepted = new Float64Array(this.isNode.length);
-    this.guess = new Float64Array(this.isNode.length);
+    this.order = this.couple();
+    const size = this.isNode.length;
+    this.system = new MnaSystem(size);
+    this.accepted = new Float64Array(size);
+    this.guess = new Float64Array(size);
+    const phasorSize = this.quasiStatic ? size : 0;
+    this.acRe = new Float64Array(phasorSize);
+    this.acIm = new Float64Array(phasorSize);
+    this.firstRe = new Float64Array(phasorSize);
+    this.firstIm = new Float64Array(phasorSize);
+    this.phasorView = this.phasors(this.acRe, this.acIm, true);
+    this.firstView = this.phasors(this.firstRe, this.firstIm, false);
+    if (this.quasiStatic) {
+      for (const el of this.elements) {
+        el.log = new StampLog();
+        el.acRe = new Float64Array(el.pins.length);
+        el.acIm = new Float64Array(el.pins.length);
+      }
+    }
 
     this.wires = buildWireGraph(doc, pinPositions);
     this.wireScratch = new Float64Array(this.wires.vertexCount);
@@ -218,7 +264,9 @@ export class Simulator {
       if (p.kind === 'voltage') {
         return { id: p.id, kind: 'voltage', plus: pinNode(p.plus), minus: pinNode(p.minus) };
       }
-      return { id: p.id, kind: p.kind, element: this.byId.get(p.element)! };
+      const element = this.byId.get(p.element);
+      if (!element) return { id: p.id, kind: 'wire', key: `${p.element}.current` };
+      return { id: p.id, kind: p.kind, element };
     });
     for (const p of this.probes) this.sampleValues[p.id] = [];
   }
@@ -242,6 +290,12 @@ export class Simulator {
    * solution.
    */
   step(): void {
+    if (this.quasiStatic) {
+      this.solveQuasiStatic(this.dt, true);
+      this.steps++;
+      this.recordSamples();
+      return;
+    }
     const end = this.t + this.dt;
     if (!this.tryAdvance(this.dt, this.restart ? 'be' : 'trap')) {
       let pieces = 2;
@@ -263,6 +317,10 @@ export class Simulator {
    * made while paused (a switch, a slider) shows right away.
    */
   refresh(): void {
+    if (this.quasiStatic) {
+      this.solveQuasiStatic(0, false);
+      return;
+    }
     const step: StepInfo =
       this.mode === 'dc'
         ? { mode: 'dc', t: this.t, dt: 0, method: 'be', nl: newtonState() }
@@ -296,6 +354,12 @@ export class Simulator {
     this.restart = true;
     this.solved = false;
     this.accepted.fill(0);
+    this.acRe.fill(0);
+    this.acIm.fill(0);
+    for (const signal of this.signals.values()) {
+      signal.phase = undefined;
+      signal.frames.length = 0;
+    }
     this.pendingEvents = [];
     this.clearSamples();
     for (const el of this.elements) {
@@ -316,15 +380,10 @@ export class Simulator {
   frame(opts: { samples?: boolean; maxSamples?: number } = {}): SimFrame {
     const x = this.view(this.accepted);
     const nodeVoltages: Record<string, number> = { [GROUND]: 0 };
-    this.nodeIds.forEach((id, i) => (nodeVoltages[id] = this.accepted[i]));
+    this.nodeIds.forEach((id, i) => (nodeVoltages[id] = this.combined(this.accepted[i], i, -1)));
     const readouts: SimFrame['readouts'] = {};
     for (const el of this.elements) this.collect(el, x, readouts);
-    wireCurrents(
-      this.wires,
-      (element, pin) => this.elements[element].currents[pin],
-      readouts,
-      this.wireScratch,
-    );
+    this.wireCurrents(readouts);
     for (const p of this.probes) readouts[p.id] = this.probeValue(p, x, readouts);
     const frame: SimFrame = { t: this.t, nodeVoltages, readouts, events: this.pendingEvents };
     this.pendingEvents = [];
@@ -345,6 +404,142 @@ export class Simulator {
 
   private view(x: Float64Array): SolutionView {
     return { x, v: (i: number) => (i < 0 ? 0 : x[i]) };
+  }
+
+  /** Shared signals of a node (phase control, data frames). */
+  private signal(node: number): NodeSignal {
+    let s = this.signals.get(node);
+    if (!s) {
+      s = { frames: [] };
+      this.signals.set(node, s);
+    }
+    return s;
+  }
+
+  /**
+   * Resolves couplings between devices (`params.motor = "M1"`) and returns
+   * the update order: each coupled device after the one it follows.
+   */
+  private couple(): Element[] {
+    const problems: string[] = [];
+    const targets = new Map<Element, Element>();
+    for (const el of this.elements) {
+      if (!el.model.couple) continue;
+      let target: Element | undefined;
+      const problem = el.model.couple((id) => {
+        target = this.byId.get(id);
+        return target?.model;
+      });
+      if (problem) problems.push(`elemento ${el.id}: ${problem}`);
+      if (target && target !== el) targets.set(el, target);
+    }
+    if (problems.length) throw new CircuitError(this.doc.id, problems);
+    const depth = (el: Element, seen = new Set<Element>()): number => {
+      const target = targets.get(el);
+      if (!target || seen.has(el)) return 0;
+      seen.add(el);
+      return 1 + depth(target, seen);
+    };
+    const depths = new Map(this.elements.map((el) => [el, depth(el)]));
+    return [...this.elements].sort((a, b) => depths.get(a)! - depths.get(b)! || a.index - b.index);
+  }
+
+  /**
+   * One quasi-static step of length dt (0 = refresh, nothing advances): the
+   * DC solution (logic, sensors, relay coils), then the AC steady state at
+   * the analysis frequency (mains, motors, TRIACs), then device updates with
+   * both, where motors and mechanics integrate over dt.
+   */
+  private solveQuasiStatic(dt: number, commit: boolean): void {
+    const step: StepInfo = {
+      mode: 'dc',
+      t: this.t + dt,
+      dt,
+      method: 'be',
+      nl: newtonState(),
+      quasiStatic: true,
+    };
+    const x = this.solveRobust(step);
+    this.solvePhasors(x);
+    step.ac = this.phasorView;
+    this.solved = true;
+    this.update(step, x, commit);
+    this.accepted.set(x);
+    this.t = step.t;
+  }
+
+  /**
+   * Phasor solve at the analysis frequency around the DC solution `op`, in
+   * two passes when a device asks for the first one's solution. Records each
+   * device's stamps to get its pin currents.
+   */
+  private solvePhasors(op: Float64Array): void {
+    const n = this.isNode.length;
+    const cm = (this.complex ??= new ComplexMna(n));
+    const opView = this.view(op);
+    let again = false;
+    const ctx: AcContext = {
+      omega: this.omega,
+      source: '',
+      id: '',
+      phasor: true,
+      again: () => (again = true),
+    };
+    for (let pass = 0; pass < 2; pass++) {
+      cm.clear();
+      for (let i = 0; i < n; i++) if (this.isNode[i]) cm.add(i, i, GMIN);
+      for (const el of this.elements) {
+        ctx.id = el.id;
+        el.log!.clear();
+        cm.log = el.log;
+        el.model.stampAc!(cm, ctx, opView);
+      }
+      cm.log = undefined;
+      try {
+        cm.solve();
+      } catch (error) {
+        if (error instanceof SingularMatrixError) throw new SimulationError(SINGULAR);
+        throw error;
+      }
+      for (let i = 0; i < n; i++) {
+        if (!Number.isFinite(cm.xRe[i]) || !Number.isFinite(cm.xIm[i]))
+          throw new SimulationError(DIVERGED);
+      }
+      if (!again || pass === 1) break;
+      this.firstRe.set(cm.xRe);
+      this.firstIm.set(cm.xIm);
+      ctx.first = this.firstView;
+      again = false;
+    }
+    this.acRe.set(cm.xRe);
+    this.acIm.set(cm.xIm);
+    for (const el of this.elements) el.log!.pinCurrents(el.pins, cm.xRe, cm.xIm, el.acRe!, el.acIm!);
+  }
+
+  /** A phasor solution; `pins` reads the pin currents of the element in `acElement`. */
+  private phasors(re: Float64Array, im: Float64Array, pins: boolean): PhasorView {
+    const omega = this.omega;
+    return {
+      omega,
+      re: (i) => (i < 0 ? 0 : re[i]),
+      im: (i) => (i < 0 ? 0 : im[i]),
+      pinRe: (k) => (pins ? (this.acElement?.acRe?.[k] ?? 0) : 0),
+      pinIm: (k) => (pins ? (this.acElement?.acIm?.[k] ?? 0) : 0),
+    };
+  }
+
+  /**
+   * A DC value and the phasor at `plus` − `minus` combined as a true-RMS
+   * reading, signed like the DC part (what nodes, probes and two-terminal
+   * readouts report in the quasi-static analysis). Outside it, the DC value.
+   */
+  private combined(dc: number, plus: number, minus: number): number {
+    if (!this.quasiStatic) return dc;
+    const at = (arr: Float64Array, i: number) => (i < 0 ? 0 : arr[i]);
+    const re = at(this.acRe, plus) - at(this.acRe, minus);
+    const im = at(this.acIm, plus) - at(this.acIm, minus);
+    const value = Math.sqrt(dc * dc + re * re + im * im);
+    return dc < 0 ? -value : value;
   }
 
   /**
@@ -560,11 +755,13 @@ export class Simulator {
     const ctx = this.updateContext;
     ctx.commit = commit;
     ctx.t = step.t;
-    for (const el of this.elements) {
+    for (const el of this.order) {
       ctx.element = el.id;
+      this.acElement = el;
       el.model.update?.(step, view, ctx);
       el.model.pinCurrents(view, el.currents);
     }
+    this.acElement = undefined;
   }
 
   /** One context reused for every device update (no allocation per step). */
@@ -585,20 +782,67 @@ export class Simulator {
 
   private collect(el: Element, x: SolutionView, out: SimFrame['readouts']): void {
     const prefix = `${el.id}.`;
-    el.info.pins.forEach((pin, i) => (out[`${prefix}pin.${pin.name}`] = el.currents[i]));
+    const qs = this.quasiStatic;
+    el.info.pins.forEach((pin, k) => {
+      const i = el.currents[k];
+      out[`${prefix}pin.${pin.name}`] = qs ? this.combinedCurrent(i, el, k) : i;
+    });
     if (el.twoTerminal) {
-      const v = x.v(el.pins[0]) - x.v(el.pins[1]);
-      const i = el.def.source ? -el.currents[0] : el.currents[0];
-      out[`${prefix}voltage`] = v;
-      out[`${prefix}current`] = i;
-      out[`${prefix}power`] = v * i;
+      const [a, b] = el.pins;
+      const sign = el.def.source ? -1 : 1;
+      const v = x.v(a) - x.v(b);
+      const i = sign * el.currents[0];
+      out[`${prefix}voltage`] = this.combined(v, a, b);
+      out[`${prefix}current`] = qs ? sign * this.combinedCurrent(el.currents[0], el, 0) : i;
+      let power = v * i;
+      if (qs) {
+        // Average power: DC part plus Re(V·I*) of the RMS phasors.
+        const vr = this.phasorView.re(a) - this.phasorView.re(b);
+        const vi = this.phasorView.im(a) - this.phasorView.im(b);
+        power += sign * (vr * el.acRe![0] + vi * el.acIm![0]);
+      }
+      out[`${prefix}power`] = power;
     }
-    el.model.readouts?.(x, (name, value) => (out[prefix + name] = value));
+    this.acElement = el;
+    el.model.readouts?.(
+      x,
+      (name, value) => (out[prefix + name] = value),
+      qs ? this.phasorView : undefined,
+    );
+    this.acElement = undefined;
     if (el.damaged) out[`${prefix}damaged`] = true;
   }
 
+  /** True-RMS current into pin k (DC plus phasor), signed like the DC part. */
+  private combinedCurrent(dc: number, el: Element, k: number): number {
+    const value = Math.sqrt(dc * dc + el.acRe![k] ** 2 + el.acIm![k] ** 2);
+    return dc < 0 ? -value : value;
+  }
+
+  /** Current in every wire segment; true RMS (signed like the DC part) in the quasi-static analysis. */
+  private wireCurrents(out: SimFrame['readouts']): void {
+    const scratch = this.wireScratch;
+    wireCurrents(this.wires, (e, pin) => this.elements[e].currents[pin], out, scratch);
+    if (!this.quasiStatic) return;
+    const re: SimFrame['readouts'] = {};
+    const im: SimFrame['readouts'] = {};
+    wireCurrents(this.wires, (e, pin) => this.elements[e].acRe![pin], re, scratch);
+    wireCurrents(this.wires, (e, pin) => this.elements[e].acIm![pin], im, scratch);
+    for (const key of Object.keys(re)) {
+      const dc = out[key] as number;
+      const value = Math.sqrt(dc * dc + (re[key] as number) ** 2 + (im[key] as number) ** 2);
+      out[key] = dc < 0 ? -value : value;
+    }
+  }
+
   private probeValue(p: ResolvedProbe, x: SolutionView, readouts?: SimFrame['readouts']): number {
-    if (p.kind === 'voltage') return x.v(p.plus) - x.v(p.minus);
+    if (p.kind === 'voltage') return this.combined(x.v(p.plus) - x.v(p.minus), p.plus, p.minus);
+    if (p.kind === 'wire') {
+      if (readouts) return (readouts[p.key] as number | undefined) ?? 0;
+      const tmp: SimFrame['readouts'] = {};
+      this.wireCurrents(tmp);
+      return (tmp[p.key] as number | undefined) ?? 0;
+    }
     const key = `${p.element.id}.${p.kind}`;
     if (readouts) return readouts[key] as number;
     const tmp: SimFrame['readouts'] = {};
@@ -610,7 +854,11 @@ export class Simulator {
     if (!this.probes.length) return;
     const x = this.view(this.accepted);
     this.sampleT.push(this.t);
-    for (const p of this.probes) this.sampleValues[p.id].push(this.probeValue(p, x));
+    let wires: SimFrame['readouts'] | undefined;
+    for (const p of this.probes) {
+      if (p.kind === 'wire' && !wires) this.wireCurrents((wires = {}));
+      this.sampleValues[p.id].push(this.probeValue(p, x, p.kind === 'wire' ? wires : undefined));
+    }
   }
 
   private takeSamples(max: number): NonNullable<SimFrame['samples']> {

@@ -77,7 +77,14 @@ export default defineDevice({
         iTest = gTest() * (x.v(l2) - x.v(n1));
         if (!ctx.commit || step.dt <= 0) return;
         // Both conductors pass through the core: what does not come back is leaking.
-        residual.update(iL + iN, step.dt);
+        let leak = iL + iN;
+        const ac = step.ac;
+        if (ac) {
+          const re = g() * (ac.re(l1) - ac.re(l2) + ac.re(n1) - ac.re(n2));
+          const im = g() * (ac.im(l1) - ac.im(l2) + ac.im(n1) - ac.im(n2));
+          leak = Math.sqrt(leak * leak + re * re + im * im);
+        }
+        residual.update(leak, step.dt);
         const sensitivity = num(params, 'sensitivity');
         if (closed() && residual.value >= K_TRIP * sensitivity) {
           tripped = true;

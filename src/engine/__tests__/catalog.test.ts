@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { CircuitDoc, DeviceInfo } from '../contract';
 import { Simulator } from '../analysis/simulator';
+import { findDevice } from '../devices';
 import { getDeviceInfo, listDevices } from '../index';
 import { netlist, type NetPart } from './utils';
 
@@ -86,46 +87,61 @@ describe('level-2 catalog', () => {
   });
 });
 
+/** Parameters a device needs to load at all. */
+const REQUIRED: Record<string, Record<string, string>> = {
+  mcu: { firmware: 'm16/central-generica' },
+};
+
 /**
  * Every device in a small circuit: each pin on its own node, tied through
  * 1 kΩ to a 5 V source (and the first pin also to ground through 1 kΩ), then
- * DC, a short transient and an AC sweep. Nothing may throw or turn NaN.
+ * every analysis it runs in (DC, a short transient, an AC sweep, a few
+ * quasi-static steps). Nothing may throw or turn NaN.
  */
-function smoke(info: DeviceInfo, analysis: CircuitDoc['analysis']): CircuitDoc {
+function smoke(type: string, analysis: CircuitDoc['analysis']): CircuitDoc {
+  const params = REQUIRED[type];
+  const info: DeviceInfo = getDeviceInfo(type, params);
   const parts: NetPart[] = [
     { id: 'V1', type: 'dc-voltage', nodes: ['s', '0'], params: { voltage: 5 } },
+    { id: 'VA', type: 'ac-voltage', nodes: ['s', 's2'], params: { amplitude: 1 } },
   ];
   const nodes: Record<string, string> = {};
   info.pins.forEach((pin, k) => {
     nodes[pin.name] = `p${k}`;
-    parts.push({ id: `R${k}`, type: 'resistor', nodes: ['s', `p${k}`] });
+    parts.push({ id: `R${k}`, type: 'resistor', nodes: [k % 2 ? 's2' : 's', `p${k}`] });
   });
   parts.push({ id: 'RG', type: 'resistor', nodes: ['p0', '0'] });
   const dut: NetPart =
     info.terminals === 'two'
-      ? { id: 'X1', type: info.type, nodes: ['p0', 'p1'] }
-      : { id: 'X1', type: info.type, nodes };
-  return netlist(`smoke-${info.type}`, [...parts, dut], analysis);
+      ? { id: 'X1', type, nodes: ['p0', 'p1'], params }
+      : { id: 'X1', type, nodes, params };
+  return netlist(`smoke-${type}`, [...parts, dut], analysis);
 }
 
-describe('every device in DC, transient and AC sweep', () => {
+const ANALYSES: CircuitDoc['analysis'][] = [
+  { kind: 'dc' },
+  { kind: 'transient', dt: 1e-5 },
+  { kind: 'quasi-static', frequency: 60, dtMech: 0.01 },
+];
+
+describe('every device in each analysis it runs in', () => {
   for (const info of listDevices()) {
     if (info.type === 'wire' || info.type === 'ground') continue;
+    const runs = findDevice(info.type)?.analyses ?? ['dc', 'transient', 'ac-sweep', 'quasi-static'];
     it(info.type, () => {
-      const dc = new Simulator(smoke(info, { kind: 'dc' }));
-      dc.refresh();
-      for (let i = 0; i < 20; i++) dc.step();
-      const tran = new Simulator(smoke(info, { kind: 'transient', dt: 1e-5 }));
-      tran.refresh();
-      for (let i = 0; i < 200; i++) tran.step();
-      for (const sim of [dc, tran]) {
+      for (const analysis of ANALYSES) {
+        if (!runs.includes(analysis.kind)) continue;
+        const sim = new Simulator(smoke(info.type, analysis));
+        sim.refresh();
+        for (let i = 0; i < (analysis.kind === 'transient' ? 200 : 20); i++) sim.step();
         const { readouts, nodeVoltages } = sim.frame();
         for (const [key, value] of Object.entries(readouts))
-          if (typeof value === 'number') expect(Number.isNaN(value), key).toBe(false);
+          if (typeof value === 'number') expect(Number.isNaN(value), `${analysis.kind} ${key}`).toBe(false);
         for (const v of Object.values(nodeVoltages)) expect(Number.isFinite(v)).toBe(true);
       }
+      if (!runs.includes('ac-sweep')) return;
       const ac = new Simulator(
-        smoke(info, { kind: 'ac-sweep', source: 'V1', fStart: 10, fStop: 1e5, points: 9 }),
+        smoke(info.type, { kind: 'ac-sweep', source: 'V1', fStart: 10, fStop: 1e5, points: 9 }),
       );
       ac.refresh();
       const { sweep } = ac.frame();

@@ -1,4 +1,5 @@
 import type { CircuitDoc, Netlist, Vec2 } from '../contract';
+import { infoFor } from '../device';
 import { findDevice } from '../devices';
 import { pinPoints, pointKey, wirePoints } from './geometry';
 
@@ -67,8 +68,9 @@ export function buildNetlist(doc: CircuitDoc): Netlist {
     const def = findDevice(el.type);
     if (!def)
       throw new Error(`Tipo de dispositivo desconhecido: "${el.type}" (elemento ${el.id}).`);
-    const points = pinPoints(el, def.info);
-    def.info.pins.forEach((pin, i) => {
+    const info = infoFor(def, el.params);
+    const points = pinPoints(el, info);
+    info.pins.forEach((pin, i) => {
       const k = visit(points[i]);
       pinKeys.set(`${el.id}.${pin.name}`, k);
       if (el.type === 'ground') groundKeys.push(k);
