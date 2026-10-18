@@ -44,6 +44,9 @@ test.describe('módulo 4: componentes passivos', () => {
 
   for (const slug of LESSONS) {
     test(`lesson ${slug} loads its simulations and widgets without errors`, async ({ page }) => {
+      // Lesson 4.3 has five 3D models; with software WebGL (CI) each canvas
+      // blocks the page for a few seconds while its shaders compile.
+      test.setTimeout(90_000);
       const errors = watchErrors(page);
       await page.goto(`${MODULE}${slug}/`);
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
