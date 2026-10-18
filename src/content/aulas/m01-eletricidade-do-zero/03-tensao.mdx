@@ -1,0 +1,320 @@
+---
+titulo: Tensão
+modulo: m01-eletricidade-do-zero
+ordem: 3
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Explicar a tensão como a energia que cada carga ganha ou perde entre dois pontos
+  - Medir a tensão entre dois pontos, escolhendo um ponto de referência
+  - Conferir que as tensões de um circuito em série somam a tensão da fonte
+  - Saber o que define a tensão de uma pilha e o que acontece ao ligar pilhas em série
+  - Usar a analogia da água sabendo onde ela deixa de valer
+prerequisitos: [m01-eletricidade-do-zero/02-corrente-eletrica]
+tags: [tensão, volt, diferença de potencial, pilha, bateria, referência, GND]
+seguranca: baixa-tensao
+---
+
+import AnalogiaAgua from '../../../lessons/m01/figuras/AnalogiaAgua.astro';
+import PilhaEmCorte from '../../../lessons/m01/figuras/PilhaEmCorte.astro';
+
+A central do portão tem dois bornes marcados "+12V" e "GND" para alimentar a fotocélula. Você encosta a ponta preta do <Term id="multimetro">multímetro</Term> no GND e a vermelha no +12V: o visor mostra 12,3 V. Agora encosta as duas pontas no mesmo borne +12V e o visor mostra zero. O borne não perdeu os 12 V. É que tensão nunca está **num** ponto: ela está **entre** dois pontos. Essa é a ideia mais importante desta aula.
+
+## A ideia: um empurrão entre dois pontos
+
+Na aula <LinkAula id="m01-eletricidade-do-zero/02-corrente-eletrica" /> você viu que a <Term id="corrente-eletrica">corrente</Term> é o movimento de <Term id="carga-eletrica">cargas</Term> por um caminho fechado. Mas as cargas não se movem sozinhas. Os elétrons livres de um fio solto na mesa ficam só sacudindo para lá e para cá, sem ir a lugar nenhum. Para que eles andem numa direção, alguma coisa precisa empurrá-los. Esse empurrão é a <Term id="tensao">tensão</Term>.
+
+Uma forma boa de pensar é em energia. Quando uma carga atravessa uma <Term id="bateria">pilha</Term>, a pilha entrega energia a ela, como quem sobe uma bola até o alto de uma escada. Depois, ao percorrer o circuito, a carga devolve essa energia: na lâmpada ela vira luz e calor, no motor ela vira movimento. A tensão entre dois pontos mede **quanta energia cada carga ganha ou perde** ao ir de um ponto até o outro.
+
+Repare em duas consequências dessa ideia:
+
+- **Tensão existe sem corrente.** Uma pilha guardada na gaveta tem 1,5 V entre os terminais, mas nenhuma corrente, porque não há caminho fechado. É como a bola no alto da escada: a energia está lá, esperando um caminho para descer.
+- **Tensão é sempre uma comparação.** Dizer que a bola está "a 3 metros" só faz sentido se você disser a partir de onde: do chão, da mesa, do degrau. Com a tensão é igual. Por isso o nome técnico é **diferença de potencial**, ou ddp.
+
+## Formalização: o volt
+
+A unidade de tensão é o <Term id="volt">volt</Term> (V). Um volt quer dizer que cada coulomb de carga ganha (ou perde) um joule de energia entre os dois pontos:
+
+$$
+V = \frac{E}{Q} \qquad 1\,\text{V} = 1\,\frac{\text{J}}{\text{C}}
+$$
+
+Aqui, $V$ é a tensão em volts, $E$ é a energia em joules (J) e $Q$ é a carga em coulombs (C), a unidade de carga que você conheceu nas aulas anteriores. A mesma letra V serve para a grandeza e para a unidade; alguns livros e manuais usam a letra U para a grandeza, para evitar a confusão.
+
+Numa bateria de 12 V, cada coulomb que passa por dentro dela sai com 12 J de energia a mais. Numa pilha de 1,5 V, sai com só 1,5 J. Essa é a diferença entre as duas: o tamanho do empurrão que cada carga recebe.
+
+<DeepDive title="Quanta energia uma bateria entrega em um minuto">
+Uma lâmpada de painel ligada numa bateria de 12 V puxa 0,5 A. Em um minuto (60 s), a carga que passa por ela é, como você viu na aula de corrente:
+
+$$
+Q = I \cdot t = 0{,}5\,\text{A} \times 60\,\text{s} = 30\,\text{C}
+$$
+
+Cada coulomb leva 12 J da bateria até a lâmpada, então a energia entregue é:
+
+$$
+E = V \cdot Q = 12\,\text{V} \times 30\,\text{C} = 360\,\text{J}
+$$
+
+Energia por tempo é potência, o assunto da aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />.
+</DeepDive>
+
+## Sempre entre dois pontos: a referência
+
+Se a tensão é sempre uma comparação, para falar da tensão "de um ponto" precisamos combinar um ponto de comparação. Esse ponto é a **referência**, e por definição ele tem 0 V. Num circuito alimentado por pilha, bateria ou fonte, a referência quase sempre é o **negativo** da alimentação. Nos esquemas e nas placas ela aparece com vários nomes:
+
+- **GND** (do inglês _ground_), **0V**, **COM** ou **−** nas placas e centrais;
+- o símbolo de três tracinhos que você vê no simulador;
+- **massa** ou **chassi** no carro, onde a lataria toda é ligada ao negativo da bateria.
+
+Com a referência combinada, cada ponto ganha um valor. A tensão entre dois pontos é a diferença entre os valores deles:
+
+$$
+V_{AB} = V_A - V_B
+$$
+
+A ordem importa. Se o ponto A está a 10 V e o B a 6 V, então $V_{AB} = 4\,\text{V}$ e $V_{BA} = -4\,\text{V}$. O multímetro faz exatamente essa conta: ele mostra o valor da ponta vermelha menos o da ponta preta. Por isso, com as pontas trocadas, aparece um sinal de menos no visor, como você viu na aula <LinkAula id="m00-comece-aqui/03-ferramentas-essenciais" />. Na prática, a ponta preta fica no GND e a vermelha passeia pelos pontos que você quer medir.
+
+<Callout type="atencao" title="GND não é o fio terra da casa">
+Em eletrônica, GND é só o ponto de referência do circuito, em geral o negativo da fonte. O **fio terra** da instalação elétrica é outra coisa: um condutor ligado de verdade ao solo, por segurança. Às vezes os dois são ligados entre si, às vezes não. A aula <LinkAula id="m07-instalacoes/02-fase-neutro-e-terra" /> explica o <Term id="aterramento">aterramento</Term> da casa.
+</Callout>
+
+## Explore: medindo entre vários pontos
+
+O circuito abaixo tem uma bateria de 12 V e três resistores ligados um depois do outro: R1 de 1 kΩ, R2 de 2 kΩ e R3 de 3 kΩ. Um <Term id="resistor">resistor</Term> é um componente feito para dificultar a passagem da corrente; você vai estudá-lo na próxima aula. Para falar dos pontos, vamos dar nomes a eles:
+
+- **A**: o fio que sai do + da bateria e chega em R1;
+- **B**: o fio entre R1 e R2;
+- **C**: o fio entre R2 e R3;
+- **D**: o fio de baixo, que volta ao − da bateria. É a referência (0 V).
+
+<Simulation circuit="m01/tensao" />
+
+Faça nesta ordem:
+
+1. No menu **Exibir**, ligue **Tensão em cada ponto**. Anote o valor de cada fio: A tem 12 V, B tem 10 V, C tem 6 V e D tem 0 V.
+2. Passe o dedo ou o mouse sobre cada resistor e leia a tensão nele: 2 V em R1, 4 V em R2 e 6 V em R3. Confira que cada uma é a diferença entre os pontos das pontas: em R1, $12 - 10 = 2\,\text{V}$.
+3. Some as três: $2 + 4 + 6 = 12\,\text{V}$, a tensão da bateria. A energia que cada carga ganha na bateria é toda gasta nos resistores, nem mais, nem menos.
+4. Arraste o controle da bateria para 24 V. Todas as tensões dobram, e a soma continua igual à da bateria.
+5. Resolva os dois desafios abaixo da simulação. Dica: R3 fica sempre com a metade da tensão da bateria.
+
+A regra do passo 3 vale para qualquer circuito: numa volta completa, a soma das tensões que as cargas ganham é igual à soma das que elas perdem. Ela se chama **lei das tensões de Kirchhoff** e volta com nome e sobrenome na aula <LinkAula id="m02-circuitos-cc/05-leis-de-kirchhoff" />. E por que R3 ficou com a maior fatia? Porque é o resistor maior. Isso ficará claro com a Lei de Ohm, na próxima aula, e vira ferramenta de projeto na aula <LinkAula id="m02-circuitos-cc/06-divisores-de-tensao-e-corrente" />.
+
+## Exemplo resolvido: a tensão entre dois pontos quaisquer
+
+Com os valores do simulador (bateria de 12 V), qual é a tensão entre B e D? E entre A e C? E entre C e B?
+
+**Entre B e D.** Basta subtrair os valores dos pontos:
+
+$$
+V_{BD} = V_B - V_D = 10\,\text{V} - 0\,\text{V} = 10\,\text{V}
+$$
+
+É a soma das tensões de R2 e R3 ($4 + 6 = 10\,\text{V}$), que estão entre esses dois pontos.
+
+**Entre A e C.**
+
+$$
+V_{AC} = V_A - V_C = 12\,\text{V} - 6\,\text{V} = 6\,\text{V}
+$$
+
+De novo, é a soma do que fica no caminho: R1 e R2 ($2 + 4 = 6\,\text{V}$).
+
+**Entre C e B.**
+
+$$
+V_{CB} = V_C - V_B = 6\,\text{V} - 10\,\text{V} = -4\,\text{V}
+$$
+
+O sinal de menos diz que C está num nível mais baixo que B. Um multímetro com a ponta vermelha em C e a preta em B mostraria −4 V.
+
+**E se a referência mudasse?** Suponha que alguém resolva usar o ponto C como referência. Então C passa a valer 0 V, e todos os outros pontos descem 6 V: A fica com 6 V, B com 4 V e D com −6 V. Os valores dos pontos mudaram, mas a tensão entre dois pontos não muda: entre A e B continuam $6 - 4 = 2\,\text{V}$, os mesmos 2 V de R1. A referência é só uma escolha de onde fica o zero.
+
+## Pilhas e baterias
+
+Toda pilha tem dois materiais diferentes separados por uma substância que conduz íons, o eletrólito. Uma reação química entre eles tira elétrons de um lado e acumula do outro, criando a tensão entre os terminais. Quando você liga um circuito, os elétrons saem pelo terminal negativo, percorrem o circuito e voltam pelo positivo, e a reação continua repondo a diferença até os materiais se esgotarem.
+
+<PilhaEmCorte />
+
+O valor da tensão vem da química, não do tamanho. Uma pilha AAA e uma pilha D têm a mesma tensão; a grande guarda mais material e aguenta mais tempo. Os valores abaixo são típicos, com a célula carregada e sem carga ligada:
+
+| Célula ou bateria | Tensão típica | Onde aparece |
+|---|---|---|
+| Pilha alcalina (AAA, AA, C, D) | 1,5 V (1,6 V quando nova) | controles, brinquedos, lanternas |
+| Pilha recarregável de níquel (NiMH) | 1,2 V | substituta das alcalinas |
+| Pilha de lítio tipo moeda (CR2032) | 3 V | placas-mãe, chaves de carro, controles de portão |
+| Célula de íon-lítio | 3,7 V (4,2 V carregada) | celulares, notebooks, ferramentas |
+| Bateria de 9 V | 9 V (seis células pequenas) | detectores, multímetros |
+| Bateria de chumbo-ácido | 12 V (seis células de cerca de 2 V) | carro, nobreak, bateria reserva do portão |
+
+O nome técnico de um conjunto de células é bateria, mas no Brasil se chama de "pilha" a célula avulsa e de "bateria" quase todo o resto.
+
+### Pilhas em série
+
+Quando o + de uma pilha encosta no − da próxima, como dentro de uma lanterna, as tensões se somam. É por isso que duas pilhas AA dão 3 V, e seis células de chumbo dão os 12 V da bateria do carro. Você já fez isso na lanterna da aula <LinkAula id="m00-comece-aqui/01-como-usar-este-curso" />.
+
+E se uma pilha entrar invertida? Ela passa a subtrair em vez de somar. Num controle remoto de quatro pilhas com uma ao contrário:
+
+$$
+1{,}5 + 1{,}5 + 1{,}5 - 1{,}5 = 3\,\text{V}
+$$
+
+O aparelho, que precisava de 6 V, fica com metade e não funciona, e a pilha invertida é forçada a receber corrente ao contrário, o que pode fazê-la vazar. Ligar pilhas lado a lado, todos os + juntos e todos os − juntos, mantém a tensão e soma a capacidade, mas só é seguro com pilhas iguais e com a mesma carga; o assunto volta na aula <LinkAula id="m02-circuitos-cc/07-fontes-reais-e-baterias" />.
+
+## A analogia da água (e onde ela falha)
+
+Muita gente entende eletricidade comparando com água num encanamento. A analogia ajuda, desde que você saiba onde ela para de funcionar.
+
+<AnalogiaAgua />
+
+**Onde ela funciona:**
+
+- Sem diferença de altura (ou de pressão), a água não corre. Sem tensão, não há corrente.
+- A bomba não cria água; ela só eleva a água que já existe. A bateria também não cria elétrons: ela empurra os que já estão nos fios.
+- Um cano estreito deixa passar menos água. Uma resistência maior deixa passar menos corrente.
+- A água que desce pelo cano volta para o reservatório e sobe de novo. A corrente também percorre um circuito fechado.
+
+**Onde ela falha:**
+
+- **O fio já está cheio.** Quando você liga a torneira de um cano vazio, a água leva um tempo para chegar. Num fio, os elétrons livres já estão em todo lugar; ao fechar a chave, todos começam a andar quase ao mesmo tempo, como você viu na aula de corrente.
+- **Circuito aberto não vaza.** Um cano cortado derrama água no chão. Um fio cortado simplesmente para de conduzir: os elétrons não "pingam" pela ponta.
+- **Ela não explica o resto da eletricidade.** Ímãs, motores, capacitores e indutores têm comportamentos que a água não imita bem. Quando chegarmos lá, a analogia fica para trás.
+
+Use a analogia para ter intuição, e as equações para ter certeza.
+
+## Na prática: medindo no portão
+
+<RealCase title="Conferindo a alimentação dos acessórios do portão">
+A central de um portão eletrônico recebe 127 V ou 220 V da rede, mas os acessórios dela (fotocélula, receptor, botoeira) trabalham com tensões baixas, tipicamente 12 V ou 24 V contínuos, disponíveis em bornes marcados como "+12V", "+24V" e "GND". Quando a fotocélula não liga, a primeira medida é a tensão que chega até ela:
+
+1. Coloque o multímetro em **V⎓** (tensão contínua), ponta preta no **COM** e vermelha no **VΩ**.
+2. Na central, ponta preta no **GND** e vermelha no **+12V**: deve aparecer um valor perto do marcado. Zero indica que não há alimentação; um valor negativo, que as pontas estão trocadas.
+3. Repita a medida nos bornes da própria fotocélula, lá no fim do cabo. Se ali a tensão for bem menor que na central, há um fio rompido ou uma emenda ruim no caminho. A próxima aula mostra por que um fio pode "comer" tensão.
+
+Muitos automatizadores também têm uma bateria de reserva, em geral de chumbo-ácido de 12 V, que mantém o portão funcionando na falta de energia. Uma bateria dessas carregada e em repouso costuma marcar entre 12,6 V e 12,8 V; bem abaixo de 12 V, ela está descarregada ou no fim da vida. Medir é o mesmo procedimento: preta no −, vermelha no +.
+
+Nessas medidas você só encosta nos bornes de baixa tensão. A parte da central ligada à rede elétrica fica coberta e você não mexe nela; se precisar, siga as regras da aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />. A central por dentro é o assunto da aula <LinkAula id="m16-portao/03-a-central-por-dentro" />.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **"Este ponto tem quantos volts?"** Sem dizer em relação a quê, a pergunta não tem resposta. Combine a referência, em geral o GND.
+- **Medir tensão com o multímetro em série.** Tensão se mede em paralelo: uma ponta em cada um dos dois pontos, com o circuito funcionando. A aula <LinkAula id="m03-medicoes/02-medindo-tensao" /> detalha.
+- **Confundir V⎓ com V~.** Pilhas, baterias e fontes de acessórios são de corrente contínua (V⎓). A tomada é alternada (V~).
+- **Achar que baixa tensão é sempre inofensiva.** 12 V não dão choque perigoso na pele seca, mas uma bateria de carro ou de nobreak consegue entregar centenas de ampères num curto. Uma chave de boca que encoste nos dois polos fica em brasa e pode fazer a bateria explodir. Tire anéis, pulseiras e relógio para mexer em baterias.
+- **Misturar pilhas velhas e novas, ou de tipos diferentes.** A pilha mais fraca acaba forçada pelas outras e pode vazar e corroer os contatos.
+- **Tratar o GND da placa como se fosse o fio terra da casa.** São coisas diferentes, como você viu acima.
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Uma fonte de 24 V alimenta três resistores ligados em série. No primeiro você mede 5 V e no segundo, 11 V. Quanto deve medir o terceiro?',
+      answer: 8,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        'Numa volta completa, as tensões nos resistores somam a tensão da fonte: 24 − 5 − 11 = 8 V.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'O que quer dizer "a tomada tem 127 V"?',
+      options: [
+        {
+          text: 'Que existem 127 V entre a fase e o neutro da tomada',
+          correct: true,
+          feedback: 'Isso. A tensão é sempre entre dois pontos; na tomada, entre os dois fios.',
+        },
+        {
+          text: 'Que cada furo da tomada tem 127 V',
+          feedback:
+            'Um ponto sozinho não tem tensão. O valor só existe comparando dois pontos, e na tomada a comparação é entre fase e neutro.',
+        },
+        {
+          text: 'Que passam 127 ampères pela tomada',
+          feedback:
+            'Volt é unidade de tensão, não de corrente. A corrente depende do aparelho que você liga.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Uma pilha guardada na gaveta tem tensão entre os terminais, mesmo sem corrente.',
+      answer: true,
+      explanation:
+        'A tensão está lá, cerca de 1,5 V. Falta só o caminho fechado para a corrente passar.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um controle usa quatro pilhas AA em série. Uma delas foi colocada ao contrário. Qual é a tensão total?',
+      options: [
+        {
+          text: '3 V',
+          correct: true,
+          feedback: 'Isso: 1,5 + 1,5 + 1,5 − 1,5 = 3 V. A pilha invertida subtrai em vez de somar.',
+        },
+        {
+          text: '4,5 V',
+          feedback:
+            'Seria o caso de a pilha invertida simplesmente não contar. Mas ela empurra no sentido contrário e subtrai 1,5 V.',
+        },
+        {
+          text: '6 V',
+          feedback: '6 V é o valor com as quatro pilhas na posição certa.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'No circuito da simulação, com o negativo da bateria como referência, o ponto B tem 10 V e o ponto C tem 6 V. Se a referência passar a ser o ponto C, quanto vale o ponto B?',
+      options: [
+        {
+          text: '4 V',
+          correct: true,
+          feedback:
+            'Isso. Mudar a referência desloca todos os valores juntos; a diferença entre B e C continua 10 − 6 = 4 V.',
+        },
+        {
+          text: '10 V',
+          feedback:
+            '10 V era o valor em relação ao negativo da bateria. Com outra referência, o valor do ponto muda.',
+        },
+        {
+          text: '16 V',
+          feedback:
+            'Ao trocar a referência para C, os valores descem 6 V, não sobem: 10 − 6 = 4 V.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Quanta energia, em joules, cada coulomb de carga ganha ao atravessar uma bateria de 12 V?',
+      answer: 12,
+      tolerance: 0.02,
+      unit: 'J',
+      explanation: '1 V = 1 J/C. Numa bateria de 12 V, cada coulomb ganha 12 J.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada parte da analogia da água ao que ela representa no circuito.',
+      pairs: [
+        ['Bomba', 'Bateria'],
+        ['Diferença de altura', 'Tensão'],
+        ['Vazão', 'Corrente'],
+        ['Cano estreito', 'Resistência'],
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Tensão é a energia que cada carga ganha ou perde entre dois pontos. A unidade é o volt: 1 V = 1 J/C.
+- Tensão é sempre **entre** dois pontos. Para falar do valor de um ponto, combine uma referência (GND, negativo, massa), que vale 0 V.
+- O multímetro mostra o valor da ponta vermelha menos o da preta; com as pontas trocadas, o sinal inverte.
+- Numa volta completa do circuito, as tensões nos componentes somam a tensão da fonte.
+- A tensão de uma pilha vem da química dos materiais. Em série, as tensões se somam; uma pilha invertida subtrai.
+- A analogia da água ajuda na intuição, mas não explica tudo: o fio já está cheio de elétrons e um circuito aberto não vaza.

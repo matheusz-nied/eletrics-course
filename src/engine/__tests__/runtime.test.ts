@@ -5,6 +5,7 @@ import { WorkerSimulation } from '../runtime/client';
 import { SimHost } from '../runtime/host';
 import { LocalSimulation, type Clock } from '../runtime/local';
 import type { FromWorker, ToWorker } from '../runtime/protocol';
+import { gateCircuit } from './gate-circuit';
 import { loop } from './utils';
 
 /** Deterministic clock: time moves only with advance(). */
@@ -135,6 +136,25 @@ describe('LocalSimulation', () => {
     const doc = lampCircuit();
     doc.elements[0].type = 'pilha';
     await expect(sim.load(doc)).rejects.toThrow('tipo de dispositivo desconhecido "pilha"');
+  });
+
+  it('plays the quasi-static analysis in real time, a mechanical step at a time', async () => {
+    const clock = new FakeClock();
+    const sim = new LocalSimulation(clock);
+    await sim.load(gateCircuit());
+    const frames: SimFrame[] = [];
+    sim.subscribe((f) => frames.push(f));
+    sim.setParam('BOT', 'pressed', true);
+    sim.play();
+    clock.advance(1000);
+    expect(frames.at(-1)!.t).toBeCloseTo(1, 1);
+    expect(frames.at(-1)!.readouts['U1.estado']).toBe('ABRINDO');
+    sim.pause();
+    sim.setParam('BOT', 'pressed', false);
+    const later = await sim.runUntil(6, { maxFrames: 10 });
+    expect(later.at(-1)!.t).toBeCloseTo(6, 6);
+    expect(later.at(-1)!.readouts['G1.velocity']).toBeGreaterThan(0.2);
+    sim.dispose();
   });
 
   it('createSimulation runs on the calling thread when there is no Worker', async () => {

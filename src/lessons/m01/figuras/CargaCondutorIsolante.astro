@@ -1,0 +1,123 @@
+---
+/*
+ * Lesson 1.1: an electrical wire is a conductor wrapped in an insulator. Cross
+ * section of a stranded wire and a side view with the end stripped.
+ */
+import Figure from '../../../components/Figure.astro';
+
+const STRANDS = [
+  { x: 0, y: 0 },
+  ...Array.from({ length: 6 }, (_, i) => {
+    const rad = (i * Math.PI) / 3;
+    return { x: 21 * Math.cos(rad), y: 21 * Math.sin(rad) };
+  }),
+];
+---
+
+<Figure
+  wide
+  alt="Um fio elétrico visto em corte e de lado. Por dentro, sete fios finos de cobre torcidos, que formam o condutor. Por fora, uma capa de plástico PVC, o isolante. Na ponta descascada aparece o cobre."
+  caption="Todo fio de instalação junta os dois tipos de material: o cobre, um condutor cheio de elétrons livres, leva a corrente; a capa de PVC, um isolante, mantém a corrente dentro do caminho e protege quem encosta no fio."
+>
+  <svg
+    class="fig-fio"
+    viewBox="0 0 640 200"
+    width="640"
+    height="200"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    font-family="var(--font-sans)"
+    font-size="18"
+  >
+    <!-- Cross section -->
+    <circle cx="90" cy="100" r="52" class="fig-fio__pvc" stroke-width="2"></circle>
+    {STRANDS.map((s) => (
+      <circle cx={90 + s.x} cy={100 + s.y} r="10.5" class="fig-fio__cobre" stroke-width="1.5" />
+    ))}
+    <text x="90" y="186" text-anchor="middle" class="fig-fio__small">
+      o fio em corte
+    </text>
+
+    <!-- Side view: insulation -->
+    <rect
+      x="180"
+      y="70"
+      width="290"
+      height="60"
+      rx="12"
+      class="fig-fio__pvc"
+      stroke-width="2"
+    ></rect>
+    <!-- Side view: stripped copper strands -->
+    <path d="M470 84h112M470 100h120M470 116h112" class="fig-fio__fios" stroke-width="10"></path>
+    <path
+      d="M486 80l12 40M512 80l12 40M538 80l12 40M564 80l12 40"
+      class="fig-fio__torcao"
+      stroke-width="1.5"
+    ></path>
+
+    <!-- Labels -->
+    <path d="M560 72V58" class="fig-fio__leader" stroke-width="1.2"></path>
+    <text x="620" y="28" text-anchor="end" class="fig-fio__label fig-fio__label--cobre">
+      condutor: cobre
+    </text>
+    <text x="620" y="49" text-anchor="end" class="fig-fio__small">
+      elétrons livres circulam
+    </text>
+
+    <path d="M325 132v14" class="fig-fio__leader" stroke-width="1.2"></path>
+    <text x="325" y="164" text-anchor="middle" class="fig-fio__label">
+      isolante: PVC
+    </text>
+    <text x="325" y="186" text-anchor="middle" class="fig-fio__small">
+      elétrons presos aos átomos
+    </text>
+  </svg>
+</Figure>
+
+<style>
+  .fig-fio {
+    color: var(--fg);
+  }
+
+  .fig-fio text {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .fig-fio__label {
+    font-weight: 650;
+  }
+
+  .fig-fio text.fig-fio__label--cobre {
+    fill: var(--copper);
+  }
+
+  .fig-fio text.fig-fio__small {
+    fill: var(--fg-muted);
+    font-size: 16px;
+  }
+
+  .fig-fio__pvc {
+    fill: color-mix(in oklab, var(--accent) 32%, var(--bg));
+    stroke: color-mix(in oklab, var(--accent) 45%, var(--fg-subtle));
+  }
+
+  .fig-fio__cobre {
+    fill: color-mix(in oklab, var(--copper) 55%, var(--bg));
+    stroke: var(--copper);
+  }
+
+  .fig-fio__fios {
+    stroke: color-mix(in oklab, var(--copper) 60%, var(--bg));
+  }
+
+  .fig-fio__torcao {
+    stroke: var(--copper);
+  }
+
+  .fig-fio__leader {
+    stroke: var(--fg-subtle);
+  }
+</style>

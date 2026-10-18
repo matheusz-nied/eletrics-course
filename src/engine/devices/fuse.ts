@@ -1,4 +1,4 @@
-import { defineDevice, num, str, TWO_PINS } from '../device';
+import { acSquared, defineDevice, num, str, TWO_PINS } from '../device';
 import { formatSI } from '../messages';
 import { R_OPEN } from '../models/constants';
 import { relax } from '../models/filters';
@@ -66,12 +66,13 @@ export default defineDevice({
       update(step, x, ctx) {
         current = (x.v(a) - x.v(b)) / resistance();
         if (!ctx.commit || blown) return;
-        heat = relax(heat, current * current, step.dt, i2t() / melt());
+        const squared = current * current + acSquared(step, 0);
+        heat = relax(heat, squared, step.dt, i2t() / melt());
         if (heat >= melt()) {
           blown = true;
           ctx.emit(
             'damaged',
-            `O fusível ${id} rompeu: corrente de ${formatSI(Math.abs(current), 'A')}, nominal ${formatSI(rating(), 'A')}.`,
+            `O fusível ${id} rompeu: corrente de ${formatSI(Math.sqrt(squared), 'A')}, nominal ${formatSI(rating(), 'A')}.`,
           );
           ctx.discontinuity();
         }

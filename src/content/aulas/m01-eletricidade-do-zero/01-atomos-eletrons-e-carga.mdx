@@ -1,0 +1,321 @@
+---
+titulo: Átomos, elétrons e carga
+modulo: m01-eletricidade-do-zero
+ordem: 1
+nivel: B
+duracaoMin: 20
+objetivos:
+  - Descrever o átomo e dizer de onde vem a carga elétrica
+  - Usar o coulomb e a carga do elétron para comparar quantidades de carga
+  - Explicar por que os metais conduzem e os plásticos isolam, a partir dos elétrons livres
+  - Reconhecer a eletricidade estática e proteger placas eletrônicas contra descargas
+prerequisitos: [m00-comece-aqui/01-como-usar-este-curso]
+tags: [átomo, elétron, carga elétrica, coulomb, condutor, isolante, eletricidade estática, ESD]
+seguranca: nenhum
+---
+
+import AtomoCobre from '../../../lessons/m01/figuras/AtomoCobre.astro';
+import CargaCondutorIsolante from '../../../lessons/m01/figuras/CargaCondutorIsolante.astro';
+import EletronsLivres from '../../../lessons/m01/EletronsLivres';
+
+Num dia seco, você tira um casaco de lã, encosta na maçaneta e leva um estalo. Minutos depois, aperta o interruptor e a lâmpada da sala acende na hora. As duas coisas parecem não ter nada a ver, mas têm a mesma origem: partículas minúsculas chamadas elétrons, que existem em toda matéria.
+
+Esta aula começa a eletricidade do zero. Você vai ver o que é carga elétrica, de onde ela vem e por que ela anda tão bem pelo cobre de um fio e tão mal pela capa de plástico em volta dele. E vai entender um cuidado que parece exagero até o dia em que faz falta: quando você for trocar a central do portão, vai segurar uma placa que pode ser estragada por um estalo tão pequeno que você nem sente.
+
+## Do que tudo é feito
+
+Tudo o que existe, do fio de cobre ao seu dedo, é feito de **átomos**. Eles são pequenos demais para qualquer microscópio comum: a espessura de um fio de cabelo tem algumas centenas de milhares de átomos lado a lado.
+
+Cada átomo tem duas partes:
+
+- No centro, o **núcleo**, com dois tipos de partícula: os **prótons**, que têm carga elétrica positiva, e os **nêutrons**, que não têm carga.
+- Em volta do núcleo, os <Term id="eletron">elétrons</Term>, partículas muito mais leves, com carga elétrica negativa.
+
+Num átomo completo, o número de elétrons é igual ao de prótons. As cargas positivas e negativas se equilibram, e o átomo, visto de fora, não tem carga: dizemos que ele é **neutro**. Um átomo de cobre, por exemplo, tem 29 prótons e 29 elétrons.
+
+<AtomoCobre />
+
+O desenho mostra o modelo de camadas, uma simplificação útil: os elétrons ficam em níveis cada vez mais afastados do núcleo. Os de dentro estão bem presos. O de fora, sozinho na última camada do cobre, fica longe e preso fracamente. Guarde esse elétron solitário, porque ele é o motivo de os fios de instalação serem de cobre.
+
+## Carga elétrica
+
+A <Term id="carga-eletrica">carga elétrica</Term> é a propriedade que faz as partículas se empurrarem ou se puxarem à distância. Existem dois tipos, que por convenção se chamam positivo e negativo, e a regra é curta:
+
+- **Cargas de mesmo sinal se repelem**: dois elétrons se empurram.
+- **Cargas de sinais opostos se atraem**: o núcleo positivo puxa os elétrons, e é isso que mantém o átomo inteiro.
+- Quanto mais perto estão as cargas, mais forte é a força entre elas.
+
+A carga de um elétron e a de um próton têm exatamente o mesmo tamanho, com sinais opostos. É a menor carga que se encontra solta na natureza, e é minúscula.
+
+Um objeto fica **carregado** quando o equilíbrio se quebra. Nos sólidos, os prótons não saem do lugar: estão presos nos núcleos. Quem muda de lugar são os elétrons. Por isso:
+
+- **Carga negativa** quer dizer que o objeto **ganhou** elétrons.
+- **Carga positiva** quer dizer que ele **perdeu** elétrons.
+
+A carga nunca é criada nem destruída: ela só passa de um lugar para outro. Quando você esfrega um balão no cabelo, os elétrons que o balão ganha são exatamente os que o cabelo perdeu.
+
+### O coulomb
+
+A unidade de carga é o <Term id="coulomb">coulomb</Term>, de símbolo C. A carga de um elétron, chamada de **carga elementar** e escrita com a letra $e$, vale:
+
+$$
+e \approx 1{,}6 \times 10^{-19}\,\text{C}
+$$
+
+O número $10^{-19}$ quer dizer "dividido por 1 seguido de 19 zeros". Essa forma de escrever, a notação científica, aparece muito em eletricidade e é o assunto da aula <LinkAula id="m01-eletricidade-do-zero/06-unidades-e-ordens-de-grandeza" />.
+
+Se um objeto ganhou ou perdeu $n$ elétrons, a carga dele é:
+
+$$
+Q = n \cdot e
+$$
+
+Aqui, $Q$ é a carga em coulombs (C), $n$ é o número de elétrons e $e$ é a carga elementar. Virando a conta ao contrário, dá para saber quantos elétrons formam um coulomb:
+
+$$
+n = \frac{1\,\text{C}}{1{,}602 \times 10^{-19}\,\text{C}} \approx 6{,}24 \times 10^{18}\ \text{elétrons}
+$$
+
+São seis quintilhões e duzentos e quarenta quatrilhões de elétrons. Um coulomb é muita carga parada num lugar, mas é pouca carga passando por um fio: num ferro de passar roupa ligado, passam vários coulombs a cada segundo, como você vai ver na próxima aula.
+
+<DeepDive title="A força entre cargas: a lei de Coulomb">
+
+A força entre duas cargas paradas foi medida por Charles-Augustin de Coulomb no século XVIII:
+
+$$
+F = k \cdot \frac{q_1 \cdot q_2}{d^2}
+$$
+
+$F$ é a força em newtons (N), $q_1$ e $q_2$ são as cargas em coulombs, $d$ é a distância entre elas em metros e $k \approx 9 \times 10^{9}\,\text{N·m}^2/\text{C}^2$ é uma constante. A distância aparece ao quadrado: com metade da distância, a força fica quatro vezes maior.
+
+Duas cargas de 1 C a 1 m uma da outra se empurrariam com:
+
+$$
+F = 9 \times 10^{9} \cdot \frac{1 \cdot 1}{1^2} = 9 \times 10^{9}\,\text{N}
+$$
+
+É o peso de mais de 900 mil toneladas. Por que, então, um fio por onde passa um coulomb a cada segundo não sai voando? Porque o fio continua neutro o tempo todo: para cada elétron que entra numa ponta, outro sai pela outra, e a carga negativa dos elétrons livres continua compensada pela positiva dos átomos de cobre. A corrente é carga **em movimento**, não carga acumulada.
+
+</DeepDive>
+
+## Condutores e isolantes
+
+No cobre, o elétron solitário da última camada se solta do seu átomo. Num pedaço de metal, os átomos ficam tão juntos que esses elétrons passam a circular entre todos eles, como se fossem de ninguém. São os **elétrons livres**. O cobre tem um por átomo, e isso dá um número difícil de imaginar: cerca de $8{,}5 \times 10^{22}$ elétrons livres em cada centímetro cúbico, um cubinho do tamanho de um dado.
+
+Um material com muitos elétrons livres é um <Term id="condutor">condutor</Term>: basta um pequeno empurrão para todos esses elétrons andarem juntos. Os metais são bons condutores. Nos materiais em que os elétrons ficam presos aos seus átomos, como plásticos, borracha e vidro, quase não existe o que se mover. Esses são os <Term id="isolante">isolantes</Term>.
+
+Todo fio de instalação junta os dois tipos de material:
+
+<CargaCondutorIsolante />
+
+| Material | Comportamento | Onde aparece |
+| --- | --- | --- |
+| Cobre | Condutor muito bom | Fios, trilhas das placas, enrolamento do motor do portão |
+| Alumínio | Condutor bom e leve | Cabos da rede da rua |
+| Prata e ouro | Condutores ótimos; o ouro não oxida | Contatos de relés e conectores |
+| Água da torneira | Conduz, por causa dos sais dissolvidos | Por isso eletricidade e água não combinam |
+| PVC e borracha | Isolantes | Capa dos fios, cabo das ferramentas, luvas |
+| Porcelana e vidro | Isolantes | Isoladores dos postes |
+| Ar seco | Isolante, até ser rompido | Entre contatos abertos; o raio rompe o ar |
+| Silício | Semicondutor | Chips, transistores, LEDs |
+
+Dois cuidados com essa tabela. Primeiro, nenhum isolante é perfeito: com tensão suficiente, ele "rompe" e deixa a corrente passar (é o que o raio faz com o ar), e sujeira, umidade e capas ressecadas e rachadas também abrem caminho. Segundo, existe um meio-termo: os **semicondutores**, como o silício, conduzem pouco, mas dá para controlar quanto. Eles são a base de toda a eletrônica e aparecem na aula <LinkAula id="m09-semicondutores/01-juncao-pn" />.
+
+## Explore: os elétrons livres dentro de um fio
+
+A animação mostra um pedaço de fio de cobre visto de muito, muito perto. Os círculos com "+" são os átomos de cobre que perderam o elétron da última camada (íons), presos na estrutura do metal. Os pontos azuis são os elétrons livres, um para cada átomo. A linha tracejada marca uma seção do fio, e o contador registra quantos elétrons a atravessam em cada sentido.
+
+<EletronsLivres client:visible />
+
+Faça os testes nesta ordem:
+
+1. Com a pilha **desligada**, observe o contador por uns 10 segundos. Muitos elétrons cruzam a linha, mas para os dois lados. O saldo fica perto de zero.
+2. Marque **Destacar um elétron** e siga o elétron vermelho. Ele anda em zigue-zague, batendo nos íons e mudando de direção o tempo todo.
+3. **Ligue a pilha.** O elétron destacado continua no zigue-zague, mas aos poucos vai para a direita. O saldo passa a crescer sempre para o mesmo lado.
+4. Desligue a pilha e veja o saldo parar de crescer.
+
+O que você viu nos passos 3 e 4 é a **corrente elétrica**: não o movimento dos elétrons, que existe sempre, mas o deslocamento lento do conjunto todo para um lado. Quanto mais elétrons cruzam a seção por segundo, maior a corrente. A próxima aula, <LinkAula id="m01-eletricidade-do-zero/02-corrente-eletrica" />, transforma esse contador numa unidade de medida.
+
+<Callout type="nota" title="O que a animação exagera">
+Nos elétrons livres do cobre, a agitação desordenada chega a cerca de 1.500 km por segundo, enquanto a deriva provocada por uma pilha é de frações de milímetro por segundo: bilhões de vezes mais lenta. Se a animação mostrasse essa proporção, você nunca veria a deriva acontecer.
+</Callout>
+
+## Exemplo resolvido: quanta carga tem um estalo
+
+Andando num carpete num dia seco, uma pessoa pode acumular uma carga de cerca de 1 µC (um microcoulomb, um milionésimo de coulomb). É um valor típico, que varia muito com a roupa, o calçado e a umidade do ar. Quantos elétrons a mais isso representa?
+
+**Passo 1: escreva a carga em coulombs.**
+
+$$
+Q = 1\,\mu\text{C} = 1 \times 10^{-6}\,\text{C}
+$$
+
+**Passo 2: divida pela carga de um elétron.**
+
+$$
+n = \frac{Q}{e} = \frac{1 \times 10^{-6}\,\text{C}}{1{,}6 \times 10^{-19}\,\text{C}} \approx 6{,}2 \times 10^{12}\ \text{elétrons}
+$$
+
+São mais de seis trilhões de elétrons a mais, e bastam para dar o estalo na maçaneta.
+
+**Passo 3: compare com os elétrons livres do cobre.** Um único centímetro cúbico de cobre tem $8{,}5 \times 10^{22}$ elétrons livres:
+
+$$
+\frac{8{,}5 \times 10^{22}}{6{,}2 \times 10^{12}} \approx 1{,}4 \times 10^{10}
+$$
+
+O excesso que dá o choque da maçaneta é mais de dez bilhões de vezes menor do que os elétrons livres que existem num cubinho de cobre do tamanho de um dado. A conclusão é importante: bastam desequilíbrios minúsculos de carga para produzir efeitos que você sente. Num fio, os elétrons livres estão sempre lá, em quantidade enorme; o que a pilha faz é colocá-los em movimento.
+
+## Eletricidade estática
+
+A <Term id="eletricidade-estatica">eletricidade estática</Term> é carga parada, acumulada num objeto. Ela aparece quase sempre por atrito: quando dois materiais diferentes se esfregam, elétrons passam de um para o outro. Exemplos do dia a dia:
+
+- O balão esfregado no cabelo, que depois gruda na parede.
+- O pente de plástico que atrai pedacinhos de papel.
+- A roupa sintética que sai do varal ou da secadora estalando.
+- O choque ao sair do carro, depois de deslizar no banco.
+
+Ela é mais comum em **dias secos** e com **materiais isolantes**. Num isolante, a carga fica onde foi parar, porque os elétrons não conseguem circular para se espalhar. Com o ar úmido, uma película fina de água nas superfícies deixa a carga escapar aos poucos.
+
+A tensão da estática chega a milhares de volts, mas a carga é tão pequena que escapa num instante, com uma pequena faísca. Essa descarga é a <Term id="descarga-eletrostatica">descarga eletrostática</Term>, ou ESD, a sigla em inglês. O raio é o mesmo fenômeno numa escala gigantesca, entre nuvens carregadas e o chão.
+
+Para as pessoas, a estática é quase sempre só um susto. Há uma exceção conhecida: perto de vapores inflamáveis, como os de gasolina ou de solventes, uma faísca de estática pode iniciar um incêndio. Por isso caminhões-tanque e tanques de combustível são aterrados durante a descarga.
+
+Para a eletrônica, a história é outra. Uma pessoa costuma sentir a descarga só quando ela passa de alguns milhares de volts. Muitos componentes, como microcontroladores e transistores, podem ser danificados por descargas bem menores do que isso. Ou seja: **dá para estragar uma placa sem sentir nada**. E o dano nem sempre aparece na hora: às vezes a placa funciona e falha semanas depois.
+
+<RealCase title="A placa nova da central do portão">
+Na aula <LinkAula id="m16-portao/07-trocar-motor-e-central" />, você vai trocar o motor e a central do portão. A central é uma placa com um microcontrolador, o "cérebro" que comanda o motor, e outros componentes sensíveis a descargas eletrostáticas. Ela costuma vir num saco antiestático, de plástico cinza-prateado ou rosa, que não deixa a carga se acumular.
+
+O que fazer na hora da troca:
+
+- Siga primeiro a regra de ouro da aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />: desligue o disjuntor do portão e confirme a ausência de tensão.
+- Deixe a placa nova no saco até o momento de instalar.
+- Antes de pegar a placa, encoste a mão numa parte metálica aterrada, como a carcaça do motor ou do quadro, para descarregar o seu corpo.
+- Segure a placa pelas bordas. Não toque nos pinos dos componentes nem nas trilhas.
+- Evite trabalhar de blusa de lã ou de tecido sintético, principalmente em dias secos.
+- Se for guardar a placa antiga para diagnóstico, coloque-a no saco antiestático da nova.
+
+Quem trabalha em bancada usa uma pulseira antiestática, ligada ao terra por um fio, que mantém o corpo sempre descarregado. O que tem dentro de uma central é o assunto da aula <LinkAula id="m16-portao/03-a-central-por-dentro" />.
+</RealCase>
+
+## Erros comuns
+
+- **"A corrente é feita de elétrons que saem da pilha e viajam até a lâmpada."** Os elétrons livres já estão em todo o fio, em quantidade enorme. A pilha empurra todos ao mesmo tempo.
+- **"Um objeto com carga positiva ganhou prótons."** Nos sólidos, os prótons não saem do núcleo. Carga positiva quer dizer que o objeto **perdeu** elétrons.
+- **"Isolante nunca conduz."** Com tensão suficiente, todo isolante rompe. Umidade, sujeira e capas ressecadas e rachadas também deixam a corrente passar. Fio com capa danificada se troca.
+- **"Água é isolante."** A água pura conduz muito pouco, mas a água da torneira, a da chuva e o suor têm sais dissolvidos e conduzem. É por isso que mão molhada e eletricidade são uma combinação perigosa.
+- **"Se eu não senti o choque, a placa está bem."** Descargas que você não sente podem danificar componentes eletrônicos.
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Um balão esfregado no cabelo fica com carga negativa. O que aconteceu?',
+      options: [
+        {
+          text: 'O balão ganhou elétrons que vieram do cabelo',
+          correct: true,
+          feedback:
+            'Isso. Com o atrito, elétrons passaram do cabelo para o balão. O cabelo, que perdeu elétrons, ficou com carga positiva.',
+        },
+        {
+          text: 'O balão perdeu prótons para o cabelo',
+          feedback:
+            'Os prótons ficam presos nos núcleos e não passam de um objeto para outro. Quem muda de lugar são os elétrons.',
+        },
+        {
+          text: 'O atrito criou carga negativa no balão',
+          feedback:
+            'A carga nunca é criada: ela só muda de lugar. A carga negativa do balão é exatamente a que o cabelo perdeu.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um pente atritado ganhou 5 × 10¹² elétrons a mais. Qual é o tamanho da carga dele, em µC? Use e = 1,6 × 10⁻¹⁹ C e ignore o sinal.',
+      answer: 0.8,
+      tolerance: 0.03,
+      unit: 'µC',
+      explanation:
+        'Q = n · e = 5 × 10¹² × 1,6 × 10⁻¹⁹ C = 8 × 10⁻⁷ C = 0,8 µC. Como o pente ganhou elétrons, a carga é negativa: −0,8 µC.',
+    },
+    {
+      type: 'vf',
+      prompt: 'Num fio de cobre sem nenhuma pilha ligada, os elétrons livres ficam parados.',
+      answer: false,
+      explanation:
+        'Eles se agitam o tempo todo, em todas as direções, mas na média não vão a lugar nenhum. A pilha acrescenta uma deriva lenta para um lado: isso é a corrente.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que o cobre conduz tão bem a eletricidade?',
+      options: [
+        {
+          text: 'Porque cada átomo de cobre deixa um elétron livre circulando pelo metal',
+          correct: true,
+          feedback:
+            'Isso. Com cerca de 8,5 × 10²² elétrons livres por centímetro cúbico, basta um pequeno empurrão para todos andarem juntos.',
+        },
+        {
+          text: 'Porque o cobre tem mais prótons que elétrons',
+          feedback:
+            'Um pedaço de cobre tem prótons e elétrons em número igual e é neutro. O que importa é que parte dos elétrons fica livre.',
+        },
+        {
+          text: 'Porque o cobre é um metal pesado',
+          feedback:
+            'O peso não tem a ver com a condução. O alumínio é leve e também conduz bem, porque também tem elétrons livres.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada material ao seu comportamento elétrico.',
+      pairs: [
+        ['Cobre', 'Condutor: tem muitos elétrons livres'],
+        ['PVC da capa do fio', 'Isolante: os elétrons ficam presos aos átomos'],
+        ['Silício', 'Semicondutor: conduz pouco, de forma controlável'],
+        ['Água da torneira', 'Conduz por causa dos sais dissolvidos'],
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você vai instalar a placa nova da central do portão, já com o disjuntor desligado. Que cuidado protege a placa contra descarga eletrostática?',
+      options: [
+        {
+          text: 'Encostar numa parte metálica aterrada antes e segurar a placa pelas bordas',
+          correct: true,
+          feedback:
+            'Isso. Você descarrega o corpo antes de tocar na placa e evita encostar nos pinos e nas trilhas.',
+        },
+        {
+          text: 'Tirar a placa do saco logo cedo, para ela se acostumar com o ambiente',
+          feedback:
+            'O saco antiestático protege a placa. O melhor é deixá-la lá dentro até a hora de instalar.',
+        },
+        {
+          text: 'Trabalhar de blusa de lã, porque lã é isolante',
+          feedback:
+            'Justamente por ser isolante, a lã acumula carga quando atrita. Roupas de lã e sintéticas aumentam o risco de descarga.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Um coulomb é a carga de um único elétron.',
+      answer: false,
+      explanation:
+        'A carga de um elétron é minúscula, cerca de 1,6 × 10⁻¹⁹ C. Um coulomb é a carga de cerca de 6,24 × 10¹⁸ elétrons.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Os átomos têm um núcleo com **prótons** (carga positiva) e **nêutrons** (sem carga), rodeado por **elétrons** (carga negativa). Com o mesmo número de prótons e elétrons, o átomo é neutro.
+- Cargas iguais se repelem e opostas se atraem. Um objeto fica carregado quando **ganha** elétrons (negativo) ou **perde** elétrons (positivo); a carga só muda de lugar, nunca é criada.
+- A carga se mede em **coulombs** (C). Um elétron tem cerca de $1{,}6 \times 10^{-19}\,\text{C}$, e 1 C equivale a cerca de $6{,}24 \times 10^{18}$ elétrons.
+- Nos **condutores**, como o cobre, há elétrons livres circulando entre os átomos; nos **isolantes**, como o PVC, os elétrons ficam presos. A corrente é a deriva lenta dos elétrons livres para um lado.
+- A **eletricidade estática** é carga parada, acumulada por atrito. Descargas que você nem sente podem danificar placas: descarregue o corpo antes e segure as placas pelas bordas.

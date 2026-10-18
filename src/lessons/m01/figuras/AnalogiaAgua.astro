@@ -1,0 +1,203 @@
+---
+/*
+ * Lesson 1.3: the water analogy. A pump lifts water to a high tank; the water
+ * falls back through a narrow pipe. Next to it, the circuit it stands for.
+ */
+import Figure from '../../../components/Figure.astro';
+---
+
+<Figure
+  wide
+  alt="À esquerda, uma bomba leva água de um reservatório baixo até uma caixa alta. Da caixa, a água desce de volta ao reservatório por um cano que tem um trecho estreito. Uma seta dupla marca a diferença de altura entre o nível da caixa e o do reservatório. À direita, o circuito equivalente: uma bateria ligada a um resistor, com uma seta indicando a corrente."
+  caption="A analogia da água. A bomba faz o papel da bateria, a diferença de altura faz o papel da tensão, a vazão faz o papel da corrente e o trecho estreito do cano faz o papel da resistência."
+>
+  <svg
+    class="fig-agua"
+    viewBox="0 0 680 300"
+    width="680"
+    height="300"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    font-family="var(--font-sans)"
+    font-size="13"
+  >
+    <text x="185" y="22" text-anchor="middle" class="fig-agua__title">
+      Água
+    </text>
+    <text x="535" y="22" text-anchor="middle" class="fig-agua__title">
+      Circuito
+    </text>
+    <path d="M375 36v250" class="fig-agua__divider" stroke-width="1"></path>
+
+    <!-- Reservoir -->
+    <rect x="30" y="248" width="220" height="32" class="fig-agua__water"></rect>
+    <path d="M30 236v44h220v-44" class="fig-agua__wall" stroke-width="2"></path>
+
+    <!-- High tank -->
+    <rect x="30" y="55" width="90" height="45" class="fig-agua__water"></rect>
+    <path d="M30 40v60h90V40" class="fig-agua__wall" stroke-width="2"></path>
+
+    <!-- Pipe up, through the pump -->
+    <path d="M60 262V100" class="fig-agua__pipe" stroke-width="12"></path>
+    <circle cx="60" cy="175" r="18" class="fig-agua__pump" stroke-width="2"></circle>
+    <path d="M52 182l8-16 8 16z" class="fig-agua__arrow-fill"></path>
+
+    <!-- Pipe down, with a narrow stretch -->
+    <path d="M120 80h90v50M210 180v74" class="fig-agua__pipe" stroke-width="12"></path>
+    <path d="M210 130v50" class="fig-agua__pipe" stroke-width="4"></path>
+    <path d="M203 130h14M203 180h14" class="fig-agua__wall" stroke-width="1.5"></path>
+
+    <!-- Flow arrows -->
+    <path
+      d="M160 74l8 6-8 6M204 220l6 8 6-8M54 128l6-8 6 8"
+      class="fig-agua__flow"
+      stroke-width="2"
+    ></path>
+
+    <!-- Height difference -->
+    <path
+      d="M120 55h178M250 248h48"
+      class="fig-agua__guide"
+      stroke-width="1"
+      stroke-dasharray="4 4"
+    ></path>
+    <path
+      d="M290 62v179M284 68l6-8 6 8M284 235l6 8 6-8"
+      class="fig-agua__dim"
+      stroke-width="1.6"
+    ></path>
+    <text x="300" y="138" class="fig-agua__label">
+      diferença
+    </text>
+    <text x="300" y="154" class="fig-agua__label">
+      de altura
+    </text>
+    <text x="300" y="172" class="fig-agua__small">
+      = tensão
+    </text>
+
+    <!-- Labels -->
+    <text x="165" y="106" text-anchor="middle" class="fig-agua__label">
+      vazão
+    </text>
+    <text x="165" y="122" text-anchor="middle" class="fig-agua__small">
+      = corrente
+    </text>
+    <text x="200" y="150" text-anchor="end" class="fig-agua__label">
+      cano estreito
+    </text>
+    <text x="200" y="166" text-anchor="end" class="fig-agua__small">
+      = resistência
+    </text>
+    <text x="86" y="210" class="fig-agua__label">
+      bomba
+    </text>
+    <text x="86" y="226" class="fig-agua__small">
+      = bateria
+    </text>
+
+    <!-- Circuit -->
+    <path
+      d="M430 110V70h180v40M610 190v40H430v-40"
+      class="fig-agua__wire"
+      stroke-width="2.5"
+    ></path>
+    <path d="M412 110h36M420 122h20" class="fig-agua__wire" stroke-width="2.5"></path>
+    <path d="M412 178h36M420 190h20" class="fig-agua__wire" stroke-width="2.5"></path>
+    <path d="M430 122v56" class="fig-agua__wire" stroke-width="2.5" stroke-dasharray="3 5"></path>
+    <text x="456" y="114" class="fig-agua__small">
+      +
+    </text>
+    <text x="456" y="196" class="fig-agua__small">
+      −
+    </text>
+    <path
+      d="M610 110l-10 6 20 8-20 8 20 8-20 8 20 8-20 8 20 8-10 6v12"
+      class="fig-agua__wire"
+      stroke-width="2.5"
+    ></path>
+    <path d="M512 64l10 6-10 6" class="fig-agua__flow" stroke-width="2"></path>
+    <text x="520" y="54" text-anchor="middle" class="fig-agua__label">
+      corrente
+    </text>
+    <text x="470" y="150" class="fig-agua__label">
+      bateria
+    </text>
+    <text x="470" y="166" class="fig-agua__small">
+      tensão
+    </text>
+    <text x="590" y="150" text-anchor="end" class="fig-agua__label">
+      resistor
+    </text>
+    <text x="590" y="166" text-anchor="end" class="fig-agua__small">
+      resistência
+    </text>
+  </svg>
+</Figure>
+
+<style>
+  .fig-agua {
+    color: var(--fg);
+  }
+
+  .fig-agua text {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .fig-agua__title {
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .fig-agua__label {
+    font-weight: 600;
+  }
+
+  .fig-agua .fig-agua__small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+
+  .fig-agua__divider {
+    stroke: var(--border);
+  }
+
+  .fig-agua__water {
+    fill: color-mix(in oklab, #3b82f6 30%, var(--bg));
+  }
+
+  .fig-agua__wall {
+    stroke: var(--fg-muted);
+  }
+
+  .fig-agua__pipe {
+    stroke: color-mix(in oklab, #3b82f6 55%, var(--bg));
+  }
+
+  .fig-agua__pump {
+    stroke: var(--fg-muted);
+    fill: var(--surface);
+  }
+
+  .fig-agua__arrow-fill {
+    fill: var(--fg-muted);
+  }
+
+  .fig-agua__flow {
+    stroke: var(--accent);
+  }
+
+  .fig-agua__guide {
+    stroke: var(--fg-subtle);
+  }
+
+  .fig-agua__dim {
+    stroke: var(--fg);
+  }
+
+  .fig-agua__wire {
+    stroke: var(--fg);
+  }
+</style>

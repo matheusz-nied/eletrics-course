@@ -1,4 +1,5 @@
 import type { CircuitDoc, ControlDoc, DeviceInfo, ElementDoc, ParamValue } from '../contract';
+import { infoFor, withDefaults } from '../device';
 import { findDevice } from '../devices';
 import { pinPoints, pointKey, wirePoints } from './geometry';
 import { structuralErrors } from './schema';
@@ -84,7 +85,6 @@ export function validateCircuit(doc: unknown): ValidationResult {
       errors.push(`${where}: tipo de dispositivo desconhecido "${el.type}"`);
       continue;
     }
-    infos.set(el.id, def.info);
     const info = def.info;
     if (el.type === 'wire') {
       if (wirePoints(el).length < 2)
@@ -98,10 +98,22 @@ export function validateCircuit(doc: unknown): ValidationResult {
     } else if (!el.at) {
       errors.push(`${where}: ${info.type} precisa de "at"`);
     }
+    let paramsOk = true;
     for (const [name, value] of Object.entries(el.params ?? {})) {
       const problem = checkParam(info, name, value);
       if (problem) errors.push(`${where}: ${problem}`);
+      if (problem) paramsOk = false;
     }
+    if (paramsOk && def.checkParams) {
+      const problems = def.checkParams(withDefaults(info, el.params));
+      for (const problem of problems) errors.push(`${where}: ${problem}`);
+      if (problems.length) paramsOk = false;
+    }
+    infos.set(el.id, paramsOk ? infoFor(def, el.params) : info);
+    if (def.analyses && !def.analyses.includes(circuit.analysis.kind))
+      errors.push(
+        `${where}: ${info.label.toLowerCase()} não funciona na análise "${circuit.analysis.kind}" (só em ${def.analyses.map((a) => `"${a}"`).join(', ')})`,
+      );
     const controls: ControlDoc[] = el.control ? [el.control].flat() : [];
     for (const c of controls) {
       const p = info.params[c.param];
@@ -126,6 +138,19 @@ export function validateCircuit(doc: unknown): ValidationResult {
 
   // Readouts and pin references.
   const byId = new Map(circuit.elements.map((el) => [el.id, el]));
+  for (const el of circuit.elements) {
+    const links = findDevice(el.type)?.links ?? {};
+    for (const [param, types] of Object.entries(links)) {
+      const target = el.params?.[param];
+      if (typeof target !== 'string' || target === '') continue;
+      const other = byId.get(target);
+      if (!other) errors.push(`elemento ${el.id}: "${param}" = "${target}" não existe no circuito`);
+      else if (!types.includes(other.type))
+        errors.push(
+          `elemento ${el.id}: "${param}" = "${target}" precisa ser ${types.join(' ou ')} (é ${other.type})`,
+        );
+    }
+  }
   const probeIds = new Set<string>();
   for (const probe of circuit.probes ?? []) {
     const where = `medidor ${probe.id}`;
@@ -190,6 +215,17 @@ export function validateCircuit(doc: unknown): ValidationResult {
     for (const probe of circuit.probes ?? [])
       if (probe.kind !== 'voltage')
         warnings.push(`medidor ${probe.id}: a varredura CA só traça medidores de tensão`);
+  }
+  if (circuit.analysis.kind === 'quasi-static') {
+    const f = circuit.analysis.frequency;
+    for (const el of circuit.elements) {
+      const def = el.type === 'ac-voltage' || el.type === 'mains' ? findDevice(el.type) : undefined;
+      const fs = def && withDefaults(def.info, el.params).frequency;
+      if (typeof fs === 'number' && Math.abs(fs - f) > 1e-6 * f)
+        warnings.push(
+          `elemento ${el.id}: a análise quase-estática resolve só ${f} Hz; esta fonte de ${fs} Hz fica desligada`,
+        );
+    }
   }
   if (errors.length) return { errors, warnings };
 
