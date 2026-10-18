@@ -1,0 +1,129 @@
+---
+/* 04.5: the three common inductor shapes: radial drum, axial with colour bands and toroid. */
+const turns = Array.from({ length: 18 }, (_, i) => (i * 360) / 18);
+---
+
+<svg viewBox="0 0 600 250" width="600" height="250" class="fig" aria-hidden="true">
+  <!-- Drum (radial) -->
+  <g transform="translate(100 0)">
+    <path d="M-14 168 V214 M14 168 V214" class="lead" />
+    <rect x="-38" y="44" width="76" height="14" rx="3" class="ferrite" />
+    <rect x="-38" y="154" width="76" height="14" rx="3" class="ferrite" />
+    <rect x="-20" y="58" width="40" height="96" class="ferrite" />
+    <g class="winding">
+      {Array.from({ length: 12 }, (_, i) => (
+        <path d={`M-30 ${63 + i * 7.7} H30`} />
+      ))}
+    </g>
+    <rect x="-32" y="58" width="64" height="96" rx="2" class="winding-body" />
+    <text x="0" y="236">
+      Tambor (radial)
+    </text>
+  </g>
+
+  <!-- Axial -->
+  <g transform="translate(300 0)">
+    <path d="M-96 110 H-46 M46 110 H96" class="lead" />
+    <rect x="-46" y="86" width="92" height="48" rx="22" class="axial" />
+    <rect x="-28" y="86" width="9" height="48" class="band b1" />
+    <rect x="-12" y="86" width="9" height="48" class="band b2" />
+    <rect x="4" y="86" width="9" height="48" class="band b3" />
+    <rect x="26" y="86" width="7" height="48" class="band b4" />
+    <text x="0" y="166" class="small">
+      faixas: valor em µH
+    </text>
+    <text x="0" y="236">
+      Axial (faixas de cor)
+    </text>
+  </g>
+
+  <!-- Toroid -->
+  <g transform="translate(500 106)">
+    <path d="M-12 56 L-16 110 M12 56 L16 110" class="lead" />
+    <circle r="58" class="core" />
+    <circle r="28" class="hole" />
+    <g class="turn">
+      {turns.map((a) => (
+        <path
+          d={`M${(29 * Math.cos((a * Math.PI) / 180)).toFixed(1)} ${(29 * Math.sin((a * Math.PI) / 180)).toFixed(1)} L${(60 * Math.cos((a * Math.PI) / 180)).toFixed(1)} ${(60 * Math.sin((a * Math.PI) / 180)).toFixed(1)}`}
+        />
+      ))}
+    </g>
+    <text x="0" y="130">
+      Toroidal
+    </text>
+  </g>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .lead {
+    stroke: var(--fg-subtle);
+    stroke-width: 3;
+  }
+  .ferrite {
+    fill: color-mix(in oklab, var(--fg) 70%, var(--bg));
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .winding-body {
+    fill: color-mix(in oklab, var(--copper) 35%, transparent);
+    stroke: var(--copper);
+    stroke-width: 1.5;
+  }
+  .winding path {
+    stroke: var(--copper);
+    stroke-width: 4;
+  }
+  .axial {
+    fill: color-mix(in oklab, var(--success) 45%, var(--bg));
+    stroke: var(--success);
+    stroke-width: 1.5;
+  }
+  .band {
+    stroke: none;
+  }
+  .b1 {
+    fill: #7a4a24;
+  }
+  .b2 {
+    fill: #1d1d1f;
+  }
+  .b3 {
+    fill: #d8241c;
+  }
+  .b4 {
+    fill: #c9a227;
+  }
+  .core {
+    fill: color-mix(in oklab, #c9a227 60%, var(--bg));
+    stroke: color-mix(in oklab, #c9a227 70%, var(--fg));
+    stroke-width: 1.5;
+  }
+  .hole {
+    fill: var(--surface);
+    stroke: color-mix(in oklab, #c9a227 70%, var(--fg));
+    stroke-width: 1.5;
+  }
+  .turn path {
+    stroke: var(--copper);
+    stroke-width: 4;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 15px;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+  .small {
+    font-size: 13px;
+    font-weight: 400;
+    fill: var(--fg-muted);
+  }
+</style>
