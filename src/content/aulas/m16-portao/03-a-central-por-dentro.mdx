@@ -206,6 +206,20 @@ Deixe a **Velocidade** em 1× para ver os detalhes. Fique de olho nas linhas **M
 
 No passo 5 aparece a troca da seção anterior: mais força, limite mais alto, batida mais forte antes de reverter.
 
+## O circuito completo no simulador
+
+A central virtual acima resume a placa em linhas de texto. Aqui está o circuito inteiro, peça por peça, com o mesmo programa rodando no microcontrolador: os trimpots, o receptor, a fotocélula, o jumper J2, os botões, os reed switches, os transistores e os relés, o TRIAC, o fusível, o motor com o capacitor e o sensor de corrente. Aperte **Iniciar** e acompanhe as setas de corrente no esquema e o multímetro **Corrente do motor** embaixo. Um percurso completo leva uns 17 s; se quiser ir mais rápido, troque a velocidade de 1× para 2× ou 5×.
+
+<Simulation circuit="m16/portao-completo" height={460} />
+
+1. Segure **Botoeira** por um instante. O transistor Q2 liga a bobina de K1, o contato de K1 passa para o fio ABRE e só então o TRIAC começa a conduzir. A corrente salta na partida e depois assenta. O portão anda até o ímã chegar ao reed **FCA**, e aí o TRIAC para de conduzir e K1 desliga.
+2. Segure **Apertar o botão do controle remoto**. Nada acontece: esse controle ainda não está cadastrado. Segure **Botão PROG da central**: o LED PROG acende. Aperte o controle uma vez para gravar o código e, depois, mais uma vez. Agora o portão obedece ao controle.
+3. Com o portão aberto, aperte **Botoeira** para fechar e, no meio do caminho, ligue **Obstáculo no feixe da fotocélula**. A central desliga K2 e, depois do tempo morto, liga K1: o portão volta a abrir.
+4. Desligue a fotocélula e espere o portão terminar de abrir. Ligue **Obstáculo no caminho do portão** e aperte **Botoeira** para fechar. Quando o portão encosta no obstáculo, a corrente sobe e, em menos de 1 s, a central inverte o sentido e o portão volta a abrir.
+5. Desligue o obstáculo, ligue **Jumper J2 AUT** e leve o **Trimpot PAUSA** a 5 % (cerca de 6 s). Abra o portão: depois da pausa ele fecha sozinho.
+
+Duas simplificações deste esquema: ele usa um só símbolo de terra para o terra da rede e para o GND da lógica, e as fontes de 12 V e 5 V aparecem como fontes ideais. Na placa de verdade, a fonte isola a parte de 12 V e 5 V da rede de 127 V. Por isso os fios da botoeira, da fotocélula e dos fins de curso são de baixa tensão, enquanto os bornes da rede e do motor continuam com 127 V: desligue o disjuntor do portão antes de mexer em qualquer borne.
+
 ## Exemplo resolvido: o trimpot FORÇA no meio
 
 O trimpot `FORÇA` está no meio do curso (posição 0,5, numa escala de 0 a 1). O que a central faz com isso?

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { SimEvent, SimFrame } from '../../../engine/contract';
+import type { ElementDoc, SimEvent, SimFrame } from '../../../engine/contract';
 import { buildNetlist } from '../../../engine/format/netlist';
 import { validateCircuit } from '../../../engine/format/validate';
 import { Simulator } from '../../../engine/analysis/simulator';
@@ -17,7 +17,7 @@ class Bench {
   constructor(params: Record<string, Record<string, number | boolean>> = {}) {
     this.sim = new Simulator({
       ...doc,
-      elements: doc.elements.map((el) =>
+      elements: doc.elements.map((el: ElementDoc) =>
         params[el.id] ? { ...el, params: { ...el.params, ...params[el.id] } } : el,
       ),
     });
@@ -130,7 +130,16 @@ describe('m16/portao-completo', () => {
     ])
       expect(pins[p], p).toBe(gnd);
     // Unused pins stay on their own.
-    for (const p of ['U1.J1', 'U1.INV', 'U1.LUZ', 'U1.TRAVA', 'U1.AUX', 'U1.BUZZER', 'PH.no', 'K2.nc'])
+    for (const p of [
+      'U1.J1',
+      'U1.INV',
+      'U1.LUZ',
+      'U1.TRAVA',
+      'U1.AUX',
+      'U1.BUZZER',
+      'PH.no',
+      'K2.nc',
+    ])
       expect(Object.values(pins).filter((n) => n === pins[p]).length, p).toBe(1);
   });
 
@@ -200,8 +209,22 @@ describe('m16/portao-completo', () => {
     b.until((r) => num(r, 'G1.velocity') > 0.1, 4);
   });
 
+  it('reverses on the obstacle the lesson asks for, at its default spot', () => {
+    const b = new Bench({ G1: { position: 3.98, obstacle: true } });
+    b.run(0.5);
+    b.press('BOT');
+    b.until((r) => r['G1.blocked'] === true, 20);
+    const took = b.until((r) => r['U1.estado'] === 'ABRINDO', 3);
+    expect(took).toBeLessThan(1);
+    b.until((r) => num(r, 'G1.velocity') > 0.1, 4);
+  });
+
   it('auto closes after the pause with J2 fitted', () => {
-    const b = new Bench({ G1: { position: 3.98 }, J2: { fitted: true }, PAUSA: { position: 0.05 } });
+    const b = new Bench({
+      G1: { position: 3.98 },
+      J2: { fitted: true },
+      PAUSA: { position: 0.05 },
+    });
     b.run(0.5);
     expect(b.r['U1.estado']).toBe('ABERTO');
     expect(b.r['U1.fechamentoAutomatico']).toBe(true);
