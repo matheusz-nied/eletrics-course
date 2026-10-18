@@ -96,7 +96,7 @@ test.describe('example lesson', () => {
   test('shows placeholders for the interactive components still in construction', async ({
     page,
   }) => {
-    for (const stub of ['Model3D', 'Scene3D', 'WiringExercise']) {
+    for (const stub of ['Scene3D', 'WiringExercise']) {
       const box = page.locator(`[data-stub="${stub}"]`);
       await expect(box, stub).toHaveCount(1);
       await expect(box, stub).toContainText('em construção');
