@@ -368,14 +368,13 @@ function Disc(p: Required<NtcProps>) {
 
   const leadPath = (side: number): Vec3[] => {
     const x0 = (side * s.pitch) / 2;
-    // Formed to the centre of each face.
-    const xc = 0;
     const z = side * (faceZ + leadR);
     return [
       [x0, 0, 0],
       [x0, y0 + 0.2, 0],
-      [xc, yc - s.core * 0.33, z],
-      [xc, yc + s.core * 0.14, z],
+      // Formed to the centre of each face.
+      [0, yc - s.core * 0.33, z],
+      [0, yc + s.core * 0.14, z],
     ];
   };
 
