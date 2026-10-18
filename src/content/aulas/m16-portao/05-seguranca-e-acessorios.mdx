@@ -106,7 +106,7 @@ Se a fotocélula está com defeito, a solução é consertar, alinhar ou trocar.
 
 A fotocélula vigia uma linha, numa altura. Uma criança abaixada, a roda de uma bicicleta ou uma mão no vão perto do pilar podem ficar fora do feixe. A segunda proteção é a **reversão por obstáculo**: quando o portão encosta em alguma coisa, o motor faz mais força, e a corrente sobe.
 
-A CD-1 tem um sensor de corrente no fio comum do motor. No começo de cada movimento, depois da partida suave, ela aprende a corrente normal de trabalho, $I_\text{trab}$, durante meio segundo. A partir daí, se a corrente passar de um limite por mais de 0,25 s, é obstáculo:
+A CD-1 tem um sensor de corrente no fio comum do motor. No começo de cada movimento, depois da partida suave, ela espera 1 s para o motor pegar velocidade e aprende a corrente normal de trabalho, $I_\text{trab}$, durante meio segundo. A partir daí, se a corrente passar de um limite por mais de 0,25 s, é obstáculo:
 
 $$
 I_\text{lim} = k \cdot I_\text{trab}, \qquad k = 1{,}25 + 1{,}0 \cdot f

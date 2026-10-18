@@ -18,6 +18,13 @@ export interface Tick {
   pos: number;
 }
 
+/** One set of x labels, the page shows the densest set that fits the width. */
+export interface TickRow {
+  ticks: (Tick & { align: 'start' | 'middle' | 'end' })[];
+  /** Narrowest plot area (px) where these labels do not overlap; 0 for the last row. */
+  fit: number;
+}
+
 export interface PlotAxis {
   unit: string;
   side: 'left' | 'right';
@@ -27,7 +34,7 @@ export interface PlotAxis {
 }
 
 export interface PlotLayout {
-  x: { min: number; max: number; log: boolean; unit: string; ticks: Tick[] };
+  x: { min: number; max: number; log: boolean; unit: string; ticks: Tick[]; rows: TickRow[] };
   axes: PlotAxis[];
   series: { label: string; unit: string; axis: number; path: string; color: number }[];
 }
@@ -77,6 +84,56 @@ function logTicks(min: number, max: number): number[] {
   for (let e = Math.ceil(Math.log10(min) - 1e-9); e <= Math.floor(Math.log10(max) + 1e-9); e++)
     out.push(10 ** e);
   return out;
+}
+
+/** Width of an x label in px: monospace digits at 0.94 × 0.75rem, about 7 px each. */
+const CHAR_PX = 7;
+const LABEL_GAP_PX = 8;
+
+/** Labels at the ends align inside the area; the others are centred on their tick. */
+function alignAt(pos: number, first: boolean, last: boolean): TickRow['ticks'][number]['align'] {
+  if (first && pos < BOX * 0.1) return 'start';
+  if (last && pos > BOX * 0.9) return 'end';
+  return 'middle';
+}
+
+/** Narrowest area (px) where neighbouring labels of a row keep a gap between them. */
+function fitWidth(ticks: TickRow['ticks']): number {
+  const lean = { start: 0, middle: 0.5, end: 1 };
+  let need = 0;
+  for (let i = 1; i < ticks.length; i++) {
+    const a = ticks[i - 1]!;
+    const b = ticks[i]!;
+    const span = (b.pos - a.pos) / BOX;
+    if (span <= 0) continue;
+    const right = (1 - lean[a.align]) * a.label.length * CHAR_PX;
+    const left = lean[b.align] * b.label.length * CHAR_PX;
+    need = Math.max(need, (right + left + LABEL_GAP_PX) / span);
+  }
+  return Math.ceil(need);
+}
+
+/**
+ * The x ticks every 1, 2, 5 and 10 steps, densest first: a narrow chart shows
+ * every other label (0, 40, 80 °C) instead of overlapping ones. The sparsest
+ * row has `fit` 0 so that some labels always show.
+ */
+function tickRows(ticks: Tick[], log: boolean): TickRow[] {
+  const step = ticks.length > 1 ? ticks[1]!.value - ticks[0]!.value : 1;
+  const index = (v: number) => Math.round(log ? Math.log10(v) : v / step);
+  const rows: TickRow[] = [];
+  for (const stride of [1, 2, 5, 10]) {
+    const kept = ticks.filter((t) => index(t.value) % stride === 0);
+    if (kept.length < 2 && rows.length > 0) break;
+    if (rows.length > 0 && kept.length === rows[rows.length - 1]!.ticks.length) continue;
+    const row = kept.map((t, i) => ({
+      ...t,
+      align: alignAt(t.pos, i === 0, i === kept.length - 1),
+    }));
+    rows.push({ ticks: row, fit: fitWidth(row) });
+  }
+  rows[rows.length - 1]!.fit = 0;
+  return rows;
 }
 
 /** Below this a reading is solver residue (pA, nV…), drawn as zero. */
@@ -150,5 +207,9 @@ export function layoutPlot(
     return { label: s.label, unit: s.unit, axis, path, color: i };
   });
 
-  return { x: { min: xMin, max: xMax, log, unit: opts.xUnit, ticks: xTicks }, axes, series };
+  return {
+    x: { min: xMin, max: xMax, log, unit: opts.xUnit, ticks: xTicks, rows: tickRows(xTicks, log) },
+    axes,
+    series,
+  };
 }

@@ -198,6 +198,15 @@ São 80 W espalhados ao longo da extensão, como uma lâmpada antiga acesa dentr
 O que fazer com isso: para aparelhos de corrente alta (aquecedor, ferro de passar, forno elétrico, ar-condicionado portátil), use a tomada direto ou uma extensão de bitola compatível, desenrolada por inteiro. Não ligue uma extensão na outra e não use benjamins para juntar vários aparelhos potentes. E repare no plugue: um contato frouxo também é uma resistência, só que concentrada num ponto pequeno, e esquenta mais ainda que o fio. A escolha dos fios da instalação é o assunto da aula <LinkAula id="m07-instalacoes/04-fios-e-cabos" />.
 </RealCase>
 
+As extensões mais baratas usam o cordão paralelo de 0,75 mm². Em corte, dá para ver como é pouco cobre para 10 A:
+
+<Model3D
+  part="cable"
+  props={{ kind: 'paralelo', conductors: 2, section: 0.75, color: 'branco' }}
+  cutaway
+  caption="Cordão paralelo de 0,75 mm² em corte: dois condutores de fios finos de cobre, cada um na sua capa de PVC."
+/>
+
 ### Explore: a extensão no simulador
 
 <Simulation circuit="m01/extensao" />

@@ -5,10 +5,14 @@
  *
  * Labels point away from the middle of the model (or to the side where they
  * fit) and are nudged apart vertically when two of them would overlap.
+ *
+ * The markers are plain DOM in the viewer (<AnnotationPins>, outside the
+ * canvas); <Annotations>, inside the canvas, only moves them each frame. A
+ * React root per marker (drei's <Html>) raced with the canvas unmounting on
+ * pages with several models and threw on removal.
  */
-import { Html } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, type RefObject } from 'react';
 import { Vector3, type Group } from 'three';
 import { useView } from './view';
 import type { PartAnnotation } from '../types';
@@ -75,13 +79,41 @@ export function labelSide(
   return preferred;
 }
 
-export function Annotations({ items }: { items: PartAnnotation[] }) {
+/** The marker elements, rendered by the viewer over the canvas. */
+export function AnnotationPins({
+  items,
+  layer,
+}: {
+  items: PartAnnotation[];
+  layer: RefObject<HTMLDivElement | null>;
+}) {
+  return (
+    <div ref={layer} className="m3d__pins" aria-hidden="true">
+      {items.map((item, index) => (
+        <div key={`${index}-${item.text}`} className="m3d-pin-wrap" hidden>
+          <span className="m3d-pin" data-side="right">
+            <span className="m3d-pin__number">{index + 1}</span>
+            <span className="m3d-pin__text">{item.text}</span>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Moves the markers of <AnnotationPins> to their points, every frame. */
+export function Annotations({
+  items,
+  layer,
+}: {
+  items: PartAnnotation[];
+  layer: RefObject<HTMLDivElement | null>;
+}) {
   const placements = useMemo<Placement[]>(
     () => items.map(() => ({ x: 0, y: 0, side: 'right', pin: null })),
     [items],
   );
 
-  // Runs after the markers' own frame callbacks (children subscribe first).
   useFrame(() => {
     const offsets = spreadLabels(placements);
     placements.forEach((p, i) => {
@@ -97,7 +129,8 @@ export function Annotations({ items }: { items: PartAnnotation[] }) {
         <Marker
           key={`${index}-${item.text}`}
           item={item}
-          number={index + 1}
+          index={index}
+          layer={layer}
           placement={placements[index]!}
         />
       ))}
@@ -107,15 +140,16 @@ export function Annotations({ items }: { items: PartAnnotation[] }) {
 
 function Marker({
   item,
-  number,
+  index,
+  layer,
   placement,
 }: {
   item: PartAnnotation;
-  number: number;
+  index: number;
+  layer: RefObject<HTMLDivElement | null>;
   placement: Placement;
 }) {
   const group = useRef<Group>(null);
-  const pin = useRef<HTMLSpanElement>(null);
   const { anchors } = useView();
   const world = useRef(new Vector3());
   const origin = useRef(new Vector3());
@@ -130,30 +164,21 @@ function Marker({
     } else {
       g.position.set(...item.at);
     }
-    if (!pin.current || !g.parent) return;
+    const wrap = layer.current?.children[index] as HTMLElement | undefined;
+    const pin = wrap?.firstElementChild as HTMLSpanElement | null | undefined;
+    if (!wrap || !pin || !g.parent) return;
     g.getWorldPosition(world.current).project(camera);
     g.parent.getWorldPosition(origin.current).project(camera);
     const x = ((world.current.x + 1) / 2) * size.width;
+    const y = ((1 - world.current.y) / 2) * size.height;
+    // Behind the camera the projection mirrors; hide the marker there.
+    wrap.toggleAttribute('hidden', world.current.z > 1);
+    wrap.style.setProperty('transform', `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`);
     const preferred = world.current.x < origin.current.x - 0.02 ? 'left' : 'right';
-    const side = labelSide(x, preferred, pin.current.offsetWidth, size.width);
-    if (pin.current.dataset.side !== side) pin.current.dataset.side = side;
-    // The placement object is shared with <Annotations>, which spreads the labels.
-    Object.assign(placement, {
-      x,
-      y: ((1 - world.current.y) / 2) * size.height,
-      side,
-      pin: pin.current,
-    });
+    const side = labelSide(x, preferred, pin.offsetWidth, size.width);
+    if (pin.dataset.side !== side) pin.setAttribute('data-side', side);
+    Object.assign(placement, { x, y, side, pin });
   });
 
-  return (
-    <group ref={group} position={item.at}>
-      <Html center zIndexRange={[30, 10]} pointerEvents="none" className="m3d-pin-wrap">
-        <span ref={pin} className="m3d-pin" data-side="right" aria-hidden="true">
-          <span className="m3d-pin__number">{number}</span>
-          <span className="m3d-pin__text">{item.text}</span>
-        </span>
-      </Html>
-    </group>
-  );
+  return <group ref={group} position={item.at} />;
 }

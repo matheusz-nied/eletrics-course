@@ -38,6 +38,18 @@ test.describe('3D kit gallery', () => {
     errors.expectClean();
   });
 
+  test('drops to the low quality on software WebGL and still loads', async ({ page }) => {
+    // Switching quality remounts the canvas; the forced context loss of the
+    // old one must not mark the view as failed.
+    const errors = watchErrors(page);
+    await page.goto(`${GALLERY}?peca=multimeter`);
+    await expectReady(page);
+    await expect(page.locator('.m3d').first()).toHaveAttribute('data-quality', 'baixa');
+    await page.waitForTimeout(1500);
+    await expect(page.locator('.m3d').first()).toHaveAttribute('data-status', 'ready');
+    errors.expectClean();
+  });
+
   test('passes the accessibility checks with a part loaded', async ({ page }) => {
     await page.goto(`${GALLERY}?peca=led&qualidade=baixa`);
     await expectReady(page);

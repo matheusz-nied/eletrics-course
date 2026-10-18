@@ -255,9 +255,24 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Markers inside the canvas (drei <Html>). */
-.m3d-pin-wrap {
+/* Markers over the canvas, moved by <Annotations> every frame. */
+.m3d__pins {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
   pointer-events: none;
+}
+
+.m3d-pin-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.m3d-pin-wrap[hidden] {
+  display: none;
 }
 
 .m3d-pin {

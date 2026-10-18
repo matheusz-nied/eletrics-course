@@ -42,16 +42,14 @@ test.describe('accessibility', () => {
   test.skip(({ isMobile }) => isMobile, 'Runs once, on desktop.');
 
   for (const theme of ['light', 'dark'] as const) {
-    test(`module 0 lessons have no serious violations (${theme})`, async ({ page }) => {
-      await page.emulateMedia({ colorScheme: theme });
-      for (const path of LESSONS) {
-        await test.step(path, async () => {
-          await page.goto(path);
-          await scrollThrough(page);
-          await expectAccessible(page);
-        });
-      }
-    });
+    for (const path of LESSONS) {
+      test(`${path} has no serious violations (${theme})`, async ({ page }) => {
+        await page.emulateMedia({ colorScheme: theme });
+        await page.goto(path);
+        await scrollThrough(page);
+        await expectAccessible(page);
+      });
+    }
   }
 });
 
