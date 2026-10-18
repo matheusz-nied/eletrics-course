@@ -1,0 +1,335 @@
+---
+titulo: Osciloscópio
+modulo: m03-medicoes
+ordem: 5
+nivel: I
+duracaoMin: 30
+objetivos:
+  - Ler a tela do osciloscópio, com a tensão na vertical e o tempo na horizontal, contando divisões
+  - Medir tensão de pico a pico, período e frequência a partir das escalas V/div e tempo/div
+  - Usar o disparo (trigger) para estabilizar a imagem e o autoajuste para começar uma medida
+  - Escolher entre acoplamento CC e CA e comparar dois sinais nos dois canais
+  - Usar a ponta ×10 do jeito certo e entender por que a garra do terra nunca vai na rede elétrica
+prerequisitos:
+  - m03-medicoes/01-multimetro
+  - m03-medicoes/02-medindo-tensao
+tags: [osciloscópio, base de tempo, trigger, ponta de prova, ondulação, acoplamento]
+seguranca: baixa-tensao
+rascunho: true
+---
+
+import ScopeScreen from '../../../lessons/m03/figures/ScopeScreen.astro';
+import ProbeCompensation from '../../../lessons/m03/figures/ProbeCompensation.astro';
+import ScopeGroundClip from '../../../lessons/m03/figures/ScopeGroundClip.astro';
+
+O receptor do portão reinicia sozinho de vez em quando. Você mede a fonte de 12 V da central e o multímetro mostra um tranquilo `12.0 V`. O problema não aparece porque o multímetro mostra uma **média**, atualizada poucas vezes por segundo. O que derruba o receptor acontece dentro de cada centésimo de segundo, e para ver isso é preciso um instrumento que desenhe a tensão ao longo do tempo: o <Term id="osciloscopio">osciloscópio</Term>.
+
+Nesta aula você vai aprender a ler a tela do osciloscópio, ajustar as escalas, parar a imagem com o disparo e medir sinais reais num osciloscópio virtual. No fim, uma regra de segurança que todo técnico precisa saber antes de encostar a ponta em qualquer coisa.
+
+## O que o osciloscópio mostra
+
+O osciloscópio é um gráfico de **tensão no tempo** que se redesenha dezenas de vezes por segundo. A altura do traço é a tensão naquele instante; da esquerda para a direita, o tempo passa. Uma pilha aparece como uma linha reta e parada. A saída de um transformador aparece como uma senoide, subindo e descendo 60 vezes por segundo.
+
+Pense no monitor cardíaco de um hospital, que desenha os batimentos numa tela. A analogia vale até aqui: o monitor rola a imagem sem parar, enquanto o osciloscópio redesenha sempre a mesma janela de tempo, começando no mesmo ponto da onda. É por isso que um sinal que se repete aparece parado na tela, como uma fotografia.
+
+A tela é dividida em quadrados, as **divisões**: quase sempre 10 na horizontal e 8 na vertical, com tracinhos menores nas linhas do meio. Você mede contando divisões e multiplicando pela escala:
+
+<Figure caption="Figura 1. A tela de um osciloscópio com uma senoide. A escala vertical é 1 V por divisão e a horizontal, 0,5 ms por divisão. O disparo (o triângulo no alto e o círculo no centro) fixa o instante em que a onda cruza 0 V subindo.">
+  <ScopeScreen />
+</Figure>
+
+Três comandos fazem quase todo o trabalho:
+
+- **Volts por divisão (V/div)**: quanto vale cada quadrado na vertical. O botão costuma se chamar VOLTS/DIV ou SCALE, um para cada canal.
+- **Tempo por divisão**: quanto tempo cada quadrado vale na horizontal. Esse ajuste é a <Term id="base-de-tempo">base de tempo</Term>, e o botão se chama SEC/DIV ou TIME/DIV.
+- **Posição**: sobe ou desce o traço na tela (POSITION). A marca com o número do canal, na borda esquerda, mostra onde fica o 0 V daquele canal.
+
+## Lendo a tela: as contas
+
+Com as escalas, cada medida vira uma multiplicação:
+
+$$
+\begin{aligned}
+V_{pp} &= n_v \cdot \frac{\text{V}}{\text{div}} \\[4pt]
+T &= n_h \cdot \frac{\text{s}}{\text{div}} \\[4pt]
+f &= \frac{1}{T}
+\end{aligned}
+$$
+
+- $V_{pp}$: tensão de **pico a pico**, do ponto mais baixo ao mais alto da onda, em volts (V);
+- $n_v$: quantas divisões a onda ocupa na vertical, do vale ao pico;
+- $T$: o **período**, o tempo de um ciclo completo, em segundos (s);
+- $n_h$: quantas divisões um ciclo ocupa na horizontal;
+- $f$: a <Term id="frequencia">frequência</Term>, quantos ciclos por segundo, em hertz (Hz).
+
+Numa senoide, o pico é metade do pico a pico, e o valor eficaz (o que o multímetro mostra em CA) é o pico dividido por $\sqrt{2}$:
+
+$$
+\begin{aligned}
+V_p &= \frac{V_{pp}}{2} \\[4pt]
+V_\text{ef} &= \frac{V_p}{\sqrt{2}} \approx 0{,}707 \cdot V_p
+\end{aligned}
+$$
+
+Na Figura 1, a onda ocupa 4 divisões de pico a pico, então $V_{pp} = 4 \cdot 1\,\text{V} = 4\,\text{V}$ e o pico é 2 V. Um ciclo ocupa 2 divisões: $T = 2 \cdot 0{,}5\,\text{ms} = 1\,\text{ms}$, e a frequência é $1 / 0{,}001\,\text{s} = 1\,000\,\text{Hz}$, ou 1 kHz. Um multímetro em CA mostraria $2 \cdot 0{,}707 \approx 1{,}41\,\text{V}$ para esse mesmo sinal.
+
+## O disparo: a imagem parada
+
+Se o osciloscópio começasse cada desenho num instante qualquer, cada imagem pegaria a onda num ponto diferente, e as imagens se sobreporiam deslocadas: o traço "corre" pela tela ou vira um borrão. O <Term id="trigger">disparo</Term> (*trigger*) resolve isso. O osciloscópio espera o sinal cruzar um **nível** escolhido, subindo (borda de subida) ou descendo (borda de descida), e começa cada desenho nesse momento. Como o sinal se repete, todos os desenhos ficam iguais e a imagem para.
+
+O disparo tem modos:
+
+- **Automático (AUTO)**: se o disparo não acontece, o osciloscópio desenha mesmo assim. Você sempre vê alguma coisa, mesmo que correndo. É o modo para começar.
+- **Normal**: só desenha quando o disparo acontece. Sem disparo, a tela fica com a última imagem.
+- **Único (SINGLE)**: espera um disparo, desenha uma vez e para. Serve para capturar algo que acontece uma vez só, como o pico de corrente na partida de um motor.
+
+Quase todo osciloscópio digital tem também o **autoajuste** (AUTO SET ou AUTOSCALE): ele mede o sinal e escolhe sozinho as escalas e o disparo. É um bom ponto de partida, mas raramente é a melhor escala para o que você quer ver.
+
+## Explore: um gerador de sinais na tela
+
+Na simulação, um gerador de sinais entrega uma senoide a um resistor, e o osciloscópio mostra a saída do gerador. As escalas aparecem no alto da tela e as medidas automáticas embaixo.
+
+<Simulation circuit="m03/osc-senoide" instruments={['osciloscopio', 'multimetro']} />
+
+Tente nesta ordem:
+
+1. **Conte as divisões.** Aperte o play (▶) e espere alguns segundos: o osciloscópio faz o autoajuste sozinho. Leia a escala vertical e a de tempo no alto da tela, conte as divisões e calcule o pico a pico e a frequência. Confira com as medidas embaixo da tela: 4 V de pico a pico e 1 kHz.
+2. **Mude a base de tempo.** Baixe o tempo por divisão para 100 µs/div. Agora um ciclo inteiro ocupa a tela toda: 10 divisões × 100 µs = 1 ms.
+3. **Tire o disparo do sinal.** Suba o nível de disparo até passar de 2 V, acima do pico da onda. O estado muda para "Automático" e a onda começa a correr. Marque "Só com disparo (normal)": a tela para e fica "Esperando disparo". Volte o nível para perto de zero.
+4. **Compare com o multímetro.** Na aba Multímetro, em CA, aparece cerca de 1,41 V: o valor eficaz do mesmo sinal que o osciloscópio mostra como 4 V de pico a pico.
+5. **Troque o sinal.** Coloque a amplitude em 5 V e a frequência em 60 Hz, aperte o botão de reiniciar (↻) para limpar a tela, espere a onda aparecer e aperte "Autoajuste".
+
+### Exemplo resolvido
+
+Na tarefa 5, o autoajuste escolhe 2 V/div e 5 ms/div. A senoide ocupa 5 divisões de pico a pico, e um ciclo ocupa 3⅓ divisões. Então:
+
+$$
+\begin{aligned}
+V_{pp} &= 5 \cdot 2\,\text{V} = 10\,\text{V} \\[4pt]
+V_p &= 5\,\text{V} \\[4pt]
+V_\text{ef} &= 5 \cdot 0{,}707 \approx 3{,}54\,\text{V} \\[4pt]
+T &= 3{,}33 \cdot 5\,\text{ms} \approx 16{,}7\,\text{ms} \\[4pt]
+f &= \frac{1}{0{,}0167\,\text{s}} \approx 60\,\text{Hz}
+\end{aligned}
+$$
+
+Contar terços de divisão é impreciso. Na prática, quando o período não cai numa divisão inteira, use as medidas automáticas do aparelho ou os **cursores**, duas linhas que você arrasta até os pontos da onda para o osciloscópio calcular a diferença de tempo ou de tensão entre elas.
+
+## Acoplamento CC e CA
+
+Cada canal tem uma chave de **acoplamento**:
+
+- **CC** (DC): mostra o sinal inteiro, inclusive a parte contínua. Uma pilha aparece como uma linha 1,5 V acima do zero.
+- **CA** (AC): um capacitor em série com a entrada barra a parte contínua e deixa passar só a variação, centralizada no zero. O mesmo capacitor também atenua variações muito lentas, tipicamente abaixo de uns 10 Hz.
+
+Para que serve o CA? Imagine uma fonte de 12 V com 0,2 V de ondulação. Em CC, para caber 12 V na tela você precisa de uns 5 V/div, e 0,2 V vira 0,04 divisão: uma linha reta. Em CA, os 12 V somem e você pode usar 50 mV/div: a ondulação ocupa 4 divisões.
+
+Na simulação, o canal 1 está em CC e o canal 2 em CA. O acoplamento CA está desenhado como ele é por dentro: o capacitor de 22 nF em série com a entrada de 1 MΩ do osciloscópio.
+
+<Simulation circuit="m03/osc-ondulacao" instruments={['osciloscopio', 'multimetro']} />
+
+**Tarefa:** aperte o play e, com o capacitor de filtro bom, compare os canais. No canal 1, a 5 V/div, a fonte é uma linha reta (as medidas automáticas até acusam os 200 mV, mas na tela não dá para ver); no canal 2, a 50 mV/div, aparece a ondulação de 120 Hz, de 0,2 V de pico a pico. Agora troque para "Ressecado" e aperte "Autoajuste": a ondulação vai a 2 V de pico a pico. Na aba Multímetro, em CC, os dois casos mostram 12,0 V. Em CA, o multímetro mostra o valor eficaz da ondulação: cerca de 0,07 V com o capacitor bom e 0,71 V com o ressecado.
+
+Repare: o multímetro em CA também denuncia a ondulação, só não mostra a forma dela. É um bom teste rápido para quem não tem osciloscópio.
+
+## Dois canais: comparando sinais
+
+Os dois canais compartilham a mesma base de tempo, então dá para ver se um sinal está atrasado em relação ao outro. Na simulação, uma senoide de 60 Hz alimenta um resistor de 1 kΩ em série com um <Term id="capacitor">capacitor</Term> de 2,7 µF. O canal 1 mostra a entrada; o canal 2, a tensão no capacitor.
+
+<Simulation circuit="m03/osc-rc-fase" instruments={['osciloscopio']} />
+
+**Tarefa:** aperte o play e veja as medidas depois do autoajuste: o canal 2 é menor, com cerca de 7 V de pico a pico (3,5 V de pico). Agora baixe o tempo por divisão para 1 ms/div. O disparo põe o canal 1 cruzando o zero, subindo, bem no centro da tela; conte quantas divisões depois o canal 2 cruza o zero subindo. São cerca de 2,1 divisões: 2,1 ms de atraso. Comparado com o período de 16,7 ms, esse atraso é um oitavo de ciclo:
+
+$$
+\frac{2{,}1\,\text{ms}}{16{,}7\,\text{ms}} \cdot 360° \approx 45°
+$$
+
+Agora suba a frequência para 600 Hz. O capacitor não consegue acompanhar a variação rápida, e a tensão nele fica abaixo de 0,6 V de pico. É o princípio dos filtros, que você vai ver no módulo de corrente alternada.
+
+## A ponta de prova ×1 e ×10
+
+A <Term id="ponta-de-prova">ponta de prova</Term> do osciloscópio é um cabo blindado com um conector **BNC** (o de baioneta, que encaixa e gira) numa ponta e, na outra, um gancho que segura no terminal e uma garra jacaré curta: a **garra do terra**. Quase toda ponta tem uma chave **×1 / ×10**.
+
+Na posição ×10, um resistor de 9 MΩ dentro da ponta forma, com a entrada de 1 MΩ do osciloscópio, um <Term id="divisor-de-tensao">divisor de tensão</Term> por dez:
+
+$$
+\begin{aligned}
+V_\text{entrada} &= V_\text{sinal} \cdot \frac{1\,\text{M}\Omega}{9\,\text{M}\Omega + 1\,\text{M}\Omega} \\[4pt]
+&= \frac{V_\text{sinal}}{10}
+\end{aligned}
+$$
+
+O canal do osciloscópio, ajustado também em ×10, multiplica de volta e mostra o valor certo. Por que dividir o sinal para multiplicar depois? Porque em ×10 a ponta apresenta 10 MΩ ao circuito, em vez de 1 MΩ, e uma capacitância muito menor. Ela atrapalha menos o circuito e enxerga sinais bem mais rápidos: em ×1, uma ponta comum só funciona bem até alguns megahertz. Use ×10 como padrão e ×1 só para sinais muito pequenos e lentos.
+
+A regra de ouro: **o fator da ponta e o do canal precisam ser iguais.** Com a ponta em ×10 e o canal em ×1, tudo aparece dez vezes menor; ao contrário, dez vezes maior.
+
+A ponta ×10 tem ainda um pequeno capacitor ajustável, a **compensação**. Todo osciloscópio tem uma saída de calibração com uma onda quadrada (tipicamente 1 kHz e alguns volts). Encoste a ponta nela e gire o parafuso de ajuste, na ponta ou no conector, até a onda ficar quadrada:
+
+<Figure caption="Figura 2. A onda quadrada de calibração com a ponta ×10 mal ajustada e bem ajustada. Faça esse ajuste sempre que ligar a ponta num osciloscópio ou canal diferente.">
+  <ProbeCompensation />
+</Figure>
+
+## Segurança: a garra do terra não vai na rede
+
+<Callout type="perigo" title="A garra do terra está ligada ao pino terra da tomada">
+Num osciloscópio comum, ligado na tomada, a garra do terra de todas as pontas e a carcaça dos conectores BNC estão ligadas ao pino terra do cabo de força. Prender essa garra na fase da rede, ou em qualquer ponto de um circuito ligado direto na rede, é fazer um curto-circuito pela ponta: faísca, garra derretida, ponta e osciloscópio destruídos, e o disjuntor ou o DR desarmando.
+</Callout>
+
+<Figure caption="Figura 3. Com a garra do terra na fase, a corrente encontra um caminho sem resistência: garra, malha do cabo, carcaça do osciloscópio e pino terra da tomada.">
+  <ScopeGroundClip />
+</Figure>
+
+- Meça só circuitos **isolados da rede**: alimentados por pilha ou bateria, ou o lado de baixa tensão depois de um transformador ou de uma fonte isolada.
+- Cuidado com placas que têm fonte chaveada sem isolação, como algumas lâmpadas LED e alguns carregadores baratos: o "negativo" delas pode estar ligado direto na rede.
+- **Nunca tire nem anule o pino terra do osciloscópio** para "isolar" o aparelho. Isso não resolve o problema: a carcaça inteira, e todo conector BNC, passa a ficar com a tensão do ponto onde a garra encostou. Encostar no aparelho pode matar.
+- As garras do terra dos dois canais estão ligadas entre si por dentro. Nunca prenda as duas em pontos diferentes do circuito: isso é um curto entre esses pontos.
+- Para medir sinais ligados à rede, existem pontas diferenciais e osciloscópios com canais isolados, com categoria de medição (CAT) adequada. As entradas de um osciloscópio comum não têm categoria para a rede.
+
+## Osciloscópio ou multímetro?
+
+| | Multímetro | Osciloscópio |
+|---|---|---|
+| Mostra | Um número: média (CC) ou eficaz (CA) | A forma da tensão ao longo do tempo |
+| Bom para | Conferir valores, tensões da rede, resistência, continuidade | Ondulação, ruído, pulsos, sinais de sensores e de comunicação, defeitos que duram milissegundos |
+| Mede corrente? | Sim, em série | Não direto: mede a tensão num <Term id="shunt">shunt</Term> ou usa uma ponta de corrente |
+| Na rede elétrica | Sim, com CAT adequada | Não com pontas comuns |
+
+<RealCase title="A fonte de 12 V da central do portão">
+O receptor reinicia, a fotocélula falha sem motivo e o multímetro mostra 12,0 V na saída de 12 V da central. Um técnico com osciloscópio faria assim, sempre no lado de baixa tensão:
+
+1. **Desligue a central** e localize os bornes de 12 V (os que alimentam fotocélula e receptor) e o negativo (GND). Fique longe dos bornes do motor e da rede, que estão na mesma placa.
+2. **Confira que o negativo é isolado da rede.** Em centrais com transformador, o lado de 12 V é isolado. Se a placa tiver fonte chaveada e você não tiver certeza, não prenda a garra: use o multímetro em CA, que mostra a ondulação como um número.
+3. **Prenda a garra do terra no GND** e o gancho da ponta no +12 V, com a ponta e o canal em ×10.
+4. **Ligue a central** e ajuste: acoplamento CA, 50 mV/div, 5 ms/div.
+5. **Compare.** Algumas dezenas de milivolts de ondulação são normais. Centenas de milivolts, ou picos fortes quando o motor parte, apontam para o capacitor de filtro ressecado, que é barato de trocar.
+
+Com o disparo em modo único e o nível um pouco abaixo de 12 V em acoplamento CC, dá até para capturar o instante em que a tensão afunda na partida do motor.
+</RealCase>
+
+## Erros comuns
+
+- **Ponta em ×10, canal em ×1.** Tudo fica dez vezes menor. Confira os dois sempre que trocar de ponta.
+- **Nível de disparo fora do sinal.** O traço corre ou some (no modo normal). Ponha o nível no meio da onda ou aperte o autoajuste.
+- **Acoplamento errado.** Em CA, a tensão contínua de uma fonte "desaparece" e parece que não há nada. Em CC, uma ondulação pequena fica invisível. Escolha de acordo com o que quer ver.
+- **Escala grande demais.** Um sinal que ocupa meia divisão é medido com erro grande. Ajuste a escala para a onda ocupar boa parte da tela.
+- **Fio do terra comprido demais** em sinais rápidos: ele cria oscilações que não existem no circuito. Use a garra curta ou a molinha de terra que vem com a ponta.
+- **Garra do terra na rede.** Já vimos: nunca.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Uma onda ocupa 3,5 divisões de pico a pico na tela, com a escala em 2 V/div. Qual é a tensão de pico a pico?',
+      answer: 7,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation: 'V pico a pico = 3,5 divisões × 2 V/div = 7 V. O pico é a metade: 3,5 V.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um ciclo de um sinal ocupa 4 divisões na horizontal, com a base de tempo em 0,5 ms/div. Qual é a frequência?',
+      answer: 500,
+      tolerance: 0.02,
+      unit: 'Hz',
+      explanation: 'T = 4 × 0,5 ms = 2 ms. f = 1 ÷ 0,002 s = 500 Hz.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma senoide tem 10 V de pico a pico no osciloscópio. Quanto um multímetro em CA mostra para esse sinal?',
+      answer: 3.54,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        'O pico é metade do pico a pico, 5 V. O valor eficaz de uma senoide é o pico × 0,707 = 3,54 V.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'A senoide na tela não para: ela corre da esquerda para a direita sem parar. Qual é a causa mais provável?',
+      options: [
+        {
+          text: 'O nível de disparo está acima do pico ou abaixo do vale da onda',
+          correct: true,
+          feedback:
+            'Sem cruzar o nível, o disparo não acontece; no modo automático, o osciloscópio desenha cada imagem num ponto diferente da onda.',
+        },
+        {
+          text: 'A escala vertical está pequena demais',
+          feedback:
+            'Uma escala vertical errada deixa a onda grande ou pequena demais, mas não faz ela correr. Quem para a imagem é o disparo.',
+        },
+        {
+          text: 'A ponta está em ×10',
+          feedback:
+            'O fator da ponta muda o tamanho do que aparece, se o canal não estiver no mesmo fator. A imagem correndo é falta de disparo.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'A ponta está em ×10, mas o canal do osciloscópio está em ×1. A tela mostra 0,5 V de pico a pico. Qual é o sinal de verdade?',
+      options: [
+        {
+          text: '5 V de pico a pico',
+          correct: true,
+          feedback:
+            'A ponta dividiu o sinal por 10, e o canal em ×1 não multiplicou de volta. Ajuste o canal para ×10.',
+        },
+        {
+          text: '0,5 V de pico a pico',
+          feedback: 'Seria, se a ponta e o canal estivessem no mesmo fator. Aqui o sinal foi dividido por 10 e não foi corrigido.',
+        },
+        {
+          text: '0,05 V de pico a pico',
+          feedback: 'É o contrário: a ponta divide o sinal, então o valor real é maior que o da tela.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Você quer ver uma ondulação de cerca de 0,2 V na saída de uma fonte de 12 V. Qual ajuste usar?',
+      options: [
+        {
+          text: 'Acoplamento CA e uma escala de 50 mV/div',
+          correct: true,
+          feedback: 'O CA tira os 12 V contínuos e a ondulação pode ocupar várias divisões.',
+        },
+        {
+          text: 'Acoplamento CC e 5 V/div',
+          feedback:
+            'Assim os 12 V cabem na tela, mas 0,2 V vira 0,04 divisão: uma linha reta. Use CA para ver a ondulação.',
+        },
+        {
+          text: 'Acoplamento CC e 50 mV/div',
+          feedback:
+            'Com 12 V contínuos e 50 mV/div, o traço ficaria 240 divisões acima: fora da tela. O CA tira a parte contínua.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Com a ponta em ×10, pode-se prender a garra do terra na fase da tomada, porque o sinal chega dez vezes menor.',
+      answer: false,
+      explanation:
+        'O fator ×10 só divide o sinal da ponta. A garra do terra continua ligada ao pino terra da tomada: na fase, ela faz um curto-circuito.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O osciloscópio desenha a tensão no tempo. A tela tem 10 divisões na horizontal e 8 na vertical; você mede contando divisões e multiplicando pela escala (V/div e tempo/div).
+- Pico a pico, período e frequência: $V_{pp} = n_v \cdot \text{V/div}$, $T = n_h \cdot \text{s/div}$, $f = 1/T$. Numa senoide, o valor eficaz é o pico × 0,707.
+- O disparo começa cada desenho no mesmo ponto da onda e para a imagem. O autoajuste é um bom começo.
+- Acoplamento CC mostra tudo; CA tira a parte contínua para você ver variações pequenas, como a ondulação de uma fonte.
+- Use a ponta em ×10, com o canal no mesmo fator, e faça a compensação na saída de calibração.
+- A garra do terra está ligada ao terra da tomada: nunca na rede nem em circuitos ligados direto nela.
+
+Na próxima aula, você vai montar circuitos sem solda na [protoboard e alimentá-los com uma fonte de bancada](../06-protoboard-e-fonte-de-bancada/).
