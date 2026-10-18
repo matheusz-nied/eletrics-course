@@ -1,0 +1,369 @@
+---
+titulo: Sensores magnéticos
+modulo: m05-magnetismo
+ordem: 5
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Explicar como o reed switch fecha quando um ímã chega perto e por que ele tem histerese
+  - Ligar sensores de porta num laço fechado de alarme e entender por que um fio cortado dispara a sirene
+  - Testar o fim de curso magnético do portão com um ímã e os LEDs da central
+  - Diferenciar os sensores Hall digitais (unipolar, bipolar e latch) do sensor Hall linear
+  - Ligar a saída de um sensor Hall com o resistor de pull-up
+prerequisitos:
+  - m05-magnetismo/01-imas-e-campo-magnetico
+  - m04-passivos/07-chaves-botoes-e-reles
+tags: [reed switch, sensor Hall, ímã, fim de curso, alarme, portão, histerese, pull-up]
+seguranca: baixa-tensao
+rascunho: true
+---
+
+import ReedSwitchInside from '../../../lessons/m05/figures/ReedSwitchInside.astro';
+import GateLimitSwitch from '../../../lessons/m05/figures/GateLimitSwitch.astro';
+import HallEffect from '../../../lessons/m05/figures/HallEffect.astro';
+import HallSensorPins from '../../../lessons/m05/figures/HallSensorPins.astro';
+import ImaSensor from '../../../lessons/m05/ImaSensor';
+import Part3D from '../../../lessons/m02/Part3D.astro';
+
+O cliente liga: o portão abre, mas não para. O motor continua empurrando até o portão bater no fim do trilho, e só desliga sozinho depois de uns 40 segundos. Quem resolve esse defeito em dez minutos sabe uma coisa simples: o portão "sabe" que chegou ao fim porque um **ímã** preso na cremalheira passa por cima de um **sensor** no motor. Nenhuma peça encosta na outra.
+
+O mesmo truque está no sensor de porta do alarme, no velocímetro da bicicleta e na capa do celular, que apaga a tela quando você fecha. Nesta aula você vai conhecer os dois sensores magnéticos mais comuns, o **reed switch** e o **sensor Hall**, e usar os dois no portão.
+
+## Reed switch: um contato que o ímã fecha
+
+O <Term id="reed-switch">reed switch</Term> (ampola reed) é um contato lacrado numa ampola de vidro: duas **lâminas** de ferro e níquel, uma vinda de cada ponta, se sobrepõem no meio com uma folga de décimos de milímetro. O vidro é cheio de gás inerte, que não deixa o contato oxidar.
+
+Sem ímã por perto, a mola do próprio metal mantém as lâminas separadas: o contato está **aberto**. Quando um ímã chega perto, o campo dele magnetiza as lâminas, como o ímã magnetiza um prego (aula <LinkAula id="m05-magnetismo/01-imas-e-campo-magnetico" />). As pontas sobrepostas viram polos opostos, se atraem e se encostam: o contato **fecha**. Afastando o ímã, a mola as separa de novo.
+
+<Part3D
+  part="reed-switch"
+  props={{ variant: 'vidro', magnetNear: true }}
+  annotations
+  alt="Reed switch em corte, sem ímã e com ímã. Sem ímã, as duas lâminas dentro da ampola de vidro ficam separadas por uma folga muito pequena. Com um ímã deitado ao lado da ampola, as pontas das lâminas viram polos norte e sul, se atraem e se encostam."
+  caption="Reed switch sem ímã (aberto) e com um ímã deitado ao lado (fechado)."
+>
+  <ReedSwitchInside />
+</Part3D>
+
+Repare em três consequências:
+
+- **Qualquer polo serve:** norte ou sul magnetizam as lâminas do mesmo jeito.
+- **Não precisa de alimentação:** é só um contato, como o de um botão, com dois fios.
+- **É frágil:** o vidro trinca com pancada, com calor demais na solda ou com o terminal dobrado rente à ampola.
+
+Como os contatos da aula <LinkAula id="m04-passivos/07-chaves-botoes-e-reles" />, o reed pode ser <Term id="contato-na-nf">NA</Term> (aberto sem ímã, o mais comum), NF (fechado sem ímã) ou reversível, com três terminais.
+
+### A distância e a histerese
+
+Quanto mais perto o ímã, mais forte o campo nas lâminas. Mas o campo não diminui aos poucos: ele despenca. Longe do ímã (a mais de duas ou três vezes o tamanho dele), ele cai com o **cubo** da distância:
+
+$$
+B \propto \frac{1}{d^3} \qquad\Rightarrow\qquad \frac{B(2d)}{B(d)} = \frac{1}{2^3} = \frac{1}{8}
+$$
+
+com $B$ o campo magnético, em militesla (mT), e $d$ a distância até o ímã. Dobrando a distância, o campo fica oito vezes mais fraco. Por isso o ímã do sensor de porta precisa ficar alinhado e a poucos milímetros do sensor.
+
+Outra coisa: o reed **fecha** com um campo maior do que aquele em que **abre**. Com as lâminas encostadas, o campo passa quase todo pelo metal, e um campo mais fraco basta para segurá-las, como no relé já puxado. Essa diferença entre o ponto de ligar e o de desligar é a <Term id="histerese">histerese</Term>, e ela é útil: sem ela, um ímã parado bem no limite faria o contato abrir e fechar a cada vibração.
+
+<ImaSensor client:visible />
+
+1. Comece com o ímã de **ferrite** a 40 mm e aproxime devagar, de milímetro em milímetro. Em que distância o reed fecha?
+2. Agora afaste devagar. Em que distância ele abre? Pare em 18 mm, aproxime até 15 mm e volte para 18 mm: o reed fica fechado ou aberto?
+3. Troque para o ímã de **neodímio** e repita. O que muda?
+4. Vire o polo (norte para o sensor). O reed muda? E o sensor Hall digital?
+
+Com o ímã de ferrite, o reed fecha a uns 17 mm e só abre a uns 20 mm; entre os dois, ele fica como estava. Isso é a histerese. O ímã de neodímio, cerca de três vezes mais forte, fecha o reed a uns 26 mm e o solta a uns 31 mm. Virar o polo não muda nada no reed. Os números são de um reed e de ímãs típicos: o manual de cada sensor traz a distância de instalação.
+
+A posição também conta. O melhor é o ímã **deitado ao lado da ampola**, paralelo a ela. Atravessado, o campo pode magnetizar as duas lâminas com o mesmo polo, e aparecem **pontos mortos**: o reed fecha, abre e fecha de novo enquanto o ímã passa. Antes de fixar sensor e ímã, teste a posição com o multímetro na continuidade.
+
+## O sensor de porta do alarme
+
+O sensor de porta é um reed numa caixinha parafusada no batente e um ímã numa caixinha igual, na porta. Porta fechada, o ímã mantém o reed **fechado**; a porta abriu, o reed abriu. Repare: o reed em si é NA, mas, instalado, passa o tempo todo fechado. Por isso o manual da central de alarme chama esse sensor de "NF": fechado na situação normal.
+
+A central liga os sensores de uma zona **em série**, num caminho que sai dela, passa por cada sensor e volta: o **laço**. Uma porta que abre corta o laço. E se alguém **cortar o fio** para enganar o alarme, o laço também abre, e a central dispara do mesmo jeito. O defeito leva ao lado seguro, como na entrada da fotocélula do portão (aula <LinkAula id="m04-passivos/07-chaves-botoes-e-reles" />).
+
+### Explore: o laço de três sensores
+
+Na simulação, uma bateria de 12 V alimenta um laço com três reeds (porta da frente, janela da sala e porta da cozinha) e um trecho de fio. O laço mantém puxado um <Term id="rele">relé</Term> de 12 V: o contato NA acende o LED verde "Pronto" e o NF liga a sirene.
+
+<Simulation circuit="m05/alarme-porta" instruments={['multimetro']} />
+
+1. Aperte o play (▶). Quanto marca a corrente no laço? A sirene toca?
+2. Abra a **porta da frente** (desligue a chave "Porta da frente fechada"). O que acontece com a corrente, com o LED e com a sirene?
+3. Feche a porta de novo. Agora **corte o fio do laço** (desligue "Fio do laço inteiro").
+
+Com tudo fechado, passam cerca de 30 mA pelo laço, o LED "Pronto" acende e a sirene fica quieta. Abrindo a porta, a corrente cai a zero, o relé solta e a sirene toca. Cortando o fio, acontece o mesmo: para o alarme, fio cortado e porta aberta são iguais.
+
+### Exemplo resolvido: a corrente no laço
+
+A bobina do relé tem 400 Ω e a bateria, 12 V. Os reeds fechados e os fios quase não têm resistência perto da bobina. Pela Lei de Ohm:
+
+$$
+I_\text{laço} = \frac{V}{R_\text{bobina}} = \frac{12\,\text{V}}{400\,\Omega} = 0{,}03\,\text{A} = 30\,\text{mA}
+$$
+
+Cada reed conduz esses 30 mA, bem dentro do que um reed de alarme aguenta. Já uma sirene de verdade puxa centenas de miliampères (típico) e poderia colar as lâminas: quem a liga é o relé.
+
+As centrais de verdade não usam relé no laço: uma entrada mede a resistência do laço. Muitas aceitam um resistor no fim do laço, para perceber também quando alguém junta os dois fios; o valor vem no manual da central.
+
+## O fim de curso do portão
+
+No portão deslizante, o <Term id="fim-de-curso">fim de curso</Term> é o que diz à central "chegou, pode desligar o motor". Em boa parte dos automatizadores deslizantes vendidos no Brasil, ele é magnético:
+
+- uma plaquinha com **reeds** fica no alto do motor, logo abaixo da cremalheira;
+- dois **suportes com ímã** ficam presos na cremalheira, um em cada ponta do curso: o de fechamento (FCF) e o de abertura (FCA).
+
+Com o portão fechado, o ímã FCF está em cima do sensor. O portão começa a abrir, o ímã FCF se afasta, e o portão corre até o ímã FCA chegar em cima do sensor. Aí a central desliga o motor.
+
+<Figure
+  caption="Figura 1. Portão fechado visto de dentro do terreno. O ímã FCF, preso na cremalheira, está em cima do sensor no alto do automatizador; o ímã FCA está na outra ponta e só chega ao sensor com o portão todo aberto. Embaixo, a ligação: dois reeds com um fio comum (GND) no conector de três vias FCA, GND e FCF da central. Com o ímã FCF em cima, o reed FCF está fechado e o LED FCF (vermelho) acende."
+  alt="Desenho de um portão deslizante fechado com a cremalheira, o automatizador embaixo dela e os dois ímãs de fim de curso, e o esquema dos dois reeds ligados ao conector FCA, GND e FCF da central com os LEDs."
+  wide
+>
+  <GateLimitSwitch />
+</Figure>
+
+Na central do curso, o fim de curso entra num **conector de três vias**: FCA, GND e FCF. O GND é o fio comum dos dois reeds. A regra é **ímã perto, contato fechado**: a entrada daquele reed vai ao GND e o LED dela acende, verde no FCA e vermelho no FCF.
+
+Em muitos modelos, os dois suportes de ímã **não são iguais**: cada um põe o ímã onde só um dos reeds o sente, e trocá-los de ponta faz o portão não parar. Siga o desenho do manual do automatizador. Também há fim de curso por **microchave**, que o suporte empurra, e por **encoder**, que conta as voltas do motor com um sensor Hall (aula <LinkAula id="m16-portao/04-fim-de-curso-e-sensores" />).
+
+<RealCase title="Portão que não para no fim do curso">
+
+A central do curso desliga o motor por segurança se o portão andar 40 segundos sem encontrar o fim de curso. Se o portão passa do ponto e só para depois desse tempo, as causas mais comuns são três: **reed com defeito** (ampola trincada, fio rompido), **ímã fora do lugar** (suporte solto, longe do sensor ou trocado) e **conector invertido**. Com FCA e FCF trocados, o ímã de abertura fecha a entrada que a central entende como fim de fechamento, que ela não espera enquanto abre, e o motor segue empurrando.
+
+O teste é rápido e se faz com os LEDs da central:
+
+<Steps>
+  <Step title="Olhe os LEDs com o portão parado">
+    Portão fechado: LED FCF aceso. Portão no meio do curso: os dois apagados. Portão todo aberto: LED FCA aceso. Se o LED que acende é o do outro lado, desconfie do conector invertido ou dos suportes trocados.
+  </Step>
+  <Step title="Passe um ímã solto sobre o sensor">
+    Com o portão no meio do curso, passe devagar um ímã solto por cima do sensor, no lugar por onde passam os suportes. Cada LED deve acender quando o ímã passa sobre o reed dele. Se nenhum acende, confira o conector antes de culpar o sensor.
+  </Step>
+  <Step title="Meça o sensor fora da central">
+    Solte o conector e meça com o multímetro na continuidade entre FCA e GND, e depois entre FCF e GND. Sem ímã: não apita. Com o ímã em cima do reed certo: apita. Se não apita nunca, o reed ou o fio está aberto.
+  </Step>
+  <Step title="Ajuste os suportes">
+    Com o portão destravado (no modo manual), leve o portão até a posição em que ele deve parar e confira se o suporte está em cima do sensor. O motor demora um pouco para parar depois que o ímã chega, então os suportes ficam um pouco antes do batente. A regulagem fina está na aula <LinkAula id="m16-portao/08-ajustes-e-testes" />.
+  </Step>
+</Steps>
+
+Mexa só no conector do fim de curso e nos suportes. A central está ligada à rede elétrica: não encoste nos bornes da rede e do motor e, para abrir a caixa da central, desligue o disjuntor antes (aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />). E mantenha as mãos longe do pinhão e da cremalheira enquanto a central estiver ligada: um toque no controle remoto liga o motor.
+
+</RealCase>
+
+## Efeito Hall: sentir o campo sem nenhuma peça mexendo
+
+O reed tem lâminas que se movem, e tudo que se move se gasta. O sensor Hall sente o campo sem nenhuma peça móvel. Ele se baseia no <Term id="efeito-hall">efeito Hall</Term>: faça passar uma corrente por uma placa fina, de uma ponta à outra. Sem campo, as cargas andam retas e não há tensão entre as bordas laterais. Com o campo de um ímã atravessando a placa, as cargas em movimento são empurradas para um dos lados, se acumulam numa borda, e aparece uma pequena tensão entre as bordas: a **tensão Hall**.
+
+<Figure
+  caption="Figura 2. O efeito Hall. A corrente (setas de cobre) atravessa a placa de cima para baixo. Sem campo, a tensão entre as bordas laterais é zero. Com o campo atravessando a placa (os círculos com X representam o campo entrando na folha), as cargas são empurradas para um dos lados e aparece a tensão Hall entre as bordas."
+  alt="Duas placas retangulares com corrente de cima para baixo e um medidor ligado às bordas laterais. Sem ímã, o medidor marca zero. Com campo entrando na folha, uma borda fica positiva, a outra negativa, e o medidor marca a tensão Hall."
+>
+  <HallEffect />
+</Figure>
+
+A tensão Hall é proporcional ao campo e **troca de sinal** quando o polo troca, porque o campo passa a empurrar as cargas para a outra borda. Ao contrário do reed, o sensor Hall sabe qual polo está perto.
+
+Essa tensão é minúscula, de milivolts para baixo. Por isso o sensor Hall vendido como componente é um circuito integrado: a placa, um amplificador e, nos digitais, um circuito que decide "tem ímã" ou "não tem". Ele precisa de alimentação, de 3 V a 24 V conforme o modelo (típico).
+
+<DeepDive title="De onde vem o tamanho da tensão Hall">
+
+Numa placa de espessura $t$ (em metros), com corrente $I$ (em ampères) e campo $B$ (em teslas) atravessando a placa, a tensão Hall é
+
+$$
+V_H = \frac{I\,B}{n\,q\,t}
+$$
+
+em que $q = 1{,}6 \times 10^{-19}\,\text{C}$ é a carga do elétron e $n$ é quantas cargas livres há em cada metro cúbico do material. Num metal como o cobre, $n$ é enorme (cerca de $8{,}5 \times 10^{28}$ por metro cúbico) e a tensão sai minúscula. Num semicondutor, $n$ é muito menor, de milhares a milhões de vezes, e a tensão cresce na mesma proporção. Por isso os sensores Hall são feitos de semicondutor, e por isso a placa é fina: $t$ pequeno, tensão maior.
+
+</DeepDive>
+
+### Sensores Hall digitais
+
+O sensor Hall digital tem saída de dois estados. Ele **liga** quando o campo passa do **ponto de operação** e **desliga** quando cai abaixo do **ponto de liberação**, um pouco menor: é a histerese de novo. No widget, ele liga com 10 mT e desliga com 7 mT (típico). Há três tipos:
+
+- **Unipolar:** liga com **um** polo perto, em geral o sul virado para a face marcada, e desliga quando o ímã se afasta. O norte não faz nada. É o do widget.
+- **Bipolar:** os pontos de ligar e desligar ficam perto de zero, um de cada lado. Liga com o sul e desliga com o norte, mas o fabricante não garante o que acontece quando o sul só se afasta. É usado com ímãs de vários polos alternados.
+- **Latch** (trava): liga com o sul e **continua ligado** sem campo, até um norte desligá-lo. Com um ímã em anel de polos alternados girando na frente, a saída muda a cada polo: perfeito para contar voltas.
+
+A saída da maioria dos Hall digitais é de **coletor aberto**: por dentro, um transistor que só consegue ligar a saída ao 0 V. Desligado, ele deixa a saída solta. Para ter 5 V nesse momento, ligue um **resistor de pull-up**, de uns 10 kΩ (típico), entre a saída e o +5 V. Resultado: ímã perto, saída em 0 V; ímã longe, 5 V. A lógica fica "ao contrário", e o programa precisa saber disso. O pull-up é assunto da aula <LinkAula id="m11-digital/03-pull-up-pull-down-e-debounce" />, e muitos microcontroladores já têm um por dentro.
+
+<Part3D
+  part="hall-sensor"
+  props={{ detecting: false }}
+  annotations
+  alt="Sensor Hall de três terminais visto de frente, com a face marcada voltada para quem olha. Na ordem típica, os terminais são 1 alimentação, 2 GND e 3 saída. Ao lado, a ligação: alimentação em +5 V, GND em 0 V e a saída ligada ao +5 V por um resistor de pull-up de 10 quilo-ohms."
+  caption="Sensor Hall digital de três terminais e a ligação da saída com pull-up. A ordem dos terminais muda de um modelo para outro: confira na folha de dados."
+>
+  <HallSensorPins />
+</Part3D>
+
+### Sensores Hall lineares
+
+O sensor Hall **linear** não decide nada: a saída é uma tensão proporcional ao campo. Alimentado com 5 V, ele dá cerca de 2,5 V sem campo; com um polo, a saída sobe; com o outro, desce. No widget, cada militesla muda a saída em 14 mV, entre 0,9 V e 4,1 V (valores típicos). Com o ímã de neodímio a 10 mm, a saída passa de uns 3,0 V (sul) para uns 2,0 V (norte).
+
+## Onde eles aparecem
+
+- **Velocímetro de bicicleta:** um ímã no raio da roda e um reed no garfo, que fecha uma vez por volta.
+- **Encoder do motor do portão:** um ímã no eixo e um Hall que conta as voltas. Assim a central sabe onde o portão está, desacelera antes do fim e percebe quando ele travou num obstáculo.
+- **Ventoinha do computador:** um Hall dentro dá dois pulsos por volta (típico) no fio de rotação, em coletor aberto; o pull-up fica na placa-mãe.
+- **Alicate amperímetro de corrente contínua:** um Hall linear numa fresta da garra mede o campo em volta do fio. Por isso esse alicate mede corrente contínua, e o de bobina, só alternada (aula <LinkAula id="m03-medicoes/03-medindo-corrente" />).
+- **Capa do celular:** um ímã na capa e um Hall no aparelho. Fechou, a tela apaga.
+
+### Exemplo resolvido: o velocímetro da bicicleta
+
+Uma roda de bicicleta aro 29 tem cerca de 2,3 m de circunferência (depende do pneu), e o reed fecha 3 vezes por segundo. A cada fechamento, a bicicleta anda uma volta da roda:
+
+$$
+v = C \times f = 2{,}3\,\text{m} \times 3\,\text{voltas/s} = 6{,}9\,\text{m/s}
+$$
+
+Para passar para quilômetros por hora, multiplique por 3,6:
+
+$$
+v = 6{,}9 \times 3{,}6 \approx 25\,\text{km/h}
+$$
+
+Compare com a ventoinha a 1.800 rotações por minuto: 30 voltas e 60 pulsos por segundo, 216 mil por hora. As lâminas de um reed se gastariam em pouco tempo; o Hall não tem peça móvel.
+
+### Reed ou Hall?
+
+| | Reed switch | Sensor Hall digital |
+|---|---|---|
+| Alimentação | Não precisa: é só um contato | Precisa, de 3 V a 24 V conforme o modelo (típico) |
+| Polo do ímã | Qualquer um | Unipolar: só um (em geral, o sul) |
+| Peças móveis | Lâminas, que se gastam com o uso | Nenhuma |
+| Velocidade | Algumas centenas de vezes por segundo (típico) | Muitos milhares de vezes por segundo |
+| Saída | Contato para sinal, com corrente pequena | Transistor de coletor aberto, com pull-up |
+| Onde aparece | Alarme, fim de curso, boia de nível, bicicleta | Encoder, ventoinha, celular, alicate CC |
+
+## Erros comuns e segurança
+
+- **Dobrar o terminal do reed rente ao vidro.** Segure o terminal com um alicate entre a ampola e a dobra, e solde rápido: calor demais também trinca o vidro.
+- **Ligar a carga direto no reed.** Lâmpada, sirene, motor e fechadura passam por um relé ou por um transistor.
+- **Ímã longe demais ou atravessado.** Teste a posição com o multímetro antes de fixar.
+- **Sensor Hall sem pull-up** (a saída fica solta) ou **com o polo errado** (o unipolar não liga nunca).
+- **Inverter a alimentação do Hall.** Muitos modelos queimam. Confira a ordem dos terminais na folha de dados.
+- **No portão,** suportes soltos ou trocados e conector invertido fazem o portão passar do ponto. A central fica ligada à rede: desligue o disjuntor antes de abrir a caixa, e nunca ponha a mão perto do pinhão com a central ligada.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Por que as lâminas de um reed switch se encostam quando um ímã chega perto?',
+      options: [
+        {
+          text: 'O campo magnetiza as lâminas, e as pontas sobrepostas viram polos opostos que se atraem',
+          correct: true,
+          feedback:
+            'As lâminas são de ferro e níquel. O ímã as magnetiza como magnetiza um prego, e as pontas, com polos opostos, se atraem.',
+        },
+        {
+          text: 'O ímã gera uma corrente nas lâminas, que esquentam e se dobram',
+          feedback:
+            'Não há corrente nem aquecimento envolvidos. O reed fecha até desligado de tudo, só com o ímã.',
+        },
+        {
+          text: 'O polo norte do ímã atrai as lâminas, e o polo sul as afasta',
+          feedback:
+            'Os dois polos magnetizam as lâminas do mesmo jeito. O reed fecha com qualquer polo.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Num laço de alarme com os sensores de porta em série, cortar o fio do laço impede o alarme de disparar.',
+      answer: false,
+      explanation:
+        'Cortar o fio abre o laço, exatamente como abrir uma porta. A central dispara. É uma falha segura.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'A roda de uma bicicleta tem 2,1 m de circunferência e o reed do velocímetro fecha 4 vezes por segundo. Qual é a velocidade, em km/h?',
+      answer: 30.24,
+      tolerance: 0.03,
+      unit: 'km/h',
+      explanation:
+        'v = 2,1 m × 4 voltas/s = 8,4 m/s. Multiplicando por 3,6: 8,4 × 3,6 ≈ 30,2 km/h.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'O portão abre e não para no fim do curso. Com o portão todo aberto, o LED FCA continua apagado, mas o LED FCF acende. O que é mais provável?',
+      options: [
+        {
+          text: 'Conector do fim de curso invertido (FCA e FCF trocados) ou suportes de ímã trocados',
+          correct: true,
+          feedback:
+            'O ímã chegou ao sensor, porque um LED acendeu; só que a central entende o sinal como fim de fechamento. Confira o conector e os suportes.',
+        },
+        {
+          text: 'O reed está queimado',
+          feedback:
+            'Se o reed estivesse aberto de vez, nenhum LED acenderia com o portão aberto. Aqui um LED acende, só que o errado.',
+        },
+        {
+          text: 'O ímã está fraco',
+          feedback:
+            'Um ímã fraco não acenderia LED nenhum. O LED do outro lado acendendo aponta para uma troca de ligação ou de suporte.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você ligou a saída de um sensor Hall digital direto na entrada de um microcontrolador, sem mais nada. Sem ímã, a leitura muda sozinha entre 0 e 1. Por quê?',
+      options: [
+        {
+          text: 'A saída é de coletor aberto e precisa de um resistor de pull-up até o +5 V',
+          correct: true,
+          feedback:
+            'Sem ímã, o transistor de saída fica desligado e a saída fica solta. O pull-up a segura em 5 V.',
+        },
+        {
+          text: 'O sensor Hall precisa de um ímã encostado o tempo todo',
+          feedback:
+            'Sem ímã, a saída deve ficar desligada, em 5 V pelo pull-up. Quem falta é o resistor.',
+        },
+        {
+          text: 'O campo da Terra está ligando e desligando o sensor',
+          feedback:
+            'O campo da Terra é fraco demais para passar do ponto de operação de um Hall digital comum. O problema é a saída solta.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada sensor Hall ao comportamento dele.',
+      pairs: [
+        ['Unipolar', 'Liga com o sul perto e desliga quando o ímã se afasta'],
+        ['Latch', 'Liga com o sul e só desliga quando aparece o norte'],
+        ['Linear', 'Dá uma tensão proporcional ao campo, perto de 2,5 V sem ímã'],
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um sensor Hall linear dá 2,5 V sem campo e sobe 14 mV a cada militesla de polo sul. Quanto ele marca com 50 mT, em volts?',
+      answer: 3.2,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation: '50 mT × 14 mV/mT = 700 mV = 0,7 V. Somando aos 2,5 V: 3,2 V.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **reed switch** é um contato de duas lâminas numa ampola de vidro. Um ímã perto magnetiza as lâminas e o contato fecha, com qualquer polo e sem alimentação.
+- O campo de um ímã cai com o **cubo da distância**, e os sensores têm **histerese**: fecham mais perto do que abrem.
+- O **laço** do alarme liga os sensores em série. Porta aberta ou fio cortado abrem o laço e disparam a sirene.
+- No portão, ímãs na cremalheira passam sobre os reeds do motor. O conector **FCA, GND e FCF** e os LEDs da central mostram se cada fim de curso funciona.
+- O **sensor Hall** sente o campo sem peças móveis e sabe o polo. O digital (unipolar, bipolar ou latch) tem saída de coletor aberto, que pede **pull-up**; o linear dá uma tensão proporcional ao campo.
+
+Na próxima aula, o eletroímã volta para comandar cargas grandes: <LinkAula id="m05-magnetismo/06-reles-e-contatores" />.

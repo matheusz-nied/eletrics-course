@@ -1,0 +1,182 @@
+---
+/*
+ * 05.5: the Hall effect. A thin plate carries a current from top to bottom;
+ * with a field crossing the plate, the moving charges are pushed to one edge
+ * and a small voltage appears between the side edges.
+ */
+const panels = [
+  { dx: 0, field: false, title: 'Sem ímã', state: 'A corrente passa reta: 0 V entre as bordas.' },
+  {
+    dx: 285,
+    field: true,
+    title: 'Com ímã (campo entrando na folha)',
+    state: 'As cargas se acumulam: surge a tensão Hall.',
+  },
+];
+const crosses = [92, 118, 144];
+const edge = [84, 104, 132, 152];
+---
+
+<svg viewBox="0 0 560 270" width="560" height="270" class="fig" aria-hidden="true">
+  {panels.map((p) => (
+    <g transform={`translate(${p.dx} 0)`}>
+      <text x="135" y="22" class="title">
+        {p.title}
+      </text>
+      <path d="M135 44 V66 M135 170 V190" class="lead" />
+      <circle cx="135" cy="44" r="4" class="term" />
+      <circle cx="135" cy="190" r="4" class="term" />
+      <text x="146" y="58" class="small start">
+        I
+      </text>
+      <rect x="95" y="66" width="80" height="104" class="plate" />
+      <path d="M115 80 V154" class="flow" marker-end="url(#hall-arrow)" />
+      <path d="M155 80 V154" class="flow" marker-end="url(#hall-arrow)" />
+      {p.field &&
+        crosses.map((y) => (
+          <g class="cross">
+            <circle cx="135" cy={y} r="7" />
+            <path d={`M130 ${y - 5} L140 ${y + 5} M140 ${y - 5} L130 ${y + 5}`} />
+          </g>
+        ))}
+      {p.field &&
+        edge.map((y) => (
+          <g>
+            <text x="103" y={y + 4} class="charge plus">
+              +
+            </text>
+            <text x="167" y={y + 4} class="charge minus">
+              −
+            </text>
+          </g>
+        ))}
+      <rect x="91" y="114" width="8" height="8" class="pad" />
+      <rect x="171" y="114" width="8" height="8" class="pad" />
+      <path d="M91 118 H60 V222 H100 M179 118 H210 V222 H170" class="sense" />
+      <rect x="100" y="208" width="70" height="28" rx="4" class="meter" />
+      {p.field ? (
+        <text x="135" y="227" class="reading on">
+          V
+          <tspan class="sub" dy="4">
+            H
+          </tspan>
+        </text>
+      ) : (
+        <text x="135" y="227" class="reading">
+          0 V
+        </text>
+      )}
+      <text x="135" y="260" class={p.field ? 'state on' : 'state'}>
+        {p.state}
+      </text>
+    </g>
+  ))}
+  <defs>
+    <marker
+      id="hall-arrow"
+      viewBox="0 0 10 10"
+      refX="8"
+      refY="5"
+      markerWidth="7"
+      markerHeight="7"
+      orient="auto"
+    >
+      <path d="M0 1 L9 5 L0 9 Z" class="head" />
+    </marker>
+  </defs>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .plate {
+    fill: color-mix(in oklab, var(--fg-subtle) 18%, transparent);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .lead {
+    stroke: var(--copper);
+    stroke-width: 2.5;
+  }
+  .term {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .flow {
+    stroke: var(--copper);
+    stroke-width: 2;
+  }
+  .head {
+    fill: var(--copper);
+    stroke: none;
+  }
+  .cross {
+    stroke: var(--info);
+    stroke-width: 1.6;
+  }
+  .pad {
+    fill: var(--fg-muted);
+  }
+  .sense {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .meter {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .title {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .small {
+    font-size: 13px;
+    font-weight: 700;
+    fill: var(--copper);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .charge {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .plus {
+    fill: var(--danger);
+  }
+  .minus {
+    fill: var(--info);
+  }
+  .reading {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    fill: var(--fg-muted);
+  }
+  .reading.on {
+    fill: var(--fg);
+    font-weight: 700;
+  }
+  .sub {
+    font-size: 10px;
+  }
+  .state {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .state.on {
+    fill: var(--success);
+    font-weight: 600;
+  }
+</style>

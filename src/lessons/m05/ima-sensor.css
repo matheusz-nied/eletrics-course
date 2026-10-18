@@ -1,0 +1,190 @@
+/* ImaSensor.tsx: a magnet coming closer to a reed switch and Hall sensors (lesson 5.5). */
+
+.ima-sensor__scene,
+.ima-sensor__graph svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.ima-sensor__scene {
+  max-width: 34rem;
+  margin-inline: auto;
+}
+
+.ima-sensor__graph {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+.ima-sensor__axis {
+  stroke: var(--border);
+  stroke-dasharray: 2 4;
+  stroke-width: 1;
+}
+
+.ima-sensor__pole {
+  stroke: var(--fg);
+  stroke-width: 1.5;
+}
+
+.ima-sensor__pole--n {
+  fill: var(--danger);
+}
+
+.ima-sensor__pole--s {
+  fill: var(--info);
+}
+
+.ima-sensor__pole-text {
+  fill: var(--on-accent);
+  font-size: 12px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.ima-sensor__glass {
+  fill: color-mix(in oklab, var(--info) 10%, transparent);
+  stroke: var(--fg-muted);
+  stroke-width: 1.2;
+}
+
+.ima-sensor__reed {
+  fill: none;
+  stroke: var(--fg-muted);
+  stroke-linecap: round;
+  stroke-width: 2.5;
+}
+
+.ima-sensor__reed.is-on {
+  stroke: var(--copper);
+}
+
+.ima-sensor__chip {
+  fill: var(--fg);
+}
+
+.ima-sensor__leg {
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+
+.ima-sensor__label {
+  fill: var(--fg-muted);
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.ima-sensor__label--start {
+  text-anchor: start;
+}
+
+.ima-sensor__dim {
+  stroke: var(--fg-subtle);
+  stroke-width: 1;
+}
+
+.ima-sensor__states {
+  display: grid;
+  gap: 0.6rem;
+  font-size: 0.9375rem;
+}
+
+.ima-sensor__states li {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+}
+
+.ima-sensor__led {
+  flex: none;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-top: 0.3rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.ima-sensor__led.is-on {
+  border-color: var(--success);
+  background: var(--success);
+  box-shadow: 0 0 0.5rem color-mix(in oklab, var(--success) 60%, transparent);
+}
+
+.ima-sensor__meter {
+  flex: none;
+  min-width: 2.6rem;
+  padding: 0 0.3rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.3rem;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.ima-sensor__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.ima-sensor__tick {
+  fill: var(--fg-muted);
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.ima-sensor__tick--end {
+  text-anchor: end;
+}
+
+.ima-sensor__tick--reed {
+  fill: var(--copper);
+}
+
+.ima-sensor__tick--hall {
+  fill: var(--accent);
+}
+
+.ima-sensor__axis-label {
+  fill: var(--fg-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.ima-sensor__threshold {
+  stroke-dasharray: 5 4;
+  stroke-width: 1.2;
+}
+
+.ima-sensor__threshold--reed {
+  stroke: var(--copper);
+}
+
+.ima-sensor__threshold--hall {
+  stroke: var(--accent);
+}
+
+.ima-sensor__curve {
+  fill: none;
+  stroke: var(--fg);
+  stroke-linecap: round;
+  stroke-width: 2.5;
+}
+
+.ima-sensor__cursor {
+  stroke: var(--fg-subtle);
+  stroke-dasharray: 3 4;
+  stroke-width: 1;
+}
+
+.ima-sensor__dot {
+  fill: var(--fg);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
