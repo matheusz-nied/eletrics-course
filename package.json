@@ -30,7 +30,7 @@
     "@tailwindcss/vite": "^4.3.3",
     "@vite-pwa/astro": "^1.2.0",
     "astro": "^7.4.0",
-    "katex": "^0.19.0",
+    "katex": "^0.16.47",
     "postprocessing": "^6.39.5",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

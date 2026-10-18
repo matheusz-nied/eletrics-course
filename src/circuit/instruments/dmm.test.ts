@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dcAndRms, dmmReading } from './dmm';
+import { dcAndRms, dmmReading, quasiStaticReading } from './dmm';
 
 describe('dmmReading', () => {
   it('autoranges like a 3½-digit meter', () => {
@@ -34,5 +34,17 @@ describe('dcAndRms', () => {
     const { mean, rms } = dcAndRms(values);
     expect(mean).toBeCloseTo(2, 6);
     expect(rms).toBeCloseTo(10 / Math.SQRT2, 3);
+  });
+});
+
+describe('quasiStaticReading', () => {
+  it('reads the DC part in DC mode and the AC RMS in AC mode', () => {
+    const readouts = { VS: 12, 'VS.dc': 0, 'VS.ac': 12 };
+    expect(quasiStaticReading(readouts, 'VS', 'dc')).toBe(0);
+    expect(quasiStaticReading(readouts, 'VS', 'ac')).toBe(12);
+  });
+
+  it('is undefined when the frame has no split', () => {
+    expect(quasiStaticReading({ VS: 12 }, 'VS', 'ac')).toBeUndefined();
   });
 });

@@ -16,8 +16,8 @@ const WEAK = 0.3;
 
 /**
  * Capacitor. Transient: companion model of the trapezoidal rule (backward
- * Euler after discontinuities); DC: open circuit. Starts at `ic` volts.
- * Pin a is + when `polarized`.
+ * Euler after discontinuities); DC: open circuit. Starts at `ic` volts;
+ * changing `ic` charges it to that voltage at once. Pin a is + when `polarized`.
  *
  * Damage: an electrolytic (`polarized`) with more than 1,5 V reversed, or any
  * capacitor above 1,2× its rated voltage, accumulates stress with the square
@@ -166,6 +166,12 @@ export default defineDevice({
         out('charge', shorted() ? 0 : c * v);
         out('energy', shorted() ? 0 : 0.5 * c * v * v);
         out('bulged', failed);
+      },
+      paramChanged(name) {
+        // A new initial voltage takes effect now, as if the capacitor had been charged to it.
+        if (name !== 'ic') return;
+        vPrev = v = num(params, 'ic');
+        iPrev = i = 0;
       },
       reset() {
         vPrev = v = num(params, 'ic');
