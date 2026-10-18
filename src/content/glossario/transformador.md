@@ -2,7 +2,7 @@
 termo: Transformador
 resumo: Duas bobinas no mesmo núcleo de ferro que mudam o valor de uma tensão alternada, para baixo ou para cima. Chamado de trafo. Só funciona em CA.
 sinonimos: [trafo]
-relacionados: [primario, secundario, relacao-de-espiras, nucleo-laminado, autotransformador, volt-ampere]
+relacionados: [primario, secundario, relacao-de-espiras, nucleo-laminado, autotransformador, volt-ampere, lei-de-faraday]
 aula: m05-magnetismo/04-transformadores
 ---
 A CA no primário cria um fluxo magnético que muda o tempo todo; o núcleo leva esse fluxo ao secundário, onde ele induz a tensão de saída. A relação entre as tensões é a relação de espiras.

@@ -15,7 +15,7 @@ prerequisitos:
   - m05-magnetismo/02-eletroimas-e-solenoides
 tags: [relé, contator, selo, intertravamento, relé térmico, partida direta, reversão, motor, portão, bomba]
 seguranca: rede
-rascunho: true
+rascunho: false
 ---
 
 import ContactorTerminals from '../../../lessons/m05/figures/ContactorTerminals.astro';
@@ -207,7 +207,7 @@ Quando a corrente da bobina é cortada, o indutor gera um pico de tensão de cen
 | Varistor | CA e CC | Quase não atrasa o desligamento | Deixa passar um pico um pouco maior |
 | RC (resistor com capacitor) | CA, principalmente | Também reduz a interferência | Ocupa mais espaço |
 
-O diodo vai **ao contrário** da tensão da bobina: o catodo no lado positivo. Montado ao contrário disso, ele vira um curto na fonte assim que a bobina é ligada. Muitos contatores aceitam um módulo supressor encaixado nos bornes A1 e A2.
+O diodo, chamado <Term id="diodo-de-roda-livre">diodo de roda livre</Term>, vai **ao contrário** da tensão da bobina: o catodo no lado positivo. Montado ao contrário disso, ele vira um curto na fonte assim que a bobina é ligada. Muitos contatores aceitam um módulo supressor encaixado nos bornes A1 e A2.
 
 ## O relé de estado sólido
 
