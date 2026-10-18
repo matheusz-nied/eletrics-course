@@ -82,7 +82,7 @@ Imagine que você tem uma bateria de 12 V e um aparelho de 6 V que puxa 100 mA. 
 
 E se você usar resistores pequenos, de 60 Ω, para o divisor "aguentar" a carga? Sem o aparelho, a saída fica nos 6 V certos. Com o aparelho, o lance de baixo vira 30 Ω e a saída cai para $12 \cdot 30 / 90 = 4\,\text{V}$. Pior: o divisor passa a gastar sozinho mais energia que o aparelho, transformada em calor nos resistores, e a tensão muda toda vez que o aparelho puxa mais ou menos corrente.
 
-Por isso divisores servem para **sinais**: ajustes, sensores, a entrada de um microcontrolador, que puxam correntes minúsculas. Para alimentar um aparelho com uma tensão menor que a da fonte, usa-se um regulador ou uma fonte, assunto do módulo de fontes de alimentação.
+Por isso divisores servem para **sinais**: ajustes, sensores, a entrada de um microcontrolador, que puxam correntes minúsculas. Para alimentar um aparelho com uma tensão menor que a da fonte, usa-se um regulador ou uma fonte, assunto do módulo <LinkAula id="m10-fontes" />.
 
 ## Potenciômetro: o divisor ajustável
 
@@ -107,7 +107,7 @@ No meio você leu 2,5 V. Os 3,3 V aparecem com o cursor em 0,66 da pista ($5 \ti
 É exatamente o que acontece no botão de volume de um rádio antigo, no pedal do acelerador eletrônico de muitos carros (que tem potenciômetros ou sensores parecidos dentro) e nos joysticks. Os potenciômetros vêm marcados com a curva e o valor: em muitos modelos, **B10K** é linear de 10 kΩ e **A10K** é logarítmico, usado em volume, porque o ouvido percebe o som de forma logarítmica.
 
 <Callout type="nota" title="Trimpot: o potenciômetro de ajuste">
-Numa placa, o potenciômetro pequeno ajustado com chave de fenda é o **trimpot**. Ele é regulado uma vez e fica parado. A central do portão eletrônico usa trimpots para ajustar a força do motor e os tempos de pausa; dentro, cada trimpot é um divisor de tensão lido pelo microcontrolador. Você vai mexer neles no módulo do portão.
+Numa placa, o potenciômetro pequeno ajustado com chave de fenda é o **trimpot**. Ele é regulado uma vez e fica parado. A central do portão eletrônico usa trimpots para ajustar a força do motor e os tempos de pausa; dentro, cada trimpot é um divisor de tensão lido pelo microcontrolador. Você vai mexer neles na aula <LinkAula id="m16-portao/08-ajustes-e-testes" />.
 </Callout>
 
 ## O divisor de corrente
@@ -174,7 +174,7 @@ Sozinho, o LDR só muda de resistência. Para virar um sinal que um circuito con
 
 De dia, o LDR fica perto de 490 Ω e a saída em cerca de 0,23 V. A saída chega a 2,5 V por volta de 27 lx, a luz do fim da tarde, quando o LDR vale 10 kΩ, igual ao resistor de cima (metade da tensão para cada um). No escuro, o LDR chega a 1 MΩ e a saída passa de 4,9 V. O LDR da simulação segue uma curva típica; o de verdade muda bastante de um modelo para outro, e é por isso que os circuitos reais têm um ajuste.
 
-O resto da luz noturna é um circuito de comando: um transistor ou um comparador "olha" essa tensão e, quando ela passa de um limite (2,5 V no nosso exemplo), liga um relé que acende a lâmpada. Você vai montar essa parte nos módulos de semicondutores. Os circuitos reais têm também uma pequena folga (a luz acende com uma tensão e só apaga com outra um pouco diferente) para não ficar piscando no lusco-fusco.
+O resto da luz noturna é um circuito de comando: um transistor ou um comparador "olha" essa tensão e, quando ela passa de um limite (2,5 V no nosso exemplo), liga um relé que acende a lâmpada. Você vai montar essa parte no módulo <LinkAula id="m09-semicondutores" />. Os circuitos reais têm também uma pequena folga (a luz acende com uma tensão e só apaga com outra um pouco diferente) para não ficar piscando no lusco-fusco.
 
 Trocando o resistor fixo por um trimpot, você ajusta o ponto de acender. E trocando o LDR por um <Term id="ntc">NTC</Term>, que muda de resistência com a temperatura, o mesmo divisor vira um termômetro: é assim que o sensor de temperatura do motor do carro, o da geladeira e o do carregador do celular conversam com as suas centrais.
 
@@ -185,12 +185,12 @@ Um detalhe de instalação: o sensor não pode "ver" a própria lâmpada. Se a l
 ## Erros comuns e segurança
 
 - **Alimentar um aparelho com um divisor.** A tensão cai assim que o aparelho puxa corrente e muda junto com o consumo dele. Use um regulador ou uma fonte.
-- **Esquecer que quem mede também é carga.** Um multímetro digital comum se comporta, na escala de tensão, como uma resistência de cerca de 10 MΩ entre as pontas (valor típico). Num divisor de 1 MΩ com 1 MΩ em 10 V, ligar o multímetro no ponto do meio já tira a leitura do lugar: em vez de 5 V, ele marca cerca de 4,76 V. Em divisores de resistores menores, o efeito some. Você vai ver isso de perto no módulo de medições.
+- **Esquecer que quem mede também é carga.** Um multímetro digital comum se comporta, na escala de tensão, como uma resistência de cerca de 10 MΩ entre as pontas (valor típico). Num divisor de 1 MΩ com 1 MΩ em 10 V, ligar o multímetro no ponto do meio já tira a leitura do lugar: em vez de 5 V, ele marca cerca de 4,76 V. Em divisores de resistores menores, o efeito some. Você vai ver isso de perto na aula <LinkAula id="m03-medicoes/01-multimetro" />.
 - **Usar resistores baixos demais.** Divisor de resistores pequenos puxa muita corrente da fonte e esquenta os resistores à toa. Confira a potência: $P = V^2 / R$ em cada um.
 - **Potenciômetro como reostato com o cursor na ponta.** Ligado só por uma ponta e pelo cursor, com o cursor quase encostado nessa ponta, toda a corrente passa por um pedacinho da pista e ele queima. Um resistor em série limita a corrente nesse caso.
 
 <Callout type="perigo" title="Nunca faça um divisor na tomada">
-Pode parecer uma forma esperta de tirar "uns 5 volts" dos 127 V da tomada, mas um divisor de resistores **não isola** o circuito da rede. Qualquer ponto dele, inclusive o "negativo", pode estar na tensão da fase e dar choque, e um resistor que abrir joga a tensão inteira na saída. Para tirar tensão baixa da rede, só com uma fonte própria, com transformador ou isolação, assunto do módulo de fontes.
+Pode parecer uma forma esperta de tirar "uns 5 volts" dos 127 V da tomada, mas um divisor de resistores **não isola** o circuito da rede. Qualquer ponto dele, inclusive o "negativo", pode estar na tensão da fase e dar choque, e um resistor que abrir joga a tensão inteira na saída. Para tirar tensão baixa da rede, só com uma fonte própria, com transformador ou isolação, assunto do módulo <LinkAula id="m10-fontes" />.
 </Callout>
 
 ## Exercícios

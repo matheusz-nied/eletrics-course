@@ -1,0 +1,88 @@
+---
+/* 03.5: the 1 kHz calibration square wave with an under-, well- and over-compensated ×10 probe. */
+const W = 190;
+const H = 110;
+const LOW = 85;
+const HIGH = 25;
+
+/** Square wave of two periods; `edge` shapes the level after each transition. */
+function wave(edge: (u: number) => number): string {
+  const half = W / 4;
+  let d = `M0 ${LOW}`;
+  for (let k = 0; k < 4; k++) {
+    const rising = k % 2 === 0;
+    const from = rising ? LOW : HIGH;
+    const to = rising ? HIGH : LOW;
+    for (let s = 0; s <= 24; s++) {
+      const u = s / 24;
+      const y = to + (from - to) * edge(u);
+      d += ` L${(k * half + u * half).toFixed(1)} ${y.toFixed(1)}`;
+    }
+  }
+  return d;
+}
+
+const panels = [
+  {
+    title: 'Subcompensada',
+    sub: 'cantos arredondados',
+    // starts at 60 % of the step and creeps to the final level
+    d: wave((u) => 0.6 * Math.exp(-u * 6)),
+  },
+  { title: 'Compensada', sub: 'quadrada: está certa', d: wave(() => 0) },
+  {
+    title: 'Sobrecompensada',
+    sub: 'picos nas bordas',
+    d: wave((u) => -0.35 * Math.exp(-u * 6)),
+  },
+];
+---
+
+<svg viewBox="0 0 660 200" width="660" height="200" class="fig" aria-hidden="true">
+  {panels.map((p, i) => (
+    <g transform={`translate(${15 + i * 220} 10)`}>
+      <rect x="-5" y="0" width={W + 10} height={H + 20} rx="6" class="screen" />
+      <path d={`M0 ${H / 2 + 10} H${W} M${W / 2} 10 V${H + 10}`} class="grid" />
+      <path d={p.d} class={i === 1 ? 'trace ok' : 'trace'} transform="translate(0 10)" />
+      <text x={W / 2} y={H + 48} class="title">
+        {p.title}
+      </text>
+      <text x={W / 2} y={H + 68} class="sub">
+        {p.sub}
+      </text>
+    </g>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .screen {
+    fill: #0b1015;
+  }
+  .grid {
+    stroke: rgb(255 255 255 / 0.18);
+    stroke-width: 1;
+  }
+  .trace {
+    stroke: #f5c518;
+    stroke-width: 2.5;
+  }
+  text {
+    stroke: none;
+    text-anchor: middle;
+    fill: var(--fg);
+    font-size: 14px;
+  }
+  .title {
+    font-weight: 700;
+  }
+  .sub {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+</style>

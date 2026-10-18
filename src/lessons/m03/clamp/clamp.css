@@ -1,0 +1,84 @@
+/* Lesson 3.3 clamp meter (ClampMeter.tsx). Layout and panel come from ../multimeter/trainer.css. */
+
+/* The clamp has fixed colors: it is an object, not part of the theme. */
+.cl-meter {
+  max-width: 12rem;
+}
+
+@media (min-width: 40rem) {
+  .cl-meter {
+    max-width: 16rem;
+  }
+}
+
+.cl-body {
+  fill: #2a2e35;
+}
+.cl-guard {
+  fill: #e0a91b;
+}
+.cl-trigger {
+  fill: #e0a91b;
+  stroke: #1a1d22;
+  stroke-width: 2;
+}
+.cl-jaw {
+  fill: none;
+  stroke: #e0a91b;
+  stroke-width: 28;
+}
+.cl-split {
+  stroke: #1a1d22;
+  stroke-width: 3;
+}
+.cl-field {
+  fill: none;
+  stroke: #d63a2c;
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  opacity: 0.8;
+}
+.cl-field.is-strong {
+  stroke-width: 4;
+}
+.cl-sheath {
+  fill: #d9dce1;
+  stroke: #8b919b;
+  stroke-width: 2;
+}
+.cl-cond-ins {
+  stroke: #1a1d22;
+  stroke-width: 1.5;
+}
+.cl-cond.is-f .cl-cond-ins {
+  fill: #7a4a24;
+}
+.cl-cond.is-n .cl-cond-ins {
+  fill: #2f6fd6;
+}
+.cl-cond.is-pos .cl-cond-ins {
+  fill: #d63a2c;
+}
+.cl-cond.is-neg .cl-cond-ins {
+  fill: #15171b;
+}
+.cl-cond-cu {
+  fill: #d98b4a;
+}
+.cl-mark {
+  fill: #1a1d22;
+}
+.cl-mark-x {
+  stroke: #1a1d22;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.cl-pos {
+  fill: #e8ebf0;
+  font-size: 13px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.cl-pos.is-current {
+  fill: #ff9d8f;
+}

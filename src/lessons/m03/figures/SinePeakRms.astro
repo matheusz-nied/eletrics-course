@@ -1,0 +1,123 @@
+---
+/* 03.2: two cycles of the 127 V outlet: peak 179,6 V, RMS 127 V, mean zero, 16,7 ms per cycle. */
+const X0 = 70;
+const X1 = 610;
+const Y0 = 125;
+const PEAK = 90; // px for 179,6 V
+const RMS = PEAK / Math.SQRT2;
+const N = 240;
+const d = Array.from({ length: N + 1 }, (_, i) => {
+  const x = X0 + ((X1 - X0) * i) / N;
+  const y = Y0 - PEAK * Math.sin((4 * Math.PI * i) / N);
+  return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
+}).join(' ');
+const cycle = (X1 - X0) / 2;
+---
+
+<svg viewBox="0 0 640 272" width="640" height="272" class="fig" aria-hidden="true">
+  <path d={`M${X0} ${Y0 - PEAK - 14} V${Y0 + PEAK + 14}`} class="axis" />
+  <path d={`M${X0} ${Y0} H${X1 + 10}`} class="axis" />
+  <text x={X0 - 8} y={Y0 - PEAK - 20} class="axis-t start">
+    tensão
+  </text>
+  <text x={X1 + 10} y={Y0 - 8} class="axis-t end">
+    tempo
+  </text>
+
+  <path d={`M${X0} ${Y0 - PEAK} H${X1}`} class="ref peak" />
+  <path d={`M${X0} ${Y0 + PEAK} H${X1}`} class="ref peak" />
+  <path d={`M${X0} ${Y0 - RMS} H${X1}`} class="ref rms" />
+
+  <path d={d} class="wave" />
+
+  <text x={X0 - 8} y={Y0 - PEAK + 4} class="lbl peak-t end">
+    +179,6 V
+  </text>
+  <text x={X0 - 8} y={Y0 - RMS + 4} class="lbl rms-t end">
+    127 V
+  </text>
+  <text x={X0 - 8} y={Y0 + 4} class="lbl end">
+    0 V
+  </text>
+  <text x={X0 - 8} y={Y0 + PEAK + 4} class="lbl peak-t end">
+    −179,6 V
+  </text>
+
+  <text x={X1} y={Y0 - PEAK - 8} class="lbl peak-t end">
+    pico
+  </text>
+  <text x={X1} y={Y0 - RMS - 8} class="lbl rms-t end">
+    eficaz (V~)
+  </text>
+  <text x={X0 + cycle * 0.75} y={Y0 - 8} class="lbl muted">
+    média = 0
+  </text>
+
+  <path
+    d={`M${X0} ${Y0 + PEAK + 22} V${Y0 + PEAK + 32} M${X0 + cycle} ${Y0 + PEAK + 22} V${Y0 + PEAK + 32} M${X0} ${Y0 + PEAK + 27} H${X0 + cycle}`}
+    class="dim"
+  />
+  <text x={X0 + cycle / 2} y={Y0 + PEAK + 46} class="lbl">
+    um ciclo: 16,7 ms (60 por segundo)
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .wave {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  .ref {
+    stroke-width: 1.5;
+    stroke-dasharray: 6 5;
+  }
+  .peak {
+    stroke: var(--danger);
+  }
+  .rms {
+    stroke: var(--success);
+  }
+  .dim {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .axis-t {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .peak-t {
+    fill: var(--danger);
+  }
+  .rms-t {
+    fill: var(--success);
+  }
+  .muted {
+    fill: var(--fg-muted);
+    font-weight: 500;
+  }
+</style>

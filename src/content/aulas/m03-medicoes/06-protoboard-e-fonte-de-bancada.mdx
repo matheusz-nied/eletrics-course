@@ -1,0 +1,310 @@
+---
+titulo: Protoboard e fonte de bancada
+modulo: m03-medicoes
+ordem: 6
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Saber quais furos da protoboard estão ligados entre si e para que serve o canal do meio
+  - Montar um circuito na protoboard sem deixar peças em curto
+  - Ajustar a tensão e o limite de corrente da fonte de bancada antes de ligar a saída
+  - Entender os modos CV e CC e por que um curto na fonte de bancada não queima nada
+  - Montar um divisor de tensão e conferir os valores com o multímetro
+prerequisitos:
+  - m02-circuitos-cc/06-divisores-de-tensao-e-corrente
+  - m03-medicoes/01-multimetro
+  - m03-medicoes/02-medindo-tensao
+tags: [protoboard, fonte de bancada, montagem, limite de corrente, jumper, CV, CC]
+seguranca: baixa-tensao
+---
+
+import Breadboard from '../../../lessons/m03/Breadboard';
+import BenchSupply from '../../../lessons/m03/BenchSupply';
+
+Antes de soldar qualquer coisa numa placa, quem projeta circuitos testa a ideia numa **protoboard**: encaixa as peças, liga, mede, troca uma peça, mede de novo. Sem solda e sem estragar nada. Para alimentar o teste, usa uma **fonte de bancada**, que entrega a tensão que você escolher e, o mais importante, para de empurrar corrente quando passa do limite que você ajustou. O curto que derreteria um fio na bateria do carro vira, na fonte de bancada, só uma luz vermelha acesa no painel.
+
+Nesta aula você vai descobrir o que tem dentro da protoboard, aprender a ajustar a fonte de bancada do jeito seguro e, no fim, montar e medir um circuito de verdade.
+
+## A protoboard por fora
+
+A <Term id="protoboard">protoboard</Term> (também chamada de matriz de contatos ou *breadboard*) é uma placa de plástico cheia de furos, num espaçamento de 2,54 mm. Esse é o mesmo espaçamento das pernas dos circuitos integrados e dos conectores de placa, então quase toda peça de eletrônica encaixa direto.
+
+- Os furos do meio formam a área de montagem: **colunas** numeradas (1, 2, 3…) e **fileiras** com letras, de A a E em cima e de F a J embaixo.
+- Entre o E e o F fica um **canal** sem furos.
+- Nas bordas ficam os **trilhos de alimentação**, duas linhas de furos de cada lado, marcadas com uma linha vermelha (+) e uma azul (−).
+
+Os tamanhos mais comuns são a mini, de 170 furos e sem trilhos; a média, de 400 furos; e a grande, de 830 furos.
+
+## Por dentro: as trilhas de metal
+
+Embaixo dos furos há tiras de metal com molas que apertam as pernas das peças. O segredo da protoboard é saber quais furos dividem a mesma tira:
+
+- Em cada **coluna**, os cinco furos de A a E estão ligados entre si. Os cinco de F a J formam outra tira, separada pelo canal.
+- Colunas vizinhas **não** se ligam: a coluna 10 e a coluna 11 são tiras diferentes.
+- Cada **trilho** é uma tira comprida, ao longo da placa. Em algumas protoboards grandes, os trilhos são **divididos no meio**: a linha vermelha ou azul tem uma falha, e as duas metades não se ligam.
+
+O canal existe por causa dos circuitos integrados: um chip encaixado atravessando o canal fica com cada perna numa coluna diferente, e nenhuma perna fica em curto com a da frente.
+
+<Breadboard client:visible />
+
+**Tarefas:**
+
+1. Clique no furo C10. Que furos acendem? Agora clique no F10: ele está na mesma coluna, mas do outro lado do canal.
+2. Clique num furo do trilho + de cima: a linha inteira acende. Marque "trilhos divididos no meio" e clique de novo.
+3. Ligue "Mostrar as trilhas de metal" para ver as tiras por baixo do plástico.
+4. Resolva os três defeitos. Em cada um, investigue clicando nos furos onde as peças estão encaixadas e só então responda.
+
+Os três defeitos são os erros mais comuns de quem está começando, e todos têm a mesma causa: uma ligação que parece existir no desenho, mas não existe nas tiras de metal (ou existe onde não devia).
+
+## Regras de montagem
+
+- **Cada perna numa tira diferente.** Duas pernas da mesma peça na mesma coluna deixam a peça em curto: a corrente passa pela tira, não pela peça.
+- **Chips atravessam o canal.** Cada perna fica numa coluna, e sobram quatro furos livres em cada coluna para ligar outras coisas.
+- **Alimentação nos trilhos.** Ligue o + da fonte num trilho vermelho e o − num azul, e leve até as colunas com <Term id="jumper">jumpers</Term> curtos. Use vermelho para o + e preto ou azul para o −, sempre, para bater o olho e saber o que é o quê.
+- **Confira os trilhos divididos** com o multímetro em continuidade (aula [Resistência, continuidade e teste de diodo](../04-resistencia-continuidade-e-diodo/)) antes de confiar que eles vão de ponta a ponta.
+- **Nada de rede elétrica na protoboard.** Ela é feita para baixa tensão e correntes pequenas. Motores e cargas de vários ampères ficam fora dela, ligados com fios e bornes de verdade.
+- **Não force.** Pernas grossas demais alargam as molas e estragam aquele furo para sempre.
+
+## A fonte de bancada
+
+A <Term id="fonte-de-bancada">fonte de bancada</Term> é uma fonte de tensão ajustável feita para testes. Um modelo comum vai de 0 a 30 V e de 0 a 5 A. O painel quase sempre tem:
+
+- dois visores: a **tensão** na saída (V) e a **corrente** que está saindo (A);
+- o botão **VOLTAGE**, que ajusta a tensão, e o botão **CURRENT**, que ajusta o **limite de corrente**;
+- duas luzes, **CV** e **CC**, que dizem em que modo a fonte está trabalhando;
+- os bornes de saída, **+** vermelho e **−** preto. Muitas têm também um borne verde (terra), ligado ao pino terra da tomada e não à saída; deixe-o livre, a não ser que saiba por que usá-lo;
+- em vários modelos, um botão **OUTPUT**, que liga e desliga a saída sem desligar a fonte.
+
+### Os modos CV e CC
+
+A fonte obedece a dois limites ao mesmo tempo: a tensão nunca passa da que você ajustou, e a corrente nunca passa do limite. O que for alcançado primeiro manda:
+
+- **CV, tensão constante.** A carga puxa menos que o limite. A fonte mantém a tensão ajustada, e a corrente é a que a carga pedir, pela <Term id="lei-de-ohm">Lei de Ohm</Term>.
+- **CC, corrente constante.** A carga puxaria mais que o limite. A fonte baixa a tensão até a corrente ficar exatamente no limite.
+
+Para uma carga de resistência $R$, a fonte compara a corrente que a carga puxaria com o limite:
+
+$$
+\begin{aligned}
+I &= \frac{V_\text{ajustada}}{R} \\[4pt]
+I &\le I_\text{limite} \;\Rightarrow\; \text{CV} \\[4pt]
+I &> I_\text{limite} \;\Rightarrow\; \text{CC:}\; V = I_\text{limite} \cdot R
+\end{aligned}
+$$
+
+- $V_\text{ajustada}$: a tensão do botão VOLTAGE, em volts;
+- $I_\text{limite}$: o limite do botão CURRENT, em ampères;
+- $R$: a resistência da carga, em ohms.
+
+**Exemplo resolvido.** Um resistor de 10 Ω e 5 W ligado em 12 V puxaria $I = 12 / 10 = 1{,}2\,\text{A}$ e dissiparia $P = 12 \cdot 1{,}2 = 14{,}4\,\text{W}$: quase o triplo do que ele aguenta, e ele queima. Com o limite em 0,5 A, a fonte entra em CC e baixa a tensão para $V = 0{,}5 \cdot 10 = 5\,\text{V}$. O resistor dissipa $P = 5 \cdot 0{,}5 = 2{,}5\,\text{W}$ e sobrevive. Confira na fonte virtual abaixo.
+
+Num **curto**, a resistência é quase zero. A fonte entra em CC, a corrente fica no limite e a tensão cai para perto de zero. Nada queima: a fonte foi feita para isso. Compare com a bateria de carro em curto da aula <LinkAula id="m02-circuitos-cc/01-o-circuito-eletrico" />, onde a corrente passava de cem ampères.
+
+### Ajustando o limite antes de ligar
+
+O limite de corrente só protege se for ajustado **antes** de o circuito receber energia:
+
+<Steps>
+  <Step title="Ajuste a tensão com a saída desligada">
+    Com o botão OUTPUT desligado (ou nada ligado nos bornes), gire VOLTAGE até o visor mostrar a tensão que o circuito precisa.
+  </Step>
+  <Step title="Ajuste o limite de corrente">
+    Escolha um limite um pouco acima do que o circuito deve puxar: para um circuito de 50 mA, uns 100 mA. Muitas fontes mostram o limite no visor enquanto a saída está desligada. Nas mais simples, sem botão OUTPUT, encoste um fio grosso entre os bornes + e −, gire CURRENT até o amperímetro mostrar o limite e tire o fio.
+  </Step>
+  <Step title="Ligue o circuito e depois a saída">
+    Conecte os fios com a saída desligada, ligue a saída e olhe as luzes. CV acesa: tudo certo. CC acesa num circuito que deveria puxar pouco: há um curto ou uma peça errada. Desligue e investigue.
+  </Step>
+</Steps>
+
+<BenchSupply client:visible />
+
+**Tarefas:**
+
+1. **CV.** Com a lâmpada de 12 V e 5 W, 12 V e limite de 1 A, ligue a saída. A luz CV acende e a lâmpada puxa 0,417 A.
+2. **CC.** Baixe o limite para 0,30 A. A fonte passa para CC e a tensão cai para cerca de 6,5 V: a lâmpada fica fraca. Com 0,20 A, a tensão cai para cerca de 3,1 V e o filamento mal esquenta.
+3. **Curto.** Escolha "Curto" com o limite em 0,5 A. A corrente fica em 0,5 A, a tensão quase zero, e nada queima.
+4. **Resistor de potência.** Escolha o resistor de 10 Ω, deixe 12 V e o limite em 2 A, e ligue a saída. Troque a peça, baixe o limite para 0,5 A e ligue de novo.
+5. **LED sem resistor.** Com 5 V e limite de 1 A, o LED queima na hora. Troque, baixe o limite para 0,02 A (20 mA) e ligue: o LED acende com cerca de 2 V. O limite de corrente fez o papel do resistor.
+
+O truque da tarefa 5 é útil na bancada, para testar um LED ou descobrir a cor dele. Num circuito de verdade, o LED sempre leva um resistor, como você vai ver na aula <LinkAula id="m09-semicondutores/04-leds" />.
+
+### Duas saídas
+
+Fontes com dois canais podem ser ligadas **em série**, somando as tensões, ou com o ponto do meio como referência, formando uma fonte simétrica, como +12 V e −12 V para amplificadores. Ligar canais **em paralelo** para somar corrente só deve ser feito se o manual da fonte permitir.
+
+## Montar e medir
+
+Hora de juntar as duas coisas. Você vai montar um <Term id="divisor-de-tensao">divisor de tensão</Term> com um resistor de 1 kΩ (marrom, preto, vermelho) e um de 2,2 kΩ (vermelho, vermelho, vermelho), alimentado com 9 V.
+
+Antes de montar, a conta:
+
+$$
+\begin{aligned}
+I &= \frac{9\,\text{V}}{1\,000\,\Omega + 2\,200\,\Omega} \approx 2{,}81\,\text{mA} \\[4pt]
+V_{R2} &= 9\,\text{V} \cdot \frac{2\,200}{3\,200} \approx 6{,}19\,\text{V}
+\end{aligned}
+$$
+
+<Steps>
+  <Step title="Prepare a fonte">
+    Saída desligada, 9 V e limite de 20 mA: bem acima dos 2,81 mA esperados, mas baixo o bastante para um erro de montagem não aquecer nada.
+  </Step>
+  <Step title="Monte os resistores">
+    R1 da coluna 10 à coluna 14, na fileira C. R2 da coluna 14 à coluna 18, na fileira D. As duas pernas que se encontram ficam na coluna 14, que é o ponto do meio do divisor.
+  </Step>
+  <Step title="Ligue a alimentação">
+    Jumper vermelho do trilho + até a coluna 10; jumper preto da coluna 18 até o trilho −. Leve os fios da fonte aos trilhos: vermelho no +, preto no −.
+  </Step>
+  <Step title="Confira antes de ligar">
+    Siga o caminho com o dedo, do + ao −: trilho, coluna 10, R1, coluna 14, R2, coluna 18, trilho. Nenhuma peça com as duas pernas na mesma coluna.
+  </Step>
+  <Step title="Ligue e meça">
+    Ligue a saída. A luz CV deve acender e o visor da fonte deve mostrar cerca de 2,8 mA. Com o multímetro em V⎓, meça entre a coluna 14 e o trilho −.
+  </Step>
+</Steps>
+
+A simulação é essa montagem. A chave reproduz o erro do primeiro defeito: R2 encaixado com as duas pernas na mesma coluna.
+
+<Simulation circuit="m03/montagem-divisor" instruments={['multimetro']} />
+
+**Tarefa:** confira os 6,19 V em R2 e os 2,81 mA. Depois feche a chave "Mesma coluna": a tensão em R2 vai a zero e a corrente sobe para 9 mA, porque só sobrou R1 no caminho. A fonte, com limite de 20 mA, continua em CV. Se o limite estivesse em 5 mA, a luz CC acenderia: na bancada, a luz CC acesa sem motivo é quase sempre um erro de montagem.
+
+Para medir a corrente na protoboard, abra o circuito tirando uma perna de R1 da coluna 10 para uma coluna vazia, e feche o caminho com o multímetro em série, no borne de mA, como na aula [Medindo corrente](../03-medindo-corrente/).
+
+<RealCase title="Testando um acessório antes de ligar na central do portão">
+Você comprou uma fotocélula nova, ou um receptor de controle, para o portão. Antes de ligar na saída de 12 V da central, teste na bancada:
+
+1. Veja no manual do acessório a tensão e o consumo. Ajuste a fonte para essa tensão, com a saída desligada, e o limite um pouco acima do consumo indicado.
+2. Ligue o acessório, respeitando o + e o −, e ligue a saída.
+3. Luz CV e corrente perto da indicada: o acessório está bom. Luz CC na hora: há um curto ou o acessório está ligado ao contrário. Desligue antes de qualquer coisa.
+
+Se esse curto acontecesse na central, ele poderia queimar a fonte de 12 V da placa ou o fusível dela. Na bancada, o limite de corrente segurou tudo, e o defeito apareceu sem estragar nada.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Duas pernas na mesma coluna.** A peça fica em curto e o resto do circuito recebe a tensão inteira.
+- **Trilho dividido sem jumper.** Metade da placa fica sem alimentação. Na dúvida, teste com o multímetro em continuidade.
+- **Uma coluna de diferença.** O jumper parece certo, mas está ao lado de onde devia. Confira coluna por coluna.
+- **Esquecer o − em comum.** Quando um circuito usa duas fontes, ou a fonte e um módulo com alimentação própria, os negativos precisam estar ligados entre si para as tensões terem a mesma referência.
+- **Limite de corrente no máximo "para não atrapalhar".** Isso desliga a proteção. Ajuste sempre um limite próximo do que o circuito deve puxar.
+- **Ligar a saída com o circuito conectado antes de ajustar.** A tensão que estava no botão da última vez vai direto para o circuito.
+- **Ligar e desligar com o circuito conectado** em fontes que não têm botão OUTPUT: algumas dão um pico de tensão quando são ligadas. Conecte e desconecte com a fonte desligada, ou use o botão OUTPUT.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Numa protoboard comum, quais furos estão ligados ao furo C12?',
+      options: [
+        {
+          text: 'A12, B12, D12 e E12',
+          correct: true,
+          feedback: 'Os cinco furos de A a E de cada coluna formam uma tira de metal.',
+        },
+        {
+          text: 'C1 a C30, a fileira C inteira',
+          feedback: 'As fileiras não se ligam na área do meio. Quem é ligado de ponta a ponta são os trilhos das bordas.',
+        },
+        {
+          text: 'A12 a J12, a coluna inteira',
+          feedback: 'O canal do meio separa a coluna em duas tiras: A a E e F a J.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Os furos E12 e F12 estão ligados entre si.',
+      answer: false,
+      explanation:
+        'E12 e F12 ficam em lados opostos do canal, em tiras diferentes. É por isso que um chip atravessando o canal não fica com as pernas em curto.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma fonte de bancada está em 12 V com limite de 0,5 A. Você liga um resistor de 10 Ω. Que tensão o visor mostra?',
+      answer: 5,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        'O resistor puxaria 12 ÷ 10 = 1,2 A, acima do limite. A fonte entra em CC com 0,5 A, e a tensão fica em 0,5 A × 10 Ω = 5 V.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma fonte de bancada ajustada em 12 V e 1 A tem os bornes encostados por um fio grosso. O que acontece?',
+      options: [
+        {
+          text: 'A fonte entra em CC: 1 A de corrente e tensão perto de zero',
+          correct: true,
+          feedback: 'A fonte segura a corrente no limite. Com resistência quase zero, a tensão também fica quase zero.',
+        },
+        {
+          text: 'A fonte queima, como uma bateria em curto',
+          feedback:
+            'A bateria não tem limite de corrente. A fonte de bancada tem, e foi feita para aguentar o curto.',
+        },
+        {
+          text: 'A corrente sobe para centenas de ampères por um instante',
+          feedback: 'O limite age o tempo todo. A corrente fica em 1 A, o valor ajustado no botão CURRENT.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um divisor tem R1 = 1 kΩ e R2 = 2,2 kΩ em série, ligados em 9 V. Qual é a corrente?',
+      answer: 2.81,
+      tolerance: 0.02,
+      unit: 'mA',
+      explanation: 'I = 9 V ÷ (1.000 Ω + 2.200 Ω) = 9 ÷ 3.200 ≈ 0,00281 A = 2,81 mA.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um circuito que deveria puxar 20 mA está na fonte com limite de 100 mA. Ao ligar a saída, a luz CC acende. O que fazer?',
+      options: [
+        {
+          text: 'Desligar a saída e procurar um curto ou uma peça errada na montagem',
+          correct: true,
+          feedback:
+            'A luz CC diz que o circuito está puxando mais que 100 mA, cinco vezes o esperado. Algo está errado na montagem.',
+        },
+        {
+          text: 'Subir o limite até a luz CC apagar',
+          feedback:
+            'Isso tira a proteção justamente quando há um problema. Primeiro descubra por que o circuito puxa tanto.',
+        },
+        {
+          text: 'Subir a tensão para compensar',
+          feedback: 'Em CC, a fonte já está baixando a tensão para segurar a corrente. Subir o botão não resolve nada.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem os passos para alimentar um circuito novo na fonte de bancada.',
+      items: [
+        'Ajustar a tensão com a saída desligada',
+        'Ajustar o limite de corrente um pouco acima do consumo esperado',
+        'Conectar o circuito aos bornes',
+        'Ligar a saída',
+        'Conferir se a luz CV está acesa e a corrente é a esperada',
+      ],
+      explanation:
+        'Os ajustes vêm antes de o circuito receber energia. Assim, se houver um erro de montagem, o limite já está lá para proteger.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Na protoboard, cada coluna tem duas tiras de cinco furos (A a E e F a J), separadas pelo canal. Os trilhos das bordas são tiras compridas, às vezes divididas no meio.
+- Cada perna de uma peça vai numa tira diferente; chips atravessam o canal; alimentação pelos trilhos, com jumpers vermelho para o + e preto para o −.
+- A fonte de bancada obedece à tensão ajustada e ao limite de corrente. Em CV, a tensão fica fixa; em CC, a corrente fica no limite e a tensão cai.
+- Ajuste a tensão e o limite com a saída desligada, um pouco acima do consumo esperado. Luz CC acesa sem motivo é sinal de erro de montagem.
+- Um curto na fonte de bancada não queima nada: a corrente fica no limite e a tensão cai para quase zero.
+
+Com esta aula você fecha o módulo de medições: já sabe medir tensão, corrente e resistência, ver sinais no osciloscópio e montar circuitos com segurança na bancada. O próximo módulo, <LinkAula id="m04-passivos" />, abre cada peça que você encaixou aqui: resistores, capacitores, indutores, fusíveis e relés.

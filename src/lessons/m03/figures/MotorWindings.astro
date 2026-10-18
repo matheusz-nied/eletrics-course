@@ -1,0 +1,107 @@
+---
+/* 03.4: the two windings of a single-phase gate motor share the common wire; the ends read the sum. */
+const coil = 'a10 10 0 0 1 20 0 '.repeat(6);
+---
+
+<svg viewBox="0 0 460 252" width="460" height="252" class="fig" aria-hidden="true">
+  <!-- Windings -->
+  <g class="wire">
+    <path d="M40 80 H80" />
+    <path d={`M80 80 ${coil}`} class="coil" />
+    <path d="M200 80 H260" />
+    <path d={`M260 80 ${coil}`} class="coil" />
+    <path d="M380 80 H420" />
+    <path d="M230 80 V142" />
+    <path d="M40 80 V36 H218 M242 36 H420 V80" class="cap-wire" />
+  </g>
+  <g class="cap">
+    <path d="M218 22 V50 M242 22 V50" />
+  </g>
+  <circle cx="230" cy="80" r="4" class="node" />
+
+  <text x="140" y="66" class="sub">
+    enrolamento 1 ≈ 8 Ω
+  </text>
+  <text x="320" y="66" class="sub">
+    enrolamento 2 ≈ 8 Ω
+  </text>
+  <text x="208" y="26" class="sub end">
+    capacitor (na central ou no motor)
+  </text>
+
+  <g class="term">
+    <circle cx="40" cy="80" r="7" />
+    <circle cx="420" cy="80" r="7" />
+    <circle cx="230" cy="150" r="7" />
+  </g>
+  <text x="40" y="112" class="label">
+    Fio 1
+  </text>
+  <text x="420" y="112" class="label">
+    Fio 2
+  </text>
+  <text x="230" y="180" class="label">
+    Fio 3: comum
+  </text>
+
+  <!-- The three readings -->
+  <g class="readings">
+    <text x="230" y="218">
+      1 e 3: 8 Ω · 2 e 3: 8 Ω · <tspan class="strong">1 e 2: 16 Ω, o maior</tspan>
+    </text>
+    <text x="230" y="240" class="sub">
+      o fio 3 fica de fora do maior par: é o comum (valores de exemplo)
+    </text>
+  </g>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    stroke: var(--copper);
+  }
+  .coil {
+    stroke: var(--fg);
+  }
+  .cap-wire {
+    stroke-dasharray: 5 4;
+  }
+  .cap {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .node {
+    fill: var(--copper);
+    stroke: none;
+  }
+  .term circle {
+    fill: var(--surface);
+    stroke: var(--fg);
+  }
+  text {
+    stroke: none;
+    text-anchor: middle;
+    fill: var(--fg);
+    font-size: 14px;
+  }
+  .label {
+    font-weight: 700;
+  }
+  .sub {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .strong {
+    font-weight: 700;
+    fill: var(--accent-strong);
+  }
+</style>

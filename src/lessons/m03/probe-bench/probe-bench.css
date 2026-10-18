@@ -1,0 +1,489 @@
+/* Lesson 3.4 probe bench (ProbeBench.tsx). Unlayered, like the quiz, so it wins over .prose. */
+
+.pb {
+  display: grid;
+  gap: 1.25rem;
+  margin: 2em 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 48rem) {
+  .pb {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.pb :where(p, fieldset, legend, table) {
+  margin: 0;
+  padding: 0;
+}
+
+.pb-stage,
+.pb-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.pb-field {
+  display: grid;
+  gap: 0.5rem;
+  border: 0;
+  min-width: 0;
+}
+
+.pb-legend {
+  margin-bottom: 0.25rem;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.pb-select {
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+}
+
+.pb-hint {
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+}
+
+/* Drawing */
+.pb-drawing {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--bg);
+}
+
+.pb-drawing svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+  user-select: none;
+}
+
+.pb-caption {
+  fill: var(--fg-muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.pb-tiny {
+  fill: var(--fg-muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.pb-tiny.is-dark {
+  fill: #3a3f47;
+}
+
+.pb-label {
+  fill: var(--fg);
+  font-size: 13px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.pb-point {
+  cursor: pointer;
+}
+
+.pb-hit {
+  fill: transparent;
+}
+
+.pb-point:hover .pb-hit {
+  fill: color-mix(in oklab, var(--accent) 16%, transparent);
+}
+
+.pb-dot {
+  fill: var(--bg);
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+.pb-probe-body {
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.pb-probe-needle {
+  stroke: #9aa1ab;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.pb-probe.is-red .pb-probe-body {
+  stroke: #d63a2c;
+}
+
+.pb-probe.is-black .pb-probe-body {
+  stroke: #15171b;
+}
+
+/* Objects have fixed colors: they are things, not part of the theme. */
+.pb-metal {
+  fill: #b9bec7;
+  stroke: #6b7380;
+  stroke-width: 1.5;
+}
+
+.pb-plastic {
+  fill: #f1efe9;
+  stroke: #a8a49a;
+  stroke-width: 1.5;
+}
+
+.pb-plastic-dark {
+  fill: #3a3f47;
+}
+
+.pb-socket {
+  fill: #e4e1d8;
+  stroke: #a8a49a;
+}
+
+.pb-hole {
+  fill: #2a2e35;
+}
+
+.pb-cable {
+  fill: none;
+  stroke: #2a2e35;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+.pb-wall {
+  fill: #c9b9a3;
+  stroke: #a8957c;
+  stroke-dasharray: 6 4;
+}
+
+.pb-lever {
+  fill: #e9e6de;
+}
+
+.pb-wire {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.pb-wire.is-black {
+  stroke: #15171b;
+}
+
+.pb-wire.is-blue {
+  stroke: #5aa9e6;
+}
+
+.pb-wire.is-red {
+  stroke: #d63a2c;
+}
+
+.pb-wire.is-white {
+  stroke: #f4f4f4;
+  filter: drop-shadow(0 0 1px #6b7380);
+}
+
+.pb-wire.is-jumper {
+  stroke: #e0a91b;
+}
+
+.pb-motor {
+  fill: #8d949e;
+  stroke: #5b626d;
+  stroke-width: 2;
+}
+
+.pb-fin {
+  stroke: #6f7681;
+  stroke-width: 3;
+}
+
+.pb-glass {
+  fill: rgb(200 225 240 / 0.45);
+  stroke: #8fb3c9;
+  stroke-width: 1.5;
+}
+
+.pb-ceramic {
+  fill: #efe9dc;
+  stroke: #b8ad95;
+  stroke-width: 1.5;
+}
+
+.pb-filament {
+  fill: none;
+  stroke: #6b7380;
+  stroke-width: 1.5;
+}
+
+.pb-rocker {
+  fill: #f8f7f3;
+  stroke: #a8a49a;
+}
+
+.pb-rocker.is-pressed {
+  fill: #dcd8ce;
+}
+
+.pb-slot {
+  stroke: #4b525c;
+  stroke-width: 2;
+}
+
+.pb-leg {
+  stroke: #9aa1ab;
+  stroke-width: 3;
+}
+
+.pb-resistor {
+  fill: #e3c9a0;
+  stroke: #b89c70;
+}
+
+.pb-finger {
+  fill: #e8b996;
+  opacity: 0.85;
+}
+
+.pb-diode {
+  fill: #1f2226;
+}
+
+.pb-band {
+  fill: #c7ccd3;
+}
+
+.pb-led {
+  fill: rgb(214 58 44 / 0.55);
+  stroke: #a3291f;
+  stroke-width: 1.5;
+}
+
+.pb-led.is-on {
+  fill: rgb(255 82 64 / 0.9);
+}
+
+.pb-glow {
+  fill: rgb(255 70 50 / 0.18);
+  filter: blur(6px);
+}
+
+/* Display */
+.pb-lcd {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: baseline;
+  gap: 0 0.5rem;
+  padding: 0.6rem 0.9rem;
+  border: 6px solid #14171c;
+  border-radius: 0.75rem;
+  background: #b8c6a3;
+  color: #1c2318;
+  font-family: var(--font-mono);
+}
+
+.pb-lcd-fn {
+  grid-row: 1 / 3;
+  align-self: center;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.pb-lcd-digits {
+  justify-self: end;
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+}
+
+.pb-lcd-unit {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.pb-lcd-beep {
+  grid-column: 2 / 4;
+  justify-self: end;
+  min-height: 1.1em;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Panel */
+
+/* On a phone the explanation comes right under the display, before the controls. */
+@media (max-width: 47.99rem) {
+  .pb-status {
+    order: -1;
+  }
+}
+.pb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.pb-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--bg);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.pb-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pb-chip:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.pb-chip.is-on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.pb-chip-sub {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+
+.pb-chip.is-on .pb-chip-sub {
+  color: inherit;
+}
+
+.pb-tips {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.pb-tip {
+  display: grid;
+  gap: 0.25rem;
+  padding-left: 0.625rem;
+  border-left: 4px solid #d63a2c;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.pb-tip.is-black {
+  border-left-color: var(--fg);
+}
+
+.pb-armed {
+  padding: 0 0.45rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--fg);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.pb-armed.is-red {
+  border-color: #d63a2c;
+  color: #c0392b;
+}
+
+.pb-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.pb-check input {
+  margin-top: 0.3rem;
+  accent-color: var(--accent);
+}
+
+.pb-status {
+  display: grid;
+  gap: 0.375rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: 0.625rem;
+  background: var(--bg);
+}
+
+.pb-status.is-ok {
+  border-color: var(--success-border);
+  border-left-color: var(--success);
+}
+
+.pb-status.is-info {
+  border-left-color: var(--info);
+}
+
+.pb-status.is-warn {
+  border-color: var(--warning-border);
+  border-left-color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.pb-reading {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+.pb-notes {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.pb-notes table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.pb-notes :is(th, td) {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.pb-notes td:last-child {
+  font-family: var(--font-mono);
+}
