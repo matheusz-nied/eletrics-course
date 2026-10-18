@@ -1,0 +1,292 @@
+---
+titulo: Leis de Kirchhoff
+modulo: m02-circuitos-cc
+ordem: 5
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Aplicar a lei dos nós, em que a corrente que chega a um nó é igual à que sai
+  - Aplicar a lei das malhas, em que as tensões numa volta completa somam zero
+  - Interpretar uma corrente negativa como corrente no sentido contrário ao escolhido
+  - Calcular um circuito com duas fontes, que não se resolve só com série e paralelo
+  - Explicar o que acontece nos cabos durante uma chupeta e a ordem segura de ligação
+prerequisitos:
+  - m02-circuitos-cc/04-circuitos-mistos
+  - m01-eletricidade-do-zero/04-lei-de-ohm
+tags: [Kirchhoff, lei dos nós, lei das malhas, duas fontes, chupeta]
+seguranca: baixa-tensao
+rascunho: true
+---
+
+import KirchhoffLaws from '../../../lessons/m02/figures/KirchhoffLaws.astro';
+
+Ligue duas baterias ao mesmo circuito, uma de 12 V e outra de 9 V, e tente prever a corrente em cada fio. As ferramentas da aula anterior não bastam: não há nenhum par de resistores claramente em série ou em paralelo, e as duas fontes disputam o mesmo pedaço do circuito. Quem empurra mais? Alguma das baterias acaba recebendo corrente em vez de fornecer?
+
+É o que acontece quando alguém faz uma chupeta num carro com a bateria arriada: duas baterias ligadas entre si e ao motor de partida. Para responder a perguntas assim existem duas regras simples, publicadas pelo físico alemão Gustav Kirchhoff em 1845, que valem para qualquer circuito.
+
+## Duas regras que valem sempre
+
+As <Term id="leis-de-kirchhoff">leis de Kirchhoff</Term> são duas, e nenhuma delas é realmente nova. São a conservação da carga e a conservação da energia, escritas na linguagem dos circuitos.
+
+<Figure caption="Figura 1. À esquerda, a lei dos nós: 3 A chegam ao nó e saem divididos em 1 A e 2 A. À direita, a lei das malhas: dando uma volta completa no sentido da seta tracejada, a fonte soma 12 V, os resistores tiram 4 V e 8 V, e o total é zero.">
+  <KirchhoffLaws />
+</Figure>
+
+**Lei dos nós.** Num <Term id="no-de-circuito">nó</Term>, a corrente que chega é igual à corrente que sai. Os elétrons não se acumulam no ponto de ligação e não surgem do nada: tudo o que entra precisa sair por algum fio. É como um cruzamento de canos de água, em que a vazão que chega se divide entre os canos de saída, sem sobra.
+
+**Lei das malhas.** Numa <Term id="malha">malha</Term>, que é qualquer caminho fechado do circuito, a soma das tensões é zero. Pense na tensão como a altura num morro. Se você sai de um ponto, sobe e desce por trilhas diferentes e volta ao mesmo ponto, as subidas e as descidas se cancelam. No circuito, as fontes são as subidas e os resistores são as descidas.
+
+## As leis em fórmulas
+
+A lei dos nós diz que a soma das correntes que entram num nó é igual à soma das que saem:
+
+$$
+\sum I_\text{entram} = \sum I_\text{saem}
+$$
+
+Na Figura 1, $3\,\text{A} = 1\,\text{A} + 2\,\text{A}$.
+
+A lei das malhas diz que, numa volta completa, a soma das tensões, cada uma com o seu sinal, é zero:
+
+$$
+\sum V = 0
+$$
+
+Na Figura 1, $+12\,\text{V} - 4\,\text{V} - 8\,\text{V} = 0$.
+
+As duas fórmulas só funcionam com uma convenção de sinais. Use sempre esta:
+
+1. **Escolha um sentido para cada corrente** e desenhe uma seta. Se não souber o sentido real, chute. Se a conta der um valor negativo, a corrente vai no sentido contrário ao da seta, e o valor sem o sinal está certo.
+2. **Escolha um sentido para percorrer a malha**, por exemplo o horário, e não mude no meio da volta.
+3. **Fonte:** atravessando do − para o +, some a tensão dela (você sobe). Do + para o −, subtraia.
+4. **Resistor:** atravessando no mesmo sentido da seta da corrente, subtraia $R \cdot I$, porque a corrente entra no resistor pelo lado de tensão mais alta e você desce. Contra a seta, some.
+
+Junto com a <Term id="lei-de-ohm">Lei de Ohm</Term>, essas duas leis bastam para resolver qualquer circuito de fontes e resistores, inclusive os que não se reduzem a série e paralelo.
+
+<Callout type="dica" title="Corrente negativa não é erro">
+O simulador usa a mesma ideia: cada amperímetro tem um sentido de referência, escrito no nome dele. Uma leitura negativa quer dizer que a corrente está passando ao contrário desse sentido. Nas contas, é igual: escolha as setas sem medo e deixe o sinal do resultado dizer para onde a corrente vai.
+</Callout>
+
+## Explore: as correntes no nó A
+
+No circuito abaixo, a fonte V1 = 12 V, à esquerda, liga-se ao nó A por R1 = 100 Ω. A fonte V2 = 9 V, à direita, liga-se ao mesmo nó por R2 = 100 Ω. Do nó A, que é o ponto no alto de R3 onde os três resistores se encontram, R3 = 1 kΩ desce até o negativo comum. Os amperímetros medem I1, que chega ao nó por R1, e I2 e I3, que saem do nó por R2 e por R3.
+
+<Simulation circuit="m02/kirchhoff-nos" instruments={['multimetro']} />
+
+1. Leia as três correntes: 20 mA chegam por R1, 10 mA saem por R2 e 10 mA saem por R3. Confira que $I_1 = I_2 + I_3$.
+2. Repare no sentido de I2. A corrente sai do nó A e **entra** pelo polo positivo de V2: a fonte de 9 V está recebendo corrente, empurrada pela de 12 V. Se V2 fosse uma bateria recarregável, ela estaria sendo carregada.
+3. Suba V2 para 12 V. I2 fica negativa, cerca de −5,7 mA: agora a corrente vai de V2 para o nó A, contra a seta. Some as três correntes respeitando o sinal e confira que $I_1 = I_2 + I_3$ continua valendo.
+4. Procure o valor de V2 em que I2 troca de sinal. Ele fica entre 10,5 V e 11 V. O que acontece com R2 nesse ponto?
+
+No ponto em que I2 troca de sinal, as duas pontas de R2 ficam com a mesma tensão, e nenhuma corrente passa por ele. Com V2 abaixo desse valor, a fonte da direita recebe corrente; acima dele, ela também fornece.
+
+## Explore: as tensões em cada malha
+
+Agora o mesmo circuito, com voltímetros nos três resistores. Ele tem três malhas: a da esquerda (V1, R1 e R3), a da direita (R3, R2 e V2) e a de fora (V1, R1, R2 e V2).
+
+<Simulation circuit="m02/kirchhoff-malhas" instruments={['multimetro']} />
+
+1. Leia as três tensões: 2 V em R1, 10 V em R3 e 1 V em R2.
+2. Percorra a malha da esquerda no sentido horário. V1 sobe 12 V, R1 desce 2 V e R3 desce 10 V. Confira: $12 - 2 - 10 = 0$.
+3. Percorra a malha da direita também no sentido horário, saindo do nó A. R2 desce 1 V, porque você vai no sentido da corrente. V2 desce 9 V, porque você a atravessa do + para o −. R3 sobe 10 V, porque você vai do negativo até o nó A, contra a corrente. Confira: $-1 - 9 + 10 = 0$.
+4. Faça o mesmo na malha de fora, com V1, R1, R2 e V2. A soma também dá zero?
+5. Suba V2 para 12 V. R3 passa a ter cerca de 11,4 V, e as outras tensões também mudam, mas cada malha continua somando zero. Repare que a leitura de R2 fica negativa: a corrente inverteu, e o lado mais alto de R2 agora é o da fonte V2.
+
+Na malha de fora, $12 - 2 - 1 - 9 = 0$. A lei das malhas vale para qualquer caminho fechado que você escolher, não só para os "buracos" do desenho.
+
+## Exemplo resolvido: calcular sem medir
+
+Vamos achar as correntes do mesmo circuito (V1 = 12 V, V2 = 9 V, R1 = R2 = 100 Ω e R3 = 1 kΩ) só com papel e as leis de Kirchhoff. O caminho mais curto é usar como incógnita a tensão do nó A, $V_A$, medida em relação ao negativo comum.
+
+**1. Escrever cada corrente com a Lei de Ohm.** Use as mesmas setas dos amperímetros. Cada corrente é a diferença de tensão entre as pontas do resistor, da ponta onde a seta começa para a ponta onde ela termina, dividida pela resistência:
+
+$$
+I_1 = \frac{12 - V_A}{100} \qquad I_2 = \frac{V_A - 9}{100} \qquad I_3 = \frac{V_A}{1000}
+$$
+
+**2. Aplicar a lei dos nós em A.** Chega $I_1$; saem $I_2$ e $I_3$:
+
+$$
+\frac{12 - V_A}{100} = \frac{V_A - 9}{100} + \frac{V_A}{1000}
+$$
+
+**3. Resolver.** Multiplicando os dois lados por 1000:
+
+$$
+10\,(12 - V_A) = 10\,(V_A - 9) + V_A
+$$
+
+$$
+120 - 10\,V_A = 11\,V_A - 90 \quad\Rightarrow\quad 21\,V_A = 210 \quad\Rightarrow\quad V_A = 10\,\text{V}
+$$
+
+**4. Voltar às correntes.**
+
+$$
+I_1 = \frac{12 - 10}{100} = 0{,}02\,\text{A} = 20\,\text{mA} \qquad I_2 = \frac{10 - 9}{100} = 10\,\text{mA} \qquad I_3 = \frac{10}{1000} = 10\,\text{mA}
+$$
+
+**5. Conferir com a lei das malhas.** Na malha da esquerda: $12 - 100 \times 0{,}02 - 1000 \times 0{,}01 = 12 - 2 - 10 = 0$.
+
+I2 deu positiva, então a corrente vai mesmo do nó A para a fonte V2, como a seta. Se tivesse dado negativa, bastaria saber que ela vai ao contrário; nada mais na conta mudaria. Os resultados batem com os multímetros dos dois simuladores acima: 20 mA, 10 mA e 10 mA nos amperímetros e 10 V em R3, que é a própria tensão do nó A.
+
+Esse jeito de resolver se chama **análise nodal**: uma incógnita para cada nó de tensão desconhecida e uma equação da lei dos nós para cada um. Com dois nós desconhecidos você teria duas equações e duas incógnitas; o método cresce sem mudar.
+
+## Na prática
+
+<RealCase title="A chupeta: duas baterias e um motor de partida">
+
+Na chupeta, os cabos ligam a bateria de um carro que funciona à bateria arriada do outro: positivo com positivo e negativo com negativo, este pelo chassi. As duas baterias ficam em paralelo, e o motor de partida do carro parado fica ligado às duas. É o circuito de duas fontes desta aula, só que com valores de carro: resistências de centésimos de ohm e correntes de centenas de ampères.
+
+No modelo abaixo, a bateria boa tem 12,6 V e a fraca, 11,8 V. Cada uma tem a sua <Term id="resistencia-interna">resistência interna</Term>, maior na bateria fraca. Os cabos somam 0,02 Ω, contando a ida e a volta, e o motor de partida é representado por uma resistência de 0,05 Ω. Os valores são aproximados e servem para ver o comportamento do circuito, não para dimensionar nada.
+
+<Simulation circuit="m02/chupeta" instruments={['multimetro']} />
+
+1. Sem os cabos, dê a partida. A bateria fraca desaba para cerca de 7,4 V: mais de 4 V ficam na resistência interna dela, e sobra pouca tensão para o motor girar com força.
+2. Solte o botão e ligue os cabos. Mesmo sem a partida, cerca de 13 A passam da bateria boa para a fraca, e a corrente da fraca fica negativa: ela está recebendo carga. É a lei das malhas: a diferença de 0,8 V entre as baterias fica nas resistências internas e nos cabos, 0,06 Ω no total, e $0{,}8\,\text{V} \div 0{,}06\,\Omega \approx 13\,\text{A}$.
+3. Com os cabos ligados, dê a partida. A tensão fica perto de 9,4 V e o motor puxa cerca de 187 A. Pelos cabos chegam cerca de 107 A, mais da metade. Confira a lei dos nós no positivo da bateria fraca: a corrente dos cabos mais a da bateria fraca dá a do motor.
+4. Simule cabos finos: suba a resistência dos cabos para 0,1 Ω e dê a partida de novo. A tensão cai para cerca de 8,1 V. Cabo fino ajuda bem menos.
+
+Por que a chupeta funciona? Sem os cabos, a corrente inteira do motor passa pela resistência interna da bateria fraca, que fica com boa parte da tensão. Com os cabos, a bateria boa vira um segundo caminho em paralelo, e a corrente do motor se divide entre as duas baterias. Cada uma conduz menos, perde menos tensão por dentro, e sobra mais para o motor.
+
+A lei das malhas também explica o papel dos cabos. Na partida, a bateria boa tem 12,6 V, perde cerca de 1,1 V na própria resistência interna e cerca de 2,1 V nos cabos: $12{,}6 - 1{,}1 - 2{,}1 \approx 9{,}4\,\text{V}$, a tensão que chega à bateria fraca e ao motor. Com mais de 100 A, os cabos de 0,02 Ω dissipam mais de 200 W enquanto o motor gira. Quanto menor a resistência dos cabos, mais a bateria boa consegue ajudar, e é por isso que cabo de chupeta é grosso.
+
+**A ordem dos cabos.** Siga sempre o manual do carro, porque alguns modelos têm pontos próprios para a chupeta. A sequência mais usada é esta:
+
+1. Desligue os dois carros, com a ignição e os acessórios desligados, e confira se as duas baterias são de 12 V. Os carros não podem se encostar.
+2. Prenda uma garra vermelha no positivo (+) da bateria descarregada.
+3. Prenda a outra garra vermelha no positivo (+) da bateria boa.
+4. Prenda uma garra preta no negativo (−) da bateria boa.
+5. Prenda a última garra preta numa parte de metal sem pintura do motor ou do chassi do carro parado, longe da bateria.
+6. Ligue o carro bom, espere alguns minutos e tente dar a partida no outro.
+7. Para tirar os cabos, faça o caminho inverso: primeiro a garra preta do chassi do carro que recebeu a ajuda e, por último, a garra vermelha da bateria dele.
+
+A última ligação costuma soltar uma faísca. Fazendo essa ligação longe da bateria, a faísca acontece longe dos gases que ela pode liberar.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Mudar o sentido de percurso no meio da malha.** Escolha horário ou anti-horário e vá até o fim. Trocar no meio troca sinais e a soma deixa de dar zero.
+- **Achar que corrente negativa é erro de conta.** Ela só diz que a seta foi desenhada ao contrário. O valor está certo.
+- **Esquecer um ramo no nó.** Toda corrente que toca o nó entra na conta, inclusive a de fios que parecem não fazer nada.
+- **Confundir a tensão de um nó com a tensão de um resistor.** $V_A$ é medida em relação ao negativo comum. A tensão num resistor é a diferença entre as tensões das duas pontas dele.
+- **Ligar em paralelo baterias de tensões diferentes.** A de tensão maior força corrente na outra, limitada só pelas resistências internas e pelos fios, que são muito baixas. No simulador, 0,8 V de diferença já deram 13 A. Por isso nunca se faz chupeta entre sistemas de tensões diferentes, como um carro de 12 V e um caminhão de 24 V.
+
+<Callout type="perigo" title="Bateria de carro: curto, faísca e hidrogênio">
+Os 12 V de uma bateria de carro não dão choque perigoso pela pele seca, mas ela fornece centenas de ampères. Uma ferramenta, uma garra ou uma aliança que encoste no positivo e na lataria ao mesmo tempo vira um curto-circuito: o metal esquenta na hora e pode causar queimaduras graves. Tire anéis, relógios e pulseiras de metal e nunca deixe as garras dos cabos se encostarem enquanto estiverem ligadas a uma bateria.
+
+Baterias de chumbo-ácido podem liberar gás hidrogênio, principalmente quando estão sendo carregadas, e esse gás explode com uma faísca. Não fume nem faça faísca perto da bateria, faça a última ligação longe dela e não tente a chupeta numa bateria rachada, vazando ou congelada.
+</Callout>
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Três fios se encontram num nó. Pelo primeiro chegam 0,5 A. Pelo segundo saem 0,2 A. Quanto sai pelo terceiro?',
+      answer: 0.3,
+      tolerance: 0.01,
+      unit: 'A',
+      explanation:
+        'Pela lei dos nós, o que chega é igual ao que sai: 0,5 A = 0,2 A + I. Logo, I = 0,3 A.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma malha tem uma bateria de 9 V e dois resistores em série. Um deles tem 3,5 V. Qual é a tensão no outro?',
+      answer: 5.5,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation:
+        'Pela lei das malhas, 9 − 3,5 − V = 0. Logo, V = 5,5 V. As tensões nos resistores somam a tensão da bateria.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'No circuito desta aula (V1 = 12 V, R1 = R2 = 100 Ω, R3 = 1 kΩ), a fonte V2 passa para 12 V. Qual é a tensão no nó A? Confira no simulador das malhas, que mostra essa tensão em R3.',
+      answer: 11.43,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation:
+        'A lei dos nós em A fica (12 − VA)/100 = (VA − 12)/100 + VA/1000. Multiplicando por 1000: 120 − 10·VA = 10·VA − 120 + VA, ou seja, 21·VA = 240 e VA ≈ 11,43 V.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Você resolveu um circuito e a corrente I2 deu −0,15 A. O que isso quer dizer?',
+      options: [
+        {
+          text: 'Passam 0,15 A no sentido contrário ao da seta que você desenhou para I2',
+          correct: true,
+          feedback:
+            'O sentido da seta é um chute. O sinal negativo só avisa que a corrente real vai ao contrário; o valor está certo.',
+        },
+        {
+          text: 'A conta está errada, porque corrente não pode ser negativa',
+          feedback:
+            'Corrente negativa é normal na análise de circuitos. Ela indica o sentido, não um erro.',
+        },
+        {
+          text: 'O resistor desse ramo está consumindo energia ao contrário',
+          feedback:
+            'Um resistor sempre transforma energia elétrica em calor, seja qual for o sentido da corrente. O sinal só fala do sentido.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'A lei das malhas só vale para caminhos fechados que têm pelo menos uma fonte.',
+      answer: false,
+      explanation:
+        'Vale para qualquer caminho fechado. Numa malha só de resistores, as tensões, cada uma com o seu sinal, também somam zero: algumas são subidas e outras são descidas.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem as ligações dos cabos de uma chupeta.',
+      items: [
+        'Garra vermelha no positivo da bateria descarregada',
+        'Outra garra vermelha no positivo da bateria boa',
+        'Garra preta no negativo da bateria boa',
+        'Última garra preta num metal sem pintura do carro parado, longe da bateria',
+      ],
+      explanation:
+        'Primeiro os dois positivos, depois o negativo da bateria boa e, por último, o chassi do carro parado, longe da bateria, porque a última ligação pode soltar faísca.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Na chupeta, por que a última garra preta vai num metal do motor ou do chassi, e não no negativo da bateria descarregada?',
+      options: [
+        {
+          text: 'Porque a última ligação pode soltar faísca, e a bateria pode liberar hidrogênio, que explode',
+          correct: true,
+          feedback:
+            'Fazendo a última ligação longe da bateria, a faísca acontece longe dos gases que ela pode liberar.',
+        },
+        {
+          text: 'Porque assim a corrente não passa pelo motor de partida',
+          feedback:
+            'A corrente da partida passa pelo motor de qualquer jeito. O chassi é o caminho de volta do próprio carro até o negativo da bateria.',
+        },
+        {
+          text: 'Porque o negativo da bateria descarregada não conduz',
+          feedback:
+            'O negativo conduz normalmente. O motivo é segurança: a faísca da última ligação deve acontecer longe da bateria.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- **Lei dos nós:** num nó, a soma das correntes que chegam é igual à soma das que saem. Vem da conservação da carga.
+- **Lei das malhas:** numa volta completa por qualquer caminho fechado, as tensões com sinal somam zero. Vem da conservação da energia.
+- Escolha um sentido para cada corrente e um sentido de percurso para cada malha. Corrente negativa só quer dizer sentido contrário ao escolhido.
+- Na **análise nodal**, a tensão de cada nó desconhecido vira incógnita; a Lei de Ohm escreve as correntes, e a lei dos nós dá as equações.
+- Com duas fontes, uma pode receber corrente da outra. Na chupeta, a bateria fraca recebe carga e, na partida, as duas dividem a corrente do motor.
+- Na chupeta, a última ligação vai num metal do carro parado, longe da bateria.
+
+Na próxima aula, os [divisores de tensão e de corrente](../06-divisores-de-tensao-e-corrente/) transformam as leis de Kirchhoff em atalhos para os circuitos que aparecem o tempo todo na eletrônica.

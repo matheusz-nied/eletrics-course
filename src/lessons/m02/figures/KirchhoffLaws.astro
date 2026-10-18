@@ -1,0 +1,164 @@
+---
+/* 02.5: the node law (what enters a node leaves it) and the loop law (a closed loop adds up to zero). */
+---
+
+<div class="panels">
+  <!-- Lei dos nós -->
+  <svg viewBox="0 0 300 250" class="fig" aria-hidden="true">
+    <path class="wire" d="M30 100 H150 L250 40 M150 100 L250 160" />
+    <circle class="node" cx="150" cy="100" r="7" />
+    <path class="arrow" d="M60 100 H100 m-10 -7 l10 7 l-10 7" />
+    <path class="arrow" d="M188 77 L222 57 m-12 -2 l12 2 l-6 10" />
+    <path class="arrow" d="M188 123 L222 143 m-6 -10 l6 10 l-12 2" />
+    <text x="80" y="88" class="cur">
+      3 A
+    </text>
+    <text x="196" y="52" class="cur">
+      1 A
+    </text>
+    <text x="196" y="160" class="cur">
+      2 A
+    </text>
+    <text x="150" y="128" class="lab">
+      nó
+    </text>
+    <text x="150" y="196" class="title">
+      Lei dos nós
+    </text>
+    <text x="150" y="218" class="sub">
+      a corrente que entra é a que sai
+    </text>
+    <text x="150" y="240" class="formula">
+      3 A = 1 A + 2 A
+    </text>
+  </svg>
+
+  <!-- Lei das malhas -->
+  <svg viewBox="0 0 300 250" class="fig" aria-hidden="true">
+    <path class="wire" d="M60 40 H122 M178 40 H240 V72 M240 128 V160 H60 V106 M60 94 V40" />
+    <path class="src" d="M42 94 H78 M51 106 H69" />
+    <rect class="res" x="122" y="32" width="56" height="16" rx="2" />
+    <rect class="res" x="232" y="72" width="16" height="56" rx="2" />
+    <text x="84" y="105" class="volt up start">
+      +12 V
+    </text>
+    <text x="150" y="24" class="volt down">
+      −4 V
+    </text>
+    <text x="256" y="104" class="volt down start">
+      −8 V
+    </text>
+    <path class="loop" d="M110 70 A40 40 0 1 1 110 130" />
+    <path class="loop-head" d="M107 127 L119 132 L113 139 Z" />
+    <text x="150" y="105" class="lab">
+      volta
+    </text>
+    <text x="150" y="196" class="title">
+      Lei das malhas
+    </text>
+    <text x="150" y="218" class="sub">
+      numa volta completa, as tensões somam zero
+    </text>
+    <text x="150" y="240" class="formula">
+      +12 − 4 − 8 = 0
+    </text>
+  </svg>
+</div>
+
+<style>
+  .panels {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem 1.5rem;
+    width: 100%;
+  }
+  .fig {
+    flex: 1 1 15rem;
+    max-width: 19rem;
+    height: auto;
+    font-family: var(--font-sans);
+  }
+  .wire {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .node {
+    fill: var(--fg);
+  }
+  .arrow {
+    fill: none;
+    stroke: var(--copper);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .src {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+  .res {
+    fill: var(--bg);
+    stroke: var(--copper);
+    stroke-width: 2.5;
+  }
+  .loop {
+    fill: none;
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 4;
+  }
+  .loop-head {
+    fill: var(--fg-subtle);
+  }
+  text {
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .cur {
+    fill: var(--copper);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .volt {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .up {
+    fill: var(--accent);
+  }
+  .down {
+    fill: var(--danger);
+  }
+  .lab {
+    fill: var(--fg-subtle);
+    font-size: 12px;
+  }
+  .title {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .sub {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .formula {
+    fill: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+</style>
