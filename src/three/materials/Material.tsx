@@ -25,18 +25,24 @@ interface CompiledShader {
   fragmentShader: string;
 }
 
-/** Back faces seen through the cut are painted flat, so shells read as solid. */
-function patchCutFaces(uniform: { value: Color }) {
+/**
+ * Back faces seen through the cut are painted flat, so shells read as solid.
+ * Only while this material is being cut: other double-sided surfaces (thin
+ * sheets, labels) keep their normal shading on the back.
+ */
+function patchCutFaces(color: { value: Color }, on: { value: number }) {
   return (shader: CompiledShader) => {
-    shader.uniforms.uCutColor = uniform;
-    shader.fragmentShader = `uniform vec3 uCutColor;\n${shader.fragmentShader}`.replace(
-      '#include <dithering_fragment>',
-      '#include <dithering_fragment>\n  if (!gl_FrontFacing) gl_FragColor = vec4(uCutColor, 1.0);',
-    );
+    shader.uniforms.uCutColor = color;
+    shader.uniforms.uCutOn = on;
+    shader.fragmentShader =
+      `uniform vec3 uCutColor;\nuniform float uCutOn;\n${shader.fragmentShader}`.replace(
+        '#include <dithering_fragment>',
+        '#include <dithering_fragment>\n  if (!gl_FrontFacing && uCutOn > 0.5) gl_FragColor = vec4(uCutColor, 1.0);',
+      );
   };
 }
 
-const cacheKey = () => 'kit3d-cut-v1';
+const cacheKey = () => 'kit3d-cut-v2';
 
 export function Material({
   preset,
@@ -51,7 +57,8 @@ export function Material({
   const params: MaterialPreset = { ...(preset ? PRESETS[preset] : {}), ...overrides };
 
   const uniform = useRef({ value: new Color() }).current;
-  const onBeforeCompile = useMemo(() => patchCutFaces(uniform), [uniform]);
+  const cutOn = useRef({ value: 0 }).current;
+  const onBeforeCompile = useMemo(() => patchCutFaces(uniform, cutOn), [uniform, cutOn]);
   const baseColor = params.color ?? '#ffffff';
   useLayoutEffect(() => {
     if (cutColor !== undefined) uniform.value.set(cutColor);
@@ -68,6 +75,7 @@ export function Material({
   }
 
   const cut = clip && cutaway;
+  cutOn.value = cut ? 1 : 0;
 
   return (
     <meshPhysicalMaterial
