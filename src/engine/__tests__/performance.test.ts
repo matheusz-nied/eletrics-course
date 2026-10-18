@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Simulator } from '../analysis/simulator';
 import { ladderCircuit } from '../benchmark';
+import { gateCircuit } from './gate-circuit';
 
 /**
  * The browser requirement is 1000 steps/s for 50 nodes on a mid-range phone
@@ -37,5 +38,20 @@ describe('performance', () => {
     const stepsPerSecond = n / ((performance.now() - start) / 1000);
     console.log(`50 nós com diodos e LEDs: ${Math.round(stepsPerSecond)} passos/s`);
     expect(stepsPerSecond).toBeGreaterThan(5000);
+  });
+
+  it('runs the gate circuit (quasi-static, 10 ms steps) far faster than real time', () => {
+    const sim = new Simulator(gateCircuit());
+    sim.refresh();
+    sim.setParam('BOT', 'pressed', true);
+    for (let i = 0; i < 300; i++) sim.step(); // starting: two phasor passes for the TRIAC
+    sim.setParam('BOT', 'pressed', false);
+    const n = 1000;
+    const start = performance.now();
+    for (let i = 0; i < n; i++) sim.step();
+    const stepsPerSecond = n / ((performance.now() - start) / 1000);
+    console.log(`portão (quase-estático): ${Math.round(stepsPerSecond)} passos/s`);
+    // Real time is 100 steps/s.
+    expect(stepsPerSecond).toBeGreaterThan(500);
   });
 });

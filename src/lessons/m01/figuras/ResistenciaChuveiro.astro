@@ -1,0 +1,159 @@
+---
+/*
+ * Lesson 1.5: the heating element of an electric shower. One coiled wire
+ * with three terminals: one at each end and a tap in the middle. Winter uses
+ * only the first stretch (less resistance, more power); summer uses the
+ * whole wire.
+ */
+import Figure from '../../../components/Figure.astro';
+
+const loops = (from: number, to: number) => {
+  const out: number[] = [];
+  for (let x = from; x <= to; x += 12) out.push(x);
+  return out;
+};
+const first = loops(132, 312);
+const second = loops(348, 528);
+---
+
+<Figure
+  wide
+  alt="Resistência de chuveiro: um fio enrolado em espiral, preso numa base, com três terminais. O terminal A fica numa ponta do fio, o terminal B no meio e o terminal C na outra ponta. Na posição inverno a corrente passa só entre A e B, metade do fio, 8,8 Ω. Na posição verão ela passa pelo fio inteiro, de A até C, 17,6 Ω."
+  caption="A resistência de um chuveiro de 220 V e 5.500 W (valores típicos). A chave verão/inverno escolhe por quanto fio a corrente passa. No inverno ela passa por menos fio: menos resistência, mais corrente, mais potência."
+>
+  <svg
+    class="fig-chuv"
+    viewBox="0 0 640 290"
+    width="640"
+    height="290"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    font-family="var(--font-sans)"
+    font-size="13"
+  >
+    <text x="330" y="34" text-anchor="middle" class="fig-chuv__label">
+      fio de resistência enrolado em espiral
+    </text>
+
+    <!-- Plastic base -->
+    <rect
+      x="60"
+      y="56"
+      width="520"
+      height="116"
+      rx="14"
+      class="fig-chuv__base"
+      stroke-width="1.5"
+    ></rect>
+
+    <!-- Coil -->
+    {first.map((x) => (
+      <ellipse cx={x} cy="104" rx="5" ry="20" class="fig-chuv__coil" stroke-width="2.5" />
+    ))}
+    {second.map((x) => (
+      <ellipse cx={x} cy="104" rx="5" ry="20" class="fig-chuv__coil" stroke-width="2.5" />
+    ))}
+    <path d="M318 104h24" class="fig-chuv__coil" stroke-width="2.5"></path>
+
+    <!-- Leads to the terminals -->
+    <path d="M127 104h-27v46" class="fig-chuv__lead" stroke-width="2.5"></path>
+    <path d="M330 104v46" class="fig-chuv__lead" stroke-width="2.5"></path>
+    <path d="M533 104h27v46" class="fig-chuv__lead" stroke-width="2.5"></path>
+
+    <!-- Terminals -->
+    {[100, 330, 560].map((x, i) => (
+      <g>
+        <rect
+          x={x - 14}
+          y="148"
+          width="28"
+          height="22"
+          rx="4"
+          class="fig-chuv__terminal"
+          stroke-width="1.5"
+        />
+        <circle cx={x} cy="159" r="6" class="fig-chuv__screw" stroke-width="1.5" />
+        <path d={`M${x - 4} 159h8`} class="fig-chuv__screw-slot" stroke-width="1.5" />
+        <text x={x} y="192" text-anchor="middle" class="fig-chuv__label">
+          {['terminal A', 'terminal B', 'terminal C'][i]}
+        </text>
+      </g>
+    ))}
+
+    <!-- Winter: A to B -->
+    <path d="M100 210v10h230v-10" class="fig-chuv__inverno" stroke-width="2"></path>
+    <text x="215" y="240" text-anchor="middle" class="fig-chuv__small fig-chuv__inverno-t">
+      inverno: só o trecho A–B, 8,8 Ω
+    </text>
+
+    <!-- Summer: A to C -->
+    <path d="M100 252v10h460v-10" class="fig-chuv__verao" stroke-width="2"></path>
+    <text x="330" y="282" text-anchor="middle" class="fig-chuv__small fig-chuv__verao-t">
+      verão: o fio inteiro, de A até C, 17,6 Ω
+    </text>
+  </svg>
+</Figure>
+
+<style>
+  .fig-chuv {
+    color: var(--fg);
+  }
+
+  .fig-chuv text {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .fig-chuv__label {
+    font-weight: 600;
+  }
+
+  .fig-chuv__small {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .fig-chuv__base {
+    stroke: var(--fg-subtle);
+    fill: color-mix(in oklab, var(--fg-subtle) 12%, transparent);
+  }
+
+  .fig-chuv__coil {
+    stroke: var(--copper);
+  }
+
+  .fig-chuv__lead {
+    stroke: var(--fg-muted);
+  }
+
+  .fig-chuv__terminal {
+    stroke: var(--fg-muted);
+    fill: color-mix(in oklab, #c9a36b 45%, var(--bg));
+  }
+
+  .fig-chuv__screw {
+    stroke: var(--fg-muted);
+    fill: color-mix(in oklab, var(--fg-subtle) 35%, var(--bg));
+  }
+
+  .fig-chuv__screw-slot {
+    stroke: var(--fg);
+  }
+
+  .fig-chuv__inverno {
+    stroke: var(--danger);
+  }
+
+  .fig-chuv text.fig-chuv__inverno-t {
+    fill: var(--danger);
+  }
+
+  .fig-chuv__verao {
+    stroke: var(--accent);
+  }
+
+  .fig-chuv text.fig-chuv__verao-t {
+    fill: var(--accent);
+  }
+</style>

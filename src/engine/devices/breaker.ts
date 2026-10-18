@@ -1,4 +1,4 @@
-import { bool, defineDevice, num, str, TWO_PINS } from '../device';
+import { acSquared, bool, defineDevice, num, str, TWO_PINS } from '../device';
 import { formatSI } from '../messages';
 import { R_OPEN } from '../models/constants';
 import { relax, RmsMeter } from '../models/filters';
@@ -79,8 +79,9 @@ export default defineDevice({
         current = g() * (x.v(a) - x.v(b));
         if (!ctx.commit || step.dt <= 0) return;
         const rating = num(params, 'rating');
-        rms.update(current, step.dt);
-        heat = relax(heat, (current / rating) ** 2, step.dt, THERMAL_TAU);
+        const effective = Math.sqrt(current * current + acSquared(step, 0));
+        rms.update(effective, step.dt);
+        heat = relax(heat, (effective / rating) ** 2, step.dt, THERMAL_TAU);
         if (!closed()) return;
         const curve = str(params, 'curve');
         if (rms.value >= (MAGNETIC[curve] ?? MAGNETIC.C) * rating) {

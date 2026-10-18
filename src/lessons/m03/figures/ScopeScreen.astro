@@ -1,0 +1,181 @@
+---
+/* 03.5: reading an oscilloscope screen; peak to peak from V/div, period from time/div. */
+const X0 = 40;
+const Y0 = 40;
+const DIV = 40;
+const CX = X0 + 5 * DIV;
+const CY = Y0 + 4 * DIV;
+const AMP = 2 * DIV;
+const PERIOD = 2 * DIV;
+
+let sine = '';
+for (let x = X0; x <= X0 + 10 * DIV; x += 2) {
+  const y = CY - AMP * Math.sin((2 * Math.PI * (x - CX)) / PERIOD);
+  sine += `${x === X0 ? 'M' : 'L'}${x} ${y.toFixed(1)} `;
+}
+const grid: string[] = [];
+for (let i = 1; i < 10; i++) grid.push(`M${X0 + i * DIV} ${Y0} V${Y0 + 8 * DIV}`);
+for (let j = 1; j < 8; j++) grid.push(`M${X0} ${Y0 + j * DIV} H${X0 + 10 * DIV}`);
+const ticks: string[] = [];
+for (let k = 0; k <= 50; k++) ticks.push(`M${X0 + k * 8} ${CY - 3} V${CY + 3}`);
+for (let k = 0; k <= 40; k++) ticks.push(`M${CX - 3} ${Y0 + k * 8} H${CX + 3}`);
+---
+
+<svg viewBox="0 0 640 420" width="640" height="420" class="fig" aria-hidden="true">
+  <rect
+    x={X0 - 10}
+    y={Y0 - 30}
+    width={10 * DIV + 20}
+    height={8 * DIV + 40}
+    rx="8"
+    class="bezel"
+  ></rect>
+  <rect x={X0} y={Y0} width={10 * DIV} height={8 * DIV} class="screen"></rect>
+  <path d={grid.join(' ')} class="grid"></path>
+  <path d={ticks.join(' ')} class="ticks"></path>
+  <text x={X0 + 4} y={Y0 - 10} class="badge ch1">
+    CH1 1 V/div
+  </text>
+  <text x={X0 + 120} y={Y0 - 10} class="badge">
+    0,5 ms/div
+  </text>
+  <text x={X0 + 10 * DIV - 4} y={Y0 - 10} class="badge end">
+    Disparo: subida, 0 V
+  </text>
+
+  <!-- peak and trough guides -->
+  <path
+    d={`M${X0} ${CY - AMP} H${X0 + 10 * DIV + 26} M${X0} ${CY + AMP} H${X0 + 10 * DIV + 26}`}
+    class="guide"
+  ></path>
+  <!-- period guides -->
+  <path
+    d={`M${CX} ${CY} V${Y0 + 8 * DIV + 26} M${CX + PERIOD} ${CY} V${Y0 + 8 * DIV + 26}`}
+    class="guide"
+  ></path>
+
+  <path d={sine} class="trace"></path>
+
+  <!-- zero marker and trigger -->
+  <text x={X0 - 18} y={CY + 5} class="marker ch1">
+    1
+  </text>
+  <path d={`M${CX - 7} ${Y0 + 2} L${CX + 7} ${Y0 + 2} L${CX} ${Y0 + 12} Z`} class="trig"></path>
+  <circle cx={CX} cy={CY} r="5" class="trig-dot"></circle>
+
+  <!-- peak to peak bracket -->
+  <path
+    d={`M${X0 + 10 * DIV + 26} ${CY - AMP} V${CY + AMP} M${X0 + 10 * DIV + 20} ${CY - AMP} H${X0 + 10 * DIV + 32} M${X0 + 10 * DIV + 20} ${CY + AMP} H${X0 + 10 * DIV + 32}`}
+    class="bracket"
+  ></path>
+  <text x="482" y={CY - 30} class="ann start">
+    Pico a pico:
+  </text>
+  <text x="482" y={CY - 10} class="ann start strong">
+    4 divisões
+  </text>
+  <text x="482" y={CY + 10} class="ann start">
+    × 1 V/div
+  </text>
+  <text x="482" y={CY + 32} class="ann start strong">
+    = 4 V
+  </text>
+  <text x="482" y={CY + 58} class="sub start">
+    pico: 2 V
+  </text>
+
+  <!-- period bracket -->
+  <path
+    d={`M${CX} ${Y0 + 8 * DIV + 26} H${CX + PERIOD} M${CX} ${Y0 + 8 * DIV + 20} V${Y0 + 8 * DIV + 32} M${CX + PERIOD} ${Y0 + 8 * DIV + 20} V${Y0 + 8 * DIV + 32}`}
+    class="bracket"
+  ></path>
+  <text x={CX + PERIOD / 2} y={Y0 + 8 * DIV + 52} class="ann strong">
+    Período: 2 divisões × 0,5 ms/div = 1 ms
+  </text>
+  <text x={CX + PERIOD / 2} y={Y0 + 8 * DIV + 72} class="sub">
+    frequência = 1 ÷ 1 ms = 1 kHz
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  /* The screen is an object with its own colors, like a real instrument. */
+  .bezel {
+    fill: #1d2229;
+  }
+  .screen {
+    fill: #0b1015;
+  }
+  .grid {
+    stroke: rgb(255 255 255 / 0.16);
+    stroke-width: 1;
+  }
+  .ticks {
+    stroke: rgb(255 255 255 / 0.35);
+    stroke-width: 1;
+  }
+  .trace {
+    stroke: #f5c518;
+    stroke-width: 2.5;
+  }
+  .guide {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+  }
+  .bracket {
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  .trig {
+    fill: #f5c518;
+  }
+  .trig-dot {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 1.5;
+  }
+  text {
+    stroke: none;
+    text-anchor: middle;
+    fill: var(--fg);
+    font-size: 14px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .badge {
+    text-anchor: start;
+    fill: #d7dbe2;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge.end {
+    text-anchor: end;
+  }
+  .ch1 {
+    fill: #f5c518;
+  }
+  .marker {
+    font-weight: 700;
+  }
+  .ann {
+    fill: var(--fg);
+  }
+  .strong {
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .sub {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+</style>

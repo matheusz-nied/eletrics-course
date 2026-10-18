@@ -1,0 +1,393 @@
+---
+titulo: O motor do portão
+modulo: m16-portao
+ordem: 2
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Explicar por que o motor do portão tem três fios e como o capacitor cria o campo girante
+  - Entender por que trocar ABRE e FECHA inverte o sentido do motor
+  - Reconhecer o motor sem capacitor (zumbe e esquenta) e saber o que faz o protetor térmico
+  - Identificar comum, ABRE e FECHA com o ohmímetro, sem depender da cor dos fios
+  - Descarregar o capacitor do motor com segurança antes de manusear
+prerequisitos:
+  - m03-medicoes/04-resistencia-continuidade-e-diodo
+  - m04-passivos/03-capacitores
+  - m06-corrente-alternada/03-fase-e-fasores
+  - m08-motores/04-motor-monofasico-capacitor
+  - m16-portao/01-anatomia-do-automatizador
+tags: [motor, capacitor, enrolamento, campo girante, multímetro, portão]
+seguranca: rede
+---
+
+import CentralVirtual from '../../../lessons/m16/ui/CentralVirtual';
+import MedirFios from '../../../lessons/m16/ui/MedirFios';
+import LigacaoMotor from '../../../lessons/m16/figuras/LigacaoMotor.astro';
+import { lessonUrl } from '../../../lib/url';
+
+O portão de um vizinho parou. Quando alguém aperta o controle, o motor faz um zumbido grave e o portão não sai do lugar. Se alguém dá um empurrão, ele vai, às vezes até para o lado errado. O técnico chega, troca uma peça barata, um cilindro de plástico com dois fios, e tudo volta ao normal. A peça é o capacitor, e para entender por que ela faz tanta falta você precisa ver como um motor de três fios gira.
+
+## Três fios, dois enrolamentos
+
+Dentro do motor há dois <Term id="enrolamento">enrolamentos</Term>: bobinas de fio de cobre esmaltado presas na parte fixa do motor, o estator. Cada enrolamento tem duas pontas. Uma ponta de cada um vai ligada à mesma ponta do outro, ainda dentro do motor, e sai num fio só: o **comum**. As duas pontas que sobram são os fios **ABRE** e **FECHA**. Por isso o motor tem três fios, e não quatro.
+
+Na central, o comum vai ao borne `COM`, que a CD-1 liga por dentro ao `N`, o do <Term id="neutro">neutro</Term>. A <Term id="fase">fase</Term> vai a ABRE ou a FECHA, conforme o relé que a central liga. O capacitor fica fixo, ligado entre ABRE e FECHA. A carcaça do motor vai ao terra, por um fio separado.
+
+<LigacaoMotor caption="Figura 1. Como a central liga o motor. A fase passa pelo fusível e pelo TRIAC (aula 16.3) e chega ao relé K1 ou ao K2. Na CD-1, os bornes CAP são ligados por dentro a ABRE e FECHA, então o capacitor fica nesses mesmos pontos. A posição do protetor térmico dentro do motor varia de modelo para modelo." />
+
+## Um campo que gira
+
+Um enrolamento sozinho, ligado na rede de <Term id="corrente-alternada">corrente alternada</Term>, cria um campo magnético que cresce, diminui, inverte e volta, 60 vezes por segundo. Esse campo pulsa sempre na mesma direção. Ele não gira, e um campo que não gira não tem como arrastar o rotor.
+
+Agora ponha dois enrolamentos no estator, cruzados (um a um quarto de volta do outro), e alimente cada um com uma corrente atrasada um quarto de ciclo em relação à outra. Quando o primeiro está no máximo, o segundo está passando por zero; um instante depois, os papéis se trocam. Somados, os dois campos formam um campo só, que **gira**. Esse campo girante induz correntes no rotor (uma gaiola de barras de alumínio ou cobre) e arrasta o rotor com ele. Por isso o nome <Term id="motor-de-inducao">motor de indução</Term>.
+
+Pense em duas pessoas girando um gira-gira de praça, uma empurrando um quarto de volta depois da outra: o brinquedo gira sempre no mesmo sentido. Se as duas empurram juntas, ele só balança. A analogia para aí: o campo não empurra num ponto, e a soma dos dois é um campo único, que gira de verdade.
+
+### Quem atrasa uma das correntes
+
+A rede entrega uma tensão só. Como fazer duas correntes defasadas? O enrolamento ligado direto na fase se comporta como um <Term id="indutor">indutor</Term>: a corrente fica um pouco **atrasada** em relação à tensão. O enrolamento que recebe a fase pelo capacitor tem a corrente **adiantada**, porque o capacitor puxa corrente antes de a tensão chegar ao máximo. Uma atrasada, outra adiantada: a diferença chega perto de um quarto de ciclo.
+
+### Por que o motor gira para um lado ou para o outro
+
+O sentido do giro depende de qual corrente vem primeiro. Com o relé K1 fechado, a fase vai direto ao enrolamento ABRE, e o FECHA recebe pelo capacitor. Com o K2 fechado, é o contrário. A ordem das correntes se inverte, o campo gira ao contrário, e o portão vai para o outro lado.
+
+Nos motores de portão, os dois enrolamentos costumam ser iguais, então o motor gira igual para os dois lados. Em motores de ventilador ou de bomba, eles costumam ser diferentes, e o motor é feito para um sentido só. Pela mesma razão, trocar os fios ABRE e FECHA na central inverte o sentido. É a primeira coisa a fazer quando o portão novo fecha no lugar de abrir.
+
+## A conta da defasagem
+
+Um enrolamento tem uma parte resistiva, $R$, e uma parte indutiva. O capacitor tem só a parte capacitiva. A oposição que cada um faz à corrente alternada se chama reatância:
+
+$$
+X_L = 2\pi f L \qquad\qquad X_C = \frac{1}{2\pi f C}
+$$
+
+em que $X_L$ é a reatância do enrolamento e $X_C$ a do capacitor, as duas em ohms (Ω); $f$ é a frequência da rede em hertz (60 Hz); $L$ é a indutância em henrys (H); e $C$ é a capacitância em farads (F). A <LinkAula id="m06-corrente-alternada/03-fase-e-fasores">aula 6.3</LinkAula> explica fasores com calma.
+
+O ângulo entre a tensão e a corrente num ramo com resistência $R$ e reatância total $X$ é:
+
+$$
+\varphi = \arctan\left(\frac{X}{R}\right)
+$$
+
+Ângulo positivo quer dizer corrente atrasada; negativo, adiantada. A reatância do capacitor entra com sinal negativo.
+
+O simulador abaixo usa um modelo de ensino de um motor de 1/4 CV em 127 V: cada enrolamento vale $R = 30\,\Omega$ com $L = 66\,\text{mH}$, e o capacitor tem 40 µF. Então $X_L \approx 24{,}9\,\Omega$ e $X_C \approx 66{,}3\,\Omega$.
+
+- Enrolamento ligado direto: $\varphi = \arctan(24{,}9 / 30) \approx 39{,}7^\circ$, corrente atrasada.
+- Enrolamento com o capacitor: $X = 24{,}9 - 66{,}3 = -41{,}4\,\Omega$, então $\varphi = \arctan(-41{,}4 / 30) \approx -54{,}1^\circ$, corrente adiantada.
+
+A diferença entre as duas é $39{,}7^\circ + 54{,}1^\circ \approx 94^\circ$, quase um quarto de ciclo (90°). É isso que faz o campo girar.
+
+## Explore: as duas correntes do motor
+
+<Simulation
+  circuit="m16/motor-capacitor"
+  instruments={[{ kind: 'osciloscopio', series: ['IA', 'IF'] }, 'multimetro']}
+/>
+
+1. Aperte o botão de iniciar (▶). No osciloscópio, aperte **Autoajuste**. Você vê a corrente do enrolamento ABRE (IA) e a do FECHA (IF). Qual das duas passa por zero subindo primeiro?
+2. Ligue **Relé de sentido acionado (fechar)**. A fase agora vai direto ao FECHA. O que aconteceu com a ordem das correntes?
+3. Abra a aba **Multímetro**. Com o relé em repouso, o ABRE puxa cerca de 3,3 A e o FECHA cerca de 2,5 A. Veja a tensão no capacitor: cerca de 165 V, mais que os 127 V da rede.
+4. Desligue **Capacitor ligado**. A corrente do FECHA cai a zero. Sobrou uma corrente só, e o campo não gira mais: no motor de verdade, é o zumbido.
+5. Ligue o capacitor de novo e mude o valor dele. Com 20 µF, a defasagem passa de 110°, mas a corrente do FECHA cai para pouco mais de 1 A. Com 60 µF, ela sobe para cerca de 3,6 A e a defasagem cai para uns 73°.
+
+No passo 1, vem primeiro a corrente do enrolamento com o capacitor, a adiantada. No passo 2, a ordem se inverte, e é isso que inverte o sentido do motor. O passo 5 mostra que capacitor não é "quanto mais, melhor": o motor é projetado para o valor da etiqueta.
+
+<DeepDive title="Por que o modelo usa 30 Ω, se o multímetro mede uns 5 Ω">
+O <Term id="multimetro">multímetro</Term> mede a resistência com uma corrente contínua pequena e o rotor parado. Assim ele vê só o cobre do enrolamento: nos motores de portão de 127 V, uma estimativa de 3 a 7 Ω (os fabricantes não publicam esse valor).
+
+Com o motor girando, a energia sai do circuito de dois jeitos: vira calor no cobre e vira trabalho no eixo (mais um pouco de calor no rotor e no ferro). Para a rede, toda potência que sai e não volta aparece como resistência, porque $P = I^2 R$. A indutância não gasta energia: ela guarda e devolve a cada ciclo. Então os 30 Ω do modelo são o cobre (uns 5 Ω) mais uns 25 Ω que representam o trabalho do rotor. É um modelo de ensino, escolhido para dar uma corrente típica desses motores.
+
+Com esses números, a conta completa fica assim, com $\omega = 2\pi f = 377\,\text{rad/s}$:
+
+$$
+Z_A = 30 + j\,24{,}9\,\Omega \quad\Rightarrow\quad |Z_A| = 39{,}0\,\Omega, \quad I_A = \frac{127\,\text{V}}{39{,}0\,\Omega} \approx 3{,}26\,\text{A}
+$$
+
+$$
+Z_F = 30 + j\,(24{,}9 - 66{,}3)\,\Omega = 30 - j\,41{,}4\,\Omega \quad\Rightarrow\quad |Z_F| = 51{,}2\,\Omega, \quad I_F \approx 2{,}48\,\text{A}
+$$
+
+$$
+V_C = I_F \cdot X_C = 2{,}48\,\text{A} \times 66{,}3\,\Omega \approx 165\,\text{V}
+$$
+
+Esses 165 V são eficazes. O pico é $165 \times \sqrt{2} \approx 233\,\text{V}$, mais que o pico da rede de 127 V (180 V). Num motor real, o capacitor também trabalha acima da tensão da rede, e por isso a tensão da etiqueta dele importa.
+
+Quando o portão trava, o rotor freia e a parte "trabalho" da resistência encolhe. A impedância cai e a corrente sobe muito, até perto da corrente de rotor bloqueado. A central usa justamente essa subida para perceber um obstáculo (<LinkAula id="m16-portao/03-a-central-por-dentro">aula 16.3</LinkAula>).
+</DeepDive>
+
+## Sem capacitor, o motor só zumbe
+
+Se o capacitor abre (perde a ligação por dentro) ou se um fio dele solta, só um enrolamento recebe corrente. O campo pulsa, mas não gira. Um campo que pulsa equivale a dois campos iguais girando em sentidos opostos. Com o rotor parado, os dois puxam com a mesma força, e ele não sai do lugar.
+
+O resultado é o sintoma clássico: o motor **zumbe e não gira**. O rotor parado puxa uma corrente alta, e o motor **esquenta** depressa. Se alguém empurra o portão, o rotor começa a girar, um dos dois campos passa a puxar mais e o motor pode pegar e seguir, **para o lado do empurrão**, que pode ser o errado. Um capacitor fraco, com menos µF do que diz a etiqueta, dá um sintoma parecido e mais brando: partida difícil, pouca força, portão que para no meio.
+
+<CentralVirtual
+  client:visible
+  titulo="Central virtual: capacitor aberto"
+  defeitos={{ capacitorAberto: true }}
+  mostrar={['comandos']}
+/>
+
+Aperte **Controle remoto** e observe:
+
+- A linha **Motor** mostra "zumbindo, sem girar", com o TRIAC em 70 %. O portão não sai do lugar.
+- A **Corrente** fica em torno de 4,2 A. Com o capacitor bom, a mesma central mostra cerca de 1,4 A com o portão andando.
+- Espere a contagem de **Percurso** chegar a 40 s. A central desiste: estado "Erro", LED PROG piscando, buzzer.
+
+Por que a central não percebeu antes? Ela detecta obstáculo quando a corrente **sobe** em relação à que ela mediu no começo do movimento. Aqui a corrente começou alta e ficou alta. Só o limite de 40 s pegou o defeito. Num motor real, o <Term id="protetor-termico">protetor térmico</Term> pode desligar antes disso.
+
+## O capacitor certo
+
+Os manuais de motor consultados para o curso trazem capacitores de **25 a 40 µF** nos motores de 127 V e de **12 a 15 µF** nos de 220 V, de 1/4 a 1/2 CV. São valores típicos; o do seu motor está na etiqueta dele. A tensão do capacitor, em VCA, vem impressa no próprio capacitor. Os manuais não informam esse número, e este curso também não cita um. Na troca, use o **mesmo valor em µF** e uma **tensão igual ou maior** que a do original.
+
+Por que o capacitor de 220 V é bem menor? Para a mesma potência, as impedâncias do motor crescem com o quadrado da tensão: $(220/127)^2 \approx 3$. Para manter a defasagem, a reatância do capacitor precisa ficar 3 vezes maior, e a capacitância, 3 vezes menor. Os 40 µF de 127 V viram uns 13 µF, dentro da faixa de 12 a 15 µF dos manuais.
+
+O capacitor de motor é de filme plástico, sem polaridade, feito para corrente alternada. Um capacitor eletrolítico, aquele de fonte com terminal + e −, não serve: ligado na rede alternada, ele esquenta e pode estourar.
+
+## O protetor térmico
+
+Dentro do motor, no caminho da corrente, há um protetor térmico: uma chave que abre sozinha quando o motor passa de uma temperatura. Nos manuais consultados, ele atua entre 130 °C e 150 °C. Em geral, ele volta a fechar quando o motor esfria.
+
+O sintoma é típico: o portão para no meio depois de vários ciclos seguidos e volta a funcionar quando o motor esfria. As causas mais comuns são uso demais em pouco tempo, capacitor errado ou fraco e atrito (trilho sujo, roldana travando, portão pesado demais). Anular a proteção não resolve: a causa continua lá, e o motor queima.
+
+## Identificar COM, ABRE e FECHA com o ohmímetro
+
+A cor dos fios varia de fabricante para fabricante. Nos manuais consultados, o fio comum é amarelo na Intelbras, na Rossi e na PPA, azul no Omegaport DZ 1000 e preto na central Omegasat CT30A. Por isso, meça. O multímetro na escala de resistência (Ω) resolve o problema em um minuto.
+
+<Steps>
+  <Step title="Desligue e confirme">
+    Desligue o disjuntor do portão. Teste o multímetro numa tomada energizada, meça a ausência de tensão entre F, N e terra na central, teste o multímetro de novo na tomada e sinalize o quadro.
+  </Step>
+  <Step title="Descarregue o capacitor">
+    Siga o método da seção "Descarga segura do capacitor", mais abaixo, antes de tocar nos terminais.
+  </Step>
+  <Step title="Solte os três fios do motor">
+    Fotografe e etiquete antes. Com os fios ainda presos na central ou no capacitor, a leitura pode enganar.
+  </Step>
+  <Step title="Zere as pontas">
+    Na escala de 200 Ω, encoste uma ponta na outra. O visor mostra uns 0,2 Ω: é a resistência das próprias pontas, que você desconta das leituras.
+  </Step>
+  <Step title="Meça os três pares">
+    Fio 1 com fio 2, fio 1 com fio 3, fio 2 com fio 3. Anote as três leituras.
+  </Step>
+  <Step title="Ache o comum">
+    A **maior** leitura é entre ABRE e FECHA, os dois enrolamentos em série. O fio que ficou de fora desse par é o **comum**. As outras duas leituras dão, cada uma, mais ou menos metade da maior.
+  </Step>
+  <Step title="Confira a isolação">
+    Na escala mais alta de resistência, meça entre cada fio e a carcaça, num ponto sem tinta. Tem de dar OL. Qualquer leitura em ohms ali indica isolação danificada e risco de choque.
+  </Step>
+</Steps>
+
+O que esperar: nos motores de 127 V, uma **estimativa** de 3 a 7 Ω por enrolamento; nos de 220 V, de 7 a 14 Ω. Nenhum fabricante publica esses valores, e o método não depende deles. Uma leitura **zero** entre dois fios indica curto. **OL** indica enrolamento interrompido. Num motor que acabou de esquentar, um OL pode ser só o protetor térmico aberto: espere esfriar e meça de novo antes de condenar o motor.
+
+E qual fio é ABRE e qual é FECHA? Com enrolamentos iguais, o ohmímetro não diz, e a resposta depende até do lado em que o motor está montado. Ligue um deles em ABRE, o outro em FECHA, e faça o primeiro teste. Se o portão fechar quando deveria abrir, desligue o disjuntor, confirme a ausência de tensão e troque os dois fios (ou use a chave de inversão da central, quando houver). A aula <a href={lessonUrl('m16-portao/08-ajustes-e-testes')}>16.8</a> faz esse teste.
+
+<MedirFios client:visible />
+
+No exercício acima, meça os três pares, escolha o comum e aperte **Verificar**. Depois aperte **Outro motor** e repita até acertar sem pensar. Por fim, troque para o motor de 220 V: as leituras ficam mais ou menos o dobro, e o método é o mesmo.
+
+## Exemplo resolvido: o motor de três fios sem etiqueta
+
+Você soltou os fios de um motor de 127 V: um preto, um branco e um cinza. Com as pontas encostadas, o multímetro mostra 0,2 Ω. As leituras foram:
+
+| Par | Leitura | Descontando as pontas |
+|-----|---------|-----------------------|
+| preto e branco | 10,4 Ω | 10,2 Ω |
+| preto e cinza | 5,4 Ω | 5,2 Ω |
+| branco e cinza | 5,2 Ω | 5,0 Ω |
+
+**Passo 1: a maior leitura.** É entre preto e branco: 10,4 Ω. Esses dois são ABRE e FECHA.
+
+**Passo 2: o comum.** O fio que não está nesse par é o **cinza**.
+
+**Passo 3: conferir.** Os dois enrolamentos somados devem dar a leitura grande: $5{,}2 + 5{,}0 = 10{,}2\,\Omega$, igual à leitura de preto e branco descontadas as pontas. Bateu.
+
+**Passo 4: a ordem de grandeza.** Uns 5 Ω por enrolamento, dentro da estimativa de 3 a 7 Ω para 127 V, sem curto nem OL.
+
+**Passo 5: ABRE e FECHA.** Ligue o cinza no COM, o preto em ABRE e o branco em FECHA, e teste o primeiro comando. Se o portão fechar, desligue o disjuntor, confirme a ausência de tensão e troque preto e branco.
+
+## Descarga segura do capacitor
+
+Um capacitor guarda carga mesmo com o disjuntor desligado. Enquanto ele está ligado ao motor, a carga escoa pelos enrolamentos, que têm poucos ohms, e some num instante. Um capacitor solto, ou com um fio desligado, pode ficar carregado com até o pico da rede: cerca de 180 V em 127 V, ou 311 V em 220 V.
+
+A energia guardada é:
+
+$$
+E = \frac{1}{2} C V^2 = \frac{1}{2} \times 40\,\mu\text{F} \times (180\,\text{V})^2 \approx 0{,}65\,\text{J}
+$$
+
+em que $E$ é a energia em joules (J), $C$ a capacitância em farads e $V$ a tensão em volts. Parece pouco, mas basta para um choque doloroso ou um multímetro danificado.
+
+O jeito seguro é descarregar por um resistor. Use um de 10 kΩ e 5 W, com fios isolados e garras jacaré, segurando só pela parte isolada. Encoste nos dois terminais por alguns segundos e depois meça a tensão com o multímetro, nas escalas de CC e de CA, para confirmar que ficou perto de zero. A tensão cai assim:
+
+$$
+v(t) = V_0 \, e^{-t/(RC)}
+$$
+
+em que $V_0$ é a tensão inicial, $t$ o tempo em segundos e $RC$ a constante de tempo, $\tau$. Com 10 kΩ e 40 µF, $\tau = 10.000\,\Omega \times 0{,}000040\,\text{F} = 0{,}4\,\text{s}$. A corrente começa em $180\,\text{V} / 10\,\text{k}\Omega = 18\,\text{mA}$, e a tensão cai pela metade a cada 0,28 s. Em 2 s, sobra pouco mais de 1 V.
+
+<Simulation circuit="m16/descarga-capacitor" />
+
+Aperte iniciar (▶) e veja que o capacitor sozinho fica parado em 180 V: ele não perde a carga por conta própria. Agora ligue **Resistor encostado nos terminais** e acompanhe a queda. Quanto tempo leva para a tensão ficar abaixo de 5 V? (Pouco mais de 1 s; é o desafio do simulador.)
+
+Nunca descarregue encostando uma chave de fenda nos dois terminais. O curto faz uma faísca forte, pode danificar o capacitor e não confirma nada. O resistor descarrega devagar e com controle, e a medição depois confirma.
+
+<RealCase title="O motor que só zumbia">
+O sintoma era o do começo da aula: zumbido, portão parado, e só andava com um empurrão. O técnico desligou o disjuntor, testou o multímetro numa tomada energizada, mediu a ausência de tensão na central, testou de novo e sinalizou o quadro. Depois soltou o capacitor e descarregou com o resistor.
+
+A etiqueta dizia 35 µF. Na função de capacitância do multímetro, o capacitor marcou 12 µF: tinha perdido quase dois terços do valor. Ele comprou outro de 35 µF, com a tensão da etiqueta igual ou maior que a do original, ligou nos mesmos bornes e testou. O portão voltou a abrir no primeiro comando.
+
+Antes de encerrar, ele mediu os enrolamentos (5,1 Ω e 5,3 Ω, normais) e testou o portão à mão com o desbloqueio aberto: um portão emperrado acabaria com o capacitor novo também.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Medir os enrolamentos com os fios ainda ligados** na central ou no capacitor. Solte os três fios antes.
+- **Confiar na cor do fio.** Cada fabricante usa uma. Meça.
+- **Usar um capacitor "parecido".** Com menos µF, o motor fica fraco. Com mais, a corrente no enrolamento do capacitor sobe (no modelo, de 2,5 A para 3,6 A com 60 µF) e o motor esquenta.
+- **Usar capacitor de tensão menor** porque "a rede é 127 V". O capacitor trabalha acima da tensão da rede: no modelo, 165 V eficazes.
+- **Descarregar com chave de fenda**, ou não descarregar. Use o resistor e confirme com o multímetro.
+- **Ligar o comum no lugar errado.** O motor zumbe, gira fraco, esquenta ou desarma o disjuntor.
+- **Condenar o motor quente.** Um OL logo depois de esquentar pode ser o protetor térmico aberto. Espere esfriar.
+- **Esquecer o terra da carcaça.** Se a isolação falhar, é o terra que leva a fuga e faz o DR ou o disjuntor atuar.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Por que o motor do portão tem três fios?',
+      options: [
+        {
+          text: 'São dois enrolamentos com uma ponta em comum: comum, ABRE e FECHA',
+          correct: true,
+        },
+        {
+          text: 'São fase, neutro e terra',
+          feedback:
+            'O terra vai à carcaça por um fio separado. Os três fios do motor são as pontas dos dois enrolamentos.',
+        },
+        {
+          text: 'Um fio é do motor e dois são do capacitor',
+          feedback:
+            'O capacitor fica entre ABRE e FECHA, mas os três fios saem dos enrolamentos.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você mediu um motor solto: fio A com B, 6,3 Ω; A com C, 12,4 Ω; B com C, 6,3 Ω. Qual fio é o comum?',
+      options: [
+        { text: 'B', correct: true },
+        {
+          text: 'A',
+          feedback:
+            'A está no par de maior leitura (A com C, 12,4 Ω), então é a ponta de um enrolamento. O comum é o que fica de fora desse par.',
+        },
+        {
+          text: 'C',
+          feedback:
+            'C está no par de maior leitura, junto com A. Os dois são ABRE e FECHA. O comum é o B.',
+        },
+      ],
+      explanation:
+        'A maior leitura (12,4 Ω) é entre A e C, os dois enrolamentos em série. O fio que sobra, B, é o comum; as outras leituras dão a metade.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Qual a reatância de um capacitor de 40 µF na rede de 60 Hz, em ohms?',
+      answer: 66.3,
+      tolerance: 0.02,
+      unit: 'Ω',
+      explanation: 'X_C = 1 / (2π × 60 × 0,000040) ≈ 66,3 Ω.',
+    },
+    {
+      type: 'vf',
+      prompt: 'Sem o capacitor, o motor do portão parte sozinho, só que mais devagar.',
+      answer: false,
+      explanation:
+        'Sem capacitor só um enrolamento recebe corrente. O campo pulsa e não gira: o motor zumbe e não parte, a menos que alguém empurre.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'A etiqueta do capacitor queimado diz 35 µF. Qual capacitor você compra para a troca?',
+      options: [
+        {
+          text: 'Um de 35 µF, de filme, com tensão igual ou maior que a do original',
+          correct: true,
+        },
+        {
+          text: 'Um de 50 µF, para o motor ter mais força',
+          feedback:
+            'Mais µF aumenta a corrente no enrolamento do capacitor e esquenta o motor. O motor foi projetado para o valor da etiqueta.',
+        },
+        {
+          text: 'Um eletrolítico de 35 µF, que é mais barato',
+          feedback:
+            'O eletrolítico tem polaridade e é feito para corrente contínua. Na rede alternada ele esquenta e pode estourar.',
+        },
+        {
+          text: 'Um de 35 µF com tensão menor, porque a rede é de 127 V',
+          feedback:
+            'O capacitor do motor trabalha acima da tensão da rede (no modelo, 165 V eficazes). Use tensão igual ou maior que a do original.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um capacitor de 30 µF ficou carregado com 180 V depois de solto do motor. Quanta energia ele guarda, em joules?',
+      answer: 0.486,
+      tolerance: 0.03,
+      unit: 'J',
+      explanation: 'E = ½ × C × V² = 0,5 × 0,000030 × 180² ≈ 0,49 J.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem segura os passos para medir os fios do motor.',
+      items: [
+        'Desligar o disjuntor do portão',
+        'Testar o multímetro numa tomada energizada',
+        'Medir a ausência de tensão na central',
+        'Testar o multímetro de novo na tomada',
+        'Sinalizar o quadro',
+        'Descarregar o capacitor com o resistor',
+        'Soltar os fios do motor e medir os três pares',
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que trocar os fios ABRE e FECHA na central inverte o sentido do motor?',
+      options: [
+        {
+          text: 'Muda qual enrolamento recebe a fase direto, e a ordem das correntes se inverte',
+          correct: true,
+        },
+        {
+          text: 'Inverte a polaridade da tensão, como numa pilha',
+          feedback:
+            'Na corrente alternada a polaridade já inverte 120 vezes por segundo. O que decide o sentido é qual corrente vem primeiro.',
+        },
+        {
+          text: 'Tira o capacitor do circuito',
+          feedback:
+            'O capacitor continua entre ABRE e FECHA. Ele só passa a alimentar o outro enrolamento.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O motor do portão tem dois enrolamentos com uma ponta em comum: os fios comum, ABRE e FECHA. O comum vai ao neutro, a fase vai a ABRE ou a FECHA, e o capacitor fica entre os dois.
+- O capacitor adianta a corrente de um enrolamento. Com as duas correntes defasadas quase um quarto de ciclo (94° no modelo), o campo gira. Trocar qual enrolamento recebe a fase inverte o sentido.
+- Sem capacitor, o motor zumbe, esquenta e só gira se alguém empurrar. Use o mesmo valor em µF e tensão igual ou maior: tipicamente 25 a 40 µF em 127 V e 12 a 15 µF em 220 V.
+- O protetor térmico desliga o motor quente. A causa (uso demais, capacitor errado, atrito) é o que precisa de conserto.
+- Com o motor solto e desligado, a maior leitura de resistência é entre ABRE e FECHA, e o fio que sobra é o comum. Não confie na cor.
+- Descarregue o capacitor com um resistor (10 kΩ, 5 W) e confirme com o multímetro antes de tocar.

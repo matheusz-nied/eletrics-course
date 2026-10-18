@@ -4,7 +4,8 @@ import { R_SERIES_MIN } from '../models/constants';
 /**
  * Inductor with winding resistance, as a branch-current unknown:
  * v = R·i + L·di/dt (trapezoidal, backward Euler after discontinuities).
- * DC: the winding resistance only. Starts with `ic` amperes.
+ * DC: the winding resistance only. Starts with `ic` amperes; changing `ic`
+ * sets the current to it at once.
  */
 export default defineDevice({
   info: {
@@ -65,6 +66,12 @@ export default defineDevice({
       },
       readouts(_x, out) {
         out('energy', 0.5 * num(params, 'inductance') * i * i);
+      },
+      paramChanged(name) {
+        // A new initial current takes effect now.
+        if (name !== 'ic') return;
+        iPrev = i = num(params, 'ic');
+        vPrev = 0;
       },
       reset() {
         iPrev = i = num(params, 'ic');
