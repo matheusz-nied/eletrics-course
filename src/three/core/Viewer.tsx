@@ -288,7 +288,7 @@ export default function Viewer({
               pressed={showNotes}
               onClick={() => setShowNotes((v) => !v)}
               icon="anotacoes"
-              controls={legendId}
+              controls={showNotes && notes.length > 0 ? legendId : undefined}
             >
               Anotações
             </ToolbarToggle>

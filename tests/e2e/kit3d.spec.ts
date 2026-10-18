@@ -50,14 +50,16 @@ test.describe('every part assembles', () => {
 
   for (const id of PARTS) {
     test(id, async ({ page }, testInfo) => {
+      // Software WebGL on CI renders the larger instruments slowly.
+      test.setTimeout(90_000);
       const errors = watchErrors(page);
       await page.goto(`${GALLERY}?peca=${id}&qualidade=baixa`);
       await expectReady(page);
       const viewport = page.locator('.m3d__viewport').first();
-      await testInfo.attach(`${id}.png`, {
-        body: await viewport.screenshot(),
-        contentType: 'image/png',
-      });
+      // A page screenshot clipped to the view: element screenshots wait for
+      // the element to stop changing, which an animated part never does.
+      const shot = async () => page.screenshot({ clip: (await viewport.boundingBox())! });
+      await testInfo.attach(`${id}.png`, { body: await shot(), contentType: 'image/png' });
 
       const explode = page.getByRole('button', { name: 'Vista explodida' });
       if (await explode.isVisible()) {
@@ -65,7 +67,7 @@ test.describe('every part assembles', () => {
         await expect(explode).toHaveAttribute('aria-pressed', 'true');
         await page.waitForTimeout(1200);
         await testInfo.attach(`${id}-explodida.png`, {
-          body: await viewport.screenshot(),
+          body: await shot(),
           contentType: 'image/png',
         });
       }
