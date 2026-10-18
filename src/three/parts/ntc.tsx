@@ -77,15 +77,25 @@ export function ntcResistance(ohms25: number, celsius: number, beta = 3950): num
   return ohms25 * Math.exp(beta * (1 / (celsius + 273.15) - 1 / 298.15));
 }
 
-/** A faint warm (hot) or cool (cold) tint: a visual hint only. */
-function thermalTint(celsius: number): MaterialProps {
-  if (celsius > 60) {
-    return { emissive: '#ff4a12', emissiveIntensity: Math.min((celsius - 60) / 90, 1) * 0.3 };
-  }
-  if (celsius < 5) {
-    return { emissive: '#3d8bff', emissiveIntensity: Math.min((5 - celsius) / 25, 1) * 0.22 };
-  }
-  return {};
+/** Mixes two #rrggbb colours (k = 0 → a, 1 → b). */
+function mix(a: string, b: string, k: number): string {
+  const ca = parseInt(a.slice(1), 16);
+  const cb = parseInt(b.slice(1), 16);
+  const channel = (shift: number) =>
+    Math.round(((ca >> shift) & 255) * (1 - k) + ((cb >> shift) & 255) * k);
+  return `#${((channel(16) << 16) | (channel(8) << 8) | channel(0)).toString(16).padStart(6, '0')}`;
+}
+
+/**
+ * Coating colour at a temperature: a visual hint only, browned when hot
+ * (as epoxy discolours) and frosted when below freezing.
+ */
+function coatColor(p: Required<NtcProps>): string {
+  const base = (COATS[p.color] ?? COATS.verde).color;
+  const t = p.temperature;
+  if (t > 60) return mix(base, '#5e3417', Math.min((t - 60) / 90, 1) * 0.35);
+  if (t < 0) return mix(base, '#dce8f4', Math.min(-t / 20, 1) * 0.22);
+  return base;
 }
 
 export const meta: PartMeta = {
@@ -289,13 +299,12 @@ function coatMaterial(p: Required<NtcProps>): MaterialProps {
   const coat = COATS[p.color] ?? COATS.verde;
   return {
     preset: 'epoxyOrange',
-    color: coat.color,
+    color: coatColor(p),
     roughness: 0.42,
     clearcoat: 0.45,
     clearcoatRoughness: 0.35,
     clip: true,
     cutColor: coat.cut,
-    ...thermalTint(p.temperature),
   };
 }
 
@@ -307,7 +316,7 @@ function Disc(p: Required<NtcProps>) {
   const hw = s.pitch / 2 + s.lead / 2 + 0.25;
   const yc = y0 + r + s.neck;
   const code = codeOf(p);
-  const coat = COATS[p.color] ?? COATS.verde;
+  const tinted = coatColor(p);
   const key = power ? 'p' : 's';
 
   const body = useDisposable(() => {
@@ -338,7 +347,7 @@ function Disc(p: Required<NtcProps>) {
   const ch = Math.round((cw * capH) / capW);
   const mark = useCanvasTexture(
     (ctx, w, h) => {
-      ctx.fillStyle = coat.color;
+      ctx.fillStyle = tinted;
       ctx.fillRect(0, 0, w, h);
       const cy = (h * r) / (2 * r + s.neck);
       ctx.fillStyle = '#efeee6';
@@ -347,7 +356,7 @@ function Disc(p: Required<NtcProps>) {
         family: FONT_SANS,
       });
     },
-    `ntc-${key}-${code}-${p.color}`,
+    `ntc-${key}-${code}-${tinted}`,
     { width: cw, height: ch, fonts: [`700 40px ${FONT_SANS}`] },
   );
 
@@ -398,11 +407,12 @@ function Disc(p: Required<NtcProps>) {
         {[-1, 1].map((side) => (
           <mesh
             key={side}
-            position={[0, 0, side * (s.coreT / 2 + elT / 2)]}
+            // A hair off the ceramic so the faces never coincide.
+            position={[0, 0, side * (s.coreT / 2 + elT / 2 + 0.005)]}
             rotation={[Math.PI / 2, 0, 0]}
           >
             <cylinderGeometry args={[s.core / 2 - 0.25, s.core / 2 - 0.25, elT, 48]} />
-            <Material color="#dedbd3" metalness={0.9} roughness={0.42} clip cutColor="#a9a6a0" />
+            <Material color="#dedbd3" metalness={0.9} roughness={0.42} clip cutColor="#8d8a84" />
           </mesh>
         ))}
         <Anchor name="core" position={[-s.core / 2, s.core * 0.12, 0]} />

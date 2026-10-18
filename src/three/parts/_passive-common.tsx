@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/immutability -- React Three Fiber mutates three.js objects every frame; this React Compiler rule does not apply here (the compiler is not used). */
 /**
  * Shared pieces of the passive parts (potentiometers, capacitors, inductors):
  * the flat section face drawn at the cutaway plane, groups that only appear

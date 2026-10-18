@@ -885,6 +885,13 @@ function ToroidInductor(p: Required<InductorProps>) {
         </mesh>
         <Wire points={startEnamel} radius={rw} bend={0.6} material={{ preset: 'magnetWire' }} />
         <Wire points={endEnamel} radius={rw} bend={0.6} material={{ preset: 'magnetWire' }} />
+        {/* Joints where the winding meets the leads (the tube ends turn there). */}
+        {[startEnamel[startEnamel.length - 1]!, endEnamel[0]!].map((point, i) => (
+          <mesh key={i} position={point}>
+            <sphereGeometry args={[rw, 12, 8]} />
+            <Material preset="magnetWire" clip cutColor="#d88a5a" />
+          </mesh>
+        ))}
         {/* Scraped and tinned ends. */}
         {[
           [startR, a0],

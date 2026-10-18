@@ -348,20 +348,23 @@ export default function TransformerEi(props: TransformerEiProps) {
           { x: -0.3 * a, color: '#1a1a1c' },
           { x: 0.05 * a, color: p.primaryVoltage === 220 ? '#c42a1f' : '#6b3a1e' },
         ];
-    // Out of the winding, over the frame and down to the bench in front.
+    // Out of the top of the winding, dressed to the left along its edge (clear
+    // of the label) and down to the bench in front.
+    const side = -coilOut.w / 2;
     return list.map(({ x, color }, i) => ({
       color,
       points: [
         [x, yHigh - 1.6, zf - 1.5],
-        [x, yHigh - 1.6, zf + 1.4],
-        [x, yHigh + 2.5 + i * 0.6, zf + 3],
-        [x * 1.2, yHigh + 1 + i * 0.6, zf + 11],
-        [x * 1.45 - 2, 9 + i * 1.5, zf + 19 + i * 1.5],
-        [x * 1.7 - 4, 0.9, zf + 30 + i * 2],
-        [x * 2 - 6, 0.9, zf + 46 + i * 3],
+        [x, yHigh - 1.6, zf + 0.9],
+        [x - 2.5, yHigh - 0.6 + i * 0.5, zf + 1.6 + i * 0.4],
+        [side + 1.5, yHigh - 0.8 + i * 0.5, zf + 1.8 + i * 0.6],
+        [side - 3 - i * 1.4, yHigh - 5, zf + 4 + i],
+        [side - 8 - i * 2.2, 9, zf + 12 + i * 2],
+        [side - 13 - i * 3, 0.9, zf + 24 + i * 2.5],
+        [side - 18 - i * 4, 0.9, zf + 40 + i * 3],
       ] as Vec3[],
     }));
-  }, [a, bivolt, coilFrontZ, p.primaryVoltage, yHigh]);
+  }, [a, bivolt, coilFrontZ, coilOut.w, p.primaryVoltage, yHigh]);
   const leadsSecondary = useMemo(() => {
     const zb = -coilFrontZ;
     return [-0.22 * a, 0.22 * a].map((x, i) => ({
@@ -397,7 +400,7 @@ export default function TransformerEi(props: TransformerEiProps) {
     />
   );
   const cutFace = (
-    <Material preset="siliconSteel" color="#9a9ea4" roughness={0.38} roughnessMap={noise} />
+    <Material preset="siliconSteel" color="#b9bdc2" roughness={0.34} roughnessMap={noise} />
   );
   const coreFace = (
     <Material

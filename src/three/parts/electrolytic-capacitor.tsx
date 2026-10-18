@@ -14,7 +14,7 @@ import { Material } from '../materials/Material';
 import { FONT_SANS, fitText, getNoiseTexture, useCanvasTexture } from '../materials/textures';
 import { axialLathe } from '../shapes/geometry';
 import { useDisposable, Wire } from '../shapes/Wire';
-import type { PartMeta, PartProps } from '../types';
+import type { PartMeta } from '../types';
 import {
   arc,
   domedDiscGeometry,

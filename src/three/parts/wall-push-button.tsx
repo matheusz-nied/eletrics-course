@@ -9,8 +9,7 @@
  *   coloured button in a metal bezel (Ø 29,7 mm), ring nut, fixing collar and
  *   snap-on contact blocks (NA 13–14 green marker, NF 11–12 red marker) with
  *   screw terminals. Dimensions from typical 22 mm series catalogues.
- * Both are modelled facing +Z and shown facing +X, so the cutaway plane
- * (z = 0) runs through the middle of the mechanism.
+ * Both face +Z; the cutaway is the vertical plane x = 0 through the mechanism.
  * Pressing moves the key (or button) and the moving contact smoothly.
  */
 import { useRef } from 'react';
@@ -20,7 +19,7 @@ import { Material } from '../materials/Material';
 import { FONT_SANS, fitText, getNoiseTexture, useCanvasTexture } from '../materials/textures';
 import { axialLathe, tube } from '../shapes/geometry';
 import { useDisposable } from '../shapes/Wire';
-import type { PartAnnotation, PartMeta, Vec3 } from '../types';
+import type { PartAnnotation, PartMeta } from '../types';
 import {
   addRoundedRect,
   extrudeAlongZ,
@@ -85,10 +84,6 @@ const BLOCK_BACK = BLOCK_FRONT - 20;
 const PLUNGER_FRONT = BLOCK_FRONT + 1;
 const PRE_TRAVEL = B.travel - B.bridgeTravel;
 
-/** Modelled facing +Z, shown facing +X. */
-const FACE_X: Vec3 = [0, Math.PI / 2, 0];
-const shown = ([x, y, z]: Vec3): Vec3 => [z, y, -x];
-
 export const meta: PartMeta = {
   id: 'wall-push-button',
   label: 'Botoeira (campainha) e botão de painel',
@@ -142,12 +137,12 @@ export const meta: PartMeta = {
     if (p.variant === 'pulsador-industrial') {
       return [
         {
-          at: shown([-3, B.panel / 2 + 4, CAP_FRONT]),
+          at: [3, B.panel / 2 + 4, CAP_FRONT],
           text: 'Botão: só fecha (ou abre) enquanto está apertado',
           exploded: false,
         },
         {
-          at: shown([-B.bezelR * 0.75, B.panel / 2 - B.bezelR * 0.6, BEZEL_TOP - 0.5]),
+          at: [B.bezelR * 0.75, B.panel / 2 - B.bezelR * 0.6, BEZEL_TOP - 0.5],
           text: 'Aro de 22 mm: furo padrão no painel',
           exploded: false,
         },
@@ -158,11 +153,11 @@ export const meta: PartMeta = {
     }
     return [
       {
-        at: shown([-KEY.W / 2 + 6, P.H / 2 + 6, KEY.front]),
+        at: [KEY.W / 2 - 6, P.H / 2 + 6, KEY.front],
         text: 'Tecla de campainha: contato NA (pulsador)',
         exploded: false,
       },
-      { at: shown([-P.W / 2 + 4, P.H - 8, P.D]), text: 'Placa 4 × 2', exploded: false },
+      { at: [P.W / 2 - 4, P.H - 8, P.D], text: 'Placa 4 × 2', exploded: false },
       {
         at: [0, 0, 0],
         text: 'Parafusos da caixa 4 × 2 (83,5 mm)',
@@ -202,7 +197,12 @@ export const meta: PartMeta = {
     const color = PLATE_COLORS[plateOf(p.plateColor)].label;
     return `Botão de campainha em placa 4 × 2 ${color}, com contato normalmente aberto e dois bornes de parafuso atrás. ${pressed ? 'Apertado: o contato fecha e a campainha toca.' : 'Solto: o contato está aberto.'}`;
   },
-  view: [1.35, 0.5, 0.8],
+  // Vertical cut through the middle; the half towards the camera (x > 0) is removed.
+  cut: (p) => ({
+    normal: [-1, 0, 0],
+    through: [0, p.variant === 'pulsador-industrial' ? B.panel / 2 : P.H / 2, 0],
+  }),
+  view: [0.75, 0.45, 1.35],
 };
 
 function plateOf(v: unknown): PlateColor {
@@ -217,19 +217,15 @@ function contactsOf(v: unknown): Contacts {
 
 export default function WallPushButton(props: WallPushButtonProps) {
   const p = { ...meta.defaults, ...props } as Required<WallPushButtonProps>;
-  return (
-    <group rotation={FACE_X}>
-      {p.variant === 'pulsador-industrial' ? (
-        <IndustrialButton
-          pressed={!!p.pressed}
-          cap={CAP_COLORS[capOf(p.capColor)].color}
-          contacts={contactsOf(p.contacts)}
-        />
-      ) : (
-        <DoorbellPlate pressed={!!p.pressed} color={plateOf(p.plateColor)} />
-      )}
-    </group>
-  );
+  if (p.variant === 'pulsador-industrial')
+    return (
+      <IndustrialButton
+        pressed={!!p.pressed}
+        cap={CAP_COLORS[capOf(p.capColor)].color}
+        contacts={contactsOf(p.contacts)}
+      />
+    );
+  return <DoorbellPlate pressed={!!p.pressed} color={plateOf(p.plateColor)} />;
 }
 
 /** Flat face with holes, at height y, facing up or down (for shells built along +Y). */
@@ -484,7 +480,7 @@ function DoorbellPlate({ pressed, color }: { pressed: boolean; color: PlateColor
             </mesh>
           </group>
         ))}
-        <Anchor name="suporte" position={[3.4, 41.75, 4]} />
+        <Anchor name="suporte" position={[-3.4, 41.75, 4]} />
       </Explode>
 
       {/* Module housing (hollow): moves back and leaves the contact block. */}
@@ -553,7 +549,7 @@ function DoorbellPlate({ pressed, color }: { pressed: boolean; color: PlateColor
           </mesh>
         </group>
       ))}
-      <Anchor name="bornes" position={[CB.strip, 3.6, MODULE.back - 1.8]} />
+      <Anchor name="bornes" position={[-CB.strip, 3.6, MODULE.back - 1.8]} />
       <group ref={bridge}>
         <mesh position={[0, 0, bridgeZ]}>
           <boxGeometry args={[21, 3.4, 0.7]} />
@@ -574,14 +570,14 @@ function DoorbellPlate({ pressed, color }: { pressed: boolean; color: PlateColor
           <boxGeometry args={[6, 6, KEY.back - bridgeZ - 0.35]} />
           <Material preset="absWhite" color="#e7e4dc" roughness={0.5} />
         </mesh>
-        <Anchor name="ponte" position={[5, 1.7, bridgeZ]} />
+        <Anchor name="ponte" position={[-5, 1.7, bridgeZ]} />
       </group>
       <group ref={spring} position={[0, 0, springBase]}>
         <mesh geometry={springGeometry} rotation={[Math.PI / 2, 0, 0]}>
           <Material preset="steel" color="#c2c5c9" roughness={0.3} />
         </mesh>
       </group>
-      <Anchor name="mola" position={[2.4, 2.4, springBase + springLength * 0.45]} />
+      <Anchor name="mola" position={[-2.4, 2.4, springBase + springLength * 0.45]} />
     </group>
   );
 }
@@ -720,7 +716,7 @@ function IndustrialButton({
       {/* Panel section. */}
       <mesh geometry={panel}>
         <Material
-          color="#d6d6d1"
+          color="#c8cac7"
           roughness={0.45}
           roughnessMap={noise}
           clearcoat={0.2}
@@ -762,7 +758,7 @@ function IndustrialButton({
       </Explode>
 
       {/* Collar and blocks, turned so the blocks stack vertically (the cut runs across them). */}
-      <group rotation={[0, 0, -Math.PI / 2]}>
+      <group rotation={[0, 0, Math.PI / 2]}>
         <Explode offset={[0, 0, -16]} delay={0.15}>
           <mesh geometry={collar}>
             <Material preset="zinc" color="#bfc2c4" roughness={0.4} roughnessMap={noise} clip />
@@ -826,7 +822,7 @@ function ContactBlock({
       for (const [i, n] of numbers.entries()) {
         ctx.save();
         ctx.translate(w / 2, h * (i === 0 ? 0.33 : 0.67));
-        ctx.rotate(Math.PI / 2);
+        ctx.rotate(-Math.PI / 2);
         fitText(ctx, n, 0, 0, h * 0.2, w * 0.55, { weight: 700, family: FONT_SANS });
         ctx.restore();
       }

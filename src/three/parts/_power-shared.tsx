@@ -4,13 +4,15 @@
  * edges, thin shells, helices, insulated flying leads, winding and
  * lamination textures, and cut-face decals that show wire cross-sections.
  */
-import { useEffect, useMemo } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { useEffect, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react';
 import {
   BufferGeometry,
   Curve,
   ExtrudeGeometry,
   Float32BufferAttribute,
   FrontSide,
+  type Group,
   LatheGeometry,
   PlaneGeometry,
   Quaternion,
@@ -20,6 +22,7 @@ import {
   type ColorRepresentation,
 } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { damp, easeInOut, useReducedMotion } from '../core/motion';
 import { useQuality } from '../core/quality';
 import { useView } from '../core/view';
 import { Material, type MaterialProps } from '../materials/Material';
@@ -659,4 +662,115 @@ export function useGeometrySet<T extends Record<string, BufferGeometry>>(
   const value = useMemo(() => factory(), [key]);
   useEffect(() => () => Object.values(value).forEach((g) => g.dispose()), [value]);
   return value;
+}
+
+/**
+ * Copy of a geometry without the triangles `drop` selects (given the three
+ * corners). Used to open an extrusion where a separate face is drawn.
+ */
+export function dropTriangles(
+  geometry: BufferGeometry,
+  drop: (a: Vector3, b: Vector3, c: Vector3) => boolean,
+): BufferGeometry {
+  const src = geometry.index ? geometry.toNonIndexed() : geometry;
+  const position = src.attributes.position!;
+  const keep: number[] = [];
+  const a = new Vector3();
+  const b = new Vector3();
+  const c = new Vector3();
+  for (let i = 0; i + 2 < position.count; i += 3) {
+    a.fromBufferAttribute(position, i);
+    b.fromBufferAttribute(position, i + 1);
+    c.fromBufferAttribute(position, i + 2);
+    if (!drop(a, b, c)) keep.push(i, i + 1, i + 2);
+  }
+  const out = new BufferGeometry();
+  for (const name of ['position', 'normal', 'uv'] as const) {
+    const attr = src.attributes[name];
+    if (!attr) continue;
+    const size = attr.itemSize;
+    const array = new Float32Array(keep.length * size);
+    keep.forEach((v, j) => {
+      for (let k = 0; k < size; k++) array[j * size + k] = attr.array[v * size + k]!;
+    });
+    out.setAttribute(name, new Float32BufferAttribute(array, size));
+  }
+  if (src !== geometry) src.dispose();
+  geometry.dispose();
+  return out;
+}
+
+/** Sets the texture coordinates from the X and Y of the positions, mapping the box to 0..1. */
+export function planarUv<T extends BufferGeometry>(
+  geometry: T,
+  [x0, x1]: [number, number],
+  [y0, y1]: [number, number],
+): T {
+  const position = geometry.attributes.position!;
+  const uv: number[] = [];
+  for (let i = 0; i < position.count; i++)
+    uv.push((position.getX(i) - x0) / (x1 - x0), (position.getY(i) - y0) / (y1 - y0));
+  geometry.setAttribute('uv', new Float32BufferAttribute(uv, 2));
+  return geometry;
+}
+
+/**
+ * Children that appear (growing from nothing) only in the exploded view,
+ * once the pieces are mostly apart.
+ */
+export function ExplodeReveal({
+  from = 0.55,
+  position,
+  children,
+}: {
+  from?: number;
+  position?: Vec3;
+  children: ReactNode;
+}) {
+  const ref = useRef<Group>(null);
+  const { explode } = useView();
+  const apply = (group: Group) => {
+    const f = easeInOut(((explode.current ?? 0) - from) / (1 - from));
+    group.visible = f > 0.01;
+    group.scale.setScalar(Math.max(f, 0.01));
+  };
+  useLayoutEffect(() => {
+    if (ref.current) apply(ref.current);
+  });
+  useFrame(() => {
+    if (ref.current) apply(ref.current);
+  });
+  return (
+    <group ref={ref} position={position}>
+      {children}
+    </group>
+  );
+}
+
+/**
+ * A value that follows `target` smoothly (instant with reduced motion),
+ * calling `apply` while it moves and asking the canvas for frames until it
+ * settles. Starts at the target, so posters show the final state.
+ */
+export function useFollow(target: number, apply: (value: number) => void, lambda = 8) {
+  const reduced = useReducedMotion();
+  const invalidate = useThree((s) => s.invalidate);
+  const value = useRef<number | null>(null);
+  const applyRef = useRef(apply);
+  useLayoutEffect(() => {
+    applyRef.current = apply;
+    if (value.current === null) {
+      value.current = target;
+      apply(target);
+    }
+  });
+  useEffect(() => invalidate(), [target, invalidate]);
+  useFrame((_, dt) => {
+    if (value.current === null) return;
+    let v = reduced ? target : damp(value.current, target, lambda, Math.min(dt, 0.05));
+    if (Math.abs(v - target) < 1e-4) v = target;
+    value.current = v;
+    applyRef.current(v);
+    if (v !== target) invalidate();
+  });
 }

@@ -258,7 +258,7 @@ export default function Ldr(props: LdrProps) {
     (ctx, w, h) => {
       const rand = random(7 + s.passes);
       // Fired electrode paste: warm silver with some grain.
-            ctx.fillStyle = '#a9a294';
+      ctx.fillStyle = '#a9a294';
       ctx.fillRect(0, 0, w, h);
       for (let i = 0; i < 2600; i++) {
         ctx.fillStyle = rand() > 0.5 ? 'rgba(215,209,196,0.45)' : 'rgba(150,143,130,0.4)';
@@ -272,14 +272,14 @@ export default function Ldr(props: LdrProps) {
       l.lineJoin = 'miter';
       l.lineCap = 'butt';
       l.lineWidth = track.gap * pxPerMm;
-            l.strokeStyle = '#86391a';
+      l.strokeStyle = '#86391a';
       tracePath(l);
       l.stroke();
       l.globalCompositeOperation = 'source-atop';
       for (let i = 0; i < 9000; i++) {
         const v = rand();
         l.fillStyle =
-                    v > 0.66
+          v > 0.66
             ? 'rgba(176,82,32,0.55)'
             : v > 0.33
               ? 'rgba(104,40,12,0.5)'
@@ -288,7 +288,7 @@ export default function Ldr(props: LdrProps) {
         l.fillRect(rand() * w, rand() * h, sz, sz);
       }
       l.lineWidth = track.gap * pxPerMm * 0.35;
-            l.strokeStyle = 'rgba(196,96,44,0.25)';
+      l.strokeStyle = 'rgba(196,96,44,0.25)';
       tracePath(l);
       l.stroke();
       // Thin dark border where the electrode paste meets the film.
