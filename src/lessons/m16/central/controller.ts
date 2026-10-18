@@ -36,7 +36,12 @@ export const CONFIG = {
   pulsoTrava: 1,
   /** Garage light after the movement, with DIP LUZ on (s). */
   luzExtra: 60,
-  /** The running current is learned during the first part of the run (s). */
+  /**
+   * After the soft start the motor still accelerates the gate, drawing several
+   * times its running current: the central waits this long (s)…
+   */
+  esperaAprendizado: 1,
+  /** …and then learns the running current for this long (s). */
   aprendizado: 0.5,
   /** Current above the limit for this long counts as an obstacle (s). */
   persistencia: 0.25,
@@ -486,9 +491,11 @@ export function stepCentral(
   if (m.fase === 'regime') {
     e.t += dt;
     if (e.referencia === null) {
-      e.soma += inp.corrente;
-      e.amostras++;
-      if (e.t >= cfg.aprendizado) e.referencia = e.soma / e.amostras;
+      if (e.t > cfg.esperaAprendizado) {
+        e.soma += inp.corrente;
+        e.amostras++;
+      }
+      if (e.t >= cfg.esperaAprendizado + cfg.aprendizado) e.referencia = e.soma / e.amostras;
     } else if (inp.corrente > e.referencia * fatorLimite(inp.forca, cfg)) {
       e.tAcima += dt;
       if (e.tAcima + 1e-9 >= cfg.persistencia) e.sobrecarga = true;

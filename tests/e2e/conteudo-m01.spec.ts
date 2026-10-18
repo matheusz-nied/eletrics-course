@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import { expectAccessible, expectNoHorizontalOverflow, watchErrors } from './helpers';
 
 const MODULE = 'm01-eletricidade-do-zero';
@@ -21,6 +21,14 @@ async function scrollThrough(page: Page) {
   });
   await expect(page.locator('astro-island[ssr]')).toHaveCount(0);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+}
+
+/** Scrolls to a `client:visible` widget and waits until React has hydrated it. */
+async function hydrated(page: Page, widget: Locator): Promise<Locator> {
+  const island = page.locator('astro-island', { has: widget }).last();
+  await island.scrollIntoViewIfNeeded();
+  await expect(island).not.toHaveAttribute('ssr');
+  return widget;
 }
 
 /** "12,4 W" or "1,23 kW" in watts. */
@@ -84,8 +92,10 @@ test('the shower challenges stay marked in both positions', async ({ page }) => 
 test('the cord calculator shows less heat in a thicker cord', async ({ page }) => {
   const errors = watchErrors(page);
   await page.goto(LESSONS[3]!);
-  const calculator = page.getByRole('region', { name: 'Quanto esquenta a sua extensão' });
-  await calculator.scrollIntoViewIfNeeded();
+  const calculator = await hydrated(
+    page,
+    page.getByRole('region', { name: 'Quanto esquenta a sua extensão' }),
+  );
   const heat = calculator.locator('.lw__output .lw__value');
   const thin = watts(await heat.innerText());
   await calculator.locator('label', { hasText: '2,5 mm²' }).click();
@@ -96,8 +106,7 @@ test('the cord calculator shows less heat in a thicker cord', async ({ page }) =
 test('the energy cost of a winter shower is about R$ 79 a month', async ({ page }) => {
   const errors = watchErrors(page);
   await page.goto(LESSONS[4]!);
-  const cost = page.getByRole('region', { name: 'Quanto custa por mês?' });
-  await cost.scrollIntoViewIfNeeded();
+  const cost = await hydrated(page, page.getByRole('region', { name: 'Quanto custa por mês?' }));
   await expect(cost).toContainText('88 kWh');
   await expect(cost).toContainText('79,20');
   await cost.locator('label', { hasText: 'Chuveiro no verão' }).click();

@@ -159,6 +159,15 @@ Para medir quantos carros passam por uma rua, o contador precisa ficar **na** ru
   </Step>
 </Steps>
 
+É assim que o multímetro fica pronto para medir uma corrente pequena: seletor numa escala de mA e ponta vermelha no borne mA.
+
+<Model3D
+  part="multimeter"
+  props={{ mode: 'Adc200m', redJack: 'mA', reading: '48.6' }}
+  annotations
+  caption="Multímetro na escala de 200 mA, com a ponta vermelha no borne mA. Terminada a medição, ela volta para o VΩ."
+/>
+
 <Callout type="perigo" title="Nunca ligue o multímetro em corrente direto numa fonte">
 Na posição de corrente, o multímetro funciona como um pedaço de fio, para atrapalhar o mínimo possível a corrente que mede. Se você encostar as pontas nos dois polos de uma bateria ou de uma tomada, ele vira um curto-circuito: no melhor caso, queima o fusível interno; no pior, as pontas derretem e saem faíscas na sua mão. Para medir a corrente de aparelhos da tomada, use o alicate amperímetro, que abraça um só fio e mede sem abrir o circuito.
 </Callout>

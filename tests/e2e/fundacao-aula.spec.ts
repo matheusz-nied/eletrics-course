@@ -44,6 +44,8 @@ test.describe('example lesson', () => {
   test('renders formulas with KaTeX at build time', async ({ page }) => {
     await expect(page.locator('.katex').first()).toBeVisible();
     await expect(page.locator('.katex-error')).toHaveCount(0);
+    // The stylesheet matches the renderer's version, so formulas never wrap mid-symbol.
+    await expect(page.locator('.katex-html > *').first()).toHaveCSS('white-space', 'nowrap');
 
     // Display formulas can scroll sideways, so each one takes keyboard focus.
     const formulas = page.locator('.katex-display');
@@ -94,7 +96,7 @@ test.describe('example lesson', () => {
   test('shows placeholders for the interactive components still in construction', async ({
     page,
   }) => {
-    for (const stub of ['Model3D', 'Scene3D', 'WiringExercise']) {
+    for (const stub of ['Scene3D', 'WiringExercise']) {
       const box = page.locator(`[data-stub="${stub}"]`);
       await expect(box, stub).toHaveCount(1);
       await expect(box, stub).toContainText('em construção');

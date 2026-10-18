@@ -108,6 +108,15 @@ Todo fio de instalação junta os dois tipos de material:
 
 <CargaCondutorIsolante />
 
+Num fio de verdade é assim: o cobre por dentro, o PVC por fora. O botão Corte mostra os dois materiais lado a lado.
+
+<Model3D
+  part="wire"
+  props={{ section: 1.5, color: 'azul-claro', strip: 12 }}
+  cutaway
+  caption="Fio de instalação de 1,5 mm² em corte: o cobre conduz a corrente, a capa de PVC impede que ela escape."
+/>
+
 | Material | Comportamento | Onde aparece |
 | --- | --- | --- |
 | Cobre | Condutor muito bom | Fios, trilhas das placas, enrolamento do motor do portão |

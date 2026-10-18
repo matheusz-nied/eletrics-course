@@ -43,6 +43,15 @@ Faça este roteiro:
 
 O que dá para tirar daí: tensão se mede **em paralelo**, com o circuito ligado; resistência e continuidade, **com o circuito desligado**; corrente, **em série**, com a ponta vermelha no borne de corrente. Medir tensão com a ponta no borne de corrente transforma o multímetro num fio e provoca um curto-circuito ali mesmo, na sua mão.
 
+Agora um multímetro de verdade, em 3D. Gire a vista e repare nos quatro bornes embaixo do seletor: a ponta preta no COM, a vermelha no VΩ. As anotações dão o nome de cada parte.
+
+<Model3D
+  part="multimeter"
+  props={{ mode: 'Vdc20', reading: '12.48' }}
+  annotations
+  caption="Multímetro na escala de 20 V contínuos, medindo uma bateria de 12 V: ponta preta no COM, vermelha no VΩ."
+/>
+
 ### Como escolher um multímetro
 
 Três coisas importam mais que a marca:
@@ -62,6 +71,14 @@ A <Term id="chave-de-teste">chave de teste</Term> (ou caneta neon) parece uma ch
 <ChaveDeTeste />
 
 Mas espere: se a corrente passa pelo seu corpo, por que não dá choque? Por causa do resistor de valor muito alto que fica dentro dela, tipicamente perto de 1 MΩ (um milhão de ohms). Com 127 V, a corrente fica perto de 0,13 mA, abaixo do que alguém consegue sentir, como você viu na aula de segurança. É pouco, mas basta para a neon brilhar.
+
+Abra a chave de teste em 3D e veja as peças em fila dentro do cabo: a ponta, o resistor, a lâmpada neon e a mola que encosta na tampa.
+
+<Model3D
+  part="neon-tester"
+  explode
+  caption="Chave de teste desmontada: a corrente vai da ponta ao resistor, à lâmpada neon, à mola e à tampa, onde fica o seu dedo."
+/>
 
 A chave de teste é útil para achar a fase rapidamente, mas tem limites que você precisa conhecer:
 
@@ -115,6 +132,12 @@ O ferro de solda une fios e componentes eletrônicos com uma liga metálica que 
 - **Solda com fluxo** (o fio de solda tem um núcleo de resina que limpa o metal na hora de soldar).
 - **Suporte** para apoiar o ferro quente, e uma **esponja úmida** ou palha de latão para limpar a ponta.
 - **Sugador de solda** ou malha dessoldadora, para desfazer soldas.
+
+<Model3D
+  part="soldering-iron"
+  props={{ temperature: 350, stand: true, solderWire: true }}
+  caption="Ferro de solda no suporte, com o fio de solda ao lado. Use a vista explodida para ver a resistência de aquecimento que fica dentro da haste."
+/>
 
 A ponta trabalha tipicamente entre 300 °C e 400 °C. Nunca pegue o ferro pela haste, nunca solde um circuito ligado na energia e trabalhe num lugar ventilado: a fumaça do fluxo irrita. Muitas soldas têm chumbo, por isso lave as mãos depois e não coma na bancada. A técnica de soldar e dessoldar está na aula <LinkAula id="m14-placas/05-soldagem-e-dessoldagem" />.
 

@@ -20,7 +20,11 @@ export interface Props {
   cutaway?: boolean;
   annotations?: boolean;
   height?: number;
-  /** What the illustration shows, for screen readers (required). */
+  /**
+   * What the SVG illustration shows, for screen readers (required). The 3D
+   * view describes itself from its props, so the description always matches
+   * the model.
+   */
   alt: string;
   /** Caption under the illustration. */
   caption?: string;
@@ -63,6 +67,7 @@ if (!has3D && !Astro.slots.has('default')) {
     cutaway={cutaway}
     annotations={annotations}
     height={height}
+    caption={caption}
   />
 ) : (
   <figure class="part3d" data-part={part}>

@@ -1,7 +1,8 @@
 /**
  * Digital multimeter display for a probe: 7-segment LCD, autorange, CC/CA
- * modes (average or true RMS over the last 100 ms of simulated time), like
- * the meter the student holds. The reading is also given as pt-BR text.
+ * modes (average or true RMS over the last 100 ms of simulated time; in the
+ * quasi-static analysis, the DC and AC parts the engine gives), like the
+ * meter the student holds. The reading is also given as pt-BR text.
  */
 import { useMemo, useState } from 'react';
 import type { ProbeDoc } from '../../engine/contract';
@@ -9,7 +10,7 @@ import { formatSI } from '../format';
 import { probeMeta } from '../readouts';
 import { probeChannel } from '../runtime/controller';
 import { useSim, useSimState } from '../ui/context';
-import { dcAndRms, dmmReading, meterValue } from './dmm';
+import { dcAndRms, dmmReading, meterValue, quasiStaticReading } from './dmm';
 
 const SEGMENTS: Record<string, string> = {
   a: '4,1 16,1 14,4.2 6,4.2',
@@ -93,6 +94,12 @@ export function Multimeter({ probe, defaultMode }: { probe: ProbeDoc; defaultMod
   const value = useMemo(() => {
     const now = slow ? sim.probeValue(probe, slow) : Number.NaN;
     if (sim.isDc || !canAc) return now;
+    const part = slow ? quasiStaticReading(slow.readouts, probe.id, mode) : undefined;
+    if (part !== undefined) return part;
+    // A current a device reports itself (the common of a 3-pin motor) has no
+    // DC/AC split: it is already the RMS. Its history is flat, so the AC
+    // coupling below would read zero.
+    if (sim.doc.analysis.kind === 'quasi-static') return now;
     const h = sim.history;
     const end = h.lastT();
     if (!Number.isFinite(end)) return now;
