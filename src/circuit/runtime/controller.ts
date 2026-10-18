@@ -18,6 +18,7 @@ import { deviceInfo, engineFor, frameSamples, type EngineApi, type FrameSamples 
 import { elementParams } from '../geometry';
 import { buildSchematicModel, type SchematicModel } from '../schematic/model';
 import { History } from './history';
+import { sweepOf, type Sweep } from './sweep';
 
 export interface ViewOptions {
   /** Moving dots along the wires. */
@@ -43,8 +44,8 @@ export interface SimState {
   /** Latest frame, a few times per second: for numbers people read. */
   slow: SimFrame | null;
   events: (SimEvent & { key: number })[];
-  /** Results of an AC sweep (one frame per frequency). */
-  sweep: SimFrame[] | null;
+  /** Result of an AC sweep. */
+  sweep: Sweep | null;
   error: string | null;
   view: ViewOptions;
   sound: boolean;
@@ -375,6 +376,6 @@ export class SimController {
     if (!this.handle) return;
     const generation = this.generation;
     const frames = await this.handle.runUntil(Number.POSITIVE_INFINITY);
-    if (generation === this.generation) this.store.setState({ sweep: frames });
+    if (generation === this.generation) this.store.setState({ sweep: sweepOf(frames) });
   }
 }

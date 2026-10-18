@@ -8,6 +8,7 @@ import { useShallow } from 'zustand/react/shallow';
 import type { ControlDoc, ParamValue, SimFrame } from '../../engine/contract';
 import type { ElementView } from '../schematic/model';
 import {
+  engineToggle,
   formatControlValue,
   fromFraction,
   isOn,
@@ -47,6 +48,8 @@ export const ElementGlyph = memo(function ElementGlyph({
   const live = useSimState(useShallow((s) => pickLive(s.frame, id, view.symbol.live)));
   const focused = useSimState((s) => s.focus === id);
   const control = primaryControl(view.controls);
+  const engine = useSimState((s) => (control ? engineToggle(s.frame, id, control) : undefined));
+  const toggleOn = control ? (engine ?? isOn(params[control.param])) : false;
   const drag = useRef<{ x: number; f: number; pointer: number } | null>(null);
 
   const set = useCallback(
@@ -94,7 +97,7 @@ export const ElementGlyph = memo(function ElementGlyph({
       sim.setFocus(focused ? null : id);
       return;
     }
-    if (control.kind === 'toggle') set(control, !isOn(params[control.param]));
+    if (control.kind === 'toggle') set(control, !toggleOn);
     else if (control.kind === 'select' && control.options?.length) {
       const i = control.options.findIndex((o) => o.value === params[control.param]);
       set(control, control.options[(i + 1) % control.options.length]!.value);
@@ -154,7 +157,7 @@ export const ElementGlyph = memo(function ElementGlyph({
     a11y['aria-label'] = control.label;
     if (control.kind === 'toggle') {
       a11y.role = 'switch';
-      a11y['aria-checked'] = isOn(value);
+      a11y['aria-checked'] = toggleOn;
     } else if (control.kind === 'momentary') {
       a11y.role = 'button';
       a11y['aria-pressed'] = isOn(value);

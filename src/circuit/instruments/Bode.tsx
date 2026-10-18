@@ -4,10 +4,10 @@
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type uPlot from 'uplot';
-import type { SimFrame } from '../../engine/contract';
 import { SERIES_COLORS } from '../colors';
 import { formatNumber, formatSI } from '../format';
 import { probeMeta } from '../readouts';
+import type { Sweep } from '../runtime/sweep';
 import { useSim, useSimState } from '../ui/context';
 import { axisValues, useUPlot, type ChartColors } from './chart';
 
@@ -19,19 +19,18 @@ export interface BodeCurve {
   phase: number[];
 }
 
-/** Gain (dB) and phase (°) of a probe along the sweep frames. */
-export function bodeCurve(frames: SimFrame[], probe: string): BodeCurve {
-  const freq: number[] = [];
-  const db: number[] = [];
-  const phase: number[] = [];
-  for (const f of frames) {
-    const mag = f.readouts[probe];
-    const ph = f.readouts[`${probe}.phase`];
-    freq.push(f.t);
-    db.push(typeof mag === 'number' && mag > 0 ? 20 * Math.log10(mag) : Number.NaN);
-    phase.push(typeof ph === 'number' ? ph : Number.NaN);
-  }
-  return { freq, db, phase };
+/** Gain (dB) and phase (°) of a probe along the sweep. */
+export function bodeCurve(sweep: Sweep, probe: string): BodeCurve {
+  const magnitude = sweep.magnitude[probe] ?? [];
+  const phase = sweep.phase[probe] ?? [];
+  return {
+    freq: [...sweep.f],
+    db: sweep.f.map((_, i) => {
+      const m = magnitude[i];
+      return m !== undefined && m > 0 ? 20 * Math.log10(m) : Number.NaN;
+    }),
+    phase: sweep.f.map((_, i) => phase[i] ?? Number.NaN),
+  };
 }
 
 /**

@@ -6,10 +6,10 @@ export default defineSymbol({
   type: 'capacitor',
   body: 10,
   half: 12,
-  live: ['burned', 'damaged'],
+  live: ['burned', 'damaged', 'bulged'],
   draw: (ctx) => {
     const polarized = isOn(ctx.params.polarized);
-    const swollen = isBurned(ctx.live);
+    const swollen = isBurned(ctx.live) || ctx.live.bulged === true;
     return (
       <>
         <path d="M-5 0H-3M3 0H5" />

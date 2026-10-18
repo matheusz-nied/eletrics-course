@@ -30,11 +30,10 @@ const QUANTITIES: Record<string, QuantityMeta> = {
   closed: { label: 'Contato', unit: '', words: ['fechado', 'aberto'] },
   blown: { label: 'Fusível', unit: '', words: ['queimado', 'inteiro'] },
   damaged: { label: 'Estado', unit: '', words: ['danificado', 'normal'] },
-  tripped: { label: 'Disjuntor', unit: '', words: ['desarmado', 'armado'] },
+  tripped: { label: 'Proteção', unit: '', words: ['desarmou', 'armada'] },
   humming: { label: 'Zumbido', unit: '', words: ['sim', 'não'] },
   sounding: { label: 'Som', unit: '', words: ['tocando', 'em silêncio'] },
   blocked: { label: 'Feixe', unit: '', words: ['interrompido', 'livre'] },
-  danger: { label: 'Risco', unit: '', words: ['perigoso', 'baixo'] },
   open: { label: 'Trava', unit: '', words: ['aberta', 'fechada'] },
   output: { label: 'Saída', unit: '', words: ['alta (1)', 'baixa (0)'] },
   burned: { label: 'Estado', unit: '', words: ['queimado', 'normal'] },
@@ -43,6 +42,33 @@ const QUANTITIES: Record<string, QuantityMeta> = {
   resistance: { label: 'Resistência', unit: 'Ω' },
   charge: { label: 'Carga', unit: 'C' },
   energy: { label: 'Energia armazenada', unit: 'J' },
+};
+
+/**
+ * Words for readouts the engine also describes (`readoutInfo`), used only when
+ * it does not: the stand-in engine has no readoutInfo.
+ */
+const FALLBACK: Record<string, QuantityMeta> = {
+  energized: { label: 'Bobina', unit: '', words: ['energizada', 'sem corrente'] },
+  welded: { label: 'Contatos colados', unit: '', words: ['sim', 'não'] },
+  coilCurrent: { label: 'Corrente na bobina', unit: 'A' },
+  coilVoltage: { label: 'Tensão na bobina', unit: 'V' },
+  bulged: { label: 'Estado', unit: '', words: ['estufado', 'normal'] },
+  saturated: { label: 'Saída saturada', unit: '', words: ['sim', 'não'] },
+  currentRms: { label: 'Corrente eficaz pelo corpo', unit: 'A' },
+  impedance: { label: 'Impedância do corpo', unit: 'Ω' },
+  heat: { label: 'Aquecimento (proteção térmica)', unit: '%', scale: 100 },
+  residual: { label: 'Corrente de fuga', unit: 'A' },
+  speed: { label: 'Velocidade angular', unit: 'rad/s' },
+  zone: { label: 'Zona (IEC 60479)', unit: '' },
+  effect: { label: 'Efeito no corpo', unit: '' },
+  worst: { label: 'Pior zona atingida', unit: '' },
+  high: { label: 'Saída', unit: '', words: ['alta (1)', 'baixa (0)'] },
+  discharging: { label: 'Descarga (DIS)', unit: '', words: ['conduzindo', 'aberta'] },
+  vout: { label: 'Tensão de saída', unit: 'V' },
+  a: { label: 'Entrada A', unit: '', words: ['alta (1)', 'baixa (0)'] },
+  b: { label: 'Entrada B', unit: '', words: ['alta (1)', 'baixa (0)'] },
+  y: { label: 'Saída Y', unit: '', words: ['alta (1)', 'baixa (0)'] },
 };
 
 /**
@@ -58,8 +84,13 @@ export function quantityMeta(quantity: string, info?: DeviceInfo): QuantityMeta 
   const own = QUANTITIES[quantity];
   if (own) return own;
   const engine = info?.readoutInfo?.[quantity];
-  if (engine) return { label: engine.label, unit: engine.unit ?? '', words: ['sim', 'não'] };
-  return { label: quantity, unit: '' };
+  const fallback = FALLBACK[quantity];
+  if (engine) {
+    // the engine's label; a unitless fraction is shown as % like the course does
+    if (!engine.unit && fallback) return { ...fallback, label: engine.label };
+    return { label: engine.label, unit: engine.unit ?? '', words: ['sim', 'não'] };
+  }
+  return fallback ?? { label: quantity, unit: '' };
 }
 
 /** Splits "Q1.pin.c" into element "Q1" and quantity "pin.c". */

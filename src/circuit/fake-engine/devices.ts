@@ -40,6 +40,8 @@ export interface Device {
   accept?(c: DevCtx): void;
   /** Device-specific readouts ("brightness", "blown"…). */
   readouts?(out: Record<string, number | boolean | string>, c: DevCtx): void;
+  /** Reacts to a parameter the student changed (re-arming a breaker). */
+  onParam?(param: string, value: ParamValue): void;
   reset(): void;
 }
 
@@ -47,7 +49,8 @@ const VT = 0.025852;
 const G_ON = 1e3; // 1 mΩ
 const G_OFF = 1e-12;
 
-const v = (c: DevCtx, i: number) => (i < 0 ? 0 : c.x[i]!);
+/** Node voltage; -1 and indices past the unknowns are the reference node. */
+const v = (c: DevCtx, i: number) => (i < 0 || i >= c.x.length ? 0 : c.x[i]!);
 const num = (p: ParamValue | undefined, d: number) => (typeof p === 'number' ? p : d);
 const bool = (p: ParamValue | undefined) => p === true || p === 'true' || p === 1;
 
@@ -203,7 +206,7 @@ function capacitorFactory(b: Base): Device {
       }
     },
     readouts(out) {
-      out.damaged = damaged;
+      out.bulged = damaged;
     },
     reset() {
       vPrev = 0;
@@ -336,9 +339,13 @@ function fuseFactory(b: Base): Device {
   });
 }
 
+/** Instantaneous (magnetic) trip of each curve, in multiples of the rated current. */
+const BREAKER_CURVE: Record<string, number> = { B: 4, C: 7.5, D: 15 };
+
 function breakerFactory(b: Base): Device {
   let heat = 0;
   let tripped = false;
+  const limit = () => 20 * num(b.params.rating, 10) ** 2;
   return dev(b, {
     stamp(st) {
       const on = b.params.closed !== false && !tripped;
@@ -346,16 +353,18 @@ function breakerFactory(b: Base): Device {
     },
     accept(c) {
       if (tripped || b.params.closed === false) return;
-      const rating = num(b.params.rating, 16);
+      const rating = num(b.params.rating, 10);
       const i = (v(c, b.pins.a!) - v(c, b.pins.b!)) * G_ON;
       const dt = c.dt || 0.016;
-      const magnetic = (b.params.curve === 'B' ? 4 : 7) * rating;
+      const magnetic = (BREAKER_CURVE[String(b.params.curve)] ?? 7.5) * rating;
       heat =
         Math.abs(i) > 1.13 * rating
           ? heat + (i * i - rating * rating) * dt
           : Math.max(0, heat - rating * rating * dt);
-      if (Math.abs(i) > magnetic || heat > 20 * rating * rating) {
+      if (Math.abs(i) > magnetic || heat > limit()) {
         tripped = true;
+        // the handle drops: the student switches it back on to re-arm
+        b.params.closed = false;
         emit(
           c,
           b.id,
@@ -365,11 +374,79 @@ function breakerFactory(b: Base): Device {
       }
     },
     readouts(out) {
+      out.closed = b.params.closed !== false && !tripped;
       out.tripped = tripped;
+      out.heat = Math.min(1, heat / limit());
+    },
+    onParam(param, value) {
+      if (param === 'closed' && value === true) {
+        tripped = false;
+        heat = 0;
+      }
     },
     reset() {
       heat = 0;
       tripped = false;
+    },
+  });
+}
+
+/** Residual-current device (DR): opens both poles when line and neutral currents differ. */
+function rcdFactory(b: Base): Device {
+  let tripped = false;
+  let residual = 0;
+  let over = 0;
+  return dev(b, {
+    stamp(st) {
+      const on = b.params.closed !== false && !tripped;
+      const g = on ? G_ON : G_OFF;
+      st.g(b.pins.l1!, b.pins.l2!, g);
+      st.g(b.pins.n1!, b.pins.n2!, g);
+    },
+    accept(c) {
+      if (tripped || b.params.closed === false) {
+        residual = 0;
+        return;
+      }
+      const il = (v(c, b.pins.l1!) - v(c, b.pins.l2!)) * G_ON;
+      const iN = (v(c, b.pins.n1!) - v(c, b.pins.n2!)) * G_ON;
+      // the test button leaks about 1,5 × IΔn around the core while the supply is on
+      const sensitivity = num(b.params.sensitivity, 0.03);
+      const powered = Math.abs(v(c, b.pins.l1!) - v(c, b.pins.n1!)) > 10;
+      const test = bool(b.params.test) && powered ? 1.5 * sensitivity : 0;
+      const dt = c.dt || 0.016;
+      // an ac residual is followed by its peak, held with a slow decay
+      residual = Math.max(Math.abs(il + iN) + test, residual * Math.exp(-dt / 0.03));
+      over = residual > 0.75 * sensitivity ? over + dt : 0;
+      if (over > 0.025) {
+        tripped = true;
+        b.params.closed = false;
+        emit(
+          c,
+          b.id,
+          'tripped',
+          test > 0
+            ? `O DR ${b.label} desarmou pelo botão de teste.`
+            : `O DR ${b.label} desarmou: corrente de fuga de ${A(residual)}, sensibilidade ${A(sensitivity)}.`,
+        );
+      }
+    },
+    readouts(out) {
+      out.closed = b.params.closed !== false && !tripped;
+      out.tripped = tripped;
+      out.residual = residual;
+    },
+    onParam(param, value) {
+      if (param === 'closed' && value === true) {
+        tripped = false;
+        residual = 0;
+        over = 0;
+      }
+    },
+    reset() {
+      tripped = false;
+      residual = 0;
+      over = 0;
     },
   });
 }
@@ -392,6 +469,7 @@ const LED_VF: Record<string, number> = {
   azul: 3.0,
   white: 3.0,
   branco: 3.0,
+  infrared: 1.2,
 };
 
 function diodeFactory(model: (b: Base) => DiodeModel, kind: 'diode' | 'led' | 'zener'): Factory {
@@ -450,7 +528,7 @@ function diodeFactory(model: (b: Base) => DiodeModel, kind: 'diode' | 'led' | 'z
         iLast = id;
         gdOp = gd;
         if (damaged || kind !== 'led') return;
-        const max = num(b.params.maxCurrent, 0.03);
+        const max = num(b.params.imax, 0.03);
         over = id > 1.5 * max ? over + (c.dt || 0.016) : 0;
         if (over > 0.03) {
           damaged = true;
@@ -486,10 +564,7 @@ function diodeFactory(model: (b: Base) => DiodeModel, kind: 'diode' | 'led' | 'z
 }
 
 const diode = diodeFactory(() => ({ is: 1e-14, n: 1 }), 'diode');
-const zener = diodeFactory(
-  (b) => ({ is: 1e-14, n: 1, vz: num(b.params.breakdownVoltage, 5.1) }),
-  'zener',
-);
+const zener = diodeFactory((b) => ({ is: 1e-14, n: 1, vz: num(b.params.voltage, 5.1) }), 'zener');
 const led = diodeFactory((b) => {
   const vf = LED_VF[String(b.params.color ?? 'red')] ?? 2;
   const n = 2;
@@ -521,35 +596,82 @@ function spdtFactory(b: Base): Device {
   });
 }
 
+/**
+ * Relay: coil (R in series with L) pulls the armature when its current passes
+ * 70 % of the nominal and drops it below 30 %; the armature takes `travelTime`
+ * to cross, and the contacts break before they make.
+ */
 function relayFactory(b: Base): Device {
-  let closed = false;
-  let timer = 0;
+  let energized = false;
+  let position = 0; // 0 = at rest (COM–NC), 1 = pulled (COM–NO)
+  let iCoil = 0;
+  let vCoil = 0;
+  let welded = false;
+  let over = 0;
+  const rc = () => Math.max(num(b.params.coilResistance, 400), 1e-3);
+  const nc = () => !welded && position <= 0;
+  const no = () => welded || position >= 1;
   return dev(b, {
-    stamp(st) {
-      const rc = Math.max(num(b.params.coilResistance, 400), 1e-3);
-      st.g(b.pins.coil1!, b.pins.coil2!, 1 / rc);
-      st.g(b.pins.com!, b.pins.nc!, closed ? G_OFF : G_ON);
-      st.g(b.pins.com!, b.pins.no!, closed ? G_ON : G_OFF);
+    stamp(st, c) {
+      const R = rc();
+      const L = Math.max(num(b.params.coilInductance, 0.15), 0);
+      const [c1, c2] = [b.pins.coil1!, b.pins.coil2!];
+      if (c.mode === 'tran' && L > 0) {
+        const k = L / c.dt;
+        const g = 1 / (R + k);
+        st.g(c1, c2, g);
+        st.i(c1, c2, g * k * iCoil);
+      } else st.g(c1, c2, 1 / R);
+      st.g(b.pins.com!, b.pins.nc!, nc() ? G_ON : G_OFF);
+      st.g(b.pins.com!, b.pins.no!, no() ? G_ON : G_OFF);
     },
     accept(c) {
-      const rc = Math.max(num(b.params.coilResistance, 400), 1e-3);
-      const i = Math.abs(v(c, b.pins.coil1!) - v(c, b.pins.coil2!)) / rc;
-      const nominal = num(b.params.coilVoltage, 12) / rc;
-      const want = closed ? i > 0.3 * nominal : i > 0.7 * nominal;
-      if (want !== closed) {
-        timer += c.dt || 0.016;
-        if (timer >= (closed ? 0.005 : 0.008)) {
-          closed = want;
-          timer = 0;
-        }
-      } else timer = 0;
+      const R = rc();
+      const L = Math.max(num(b.params.coilInductance, 0.15), 0);
+      const vc = v(c, b.pins.coil1!) - v(c, b.pins.coil2!);
+      vCoil = vc;
+      if (c.mode === 'tran' && L > 0) {
+        const k = L / c.dt;
+        iCoil = (vc + k * iCoil) / (R + k);
+      } else iCoil = vc / R;
+      const nominal = num(b.params.coilVoltage, 12) / R;
+      energized = energized ? Math.abs(iCoil) > 0.3 * nominal : Math.abs(iCoil) > 0.7 * nominal;
+      const dt = c.dt || 0.016;
+      const travel = Math.max(num(b.params.travelTime, 0.004), 1e-6);
+      position = Math.min(1, Math.max(0, position + ((energized ? 1 : -1) * dt) / travel));
+      if (welded) return;
+      // contact current far above its rating for a while welds the contacts
+      const rating = num(b.params.contactRating, 10);
+      const i = Math.max(
+        Math.abs(v(c, b.pins.com!) - v(c, b.pins.no!)) * (no() ? G_ON : 0),
+        Math.abs(v(c, b.pins.com!) - v(c, b.pins.nc!)) * (nc() ? G_ON : 0),
+      );
+      over = i > 2 * rating ? over + dt : 0;
+      if (over > 0.05) {
+        welded = true;
+        emit(
+          c,
+          b.id,
+          'damaged',
+          `Os contatos do relé ${b.label} colaram: corrente de ${A(i)}, máximo ${A(rating)}.`,
+        );
+      }
     },
     readouts(out) {
-      out.closed = closed;
+      out.closed = no();
+      out.energized = energized;
+      out.position = welded ? 1 : position;
+      out.coilCurrent = iCoil;
+      out.coilVoltage = vCoil;
+      out.welded = welded;
     },
     reset() {
-      closed = false;
-      timer = 0;
+      energized = false;
+      position = 0;
+      iCoil = 0;
+      vCoil = 0;
+      welded = false;
+      over = 0;
     },
   });
 }
@@ -581,6 +703,7 @@ function dcMotorFactory(b: Base): Device {
     },
     readouts(out) {
       out.rpm = (omega * 60) / (2 * Math.PI);
+      out.speed = omega;
       out.torque = torque;
       out.burned = false;
     },
@@ -614,13 +737,15 @@ function transformerFactory(b: Base): Device {
 
 function gateFactory(fn: (a: boolean, b: boolean) => boolean, inputs: 1 | 2): Factory {
   return (b) => {
+    let ia = false;
+    let ib = false;
     let out = false;
     return dev(b, {
       nonlinear: true,
       stamp(st, c) {
         const vcc = num(b.params.vcc, 5);
-        const ia = v(c, b.pins.a!) > vcc / 2;
-        const ib = inputs === 2 ? v(c, b.pins.b!) > vcc / 2 : false;
+        ia = v(c, b.pins.a!) > vcc / 2;
+        ib = inputs === 2 ? v(c, b.pins.b!) > vcc / 2 : false;
         const next = fn(ia, ib);
         if (next !== out) c.limited = true;
         out = next;
@@ -630,27 +755,40 @@ function gateFactory(fn: (a: boolean, b: boolean) => boolean, inputs: 1 | 2): Fa
         if (c.mode !== 'ac') st.i(-1, b.pins.y!, g * (out ? vcc : 0));
       },
       readouts(o) {
-        o.output = out;
+        o.a = ia;
+        if (inputs === 2) o.b = ib;
+        o.y = out;
       },
       reset() {
+        ia = false;
+        ib = false;
         out = false;
       },
     });
   };
 }
 
+/**
+ * Op-amp: high gain between `inp` and `inn`, output limited to `headroom`
+ * inside the vcc/vee rails.
+ */
 function opampFactory(b: Base): Device {
   let region = 0; // -1 low rail, 0 linear, 1 high rail
+  let vout = 0;
+  const rails = () => {
+    const h = Math.max(num(b.params.headroom, 1.5), 0);
+    return [num(b.params.vee, -12) + h, num(b.params.vcc, 12) - h] as const;
+  };
   return dev(b, {
     branches: 1,
     nonlinear: true,
     stamp(st, c) {
-      const vs = num(b.params.supply, 15);
+      const [low, high] = rails();
       const gain = 1e5;
       const k = this.branch;
       const out = b.pins.out!;
-      const vd = v(c, b.pins.inp!) - v(c, b.pins.inn!);
-      const next = gain * vd > vs ? 1 : gain * vd < -vs ? -1 : 0;
+      const vo = gain * (v(c, b.pins.inp!) - v(c, b.pins.inn!));
+      const next = vo > high ? 1 : vo < low ? -1 : 0;
       if (next !== region) c.limited = true;
       region = next;
       st.m(out, k, 1);
@@ -658,10 +796,18 @@ function opampFactory(b: Base): Device {
       if (region === 0) {
         st.m(k, b.pins.inp!, -gain);
         st.m(k, b.pins.inn!, gain);
-      } else st.rhs(k, c.mode === 'ac' ? 0 : region * vs);
+      } else st.rhs(k, c.mode === 'ac' ? 0 : region > 0 ? high : low);
+    },
+    accept(c) {
+      vout = v(c, b.pins.out!);
+    },
+    readouts(out) {
+      out.vout = vout;
+      out.saturated = region !== 0;
     },
     reset() {
       region = 0;
+      vout = 0;
     },
   });
 }
@@ -710,26 +856,85 @@ function dipFactory(b: Base): Device {
   });
 }
 
+/**
+ * Zones of IEC 60479-1 for long contact (the worst case), by rms current:
+ * thresholds of the zone boundaries for ac (15–100 Hz) and dc.
+ */
+const BODY_ZONES = {
+  AC: [0.0005, 0.01, 0.04],
+  DC: [0.002, 0.025, 0.14],
+};
+const BODY_EFFECTS = [
+  'Imperceptível ou leve percepção, sem reação',
+  'Formigamento e contrações involuntárias, sem efeito perigoso',
+  'Contrações musculares fortes: difícil soltar e respirar',
+  'Risco de fibrilação ventricular e parada cardíaca',
+];
+
+/**
+ * Body impedance (Ω) hand to hand, about 50 % of people at mains voltage
+ * (IEC 60479-1), and the share left by each current path.
+ */
+const BODY_SKIN: Record<string, number> = { dry: 1500, wet: 1000 };
+const BODY_PATH: Record<string, number> = { 'hand-hand': 1, 'hand-feet': 0.75, 'hands-feet': 0.5 };
+
 function humanFactory(b: Base): Device {
-  let warned = false;
-  let iLast = 0;
+  const impedance = () =>
+    (BODY_SKIN[String(b.params.skin)] ?? 1500) * (BODY_PATH[String(b.params.path)] ?? 1);
+  let rms = 0;
+  let peak = 0;
+  let flipT = -1;
+  let sign = 0;
+  let level = 0;
+  let worst = '';
+  let worstLevel = -1;
+  let kind: 'AC' | 'DC' = 'DC';
+  const zone = () => `${kind}-${level + 1}`;
   return dev(b, {
     stamp(st) {
-      st.g(b.pins.a!, b.pins.b!, 1 / Math.max(num(b.params.resistance, 1000), 1));
+      st.g(b.pins.a!, b.pins.b!, 1 / impedance());
     },
     accept(c) {
-      iLast = (v(c, b.pins.a!) - v(c, b.pins.b!)) / Math.max(num(b.params.resistance, 1000), 1);
-      if (!warned && Math.abs(iLast) > 0.03) {
-        warned = true;
-        emit(c, b.id, 'warning', `Corrente de ${A(iLast)} pelo corpo: risco de morte.`);
+      const i = (v(c, b.pins.a!) - v(c, b.pins.b!)) / impedance();
+      const dt = c.dt || 0.016;
+      const s = Math.sign(i);
+      if (s !== 0 && sign !== 0 && s !== sign) flipT = c.t;
+      if (s !== 0) sign = s;
+      // alternating when the current changed direction in the last 50 ms
+      kind = c.mode === 'tran' && flipT >= 0 && c.t - flipT < 0.05 ? 'AC' : 'DC';
+      peak = Math.max(Math.abs(i), peak * Math.exp(-dt / 0.05));
+      rms = kind === 'AC' ? peak / Math.SQRT2 : Math.abs(i);
+      const limits = BODY_ZONES[kind];
+      level = limits.filter((x) => rms >= x).length;
+      if (level > worstLevel) {
+        worstLevel = level;
+        worst = zone();
+        if (level >= 2) {
+          emit(
+            c,
+            b.id,
+            'warning',
+            `Corrente de ${A(rms)} pelo corpo (zona ${worst}): ${BODY_EFFECTS[level]!.toLowerCase()}.`,
+          );
+        }
       }
     },
     readouts(out) {
-      out.danger = Math.abs(iLast) > 0.03;
+      out.currentRms = rms;
+      out.impedance = impedance();
+      out.zone = zone();
+      out.effect = BODY_EFFECTS[level]!;
+      out.worst = worst || zone();
     },
     reset() {
-      warned = false;
-      iLast = 0;
+      rms = 0;
+      peak = 0;
+      flipT = -1;
+      sign = 0;
+      level = 0;
+      worst = '';
+      worstLevel = -1;
+      kind = 'DC';
     },
   });
 }
@@ -785,6 +990,7 @@ export const FACTORIES: Record<string, Factory> = {
   lamp: lampFactory,
   fuse: fuseFactory,
   breaker: breakerFactory,
+  rcd: rcdFactory,
   diode,
   led,
   zener,

@@ -14,16 +14,25 @@ const SCALE_TWO = 1.4;
 const ACTIVE: Record<string, number | boolean | string> = {
   brightness: 1,
   closed: true,
+  energized: true,
   actuated: true,
   rpm: 1200,
   direction: 1,
   humming: false,
   sounding: true,
-  output: true,
   open: true,
   position: 0.6,
   blocked: true,
-  danger: true,
+  a: true,
+  b: false,
+  y: true,
+  high: true,
+  zone: 'AC-4',
+};
+
+/** Active state of a type when the shared one does not fit (armature fully pulled). */
+const ACTIVE_BY_TYPE: Record<string, Record<string, number | boolean | string>> = {
+  'relay-spdt': { position: 1 },
 };
 
 const BROKEN: Record<string, number | boolean | string> = {
@@ -31,6 +40,9 @@ const BROKEN: Record<string, number | boolean | string> = {
   damaged: true,
   blown: true,
   tripped: true,
+  closed: false,
+  welded: true,
+  bulged: true,
 };
 
 function Glyph({ type, state }: { type: string; state: 'rest' | 'active' | 'broken' }) {
@@ -38,7 +50,8 @@ function Glyph({ type, state }: { type: string; state: 'rest' | 'active' | 'brok
   const el: ElementDoc = { id: 'X1', type, at: [0, 0] };
   const info = deviceInfo(type, el.params);
   const params = elementParams(el, info);
-  const live = state === 'active' ? ACTIVE : state === 'broken' ? BROKEN : {};
+  const live =
+    state === 'active' ? { ...ACTIVE, ...ACTIVE_BY_TYPE[type] } : state === 'broken' ? BROKEN : {};
   if (state === 'active') {
     for (const k of ['closed', 'pressed', 'actuated', 'fitted', 'blocked'])
       if (k in params) params[k] = !params[k];

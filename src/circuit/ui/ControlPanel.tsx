@@ -1,6 +1,13 @@
 import { useId, type PointerEvent } from 'react';
 import type { ControlDoc, ElementDoc, ParamValue } from '../../engine/contract';
-import { formatControlValue, fromFraction, isOn, sliderRange, toFraction } from './control-utils';
+import {
+  engineToggle,
+  formatControlValue,
+  fromFraction,
+  isOn,
+  sliderRange,
+  toFraction,
+} from './control-utils';
 import { useSim, useSimState } from './context';
 
 const RESOLUTION = 1000;
@@ -9,10 +16,11 @@ function Control({ el, c }: { el: ElementDoc; c: ControlDoc }) {
   const sim = useSim();
   const id = useId();
   const value = useSimState((s) => s.params[el.id]?.[c.param]);
+  const engine = useSimState((s) => engineToggle(s.frame, el.id, c));
   const set = (v: ParamValue) => sim.setParam(el.id, c.param, v);
 
   if (c.kind === 'toggle') {
-    const on = isOn(value);
+    const on = engine ?? isOn(value);
     return (
       <div className="sim-control">
         <span className="sim-control__label" id={id}>

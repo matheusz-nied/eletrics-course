@@ -130,7 +130,7 @@ const DEVICES: DeviceInfo[] = [
       polarized: { default: false, label: 'Polarizado (eletrolítico)' },
       ic: { default: 0, label: 'Tensão inicial', unit: 'V' },
     },
-    ['damaged'],
+    ['bulged'],
   ),
   two('inductor', 'Indutor (bobina)', {
     inductance: { default: 1e-3, label: 'Indutância', unit: 'H', min: 1e-12 },
@@ -163,7 +163,7 @@ const DEVICES: DeviceInfo[] = [
     ['blown'],
   ),
 
-  // Nível 2
+  // Nível 2: same names as the real engine's level 2 (pins, params, readouts)
   two('diode', 'Diodo', {}, ['burned']),
   two(
     'led',
@@ -172,8 +172,16 @@ const DEVICES: DeviceInfo[] = [
       color: {
         default: 'red',
         label: 'Cor',
+        options: [
+          { value: 'red', label: 'Vermelho' },
+          { value: 'yellow', label: 'Amarelo' },
+          { value: 'green', label: 'Verde' },
+          { value: 'blue', label: 'Azul' },
+          { value: 'white', label: 'Branco' },
+          { value: 'infrared', label: 'Infravermelho' },
+        ],
       },
-      maxCurrent: { default: 0.03, label: 'Corrente máxima', unit: 'A', min: 0 },
+      imax: { default: 0.03, label: 'Corrente máxima', unit: 'A', min: 0 },
     },
     ['brightness', 'burned'],
   ),
@@ -181,7 +189,7 @@ const DEVICES: DeviceInfo[] = [
     'zener',
     'Diodo zener',
     {
-      breakdownVoltage: { default: 5.1, label: 'Tensão zener', unit: 'V', min: 0 },
+      voltage: { default: 5.1, label: 'Tensão zener', unit: 'V', min: 0 },
     },
     ['burned'],
   ),
@@ -190,7 +198,7 @@ const DEVICES: DeviceInfo[] = [
     'Transistor NPN',
     { b: [-2, 0], c: [1, -2], e: [1, 2] },
     {
-      beta: { default: 100, label: 'Ganho (β)', min: 1 },
+      beta: { default: 200, label: 'Ganho (β)', min: 1 },
     },
     ['burned'],
   ),
@@ -199,7 +207,7 @@ const DEVICES: DeviceInfo[] = [
     'Transistor PNP',
     { b: [-2, 0], c: [1, -2], e: [1, 2] },
     {
-      beta: { default: 100, label: 'Ganho (β)', min: 1 },
+      beta: { default: 200, label: 'Ganho (β)', min: 1 },
     },
     ['burned'],
   ),
@@ -208,16 +216,18 @@ const DEVICES: DeviceInfo[] = [
     'MOSFET canal N',
     { g: [-2, 0], d: [1, -2], s: [1, 2] },
     {
-      threshold: { default: 2, label: 'Tensão de limiar', unit: 'V' },
+      vth: { default: 2.5, label: 'Tensão de limiar', unit: 'V' },
     },
+    ['burned'],
   ),
   fixed(
     'pmos',
     'MOSFET canal P',
     { g: [-2, 0], d: [1, -2], s: [1, 2] },
     {
-      threshold: { default: -2, label: 'Tensão de limiar', unit: 'V' },
+      vth: { default: 2.5, label: 'Tensão de limiar', unit: 'V' },
     },
+    ['burned'],
   ),
   fixed(
     'relay-spdt',
@@ -226,8 +236,11 @@ const DEVICES: DeviceInfo[] = [
     {
       coilVoltage: { default: 12, label: 'Tensão da bobina', unit: 'V', min: 0 },
       coilResistance: R(400, 'Resistência da bobina'),
+      coilInductance: { default: 0.15, label: 'Indutância da bobina', unit: 'H', min: 0 },
+      travelTime: { default: 0.004, label: 'Tempo de comutação', unit: 's', min: 0 },
+      contactRating: { default: 10, label: 'Corrente máxima do contato', unit: 'A', min: 0 },
     },
-    ['closed'],
+    ['closed', 'energized', 'position', 'coilCurrent', 'coilVoltage', 'welded'],
   ),
   fixed(
     'transformer',
@@ -245,7 +258,7 @@ const DEVICES: DeviceInfo[] = [
       ke: { default: 0.01, label: 'Constante de força contraeletromotriz', unit: 'V·s/rad' },
       load: { default: 0, label: 'Carga', unit: 'N·m', min: 0 },
     },
-    ['rpm', 'torque', 'burned'],
+    ['rpm', 'speed', 'torque', 'burned'],
   ),
   two('buzzer', 'Buzzer', { resistance: R(200) }, ['sounding']),
   two('ldr', 'LDR (resistor sensível à luz)', {
@@ -260,8 +273,11 @@ const DEVICES: DeviceInfo[] = [
     'Amplificador operacional',
     { inn: [-3, -1], inp: [-3, 1], out: [3, 0] },
     {
-      supply: { default: 15, label: 'Alimentação (±)', unit: 'V', min: 0 },
+      vcc: { default: 12, label: 'Alimentação positiva', unit: 'V' },
+      vee: { default: -12, label: 'Alimentação negativa', unit: 'V' },
+      headroom: { default: 1.5, label: 'Margem até a alimentação', unit: 'V', min: 0 },
     },
+    ['vout', 'saturated'],
   ),
   fixed(
     'timer-555',
@@ -277,6 +293,7 @@ const DEVICES: DeviceInfo[] = [
       out: [4, 0],
     },
     {},
+    ['high', 'discharging', 'vout'],
   ),
   ...(['and', 'or', 'nand', 'nor', 'xor'] as const).map((g) =>
     fixed(
@@ -286,6 +303,7 @@ const DEVICES: DeviceInfo[] = [
       {
         vcc: { default: 5, label: 'Nível lógico alto', unit: 'V' },
       },
+      ['a', 'b', 'y'],
     ),
   ),
   fixed(
@@ -295,6 +313,7 @@ const DEVICES: DeviceInfo[] = [
     {
       vcc: { default: 5, label: 'Nível lógico alto', unit: 'V' },
     },
+    ['a', 'y'],
   ),
   fixed('scr', 'SCR (tiristor)', { a: [-2, 0], k: [2, 0], g: [1, 2] }, {}),
   fixed('triac', 'TRIAC', { mt2: [-2, 0], mt1: [2, 0], g: [1, 2] }, {}),
@@ -303,11 +322,19 @@ const DEVICES: DeviceInfo[] = [
     'breaker',
     'Disjuntor',
     {
-      rating: { default: 16, label: 'Corrente nominal', unit: 'A', min: 0 },
-      curve: { default: 'C', label: 'Curva' },
+      rating: { default: 10, label: 'Corrente nominal', unit: 'A', min: 0 },
+      curve: {
+        default: 'C',
+        label: 'Curva',
+        options: [
+          { value: 'B', label: 'B (3 a 5 × In)' },
+          { value: 'C', label: 'C (5 a 10 × In)' },
+          { value: 'D', label: 'D (10 a 20 × In)' },
+        ],
+      },
       closed: { default: true, label: 'Ligado' },
     },
-    ['tripped'],
+    ['closed', 'tripped', 'heat'],
   ),
   fixed(
     'rcd',
@@ -315,10 +342,35 @@ const DEVICES: DeviceInfo[] = [
     { l1: [-3, -1], n1: [-3, 1], l2: [3, -1], n2: [3, 1] },
     {
       sensitivity: { default: 0.03, label: 'Sensibilidade (IΔn)', unit: 'A', min: 0 },
+      closed: { default: true, label: 'Ligado' },
+      test: { default: false, label: 'Botão de teste' },
     },
-    ['tripped'],
+    ['closed', 'tripped', 'residual'],
   ),
-  two('human-body', 'Corpo humano', { resistance: R(1000, 'Resistência do corpo') }, ['danger']),
+  two(
+    'human-body',
+    'Corpo humano',
+    {
+      skin: {
+        default: 'dry',
+        label: 'Pele',
+        options: [
+          { value: 'dry', label: 'Seca' },
+          { value: 'wet', label: 'Molhada' },
+        ],
+      },
+      path: {
+        default: 'hand-hand',
+        label: 'Caminho da corrente',
+        options: [
+          { value: 'hand-hand', label: 'Mão a mão' },
+          { value: 'hand-feet', label: 'Mão aos pés' },
+          { value: 'hands-feet', label: 'Mãos aos pés' },
+        ],
+      },
+    },
+    ['currentRms', 'impedance', 'zone', 'effect', 'worst'],
+  ),
 
   // Nível 3
   fixed(

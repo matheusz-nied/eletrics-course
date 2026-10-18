@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CircuitDoc, ElementDoc } from '../../engine/contract';
+import { sweepOf } from '../runtime/sweep';
 import { buildNetlist, createSimulation, getDeviceInfo } from './index';
 
 const wire = (id: string, ...points: [number, number][]): ElementDoc => ({
@@ -110,6 +111,17 @@ describe('transient', () => {
     );
   });
 
+  it('shows the circuit at t = 0 before it plays', async () => {
+    const sim = createSimulation();
+    let last: Record<string, number | boolean | string> = {};
+    sim.subscribe((f) => (last = f.readouts));
+    await sim.load(rc);
+    // the discharged capacitor holds (almost) 0 V: the 10 V are across R1
+    expect(last.VC as number).toBeLessThan(0.2);
+    expect(last['R1.current'] as number).toBeCloseTo(0.01, 3);
+    expect(last['V1.current'] as number).toBeCloseTo(0.01, 3);
+  });
+
   it('recomputes at once when a parameter changes while paused, keeping the charge', async () => {
     const sim = createSimulation();
     let last: Record<string, number | boolean | string> = {};
@@ -144,6 +156,8 @@ describe('damage', () => {
       /^O LED D1 queimou: corrente de .+ máximo 30 mA\.$/,
     );
     expect(frames.at(-1)!.readouts['D1.burned']).toBe(true);
+    // generic flag for anything a 'damaged' event destroyed, until reset
+    expect(frames.at(-1)!.readouts['D1.damaged']).toBe(true);
     expect(Math.abs(frames.at(-1)!.readouts['D1.current'] as number)).toBeLessThan(1e-6);
   });
 
@@ -196,6 +210,180 @@ describe('damage', () => {
   });
 });
 
+describe('level 2 devices (names shared with the real engine)', () => {
+  it('trips a breaker on a short and re-arms it when switched back on', async () => {
+    const doc: CircuitDoc = {
+      id: 'test/breaker',
+      title: 'Disjuntor',
+      description: 'Curto',
+      analysis: { kind: 'transient', dt: 1e-4 },
+      elements: [
+        {
+          id: 'B1',
+          type: 'battery',
+          a: [0, 0],
+          b: [0, 10],
+          params: { voltage: 12, resistance: 0.1 },
+        },
+        { id: 'Q1', type: 'breaker', a: [0, 0], b: [10, 0], params: { rating: 10 } },
+        wire('W', [10, 0], [10, 10], [0, 10]),
+      ],
+    };
+    const sim = createSimulation();
+    let last: Record<string, number | boolean | string> = {};
+    sim.subscribe((f) => (last = f.readouts));
+    await sim.load(doc);
+    const frames = await sim.runUntil(0.01);
+    const r = frames.at(-1)!.readouts;
+    expect(r['Q1.tripped']).toBe(true);
+    expect(r['Q1.closed']).toBe(false);
+    expect(frames.flatMap((f) => f.events).some((e) => e.kind === 'tripped')).toBe(true);
+    sim.setParam('Q1', 'closed', true);
+    expect(last['Q1.tripped']).toBe(false);
+    expect(last['Q1.closed']).toBe(true);
+  });
+
+  it('moves the relay armature over its travel time', async () => {
+    const doc: CircuitDoc = {
+      id: 'test/relay',
+      title: 'Relé',
+      description: 'Bobina ligada a 12 V',
+      analysis: { kind: 'transient', dt: 1e-4 },
+      elements: [
+        { id: 'V1', type: 'dc-voltage', a: [0, 0], b: [0, 14], params: { voltage: 12 } },
+        // coil1 (18,7), coil2 (18,11), com (22,11), nc (21,7), no (23,7)
+        {
+          id: 'K1',
+          type: 'relay-spdt',
+          at: [20, 9],
+          params: { coilInductance: 0, travelTime: 0.01 },
+        },
+        wire('W1', [0, 0], [18, 0], [18, 7]),
+        wire('W2', [18, 11], [18, 14], [0, 14]),
+        // load from + to the NO contact; COM to ground, like the coil's coil2
+        { id: 'R1', type: 'resistor', a: [23, 0], b: [23, 7], params: { resistance: 120 } },
+        wire('W3', [18, 0], [23, 0]),
+        wire('W4', [22, 11], [22, 14], [18, 14]),
+        { id: 'G', type: 'ground', at: [0, 14] },
+      ],
+    };
+    const sim = createSimulation();
+    await sim.load(doc);
+    const half = (await sim.runUntil(0.005)).at(-1)!.readouts;
+    expect(half['K1.energized']).toBe(true);
+    expect(half['K1.position'] as number).toBeGreaterThan(0.3);
+    expect(half['K1.position'] as number).toBeLessThan(0.7);
+    expect(half['K1.closed']).toBe(false);
+    const done = (await sim.runUntil(0.02)).at(-1)!.readouts;
+    expect(done['K1.position']).toBe(1);
+    expect(done['K1.closed']).toBe(true);
+    expect(done['K1.welded']).toBe(false);
+    // two pins on ground: each one still reports its own current
+    expect(done['K1.pin.no'] as number).toBeCloseTo(0.1, 4);
+    expect(done['K1.pin.com'] as number).toBeCloseTo(-0.1, 4);
+    expect(done['K1.pin.coil1'] as number).toBeCloseTo(0.03, 4);
+    expect(done['K1.pin.coil2'] as number).toBeCloseTo(-0.03, 4);
+  });
+
+  it('reports the inputs and the output of a logic gate', async () => {
+    const doc: CircuitDoc = {
+      id: 'test/gate',
+      title: 'Porta',
+      description: 'Porta OR',
+      analysis: { kind: 'dc' },
+      elements: [
+        { id: 'V1', type: 'dc-voltage', a: [0, 0], b: [0, 14], params: { voltage: 5 } },
+        // a (17,9), b (17,11), y (23,10)
+        { id: 'U1', type: 'or', at: [20, 10] },
+        wire('W1', [0, 0], [17, 0], [17, 9]),
+        wire('W2', [17, 11], [17, 14], [0, 14]),
+        { id: 'R1', type: 'resistor', a: [23, 10], b: [23, 14], params: { resistance: 1000 } },
+        wire('W3', [23, 14], [17, 14]),
+        { id: 'G', type: 'ground', at: [0, 14] },
+      ],
+    };
+    const sim = createSimulation();
+    await sim.load(doc);
+    const [frame] = await sim.runUntil(0);
+    expect(frame!.readouts['U1.a']).toBe(true);
+    expect(frame!.readouts['U1.b']).toBe(false);
+    expect(frame!.readouts['U1.y']).toBe(true);
+  });
+
+  it('classifies a shock in the zones of IEC 60479', async () => {
+    const doc = (kind: 'dc-voltage' | 'ac-voltage'): CircuitDoc => ({
+      id: 'test/choque',
+      title: 'Choque',
+      description: 'Corrente pelo corpo',
+      analysis: { kind: 'transient', dt: 2e-4 },
+      elements: [
+        {
+          id: 'V1',
+          type: kind,
+          a: [0, 0],
+          b: [0, 10],
+          params: kind === 'dc-voltage' ? { voltage: 100 } : { amplitude: 100, frequency: 60 },
+        },
+        // wet skin, hand to hand: about 1 kΩ
+        { id: 'H1', type: 'human-body', a: [0, 0], b: [10, 0], params: { skin: 'wet' } },
+        wire('W', [10, 0], [10, 10], [0, 10]),
+      ],
+    });
+    // 100 mA dc: strong contractions, below the dc fibrillation threshold
+    const dc = createSimulation();
+    await dc.load(doc('dc-voltage'));
+    expect((await dc.runUntil(0.1)).at(-1)!.readouts['H1.zone']).toBe('DC-3');
+    // 71 mA rms at 60 Hz: fibrillation is likely
+    const ac = createSimulation();
+    await ac.load(doc('ac-voltage'));
+    const frames = await ac.runUntil(0.1);
+    const r = frames.at(-1)!.readouts;
+    expect(r['H1.zone']).toBe('AC-4');
+    expect(r['H1.worst']).toBe('AC-4');
+    expect(r['H1.effect']).toMatch(/fibrilação/);
+    expect(frames.flatMap((f) => f.events).some((e) => e.kind === 'warning')).toBe(true);
+  });
+
+  it('opens a residual-current device on a leak to earth', async () => {
+    const doc: CircuitDoc = {
+      id: 'test/dr',
+      title: 'DR',
+      description: 'Fuga para a terra',
+      analysis: { kind: 'transient', dt: 2e-4 },
+      elements: [
+        {
+          id: 'V1',
+          type: 'ac-voltage',
+          a: [0, 0],
+          b: [0, 10],
+          params: { amplitude: 180, frequency: 60 },
+        },
+        // l1 (7,4), n1 (7,6), l2 (13,4), n2 (13,6)
+        { id: 'DR1', type: 'rcd', at: [10, 5] },
+        wire('W1', [0, 0], [7, 0], [7, 4]),
+        wire('W2', [0, 10], [7, 10], [7, 6]),
+        { id: 'R1', type: 'resistor', a: [13, 4], b: [13, 6], params: { resistance: 100 } },
+        wire('W3', [13, 4], [18, 4]),
+        { id: 'R2', type: 'resistor', a: [18, 4], b: [18, 12], params: { resistance: 10000 } },
+        wire('W4', [18, 12], [0, 12], [0, 10]),
+        { id: 'G', type: 'ground', at: [0, 10] },
+      ],
+    };
+    // 13 mA of leak: below the 30 mA sensitivity
+    const sim = createSimulation();
+    await sim.load(doc);
+    let r = (await sim.runUntil(0.1)).at(-1)!.readouts;
+    expect(r['DR1.tripped']).toBe(false);
+    expect(r['DR1.residual'] as number).toBeGreaterThan(0.01);
+    // the test button trips it
+    sim.setParam('DR1', 'test', true);
+    r = (await sim.runUntil(0.2)).at(-1)!.readouts;
+    expect(r['DR1.tripped']).toBe(true);
+    expect(r['DR1.closed']).toBe(false);
+    expect(Math.abs(r['R1.current'] as number)).toBeLessThan(1e-3);
+  });
+});
+
 describe('ac sweep', () => {
   it('gives -3 dB and -45° at the RC cut-off frequency', async () => {
     const doc: CircuitDoc = {
@@ -215,16 +403,20 @@ describe('ac sweep', () => {
     const sim = createSimulation();
     await sim.load(doc);
     const frames = await sim.runUntil(0);
-    expect(frames).toHaveLength(41);
+    const sweep = sweepOf(frames)!;
+    expect(sweep.f).toHaveLength(41);
+    expect(sweep.magnitude.VO).toHaveLength(41);
     const fc = 1 / (2 * Math.PI * 1000 * 1e-7); // 1.59 kHz
-    const near = frames.reduce((best, f) =>
-      Math.abs(Math.log(f.t / fc)) < Math.abs(Math.log(best.t / fc)) ? f : best,
+    const near = sweep.f.reduce(
+      (best, f, i) =>
+        Math.abs(Math.log(f / fc)) < Math.abs(Math.log(sweep.f[best]! / fc)) ? i : best,
+      0,
     );
-    const db = 20 * Math.log10(near.readouts.VO as number);
+    const db = 20 * Math.log10(sweep.magnitude.VO![near]!);
     expect(db).toBeGreaterThan(-4);
     expect(db).toBeLessThan(-2);
-    expect(near.readouts['VO.phase'] as number).toBeGreaterThan(-55);
-    expect(near.readouts['VO.phase'] as number).toBeLessThan(-35);
+    expect(sweep.phase.VO![near]!).toBeGreaterThan(-55);
+    expect(sweep.phase.VO![near]!).toBeLessThan(-35);
   });
 });
 

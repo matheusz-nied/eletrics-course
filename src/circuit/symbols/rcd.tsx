@@ -6,9 +6,10 @@ export default defineSymbol({
   type: 'rcd',
   pins: { l1: [-3, -1], n1: [-3, 1], l2: [3, -1], n2: [3, 1] },
   box: [-30, -22, 60, 44],
-  live: ['tripped'],
+  live: ['closed', 'tripped'],
   draw: (ctx) => {
     const tripped = ctx.live.tripped === true;
+    const open = tripped || ctx.live.closed === false || ctx.params.closed === false;
     return (
       <>
         <path d="M-30 -10H-12M-30 10H-12M12 -10H30M12 10H30" />
@@ -22,8 +23,8 @@ export default defineSymbol({
           strokeWidth={1.4}
         />
         <path
-          d={tripped ? 'M-12 -10L8 -18M-12 10L8 2' : 'M-12 -10H12M-12 10H12'}
-          className="sym-blade"
+          d={open ? 'M-12 -10L8 -18M-12 10L8 2' : 'M-12 -10H12M-12 10H12'}
+          className={tripped ? 'sym-blade sym-danger' : 'sym-blade'}
         />
         <Upright x={0} y={16} ctx={ctx} size={8} weight={600}>
           IΔ
