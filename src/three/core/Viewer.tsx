@@ -19,7 +19,7 @@ import {
 } from 'react';
 import { annotationsFor, cutFor, isAnimated, loadPart, resolveProps } from '../registry';
 import type { PartModule, PartProps } from '../types';
-import { Annotations, visibleAnnotations } from './Annotations';
+import { AnnotationPins, Annotations, visibleAnnotations } from './Annotations';
 import { FrameRateMonitor, KeyboardOrbit, ReadySignal, ViewerErrorBoundary } from './helpers';
 import { useReducedMotion } from './motion';
 import { guessQuality, QUALITY, QUALITY_LABELS, useQuality, type QualityLevel } from './quality';
@@ -72,6 +72,7 @@ export default function Viewer({
 }: ViewerProps) {
   const root = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
+  const pins = useRef<HTMLDivElement>(null);
   const descriptionId = useId();
   const legendId = useId();
   const reducedMotion = useReducedMotion();
@@ -237,7 +238,7 @@ export default function Viewer({
                     onBounds={(bounds) => setExtent(bounds.radius * 1.05)}
                   >
                     {module && createElement(module.default, resolved)}
-                    {showNotes && <Annotations items={notes} />}
+                    {showNotes && <Annotations items={notes} layer={pins} />}
                   </Stage>
                   <ContinuousRender active={animated} />
                 </ViewProvider>
@@ -248,6 +249,8 @@ export default function Viewer({
             </Canvas>
           </ViewerErrorBoundary>
         )}
+
+        {showCanvas && showNotes && <AnnotationPins items={notes} layer={pins} />}
 
         {(unsupported || status === 'error') && fallback}
         {!unsupported && status === 'loading' && inView && (
