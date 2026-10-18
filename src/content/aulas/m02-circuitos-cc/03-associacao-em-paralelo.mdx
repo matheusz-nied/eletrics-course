@@ -14,7 +14,6 @@ prerequisitos:
   - m01-eletricidade-do-zero/05-potencia-e-energia
 tags: [paralelo, resistência equivalente, tomadas, disjuntor, sobrecarga]
 seguranca: baixa-tensao
-rascunho: true
 ---
 
 import ParallelSplit from '../../../lessons/m02/figures/ParallelSplit.astro';
@@ -100,9 +99,11 @@ No passo 2, as correntes de R1 e R2 não mudam nada: cada ramo recebe os mesmos 
 **1. Correntes dos ramos**, cada uma com os 12 V inteiros:
 
 $$
-I_1 = \frac{12}{1.000} = 12\,\text{mA} \qquad
-I_2 = \frac{12}{2.200} \approx 5{,}45\,\text{mA} \qquad
-I_3 = \frac{12}{4.700} \approx 2{,}55\,\text{mA}
+\begin{aligned}
+I_1 &= \frac{12}{1.000} = 12\,\text{mA} \\[4pt]
+I_2 &= \frac{12}{2.200} \approx 5{,}45\,\text{mA} \\[4pt]
+I_3 &= \frac{12}{4.700} \approx 2{,}55\,\text{mA}
+\end{aligned}
 $$
 
 **2. Corrente total:**
@@ -114,7 +115,11 @@ $$
 **3. Resistência equivalente.** Pela fórmula dos inversos:
 
 $$
-\frac{1}{R_\text{eq}} = \frac{1}{1.000} + \frac{1}{2.200} + \frac{1}{4.700} \approx 0{,}001668 \quad\Rightarrow\quad R_\text{eq} \approx 600\,\Omega
+\begin{aligned}
+\frac{1}{R_\text{eq}} &= \frac{1}{1.000} + \frac{1}{2.200} + \frac{1}{4.700} \\[4pt]
+&\approx 0{,}001668 \\[4pt]
+R_\text{eq} &\approx 600\,\Omega
+\end{aligned}
 $$
 
 **4. Conferência:** $12\,\text{V} / 600\,\Omega = 20\,\text{mA}$, a mesma corrente total. E 600 Ω é menor que o menor resistor (1 kΩ), como tinha de ser. São os valores que o simulador mostra.

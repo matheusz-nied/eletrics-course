@@ -15,7 +15,6 @@ prerequisitos:
   - m01-eletricidade-do-zero/04-lei-de-ohm
 tags: [circuito, curto-circuito, circuito aberto, fusível, chave]
 seguranca: baixa-tensao
-rascunho: true
 ---
 
 import Flashlight from '../../../lessons/m02/figures/Flashlight.astro';
@@ -118,7 +117,10 @@ A resistência interna da bateria (0,02 Ω) e a do fusível (cerca de 0,05 Ω) q
 **Corrente de curto.** Quando o fio encosta, a lâmpada sai do caminho. Sobram a resistência interna da bateria e a do fusível:
 
 $$
-I_\text{curto} = \frac{12\,\text{V}}{0{,}02\,\Omega + 0{,}05\,\Omega} = \frac{12}{0{,}07} \approx 171\,\text{A}
+\begin{aligned}
+I_\text{curto} &= \frac{12\,\text{V}}{0{,}02\,\Omega + 0{,}05\,\Omega} \\[4pt]
+&= \frac{12}{0{,}07} \approx 171\,\text{A}
+\end{aligned}
 $$
 
 São cerca de 400 vezes a corrente normal, e foi esse o valor que a simulação mostrou na mensagem do fusível. Sem o fusível, essa corrente esquentaria o fio fino do circuito até derreter o isolamento em segundos.

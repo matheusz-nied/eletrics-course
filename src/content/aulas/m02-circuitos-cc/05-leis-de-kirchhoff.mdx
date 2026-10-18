@@ -15,7 +15,6 @@ prerequisitos:
   - m01-eletricidade-do-zero/04-lei-de-ohm
 tags: [Kirchhoff, lei dos nós, lei das malhas, duas fontes, chupeta]
 seguranca: baixa-tensao
-rascunho: true
 ---
 
 import KirchhoffLaws from '../../../lessons/m02/figures/KirchhoffLaws.astro';
@@ -101,7 +100,11 @@ Vamos achar as correntes do mesmo circuito (V1 = 12 V, V2 = 9 V, R1 = R2 = 100 �
 **1. Escrever cada corrente com a Lei de Ohm.** Use as mesmas setas dos amperímetros. Cada corrente é a diferença de tensão entre as pontas do resistor, da ponta onde a seta começa para a ponta onde ela termina, dividida pela resistência:
 
 $$
-I_1 = \frac{12 - V_A}{100} \qquad I_2 = \frac{V_A - 9}{100} \qquad I_3 = \frac{V_A}{1000}
+\begin{aligned}
+I_1 &= \frac{12 - V_A}{100} \\[4pt]
+I_2 &= \frac{V_A - 9}{100} \\[4pt]
+I_3 &= \frac{V_A}{1000}
+\end{aligned}
 $$
 
 **2. Aplicar a lei dos nós em A.** Chega $I_1$; saem $I_2$ e $I_3$:
@@ -117,13 +120,21 @@ $$
 $$
 
 $$
-120 - 10\,V_A = 11\,V_A - 90 \quad\Rightarrow\quad 21\,V_A = 210 \quad\Rightarrow\quad V_A = 10\,\text{V}
+\begin{aligned}
+120 - 10\,V_A &= 11\,V_A - 90 \\[4pt]
+21\,V_A &= 210 \\[4pt]
+V_A &= 10\,\text{V}
+\end{aligned}
 $$
 
 **4. Voltar às correntes.**
 
 $$
-I_1 = \frac{12 - 10}{100} = 0{,}02\,\text{A} = 20\,\text{mA} \qquad I_2 = \frac{10 - 9}{100} = 10\,\text{mA} \qquad I_3 = \frac{10}{1000} = 10\,\text{mA}
+\begin{aligned}
+I_1 &= \frac{12 - 10}{100} = 0{,}02\,\text{A} = 20\,\text{mA} \\[4pt]
+I_2 &= \frac{10 - 9}{100} = 10\,\text{mA} \\[4pt]
+I_3 &= \frac{10}{1000} = 10\,\text{mA}
+\end{aligned}
 $$
 
 **5. Conferir com a lei das malhas.** Na malha da esquerda: $12 - 100 \times 0{,}02 - 1000 \times 0{,}01 = 12 - 2 - 10 = 0$.

@@ -15,7 +15,6 @@ prerequisitos:
   - m02-circuitos-cc/07-fontes-reais-e-baterias
 tags: [thévenin, norton, superposição, análise de circuitos, carregador]
 seguranca: baixa-tensao
-rascunho: true
 ---
 
 import TheveninBox from '../../../lessons/m02/figures/TheveninBox.astro';
@@ -53,7 +52,10 @@ São dois números, e cada um vem de uma pergunta simples.
 No circuito da Figura 1, sem carga não passa corrente pelo resistor de 680 Ω, então ele não tem queda de tensão. Sobra um <Term id="divisor-de-tensao">divisor de tensão</Term> de 2,2 kΩ com 3,3 kΩ:
 
 $$
-V_\text{Th} = 12\,\text{V} \cdot \frac{3{,}3\,\text{k}\Omega}{2{,}2\,\text{k}\Omega + 3{,}3\,\text{k}\Omega} = 12 \cdot 0{,}6 = 7{,}2\,\text{V}
+\begin{aligned}
+V_\text{Th} &= 12\,\text{V} \cdot \frac{3{,}3\,\text{k}\Omega}{2{,}2\,\text{k}\Omega + 3{,}3\,\text{k}\Omega} \\[4pt]
+&= 12 \cdot 0{,}6 = 7{,}2\,\text{V}
+\end{aligned}
 $$
 
 **2. Qual é a resistência vista de dentro?** "Desligue" as fontes e calcule a resistência entre A e B. Essa é a **resistência de Thévenin**, $R_\text{Th}$. Desligar uma fonte de tensão ideal é trocá-la por um **fio** (ela mantém 0 V); desligar uma fonte de corrente ideal é trocá-la por um **circuito aberto** (ela mantém 0 A).
@@ -61,13 +63,19 @@ $$
 Com a fonte de 12 V virando fio, olhando de A para dentro você vê o resistor de 680 Ω em série com a combinação em paralelo de 2,2 kΩ e 3,3 kΩ:
 
 $$
-R_\text{Th} = 680\,\Omega + \frac{2{,}2 \cdot 3{,}3}{2{,}2 + 3{,}3}\,\text{k}\Omega = 680\,\Omega + 1{,}32\,\text{k}\Omega = 2{,}0\,\text{k}\Omega
+\begin{aligned}
+R_\text{Th} &= 680\,\Omega + \frac{2{,}2 \cdot 3{,}3}{2{,}2 + 3{,}3}\,\text{k}\Omega \\[4pt]
+&= 680\,\Omega + 1{,}32\,\text{k}\Omega = 2{,}0\,\text{k}\Omega
+\end{aligned}
 $$
 
 **3. Use com qualquer carga.** Com uma carga $R_L$ entre A e B, o circuito vira uma série simples:
 
 $$
-I_L = \frac{V_\text{Th}}{R_\text{Th} + R_L} \qquad V_L = V_\text{Th} \cdot \frac{R_L}{R_\text{Th} + R_L}
+\begin{aligned}
+I_L &= \frac{V_\text{Th}}{R_\text{Th} + R_L} \\[4pt]
+V_L &= V_\text{Th} \cdot \frac{R_L}{R_\text{Th} + R_L}
+\end{aligned}
 $$
 
 em que $I_L$ é a corrente na carga, em ampères, e $V_L$ é a tensão na carga, em volts.
@@ -113,7 +121,10 @@ O mesmo resultado em uma linha. E a vantagem cresce com cada carga nova: para $R
 O <Term id="equivalente-de-norton">equivalente de Norton</Term> troca a fonte de tensão em série por uma **fonte de corrente em paralelo** com o mesmo resistor. A corrente da fonte é a corrente que passaria num curto entre A e B:
 
 $$
-I_N = \frac{V_\text{Th}}{R_\text{Th}} = \frac{7{,}2\,\text{V}}{2\,\text{k}\Omega} = 3{,}6\,\text{mA} \qquad R_N = R_\text{Th} = 2\,\text{k}\Omega
+\begin{aligned}
+I_N &= \frac{V_\text{Th}}{R_\text{Th}} = \frac{7{,}2\,\text{V}}{2\,\text{k}\Omega} = 3{,}6\,\text{mA} \\[4pt]
+R_N &= R_\text{Th} = 2\,\text{k}\Omega
+\end{aligned}
 $$
 
 Na simulação abaixo, a fonte de corrente empurra sempre 3,6 mA, e eles se dividem entre o resistor de Norton e a carga.
@@ -150,7 +161,10 @@ $$
 **Só V2** (V1 desligada, virou fio): agora R1 e R3 ficam em paralelo, $1\,\text{k}\Omega \parallel 2\,\text{k}\Omega \approx 667\,\Omega$, e formam um divisor com R2:
 
 $$
-V_3'' = 6\,\text{V} \cdot \frac{667\,\Omega}{2.000\,\Omega + 667\,\Omega} = 6 \cdot 0{,}25 = 1{,}5\,\text{V}
+\begin{aligned}
+V_3'' &= 6\,\text{V} \cdot \frac{667\,\Omega}{2.000\,\Omega + 667\,\Omega} \\[4pt]
+&= 6 \cdot 0{,}25 = 1{,}5\,\text{V}
+\end{aligned}
 $$
 
 **As duas juntas:** $V_3 = 6\,\text{V} + 1{,}5\,\text{V} = 7{,}5\,\text{V}$, o mesmo valor que a simulação mostrou com as duas fontes ligadas. Para conferir pelas [leis de Kirchhoff](../05-leis-de-kirchhoff/): no nó de cima de R3, a corrente que chega por R1 é $(12 - 7{,}5)/1.000 = 4{,}5\,\text{mA}$, a que chega por R2 é $(6 - 7{,}5)/2.000 = -0{,}75\,\text{mA}$ (ela na verdade sai do nó em direção a V2), e a que desce por R3 é $7{,}5/2.000 = 3{,}75\,\text{mA}$. De fato, $4{,}5 - 0{,}75 = 3{,}75$.

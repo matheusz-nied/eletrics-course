@@ -15,7 +15,6 @@ prerequisitos:
   - m02-circuitos-cc/06-divisores-de-tensao-e-corrente
 tags: [bateria, pilha, resistência interna, capacidade, Ah, carro, partida]
 seguranca: baixa-tensao
-rascunho: true
 ---
 
 import BatteryModel from '../../../lessons/m02/figures/BatteryModel.astro';
@@ -126,7 +125,10 @@ $$
 **Passo 4: calcular a resistência interna.** A tensão que "sumiu" ficou dentro da bateria:
 
 $$
-r = \frac{E - V_\text{terminais}}{I} = \frac{9{,}00 - 7{,}69}{0{,}769} = \frac{1{,}31\,\text{V}}{0{,}769\,\text{A}} \approx 1{,}70\,\Omega
+\begin{aligned}
+r &= \frac{E - V_\text{terminais}}{I} = \frac{9{,}00 - 7{,}69}{0{,}769} \\[4pt]
+&= \frac{1{,}31\,\text{V}}{0{,}769\,\text{A}} \approx 1{,}70\,\Omega
+\end{aligned}
 $$
 
 É o valor que está escondido na simulação. Na bancada, use um resistor de potência adequada (aqui ele dissipa quase 6 W; um de 10 W serve) e faça a medida em poucos segundos, porque a bateria e o resistor esquentam.
@@ -140,7 +142,10 @@ A capacidade é dada em <Term id="ampere-hora">ampère-hora</Term> (Ah): uma bat
 Para saber a **energia** guardada, multiplique pela tensão. A unidade é o watt-hora (Wh):
 
 $$
-\text{Energia} = V \cdot \text{capacidade} = 12\,\text{V} \times 60\,\text{Ah} = 720\,\text{Wh}
+\begin{aligned}
+\text{Energia} &= V \cdot \text{capacidade} \\[4pt]
+&= 12\,\text{V} \times 60\,\text{Ah} = 720\,\text{Wh}
+\end{aligned}
 $$
 
 Três detalhes que fazem diferença na prática:
@@ -199,9 +204,12 @@ $$
 A corrente total e a tensão nos terminais são
 
 $$
-I = \frac{12{,}6\,\text{V}}{0{,}048\,\Omega + 0{,}015\,\Omega} \approx 200\,\text{A}
-\qquad
-V_\text{terminais} = 12{,}6 - 0{,}015 \times 200 \approx 9{,}6\,\text{V}
+\begin{aligned}
+I &= \frac{12{,}6\,\text{V}}{0{,}048\,\Omega + 0{,}015\,\Omega} \\[4pt]
+&\approx 200\,\text{A} \\[4pt]
+V_\text{terminais} &= 12{,}6 - 0{,}015 \times 200 \\[4pt]
+&\approx 9{,}6\,\text{V}
+\end{aligned}
 $$
 
 Com $r = 0{,}05\,\Omega$, a mesma conta dá $I \approx 12{,}6 / 0{,}098 \approx 129\,\text{A}$ e $V_\text{terminais} \approx 12{,}6 - 0{,}05 \times 129 \approx 6{,}1\,\text{V}$. Quase metade da tensão da bateria fica presa dentro dela, virando calor em vez de girar o motor.

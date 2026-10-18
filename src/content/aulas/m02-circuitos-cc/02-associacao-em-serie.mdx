@@ -14,7 +14,6 @@ prerequisitos:
   - m01-eletricidade-do-zero/04-lei-de-ohm
 tags: [série, resistência equivalente, queda de tensão, pisca-pisca]
 seguranca: baixa-tensao
-rascunho: true
 ---
 
 import SeriesVoltageSteps from '../../../lessons/m02/figures/SeriesVoltageSteps.astro';
@@ -97,7 +96,10 @@ No passo 2, aumentar R2 aumenta a resistência total, a corrente cai, e por isso
 **1. Resistência equivalente.**
 
 $$
-R_\text{eq} = 1\,\text{k}\Omega + 2{,}2\,\text{k}\Omega + 4{,}7\,\text{k}\Omega = 7{,}9\,\text{k}\Omega
+\begin{aligned}
+R_\text{eq} &= 1\,\text{k}\Omega + 2{,}2\,\text{k}\Omega + 4{,}7\,\text{k}\Omega \\[4pt]
+&= 7{,}9\,\text{k}\Omega
+\end{aligned}
 $$
 
 **2. Corrente**, a mesma nos três:
@@ -109,9 +111,11 @@ $$
 **3. Tensão em cada resistor:**
 
 $$
-V_1 = 1.000 \cdot 0{,}001519 \approx 1{,}52\,\text{V} \qquad
-V_2 = 2.200 \cdot 0{,}001519 \approx 3{,}34\,\text{V} \qquad
-V_3 = 4.700 \cdot 0{,}001519 \approx 7{,}14\,\text{V}
+\begin{aligned}
+V_1 &= 1.000 \cdot 0{,}001519 \approx 1{,}52\,\text{V} \\[4pt]
+V_2 &= 2.200 \cdot 0{,}001519 \approx 3{,}34\,\text{V} \\[4pt]
+V_3 &= 4.700 \cdot 0{,}001519 \approx 7{,}14\,\text{V}
+\end{aligned}
 $$
 
 **4. Conferência:** $1{,}52 + 3{,}34 + 7{,}14 = 12{,}00\,\text{V}$. A soma das quedas é a tensão da fonte, como devia ser. São os mesmos números que o multímetro da simulação mostra.

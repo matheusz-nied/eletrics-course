@@ -15,7 +15,6 @@ prerequisitos:
   - m02-circuitos-cc/08-thevenin-norton-e-superposicao
 tags: [potência, casamento de carga, eficiência, resistência interna, painel solar]
 seguranca: baixa-tensao
-rascunho: true
 ---
 
 import PowerExtremes from '../../../lessons/m02/figures/PowerExtremes.astro';
@@ -56,16 +55,22 @@ Esse é o teorema da <Term id="maxima-transferencia-de-potencia">máxima transfe
 O preço aparece quando se olha para a **eficiência**, a fração da potência da fonte que chega à carga:
 
 $$
-\eta = \frac{P_L}{P_\text{total}} = \frac{I^2 R_L}{I^2 (r + R_L)} = \frac{R_L}{r + R_L}
+\begin{aligned}
+\eta &= \frac{P_L}{P_\text{total}} = \frac{I^2 R_L}{I^2 (r + R_L)} \\[4pt]
+&= \frac{R_L}{r + R_L}
+\end{aligned}
 $$
 
 Com $R_L = r$, a eficiência é $\eta = r/(2r) = 50\,\%$. No ponto de máxima potência, **metade da energia se perde dentro da fonte**.
 
 <DeepDive title="De onde vem a condição RL = r">
-Para achar o máximo de $P_L(R_L)$, derive em relação a $R_L$ e iguale a zero:
+Para achar o máximo de $P_L(R_L)$, derive em relação a $R_L$ (pela regra do quociente, já simplificando um fator $r + R_L$) e iguale a zero:
 
 $$
-\frac{dP_L}{dR_L} = V^2 \cdot \frac{(r + R_L)^2 - 2 R_L (r + R_L)}{(r + R_L)^4} = V^2 \cdot \frac{r - R_L}{(r + R_L)^3}
+\begin{aligned}
+\frac{dP_L}{dR_L} &= V^2 \cdot \frac{(r + R_L) - 2 R_L}{(r + R_L)^3} \\[4pt]
+&= V^2 \cdot \frac{r - R_L}{(r + R_L)^3}
+\end{aligned}
 $$
 
 A derivada é positiva para $R_L < r$ (a potência cresce), zero em $R_L = r$ e negativa para $R_L > r$ (a potência diminui). Logo o máximo está em $R_L = r$.

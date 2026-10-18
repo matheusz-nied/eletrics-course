@@ -15,7 +15,6 @@ prerequisitos:
   - m02-circuitos-cc/03-associacao-em-paralelo
 tags: [divisor de tensão, divisor de corrente, potenciômetro, LDR, sensor]
 seguranca: baixa-tensao
-rascunho: true
 ---
 
 import DividerLadder from '../../../lessons/m02/figures/DividerLadder.astro';
@@ -118,7 +117,10 @@ Agora olhe para o ponto do meio do divisor com a carga ligada. A corrente que de
 Para dois ramos em paralelo, $R_a$ e $R_b$, que recebem juntos a corrente $I$:
 
 $$
-I_a = I \cdot \frac{R_b}{R_a + R_b} \qquad I_b = I \cdot \frac{R_a}{R_a + R_b}
+\begin{aligned}
+I_a &= I \cdot \frac{R_b}{R_a + R_b} \\[4pt]
+I_b &= I \cdot \frac{R_a}{R_a + R_b}
+\end{aligned}
 $$
 
 Cuidado com a troca: a corrente em $R_a$ usa $R_b$ em cima da fração. Faz sentido: se $R_b$ for enorme, quase toda a corrente vai por $R_a$.
@@ -126,9 +128,10 @@ Cuidado com a troca: a corrente em $R_a$ usa $R_b$ em cima da fração. Faz sent
 Volte à primeira simulação, ligue a carga e ponha RL em 1 kΩ. A corrente em R1 é 1,1 mA. Ela se divide entre R2 (10 kΩ) e RL (1 kΩ):
 
 $$
-I_\text{RL} = 1{,}1\,\text{mA} \cdot \frac{10\,\text{k}\Omega}{10\,\text{k}\Omega + 1\,\text{k}\Omega} = 1{,}0\,\text{mA}
-\qquad
-I_\text{R2} = 1{,}1\,\text{mA} \cdot \frac{1\,\text{k}\Omega}{11\,\text{k}\Omega} = 0{,}1\,\text{mA}
+\begin{aligned}
+I_\text{RL} &= 1{,}1\,\text{mA} \cdot \frac{10}{10 + 1} = 1{,}0\,\text{mA} \\[4pt]
+I_\text{R2} &= 1{,}1\,\text{mA} \cdot \frac{1}{11} = 0{,}1\,\text{mA}
+\end{aligned}
 $$
 
 Confira nos multímetros: a carga leva dez vezes mais corrente que R2, porque tem um décimo da resistência.
@@ -142,9 +145,11 @@ Você quer que um Arduino mostre a tensão da bateria do carro. A entrada analó
 **Passo 2: conferir as tensões.**
 
 $$
-V_S = 14{,}4\,\text{V} \cdot \frac{7{,}5}{30 + 7{,}5} = 14{,}4 \cdot 0{,}2 = 2{,}88\,\text{V}
-\qquad
-12{,}6\,\text{V} \cdot 0{,}2 = 2{,}52\,\text{V}
+\begin{aligned}
+V_S &= 14{,}4\,\text{V} \cdot \frac{7{,}5}{30 + 7{,}5} \\[4pt]
+&= 14{,}4 \cdot 0{,}2 = 2{,}88\,\text{V} \\[4pt]
+\text{com } 12{,}6\,\text{V}\text{: } V_S &= 12{,}6 \cdot 0{,}2 = 2{,}52\,\text{V}
+\end{aligned}
 $$
 
 Até 25 V na bateria, a entrada não passa de 5 V.
