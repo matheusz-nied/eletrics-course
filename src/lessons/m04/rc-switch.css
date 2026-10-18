@@ -1,9 +1,0 @@
-/*
- * Lesson 4.4 uses the changeover switch symbol to send the RC input to the
- * battery or to ground. Its NF/NA contact names mean nothing there, and
- * visible text inside a schematic control fails axe's
- * label-content-name-mismatch check, so they are hidden in this circuit.
- */
-[data-simulation='m04/rc-carga-descarga'] .sch-el[data-type='switch-spdt'] .sym-pin-text {
-  display: none;
-}
