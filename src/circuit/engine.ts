@@ -1,12 +1,11 @@
 /**
  * The engine used by the schematic and the instruments.
  *
- * The real engine (src/engine) runs every circuit it supports: levels 1 and 2
- * and the AC sweep. Until the Simulação front delivers level 3 (AC motors,
- * quasi-static analysis), circuits that need it run on the stand-in in
- * ./fake-engine, which follows the same contract and the same pins, parameters
- * and readouts. When the real engine covers everything, this file drops the
- * fallback.
+ * The real engine (src/engine) runs every circuit it supports: levels 1 to 3,
+ * the AC sweep and the quasi-static analysis. Circuits with a type only the
+ * stand-in in ./fake-engine knows still run there; it follows the same
+ * contract and the same pins, parameters and readouts. When the real engine
+ * covers everything, this file drops the fallback.
  */
 import * as real from '../engine';
 import type {
@@ -25,8 +24,13 @@ export interface EngineApi {
   getDeviceInfo(type: string, params?: Record<string, ParamValue>): DeviceInfo;
 }
 
-/** Analyses the real engine runs today (S3 adds quasi-static). */
-const REAL_ANALYSES = new Set<CircuitDoc['analysis']['kind']>(['dc', 'transient', 'ac-sweep']);
+/** Analyses the real engine runs. */
+const REAL_ANALYSES = new Set<CircuitDoc['analysis']['kind']>([
+  'dc',
+  'transient',
+  'ac-sweep',
+  'quasi-static',
+]);
 
 const realTypes = new Set(real.listDevices().map((d) => d.type));
 
@@ -42,7 +46,7 @@ export function engineFor(doc: CircuitDoc): EngineApi {
 
 /**
  * Typed identity for circuit files. Circuits the real engine runs are
- * validated by it (in development); the others wait for levels 2 and 3.
+ * validated by it (in development); the others run on the stand-in.
  */
 export function defineCircuit<const T extends CircuitDoc>(doc: T): T {
   return runsOnRealEngine(doc) ? real.defineCircuit(doc) : doc;
@@ -53,7 +57,8 @@ export function deviceInfo(
   type: string,
   params?: Record<string, ParamValue>,
 ): DeviceInfo | undefined {
-  if (realTypes.has(type)) return real.getDeviceInfo(type);
+  // Some devices (mcu, dip-switch) have pins that depend on their parameters.
+  if (realTypes.has(type)) return real.getDeviceInfo(type, params);
   try {
     return fake.getDeviceInfo(type, params);
   } catch {

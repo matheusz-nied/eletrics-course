@@ -1,5 +1,5 @@
-import type { DeviceInfo } from '../contract';
-import type { DeviceDefinition } from '../device';
+import type { DeviceInfo, ParamValue } from '../contract';
+import { infoFor, type DeviceDefinition } from '../device';
 
 /**
  * Device registry. Every other `.ts` file in this folder default-exports a
@@ -22,10 +22,14 @@ export function findDevice(type: string): DeviceDefinition | undefined {
   return registry.get(type);
 }
 
-export function getDeviceInfo(type: string): DeviceInfo {
+/**
+ * Pins, parameters and readouts of a device type. Pass the element's
+ * parameters for devices whose pins depend on them (`mcu`, `dip-switch`).
+ */
+export function getDeviceInfo(type: string, params?: Record<string, ParamValue>): DeviceInfo {
   const def = registry.get(type);
   if (!def) throw new Error(`Tipo de dispositivo desconhecido: "${type}".`);
-  return def.info;
+  return infoFor(def, params);
 }
 
 export function listDevices(): DeviceInfo[] {

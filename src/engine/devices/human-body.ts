@@ -1,4 +1,4 @@
-import { defineDevice, str, TWO_PINS } from '../device';
+import { acSquared, defineDevice, str, TWO_PINS } from '../device';
 import { formatNumber, formatSI } from '../messages';
 import { RmsMeter } from '../models/filters';
 
@@ -146,8 +146,10 @@ export default defineDevice({
         const v = x.v(a) - x.v(b);
         current = v / impedance;
         if (!ctx.commit || step.dt <= 0) return;
-        vRms.update(v, step.dt);
-        iRms.update(current, step.dt);
+        const ac = step.ac;
+        const vAc = ac ? Math.hypot(ac.re(a) - ac.re(b), ac.im(a) - ac.im(b)) : 0;
+        vRms.update(Math.hypot(v, vAc), step.dt);
+        iRms.update(Math.sqrt(current * current + acSquared(step, 0)), step.dt);
         // The impedance follows the touch voltage with the meters' lag (linear in each step).
         update();
         duration = iRms.value >= PERCEPTION ? duration + step.dt : 0;

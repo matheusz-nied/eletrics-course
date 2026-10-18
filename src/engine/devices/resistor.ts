@@ -1,4 +1,4 @@
-import { defineDevice, num, TWO_PINS } from '../device';
+import { acSquared, defineDevice, num, TWO_PINS } from '../device';
 import { formatSI } from '../messages';
 import { R_OPEN } from '../models/constants';
 import { ResistiveHeating } from '../models/heating';
@@ -43,7 +43,7 @@ export default defineDevice({
         const v = x.v(a) - x.v(b);
         current = v / resistance();
         if (!ctx.commit) return;
-        const result = heat.step(v * current, step.dt);
+        const result = heat.step(v * current + acSquared(step, 0) * resistance(), step.dt);
         if (result === 'ok') return;
         const watts = formatSI(num(params, 'watts'), 'W');
         if (result === 'hot') {
