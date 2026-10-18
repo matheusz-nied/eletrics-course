@@ -1,11 +1,12 @@
 /**
  * The engine used by the schematic and the instruments.
  *
- * The real engine (src/engine) runs every circuit it supports. Until the
- * Simulação front delivers levels 2 and 3 (diodes, relays, motors, AC sweep,
- * quasi-static), circuits that need them run on the stand-in in ./fake-engine,
- * which follows the same contract and the same pins, parameters and readouts.
- * When the real engine covers everything, this file drops the fallback.
+ * The real engine (src/engine) runs every circuit it supports: levels 1 and 2
+ * and the AC sweep. Until the Simulação front delivers level 3 (AC motors,
+ * quasi-static analysis), circuits that need it run on the stand-in in
+ * ./fake-engine, which follows the same contract and the same pins, parameters
+ * and readouts. When the real engine covers everything, this file drops the
+ * fallback.
  */
 import * as real from '../engine';
 import type {
@@ -24,8 +25,8 @@ export interface EngineApi {
   getDeviceInfo(type: string, params?: Record<string, ParamValue>): DeviceInfo;
 }
 
-/** Analyses the real engine runs today (S2 adds ac-sweep, S3 quasi-static). */
-const REAL_ANALYSES = new Set<CircuitDoc['analysis']['kind']>(['dc', 'transient']);
+/** Analyses the real engine runs today (S3 adds quasi-static). */
+const REAL_ANALYSES = new Set<CircuitDoc['analysis']['kind']>(['dc', 'transient', 'ac-sweep']);
 
 const realTypes = new Set(real.listDevices().map((d) => d.type));
 
