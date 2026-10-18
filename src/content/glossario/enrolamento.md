@@ -1,10 +1,12 @@
 ---
 termo: Enrolamento
-resumo: "Bobina de fio de cobre esmaltado presa no corpo de um motor ou de um transformador. A corrente que passa por ela cria o campo magnético."
-sinonimos: [bobinado, bobinagem, bobina do motor]
-relacionados: [indutor, motor-de-inducao, resistencia-eletrica]
-aula: m16-portao/02-o-motor-do-portao
+resumo: "Bobina de fio de cobre esmaltado dentro de um motor, transformador ou relé. É por onde a corrente passa para criar o campo magnético."
+sinonimos: [bobina, bobinado, bobinagem]
+relacionados: [indutor, multimetro, continuidade, motor-de-inducao]
+aula: m03-medicoes/04-resistencia-continuidade-e-diodo
 ---
-O motor do portão tem dois enrolamentos no estator, a parte fixa. Uma ponta de cada um se junta à do outro e sai num fio só, o comum; as outras pontas são os fios ABRE e FECHA.
+Com o aparelho desligado, um enrolamento inteiro mostra uma resistência baixa e estável no multímetro, de alguns ohms a algumas dezenas de ohms, conforme o tamanho e a potência. `OL` quer dizer enrolamento interrompido.
 
-Com o multímetro na escala de resistência e o motor desligado e solto, cada enrolamento mostra poucos ohms, só a resistência do cobre. Uma leitura zero entre dois fios indica curto; OL indica enrolamento interrompido, ou o protetor térmico aberto num motor que acabou de esquentar.
+Num motor monofásico de portão com três fios, os dois enrolamentos ficam no estator, a parte fixa, e se encontram no fio comum; as outras pontas são os fios ABRE e FECHA. Entre essas duas pontas, o multímetro mede os dois enrolamentos em série, e por isso esse é o par de maior resistência. Uma leitura perto de zero entre dois fios indica curto; `OL` num motor que acabou de esquentar pode ser só o protetor térmico aberto.
+
+Entre o enrolamento e a carcaça de metal, o multímetro tem que mostrar `OL`. Uma leitura ali indica isolação danificada.

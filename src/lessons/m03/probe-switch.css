@@ -1,0 +1,11 @@
+/*
+ * Lessons 3.2 and 3.3 draw "where the test lead touches" with the changeover
+ * switch symbol. Its NF/NA contact names mean nothing for a test lead, and
+ * visible text inside a schematic control fails axe's
+ * label-content-name-mismatch check, so they are hidden in these circuits.
+ */
+:is([data-simulation='m03/tensao-pontos'], [data-simulation='m03/amperimetro'])
+  .sch-el[data-type='switch-spdt']
+  .sym-pin-text {
+  display: none;
+}

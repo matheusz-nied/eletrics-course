@@ -1,0 +1,158 @@
+/* EletronsLivres.tsx: free electrons in a copper wire. */
+
+.elivres__stage {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.elivres__ends {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.elivres__ends--on {
+  justify-content: space-between;
+  color: var(--accent);
+}
+
+.elivres__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* On a phone the drawing keeps a readable height and shows the middle of the wire. */
+  min-height: 9.5rem;
+  aspect-ratio: 640 / 170;
+}
+
+.elivres__wire {
+  fill: color-mix(in oklab, var(--copper) 16%, var(--bg));
+  stroke: color-mix(in oklab, var(--copper) 60%, var(--bg));
+  stroke-width: 2;
+}
+
+.elivres__ion circle {
+  fill: color-mix(in oklab, var(--copper) 45%, var(--bg));
+  stroke: var(--copper);
+  stroke-width: 1.5;
+}
+
+.elivres__ion path {
+  stroke: var(--copper);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.elivres__section {
+  stroke: var(--fg-muted);
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+}
+
+.elivres__electron {
+  fill: var(--accent);
+}
+
+.elivres__electron--marked {
+  fill: var(--danger);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.elivres__trail {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  opacity: 0.7;
+}
+
+.elivres__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+}
+
+.elivres__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.elivres__key {
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 999px;
+}
+
+.elivres__key--ion {
+  border: 1.5px solid var(--copper);
+  background: color-mix(in oklab, var(--copper) 45%, var(--bg));
+}
+
+.elivres__key--electron {
+  width: 0.6rem;
+  height: 0.6rem;
+  background: var(--accent);
+}
+
+.elivres__key--section {
+  width: 0;
+  height: 1rem;
+  border-left: 2px dashed var(--fg-muted);
+  border-radius: 0;
+}
+
+.elivres__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+}
+
+.elivres__switch {
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+}
+
+.elivres__controls [aria-pressed='true'] .elivres__switch {
+  background: currentColor;
+}
+
+.elivres__counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 0.5rem;
+}
+
+.elivres__counts > div {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  background: var(--bg);
+}
+
+.elivres__counts dt {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.elivres__counts dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}

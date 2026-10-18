@@ -1,0 +1,340 @@
+---
+titulo: Corrente elétrica
+modulo: m01-eletricidade-do-zero
+ordem: 2
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Definir corrente como a carga que passa por segundo e usar o ampère
+  - Diferenciar o sentido convencional da corrente do movimento real dos elétrons
+  - Explicar por que a lâmpada acende na hora, mesmo com os elétrons andando devagar
+  - Medir corrente com o multímetro em série, sem provocar um curto
+  - Reconhecer a diferença entre corrente contínua e corrente alternada
+prerequisitos: [m01-eletricidade-do-zero/01-atomos-eletrons-e-carga]
+tags: [corrente elétrica, ampère, sentido convencional, velocidade de deriva, CC, CA, amperímetro]
+seguranca: baixa-tensao
+---
+
+import CorrenteEmSerie from '../../../lessons/m01/figuras/CorrenteEmSerie.astro';
+import CorrenteSentidos from '../../../lessons/m01/figuras/CorrenteSentidos.astro';
+
+Olhe a etiqueta do carregador do celular, a do motor do portão e a alavanca de um disjuntor no quadro. Nas três aparece a mesma letra: **A**, de ampère. O carregador diz 2 A, o disjuntor diz 20 A, e o motor tem o número dele. Esses números decidem que fio usar, que disjuntor escolher e quanto tempo uma bateria aguenta.
+
+Mas o que exatamente está sendo contado? Na aula anterior, você viu que os fios estão cheios de elétrons livres e que uma pilha faz todos derivarem devagar para um lado. Esta aula transforma essa deriva numa grandeza que se mede: a corrente elétrica.
+
+## Carga que passa por segundo
+
+Pense na catraca de uma estação de metrô. Para saber o movimento da estação, não adianta saber quantas pessoas existem na cidade: o que interessa é quantas passam pela catraca a cada minuto.
+
+A <Term id="corrente-eletrica">corrente elétrica</Term> é a mesma ideia aplicada à carga. Escolha uma seção do fio, como a linha tracejada da animação da aula <LinkAula id="m01-eletricidade-do-zero/01-atomos-eletrons-e-carga" />, e conte quanta carga a atravessa num certo tempo:
+
+$$
+I = \frac{Q}{t}
+$$
+
+$I$ é a corrente, $Q$ é a carga que passou pela seção, em coulombs (C), e $t$ é o tempo, em segundos (s). A unidade de corrente é o <Term id="ampere">ampère</Term>, de símbolo A:
+
+$$
+1\,\text{A} = \frac{1\,\text{C}}{1\,\text{s}}
+$$
+
+Uma corrente de 1 A quer dizer que 1 coulomb atravessa a seção do fio a cada segundo. Como 1 C é a carga de cerca de $6{,}24 \times 10^{18}$ elétrons, 1 A são mais de seis quintilhões de elétrons passando por segundo.
+
+Correntes pequenas usam submúltiplos: o **miliampère** (1 mA = 0,001 A) e o **microampère** (1 µA = 0,000001 A). Na eletrônica, mA é a unidade do dia a dia. Os prefixos todos estão na aula <LinkAula id="m01-eletricidade-do-zero/06-unidades-e-ordens-de-grandeza" />.
+
+### Correntes do dia a dia
+
+Os valores abaixo são típicos, só para você criar uma noção de tamanho. O valor certo de cada aparelho está na etiqueta ou no manual dele.
+
+| Onde | Corrente típica |
+| --- | --- |
+| Relógio de pulso digital | alguns microampères |
+| LED de sinalização numa placa | de 2 mA a 20 mA |
+| Lâmpada LED de 9 W na tomada de 127 V | cerca de 0,1 A |
+| Lâmpada de 12 V e 6 W, a da simulação desta aula | 0,5 A |
+| Celular carregando, no cabo USB | de 1 A a 3 A |
+| Motor de um portão residencial, funcionando | alguns ampères |
+| Chuveiro de 5.500 W em 220 V | 25 A |
+| Motor de arranque de um carro, na partida | centenas de ampères |
+| Raio | dezenas de milhares de ampères |
+
+Compare com a aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />: algumas dezenas de miliampères pelo corpo já podem matar. Isso é menos que a corrente de uma lâmpada LED.
+
+## Explore: a corrente é a mesma em todo o caminho
+
+O circuito abaixo tem uma bateria de 12 V, uma chave e uma lâmpada de 12 V e 6 W, como a lanterna de um carro. Três amperímetros medem a corrente em três pontos diferentes: na chave, na lâmpada e dentro da própria bateria.
+
+<Simulation circuit="m01/corrente" />
+
+Faça os testes nesta ordem:
+
+1. Clique na chave para fechá-la. A lâmpada acende, e os três amperímetros mostram 0,499 A (no visor, 0.499), quase exatamente 0,5 A.
+2. Compare os três valores. A corrente que passa pela chave, antes da lâmpada, é a mesma que passa pela lâmpada e a mesma que atravessa a bateria. A lâmpada não "gasta" corrente: todo elétron que entra por um terminal sai pelo outro.
+3. Observe os pontos que correm pelos fios. Eles mostram a corrente no sentido convencional: saem do polo positivo da bateria, passam pela lâmpada e voltam pelo negativo. Se eles não aparecerem, abra o menu **Exibir** (o botão do olho) e marque **Corrente andando nos fios**.
+4. No mesmo menu, marque **Mostrar o sentido dos elétrons**. Os pontos passam a andar ao contrário. A lâmpada continua acesa do mesmo jeito.
+5. Abra a chave. A corrente para em todos os pontos ao mesmo tempo, inclusive dentro da bateria.
+
+Se a lâmpada não gasta corrente, o que ela gasta? **Energia**: a bateria empurra os elétrons, e a lâmpada transforma esse esforço em luz e calor. Os elétrons voltam para a bateria e recomeçam a volta. Esse é o assunto das aulas <LinkAula id="m01-eletricidade-do-zero/03-tensao" /> e <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />.
+
+<Callout type="nota" title="Por que não dá exatamente 0,5 A">
+Uma lâmpada de 12 V e 6 W puxa 0,5 A quando recebe exatamente 12 V. A bateria da simulação, como toda bateria real, tem uma pequena resistência interna, que "come" alguns centésimos de volt. A lâmpada recebe um pouco menos de 12 V e a corrente fica um pouco abaixo de 0,5 A. Fontes e baterias reais aparecem na aula <LinkAula id="m02-circuitos-cc/07-fontes-reais-e-baterias" />.
+</Callout>
+
+## Sentido convencional e sentido real
+
+Os esquemas desenham a corrente saindo do polo **positivo** da bateria, passando pelo circuito e voltando pelo **negativo**. Esse é o <Term id="sentido-convencional">sentido convencional</Term> da corrente. Ele foi escolhido no século XVIII, quando ninguém sabia o que se movia dentro dos fios.
+
+O elétron só foi descoberto em 1897. Aí se percebeu que, nos metais, quem anda são os elétrons, que têm carga negativa e vão do polo **negativo** para o **positivo** pelo circuito externo. Esse é o sentido real, ou eletrônico.
+
+<CorrenteSentidos />
+
+Na prática, os dois descrevem a mesma corrente. Elétrons negativos indo para a esquerda produzem os mesmos efeitos que cargas positivas indo para a direita: a lâmpada acende igual, o fio esquenta igual, a conta dá o mesmo resultado. Por isso a convenção nunca foi trocada. Todos os esquemas, as setas dos símbolos de diodos e transistores e os manuais usam o sentido convencional, e este curso também. Quando for importante falar dos elétrons, o texto avisa.
+
+## Se os elétrons são lentos, por que a luz acende na hora?
+
+A deriva dos elétrons num fio é muito lenta: frações de milímetro por segundo. Um elétron que sai do quadro de distribuição levaria horas para chegar à lâmpada do quarto. Mesmo assim, a lâmpada acende no instante em que você aperta o interruptor. Como?
+
+Porque o fio já está cheio de elétrons livres, do começo ao fim. Quando a chave fecha, o empurrão se espalha pelo fio quase na velocidade da luz, e todos os elétrons do circuito começam a andar praticamente ao mesmo tempo, inclusive os que já estão dentro da lâmpada.
+
+Imagine uma mangueira de jardim já cheia de água. Ao abrir a torneira, a água sai na ponta na hora, embora a água que acabou de entrar demore para chegar lá. A analogia tem um limite: a água sai da mangueira e se perde, enquanto os elétrons nunca saem do circuito. Eles dão a volta e retornam à bateria. Por isso a corrente só existe com o **circuito fechado**.
+
+<DeepDive title="Calculando a velocidade de deriva">
+
+A velocidade média com que os elétrons livres avançam é:
+
+$$
+v = \frac{I}{n \cdot e \cdot A}
+$$
+
+$v$ é a velocidade de deriva em metros por segundo, $I$ é a corrente em ampères, $n$ é o número de elétrons livres por metro cúbico do material, $e$ é a carga do elétron e $A$ é a área da seção do fio em metros quadrados.
+
+Para um fio de cobre de 2,5 mm², o mais usado nas tomadas de casa, levando 10 A:
+
+- $n \approx 8{,}5 \times 10^{28}$ elétrons por m³ (cobre)
+- $e \approx 1{,}6 \times 10^{-19}\,\text{C}$
+- $A = 2{,}5\,\text{mm}^2 = 2{,}5 \times 10^{-6}\,\text{m}^2$
+
+$$
+v = \frac{10}{8{,}5 \times 10^{28} \cdot 1{,}6 \times 10^{-19} \cdot 2{,}5 \times 10^{-6}} \approx \frac{10}{34.000} \approx 2{,}9 \times 10^{-4}\,\text{m/s}
+$$
+
+São cerca de 0,3 mm por segundo. Para andar 1 metro, um elétron levaria quase uma hora. Um caracol é mais rápido.
+
+O sinal, por outro lado, viaja pelos cabos a uma fração grande da velocidade da luz, tipicamente perto de dois terços dela: uns 200 mil quilômetros por segundo.
+
+Na tomada, que é de corrente alternada, os elétrons nem chegam a avançar. A corrente troca de sentido 120 vezes por segundo, e cada elétron só balança para frente e para trás, cerca de um milésimo de milímetro para cada lado. A energia chega à lâmpada mesmo assim, porque ela é levada pelo empurrão, e não pelos elétrons.
+
+</DeepDive>
+
+## Corrente contínua e corrente alternada
+
+Existem dois tipos de corrente, e você vai encontrar os dois no portão:
+
+- Na <Term id="corrente-continua">corrente contínua</Term> (**CC**), a corrente tem sempre o mesmo sentido. É a das pilhas, das baterias e das fontes de eletrônicos. Equipamentos e multímetros marcam com **DC**, **Vcc** ou o símbolo ⎓.
+- Na <Term id="corrente-alternada">corrente alternada</Term> (**CA**), a corrente troca de sentido o tempo todo. É a das tomadas: no Brasil, ela faz 60 ciclos por segundo (60 Hz). Equipamentos marcam com **AC**, **Vca** ou o símbolo ~.
+
+Num automatizador de portão comum, o motor costuma funcionar com a CA da rede, em 127 V ou 220 V, enquanto a central, o receptor do controle remoto e os sensores funcionam com CC de baixa tensão, produzida por uma fonte dentro da própria central. Saber qual parte trabalha com qual corrente é o primeiro passo para medir e consertar sem susto. A diferença entre as duas é o assunto da aula <LinkAula id="m06-corrente-alternada/01-da-cc-a-ca" />, e o automatizador por dentro, da aula <LinkAula id="m16-portao/01-anatomia-do-automatizador" />.
+
+## Medindo corrente
+
+Para medir quantos carros passam por uma rua, o contador precisa ficar **na** rua, não ao lado dela. Com a corrente é igual: o multímetro precisa ficar no caminho, para que toda a corrente passe por dentro dele. Isso se chama ligar **em série**.
+
+<CorrenteEmSerie />
+
+<Steps>
+  <Step title="Desligue o circuito">
+    Abra a chave ou desconecte a bateria antes de mexer. Você vai abrir o caminho da corrente, e não deve fazer isso com ela passando.
+  </Step>
+  <Step title="Prepare o multímetro">
+    Gire o seletor para corrente contínua (A⎓ ou mA⎓). Ponha a ponta preta no borne **COM** e a vermelha no borne de corrente: **mA** para correntes pequenas ou **10A** (ou 20A) para as maiores. Se não souber o tamanho da corrente, comece pelo borne de 10A.
+  </Step>
+  <Step title="Abra o circuito e feche pelo multímetro">
+    Solte um dos fios e ligue uma ponta do multímetro em cada lado da abertura. A ponta vermelha vai do lado que vem do positivo da bateria.
+  </Step>
+  <Step title="Ligue e leia">
+    Religue o circuito e leia o visor. Um sinal de menos indica que a corrente está entrando pela ponta preta: inverta as pontas, se quiser.
+  </Step>
+  <Step title="Desfaça na ordem certa">
+    Desligue o circuito, tire o multímetro, refaça a ligação original e **volte a ponta vermelha para o borne VΩ**. Esquecer a ponta no borne de corrente é a causa do erro mais perigoso da lista abaixo.
+  </Step>
+</Steps>
+
+<Callout type="perigo" title="Nunca ligue o multímetro em corrente direto numa fonte">
+Na posição de corrente, o multímetro funciona como um pedaço de fio, para atrapalhar o mínimo possível a corrente que mede. Se você encostar as pontas nos dois polos de uma bateria ou de uma tomada, ele vira um curto-circuito: no melhor caso, queima o fusível interno; no pior, as pontas derretem e saem faíscas na sua mão. Para medir a corrente de aparelhos da tomada, use o alicate amperímetro, que abraça um só fio e mede sem abrir o circuito.
+</Callout>
+
+O uso do multímetro e do alicate em cada tipo de corrente é detalhado na aula <LinkAula id="m03-medicoes/03-medindo-corrente" />.
+
+## Exemplo resolvido: a lâmpada de 12 V
+
+Na simulação, a lâmpada de 12 V e 6 W puxa 0,5 A da bateria.
+
+**a) Quanta carga passa pela lâmpada em 1 minuto?** Da definição de corrente, $Q = I \cdot t$. Um minuto são 60 segundos:
+
+$$
+Q = 0{,}5\,\text{A} \cdot 60\,\text{s} = 30\,\text{C}
+$$
+
+**b) Quantos elétrons atravessam a lâmpada por segundo?** Cada segundo, passam 0,5 C. Com $6{,}24 \times 10^{18}$ elétrons por coulomb:
+
+$$
+n = 0{,}5 \cdot 6{,}24 \times 10^{18} \approx 3{,}1 \times 10^{18}\ \text{elétrons por segundo}
+$$
+
+**c) Por quanto tempo uma bateria de 7 Ah mantém a lâmpada acesa?** A capacidade de baterias é escrita em ampère-hora (Ah), que também é uma carga: 1 Ah é a carga de 1 A durante 1 hora, ou seja, 3.600 C. Então:
+
+$$
+Q = 7\,\text{Ah} = 7 \cdot 3.600\,\text{C} = 25.200\,\text{C}
+$$
+
+$$
+t = \frac{Q}{I} = \frac{25.200\,\text{C}}{0{,}5\,\text{A}} = 50.400\,\text{s} = 14\,\text{h}
+$$
+
+Dá para chegar ao mesmo resultado direto em ampère-hora: $7\,\text{Ah} \div 0{,}5\,\text{A} = 14\,\text{h}$. Na prática, a bateria dura menos que isso, porque a capacidade real cai com correntes altas, com o frio e com a idade da bateria, e porque não se deve descarregá-la até o fim.
+
+<RealCase title="mAh, Ah e quanto tempo dura uma bateria">
+O número em mAh na bateria do celular é uma carga. Uma bateria de 4.000 mAh guarda 4 Ah, ou 14.400 C. Um celular que puxa, em média, 0,4 A durante o uso fica ligado cerca de $4\,\text{Ah} \div 0{,}4\,\text{A} = 10\,\text{h}$.
+
+A mesma conta serve para o portão. Alguns automatizadores têm um nobreak: quando a energia cai, uma bateria de 12 V, muitas vezes de 7 Ah, mantém a central funcionando e permite abrir o portão algumas vezes. Para estimar quanto tempo isso dura, você precisa de duas correntes, que estão no manual do equipamento ou que você mede com o multímetro e o alicate:
+
+- a corrente da central **em espera**, só aguardando o controle remoto, que é pequena e dura o tempo todo;
+- a corrente do motor **durante a manobra**, que é grande, mas dura poucos segundos a cada abertura.
+
+Divida a capacidade pela corrente para ter o tempo, como no exemplo da lâmpada. Na aula <LinkAula id="m10-fontes/03-baterias-e-nobreak" />, você vai fazer essa conta completa, com as perdas reais.
+
+Outra leitura importante: o "2 A" de um carregador é a corrente **máxima** que ele consegue fornecer, não a que ele empurra. Quem decide a corrente é o aparelho ligado nele. Por isso um carregador de 3 A não faz mal a um celular que pede 1 A.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **"A lâmpada consome a corrente."** A corrente que sai da lâmpada é igual à que entra. O que a lâmpada consome é energia.
+- **"Um carregador de mais ampères força mais corrente no aparelho."** A corrente indicada no carregador é a máxima que ele fornece. O aparelho puxa só o que precisa.
+- **"Para medir a corrente da tomada, é só pôr o multímetro em 10A e encostar as pontas."** Isso é um curto-circuito. Para aparelhos da tomada, use o alicate amperímetro.
+- **"Medi corrente e depois fui medir tensão."** Se a ponta vermelha ficou no borne de corrente, medir a tensão de uma bateria ou de uma tomada provoca um curto. Volte sempre a ponta para o VΩ.
+- **"A seta do esquema mostra para onde vão os elétrons."** A seta segue o sentido convencional. Os elétrons andam ao contrário.
+
+<Callout type="atencao" title="Baixa tensão também pede cuidado">
+Uma bateria de 12 V não dá choque perigoso em pele seca, mas consegue empurrar centenas de ampères por um curto-circuito. Uma chave de fenda encostada nos dois polos de uma bateria de carro ou de nobreak pode ficar em brasa, soltar faíscas e queimar a mão. Tire anéis, relógio e pulseiras antes de mexer em baterias, e nunca deixe ferramentas sobre elas.
+</Callout>
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Por um LED passam 0,6 C de carga em 30 s. Qual é a corrente, em mA?',
+      answer: 20,
+      tolerance: 0.02,
+      unit: 'mA',
+      explanation: 'I = Q ÷ t = 0,6 C ÷ 30 s = 0,02 A = 20 mA, uma corrente típica de LED.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma lâmpada de 12 V puxa 0,5 A da bateria. Quanta carga passa por ela em 2 minutos, em coulombs?',
+      answer: 60,
+      tolerance: 0.02,
+      unit: 'C',
+      explanation: 'Q = I · t = 0,5 A × 120 s = 60 C. Lembre de converter os minutos em segundos.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Num esquema, a seta de corrente sai do polo positivo da bateria e passa pela lâmpada. Por onde andam os elétrons no fio?',
+      options: [
+        {
+          text: 'Do polo negativo, pela lâmpada, até o polo positivo: ao contrário da seta',
+          correct: true,
+          feedback:
+            'Isso. A seta segue o sentido convencional. Os elétrons, de carga negativa, andam ao contrário.',
+        },
+        {
+          text: 'Do polo positivo para o negativo, junto com a seta',
+          feedback:
+            'Esse é o sentido convencional, imaginado com cargas positivas. Os elétrons andam ao contrário dele.',
+        },
+        {
+          text: 'Eles ficam parados; só a energia anda',
+          feedback:
+            'Os elétrons derivam devagar, mas andam. Com a corrente contínua da bateria, eles avançam sempre no mesmo sentido.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Numa lâmpada ligada a uma bateria, a corrente que sai da lâmpada é menor do que a que entra, porque a lâmpada gasta parte da corrente.',
+      answer: false,
+      explanation:
+        'A corrente é a mesma em todos os pontos de um caminho único, como os três amperímetros da simulação mostraram. A lâmpada gasta energia, não corrente.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Os elétrons derivam a menos de 1 mm por segundo. Por que a lâmpada acende assim que você aperta o interruptor?',
+      options: [
+        {
+          text: 'Porque o fio já está cheio de elétrons livres, e o empurrão se espalha quase na velocidade da luz',
+          correct: true,
+          feedback:
+            'Isso. Todos os elétrons do circuito, inclusive os que estão dentro da lâmpada, começam a andar praticamente ao mesmo tempo.',
+        },
+        {
+          text: 'Porque os elétrons que saem do interruptor correm até a lâmpada quase na velocidade da luz',
+          feedback:
+            'Os elétrons andam devagar. O que é rápido é o empurrão que se espalha pelo fio.',
+        },
+        {
+          text: 'Porque a lâmpada guarda elétrons de quando estava acesa',
+          feedback:
+            'A lâmpada não guarda carga. Os elétrons livres já estão em todo o fio, inclusive no filamento.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem os passos para medir a corrente de uma lâmpada ligada a uma bateria.',
+      items: [
+        'Desligar o circuito',
+        'Pôr o seletor em corrente e a ponta vermelha no borne de corrente',
+        'Abrir o circuito e ligar o multímetro em série',
+        'Religar o circuito e ler o visor',
+        'Desligar, refazer a ligação e voltar a ponta vermelha para o VΩ',
+      ],
+      explanation:
+        'O circuito só é aberto desligado, a corrente passa por dentro do multímetro e, no fim, a ponta vermelha volta para o borne de tensão, para não provocar um curto na próxima medição.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você quer saber a corrente que um aparelho ligado na tomada está puxando, sem desmontar nada. O que usar?',
+      options: [
+        {
+          text: 'O alicate amperímetro, abraçando só um dos fios',
+          correct: true,
+          feedback:
+            'Isso. O alicate mede a corrente pelo campo magnético em volta do fio, sem abrir o circuito. Ele precisa abraçar só um fio: com os dois, as correntes de ida e volta se cancelam.',
+        },
+        {
+          text: 'O multímetro em 10A, com as pontas encostadas na fase e no neutro da tomada',
+          feedback:
+            'Isso é um curto-circuito pela parte de dentro do multímetro, com faísca e risco de queimadura. Nunca faça.',
+        },
+        {
+          text: 'O multímetro em V~, que mostra a corrente junto com a tensão',
+          feedback:
+            'Na posição V~, o multímetro mede só a tensão. Tensão e corrente são grandezas diferentes.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- **Corrente** é a carga que atravessa uma seção do fio por segundo: $I = Q/t$. A unidade é o **ampère**: 1 A = 1 C por segundo.
+- Num caminho único, a corrente é a **mesma em todos os pontos**. A lâmpada não gasta corrente; ela gasta energia.
+- O **sentido convencional** vai do positivo para o negativo pelo circuito. Os elétrons andam ao contrário. Esquemas e manuais usam a convenção.
+- Os elétrons derivam devagar, mas o empurrão se espalha quase na velocidade da luz. Por isso a luz acende na hora, e a corrente só existe com o **circuito fechado**.
+- **CC** tem sentido fixo (pilhas, baterias, fontes); **CA** vai e volta 60 vezes por segundo, ou 60 Hz (tomadas).
+- Para medir corrente, o multímetro entra **em série**, com a ponta vermelha no borne de corrente. Nunca ligue o multímetro em corrente direto numa fonte.

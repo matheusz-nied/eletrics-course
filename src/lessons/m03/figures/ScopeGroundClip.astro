@@ -1,0 +1,175 @@
+---
+/* 03.5: why the probe ground clip must never touch the mains: it is tied to the outlet earth. */
+---
+
+<svg viewBox="0 0 680 300" width="680" height="300" class="fig" aria-hidden="true">
+  <!-- Scope -->
+  <g class="box">
+    <rect x="20" y="40" width="170" height="110" rx="8"></rect>
+  </g>
+  <rect x="34" y="54" width="100" height="70" rx="3" class="screen"></rect>
+  <text x="105" y="30" class="title">
+    Osciloscópio
+  </text>
+  <circle cx="160" cy="104" r="11" class="bnc"></circle>
+  <text x="160" y="138" class="tiny">
+    BNC
+  </text>
+
+  <!-- probe cable from BNC to the tip and clip -->
+  <path d="M171 104 C240 104 250 80 330 80" class="probe"></path>
+  <path d="M330 72 h56 l14 8 l-14 8 h-56 z" class="tip"></path>
+  <text x="365" y="62" class="tiny">
+    ponta
+  </text>
+  <path d="M300 82 C300 130 330 150 380 160" class="clip-wire"></path>
+  <path d="M380 152 l26 8 l-26 8 z" class="clip"></path>
+  <text x="370" y="190" class="tiny">
+    garra do terra
+  </text>
+
+  <!-- the mains circuit -->
+  <g class="box mains">
+    <rect x="450" y="40" width="210" height="160" rx="8"></rect>
+  </g>
+  <text x="555" y="30" class="title">
+    Circuito ligado na rede
+  </text>
+  <circle cx="490" cy="80" r="7" class="pt"></circle>
+  <text x="508" y="85" class="start lbl">
+    ponto qualquer
+  </text>
+  <circle cx="420" cy="160" r="7" class="pt hot"></circle>
+  <text x="508" y="165" class="start lbl hotlbl">
+    fase (127 V)
+  </text>
+  <path d="M427 160 H500" class="hotline"></path>
+
+  <!-- earth path inside the scope -->
+  <path d="M160 115 V170 H105 V230" class="earth"></path>
+  <text x="112" y="196" class="start tiny">
+    carcaça
+  </text>
+  <!-- power cord and plug -->
+  <path d="M105 230 V262" class="cord"></path>
+  <rect x="85" y="262" width="40" height="22" rx="4" class="plug"></rect>
+  <text x="135" y="279" class="start lbl">
+    pino terra da tomada
+  </text>
+
+  <!-- short-circuit path -->
+  <path d="M413 160 C370 205 320 230 250 230 H105" class="short" marker-end="url(#gc-arrow)"></path>
+  <defs>
+    <marker
+      id="gc-arrow"
+      viewBox="0 0 10 10"
+      refX="8"
+      refY="5"
+      markerWidth="7"
+      markerHeight="7"
+      orient="auto-start-reverse"
+    >
+      <path d="M0 0 L10 5 L0 10 z" class="arrowhead"></path>
+    </marker>
+  </defs>
+  <text x="300" y="258" class="danger strong">
+    Curto-circuito: fase → garra → carcaça → terra
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .box rect {
+    fill: var(--surface);
+    stroke: var(--border-strong);
+    stroke-width: 2;
+  }
+  .screen {
+    fill: #0b1015;
+  }
+  .bnc {
+    fill: #c8cdd4;
+    stroke: #5b626d;
+    stroke-width: 2;
+  }
+  .probe {
+    stroke: var(--fg-muted);
+    stroke-width: 4;
+  }
+  .tip {
+    fill: var(--fg-muted);
+  }
+  .clip-wire {
+    stroke: var(--fg);
+    stroke-width: 2.5;
+  }
+  .clip {
+    fill: var(--fg);
+  }
+  .pt {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .pt.hot {
+    stroke: var(--danger);
+    fill: var(--danger-soft);
+  }
+  .hotline {
+    stroke: var(--danger);
+    stroke-width: 2.5;
+  }
+  .earth {
+    stroke: var(--success);
+    stroke-width: 3;
+    stroke-dasharray: 6 4;
+  }
+  .cord {
+    stroke: var(--fg-muted);
+    stroke-width: 5;
+  }
+  .plug {
+    fill: var(--fg-muted);
+  }
+  .short {
+    stroke: var(--danger);
+    stroke-width: 3.5;
+  }
+  .arrowhead {
+    fill: var(--danger);
+  }
+  text {
+    stroke: none;
+    text-anchor: middle;
+    fill: var(--fg);
+    font-size: 14px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .title {
+    font-weight: 700;
+  }
+  .tiny {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .lbl {
+    font-size: 13px;
+  }
+  .hotlbl {
+    fill: var(--danger);
+    font-weight: 700;
+  }
+  .danger {
+    fill: var(--danger);
+  }
+  .strong {
+    font-weight: 700;
+  }
+</style>

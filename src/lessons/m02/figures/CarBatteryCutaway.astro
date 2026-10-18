@@ -22,20 +22,20 @@ const cellR = CELL_X0 + 5 * CELL_W;
 ---
 
 <svg viewBox="0 0 750 440" width="750" height="440" class="fig" aria-hidden="true">
-  <!-- Terminals -->
-  <g class="post-pos">
-    <rect x="96" y="30" width="38" height="40" rx="3" />
-    <ellipse cx="115" cy="30" rx="19" ry="6" />
-  </g>
+  <!-- Terminals: negative on the left, positive on the right, as in the 3D kit's car-battery -->
   <g class="post-neg">
-    <rect x="512" y="33" width="32" height="37" rx="3" />
-    <ellipse cx="528" cy="33" rx="16" ry="5" />
+    <rect x="99" y="33" width="32" height="37" rx="3" />
+    <ellipse cx="115" cy="33" rx="16" ry="5" />
   </g>
-  <text x="115" y="56" class="sign pos">
-    +
-  </text>
-  <text x="528" y="58" class="sign">
+  <g class="post-pos">
+    <rect x="509" y="30" width="38" height="40" rx="3" />
+    <ellipse cx="528" cy="30" rx="19" ry="6" />
+  </g>
+  <text x="115" y="58" class="sign">
     −
+  </text>
+  <text x="528" y="56" class="sign pos">
+    +
   </text>
 
   <!-- Lid and vent caps -->
@@ -97,10 +97,13 @@ const cellR = CELL_X0 + 5 * CELL_W;
     Ligação entre células (em série)
   </text>
   <text x="144" y="48" class="lbl start">
-    Terminal positivo, mais grosso
-  </text>
-  <text x="554" y="48" class="lbl start">
     Terminal negativo
+  </text>
+  <text x="554" y="44" class="lbl start">
+    Terminal positivo,
+  </text>
+  <text x="554" y="60" class="lbl start">
+    mais grosso
   </text>
 
   <!-- Right -->

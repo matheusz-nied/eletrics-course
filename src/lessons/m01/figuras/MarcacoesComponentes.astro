@@ -1,0 +1,203 @@
+---
+/*
+ * Lesson 1.6: values printed on real parts. An SMD resistor ("472"), a
+ * ceramic capacitor ("104"), an electrolytic capacitor written in full and
+ * an example motor nameplate. Four small drawings so the text stays legible
+ * on a phone.
+ */
+import Figure from '../../../components/Figure.astro';
+---
+
+<Figure
+  wide
+  alt="Quatro componentes com valores impressos. Um resistor SMD, uma pecinha preta retangular, com o número 472: 4,7 kΩ. Um capacitor cerâmico em forma de disco com o número 104: 100 nF. Um capacitor eletrolítico cilíndrico com o valor escrito por extenso, 1000 µF e 25 V, e uma faixa marcando o terminal negativo. E a plaqueta de exemplo de um motor monofásico: 127 V, 60 Hz, 1/4 CV, 1.720 rpm, 3,8 A e capacitor de 20 µF."
+  caption="Os valores impressos nas peças usam códigos e prefixos. Os números da plaqueta são um exemplo: confira sempre a plaqueta do seu motor."
+>
+  <div class="fig-marc">
+    <div class="fig-marc__item">
+      <svg viewBox="0 0 160 90" width="160" height="90" aria-hidden="true">
+        <rect x="70" y="30" width="20" height="30" rx="2" class="fig-marc__pad"></rect>
+        <rect x="40" y="25" width="80" height="40" rx="3" class="fig-marc__smd"></rect>
+        <rect x="34" y="25" width="10" height="40" rx="2" class="fig-marc__end"></rect>
+        <rect x="116" y="25" width="10" height="40" rx="2" class="fig-marc__end"></rect>
+        <text x="80" y="52" text-anchor="middle" class="fig-marc__print">
+          472
+        </text>
+      </svg>
+      <p class="fig-marc__name">Resistor SMD</p>
+      <p class="fig-marc__read">472 = 47 × 10² Ω = 4,7 kΩ</p>
+    </div>
+
+    <div class="fig-marc__item">
+      <svg viewBox="0 0 160 90" width="160" height="90" aria-hidden="true">
+        <path d="M70 66v22M90 66v22" class="fig-marc__leg"></path>
+        <ellipse cx="80" cy="40" rx="34" ry="30" class="fig-marc__disc"></ellipse>
+        <text x="80" y="46" text-anchor="middle" class="fig-marc__print fig-marc__print--dark">
+          104
+        </text>
+      </svg>
+      <p class="fig-marc__name">Capacitor cerâmico</p>
+      <p class="fig-marc__read">104 = 10 × 10⁴ pF = 100 nF</p>
+    </div>
+
+    <div class="fig-marc__item">
+      <svg viewBox="0 0 160 90" width="160" height="90" aria-hidden="true">
+        <rect x="44" y="8" width="72" height="74" rx="8" class="fig-marc__can"></rect>
+        <rect x="96" y="8" width="20" height="74" rx="0" class="fig-marc__stripe"></rect>
+        <text x="106" y="34" text-anchor="middle" class="fig-marc__minus">
+          −
+        </text>
+        <text x="106" y="64" text-anchor="middle" class="fig-marc__minus">
+          −
+        </text>
+        <text x="70" y="40" text-anchor="middle" class="fig-marc__print fig-marc__print--small">
+          1000µF
+        </text>
+        <text x="70" y="58" text-anchor="middle" class="fig-marc__print fig-marc__print--small">
+          25V
+        </text>
+      </svg>
+      <p class="fig-marc__name">Capacitor eletrolítico</p>
+      <p class="fig-marc__read">escrito por extenso: 1.000 µF, até 25 V</p>
+    </div>
+
+    <div class="fig-marc__item">
+      <svg viewBox="0 0 160 90" width="160" height="90" aria-hidden="true">
+        <rect x="8" y="6" width="144" height="78" rx="6" class="fig-marc__plate"></rect>
+        <circle cx="16" cy="14" r="2.5" class="fig-marc__rivet"></circle>
+        <circle cx="144" cy="14" r="2.5" class="fig-marc__rivet"></circle>
+        <circle cx="16" cy="76" r="2.5" class="fig-marc__rivet"></circle>
+        <circle cx="144" cy="76" r="2.5" class="fig-marc__rivet"></circle>
+        <text x="80" y="22" text-anchor="middle" class="fig-marc__plate-t fig-marc__plate-t--head">
+          MOTOR MONOFÁSICO
+        </text>
+        <text x="80" y="39" text-anchor="middle" class="fig-marc__plate-t">
+          127 V~ 60 Hz
+        </text>
+        <text x="80" y="54" text-anchor="middle" class="fig-marc__plate-t">
+          1/4 CV 1.720 rpm
+        </text>
+        <text x="80" y="69" text-anchor="middle" class="fig-marc__plate-t">
+          3,8 A CAP. 20 µF
+        </text>
+      </svg>
+      <p class="fig-marc__name">Plaqueta de motor (exemplo)</p>
+      <p class="fig-marc__read">tensão, frequência, potência, rotação, corrente</p>
+    </div>
+  </div>
+</Figure>
+
+<style>
+  .fig-marc {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .fig-marc__item {
+    display: grid;
+    justify-items: center;
+    gap: 0.2rem;
+    text-align: center;
+  }
+
+  .fig-marc__item svg {
+    width: 100%;
+    max-width: 10rem;
+    height: auto;
+  }
+
+  .fig-marc__name {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    font-weight: 650;
+  }
+
+  .fig-marc__read {
+    margin: 0;
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    line-height: 1.35;
+  }
+
+  .fig-marc__pad {
+    fill: color-mix(in oklab, #3c8a4a 50%, var(--bg));
+  }
+
+  .fig-marc__smd {
+    fill: #1d1f23;
+  }
+
+  .fig-marc__end {
+    fill: #b8bdc4;
+    stroke: #8a9099;
+    stroke-width: 1;
+  }
+
+  .fig-marc__print {
+    fill: #f2f2f2;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .fig-marc__print--dark {
+    fill: #2a1a0e;
+  }
+
+  .fig-marc__print--small {
+    font-size: 13px;
+  }
+
+  .fig-marc__leg {
+    stroke: #9aa1aa;
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  .fig-marc__disc {
+    fill: #d98a3a;
+    stroke: #a8621f;
+    stroke-width: 2;
+  }
+
+  .fig-marc__can {
+    fill: #2f4f8a;
+  }
+
+  .fig-marc__stripe {
+    fill: #c7d3e8;
+  }
+
+  .fig-marc__minus {
+    fill: #2f4f8a;
+    font-family: var(--font-sans);
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .fig-marc__plate {
+    fill: #c9ced6;
+    stroke: #8a9099;
+    stroke-width: 1.5;
+  }
+
+  .fig-marc__rivet {
+    fill: #8a9099;
+  }
+
+  .fig-marc__plate-t {
+    fill: #1d1f23;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+
+  .fig-marc__plate-t--head {
+    font-family: var(--font-sans);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+</style>

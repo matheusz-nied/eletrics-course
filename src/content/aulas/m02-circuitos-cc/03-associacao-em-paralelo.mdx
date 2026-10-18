@@ -38,7 +38,7 @@ E uma consequência prática: **cada ramo é independente**. Abrir um ramo (desl
   <ParallelSplit />
 </Figure>
 
-Siga as setas da figura. Saem 20 mA da fonte. No primeiro nó, 12 mA descem por R1 e 8 mA seguem em frente. No segundo nó, 5,45 mA descem por R2 e 2,55 mA seguem para R3. Na volta, tudo se junta e os mesmos 20 mA chegam ao negativo da fonte. Nenhum elétron se perde no caminho: o que entra num nó é igual ao que sai. Essa ideia vai virar a lei dos nós na aula de Kirchhoff.
+Siga as setas da figura. Saem 20 mA da fonte. No primeiro nó, 12 mA descem por R1 e 8 mA seguem em frente. No segundo nó, 5,45 mA descem por R2 e 2,55 mA seguem para R3. Na volta, tudo se junta e os mesmos 20 mA chegam ao negativo da fonte. Nenhum elétron se perde no caminho: o que entra num nó é igual ao que sai. Essa ideia vai virar a lei dos nós nas [Leis de Kirchhoff](../05-leis-de-kirchhoff/).
 
 <Callout type="nota" title="Onde a analogia da água ajuda (e onde para)">
 Pense num cano principal que se divide em três torneiras abertas. Cada torneira recebe a pressão inteira da rede, e a vazão do cano principal é a soma das vazões das torneiras. A analogia funciona bem para o paralelo, mas não leve longe demais: um cano aberto derrama água, enquanto um fio interrompido simplesmente para a corrente.
@@ -138,7 +138,7 @@ No carro, quase tudo está em paralelo na bateria: faróis, lanternas, rádio, v
 Com L1 e L2 acesas, o fusível conduz cerca de 2,15 A: um pouco acima dos 2 A nominais, o que um fusível aguenta indefinidamente. As duas lâmpadas recebem a mesma tensão, quase 12 V. Ligando L3, a corrente sobe para cerca de 3,9 A, quase o dobro do valor do fusível, e ele rompe depois de uns 6 segundos, apagando as três lâmpadas de uma vez. Só com L2 e L3 (cerca de 3,5 A), ele demora mais, uns 10 segundos, mas rompe do mesmo jeito.
 
 <Callout type="nota" title="Por que um fusível retardado">
-Uma lâmpada incandescente fria tem resistência cerca de 14 vezes menor que acesa. No instante em que liga, ela puxa um pico de corrente que dura uma fração de segundo. Um fusível rápido de 2 A romperia nesse pico, toda vez que alguém acendesse uma lâmpada de 21 W. Por isso o circuito usa um fusível **retardado**, que tolera picos curtos e rompe quando o excesso de corrente dura. Você vai ver os tipos de fusível no módulo de componentes passivos.
+Uma lâmpada incandescente fria tem resistência cerca de 14 vezes menor que acesa. No instante em que liga, ela puxa um pico de corrente que dura uma fração de segundo. Um fusível rápido de 2 A romperia nesse pico, toda vez que alguém acendesse uma lâmpada de 21 W. Por isso o circuito usa um fusível **retardado**, que tolera picos curtos e rompe quando o excesso de corrente dura. Você vai ver os tipos de fusível na aula <LinkAula id="m04-passivos/06-fusiveis-e-protecao" />.
 </Callout>
 
 ## Série ou paralelo?
@@ -182,7 +182,7 @@ Se o disjuntor desarma com frequência, a tentação é trocar o de 20 A por um 
 </Callout>
 
 - **Benjamim e extensão com aparelhos de aquecimento.** Um benjamim (adaptador T) ou uma régua de tomadas coloca vários aparelhos em paralelo num único plugue. Todas as correntes passam pelos contatos daquele plugue e pelo fio da extensão. Os adaptadores e extensões têm a corrente máxima marcada no corpo (10 A é comum). Um aquecedor e uma air fryer juntos passam disso com folga: o plugue esquenta, escurece e pode derreter.
-- **Achar que ligar mais um aparelho "divide" a tensão.** Em paralelo, cada aparelho recebe a tensão inteira. O que aumenta é a corrente total no fio. Se a luz pisca quando o chuveiro liga, a causa é a queda de tensão nos fios e na rede, que você vai entender na aula de fontes reais.
+- **Achar que ligar mais um aparelho "divide" a tensão.** Em paralelo, cada aparelho recebe a tensão inteira. O que aumenta é a corrente total no fio. Se a luz pisca quando o chuveiro liga, a causa é a queda de tensão nos fios e na rede, que você vai entender na aula [Fontes reais e baterias](../07-fontes-reais-e-baterias/).
 - **Mexer em tomada "porque é só desligar o aparelho".** Tirar o aparelho da tomada abre apenas aquele ramo; a tomada continua com 127 V. Para mexer na tomada, desligue o disjuntor do circuito e teste a ausência de tensão antes.
 - **Confundir "mais potente" com "mais resistência".** Em paralelo, o aparelho mais potente é o de **menor** resistência, e é ele que puxa mais corrente.
 

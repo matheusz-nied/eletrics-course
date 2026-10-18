@@ -1,0 +1,197 @@
+---
+/*
+ * Lesson 1.2: the same battery and lamp with the two directions of current:
+ * the conventional one (+ to − through the outside circuit) and the real
+ * motion of the electrons (− to + through the outside circuit).
+ */
+import Figure from '../../../components/Figure.astro';
+
+const ELECTRONS = [
+  [150, 82],
+  [250, 82],
+  [356, 115],
+  [356, 165],
+  [150, 198],
+  [250, 198],
+];
+---
+
+<Figure
+  alt="Uma bateria ligada a uma lâmpada. Por fora do circuito, setas cheias mostram o sentido convencional da corrente: saem do polo positivo, passam pela lâmpada e voltam ao polo negativo. Por dentro, setas pontilhadas com elétrons mostram o sentido real: os elétrons saem do polo negativo, passam pela lâmpada e chegam ao polo positivo."
+  caption="Dois jeitos de contar a mesma corrente. As setas cheias, por fora, seguem a convenção usada em todos os esquemas: do positivo para o negativo pelo circuito. Os elétrons, nas setas pontilhadas por dentro, andam ao contrário. A lâmpada acende do mesmo jeito."
+>
+  <svg
+    class="fig-sentidos"
+    viewBox="0 0 460 280"
+    width="460"
+    height="280"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    font-family="var(--font-sans)"
+    font-size="16"
+  >
+    <defs>
+      <marker
+        id="fig-sentidos-conv"
+        viewBox="0 0 10 10"
+        refX="8"
+        refY="5"
+        markerWidth="6"
+        markerHeight="6"
+        orient="auto-start-reverse"
+      >
+        <path d="M0 0L10 5L0 10z" class="fig-sentidos__conv-head"></path>
+      </marker>
+      <marker
+        id="fig-sentidos-el"
+        viewBox="0 0 10 10"
+        refX="8"
+        refY="5"
+        markerWidth="6"
+        markerHeight="6"
+        orient="auto-start-reverse"
+      >
+        <path d="M0 0L10 5L0 10z" class="fig-sentidos__el-head"></path>
+      </marker>
+    </defs>
+
+    <!-- Circuit -->
+    <path
+      d="M70 132V60h310v62M380 158v62H70v-72"
+      class="fig-sentidos__wire"
+      stroke-width="3"
+    ></path>
+    <path d="M52 132h36" class="fig-sentidos__wire" stroke-width="3"></path>
+    <path d="M60 148h20" class="fig-sentidos__wire" stroke-width="7"></path>
+    <text x="34" y="130" text-anchor="middle" class="fig-sentidos__sign">
+      +
+    </text>
+    <text x="34" y="160" text-anchor="middle" class="fig-sentidos__sign">
+      −
+    </text>
+    <circle cx="380" cy="140" r="18" class="fig-sentidos__lamp" stroke-width="3"></circle>
+    <path d="M367 127l26 26M393 127l-26 26" class="fig-sentidos__wire" stroke-width="2.5"></path>
+    <text x="70" y="252" text-anchor="middle" class="fig-sentidos__small">
+      bateria
+    </text>
+    <text x="380" y="252" text-anchor="middle" class="fig-sentidos__small">
+      lâmpada
+    </text>
+
+    <!-- Conventional current, outside the loop -->
+    <path
+      d="M110 38H340"
+      class="fig-sentidos__conv"
+      stroke-width="3"
+      marker-end="url(#fig-sentidos-conv)"
+    ></path>
+    <path
+      d="M404 90V190"
+      class="fig-sentidos__conv"
+      stroke-width="3"
+      marker-end="url(#fig-sentidos-conv)"
+    ></path>
+    <path
+      d="M340 242H110"
+      class="fig-sentidos__conv"
+      stroke-width="3"
+      marker-end="url(#fig-sentidos-conv)"
+    ></path>
+    <text x="225" y="24" text-anchor="middle" class="fig-sentidos__label fig-sentidos__label--conv">
+      sentido convencional
+    </text>
+
+    <!-- Electrons, inside the loop -->
+    <path
+      d="M110 198H330"
+      class="fig-sentidos__el"
+      stroke-width="2.5"
+      marker-end="url(#fig-sentidos-el)"
+    ></path>
+    <path
+      d="M356 190V96"
+      class="fig-sentidos__el"
+      stroke-width="2.5"
+      marker-end="url(#fig-sentidos-el)"
+    ></path>
+    <path
+      d="M330 82H110"
+      class="fig-sentidos__el"
+      stroke-width="2.5"
+      marker-end="url(#fig-sentidos-el)"
+    ></path>
+    {ELECTRONS.map(([x, y]) => (
+      <circle cx={x} cy={y} r="5" class="fig-sentidos__electron" />
+    ))}
+    <text x="225" y="136" text-anchor="middle" class="fig-sentidos__label fig-sentidos__label--el">
+      elétrons
+    </text>
+    <text x="225" y="156" text-anchor="middle" class="fig-sentidos__small">
+      (sentido real)
+    </text>
+  </svg>
+</Figure>
+
+<style>
+  .fig-sentidos {
+    color: var(--fg);
+  }
+
+  .fig-sentidos text {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .fig-sentidos__wire {
+    stroke: var(--fg-muted);
+  }
+
+  .fig-sentidos__lamp {
+    stroke: var(--fg-muted);
+    fill: color-mix(in oklab, var(--warning) 25%, var(--bg));
+  }
+
+  .fig-sentidos text.fig-sentidos__sign {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .fig-sentidos__label {
+    font-weight: 700;
+  }
+
+  .fig-sentidos text.fig-sentidos__small {
+    fill: var(--fg-muted);
+    font-size: 14px;
+  }
+
+  .fig-sentidos__conv {
+    stroke: var(--warning);
+  }
+
+  .fig-sentidos__conv-head {
+    fill: var(--warning);
+  }
+
+  .fig-sentidos text.fig-sentidos__label--conv {
+    fill: var(--warning);
+  }
+
+  .fig-sentidos__el {
+    stroke: var(--accent);
+    stroke-dasharray: 2 6;
+  }
+
+  .fig-sentidos__el-head {
+    fill: var(--accent);
+  }
+
+  .fig-sentidos__electron {
+    fill: var(--accent);
+  }
+
+  .fig-sentidos text.fig-sentidos__label--el {
+    fill: var(--accent);
+  }
+</style>

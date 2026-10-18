@@ -1,0 +1,318 @@
+---
+titulo: Potência e energia
+modulo: m01-eletricidade-do-zero
+ordem: 5
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Calcular a potência de um aparelho com P = V·I e com as formas que vêm da Lei de Ohm
+  - Explicar por que fios, conexões e resistências esquentam (efeito Joule)
+  - Entender por que a posição inverno do chuveiro tem menos resistência e mais potência
+  - Transformar potência e tempo de uso em energia (kWh) e estimar o custo na conta de luz
+prerequisitos: [m01-eletricidade-do-zero/04-lei-de-ohm]
+tags: [potência, energia, watt, kWh, efeito Joule, chuveiro, conta de luz]
+seguranca: rede
+---
+
+import CustoEnergia from '../../../lessons/m01/CustoEnergia';
+import ResistenciaChuveiro from '../../../lessons/m01/figuras/ResistenciaChuveiro.astro';
+
+Chega o inverno e a conta de luz sobe. O suspeito de sempre é o chuveiro, e com razão: ele é, de longe, o aparelho mais potente da maioria das casas brasileiras. Mas repare num detalhe curioso. A parte que esquenta a água se chama **resistência**, e mesmo assim a posição inverno, a mais quente, é a que usa **menos** resistência. Como pode?
+
+Nesta aula você vai entender o que é potência, por que a corrente esquenta o que atravessa e como transformar os watts da etiqueta em reais na conta de luz. No caminho, o mistério do chuveiro se resolve com uma única fórmula.
+
+## Potência é rapidez
+
+Imagine duas pessoas carregando a mesma pilha de caixas para o segundo andar. As duas fazem o mesmo trabalho, mas uma termina em dez minutos e a outra em uma hora. A primeira tem mais **potência**: faz o mesmo trabalho em menos tempo.
+
+Com a eletricidade é igual. A <Term id="potencia-eletrica">potência elétrica</Term> diz com que rapidez um aparelho transforma energia elétrica em outra coisa: calor no chuveiro, luz na lâmpada, movimento no motor do portão. A unidade é o <Term id="watt">watt</Term> (W): um aparelho de 1 W transforma um joule de energia a cada segundo. O joule (J) é a unidade de energia do SI.
+
+É o número que vem na etiqueta ou na plaqueta dos aparelhos. Alguns valores típicos:
+
+| Aparelho | Potência típica |
+|----------|-----------------|
+| Carregador de celular | 10 W a 20 W |
+| Lâmpada LED | 9 W |
+| TV | 100 W |
+| Ferro de passar | 1.000 W |
+| Micro-ondas | 1.200 W |
+| Chuveiro elétrico (inverno) | 5.500 W a 7.500 W |
+
+O chuveiro gasta, a cada segundo, a energia que seiscentas lâmpadas LED gastariam juntas.
+
+## A fórmula da potência elétrica
+
+Na aula <LinkAula id="m01-eletricidade-do-zero/03-tensao" /> você viu que a tensão é a energia que cada coulomb de carga entrega ao passar pelo aparelho. Na aula <LinkAula id="m01-eletricidade-do-zero/02-corrente-eletrica" />, que a corrente é quantos coulombs passam por segundo. Multiplique as duas e as cargas se cancelam: sobra energia por segundo, que é a potência.
+
+$$
+P = V \cdot I
+$$
+
+- $P$ é a potência, em watts (W);
+- $V$ é a tensão nos terminais do aparelho, em volts (V);
+- $I$ é a corrente que passa por ele, em ampères (A).
+
+Um chuveiro de 220 V que puxa 25 A tem potência $P = 220 \times 25 = 5.500\,\text{W}$. Uma lâmpada LED de 9 W em 127 V puxa $I = 9 / 127 \approx 0{,}07\,\text{A}$, ou 70 mA.
+
+<Callout type="nota" title="Uma ressalva sobre a corrente alternada">
+Para aparelhos que só aquecem, como chuveiro, ferro e torradeira, $P = V \cdot I$ vale exatamente na rede elétrica, usando os valores de 127 V ou 220 V. Em motores e fontes eletrônicas a conta real tem um ajuste chamado fator de potência, assunto da aula <LinkAula id="m06-corrente-alternada/05-potencia-e-fator-de-potencia" />. Para estimar a corrente de um aparelho, a fórmula simples já dá uma boa ideia.
+</Callout>
+
+### Juntando com a Lei de Ohm
+
+A <Term id="lei-de-ohm">Lei de Ohm</Term> diz que $V = R \cdot I$. Trocando $V$ ou $I$ na fórmula da potência, aparecem mais duas formas, todas equivalentes:
+
+$$
+P = V \cdot I \qquad P = R \cdot I^2 \qquad P = \frac{V^2}{R}
+$$
+
+Use a que combina com o que você sabe:
+
+- Sabe a tensão e a corrente? $P = V \cdot I$.
+- Sabe a corrente e a resistência, como num fio? $P = R \cdot I^2$.
+- Sabe a tensão e a resistência, como num aparelho ligado na tomada? $P = V^2 / R$.
+
+<DeepDive title="De onde vêm as outras duas fórmulas">
+Comece por $P = V \cdot I$.
+
+Trocando $V$ por $R \cdot I$: $P = (R \cdot I) \cdot I = R \cdot I^2$.
+
+Trocando $I$ por $V / R$: $P = V \cdot \dfrac{V}{R} = \dfrac{V^2}{R}$.
+
+As unidades conferem: $\Omega \cdot \text{A}^2 = (\text{V}/\text{A}) \cdot \text{A}^2 = \text{V} \cdot \text{A} = \text{W}$.
+</DeepDive>
+
+## O efeito Joule: por que a corrente esquenta
+
+Quando a corrente atravessa um material, os elétrons esbarram o tempo todo nos átomos dele. A cada esbarrão, entregam um pouco de energia, que faz os átomos vibrarem mais. Vibração dos átomos é o que chamamos de calor. Esse aquecimento é o <Term id="efeito-joule">efeito Joule</Term>, e a potência que vira calor numa resistência é:
+
+$$
+P = R \cdot I^2
+$$
+
+Repare no quadrado: dobrando a corrente, o calor fica **quatro vezes** maior. O efeito Joule é o que faz funcionar o chuveiro, o ferro de passar, a torradeira e o <Term id="fusivel">fusível</Term>, que derrete de propósito quando a corrente passa do limite. E é também o que derrete tomadas e incendeia extensões.
+
+O lugar mais perigoso costuma ser uma conexão ruim. Um <Term id="borne">borne</Term> frouxo ou uma emenda malfeita têm uma resistência pequena, mas a corrente do circuito inteiro passa por ali. Com 0,05 Ω de mau contato e os 25 A de um chuveiro:
+
+$$
+P = 0{,}05 \times 25^2 = 0{,}05 \times 625 \approx 31\,\text{W}
+$$
+
+São 31 W concentrados num pontinho de metal, a potência de um ferro de solda pequeno. É assim que conexões de chuveiro escurecem e derretem.
+
+## O chuveiro por dentro
+
+Agora o mistério. A resistência do chuveiro é um fio de uma liga metálica, enrolado em espiral para caber no aparelho, com **três terminais**: um em cada ponta e um no meio.
+
+<ResistenciaChuveiro />
+
+A tensão da rede é sempre a mesma, 220 V neste exemplo. Com a tensão fixa, a forma útil é $P = V^2 / R$: **quanto menor a resistência, maior a potência**. Menos resistência deixa passar mais corrente, e a potência sobe junto.
+
+- **Inverno:** a chave liga a rede entre os terminais A e B, metade do fio. Resistência típica de 8,8 Ω.
+- **Verão:** a chave liga a rede entre A e C, o fio inteiro. São 17,6 Ω, o dobro.
+
+A palavra "resistência" engana: a resistência não é o que esquenta, é o que **limita** a corrente. O calor vem da corrente que passa. Na posição verão, mais fio limita mais a corrente, e o chuveiro esquenta menos.
+
+O chuveiro tem ainda uma segunda chave, a **chave de pressão**: um diafragma que a própria água empurra e que só fecha o contato quando a água está passando. É por isso que ele não esquenta com o registro fechado, e é por isso que a resistência não queima seca.
+
+## Explore: verão e inverno no simulador
+
+A simulação abaixo é esse chuveiro de 220 V. Os multímetros mostram a tensão na resistência e a corrente; a potência fica por sua conta, com $P = V \cdot I$.
+
+<Simulation circuit="m01/chuveiro" />
+
+1. Comece como está: água fechada. Quanto marcam a tensão e a corrente? A chave de pressão aberta deixa passar só uma corrente desprezível, menor que um microampère, como toda chave real.
+2. Clique na chave de pressão (ou use a chave "Abrir a água", abaixo do desenho). A chave verão/inverno está em verão: confira **220 V** e **12,5 A**. O visor da tensão mostra 0.220 kV, que é o mesmo valor escrito com o prefixo quilo. Multiplique tensão e corrente: quanto dá a potência?
+3. Passe o mouse (ou toque) em cada trecho da resistência para ver a potência dissipada nele. Os dois trechos dividem o calor ao meio.
+4. Ligue a **posição inverno**. A resistência caiu pela metade. O que aconteceu com a corrente? E com a potência de cada trecho?
+5. Ligue "Corrente andando nos fios" no menu Exibir e compare as duas posições.
+6. No inverno a corrente é de 25 A. Por que o disjuntor e o fio do chuveiro precisam ser maiores que os de uma tomada comum?
+
+O quadro de desafios abaixo do desenho tem uma linha para cada posição, com a corrente e a potência que você deve encontrar. Cada linha fica marcada quando você liga o chuveiro naquela posição; teste as duas. O botão Reiniciar apaga as marcas para começar de novo.
+
+<Callout type="nota" title="Por que a rede aparece como fonte contínua">
+A rede é de corrente alternada, mas os 220 V são o valor eficaz: o valor de uma tensão contínua que aqueceria a resistência do mesmo jeito. Para uma carga que só esquenta, a fonte contínua de 220 V dá a mesma potência, por isso a simulação usa a forma mais simples.
+</Callout>
+
+## Exemplo resolvido: lendo a etiqueta do chuveiro
+
+A etiqueta de um chuveiro diz **220 V, 5.500 W** (posição inverno). Quanto ele puxa de corrente? Qual a resistência? E se alguém ligar esse chuveiro numa rede de 127 V por engano?
+
+**Corrente.** Da fórmula da potência:
+
+$$
+I = \frac{P}{V} = \frac{5.500\,\text{W}}{220\,\text{V}} = 25\,\text{A}
+$$
+
+**Resistência.** Pela Lei de Ohm:
+
+$$
+R = \frac{V}{I} = \frac{220\,\text{V}}{25\,\text{A}} = 8{,}8\,\Omega
+$$
+
+Conferindo com a outra fórmula: $P = R \cdot I^2 = 8{,}8 \times 625 = 5.500\,\text{W}$. Bate com a simulação na posição inverno.
+
+**Em 127 V.** A resistência é a mesma, 8,8 Ω, mas a tensão é menor:
+
+$$
+P = \frac{V^2}{R} = \frac{127^2}{8{,}8} = \frac{16.129}{8{,}8} \approx 1.833\,\text{W}
+$$
+
+Como a tensão entra ao quadrado, uma tensão 42% menor derruba a potência para um terço. O banho fica morno.
+
+O contrário é perigoso. Um chuveiro feito para 127 V tem uma resistência bem menor; ligado em 220 V, ele recebe uma potência cerca de três vezes maior que a de projeto e a resistência queima, quando a fiação não esquenta antes. **Confira sempre a tensão da etiqueta antes de instalar.**
+
+## Energia: potência vezes tempo
+
+Potência é rapidez. A <Term id="energia-eletrica">energia</Term> é o total gasto, e depende de quanto tempo o aparelho fica ligado:
+
+$$
+E = P \cdot t
+$$
+
+Com $P$ em watts e $t$ em segundos, a energia sai em joules. Só que o joule é pequeno demais para a conta de luz: um banho de dez minutos no inverno gasta $5.500 \times 600 = 3.300.000\,\text{J}$. Por isso as distribuidoras usam o **quilowatt-hora** (kWh): a energia de um aparelho de 1.000 W (1 kW) ligado por uma hora.
+
+$$
+E\,[\text{kWh}] = P\,[\text{kW}] \times t\,[\text{h}]
+$$
+
+Um kWh são 3.600.000 J, ou 3,6 MJ. O banho de dez minutos: $5{,}5\,\text{kW} \times \tfrac{10}{60}\,\text{h} \approx 0{,}92\,\text{kWh}$.
+
+O medidor da sua casa conta exatamente isso, os kWh que passam por ele. A conta de luz mostra a leitura do mês anterior, a leitura atual e a diferença entre elas: o **consumo do mês**, em kWh. Esse consumo é multiplicado pela **tarifa**, em reais por kWh, e somam-se impostos e, em alguns meses, o adicional da bandeira tarifária.
+
+<Callout type="dica" title="Descubra a tarifa da sua casa">
+As tarifas mudam de uma distribuidora para outra e ao longo do ano. Nesta aula usamos **R\$ 0,90 por kWh** só como valor de exemplo. Para achar um valor que já inclui os impostos, divida o total da sua conta pelo consumo do mês em kWh.
+</Callout>
+
+## Explore: quanto custa cada aparelho
+
+Use a calculadora para descobrir o peso de cada aparelho no mês. Ela usa os mesmos passos do texto: potência em kW, vezes horas por dia, vezes dias, vezes a tarifa.
+
+<CustoEnergia client:visible />
+
+1. Comece pelo chuveiro no inverno, 32 minutos por dia. Quantos kWh por mês?
+2. Mude para o chuveiro no verão. O consumo caiu quanto?
+3. Escolha a lâmpada LED e compare: quantas lâmpadas acesas o mês inteiro dão o consumo do chuveiro?
+4. Troque a tarifa pelo valor da sua conta e ajuste os tempos para a sua casa.
+
+<RealCase title="O banho da família na conta de luz">
+Uma família de quatro pessoas toma, cada uma, um banho de 8 minutos por dia, num chuveiro de 5.500 W na posição inverno.
+
+**Tempo por dia:** $4 \times 8 = 32$ minutos, ou $32 / 60 \approx 0{,}533$ hora.
+
+**Energia por dia:** $5{,}5\,\text{kW} \times 0{,}533\,\text{h} \approx 2{,}93\,\text{kWh}$.
+
+**Energia no mês:** $2{,}93 \times 30 \approx 88\,\text{kWh}$.
+
+**Custo no mês**, com a tarifa de exemplo: 88 kWh × R\$ 0,90 = **R\$ 79,20**.
+
+Na posição verão, com metade da potência, o mesmo banho gasta 44 kWh e custa R\$ 39,60. E cada minuto a menos no banho de cada pessoa economiza 11 kWh por mês, perto de R\$ 10.
+
+Compare com uma lâmpada LED de 9 W acesa 6 horas por dia: 1,62 kWh no mês inteiro. O chuveiro de inverno gasta isso em menos de 18 minutos.
+
+Potência alta não quer dizer consumo alto. O motor de um portão eletrônico tem potência de algumas centenas de watts (o valor exato está na plaqueta dele), mas funciona poucos segundos por abertura. Com 300 W e dez aberturas de 15 segundos por dia, ele gasta perto de 0,4 kWh por mês: menos de R\$ 0,50 com a tarifa de exemplo.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Confundir kW com kWh.** O kW mede a rapidez (potência); o kWh mede o total (energia). "Meu chuveiro gasta 5.500 W por mês" não faz sentido: ele usa 5.500 W enquanto está ligado.
+- **"O inverno puxa mais tensão."** A tensão é a mesma nas duas posições. O que muda é a resistência, e com ela a corrente.
+- **Mudar a chave verão/inverno com a água correndo.** A corrente alta faz faísca nos contatos e os desgasta. Muitos fabricantes recomendam fechar o registro antes de mudar a posição; siga o manual do seu chuveiro.
+- **Instalar um chuveiro mais potente no mesmo fio.** Mais potência quer dizer mais corrente, e o fio e o disjuntor precisam aguentar essa corrente. Trocar o aparelho sem conferir a bitola do fio e o disjuntor é receita para fio derretido.
+- **Ligar aparelho de muitos watts em extensão ou benjamim.** Cada conexão fraca vira um pequeno aquecedor, pelo efeito Joule. Aquecedores, ferros e fornos devem ir direto numa tomada adequada.
+- **Mexer na resistência com o disjuntor ligado.** A chave de pressão e a chave verão/inverno não são proteção. Antes de abrir o chuveiro, desligue o disjuntor dele, sinalize o quadro e teste a ausência de tensão, como na aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />. A troca da resistência, passo a passo, está na aula <LinkAula id="m07-instalacoes/08-chuveiro-eletrico" />, e a escolha de fio e disjuntor na aula <LinkAula id="m07-instalacoes/04-fios-e-cabos" />.
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Um chuveiro tem etiqueta de 220 V e 4.400 W. Qual é a corrente que ele puxa, em ampères?',
+      answer: 20,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation: 'I = P ÷ V = 4.400 W ÷ 220 V = 20 A.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que a posição inverno do chuveiro esquenta mais a água?',
+      options: [
+        {
+          text: 'Porque a corrente passa por menos fio: menos resistência, mais corrente e mais potência',
+          correct: true,
+          feedback: 'Isso. Com a tensão fixa, P = V²/R: diminuir R aumenta a potência.',
+        },
+        {
+          text: 'Porque a posição inverno usa uma tensão maior',
+          feedback: 'A tensão da rede é a mesma nas duas posições. Muda só a resistência.',
+        },
+        {
+          text: 'Porque na posição inverno a resistência é maior e uma resistência maior esquenta mais',
+          feedback:
+            'É o contrário. Com a tensão fixa, uma resistência maior deixa passar menos corrente e a potência cai.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um ferro de passar de 1.000 W é usado 30 minutos por dia, 30 dias por mês. Quantos kWh ele consome no mês?',
+      answer: 15,
+      tolerance: 0.02,
+      unit: 'kWh',
+      explanation: 'E = 1 kW × 0,5 h × 30 dias = 15 kWh.',
+    },
+    {
+      type: 'vf',
+      prompt: 'O quilowatt-hora (kWh) é uma unidade de potência.',
+      answer: false,
+      explanation:
+        'O kWh é uma unidade de energia: potência vezes tempo. A potência se mede em watts (W) ou quilowatts (kW).',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um borne frouxo tem 0,05 Ω de mau contato. Se a corrente que passa por ele dobrar, o calor gerado ali:',
+      options: [
+        {
+          text: 'Fica quatro vezes maior',
+          correct: true,
+          feedback: 'Isso. P = R·I²: com o dobro da corrente, o quadrado dá quatro vezes mais calor.',
+        },
+        {
+          text: 'Dobra',
+          feedback: 'A corrente entra ao quadrado em P = R·I². Dobrar a corrente quadruplica o calor.',
+        },
+        {
+          text: 'Não muda, porque a resistência é a mesma',
+          feedback: 'A resistência é a mesma, mas o calor depende também da corrente, ao quadrado.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma TV de 100 W fica ligada 5 horas por dia durante 30 dias. Com a tarifa de exemplo de R$ 0,90 por kWh, quanto ela custa no mês, em reais?',
+      answer: 13.5,
+      tolerance: 0.02,
+      explanation: 'E = 0,1 kW × 5 h × 30 = 15 kWh. Custo = 15 × 0,90 = R$ 13,50.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada situação à fórmula mais direta.',
+      pairs: [
+        ['Você sabe a tensão e a corrente', 'P = V·I'],
+        ['Você sabe a corrente e a resistência', 'P = R·I²'],
+        ['Você sabe a tensão e a resistência', 'P = V²/R'],
+        ['Você sabe a potência e o tempo de uso', 'E = P·t'],
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- **Potência** é a rapidez com que a energia é transformada, em watts (W). Na eletricidade, $P = V \cdot I$, ou $P = R \cdot I^2$, ou $P = V^2 / R$.
+- O **efeito Joule** é o aquecimento causado pela corrente. Ele cresce com o quadrado da corrente, por isso conexões ruins e fios finos esquentam.
+- No chuveiro, a tensão é fixa: **menos resistência dá mais corrente e mais potência**. O inverno usa só parte do fio.
+- **Energia** é potência vezes tempo. A conta de luz cobra kWh: kW vezes horas de uso, multiplicado pela tarifa.
+- Potência alta não quer dizer consumo alto: o tempo de uso pesa tanto quanto os watts.
