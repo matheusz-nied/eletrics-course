@@ -44,21 +44,21 @@ export default defineCircuit({
       points: [
         [11, 0],
         [15, 0],
-        [24, 0],
+        [30, 0],
       ],
     },
     {
       id: 'SR1',
       type: 'buzzer',
-      a: [24, 0],
-      b: [24, 7],
+      a: [30, 0],
+      b: [30, 8],
       label: 'Sirene',
       params: { voltage: 12, current: 0.03 },
     },
     {
       id: 'X1',
       type: 'scr',
-      at: [24, 9],
+      at: [30, 10],
       rot: 90,
       label: 'SCR',
     },
@@ -74,7 +74,7 @@ export default defineCircuit({
       id: 'R1',
       type: 'resistor',
       a: [15, 5],
-      b: [15, 10],
+      b: [15, 11],
       label: 'R1',
       params: { resistance: 1000 },
     },
@@ -82,16 +82,16 @@ export default defineCircuit({
       id: 'W3',
       type: 'wire',
       points: [
-        [15, 10],
-        [22, 10],
+        [15, 11],
+        [28, 11],
       ],
     },
     {
       id: 'W4',
       type: 'wire',
       points: [
-        [24, 11],
-        [24, 18],
+        [30, 12],
+        [30, 18],
         [0, 18],
       ],
     },
@@ -99,15 +99,10 @@ export default defineCircuit({
   ],
   probes: [
     { id: 'IS', kind: 'current', element: 'SR1', label: 'Corrente na sirene' },
-    { id: 'VAK', kind: 'voltage', plus: 'X1.a', minus: 'X1.k', label: 'Tensão no SCR (anodo − catodo)' },
+    { id: 'VAK', kind: 'voltage', plus: 'X1.a', minus: 'X1.k', label: 'Tensão no SCR (ânodo − cátodo)' },
     { id: 'IG', kind: 'current', element: 'R1', label: 'Corrente no gatilho' },
   ],
   goals: [
-    {
-      id: 'repouso',
-      description: 'Em repouso, o SCR bloqueia: fica com quase toda a tensão da bateria e a sirene fica muda.',
-      check: { readout: 'X1.vak', op: '>', value: 11 },
-    },
     {
       id: 'dispara',
       description: 'Aperte o sensor da porta: a corrente no gatilho dispara o SCR e a sirene toca.',

@@ -3,9 +3,318 @@ titulo: Transistor como amplificador
 modulo: m09-semicondutores
 ordem: 7
 nivel: A
-duracaoMin: 25
+duracaoMin: 45
 objetivos:
-  - Em preparação
+  - Explicar por que um amplificador precisa de polarização e o que é o ponto de repouso
+  - Calcular a polarização por divisor de tensão de um amplificador emissor comum
+  - Estimar o ganho de tensão com e sem o capacitor de desvio do emissor
+  - Reconhecer no osciloscópio a inversão do sinal, a distorção e o ceifamento
+  - Comparar as classes A, B, AB e D pelo rendimento e pela distorção
+prerequisitos:
+  - m09-semicondutores/06-transistor-como-chave
+  - m03-medicoes/05-osciloscopio
+  - m04-passivos/03-capacitores
+tags: [transistor, amplificador, emissor comum, polarização, ganho, decibel, classe A, classe B, classe AB, classe D, push-pull, osciloscópio]
+seguranca: baixa-tensao
 ---
 
-Em preparação.
+import AmplificadorPolarizacao from '../../../lessons/m09/figures/AmplificadorPolarizacao.astro';
+import AmplificadorClasses from '../../../lessons/m09/figures/AmplificadorClasses.astro';
+
+O microfone de um interfone entrega poucos milivolts. A captação de uma guitarra, algumas centenas. O alto-falante do outro lado precisa de volts e de corrente. Entre o sinal pequeno e o alto-falante existe um <Term id="amplificador">amplificador</Term>, e dentro dele, na versão mais simples, está o mesmo transistor da aula anterior. Só que agora ele não liga nem desliga: trabalha no meio do caminho, onde uma variação pequena na base vira uma variação grande no coletor.
+
+Esta aula é de nível avançado: polarização, ganho, distorção e as classes de amplificador. As contas mais pesadas ficam num quadro que você pode abrir ou pular.
+
+## Da chave ao amplificador
+
+Na aula do [transistor como chave](../06-transistor-como-chave/), você viu as três regiões: corte, saturação e a região ativa, no meio, onde $I_\text{C} = \beta \cdot I_\text{B}$. Para uma chave, a região ativa é o lugar a evitar, porque o transistor esquenta. Para um amplificador, é o único lugar que interessa.
+
+Na região ativa, alguns milivolts a mais na junção base-emissor fazem a corrente de coletor crescer bastante. Um resistor no coletor, o **RC**, transforma essa variação de corrente em variação de tensão, porque o coletor fica em
+
+$$
+V_\text{C} = V_\text{CC} - R_\text{C} \cdot I_\text{C}
+$$
+
+em que $V_\text{CC}$ é a tensão da fonte. Quando a base sobe um pouco, $I_\text{C}$ aumenta, a queda em RC aumenta e o coletor **desce**. A saída sai maior e de cabeça para baixo: invertida.
+
+Pense no registro de uma caixa d'água: um movimento pequeno da mão controla uma vazão grande, e a água vem da caixa, não da mão. No amplificador, a energia a mais vem da fonte; o sinal só controla quanto dela passa. A analogia para aqui: o registro abre assim que você o gira, e a junção base-emissor só conduz depois de uns 0,6 V.
+
+## Polarização: o ponto de repouso
+
+Esse "só depois de 0,6 V" é o problema. Um sinal de áudio sobe e desce em torno de 0 V. Ligado direto na base, um sinal de 5 mV nunca chega perto dos 0,6 V, e o transistor fica cortado o tempo todo.
+
+A saída é dar ao transistor uma **<Term id="polarizacao">polarização</Term>**: uma tensão contínua fixa na base, que o deixa conduzindo uma corrente moderada mesmo sem sinal, com o coletor perto do meio do caminho entre o emissor e a fonte. Esse estado parado é o **ponto de repouso**, ou ponto quiescente (Q). O sinal entra por cima da polarização, através de um <Term id="capacitor">capacitor</Term>, e a corrente de coletor sobe e desce em torno do repouso.
+
+<Figure caption="Figura 1. A curva da junção base-emissor (desenho fora de escala). Um sinal sozinho, em torno de 0 V, fica abaixo do joelho da curva e não produz corrente. O mesmo sinal montado sobre a polarização, no ponto de repouso Q, faz a corrente de coletor subir e descer: uma cópia maior dele." alt="Gráfico da corrente de coletor contra a tensão base-emissor: a curva fica quase em zero e sobe forte perto do fim. Embaixo, à esquerda, uma senoide em torno de 0 V, com a corrente parada em zero. À direita, a mesma senoide em torno do ponto de repouso Q, no trecho em que a curva sobe, e, ao lado, a corrente de coletor variando como uma senoide maior.">
+  <AmplificadorPolarizacao />
+</Figure>
+
+### O divisor de tensão e o resistor de emissor
+
+O jeito mais usado de polarizar é o da simulação desta aula: um <Term id="divisor-de-tensao">divisor de tensão</Term> (R1 e R2) fixa a tensão da base, e um resistor no emissor, o **RE**, fixa a corrente. As contas, quando a corrente do divisor é bem maior que a da base (dez vezes ou mais), são estas:
+
+$$
+V_\text{B} \approx V_\text{CC} \cdot \frac{R_2}{R_1 + R_2} \qquad V_\text{E} = V_\text{B} - 0{,}7\,\text{V} \qquad I_\text{C} \approx I_\text{E} = \frac{V_\text{E}}{R_\text{E}}
+$$
+
+em que $V_\text{B}$ e $V_\text{E}$ são as tensões da base e do emissor em relação ao negativo (o terra), e $I_\text{E}$ a corrente do emissor, quase igual à do coletor. Depois, $V_\text{C} = V_\text{CC} - R_\text{C} \cdot I_\text{C}$.
+
+Repare que β não aparece em nenhuma conta. Esse é o mérito do RE. Os transistores de um mesmo modelo saem da fábrica com β muito diferentes (de 110 a 800 num BC548, conforme a faixa de ganho), e o β muda com a temperatura. Se a corrente de coletor tentar subir, a tensão em RE sobe junto, sobra menos tensão para a junção base-emissor e a corrente volta. É uma **realimentação negativa**: o circuito se corrige sozinho.
+
+## Exemplo resolvido: polarizando o amplificador da simulação
+
+A simulação abaixo usa fonte de 12 V, R1 = 56 kΩ, R2 = 10 kΩ, RE = 1 kΩ e RC = 4,7 kΩ. Calcule o ponto de repouso.
+
+**Passo 1: a base.** $V_\text{B} = 12 \cdot 10 / (56 + 10) = 1{,}82\,\text{V}$.
+
+**Passo 2: o emissor.** $V_\text{E} = 1{,}82 - 0{,}7 = 1{,}12\,\text{V}$, e $I_\text{C} \approx 1{,}12\,\text{V} / 1\,\text{k}\Omega = 1{,}12\,\text{mA}$.
+
+**Passo 3: o coletor.** A queda em RC é $4{,}7\,\text{k}\Omega \times 1{,}12\,\text{mA} = 5{,}26\,\text{V}$, e o coletor fica em $12 - 5{,}26 = 6{,}74\,\text{V}$. Entre coletor e emissor sobram $6{,}74 - 1{,}12 = 5{,}6\,\text{V}$: o transistor está bem no meio da região ativa.
+
+**Passo 4: confira a regra do divisor.** A corrente no divisor é $12\,\text{V} / 66\,\text{k}\Omega = 0{,}18\,\text{mA}$. A da base, com β = 200, é $1{,}12\,\text{mA} / 200 = 5{,}6\,\mu\text{A}$, trinta vezes menor. A aproximação vale.
+
+No simulador, com o multímetro em CC, a base marca cerca de 1,77 V, o emissor 1,12 V e o coletor 6,78 V. A base fica um pouco abaixo da conta porque a corrente de base passa pelos resistores do divisor, e a junção do transistor simulado pede só 0,66 V, não 0,7 V. Os dois erros quase se cancelam no emissor.
+
+## Quanto ele amplifica
+
+O <Term id="ganho">ganho</Term> de tensão é quantas vezes a saída é maior que a entrada:
+
+$$
+A_\text{v} = \frac{\Delta V_\text{saída}}{\Delta V_\text{entrada}}
+$$
+
+**Sem capacitor no emissor.** O emissor acompanha a base, sempre uns 0,7 V abaixo dela. Se a base sobe 10 mV, o emissor sobe 10 mV, e a corrente de RE aumenta $10\,\text{mV} / R_\text{E}$. Quase toda essa corrente passa também por RC, e o coletor desce $R_\text{C} \cdot 10\,\text{mV} / R_\text{E}$. Daí:
+
+$$
+A_\text{v} \approx -\frac{R_\text{C}}{R_\text{E}}
+$$
+
+O sinal de menos é a inversão. Quando há uma carga ligada na saída por um capacitor, como o resistor de 10 kΩ da simulação, para o sinal ela fica em paralelo com RC: $4{,}7\,\text{k}\Omega$ em paralelo com $10\,\text{k}\Omega$ dá $3{,}2\,\text{k}\Omega$, e o ganho fica em torno de $-3{,}2$. É pouco, mas é estável: depende só de dois resistores.
+
+**Com o capacitor de desvio.** Um capacitor grande em paralelo com RE, o **CE**, segura a tensão do emissor parada para o sinal: para a corrente contínua ele é um circuito aberto, e a polarização continua a mesma; para o sinal de 1 kHz, ele é quase um curto. Agora o sinal inteiro cai sobre a própria junção base-emissor, e o ganho passa a depender da resistência dela, que, em 1,1 mA, é de uns 23 Ω (veja o quadro abaixo). O ganho fica perto de $3{,}2\,\text{k}\Omega / 23\,\Omega \approx 137$. O simulador mostra cerca de 130.
+
+A troca é esta: com CE, muito ganho, mas ele depende da corrente do transistor, que varia com o próprio sinal, e a saída distorce cedo. Sem CE, pouco ganho, mas estável e limpo.
+
+<DeepDive title="De onde vêm os 23 Ω, e o ganho em decibéis">
+A corrente de coletor cresce de forma exponencial com a tensão da junção:
+
+$$
+I_\text{C} = I_\text{S} \cdot e^{V_\text{BE} / V_\text{T}}
+$$
+
+em que $I_\text{S}$ é uma corrente minúscula, característica do transistor, e $V_\text{T}$ é a tensão térmica, cerca de 26 mV à temperatura ambiente. Para um sinal pequeno, a junção se comporta como um resistor, a **resistência dinâmica do emissor**, que é o inverso da inclinação da curva no ponto de repouso:
+
+$$
+r_\text{e} = \frac{V_\text{T}}{I_\text{C}} \approx \frac{26\,\text{mV}}{I_\text{C}}
+$$
+
+Com $I_\text{C} = 1{,}11\,\text{mA}$, $r_\text{e} \approx 23\,\Omega$. Com CE, $A_\text{v} \approx -(R_\text{C} \parallel R_\text{L}) / r_\text{e}$; sem CE, $A_\text{v} \approx -(R_\text{C} \parallel R_\text{L}) / (R_\text{E} + r_\text{e})$, em que $R_\text{L}$ é a carga e $\parallel$ indica a associação em paralelo. Como $r_\text{e}$ depende de $I_\text{C}$, quando o sinal faz a corrente subir, o ganho aumenta; quando faz descer, o ganho diminui. As duas metades da onda saem de tamanhos diferentes: é a distorção que você vai ver na simulação.
+
+**Impedância de entrada.** Quem entrega o sinal "vê" o divisor em paralelo com a base, e a base parece β vezes maior que o que está no emissor: $\beta \cdot r_\text{e} \approx 4{,}7\,\text{k}\Omega$ com CE e $\beta \cdot (R_\text{E} + r_\text{e}) \approx 205\,\text{k}\Omega$ sem ele. Com o divisor de 8,5 kΩ (56 kΩ em paralelo com 10 kΩ), a entrada fica em cerca de 3 kΩ com CE e 8 kΩ sem CE. O simulador mostra 3,1 kΩ e 8,1 kΩ.
+
+**Os capacitores.** A reatância de cada um tem de ser bem menor que a resistência ao lado dele (veja a aula de <LinkAula id="m06-corrente-alternada/04-reatancia-e-impedancia">reatância e impedância</LinkAula>). O de entrada, de 10 µF, tem 16 Ω em 1 kHz, contra os 3 kΩ da entrada. O CE, de 100 µF, tem 1,6 Ω em 1 kHz, contra os 23 Ω de $r_\text{e}$, mas 80 Ω em 20 Hz: o ganho cai nos graves. Por isso o CE costuma ter centenas de microfarads.
+
+**Decibéis.** Em decibéis (dB), $A_\text{dB} = 20 \cdot \log_{10} |A_\text{v}|$: um ganho de 130 são cerca de 42 dB, e um de 3,1, cerca de 10 dB. Em dB, os ganhos de estágios em sequência se somam.
+</DeepDive>
+
+## Explore: o amplificador emissor comum
+
+O circuito abaixo é o do exemplo resolvido, com um gerador de sinais de 1 kHz na entrada e uma carga de 10 kΩ na saída. A chave S1 liga e desliga o capacitor de desvio CE. O <Term id="osciloscopio">osciloscópio</Term> mostra a entrada no canal 1 e a saída no canal 2; o multímetro, as tensões de repouso.
+
+<Simulation
+  circuit="m09/amplificador-emissor-comum"
+  instruments={[
+    { kind: 'osciloscopio', series: ['VIN', 'VOUT'] },
+    { kind: 'multimetro', series: ['VB', 'VEM', 'VC'] },
+  ]}
+/>
+
+Aperte o play (▶) e espere o autoajuste do osciloscópio. Embaixo da tela, ele mostra o valor de pico a pico de cada canal. Sempre que mudar a amplitude da entrada, aperte "Autoajuste" de novo.
+
+1. Abra o multímetro e coloque os três medidores em CC (⎓). Compare com o exemplo resolvido.
+2. Volte ao osciloscópio. Com 5 mV de pico na entrada, calcule o ganho: pico a pico da saída dividido pelo pico a pico da entrada. Compare a posição dos picos dos dois canais.
+3. Suba a entrada para 20 mV e depois para 50 mV. O que acontece com a forma da saída?
+4. Volte a entrada para 5 mV e desligue o capacitor CE. Quanto é o ganho agora? Depois suba a entrada até 1 V.
+
+No multímetro, a base fica em cerca de 1,77 V, o emissor em 1,12 V e o coletor em 6,78 V, perto da conta. Na tela, a entrada tem 10 mV de pico a pico e a saída cerca de 1,3 V: um ganho de cerca de 130. E, quando a entrada está no pico, a saída está no vale: invertida.
+
+Com 20 mV, a saída cresce para uns 5 V de pico a pico, mas deixa de ser uma senoide: a metade de baixo desce até uns −3,0 V e a de cima só sobe até uns +2,1 V. Com 50 mV, a saída fica achatada nas duas pontas. Embaixo, em uns −5,6 V, o transistor satura: o coletor desce até cerca de 1,2 V, quase encostando no emissor, e não tem mais para onde ir. Em cima, em uns +3,3 V, o transistor quase corta, e o coletor só sobe até onde RC e a carga deixam, perto de 10 V. Esse achatamento é o **<Term id="ceifamento">ceifamento</Term>**.
+
+Sem CE, a saída de 5 mV cai para uns 31 mV de pico a pico: ganho de cerca de 3. Em compensação, com 1 V de pico na entrada, a saída tem uns 6,1 V de pico a pico e continua uma senoide limpa e invertida. Amplificadores reais ficam no meio: dividem o RE em dois, deixam só uma parte sem capacitor e escolhem o ganho pelo tamanho dessa parte. Com 100 Ω sem desvio, por exemplo, o ganho fica em torno de $3{,}2\,\text{k}\Omega / (100 + 23)\,\Omega \approx 26$.
+
+## Classes de amplificador
+
+O emissor comum é um amplificador **classe A**: o transistor conduz o ciclo inteiro, com uma corrente de repouso que passa mesmo sem sinal. Na simulação, a fonte entrega cerca de 1,3 mA a 12 V, uns 16 mW, o tempo todo. Com 5 mV na entrada, a carga recebe uns 20 µW. Para um pré-amplificador de microfone, tudo bem. Para um amplificador de 50 W, a classe A gastaria de duas a quatro vezes isso o tempo todo, mesmo em silêncio, e pediria dissipadores enormes. A <Term id="classe-de-amplificador">classe</Term> de um amplificador diz por quanto do ciclo cada transistor conduz, e é ela que decide o rendimento.
+
+<Figure caption="Figura 2. A corrente nos transistores de saída durante dois ciclos de uma senoide (formas fora de escala). Acima da linha, o transistor de cima; abaixo, o de baixo. Na classe A, um transistor só conduz o ciclo todo, em torno da corrente de repouso. Na B, cada um conduz meio ciclo, com um vão perto do zero. Na AB, os dois conduzem um pouco em repouso e as metades se emendam. Na D, os transistores só ligam e desligam, e a largura dos pulsos segue o sinal; um filtro devolve a senoide." alt="Quatro gráficos pequenos. Classe A: uma senoide inteira acima da linha do zero. Classe B: meias ondas alternadas, acima e abaixo da linha, com um trecho parado em zero entre elas. Classe AB: meias ondas acima e abaixo que se emendam no zero sem trecho parado. Classe D: pulsos retangulares de largura variável, com uma senoide tracejada por cima.">
+  <AmplificadorClasses />
+</Figure>
+
+- **Classe B.** Dois transistores complementares, um NPN e um PNP, com os emissores juntos na saída: é o **push-pull** (empurra e puxa). O NPN empurra corrente para a carga na metade positiva; o PNP puxa na negativa. Sem sinal, nenhum dos dois conduz, e o rendimento máximo teórico chega a 78,5 % com uma senoide. O preço é a **distorção de cruzamento**: perto do zero, enquanto a entrada não passa dos cerca de 0,6 V de uma junção, nenhum dos dois conduz.
+- **Classe AB.** Dois diodos (ou um pequeno circuito com transistor) deixam as bases separadas por uns 1,3 V, e os dois transistores já conduzem uma corrente pequena em repouso. O vão some. É a classe da maioria dos amplificadores de som com transistores de saída.
+- **Classe D.** Os transistores, quase sempre MOSFETs, trabalham como chaves: ligam e desligam centenas de milhares de vezes por segundo, com a largura de cada pulso seguindo o sinal (é a modulação por largura de pulso, o <Term id="pwm">PWM</Term>). Um filtro de bobina e capacitor tira os pulsos e devolve o som. Como uma chave quase não dissipa, o rendimento passa de 90 % (valor típico). Os <LinkAula id="m09-semicondutores/08-mosfet">MOSFETs</LinkAula> vêm na próxima aula; o PWM, na aula de <LinkAula id="m11-digital/06-conversao-ad-da-e-pwm">conversão AD/DA e PWM</LinkAula>.
+
+Repare que cada transistor do push-pull é um **seguidor de emissor**: o emissor acompanha a base, e o ganho de tensão fica perto de 1. O ganho dele é de corrente. Num amplificador completo, um estágio como o emissor comum dá o ganho de tensão, e o push-pull entrega a corrente ao alto-falante.
+
+## Explore: classe B e classe AB
+
+O circuito abaixo é um estágio de saída push-pull com fonte simétrica de +12 V e −12 V. No lugar do alto-falante, uma carga de 100 Ω, para que os transistores pequenos não esquentem. Os diodos D1 e D2 separam as bases. Com a chave S1 fechada, os diodos ficam em curto e o estágio é classe B.
+
+<Simulation
+  circuit="m09/amplificador-push-pull"
+  instruments={[{ kind: 'osciloscopio', series: ['VIN', 'VOUT'] }]}
+/>
+
+Aperte o play e espere o autoajuste. Para comparar a forma das duas ondas, coloque os dois canais na mesma escala, de 1 V/div.
+
+1. Com S1 fechada (classe B) e 2 V de pico na entrada, compare a saída com a entrada. Onde está a diferença?
+2. Baixe a entrada para 0,5 V. O que sai?
+3. Abra S1 (classe AB) e repita as duas medidas.
+
+Na classe B, a saída chega a uns 1,3 V de pico, e não aos 2 V da entrada: cada transistor come os primeiros 0,6 V a 0,7 V de cada meia onda. Perto do zero, a saída fica parada enquanto a entrada passa de cerca de −0,6 V a +0,6 V, e a onda ganha um degrau no meio. Com 0,5 V na entrada, a saída fica abaixo de 1 mV: o sinal inteiro cabe dentro do vão.
+
+Com S1 aberta, os diodos voltam ao circuito, e cada transistor fica com cerca de 1,4 mA de repouso. A saída acompanha a entrada, com uns 1,9 V a 2,0 V de pico para os 2 V de entrada, e sem degrau. Com 0,5 V na entrada, saem uns 0,46 V.
+
+No simulador, a corrente de repouso fica parada. Num amplificador real, a tensão da junção cai cerca de 2 mV a cada grau de aquecimento (valor típico): o transistor quente conduz mais, esquenta mais e pode entrar em **avalanche térmica**. Por isso os diodos de polarização ficam encostados no <Term id="dissipador">dissipador</Term>, junto dos transistores, e cada emissor ganha um resistor de alguns décimos de ohm, que faz o papel do RE.
+
+<RealCase title="Do pedal de guitarra à caixinha de som">
+Os pedais de distorção de guitarra fazem de propósito o que você viu com 50 mV na entrada: empurram estágios de transistor até o ceifamento. O som "rasgado" é a senoide achatada.
+
+No resto do áudio, o ceifamento é defeito. Quem instala som automotivo ajusta o ganho do módulo amplificador para que, no volume máximo do rádio, a saída ainda não ceife: com um tom de teste e um osciloscópio na saída, sobe o ganho até a senoide começar a achatar e volta um pouco.
+
+Os aparelhos de som com dissipadores grandes no fundo são classe AB. Muitos têm um relé que estala alguns segundos depois de ligar: um transistor só liga os alto-falantes depois que a polarização se acomoda, e os desliga se aparecer tensão contínua na saída. É o transistor como chave cuidando do transistor como amplificador.
+
+A caixinha Bluetooth e o módulo de som do carro de hoje são classe D: com mais de 90 % da energia indo para o alto-falante, a bateria dura horas e quase não há dissipador.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Medir a polarização com o multímetro em CA**, ou com sinal na entrada. A polarização é contínua: meça em CC (⎓), de preferência sem sinal.
+- **Polarizar sem o resistor de emissor**, só com um resistor na base. A corrente de repouso passa a depender do β: um transistor funciona e o outro, do mesmo saquinho, satura.
+- **Esquecer os capacitores de acoplamento.** Sem o de entrada, a tensão contínua de quem entrega o sinal desloca a polarização. Sem o de saída, a carga recebe os 6,8 V do coletor.
+- **Ligar um alto-falante direto no coletor do emissor comum.** O estágio se comporta como uma fonte com 4,7 kΩ em série, e o alto-falante tem 4 Ω ou 8 Ω. Para isso existe o push-pull.
+- **Volume ou entrada grandes demais.** Na tela, os picos achatados são ceifamento. Diminua o sinal ou o ganho.
+- **Segurança.** Os circuitos desta aula são de baixa tensão. Um amplificador ligado na tomada tem 127 V ou 220 V na entrada da fonte e capacitores de filtro de milhares de microfarads, que guardam carga depois de desligados. Tire da tomada, espere e meça a tensão nos capacitores antes de mexer (veja a aula da <LinkAula id="m10-fontes/01-fonte-linear">fonte linear</LinkAula>). Um módulo de som automotivo puxa dezenas de ampères da bateria: o cabo de alimentação leva um fusível perto da bateria.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'Por que a base de um amplificador emissor comum recebe uma tensão contínua, além do sinal?',
+      options: [
+        {
+          text: 'Para o transistor ficar na região ativa o tempo todo, com espaço para o sinal subir e descer',
+          correct: true,
+          feedback:
+            'Isso. Sem a polarização, a junção base-emissor só conduziria acima de uns 0,6 V, e um sinal de milivolts nunca passaria.',
+        },
+        {
+          text: 'Para o transistor ficar saturado e conduzir melhor',
+          feedback:
+            'Saturado, o coletor fica parado perto do emissor e não acompanha o sinal. Saturação é para chave, não para amplificador.',
+        },
+        {
+          text: 'Para aumentar a frequência do sinal',
+          feedback:
+            'A polarização não mexe na frequência. Ela escolhe o ponto de repouso em que o transistor trabalha.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um emissor comum tem fonte de 9 V, R1 = 47 kΩ, R2 = 10 kΩ, RE = 1 kΩ e RC = 3,3 kΩ. Usando VBE = 0,7 V e IC ≈ IE, em quantos volts fica o coletor em repouso?',
+      answer: 6.1,
+      tolerance: 0.04,
+      unit: 'V',
+      explanation:
+        'VB = 9 × 10 ÷ 57 ≈ 1,58 V. VE = 1,58 − 0,7 = 0,88 V, e IC ≈ 0,88 mA. A queda em RC é 3,3 kΩ × 0,88 mA ≈ 2,9 V, e o coletor fica em 9 − 2,9 ≈ 6,1 V.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um emissor comum sem capacitor de desvio e sem carga tem RC = 6,8 kΩ e RE = 680 Ω. Qual é o ganho de tensão, em módulo?',
+      answer: 10,
+      tolerance: 0.06,
+      explanation:
+        'Sem CE, o ganho é cerca de RC ÷ RE = 6.800 ÷ 680 = 10. A saída sai 10 vezes maior e invertida.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Ligar o capacitor de desvio do emissor (CE) aumenta muito o ganho, e a saída passa a distorcer com sinais de entrada bem menores.',
+      answer: true,
+      explanation:
+        'Isso. Com CE, o ganho passa a depender da resistência dinâmica da junção, que muda com a corrente e, portanto, com o próprio sinal. Na simulação, o ganho sobe de cerca de 3 para cerca de 130, e a saída já distorce com 20 mV na entrada.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'No osciloscópio, a saída de um emissor comum aparece como uma senoide com a parte de baixo achatada. O que está acontecendo?',
+      options: [
+        {
+          text: 'O sinal de entrada é grande demais e o transistor satura nos picos: é ceifamento',
+          correct: true,
+          feedback:
+            'Isso. O coletor desce até quase encostar no emissor e não tem mais para onde ir. Diminua a entrada ou o ganho.',
+        },
+        {
+          text: 'O capacitor de saída está em curto',
+          feedback:
+            'Com o capacitor de saída em curto, a carga receberia a tensão contínua do coletor e a polarização mudaria toda. O achatamento só nos picos é ceifamento.',
+        },
+        {
+          text: 'A frequência do sinal é alta demais',
+          feedback:
+            'Frequência alta demais faz o ganho cair, mas a onda continua arredondada. Pico achatado é sinal grande demais.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada classe de amplificador à sua característica.',
+      pairs: [
+        ['Classe A', 'Um transistor conduz o ciclo todo; corrente de repouso alta e rendimento baixo'],
+        ['Classe B', 'Cada transistor conduz meio ciclo; nada de corrente em repouso, mas distorção de cruzamento'],
+        ['Classe AB', 'Pequena corrente de repouso que elimina o vão no zero; a mais comum no som com transistores'],
+        ['Classe D', 'Transistores como chaves, com PWM e filtro; rendimento acima de 90 %'],
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Num amplificador classe B, em que situação a distorção de cruzamento mais incomoda quem escuta?',
+      options: [
+        {
+          text: 'Com o volume baixo, porque o vão de uns 0,6 V é uma parte maior de um sinal pequeno',
+          correct: true,
+          feedback:
+            'Isso. Na simulação, uma entrada de 0,5 V nem sai. Num sinal de vários volts, o vão é uma parte pequena da onda.',
+        },
+        {
+          text: 'Com o volume no máximo',
+          feedback:
+            'No máximo, o problema é outro: o ceifamento. O vão do cruzamento tem sempre o mesmo tamanho, então pesa mais nos sinais pequenos.',
+        },
+        {
+          text: 'Só nos graves',
+          feedback:
+            'O vão acontece em toda passagem pelo zero, em qualquer frequência.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Para amplificar, o transistor trabalha na **região ativa**. A **polarização** em CC coloca o transistor num ponto de repouso, com o coletor perto do meio, e o sinal entra por cima dela através de um capacitor.
+- Na polarização por divisor, $V_\text{B}$ vem de R1 e R2, $I_\text{C} \approx (V_\text{B} - 0{,}7\,\text{V}) / R_\text{E}$ e $V_\text{C} = V_\text{CC} - R_\text{C} \cdot I_\text{C}$. O RE torna o ponto de repouso quase independente do β.
+- O emissor comum **inverte** o sinal. Sem capacitor de desvio, o ganho é cerca de $-R_\text{C}/R_\text{E}$, pequeno e estável; com ele, chega a cerca de $-R_\text{C}/r_\text{e}$, grande e com mais distorção.
+- Sinal grande demais **ceifa**: a saída achata quando o transistor satura ou corta.
+- **Classe A** conduz sempre e gasta energia parada; **B** usa um push-pull sem corrente de repouso e distorce no cruzamento; **AB** corrige isso com uma pequena corrente de repouso; **D** chaveia com PWM e passa de 90 % de rendimento.
+
+Na próxima aula, o transistor dá lugar ao seu primo controlado por tensão, que está em quase tudo que chaveia corrente alta hoje: o [MOSFET](../08-mosfet/).

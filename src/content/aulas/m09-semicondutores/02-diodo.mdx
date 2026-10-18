@@ -66,9 +66,12 @@ Na aula sobre a <LinkAula id="m01-eletricidade-do-zero/04-lei-de-ohm">lei de Ohm
 
 O que mais importa na prática: depois do joelho, a tensão do diodo muda **pouco**. A tabela mostra a tensão direta do modelo de 1N4007 usado nas simulações do curso:
 
-| Corrente | 1 mA | 10 mA | 100 mA | 1 A |
-|----------|------|-------|--------|-----|
-| Tensão no 1N4007 | 0,55 V | 0,66 V | 0,77 V | 0,91 V |
+| Corrente | Tensão no 1N4007 |
+|---------------------|------------------|
+| 1 mA | 0,55 V |
+| 10 mA | 0,66 V |
+| 100 mA | 0,77 V |
+| 1 A | 0,91 V |
 
 Cada vez que a corrente fica dez vezes maior, a tensão sobe só cerca de 0,1 V. É como uma porta de mola: precisa de um empurrão para abrir, mas, depois de aberta, empurrar com mais força faz passar muito mais gente sem que a porta abra muito mais. A analogia falha em um ponto: a porta do diodo não tem um ângulo exato em que "abre"; a curva é suave, e o joelho é só a região em que ela começa a subir rápido.
 
@@ -125,7 +128,10 @@ Um aparelho de 12 V puxa 0,5 A (ele se comporta como um resistor de 24 Ω). Para
 **Passo 1: primeira estimativa, com queda fixa.**
 
 $$
-V_{ap} \approx 12 - 0{,}7 = 11{,}3\ \text{V} \qquad I \approx \frac{11{,}3\ \text{V}}{24\ \Omega} \approx 0{,}47\ \text{A}
+\begin{aligned}
+V_{ap} &\approx 12 - 0{,}7 = 11{,}3\ \text{V} \\[4pt]
+I &\approx \frac{11{,}3\ \text{V}}{24\ \Omega} \approx 0{,}47\ \text{A}
+\end{aligned}
 $$
 
 em que $V_{ap}$ é a tensão que chega ao aparelho e $I$ a corrente.
@@ -133,7 +139,10 @@ em que $V_{ap}$ é a tensão que chega ao aparelho e $I$ a corrente.
 **Passo 2: corrigir com a curva.** Com quase meio ampère, o 1N4007 está bem acima do joelho: pela tabela, entre 0,77 V (100 mA) e 0,91 V (1 A). No modelo do curso, com 0,46 A ele fica com 0,86 V. Então:
 
 $$
-V_{ap} = 12 - 0{,}86 = 11{,}14\ \text{V} \qquad I = \frac{11{,}14\ \text{V}}{24\ \Omega} \approx 0{,}464\ \text{A}
+\begin{aligned}
+V_{ap} &= 12 - 0{,}86 = 11{,}14\ \text{V} \\[4pt]
+I &= \frac{11{,}14\ \text{V}}{24\ \Omega} \approx 0{,}464\ \text{A}
+\end{aligned}
 $$
 
 **Passo 3: a potência no diodo.**

@@ -1,0 +1,132 @@
+---
+/* 9.9: a 4-pin optocoupler with the top cut away: the infrared LED on the
+   mains side (pins 1 and 2), the phototransistor on the board side (pins 4
+   and 3) and, between them, the transparent insulation that only light
+   crosses. Stands in for the 3D model until the kit's optocoupler part
+   reaches main. */
+export interface Props {
+  /** Code printed on the body. */
+  code: string;
+}
+
+const { code } = Astro.props;
+const arrow = (x: number, y: number) => `M${x - 7} ${y - 4}L${x} ${y}L${x - 7} ${y + 4}Z`;
+---
+
+<svg viewBox="0 0 560 270" width="560" height="270" class="fig" aria-hidden="true">
+  <text x="280" y="18" class="head">isolação: só a luz atravessa</text>
+  <path d="M280 24V58" class="leader" />
+
+  <!-- Pins -->
+  <path d="M140 92H108M140 172H108M420 92H452M420 172H452" class="leg" />
+  <text x="102" y="96" class="pin end">1 ânodo</text>
+  <text x="102" y="176" class="pin end">2 cátodo</text>
+  <text x="458" y="96" class="pin">4 coletor</text>
+  <text x="458" y="176" class="pin">3 emissor</text>
+
+  <!-- Package and the cut-away top -->
+  <rect x="140" y="44" width="280" height="176" rx="6" class="body" />
+  <circle cx="156" cy="60" r="5" class="dot" />
+  <rect x="166" y="64" width="228" height="136" rx="4" class="window" />
+  <rect x="268" y="64" width="24" height="136" class="gap" />
+  <text x="280" y="214" class="code">{code}</text>
+
+  <!-- Infrared LED -->
+  <path d="M166 92H225V112M225 136V172H166" class="wire" />
+  <path d="M210 112H240L225 136Z" class="led" />
+  <path d="M210 136H240" class="wire" />
+  <path d="M246 116H300M246 132H300" class="ray" />
+  <path d={arrow(300, 116)} class="ray-head" />
+  <path d={arrow(300, 132)} class="ray-head" />
+
+  <!-- Phototransistor -->
+  <path d="M320 104V144" class="bar" />
+  <path d="M320 114L345 96V92H394M320 134L345 152V172H394" class="wire" />
+  <path d="M345 152L334.5 149.6L339.4 143.1Z" class="arrow-fill" />
+
+  <text x="200" y="250" class="side">lado da rede</text>
+  <text x="360" y="250" class="side">lado da placa</text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .body {
+    fill: var(--fg);
+  }
+  .dot {
+    fill: var(--fg-muted);
+  }
+  .window {
+    fill: var(--surface);
+    stroke: var(--border-strong);
+  }
+  .gap {
+    fill: var(--warning-soft);
+    stroke: var(--warning-border);
+    stroke-dasharray: 4 3;
+  }
+  .leg {
+    stroke: var(--fg-subtle);
+    stroke-width: 7;
+  }
+  .wire {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .bar {
+    stroke: var(--fg);
+    stroke-width: 4;
+  }
+  .arrow-fill {
+    fill: var(--fg);
+  }
+  .led {
+    fill: var(--danger-soft);
+    stroke: var(--danger);
+    stroke-width: 2;
+  }
+  .ray {
+    stroke: var(--danger);
+    stroke-width: 2;
+    stroke-dasharray: 5 3;
+  }
+  .ray-head {
+    fill: var(--danger);
+  }
+  .code {
+    fill: var(--bg);
+    font-size: 12px;
+    font-weight: 600;
+    text-anchor: middle;
+    letter-spacing: 0.04em;
+  }
+  .head {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+  .leader {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .pin {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .pin.end {
+    text-anchor: end;
+  }
+  .side {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+</style>

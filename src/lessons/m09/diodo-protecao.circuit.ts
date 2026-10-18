@@ -30,7 +30,14 @@ export default defineCircuit({
         ],
       },
     },
-    { id: 'W1', type: 'wire', points: [[0, 0], [8, 0]] },
+    {
+      id: 'W1',
+      type: 'wire',
+      points: [
+        [0, 0],
+        [8, 0],
+      ],
+    },
     {
       id: 'D1',
       type: 'diode',
@@ -48,7 +55,14 @@ export default defineCircuit({
         ],
       },
     },
-    { id: 'W2', type: 'wire', points: [[18, 0], [26, 0]] },
+    {
+      id: 'W2',
+      type: 'wire',
+      points: [
+        [18, 0],
+        [26, 0],
+      ],
+    },
     {
       id: 'R1',
       type: 'resistor',
@@ -57,7 +71,14 @@ export default defineCircuit({
       label: 'Aparelho 12 V',
       params: { resistance: 24, watts: 20 },
     },
-    { id: 'W3', type: 'wire', points: [[26, 16], [0, 16]] },
+    {
+      id: 'W3',
+      type: 'wire',
+      points: [
+        [26, 16],
+        [0, 16],
+      ],
+    },
     { id: 'G', type: 'ground', at: [0, 16] },
   ],
   probes: [
@@ -81,8 +102,7 @@ export default defineCircuit({
     },
     {
       id: 'schottky',
-      description:
-        'Troque o diodo pelo Schottky e veja o aparelho receber mais de 11,5 V.',
+      description: 'Troque o diodo pelo Schottky e veja o aparelho receber mais de 11,5 V.',
       check: { readout: 'VAP', op: '>', value: 11.5 },
       solution: { 'D1.model': 'schottky' },
     },

@@ -14,11 +14,19 @@ const SYM_Y = 186;
   <line x1="354" y1={LEAD_Y} x2="524" y2={LEAD_Y} class="lead" />
   <rect x="200" y={LEAD_Y - 24} width="160" height="48" rx="12" class="body" />
   <rect x="318" y={LEAD_Y - 24} width="18" height="48" class="band" />
-  <text x="262" y={LEAD_Y + 5} class="print">1N4007</text>
+  <text x="262" y={LEAD_Y + 5} class="print">
+    1N4007
+  </text>
 
-  <text x="120" y={LEAD_Y - 18} class="lbl">anodo (A)</text>
-  <text x="440" y={LEAD_Y - 18} class="lbl">catodo (K)</text>
-  <text x="327" y={LEAD_Y + 46} class="note">a faixa marca o catodo</text>
+  <text x="120" y={LEAD_Y - 18} class="lbl">
+    anodo (A)
+  </text>
+  <text x="440" y={LEAD_Y - 18} class="lbl">
+    catodo (K)
+  </text>
+  <text x="327" y={LEAD_Y + 46} class="note">
+    a faixa marca o catodo
+  </text>
 
   <!-- Matching lines between part and symbol -->
   <line x1="120" y1={LEAD_Y + 10} x2="120" y2={SYM_Y - 14} class="match" />
@@ -29,14 +37,20 @@ const SYM_Y = 186;
   <line x1="310" y1={SYM_Y} x2="524" y2={SYM_Y} class="wire" />
   <path d={`M250 ${SYM_Y - 26}L306 ${SYM_Y}L250 ${SYM_Y + 26}Z`} class="sym" />
   <line x1="308" y1={SYM_Y - 26} x2="308" y2={SYM_Y + 26} class="bar" />
-  <text x="120" y={SYM_Y - 12} class="lbl">A</text>
-  <text x="440" y={SYM_Y - 12} class="lbl">K</text>
+  <text x="120" y={SYM_Y - 12} class="lbl">
+    A
+  </text>
+  <text x="440" y={SYM_Y - 12} class="lbl">
+    K
+  </text>
 
   <g class="arrow">
     <line x1="210" y1={SYM_Y + 42} x2="350" y2={SYM_Y + 42} />
     <path d={`M340 ${SYM_Y + 36}L352 ${SYM_Y + 42}L340 ${SYM_Y + 48}`} />
   </g>
-  <text x="280" y={SYM_Y + 22 + 42} class="note">sentido em que a corrente passa</text>
+  <text x="280" y={SYM_Y + 22 + 42} class="note">
+    sentido em que a corrente passa
+  </text>
 </svg>
 
 <style>

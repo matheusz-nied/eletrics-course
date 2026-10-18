@@ -12,7 +12,7 @@ export default defineCircuit({
   id: 'm09/optoacoplador-rede',
   title: 'Optoacoplador lendo a rede',
   description:
-    'Do lado da rede, uma tomada de 127 V acende o LED infravermelho de um optoacoplador através de dois resistores de 47 kΩ em série; um diodo em paralelo com o LED, ao contrário, conduz nos semiciclos negativos e protege o LED. Do lado da placa, alimentado por 5 V, o fototransistor do optoacoplador puxa para 0 V a saída, que tem um resistor de 10 kΩ para os 5 V. No semiciclo positivo, o LED acende e a saída vai para perto de 0 V; no negativo, o LED apaga e a saída sobe para 5 V. Os dois lados não têm nenhum fio em comum: o único caminho entre eles é a isolação do componente, de bilhões de ohms.',
+    'Do lado da rede, uma tomada de 127 V ou 220 V, conforme o seletor, acende o LED infravermelho de um optoacoplador através de dois resistores de 47 kΩ em série; um diodo em paralelo com o LED, ao contrário, conduz nos semiciclos negativos e protege o LED. Do lado da placa, alimentado por 5 V, o fototransistor do optoacoplador puxa para 0 V a saída, que tem um resistor de 10 kΩ para os 5 V. No semiciclo positivo, o LED acende e a saída vai para perto de 0 V; no negativo, o LED apaga e a saída sobe para 5 V. Os dois lados não têm nenhum fio em comum: o único caminho entre eles é a isolação do componente, de bilhões de ohms.',
   analysis: { kind: 'transient', dt: 2e-5, speed: 0.02 },
   elements: [
     {
@@ -20,8 +20,17 @@ export default defineCircuit({
       type: 'ac-voltage',
       a: [0, 0],
       b: [0, 16],
-      label: 'Tomada 127 V',
+      label: 'Tomada',
       params: { amplitude: 179.6, frequency: 60 },
+      control: {
+        param: 'amplitude',
+        label: 'Tensão da tomada',
+        kind: 'select',
+        options: [
+          { value: 179.6, label: '127 V (pico de 180 V)' },
+          { value: 311.1, label: '220 V (pico de 311 V)' },
+        ],
+      },
     },
     {
       id: 'W1',
@@ -121,7 +130,6 @@ export default defineCircuit({
       points: [
         [30, 7],
         [34, 7],
-        [38, 7],
       ],
     },
     {
@@ -146,6 +154,16 @@ export default defineCircuit({
   probes: [
     { id: 'VT', kind: 'voltage', plus: 'V1.a', minus: 'V1.b', label: 'Tensão da tomada' },
     { id: 'VS', kind: 'voltage', plus: 'OK1.c', minus: 'OK1.e', label: 'Saída para a placa' },
-    { id: 'ILED', kind: 'current', element: 'R1', label: 'Corrente no LED' },
+    { id: 'ILED', kind: 'current', element: 'R1', label: 'Corrente nos resistores' },
+  ],
+  goals: [
+    {
+      id: 'rede-220',
+      description: 'Passe a tomada para 220 V: no pico, a corrente no LED passa de 3 mA.',
+      check: { readout: 'OK1.ledCurrent', op: '>', value: 0.003 },
+      solution: { 'V1.amplitude': 311.1 },
+      // At a positive peak of the 60 Hz sine.
+      at: 0.1 + 1 / 240,
+    },
   ],
 });

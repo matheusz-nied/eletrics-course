@@ -19,9 +19,12 @@ const BODY_W = 100;
 const left = CX - BODY_W / 2;
 const legs = [CX - 25, CX, CX + 25];
 const fins = Array.from({ length: 9 }, (_, k) => CX - 80 + k * 20);
+/* Names longer than the leg spacing ("MT1", "MT2"): the middle one goes a row lower. */
+const stagger = pins.some((p) => p.length > 2);
+const height = stagger ? 316 : 300;
 ---
 
-<svg viewBox="0 0 420 300" width="420" height="300" class="fig" aria-hidden="true">
+<svg viewBox={`0 0 420 ${height}`} width="420" height={height} class="fig" aria-hidden="true">
   {
     heatsink && (
       <g class="sink">
@@ -42,7 +45,7 @@ const fins = Array.from({ length: 9 }, (_, k) => CX - 80 + k * 20);
   {legs.map((x) => <rect x={x - 3.5} y="202" width="7" height="66" rx="1.5" class="leg" />)}
   {
     legs.map((x, k) => (
-      <text x={x} y="290" class="pin">
+      <text x={x} y={stagger && k === 1 ? 308 : 290} class="pin">
         {pins[k]}
       </text>
     ))

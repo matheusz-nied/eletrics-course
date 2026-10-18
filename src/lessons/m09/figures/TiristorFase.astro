@@ -1,0 +1,161 @@
+---
+/* 9.9: phase control. One cycle of the mains (dashed) and the voltage the
+   lamp gets (solid, shaded): nothing until the DIAC fires the TRIAC at the
+   angle α of each half-cycle, then the rest of the half-cycle, until the
+   current crosses zero and the TRIAC turns off. Below, the gate pulses. */
+export interface Props {
+  /** Firing angle in each half-cycle, in degrees. */
+  alpha?: number;
+}
+
+const { alpha = 64 } = Astro.props;
+const X0 = 90;
+const W = 480;
+const Y0 = 112;
+const A = 78;
+const Y1 = 214;
+const x = (deg: number) => X0 + (W * deg) / 360;
+const y = (deg: number) => Y0 - A * Math.sin((deg * Math.PI) / 180);
+const pt = (deg: number) => `${x(deg).toFixed(1)} ${y(deg).toFixed(1)}`;
+
+const mains = () => {
+  const pts: string[] = [];
+  for (let d = 0; d <= 360; d += 3) pts.push(pt(d));
+  return `M${pts.join('L')}`;
+};
+/* The sine from one angle to another. */
+const segment = (from: number, to: number) => {
+  const pts = [pt(from)];
+  for (let d = Math.ceil(from / 3) * 3; d <= to; d += 3) if (d > from) pts.push(pt(d));
+  return pts;
+};
+/* From the firing angle to the zero crossing, closed on the axis. */
+const conduction = (from: number, to: number) =>
+  `M${[`${x(from)} ${Y0}`, ...segment(from, to), `${x(to)} ${Y0}`].join('L')}Z`;
+const lamp = `M${[
+  `${x(0)} ${Y0}`,
+  `${x(alpha)} ${Y0}`,
+  ...segment(alpha, 180),
+  `${x(180 + alpha)} ${Y0}`,
+  ...segment(180 + alpha, 360),
+].join('L')}`;
+const pulse = (deg: number, up: boolean) =>
+  `M${x(deg) - 4} ${Y1}H${x(deg)}V${Y1 + (up ? -22 : 22)}L${x(deg) + 6} ${Y1}H${x(deg) + 10}`;
+const nf = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
+const delayMs = nf.format((alpha / 180) * (1000 / 120));
+---
+
+<svg viewBox="0 0 640 262" width="640" height="262" class="fig" aria-hidden="true">
+  <!-- Legend -->
+  <path d="M440 14H468" class="mains" />
+  <text x="474" y="18" class="legend">tensão da tomada</text>
+  <path d="M440 34H468" class="lamp" />
+  <text x="474" y="38" class="legend">tensão na lâmpada</text>
+
+  <!-- Main axes -->
+  <path d={`M${X0} ${Y0}H${X0 + W + 8}`} class="axis" />
+  <path d={`M${X0} ${Y1}H${X0 + W + 8}`} class="axis" />
+  <text x={X0 - 10} y={Y0 + 4} class="side">0 V</text>
+  <text x={X0 - 10} y={Y1 - 18} class="side">pulsos</text>
+  <text x={X0 - 10} y={Y1 - 4} class="side">no gatilho</text>
+
+  <path d={conduction(alpha, 180)} class="area" />
+  <path d={conduction(180 + alpha, 360)} class="area" />
+  <path d={mains()} class="mains" />
+  <path d={lamp} class="lamp" />
+
+  <!-- Firing angle -->
+  <path d={`M${x(alpha)} ${Y0}V${y(alpha) - 10}`} class="guide" />
+  <path d={`M${x(alpha)} ${Y0 + 42}V${Y1 - 26}`} class="guide" />
+  <text x={x(alpha)} y={y(alpha) - 16} class="note">disparo</text>
+  <path d={`M${x(0)} ${Y0 + 16}H${x(alpha)}`} class="dim" />
+  <path d={`M${x(0)} ${Y0 + 11}V${Y0 + 21}M${x(alpha)} ${Y0 + 11}V${Y0 + 21}`} class="dim" />
+  <text x={(x(0) + x(alpha)) / 2} y={Y0 + 34} class="alpha">
+    α = {alpha}° ({delayMs} ms)
+  </text>
+
+  <!-- Turn-off at the zero crossing -->
+  <text x={x(180) + 6} y={Y0 - 24} class="note start">o TRIAC desliga</text>
+  <text x={x(180) + 6} y={Y0 - 9} class="note start">sozinho no zero</text>
+
+  <!-- Gate pulses -->
+  <path d={pulse(alpha, true)} class="pulse" />
+  <path d={pulse(180 + alpha, false)} class="pulse" />
+
+  <!-- Time marks -->
+  <text x={x(0)} y={Y1 + 40} class="tick">0</text>
+  <text x={x(180)} y={Y1 + 40} class="tick">8,33 ms</text>
+  <text x={x(360)} y={Y1 + 40} class="tick">16,67 ms</text>
+  <path d={`M${x(180)} ${Y1 + 26}V${Y1 + 30}M${x(360)} ${Y1 + 26}V${Y1 + 30}M${x(0)} ${Y1 + 26}V${Y1 + 30}`} class="axis" />
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .axis {
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+    fill: none;
+  }
+  .mains {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+  }
+  .lamp {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+  }
+  .area {
+    fill: var(--accent-soft);
+  }
+  .pulse {
+    fill: none;
+    stroke: var(--danger);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .guide {
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+    stroke-dasharray: 2 3;
+  }
+  .dim {
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .alpha {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .note.start {
+    text-anchor: start;
+  }
+  .legend {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .side {
+    fill: var(--fg-muted);
+    font-size: 11px;
+    text-anchor: end;
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 11px;
+    text-anchor: middle;
+  }
+</style>

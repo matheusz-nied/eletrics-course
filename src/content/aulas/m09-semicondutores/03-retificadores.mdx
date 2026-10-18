@@ -3,9 +3,316 @@ titulo: Retificadores
 modulo: m09-semicondutores
 ordem: 3
 nivel: I
-duracaoMin: 25
+duracaoMin: 35
 objetivos:
-  - Em preparação
+  - Explicar como os retificadores de meia onda, de onda completa e em ponte transformam corrente alternada em contínua pulsante
+  - Calcular a tensão de pico a partir da tensão eficaz do transformador e descontar a queda nos diodos
+  - Dimensionar o capacitor de filtro pela ondulação aceitável, com ΔV ≈ I ÷ (f × C)
+  - Escolher a tensão do capacitor e os diodos com margem para o pico sem carga e o surto da ligação
+  - Medir a saída de uma fonte com o osciloscópio e o multímetro e reconhecer um capacitor de filtro ruim
+  - Descarregar com segurança o capacitor de uma fonte antes de mexer nela
+prerequisitos:
+  - m09-semicondutores/02-diodo
+  - m03-medicoes/05-osciloscopio
+tags: [retificador, ponte retificadora, meia onda, onda completa, filtro capacitivo, ondulação, ripple, fonte de 12 V]
+seguranca: rede
 ---
 
-Em preparação.
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import PontePeca from '../../../lessons/m09/figures/PontePeca.astro';
+import RetificadorFormas from '../../../lessons/m09/figures/RetificadorFormas.astro';
+import RetificadorDerivacao from '../../../lessons/m09/figures/RetificadorDerivacao.astro';
+import RetificadorPonte from '../../../lessons/m09/figures/RetificadorPonte.astro';
+
+Abra uma fonte de parede antiga, daquelas pesadas que alimentavam o telefone sem fio ou o rádio: lá dentro há um transformador, quatro diodos e um capacitor grande. A tomada entrega 127 V que trocam de sentido 120 vezes por segundo; o aparelho quer uns 12 V, sempre no mesmo sentido. Quem faz a parte principal da conversão são os diodos da aula anterior, montados num <Term id="retificador">retificador</Term>.
+
+Nesta aula você monta, na simulação, a primeira metade de uma fonte de 12 V: transformador, retificador e filtro. Vai ver cada etapa no osciloscópio, calcular o capacitor e entender por que uma fonte dessas mede quase 17 V sem nada ligado.
+
+## Da tomada à corrente contínua
+
+Uma fonte linear tem quatro etapas, sempre nesta ordem:
+
+1. **Transformador:** baixa os 127 V da tomada para uns 12 V e isola o circuito da rede. Ele é o assunto da aula sobre <LinkAula id="m05-magnetismo/04-transformadores">transformadores</LinkAula>.
+2. **Retificador:** os diodos deixam a corrente passar num sentido só. A saída não troca mais de sinal, mas pulsa: é uma <Term id="corrente-continua">corrente contínua</Term> pulsante.
+3. **Filtro:** um capacitor guarda energia nos picos e a devolve entre eles, alisando a tensão.
+4. **Regulador:** tira a variação que sobrou e fixa a saída em 12 V. Ele fica para a aula sobre a <LinkAula id="m10-fontes/01-fonte-linear">fonte linear completa</LinkAula>.
+
+<Figure caption="Figura 1. A tensão depois de cada etapa, em dois ciclos da rede. O secundário alterna; a meia onda aproveita só um semiciclo; a onda completa aproveita os dois; com o filtro, sobra uma pequena ondulação, exagerada no desenho." alt="Quatro gráficos de tensão ao longo do tempo, um embaixo do outro. O primeiro é uma senoide que sobe e desce em volta do zero. O segundo tem só as metades de cima da senoide, separadas por trechos em zero. O terceiro tem todas as metades viradas para cima, encostadas umas nas outras. O quarto é uma linha quase reta perto do pico, com pequenas descidas entre um pico e outro, marcadas como ondulação.">
+  <RetificadorFormas />
+</Figure>
+
+### Pico, não eficaz
+
+Um transformador é vendido pela tensão eficaz: um "trafo de 12 V" entrega 12 V de <Term id="valor-eficaz">valor eficaz</Term> no secundário, o que o multímetro mostra em CA (V~). A senoide, porém, sobe mais que isso. A <Term id="tensao-de-pico">tensão de pico</Term> é:
+
+$$
+V_p = \sqrt{2} \cdot V_\text{ef} \approx 1{,}414 \cdot 12\ \text{V} \approx 17\ \text{V}
+$$
+
+em que $V_p$ é a tensão de pico e $V_\text{ef}$, a eficaz. A relação entre pico, eficaz e médio é explicada com calma na aula sobre <LinkAula id="m06-corrente-alternada/02-pico-eficaz-e-medio">pico, eficaz e médio</LinkAula>.
+
+É até o pico que o capacitor de filtro carrega, e é o pico que conta para escolher as peças. De cada pico, os diodos no caminho da corrente tiram a queda deles, que com centenas de miliampères fica perto de 0,8 a 0,9 V por diodo, como você viu na curva do diodo.
+
+## Meia onda: um diodo
+
+O retificador mais simples é um diodo em série com a carga. No semiciclo positivo, o anodo fica mais positivo que o catodo, o diodo conduz e a carga recebe a senoide, menos a queda do diodo. No semiciclo negativo, o diodo fica reverso e a carga não recebe nada. Sobram 60 pulsos por segundo, todos para o mesmo lado.
+
+Na simulação, o canal 1 do osciloscópio mostra o secundário do transformador e o canal 2, a saída.
+
+<Simulation circuit="m09/retificador-meia-onda" instruments={['osciloscopio', 'multimetro']} />
+
+1. Aperte o play (▶) e espere o autoajuste. Qual é o pico da saída? Qual a frequência dela?
+2. Na aba Multímetro, leia o secundário em CA. Depois ponha a saída em CC: quanto dá a média?
+3. Ligue a chave **Capacitor de filtro ligado**, espere alguns ciclos e aperte "Autoajuste". Como ficam a média e o pico a pico do canal 2?
+
+O secundário tem cerca de 12,6 V eficazes e 35,7 V de pico a pico, quase 18 V de pico: o transformador da simulação, como os reais, entrega um pouco mais que o nominal com pouca corrente. A saída tem picos de cerca de 16,9 V, 60 por segundo: o diodo tira cerca de 0,9 V, porque no pico conduz 0,56 A. A média, no multímetro em CC, é de só 5,2 V, perto de um terço do pico: metade do tempo não há nada, e na outra metade a senoide passa pouco tempo lá em cima. Com o capacitor de 3.300 µF (no esquema, 3,3 mF), a média sobe para cerca de 15 V, e o canal 2 mostra uma ondulação de 2,1 V de pico a pico, ainda a 60 Hz.
+
+Repare também no que o diodo aguenta. Com o filtro, no semiciclo negativo, o catodo fica nos quase 15 V do capacitor e o anodo desce até o pico negativo do secundário: o diodo bloqueia cerca de 33 V, quase o dobro do pico. O 1N4007, com seus 1.000 V, nem sente.
+
+## Onda completa: os dois semiciclos
+
+A meia onda joga fora metade de cada ciclo e deixa um buraco entre um pulso e outro. O retificador de onda completa aproveita também o semiciclo negativo, virando-o para cima. Há dois jeitos de fazer isso.
+
+### Com derivação central
+
+O secundário tem um terminal no meio, a **derivação central**, que vira o negativo da saída. Cada metade do enrolamento tem o seu diodo: num semiciclo conduz D1, no outro, D2. São só dois diodos, e cada pulso passa por um só, mas o transformador precisa de dois enrolamentos de 12 V (vendido como "12 + 12 V" ou "12-0-12 V"), e cada metade trabalha só metade do tempo.
+
+<Figure caption="Figura 2. Retificador de onda completa com derivação central. Cada diodo trabalha num semiciclo, com uma metade do secundário." alt="Esquema com um transformador cujo secundário tem dois enrolamentos de 12 V em série e um ponto no meio. A ponta de cima vai a um diodo D1 e a de baixo a um diodo D2; os catodos dos dois se juntam no positivo da carga. O ponto do meio do secundário vai ao negativo da carga.">
+  <RetificadorDerivacao />
+</Figure>
+
+### Com ponte retificadora
+
+A <Term id="ponte-retificadora">ponte retificadora</Term> usa quatro diodos e um secundário simples. Em cada semiciclo, dois diodos conduzem, em série com a carga, e os outros dois ficam reversos. Os caminhos se alternam, mas os dois atravessam a carga no mesmo sentido.
+
+<Figure caption="Figura 3. Os dois caminhos da corrente numa ponte. No semiciclo positivo conduzem D1 e D4; no negativo, D2 e D3. Nos dois, a corrente desce pela carga, do + para o −." alt="Dois esquemas iguais lado a lado, cada um com quatro diodos em duas colunas, o secundário entre as colunas e a carga à direita. No da esquerda, um caminho destacado sai do secundário, sobe pelo diodo D1, desce pela carga e volta pelo diodo D4. No da direita, o caminho destacado sobe pelo diodo D2, desce pela carga e volta pelo diodo D3. Os diodos fora do caminho aparecem apagados.">
+  <RetificadorPonte />
+</Figure>
+
+O preço é que a corrente passa por dois diodos e perde duas quedas. Em compensação, o transformador é simples e trabalha o tempo todo. Por isso a ponte é o retificador mais comum. Ela pode ser montada com quatro 1N4007 soltos, como na simulação, ou comprada pronta num encapsulamento só.
+
+<Part3D
+  part="bridge-rectifier"
+  props={{ variant: 'kbp', code: 'KBP206', amps: 2, volts: 600 }}
+  annotations
+  alt="Ponte retificadora pronta: um bloco preto retangular com um canto chanfrado e quatro terminais em fila. As marcas no corpo são, da esquerda para a direita, +, ~, ~ e −. Os dois terminais do meio são a entrada de corrente alternada; os das pontas são a saída positiva e a negativa."
+  caption="Ponte retificadora de 2 A e 600 V num encapsulamento só. Os terminais marcados com ~ recebem a corrente alternada; os das pontas são a saída + e −."
+>
+  <PontePeca />
+</Part3D>
+
+Agora a mesma fonte, com ponte:
+
+<Simulation circuit="m09/retificador-ponte" instruments={['osciloscopio', 'multimetro']} />
+
+1. Com o filtro desligado, aperte o play. Compare com a meia onda: a frequência da saída, o pico e a média (no multímetro em CC).
+2. Ligue a chave **Capacitor de filtro ligado** (3.300 µF, carga de cerca de 0,5 A), espere alguns ciclos e aperte "Autoajuste". Leia a média e o pico a pico do canal 2.
+3. Troque o capacitor para 1.000 µF. O que acontece com a ondulação?
+4. Volte para 3.300 µF e escolha a carga de cerca de 0,15 A.
+
+Sem filtro, a saída tem 120 Hz: dois pulsos por ciclo da rede. O pico cai para 16,0 V, 1,7 V abaixo do secundário, porque a corrente passa por dois diodos; mas a média vai a 9,7 V, quase o dobro da meia onda. Com o filtro de 3.300 µF, a média fica em 14,8 V e a ondulação, em cerca de 0,9 V de pico a pico: menos da metade da meia onda com o mesmo capacitor. Com 1.000 µF, a ondulação vai a 3,0 V, cerca de três vezes mais. Com a carga de 0,15 A, cai para cerca de 0,3 V, e a média sobe para 15,6 V.
+
+## O filtro capacitivo
+
+Sem filtro, a saída vai a zero 120 vezes por segundo, e um circuito eletrônico desligaria em cada vale. O <Term id="filtro-capacitivo">filtro capacitivo</Term> é um <Term id="capacitor">capacitor</Term> grande em paralelo com a carga (como ele guarda carga é assunto da aula sobre <LinkAula id="m04-passivos/03-capacitores">capacitores</LinkAula>).
+
+Ele funciona como uma caixa-d'água: enche nos picos e abastece a carga entre eles. Perto de cada pico, os diodos conduzem e recarregam o capacitor. No resto do tempo, o secundário fica abaixo da tensão do capacitor, os diodos ficam reversos e só o capacitor alimenta a carga, descarregando um pouco. Essa descida e subida que sobra é a <Term id="ondulacao">ondulação</Term> (em inglês, *ripple*). A analogia falha num ponto: a caixa-d'água enche devagar, por uma boia; o capacitor enche em pulsos curtos e fortes, só perto do pico, como você vai ver logo abaixo.
+
+### Quanto de ondulação?
+
+Uma estimativa simples da ondulação de pico a pico:
+
+$$
+\Delta V \approx \frac{I}{f \cdot C}
+$$
+
+em que $\Delta V$ é a ondulação de pico a pico (V), $I$ a corrente da carga (A), $C$ a capacitância (F) e $f$ a frequência da ondulação (Hz): 120 Hz na onda completa e 60 Hz na meia onda, numa rede de 60 Hz.
+
+A conta supõe que o capacitor alimenta a carga durante o ciclo inteiro, sem recarga. Na verdade ele recarrega numa parte do ciclo, e a ondulação real fica um pouco menor. A fórmula erra para o lado seguro:
+
+| Circuito | Pela fórmula | Na simulação |
+|----------|--------------|--------------|
+| Ponte, 3.300 µF, cerca de 0,5 A | 1,24 V | 0,9 V |
+| Ponte, 1.000 µF, cerca de 0,5 A | 4,0 V | 3,0 V |
+| Meia onda, 3.300 µF, cerca de 0,5 A | 2,5 V | 2,1 V |
+
+Duas consequências práticas: dobrar o capacitor corta a ondulação pela metade; e a meia onda, com metade da frequência, precisa do dobro do capacitor para a mesma ondulação.
+
+### Os diodos trabalham em pulsos
+
+Com o filtro, os diodos só conduzem num trecho curto perto de cada pico. Nesse trecho, eles repõem toda a carga que o capacitor entregou no resto do ciclo, então a corrente é bem maior que a da carga. Com 0,5 A de carga e 3.300 µF, como na simulação, cada pulso nos diodos chega a cerca de 2,7 A. Na hora em que a fonte é ligada, o capacitor está descarregado, e o primeiro pulso passa de 10 A. É para isso que serve a corrente de surto da folha de dados, que você viu na aula sobre o diodo: os 30 A do 1N4007 aguentam esse pico. O transformador também esquenta mais do que a corrente média sugere, e por isso é escolhido com folga.
+
+## Exemplo resolvido: o capacitor de uma fonte de 12 V
+
+Você vai montar uma fonte para um aparelho que puxa 0,5 A, com transformador de 12 V e ponte de diodos. Depois dela virá um regulador de 12 V, que precisa receber mais que 12 V o tempo todo, inclusive no vale da ondulação. Você decide aceitar até 1,5 V de ondulação. Qual capacitor usar?
+
+**Passo 1: o pico na saída da ponte.** Com duas quedas de cerca de 0,8 V:
+
+$$
+\begin{aligned}
+V_\text{pico} &\approx 1{,}414 \cdot 12\ \text{V} - 2 \cdot 0{,}8\ \text{V} \\[4pt]
+&\approx 15{,}4\ \text{V}
+\end{aligned}
+$$
+
+**Passo 2: a capacitância.** Isolando $C$ na fórmula da ondulação, com 120 Hz da onda completa:
+
+$$
+\begin{aligned}
+C &\geq \frac{I}{f \cdot \Delta V} = \frac{0{,}5\ \text{A}}{120\ \text{Hz} \cdot 1{,}5\ \text{V}} \\[4pt]
+&\approx 0{,}00278\ \text{F} = 2.778\ \mu\text{F}
+\end{aligned}
+$$
+
+Os capacitores eletrolíticos são vendidos em valores como 2.200, 3.300 e 4.700 µF. O primeiro acima da conta é **3.300 µF**.
+
+**Passo 3: o vale.** Com 3.300 µF, a fórmula dá $0{,}5 / (120 \cdot 0{,}0033) \approx 1{,}26\ \text{V}$ de ondulação. O vale fica perto de 15,4 − 1,3 ≈ 14,1 V, acima de 12 V. Se essa folga basta, quem diz é a folha de dados do regulador, assunto da aula sobre a fonte linear.
+
+**Passo 4: a tensão do capacitor.** O capacitor precisa aguentar o maior pico, que acontece **sem carga**: sem ninguém puxando corrente, ele carrega até o pico e fica lá. Sem carga, esta fonte vai a 16,6 V. E a tomada varia: com 10 % a mais, 139,7 V, vai a 18,4 V. Um capacitor de 16 V trabalharia acima do limite. O de 25 V tem folga. Escolha: **3.300 µF, 25 V**.
+
+**Passo 5: conferir.** Na simulação da ponte, com o filtro ligado, 3.300 µF e a carga de 0,5 A: média de 14,8 V, ondulação de cerca de 0,9 V e vale de 14,3 V. A ondulação ficou abaixo da conta, como a tabela previa.
+
+<RealCase title="A fonte de 12 V que mede 17 V">
+
+Um técnico precisa trocar a fonte de um interfone e testa uma fonte de parede antiga, pesada, com a etiqueta "12 V, 500 mA". Sem nada ligado, o multímetro mostra quase 17 V, e ele acha que ela está com defeito. Não está: é uma fonte **não regulada**, só transformador, ponte e capacitor, como a da simulação. Sem carga, o capacitor carrega até o pico; com a corrente da etiqueta, a tensão desce para perto do nominal. A fonte da simulação vai de 16,6 V sem carga a 14,8 V com meio ampère. Aparelhos feitos para esse tipo de fonte têm o próprio regulador por dentro; um aparelho que exige 12 V regulados pode sofrer com os 17 V dos momentos de pouco consumo.
+
+Meses depois, outro interfone do prédio começa a zumbir. A fonte dele é regulada, e o multímetro em CC mostra 12 V certinhos. No osciloscópio, em acoplamento CA, aparece uma ondulação de 120 Hz muito maior que o normal: o capacitor de filtro ressecou com o tempo e perdeu capacitância. Com ondulação demais, o vale fica abaixo do que o regulador precisa, e a variação passa para a saída. Um eletrolítico estufado no topo ou com vazamento na base confirma o diagnóstico. A troca é por um de mesma capacitância (ou maior) e mesma tensão (ou maior), com a polaridade certa. É o caso que você viu na simulação da aula sobre o <LinkAula id="m03-medicoes/05-osciloscopio">osciloscópio</LinkAula>.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+<Callout type="perigo" title="O capacitor continua carregado depois que você tira o plugue">
+Um capacitor de filtro pode guardar carga por minutos depois que o aparelho é desligado, principalmente quando a carga foi desligada antes. Numa fonte de 12 V são uns 17 V: não dá choque, mas um curto com a chave de fenda solta faísca, derrete a ponta e pode estragar a placa. Nas fontes que retificam a tomada direto, antes de qualquer transformador (carregadores de celular, lâmpadas de LED, fontes chaveadas em geral), o capacitor de entrada carrega com o pico da tomada: cerca de 180 V na de 127 V e 311 V na de 220 V. Aí o choque é perigoso. Antes de mexer:
+
+1. Tire o plugue da tomada. Desligar o botão do aparelho não basta.
+2. Meça a tensão no capacitor com o multímetro em CC, numa escala que comporte a tensão esperada.
+3. Se houver tensão, descarregue com um resistor (por exemplo, 2,2 kΩ e 5 W), preso com pontas de garra ou segurado com alicate isolado, sem encostar nos terminais. Leva de alguns segundos num capacitor pequeno a cerca de meio minuto num de 3.300 µF.
+4. Meça de novo e só mexa quando a tensão estiver perto de zero.
+
+Nunca descarregue em curto, com a chave de fenda.
+</Callout>
+
+- **Escolher as peças pelo valor eficaz.** Um "trafo de 12 V" dá 17 V de pico, e o capacitor chega perto disso sem carga. Um capacitor de 16 V numa fonte assim trabalha acima do limite, esquenta e pode estufar ou estourar.
+- **Inverter o eletrolítico.** O capacitor eletrolítico tem polaridade: a faixa com sinais de menos no corpo marca o terminal negativo, que numa peça nova também é o mais curto. Ligado ao contrário, ele esquenta, estufa e pode romper, soltando o eletrólito.
+- **Ligar a ponte errado.** Os dois terminais ~ vão no transformador; o + e o − vão para o capacitor e a carga. Ligar o transformador num ~ e no + põe um diodo direto sobre o secundário: num dos semiciclos, ele é um curto.
+- **Esquecer o surto da ligação.** Quanto maior o capacitor, maior o pulso quando a fonte é ligada. Diodos, ponte e fusível precisam aguentar esse pico, e é por isso que os fusíveis de entrada de fontes costumam ser de ação retardada.
+- **Mexer no primário com o plugue na tomada.** O cabo, o fusível, a chave e os terminais do primário estão na tensão da rede. Eles ficam isolados com termorretrátil, dentro de uma caixa fechada, e só se mexe neles com o plugue fora da tomada. As medidas desta aula são todas no secundário.
+- **Ligar o osciloscópio no lugar errado.** A garra de terra da ponta de prova está ligada ao terra da tomada, como você viu na aula sobre o osciloscópio. No secundário de um transformador, isolado da rede, tudo bem; no primário, ou no lado da rede de uma fonte chaveada, a garra pode fazer um curto pela ponta.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Um transformador entrega 9 V eficazes no secundário. Qual é a tensão de pico?',
+      answer: 12.7,
+      tolerance: 0.03,
+      unit: 'V',
+      explanation: 'Vp = 1,414 × 9 V ≈ 12,7 V. É até perto desse valor, menos as quedas dos diodos, que o capacitor de filtro carrega.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Numa ponte retificadora, quantos diodos conduzem em cada semiciclo?',
+      options: [
+        {
+          text: 'Dois, em série com a carga',
+          correct: true,
+          feedback: 'Isso. No semiciclo positivo conduzem D1 e D4; no negativo, D2 e D3. Por isso a ponte perde duas quedas de diodo.',
+        },
+        {
+          text: 'Um só',
+          feedback: 'Um diodo por semiciclo é o caso da derivação central. Na ponte, a corrente passa por dois.',
+        },
+        {
+          text: 'Os quatro',
+          feedback: 'Em cada semiciclo, dois diodos ficam reversos e não conduzem.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma fonte com ponte, na rede de 60 Hz, alimenta 1 A com um capacitor de 4.700 µF. Pela fórmula, qual é a ondulação de pico a pico?',
+      answer: 1.77,
+      tolerance: 0.03,
+      unit: 'V',
+      explanation:
+        'ΔV ≈ I ÷ (f × C) = 1 A ÷ (120 Hz × 0,0047 F) ≈ 1,77 V. Na onda completa, a ondulação tem 120 Hz. Na prática, ela fica um pouco abaixo disso.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma fonte troca a ponte por um retificador de meia onda, com o mesmo capacitor e a mesma carga. O que acontece com a ondulação?',
+      options: [
+        {
+          text: 'Fica perto do dobro',
+          correct: true,
+          feedback:
+            'Isso. O capacitor passa a ser recarregado 60 vezes por segundo em vez de 120 e descarrega por quase o dobro do tempo. Na simulação, de cerca de 0,9 V para 2,1 V.',
+        },
+        {
+          text: 'Não muda, porque o capacitor é o mesmo',
+          feedback: 'A ondulação depende também da frequência com que o capacitor é recarregado.',
+        },
+        {
+          text: 'Cai pela metade',
+          feedback: 'É o contrário: com meia onda, o capacitor espera mais entre uma recarga e outra.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Uma fonte não regulada de 12 V que mede 17 V sem nada ligado está com defeito.',
+      answer: false,
+      explanation:
+        'Sem carga, o capacitor carrega até o pico do secundário, menos os diodos: perto de 17 V num transformador de 12 V. Com a corrente nominal, a tensão desce.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem o procedimento para mexer na placa de uma fonte.',
+      items: [
+        'Tirar o plugue da tomada',
+        'Medir a tensão no capacitor de filtro em CC',
+        'Descarregar o capacitor com um resistor, sem encostar nos terminais',
+        'Medir de novo e confirmar que a tensão está perto de zero',
+        'Mexer na placa',
+      ],
+      explanation:
+        'Primeiro sem energia; depois, medir antes e depois de descarregar, porque o capacitor guarda carga mesmo com o plugue fora da tomada.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Numa fonte, a tensão no capacitor de filtro pode chegar a 18,4 V sem carga e com a tomada alta. Que tensão nominal de capacitor escolher?',
+      options: [
+        {
+          text: '25 V',
+          correct: true,
+          feedback: 'Isso. É o primeiro valor comum acima do pico, com folga.',
+        },
+        {
+          text: '16 V, porque a fonte é de 12 V',
+          feedback: 'O capacitor vê o pico, não os 12 V nominais: 18,4 V passa do limite de um capacitor de 16 V.',
+        },
+        {
+          text: '10 V',
+          feedback: 'Bem abaixo do pico: o capacitor esquentaria e poderia estourar.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Uma fonte linear tem quatro etapas: **transformador**, **retificador**, **filtro** e **regulador**. O retificador transforma a corrente alternada em contínua pulsante.
+- O transformador é vendido pelo valor **eficaz**, mas o capacitor carrega até o **pico**: $V_p \approx 1{,}414 \cdot V_\text{ef}$, menos cerca de 0,8 V por diodo no caminho. Um trafo de 12 V dá cerca de 17 V de pico.
+- A **meia onda** usa um diodo e pulsa a 60 Hz. A **onda completa**, com derivação central ou **ponte**, aproveita os dois semiciclos e pulsa a 120 Hz. A ponte perde duas quedas de diodo, mas usa um transformador simples.
+- O **filtro capacitivo** carrega nos picos e alimenta a carga entre eles. A **ondulação** de pico a pico é cerca de ΔV ≈ I ÷ (f × C), uma conta que erra para o lado seguro.
+- O capacitor precisa aguentar o pico **sem carga**, com a tomada alta, e os diodos conduzem em **pulsos** várias vezes maiores que a corrente da carga, com um surto na ligação.
+- Antes de mexer numa fonte: plugue fora da tomada, medir, descarregar o capacitor com um resistor e medir de novo.
+
+Na próxima aula, o diodo que acende: os [LEDs](../04-leds/).

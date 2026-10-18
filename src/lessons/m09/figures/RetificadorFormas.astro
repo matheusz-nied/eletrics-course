@@ -8,7 +8,7 @@ const X0 = 150;
 const X1 = 626;
 const ROW = 88;
 const TOP = 46;
-const AMP = 30;
+const AMP = 32;
 const CYCLES = 2;
 const N = 400;
 const ts = Array.from({ length: N + 1 }, (_, k) => (k / N) * CYCLES);
@@ -17,7 +17,7 @@ const sine = (t: number) => Math.sin(2 * Math.PI * t);
 
 /* Filtered full wave: the capacitor follows the rectified sine up to the peak,
    then discharges linearly until the sine catches up again. */
-const DROP_PER_CYCLE = 0.36;
+const DROP_PER_CYCLE = 0.5;
 function filtered(): number[] {
   let held = 0;
   return ts.map((t, k) => {
@@ -39,36 +39,41 @@ const rows = [
 const path = (v: number[], y0: number) =>
   'M' + v.map((y, k) => `${xOf(ts[k]!).toFixed(1)} ${(y0 - y * AMP).toFixed(1)}`).join('L');
 
-/* Ripple bracket on the last row, at the second valley. */
+/* Ripple bracket on the last row, just after the last valley, with a dashed
+   guide at the level of the peak before it. */
 const lastY = TOP + 3 * ROW;
-const valley = Math.min(...filt.slice(Math.floor(N * 0.5), Math.floor(N * 0.75)));
-const bx = xOf(1.47);
+const from = Math.floor(N * 0.75);
+const last = filt.slice(from, Math.floor(N * 0.875));
+const valley = Math.min(...last);
+const vx = xOf(ts[from + last.indexOf(valley)]!);
+const bx = vx;
+const peakY = lastY - AMP;
+const valleyY = lastY - valley * AMP;
 ---
 
 <svg viewBox="0 0 640 380" width="640" height="380" class="fig" aria-hidden="true">
-  {
-    rows.map((r, i) => {
-      const y0 = TOP + i * ROW;
-      return (
-        <g>
-          <text x="12" y={y0 - 4} class="lbl">
-            {r.label}
-          </text>
-          <text x="12" y={y0 + 14} class="sub">
-            {r.sub}
-          </text>
-          <line x1={X0} y1={y0} x2={X1} y2={y0} class="zero" />
-          {i === 3 && <path d={path(rows[2]!.v, y0)} class="ghost" />}
-          <path d={path(r.v, y0)} class={i === 0 ? 'wave ac' : 'wave'} />
-        </g>
-      );
-    })
-  }
+  {rows.map((r, i) => {
+    const y0 = TOP + i * ROW;
+    return (
+      <g>
+        <text x="12" y={y0 - 4} class="lbl">
+          {r.label}
+        </text>
+        <text x="12" y={y0 + 14} class="sub">
+          {r.sub}
+        </text>
+        <line x1={X0} y1={y0} x2={X1} y2={y0} class="zero" />
+        {i === 3 && <path d={path(rows[2]!.v, y0)} class="ghost" />}
+        <path d={path(r.v, y0)} class={i === 0 ? 'wave ac' : 'wave'} />
+      </g>
+    );
+  })}
+  <path d={`M${xOf(1.25)} ${peakY}H${bx + 6}`} class="guide" />
   <path
-    d={`M${bx - 6} ${lastY - AMP}H${bx + 6}M${bx} ${lastY - AMP}V${lastY - valley * AMP}M${bx - 6} ${lastY - valley * AMP}H${bx + 6}`}
+    d={`M${bx - 6} ${peakY}H${bx + 6}M${bx} ${peakY}V${valleyY}M${bx - 6} ${valleyY}H${bx + 6}`}
     class="bracket"
   />
-  <text x={bx + 10} y={lastY - ((1 + valley) / 2) * AMP + 4} class="sub strong">
+  <text x={bx} y={peakY - 8} class="sub strong mid">
     ondulação
   </text>
   <line x1={X0} y1={TOP + 3 * ROW + 26} x2={X1} y2={TOP + 3 * ROW + 26} class="axis" />
@@ -97,6 +102,14 @@ const bx = xOf(1.47);
   }
   .end {
     text-anchor: end;
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .guide {
+    stroke: var(--danger);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
   }
   .zero {
     stroke: var(--border-strong);
