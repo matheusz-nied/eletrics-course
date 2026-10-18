@@ -3,6 +3,7 @@ import type { CircuitDoc, SimEvent, SimFrame } from '../contract';
 import { Simulator } from '../analysis/simulator';
 import { phaseControlFactor } from '../devices/triac';
 import { getDeviceInfo, validateCircuit } from '../index';
+import { AMBIENT_C } from '../models/constants';
 import { gateCircuit } from './gate-circuit';
 import { loop, netlist, runFor, type NetPart } from './utils';
 
@@ -112,6 +113,44 @@ describe('quasi-static analysis', () => {
     const { frame } = runFor(doc, 0.05);
     expect(r(frame, 'R1.current')).toBeCloseTo(5, 4);
     expect(r(frame, 'R1.power')).toBeCloseTo(25, 3);
+  });
+
+  it('splits each voltage and current probe into its DC part and its AC RMS', () => {
+    // 3 V DC + 4 V RMS on 1 Ω: a meter reads 3 V in DC mode and 4 V in AC mode.
+    const doc = loop(
+      'qs-partes',
+      [
+        {
+          id: 'VA',
+          type: 'ac-voltage',
+          params: { amplitude: 4 * Math.SQRT2, offset: 3 },
+        },
+        { id: 'R1', type: 'resistor', params: { resistance: 1 } },
+      ],
+      qs(),
+      {
+        probes: [
+          { id: 'V', kind: 'voltage', plus: 'R1.a', minus: 'R1.b' },
+          { id: 'I', kind: 'current', element: 'R1' },
+          { id: 'IW', kind: 'current', element: 'Wret' },
+          { id: 'P', kind: 'power', element: 'R1' },
+        ],
+      },
+    );
+    const { frame } = runFor(doc, 0.05);
+    expect(r(frame, 'V')).toBeCloseTo(5, 4);
+    expect(Math.abs(r(frame, 'V.dc'))).toBeCloseTo(3, 4);
+    expect(r(frame, 'V.ac')).toBeCloseTo(4, 4);
+    expect(Math.abs(r(frame, 'I.dc'))).toBeCloseTo(3, 4);
+    expect(r(frame, 'I.ac')).toBeCloseTo(4, 4);
+    expect(Math.abs(r(frame, 'IW.dc'))).toBeCloseTo(3, 4);
+    expect(r(frame, 'IW.ac')).toBeCloseTo(4, 4);
+    // The parts carry the sign of the reading.
+    expect(Math.sign(r(frame, 'V.dc'))).toBe(Math.sign(r(frame, 'V')));
+    expect(frame.readouts['P.ac']).toBeUndefined();
+    // Outside the quasi-static analysis there is no split.
+    const dc = runFor({ ...doc, analysis: { kind: 'transient', dt: 1e-4 } }, 0.001);
+    expect(dc.frame.readouts['V.ac']).toBeUndefined();
   });
 
   it('warns about a source at another frequency and rejects devices it cannot run', () => {
@@ -793,5 +832,53 @@ describe('current probes', () => {
     const frame = ac.frame();
     expect(Math.abs(r(frame, 'iw'))).toBeCloseTo(10 / Math.SQRT2 / 100, 6);
     expect(Math.abs(frame.samples!.values.iw[0])).toBeCloseTo(10 / Math.SQRT2 / 100, 6);
+  });
+});
+
+describe('transformer in the quasi-static analysis', () => {
+  const doc = (load: number) =>
+    netlist(
+      'qs-trafo',
+      [
+        mains(),
+        { id: 'T1', type: 'transformer', nodes: { p1: 'L', p2: '0', s1: 'S', s2: '0' } },
+        {
+          id: 'RL',
+          type: 'resistor',
+          nodes: ['S', '0'],
+          params: { resistance: load, watts: 1000 },
+        },
+      ],
+      qs(0.1),
+    );
+
+  it('reads the secondary in true RMS, so a meter in AC mode sees it', () => {
+    const { frame } = runFor(doc(10), 1);
+    const vs = r(frame, 'vS');
+    // 127 V / 10, a little less across the winding resistances.
+    expect(vs).toBeGreaterThan(11.5);
+    expect(vs).toBeLessThan(12.7);
+    expect(r(frame, 'vS.ac')).toBeCloseTo(vs, 6);
+    expect(r(frame, 'vS.dc')).toBeCloseTo(0, 6);
+    expect(r(frame, 'T1.vSecondary')).toBeCloseTo(vs, 4);
+    expect(Math.abs(r(frame, 'T1.iSecondary'))).toBeCloseTo(vs / 10, 3);
+    const ip = r(frame, 'T1.iPrimary');
+    const is = r(frame, 'T1.iSecondary');
+    expect(r(frame, 'T1.losses')).toBeCloseTo(20 * ip * ip + 0.2 * is * is, 6);
+    expect(r(frame, 'T1.losses')).toBeGreaterThan(0.1);
+  });
+
+  it('stays cool at its rating and burns open when overloaded', () => {
+    const fine = new Bench(doc(10));
+    fine.run(600);
+    expect(fine.events).toHaveLength(0);
+    // Under the warning threshold, 1,05 × the rise at the rating (80 K).
+    expect(r(fine.frame, 'T1.temperature')).toBeLessThan(AMBIENT_C + 84);
+
+    const overloaded = new Bench(doc(0.5));
+    overloaded.until((f) => f.readouts['T1.burned'] === true, 120);
+    expect(overloaded.said('O transformador T1')?.kind).toBe('warning');
+    expect(overloaded.events.at(-1)?.kind).toBe('damaged');
+    expect(r(overloaded.run(1), 'vS')).toBeLessThan(0.1);
   });
 });

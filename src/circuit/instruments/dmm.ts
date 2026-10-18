@@ -54,3 +54,17 @@ export function dcAndRms(values: number[]): { mean: number; rms: number } {
   const variance = finite.reduce((s, v) => s + (v - mean) ** 2, 0) / finite.length;
   return { mean, rms: Math.sqrt(variance) };
 }
+
+/**
+ * A quasi-static frame gives each voltage or current probe its DC part and the
+ * RMS of its AC part (`<probe>.dc`, `<probe>.ac`): every step is a steady
+ * state, so the meter shows them as they are. Undefined without that split.
+ */
+export function quasiStaticReading(
+  readouts: Record<string, number | boolean | string>,
+  probe: string,
+  mode: 'dc' | 'ac',
+): number | undefined {
+  const value = readouts[`${probe}.${mode}`];
+  return typeof value === 'number' ? value : undefined;
+}
