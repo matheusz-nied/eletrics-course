@@ -1,23 +1,77 @@
 ---
 /*
- * Placeholder created by the Fundação. The Kit 3D front replaces this file
- * with the real 3D viewer; the props are the public API used by lessons
- * (docs/plano/02-arquitetura.md, sections 4.3 and 7.3).
+ * <Model3D part="resistor" props={{ ohms: 4700 }} />: a part of the 3D kit in
+ * a lesson (docs/plano/02-arquitetura.md, sections 4.3 and 7.3). The part is
+ * resolved at build time (an unknown id fails the build), its poster and
+ * description are rendered as HTML, and the 3D view loads when it comes into
+ * view.
  */
-import UnderConstruction from '../components/UnderConstruction.astro';
+import { describePart, getPartMeta, getPoster } from './catalog';
+import Viewer from './core/Viewer';
+import type { PartProps } from './types';
 
 export interface Props {
-  /** Part id from src/three/parts: "resistor". */
+  /** Part id from src/three/parts (or src/three/instruments): "resistor". */
   part: string;
   /** Part parameters: `{ ohms: 4700 }`. */
   props?: Record<string, unknown>;
+  /** Start in the exploded view. */
   explode?: boolean;
+  /** Start with the cutaway on. */
   cutaway?: boolean;
+  /** Start with the annotations visible. */
   annotations?: boolean;
   height?: number;
+  /** Caption below the view; defaults to the part's description. */
+  caption?: string;
 }
 
-const { part, height = 360 } = Astro.props;
+const {
+  part,
+  props = {},
+  explode = false,
+  cutaway = false,
+  annotations = false,
+  height = 360,
+  caption,
+} = Astro.props;
+
+const meta = getPartMeta(part);
+if (!meta) {
+  throw new Error(
+    `<Model3D part="${part}">: peça desconhecida. Veja a lista em /dev/pecas/ ou crie src/three/parts/${part}.tsx.`,
+  );
+}
+
+const partProps = props as PartProps;
+const description = describePart(meta, partProps);
 ---
 
-<UnderConstruction component="Model3D" label="Modelo 3D" detail={part} height={height} />
+<figure class="model3d breakout" data-component="Model3D">
+  <Viewer
+    client:visible={{ rootMargin: '300px' }}
+    part={part}
+    props={partProps}
+    explode={explode}
+    cutaway={cutaway}
+    annotations={annotations}
+    height={height}
+    label={`Modelo 3D: ${meta.label}`}
+    description={description}
+    poster={getPoster(part)}
+  />
+  <figcaption>{caption ?? description}</figcaption>
+</figure>
+
+<style>
+  .model3d {
+    margin: 1.75em 0;
+  }
+
+  figcaption {
+    margin-top: 0.625rem;
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+</style>
