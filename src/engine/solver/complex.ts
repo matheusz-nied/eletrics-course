@@ -1,9 +1,79 @@
 import { SingularMatrixError } from './lu';
 
+/** Entries one device stamped, to work out the currents through its pins afterwards. */
+export class StampLog {
+  rows: number[] = [];
+  cols: number[] = [];
+  re: number[] = [];
+  im: number[] = [];
+  rhsRows: number[] = [];
+  rhsRe: number[] = [];
+  rhsIm: number[] = [];
+
+  clear(): void {
+    this.rows.length = this.cols.length = this.re.length = this.im.length = 0;
+    this.rhsRows.length = this.rhsRe.length = this.rhsIm.length = 0;
+  }
+
+  /**
+   * Current (phasor) entering the device through each pin: the device's own
+   * terms in the KCL row of the pin's node, applied to the solution. A pin on
+   * ground gets what the others leave (the device's currents add up to zero).
+   */
+  pinCurrents(
+    pins: readonly number[],
+    xRe: Float64Array,
+    xIm: Float64Array,
+    outRe: Float64Array,
+    outIm: Float64Array,
+  ): void {
+    outRe.fill(0);
+    outIm.fill(0);
+    let grounded = 0;
+    for (let k = 0; k < pins.length; k++) {
+      const node = pins[k];
+      if (node < 0) {
+        grounded++;
+        continue;
+      }
+      // The first pin on a node takes the whole row (pins sharing a node cannot be told apart).
+      if (pins.indexOf(node) !== k) continue;
+      let re = 0;
+      let im = 0;
+      for (let e = 0; e < this.rows.length; e++) {
+        if (this.rows[e] !== node) continue;
+        const c = this.cols[e];
+        re += this.re[e] * xRe[c] - this.im[e] * xIm[c];
+        im += this.re[e] * xIm[c] + this.im[e] * xRe[c];
+      }
+      for (let e = 0; e < this.rhsRows.length; e++) {
+        if (this.rhsRows[e] !== node) continue;
+        re -= this.rhsRe[e];
+        im -= this.rhsIm[e];
+      }
+      outRe[k] = re;
+      outIm[k] = im;
+    }
+    if (grounded === 0) return;
+    let re = 0;
+    let im = 0;
+    for (let k = 0; k < pins.length; k++) {
+      re += outRe[k];
+      im += outIm[k];
+    }
+    for (let k = 0; k < pins.length; k++) {
+      if (pins[k] >= 0) continue;
+      outRe[k] = -re / grounded;
+      outIm[k] = -im / grounded;
+    }
+  }
+}
+
 /**
- * Complex MNA system for the AC sweep (and, in S3, the phasor mode): same
- * layout as MnaSystem, with separate real and imaginary arrays and a dense
- * LU with partial pivoting.
+ * Complex MNA system for the AC sweep and the quasi-static phasor solve:
+ * same layout as MnaSystem, with separate real and imaginary arrays and a
+ * dense LU with partial pivoting. While `log` is set, stamps are also
+ * recorded there.
  */
 export class ComplexMna {
   readonly size: number;
@@ -14,6 +84,7 @@ export class ComplexMna {
   readonly xRe: Float64Array;
   readonly xIm: Float64Array;
   private readonly perm: Int32Array;
+  log: StampLog | undefined;
 
   constructor(size: number) {
     this.size = size;
@@ -38,12 +109,25 @@ export class ComplexMna {
     const k = row * this.size + col;
     this.re[k] += re;
     this.im[k] += im;
+    const log = this.log;
+    if (log) {
+      log.rows.push(row);
+      log.cols.push(col);
+      log.re.push(re);
+      log.im.push(im);
+    }
   }
 
   addRhs(row: number, re: number, im = 0): void {
     if (row < 0) return;
     this.bRe[row] += re;
     this.bIm[row] += im;
+    const log = this.log;
+    if (log) {
+      log.rhsRows.push(row);
+      log.rhsRe.push(re);
+      log.rhsIm.push(im);
+    }
   }
 
   /** Admittance y = g + jb between nodes i and j. */

@@ -81,7 +81,9 @@ export function netlist(
   };
   const firstPin = new Map<string, string>();
   const elements: ElementDoc[] = [{ id: 'GND0', type: 'ground', at: [0, 0] }];
-  parts.forEach((part, k) => {
+  // N-terminal parts are stacked below the node line, each clear of the last.
+  let below = 100;
+  parts.forEach((part) => {
     if (Array.isArray(part.nodes)) {
       const [na, nb] = part.nodes;
       elements.push({
@@ -95,11 +97,18 @@ export function netlist(
       if (!firstPin.has(nb)) firstPin.set(nb, `${part.id}.b`);
       return;
     }
-    const at: [number, number] = [0, 100 + 20 * k];
+    const ys = Object.values(
+      getPinPositions({ id: part.id, type: part.type, at: [0, 0], params: part.params }),
+    ).map(([, y]) => y);
+    const top = Math.min(0, ...ys);
+    const at: [number, number] = [0, below - top];
+    below = at[1] + Math.max(0, ...ys) + 10;
     const el: ElementDoc = { id: part.id, type: part.type, at, params: part.params };
     elements.push(el);
+    const pins = getPinPositions(el);
     for (const [pin, node] of Object.entries(part.nodes)) {
-      const pinAt = getPinPositions(el)[pin];
+      const pinAt = pins[pin];
+      if (!pinAt) throw new Error(`${part.id} (${part.type}) has no pin "${pin}"`);
       elements.push({ id: `W_${part.id}_${pin}`, type: 'wire', points: [pinAt, point(node)] });
       if (!firstPin.has(node)) firstPin.set(node, `${part.id}.${pin}`);
     }

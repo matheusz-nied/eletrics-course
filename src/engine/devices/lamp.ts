@@ -1,4 +1,4 @@
-import { defineDevice, num, TWO_PINS } from '../device';
+import { acSquared, defineDevice, num, TWO_PINS } from '../device';
 import { formatSI } from '../messages';
 import { KELVIN, R_OPEN } from '../models/constants';
 import { RmsMeter } from '../models/filters';
@@ -66,7 +66,8 @@ export default defineDevice({
         const v = x.v(a) - x.v(b);
         current = v / resistance();
         if (!ctx.commit || step.dt <= 0) return;
-        vRms.update(v, step.dt);
+        const ac = step.ac;
+        vRms.update(ac ? Math.hypot(v, ac.re(a) - ac.re(b), ac.im(a) - ac.im(b)) : v, step.dt);
         if (burned) {
           temp = t0;
           return;
@@ -74,7 +75,7 @@ export default defineDevice({
         // Backward Euler on C·dT/dt = P − k·(T⁴ − T0⁴), solved by Newton.
         const k = num(params, 'power') / (T_RATED ** 4 - t0 ** 4);
         const heatCapacity = num(params, 'thermalTime') * 4 * k * T_RATED ** 3;
-        const p = v * current;
+        const p = v * current + acSquared(step, 0) * resistance();
         const prev = temp;
         let t = prev;
         for (let n = 0; n < 8; n++) {
