@@ -1,0 +1,354 @@
+---
+titulo: Chaves, botões e relés
+modulo: m04-passivos
+ordem: 7
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Diferenciar contato NA, NF e reversível (COM, NA e NF), em repouso e acionado
+  - Escolher entre um botão pulsador e uma chave com retenção
+  - Explicar como um relé deixa uma corrente pequena comandar uma corrente grande
+  - Ler a etiqueta de um relé e conferir os pinos com o multímetro
+  - Reconhecer um contato seco nas saídas de uma central
+prerequisitos:
+  - m02-circuitos-cc/01-o-circuito-eletrico
+  - m03-medicoes/04-resistencia-continuidade-e-diodo
+tags: [chave, botão, pulsador, relé, NA, NF, contato seco, portão, carro]
+seguranca: baixa-tensao
+rascunho: true
+---
+
+import SwitchContacts from '../../../lessons/m04/figures/SwitchContacts.astro';
+import PushButtonInside from '../../../lessons/m04/figures/PushButtonInside.astro';
+import RelayAnatomy from '../../../lessons/m04/figures/RelayAnatomy.astro';
+import RelayPinout from '../../../lessons/m04/figures/RelayPinout.astro';
+import Part3D from '../../../lessons/m02/Part3D.astro';
+
+Você quer instalar um par de faróis auxiliares no carro, com um botãozinho no painel. Os dois faróis puxam juntos mais de 9 A. Se essa corrente passasse pelo botão e pelo fio fino que vai até o painel, o botão esquentaria, o contato derreteria com o tempo e o fio viraria um risco de incêndio atrás do painel. Quem instala faz diferente: o botão só liga um **relé**, e é o relé, perto da bateria, que liga os faróis.
+
+O mesmo truque está dentro da central do portão: o microcontrolador não aguenta a corrente do motor, então ele aciona dois relés, um para abrir e outro para fechar. Nesta aula você vai entender os contatos de chaves e botões, por dentro e pelos nomes que aparecem nos bornes, e ver um relé trabalhando numa simulação.
+
+## O contato: duas peças de metal que se encostam
+
+Toda chave, todo botão e todo relé têm a mesma coisa no coração: um **contato**, duas peças de metal que se encostam para deixar a corrente passar e se afastam para cortá-la. O que muda de uma peça para outra é quem move o contato (o seu dedo, uma alavanca, um ímã) e em que posição ele fica quando ninguém mexe.
+
+Essa posição de descanso dá nome ao contato. "Normal" quer dizer **em repouso**: botão solto, alavanca sem ninguém empurrando, bobina do relé sem corrente.
+
+- <Term id="contato-na-nf">NA</Term>, **normalmente aberto**: em repouso, não passa corrente; acionado, fecha. Em inglês, NO (*normally open*).
+- **NF**, **normalmente fechado**: em repouso, passa corrente; acionado, abre. Em inglês, NC (*normally closed*).
+- **Reversível**: três terminais. O **comum** (COM, ou C) fica encostado no NF em repouso e passa para o NA quando acionado. É um contato NA e um NF dividindo a mesma peça móvel.
+
+<Figure caption="Figura 1. Os três tipos de contato, em repouso (em cima) e acionados (embaixo). Em cobre, o caminho por onde a corrente passa. No reversível, o comum (COM) sempre está ligado a um dos dois lados.">
+  <SwitchContacts />
+</Figure>
+
+Uma forma de nunca confundir: o nome descreve o contato **parado**. Se você mede com o multímetro um relé solto na mesa, o par COM–NF apita na continuidade e o par COM–NA não.
+
+### Polos e posições
+
+Nas lojas e nos catálogos aparecem também os **polos** e as **posições**. O polo é cada caminho independente que a chave controla; a posição é cada lugar para onde o polo pode ir. As siglas em inglês são comuns até nas embalagens:
+
+| Nome | Sigla em inglês | O que é | Exemplo |
+|------|-----------------|---------|---------|
+| 1 polo, 1 posição | SPST | Liga/desliga, dois terminais | Interruptor simples da luz |
+| 1 polo, 2 posições | SPDT | Reversível: COM, NA e NF | Microchave; interruptor paralelo da escada |
+| 2 polos, 2 posições | DPDT | Duas reversíveis movidas juntas | Chave que inverte o sentido de um motor CC |
+
+O interruptor paralelo (o *three-way*), que acende a luz da escada de dois lugares, é uma chave reversível; a ligação dele está na aula <LinkAula id="m07-instalacoes/06-interruptores" />.
+
+## Pulsador ou chave com retenção
+
+A outra diferença importante é o que acontece quando você **solta**.
+
+- O <Term id="pulsador">botão pulsador</Term> volta sozinho para o repouso: uma mola empurra o contato de volta. O botão da campainha é assim. Ele fica acionado só enquanto você aperta.
+- A **chave com retenção** fica na posição em que você deixou, até alguém mudar de novo. O interruptor da luz é assim: uma pequena trava mecânica segura a tecla num dos lados.
+
+<Part3D
+  part="wall-push-button"
+  props={{ variant: 'campainha', pressed: false }}
+  explode
+  annotations
+  alt="Corte de um botão pulsador normalmente aberto, solto e apertado: a tecla empurra uma ponte de metal contra dois contatos fixos ligados aos bornes; uma mola embaixo da ponte afasta a ponte dos contatos quando a tecla é solta."
+  caption="Botão pulsador NA, como o da campainha e o da botoeira do portão."
+>
+  <PushButtonInside />
+</Part3D>
+
+Repare que "pulsador" e "NA" são coisas diferentes. Um pulsador pode ser NA (o mais comum: apertou, liga) ou NF. O botão de **parar** de uma máquina é um pulsador NF: em repouso deixa a corrente passar, e apertar corta. Já o botão de **emergência**, aquele cogumelo vermelho, é NF **com retenção**: depois de apertado, fica afundado até alguém girar ou puxar para soltar, para a máquina não voltar a funcionar sozinha.
+
+Um parente do pulsador que aparece em todo lugar é a <Term id="microchave">microchave</Term>: uma caixinha com uma alavanca (às vezes com rodinha) e um contato reversível que muda com um movimento de menos de um milímetro. Ela percebe a porta do micro-ondas fechada, o papel na impressora e, em alguns automatizadores, o portão chegando ao fim do curso.
+
+A escolha entre pulsador e retenção não é de gosto: o equipamento espera um ou outro. A entrada BOT da central do portão espera um **pulso**: cada toque é um comando. Uma chave com retenção ali deixaria a entrada acionada para sempre.
+
+## O relé: uma chave movida por um eletroímã
+
+Um <Term id="rele">relé</Term> é uma chave reversível em que, em vez do dedo, quem move o contato é um eletroímã. Ele tem duas partes isoladas entre si:
+
+- a **bobina**: um fio de cobre fino enrolado em volta de um **núcleo** de ferro. Com corrente, o núcleo vira um ímã;
+- os **contatos**: o comum (COM), o NA e o NF, presos a uma **armadura**, uma plaqueta de ferro que o núcleo consegue puxar. Uma **mola** segura a armadura longe do núcleo enquanto a bobina está sem corrente.
+
+<Figure caption="Figura 2. Um relé aberto ao meio. Em repouso, a mola mantém a armadura levantada e o contato móvel (COM) encostado no NF. Com corrente na bobina, o núcleo vira ímã (o campo magnético, tracejado, passa pelo núcleo, pela armadura e pela moldura), puxa a armadura e o COM passa para o NA. O estalo que você ouve é a armadura batendo no núcleo.">
+  <RelayAnatomy />
+</Figure>
+
+O ponto-chave é o **isolamento**: não existe ligação elétrica entre a bobina e os contatos, só o movimento mecânico. Por isso a bobina pode estar num circuito de 12 V de corrente contínua, ligado a um microcontrolador ou a um botão de painel, e os contatos podem ligar um farol de 9 A, um motor de 127 V ou a luz da garagem. Os dois lados nem precisam ter a mesma referência.
+
+Como o eletroímã funciona por dentro é assunto da aula <LinkAula id="m05-magnetismo/02-eletroimas-e-solenoides" />. Aqui o que interessa é o comportamento elétrico.
+
+### A bobina é um resistor (e um indutor)
+
+Para o circuito que a alimenta, a bobina se comporta como um resistor: a resistência do fio enrolado. A corrente vem da Lei de Ohm:
+
+$$
+I_\text{bobina} = \frac{V_\text{bobina}}{R_\text{bobina}}
+$$
+
+com $V$ em volts (V), $R$ em ohms (Ω) e $I$ em ampères (A). Um relé de placa de 12 V tem bobina de uns 400 Ω (típico), e puxa $12 / 400 = 0{,}03\,\text{A}$, ou 30 mA. Um relé automotivo de 12 V tem bobina bem mais grossa, perto de 85 Ω (típico), e puxa cerca de 0,14 A.
+
+A bobina também é um <Term id="indutor">indutor</Term>: quando a corrente dela é cortada de repente, aparece um pico de tensão de centenas de volts. É por isso que quase toda bobina de relé ligada a um circuito eletrônico tem um <Term id="diodo">diodo</Term> em paralelo, montado ao contrário, para dar um caminho a essa corrente. Você viu o pico e o diodo na aula <LinkAula id="m04-passivos/05-indutores-e-circuito-rl" />.
+
+### Puxar e soltar
+
+A armadura não se move aos pouquinhos: ela fica parada até a força magnética vencer a mola e então bate de uma vez no núcleo. Os fabricantes informam duas tensões:
+
+- **tensão de operação**: a mínima garantida para o relé "puxar". Muitos relés comuns garantem puxar com 75 % da tensão nominal (típico);
+- **tensão de desoperação**: abaixo dela, o relé com certeza solta. Valores típicos ficam perto de 10 % da nominal.
+
+A diferença existe porque, depois que a armadura encostou, o caminho do campo magnético fica quase todo dentro do ferro e é preciso muito menos corrente para segurá-la. Na prática, isso quer dizer duas coisas: um relé de 24 V ligado em 12 V (50 % da nominal) pode não puxar nunca; e um relé que já puxou continua puxado mesmo que a tensão caia bastante.
+
+## Lendo a etiqueta de um relé
+
+Na caixinha do relé vêm impressas as duas metades dele:
+
+<Part3D
+  part="relay"
+  props={{ coilVoltage: 12, energized: false, transparentCover: true }}
+  explode
+  annotations
+  alt="Relé de placa de 12 V visto de cima e de baixo. Em cima, impresso: RELÉ 12VDC e 10A 250VAC 10A 30VDC, e o desenho da bobina e do contato reversível. Embaixo, cinco pinos: de um lado, um pino da bobina, o comum e o outro pino da bobina; do outro lado, NF e NA."
+  caption="Relé de placa de 12 V: o que vem impresso e onde fica cada pino."
+>
+  <RelayPinout />
+</Part3D>
+
+- **12VDC**: a tensão da bobina, 12 V de corrente contínua (DC é a sigla em inglês para CC). Um relé "5VDC" queima a bobina em 12 V; um "24VDC" não puxa.
+- **10A 250VAC**: os contatos aguentam 10 A em corrente alternada (AC, ou CA) de até 250 V.
+- **10A 30VDC**: em corrente contínua, os mesmos 10 A só até 30 V.
+
+Por que a tensão em CC é tão menor? Por causa da faísca. Quando o contato abre com corrente passando, forma-se um pequeno arco entre as peças de metal. Em CA, a corrente passa por zero 120 vezes por segundo (na rede de 60 Hz) e o arco se apaga sozinho na primeira passagem. Em CC, a corrente nunca passa por zero, e o arco pode se manter e derreter o contato. Por isso, nunca use a especificação de CA para comandar uma carga de CC.
+
+Os números da etiqueta valem para cargas comuns. Motores e lâmpadas puxam um pico de corrente ao ligar, e muitos fabricantes indicam valores menores para esse tipo de carga na folha de dados. Contato usado acima do que aguenta gasta, escurece e pode **colar** (soldar fechado): o relé desliga a bobina e a carga continua ligada.
+
+## Contato seco
+
+Nas centrais de portão, de alarme e de automação aparece muito a expressão <Term id="contato-seco">contato seco</Term>. É um contato que **não traz tensão nenhuma** de dentro do equipamento: são só os dois terminais de uma chave (em geral, de um relé), isolados de tudo. Quem usa o contato precisa trazer a própria fonte para o circuito que ele vai comandar.
+
+O contrário de um contato seco é uma saída que **entrega tensão**. Na central do curso, a saída TRAVA+ e TRAVA− entrega 12 V para a fechadura elétrica; já a saída auxiliar, AUX NA e AUX C, é um contato seco. Para acender a luz da garagem com ela, o fio de fase da luz passa pelo contato: o relé só faz o papel do interruptor. A central não sabe nem quer saber se do outro lado há 12 V ou 127 V, desde que fique dentro do que o contato aguenta.
+
+<Callout type="atencao" title="Contato seco também pode estar na rede">
+Seco quer dizer que o contato não fornece tensão, não que ele é seguro de tocar. Se o contato comanda uma lâmpada da casa, os bornes dele estão ligados à rede elétrica. Antes de mexer, desligue o disjuntor e confirme a ausência de tensão, como na aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />.
+</Callout>
+
+## Explore: o relé dos faróis auxiliares
+
+A simulação mostra a instalação do começo da aula. São dois circuitos ligados à mesma bateria de carro:
+
+- **Comando:** o fusível F2, de 1 A, e o botão do painel levam corrente à bobina do relé. Há dois comandos em paralelo, um **botão pulsador** e uma **chave com retenção**; qualquer um dos dois energiza a bobina. O diodo em paralelo com a bobina absorve o pico ao desligar.
+- **Força:** o fusível F1, de 15 A, leva a bateria ao comum do relé. O contato NA alimenta os dois faróis de 55 W. No contato NF há uma lâmpada pequena de 5 W, só para você ver o contato NF trabalhando.
+
+<Simulation circuit="m04/rele-farol" instruments={['multimetro']} />
+
+1. Aperte o play (▶) e, sem tocar em mais nada, veja quais lâmpadas acendem. Leia a corrente no comando e na força.
+2. Aperte e segure o **botão pulsador**. O que acontece com a lâmpada do NF e com os faróis? Quanto passa agora no comando? E na força?
+3. Solte o botão. Os faróis ficam acesos?
+4. Ligue a **chave com retenção** e tire a mão. Clique no relé no esquema para ver a tensão e a corrente da bobina.
+
+Em repouso, só a lâmpada do NF acende: o comum está encostado no NF, como na Figura 1. Apertando o botão, a bobina recebe a bateria e puxa cerca de 0,15 A. O relé estala, a lâmpada do NF apaga e os faróis acendem, puxando juntos cerca de 9,3 A pelo contato. Soltando o pulsador, a mola devolve o contato ao NF e tudo volta ao repouso. Com a chave com retenção, os faróis ficam acesos sem ninguém segurar.
+
+Compare as duas correntes: o botão do painel conduz uns 0,15 A para controlar mais de 9 A, cerca de 60 vezes mais. É por isso que o fio do comando pode ser fino e o botão pode ser pequeno, enquanto o fio dos faróis é grosso e curto, da bateria ao relé e do relé aos faróis.
+
+### Exemplo resolvido: escolhendo o relé e os fusíveis
+
+Os dois faróis são de 55 W em 12 V. Quanto eles puxam juntos?
+
+$$
+I_\text{faróis} = \frac{P}{V} = \frac{2 \times 55\,\text{W}}{12\,\text{V}} \approx 9{,}2\,\text{A}
+$$
+
+(Na simulação aparecem cerca de 9,3 A porque a bateria carregada entrega um pouco mais de 12 V.)
+
+**O relé:** os contatos precisam aguentar com folga os 9,2 A em 12 V de corrente contínua, e lâmpadas puxam um pico ao acender. Um relé automotivo de 30 A, comum em lojas de autopeças, sobra. Um relé de placa de 10 A ficaria no limite.
+
+**A bobina:** com 12,5 V nos terminais e 85 Ω, a corrente é
+
+$$
+I_\text{bobina} = \frac{12{,}5\,\text{V}}{85\,\Omega} \approx 0{,}15\,\text{A}
+$$
+
+**Os fusíveis:** cada circuito tem o seu, perto da bateria, e cada um protege o fio do seu circuito. Na força, um fusível de 15 A fica acima dos 9,2 A normais (os faróis nunca o rompem), mas abaixo do que um fio adequado aguenta. No comando, 1 A sobra para os 0,15 A da bobina e protege o fio fino do painel. Fusíveis são o assunto da aula <LinkAula id="m04-passivos/06-fusiveis-e-protecao" />.
+
+**A potência no botão:** a bobina gasta $12{,}5 \times 0{,}15 \approx 1{,}9\,\text{W}$ para comandar uns 115 W de faróis.
+
+No relé automotivo, os pinos têm números padronizados pela norma alemã DIN 72552, e quase todo esquema de carro usa esses números: **30** é o comum (vem da bateria), **87** é o NA, **87a** é o NF (nos relés que têm), e **85** e **86** são a bobina.
+
+<RealCase title="Os relés da central do portão">
+
+Na central do portão do curso, dois relés decidem o sentido do motor: K1 liga o enrolamento de ABRE e K2 o de FECHA. A bobina de cada um é acionada pelo microcontrolador através de um transistor, com o diodo em paralelo, como você vai ver na aula <LinkAula id="m09-semicondutores/06-transistor-como-chave" />. O programa nunca liga os dois ao mesmo tempo e espera um pouco antes de inverter. Essa trava entre os dois se chama intertravamento, assunto da aula <LinkAula id="m05-magnetismo/06-reles-e-contatores" />.
+
+Repare também nos contatos que a central **espera** em cada entrada:
+
+- **BOT**: um pulsador **NA**. Cada toque na botoeira é um comando.
+- **FOTO**: um contato **NF**. Com o feixe da fotocélula livre, o contato fica fechado. Se o feixe for interrompido, ele abre. E se o fio da fotocélula romper, também abre, e a central age como se houvesse alguém no caminho: o portão não fecha. Um defeito no fio deixa o portão parado, nunca fechando em cima de alguém. Por isso entradas de segurança costumam ser NF.
+- **AUX**: um contato seco, para a luz da garagem.
+
+Um defeito clássico também aparece aqui: quando o contato de um relé **cola**, o motor continua ligado mesmo com a bobina desligada, e o portão não para no fim do curso. O diagnóstico dos defeitos do portão está na aula <LinkAula id="m16-portao/09-diagnostico-do-portao" />.
+
+### Testando um relé fora da placa
+
+Com o relé solto na mesa e o multímetro (como na aula <LinkAula id="m03-medicoes/04-resistencia-continuidade-e-diodo" />):
+
+<Steps>
+  <Step title="Ache a bobina">
+    Na escala de resistência, meça os pares de pinos. O par que marca dezenas a centenas de ohms é a bobina (cerca de 400 Ω num relé de placa de 12 V; perto de 85 Ω num automotivo). Se a bobina marcar aberto (OL), ela está queimada.
+  </Step>
+  <Step title="Ache o comum e o NF">
+    Na continuidade, procure o par que apita com o relé em repouso: são o COM e o NF. O pino que sobra é o NA. O desenho impresso na caixa ajuda a confirmar.
+  </Step>
+  <Step title="Energize a bobina">
+    Alimente a bobina com a tensão nominal, de preferência numa fonte de bancada com limite de corrente (aula <LinkAula id="m03-medicoes/06-protoboard-e-fonte-de-bancada" />). Deve estalar. Agora o par COM–NA apita e o par COM–NF não.
+  </Step>
+  <Step title="Confira o contato">
+    Com o relé energizado, meça a resistência entre COM e NA: um contato bom marca praticamente zero. Se marcar alguns ohms ou oscilar, o contato está gasto ou oxidado. Se COM–NA apita mesmo com a bobina desligada, o contato colou.
+  </Step>
+</Steps>
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Inverter NA e NF.** Confira com o multímetro em repouso, não pela posição dos pinos de outro relé. O desenho de pinos muda de um modelo para outro.
+- **Bobina com a tensão errada.** Um relé de 5 V em 12 V esquenta e queima a bobina. Um de 24 V em 12 V pode não puxar, ou puxar só às vezes.
+- **Contato menor que a carga.** Some o pico de partida de motores e lâmpadas. Um contato fraco esquenta, gasta e pode colar fechado, e aí a carga não desliga mais.
+- **Usar o valor de CA numa carga de CC.** Um contato de "10A 250VAC" não aguenta 10 A em 127 V de corrente contínua: o arco não se apaga.
+- **Esquecer o diodo da bobina** quando ela é acionada por transistor ou microcontrolador. O pico de tensão queima o transistor e gera ruído.
+- **Achar que o lado da bobina protege o lado dos contatos.** O relé isola, mas os bornes dos contatos estão na tensão do circuito que eles comandam. Se esse circuito é a rede elétrica, valem todas as regras da rede.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'associar',
+      prompt: 'Associe cada contato ao que ele faz em repouso.',
+      pairs: [
+        ['NA', 'Aberto em repouso; fecha quando acionado'],
+        ['NF', 'Fechado em repouso; abre quando acionado'],
+        ['COM', 'Terminal comum do contato reversível; encosta no NF em repouso'],
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'A bobina de um relé de 12 V tem 400 Ω. Quanto ela puxa ligada em 12 V, em miliampères?',
+      answer: 30,
+      tolerance: 0.02,
+      unit: 'mA',
+      explanation: 'Pela Lei de Ohm, I = V/R = 12 V ÷ 400 Ω = 0,03 A = 30 mA.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você ligou um relé com bobina de 24 V numa fonte de 12 V. O que é mais provável acontecer?',
+      options: [
+        {
+          text: 'O relé não puxa, ou puxa só às vezes',
+          correct: true,
+          feedback:
+            'Com 12 V a bobina recebe 50 % da tensão nominal. Relés comuns só garantem puxar a partir de uns 75 %.',
+        },
+        {
+          text: 'A bobina queima por excesso de corrente',
+          feedback:
+            'Com metade da tensão, a corrente é a metade da nominal. Quem queima é a bobina com tensão acima da nominal.',
+        },
+        {
+          text: 'O relé funciona normalmente, só mais devagar',
+          feedback:
+            'A armadura não se move aos poucos: ou a força magnética vence a mola, ou não. Com metade da tensão, em geral não vence.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Um contato seco fornece a tensão para a carga que ele comanda.',
+      answer: false,
+      explanation:
+        'Contato seco é só uma chave, sem tensão própria. Quem liga a carga precisa trazer a fonte, e o contato apenas abre ou fecha esse circuito.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Por que a entrada da fotocélula da central espera um contato NF (fechado com o feixe livre)?',
+      options: [
+        {
+          text: 'Porque um fio rompido aparece como feixe interrompido, e o portão não fecha',
+          correct: true,
+          feedback:
+            'É uma falha segura: qualquer defeito que abra o circuito deixa o portão sem fechar, em vez de fechar em cima de alguém.',
+        },
+        {
+          text: 'Porque contatos NF gastam menos energia',
+          feedback:
+            'O consumo da entrada é minúsculo nos dois casos. A razão é segurança: o que acontece quando o fio rompe.',
+        },
+        {
+          text: 'Porque a fotocélula só existe na versão NF',
+          feedback:
+            'Muitas fotocélulas têm saída reversível, com NA e NF. A central escolhe NF de propósito, por segurança.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Na etiqueta de um relé está escrito "10A 250VAC 10A 30VDC". O que isso quer dizer?',
+      options: [
+        {
+          text: 'Os contatos aguentam 10 A em CA até 250 V, mas em CC só até 30 V',
+          correct: true,
+          feedback:
+            'Em CC a corrente não passa por zero e o arco de abertura não se apaga sozinho. Por isso a tensão permitida é bem menor.',
+        },
+        {
+          text: 'A bobina pode ser ligada em 250 V de CA ou em 30 V de CC',
+          feedback:
+            'Esses números são dos contatos. A tensão da bobina vem escrita à parte, como "12VDC".',
+        },
+        {
+          text: 'O relé consome 10 A na bobina',
+          feedback:
+            'Uma bobina de relé de placa puxa algumas dezenas de miliampères. Os 10 A são o limite dos contatos.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um relé comanda dois faróis de 55 W em 12 V. Qual é a corrente total que passa pelo contato, em ampères?',
+      answer: 9.17,
+      tolerance: 0.03,
+      unit: 'A',
+      explanation: 'I = P/V = 110 W ÷ 12 V ≈ 9,2 A. O contato precisa aguentar isso com folga.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Todo contato tem um estado de repouso: **NA** (aberto em repouso), **NF** (fechado em repouso) ou **reversível** (COM encostado no NF, que passa para o NA quando acionado).
+- O **pulsador** volta sozinho ao repouso; a **chave com retenção** fica onde você deixou. O equipamento espera um ou outro.
+- O **relé** é uma chave reversível movida por um eletroímã. A bobina e os contatos são isolados entre si, e uma corrente pequena na bobina comanda uma corrente muito maior nos contatos.
+- A etiqueta traz a tensão da **bobina** (12VDC) e o limite dos **contatos**, que é menor em CC por causa do arco.
+- **Contato seco** não fornece tensão: é só uma chave para você ligar a sua carga.
+- Entradas de segurança costumam ser NF, para que um fio rompido deixe o equipamento parado.
+
+Com esta aula você fecha o módulo de componentes passivos. O próximo módulo começa pelo ímã e chega ao eletroímã que move a armadura do relé: <LinkAula id="m05-magnetismo/01-imas-e-campo-magnetico" />. Lá também estão os contatores e a partida de motores com selo e intertravamento.

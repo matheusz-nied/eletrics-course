@@ -1,0 +1,183 @@
+---
+/* 04.7: the three kinds of contact (NA, NF and changeover), at rest and actuated. */
+const cols = [
+  { x: 95, title: 'NA', sub: 'normalmente aberto' },
+  { x: 280, title: 'NF', sub: 'normalmente fechado' },
+  { x: 465, title: 'Reversível', sub: 'COM, NA e NF' },
+];
+---
+
+<svg viewBox="0 0 560 330" width="560" height="330" class="fig" aria-hidden="true">
+  {cols.map((c) => (
+    <g>
+      <text x={c.x} y="24" class="title">
+        {c.title}
+      </text>
+      <text x={c.x} y="42" class="small">
+        {c.sub}
+      </text>
+    </g>
+  ))}
+  <text x="10" y="68" class="row start">
+    Em repouso
+  </text>
+  <text x="10" y="198" class="row start">
+    Acionado (apertado, energizado)
+  </text>
+  <path d="M10 176 H550" class="sep" />
+
+  <!-- NA at rest: open -->
+  <g transform="translate(95 110)">
+    <path d="M-60 0 H-28 M28 0 H60" class="wire" />
+    <path d="M-28 0 L24 -22" class="blade" />
+    <circle cx="-28" cy="0" r="4" class="term" />
+    <circle cx="28" cy="0" r="4" class="term" />
+    <text x="0" y="34" class="state off">
+      aberto
+    </text>
+  </g>
+  <!-- NA actuated: closed -->
+  <g transform="translate(95 238)">
+    <path d="M-60 0 H-28 M28 0 H60" class="wire on" />
+    <path d="M-28 0 L28 0" class="blade on" />
+    <circle cx="-28" cy="0" r="4" class="term" />
+    <circle cx="28" cy="0" r="4" class="term" />
+    <text x="0" y="34" class="state onl">
+      fechado: passa corrente
+    </text>
+  </g>
+
+  <!-- NF at rest: closed -->
+  <g transform="translate(280 110)">
+    <path d="M-60 0 H-28 M28 0 H60" class="wire on" />
+    <path d="M-28 0 L30 -4" class="blade on" />
+    <path d="M28 -8 V0" class="stop" />
+    <circle cx="-28" cy="0" r="4" class="term" />
+    <circle cx="28" cy="0" r="4" class="term" />
+    <text x="0" y="34" class="state onl">
+      fechado: passa corrente
+    </text>
+  </g>
+  <!-- NF actuated: open -->
+  <g transform="translate(280 238)">
+    <path d="M-60 0 H-28 M28 0 H60" class="wire" />
+    <path d="M-28 0 L24 18" class="blade" />
+    <path d="M28 -8 V0" class="stop" />
+    <circle cx="-28" cy="0" r="4" class="term" />
+    <circle cx="28" cy="0" r="4" class="term" />
+    <text x="0" y="34" class="state off">
+      aberto
+    </text>
+  </g>
+
+  <!-- Changeover at rest: COM to NF -->
+  <g transform="translate(465 110)">
+    <path d="M-62 0 H-30 M30 -22 H62 M30 22 H62" class="wire" />
+    <path d="M-62 0 H-30 M30 -22 H62" class="wire on" />
+    <path d="M-30 0 L30 -22" class="blade on" />
+    <circle cx="-30" cy="0" r="4" class="term" />
+    <circle cx="30" cy="-22" r="4" class="term" />
+    <circle cx="30" cy="22" r="4" class="term" />
+    <text x="-30" y="-12" class="pin">
+      COM
+    </text>
+    <text x="40" y="-30" class="pin start">
+      NF
+    </text>
+    <text x="40" y="38" class="pin start">
+      NA
+    </text>
+  </g>
+  <!-- Changeover actuated: COM to NA -->
+  <g transform="translate(465 238)">
+    <path d="M-62 0 H-30 M30 -22 H62 M30 22 H62" class="wire" />
+    <path d="M-62 0 H-30 M30 22 H62" class="wire on" />
+    <path d="M-30 0 L30 22" class="blade on" />
+    <circle cx="-30" cy="0" r="4" class="term" />
+    <circle cx="30" cy="-22" r="4" class="term" />
+    <circle cx="30" cy="22" r="4" class="term" />
+    <text x="-30" y="-12" class="pin">
+      COM
+    </text>
+    <text x="40" y="-30" class="pin start">
+      NF
+    </text>
+    <text x="40" y="38" class="pin start">
+      NA
+    </text>
+  </g>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    stroke: var(--fg-subtle);
+  }
+  .wire.on {
+    stroke: var(--copper);
+  }
+  .blade {
+    stroke: var(--fg-muted);
+    stroke-width: 3;
+  }
+  .blade.on {
+    stroke: var(--copper);
+  }
+  .stop {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .term {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .sep {
+    stroke: var(--border);
+    stroke-width: 1;
+    stroke-dasharray: 5 5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .title {
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .small {
+    font-size: 13px;
+    fill: var(--fg-muted);
+  }
+  .row {
+    font-size: 13px;
+    font-weight: 600;
+    fill: var(--fg-muted);
+  }
+  .state {
+    font-size: 13px;
+  }
+  .off {
+    fill: var(--fg-muted);
+  }
+  .onl {
+    fill: var(--success);
+    font-weight: 600;
+  }
+  .pin {
+    font-size: 12.5px;
+    font-weight: 700;
+    fill: var(--fg-muted);
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>

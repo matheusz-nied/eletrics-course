@@ -1,0 +1,209 @@
+---
+/*
+ * 04.7: a clapper relay cut open, at rest and energized. The armature is a
+ * lever pivoting on the top of the yoke: the core pulls its left end down,
+ * its right end lifts the moving contact (COM) from NF to NA.
+ */
+const PIVOT = { x: 126, y: 110 };
+const LEFT = 40;
+const RIGHT = 228;
+
+function lever(energized: boolean) {
+  const yLeft = energized ? 116 : 98;
+  const slope = (PIVOT.y - yLeft) / (PIVOT.x - LEFT);
+  const at = (x: number) => PIVOT.y + slope * (x - PIVOT.x);
+  return { yLeft, yRight: at(RIGHT), at };
+}
+
+const panels = [
+  {
+    dx: 0,
+    energized: false,
+    title: 'Em repouso',
+    lines: ['A mola segura a armadura:', 'o COM encosta no NF.'],
+  },
+  {
+    dx: 285,
+    energized: true,
+    title: 'Bobina energizada',
+    lines: ['O núcleo vira ímã e puxa a', 'armadura: o COM vai para o NA.'],
+  },
+].map((p) => ({ ...p, l: lever(p.energized) }));
+---
+
+<svg viewBox="0 0 560 372" width="560" height="372" class="fig" aria-hidden="true">
+  {panels.map((p) => (
+    <g transform={`translate(${p.dx} 0)`}>
+      <text x="135" y="26" class="title">
+        {p.title}
+      </text>
+
+      {p.energized && <path d={`M60 225 V122 M66 ${p.l.at(66) - 4} H124 V232 H64`} class="flux" />}
+
+      <rect x="50" y="120" width="20" height="112" class="core" />
+      <rect x="30" y="136" width="60" height="88" rx="4" class={p.energized ? 'coil on' : 'coil'} />
+      {[146, 156, 166, 176, 186, 196, 206, 216].map((y) => (
+        <path d={`M30 ${y} H90`} class="turn" />
+      ))}
+      <path d="M60 236 H130 V112" class="yoke" />
+
+      <path d={`M38 224 V300 M82 224 V300`} class="lead" />
+      <text x="60" y="318" class="small">
+        terminais da bobina
+      </text>
+
+      <path d={`M${LEFT} ${p.l.yLeft} L${RIGHT} ${p.l.yRight}`} class="armature" />
+      <circle cx={PIVOT.x} cy={PIVOT.y} r="3.5" class="pivot" />
+
+      <path
+        d={`M165 ${p.l.at(165) + 3} l-7 6 l14 6 l-14 6 l14 6 l-14 6 l14 6 l-14 6 l14 6 l-7 6 V236`}
+        class="spring"
+      />
+      <path d="M150 238 H180" class="anchor" />
+
+      <path d={`M200 ${p.l.at(200)} q12 40 -2 70 V300`} class="braid" />
+      <text x="198" y="318" class="pin">
+        COM
+      </text>
+
+      <path d="M236 96 H252 V300" class="fixed" />
+      <circle cx="232" cy="96" r="4" class={p.energized ? 'contact on' : 'contact'} />
+      <text x="244" y="86" class="pin">
+        NA
+      </text>
+
+      <path d="M236 130 H244 V300" class="fixed" />
+      <circle cx="232" cy="130" r="4" class={p.energized ? 'contact' : 'contact on'} />
+      <text x="228" y="152" class="pin">
+        NF
+      </text>
+
+      <path d="M20 300 H262" class="base" />
+
+      {p.lines.map((line, i) => (
+        <text x="135" y={344 + i * 17} class="note">
+          {line}
+        </text>
+      ))}
+    </g>
+  ))}
+
+  <text x="6" y="128" class="lbl start">
+    núcleo
+  </text>
+  <text x="84" y="88" class="lbl">
+    armadura
+  </text>
+  <text x="165" y="256" class="lbl">
+    mola
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .core {
+    fill: color-mix(in oklab, var(--fg-subtle) 45%, transparent);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .coil {
+    fill: color-mix(in oklab, var(--copper) 30%, transparent);
+    stroke: var(--copper);
+    stroke-width: 2;
+  }
+  .coil.on {
+    fill: color-mix(in oklab, var(--copper) 55%, transparent);
+  }
+  .turn {
+    stroke: var(--copper);
+    stroke-width: 1;
+    opacity: 0.7;
+  }
+  .yoke {
+    stroke: var(--fg-muted);
+    stroke-width: 8;
+    stroke-linecap: butt;
+  }
+  .armature {
+    stroke: var(--fg);
+    stroke-width: 6;
+  }
+  .pivot {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .spring {
+    stroke: var(--info);
+    stroke-width: 1.8;
+  }
+  .anchor {
+    stroke: var(--fg-muted);
+    stroke-width: 4;
+  }
+  .lead,
+  .braid,
+  .fixed {
+    stroke: var(--fg-muted);
+    stroke-width: 2.2;
+  }
+  .braid {
+    stroke-dasharray: 3 3;
+  }
+  .contact {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .contact.on {
+    fill: var(--success);
+    stroke: var(--success);
+  }
+  .base {
+    stroke: var(--border-strong);
+    stroke-width: 3;
+  }
+  .flux {
+    stroke: var(--accent);
+    stroke-width: 1.6;
+    stroke-dasharray: 6 4;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .title {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .small {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .pin {
+    font-size: 12.5px;
+    font-weight: 700;
+    fill: var(--fg-muted);
+  }
+  .lbl {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .note {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>
