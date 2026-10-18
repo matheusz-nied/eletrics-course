@@ -4,13 +4,14 @@
  * quality, full screen), keyboard and touch handling, and a fallback when the
  * browser has no WebGL.
  */
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import {
   Suspense,
   createElement,
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -19,7 +20,7 @@ import {
 } from 'react';
 import { annotationsFor, cutFor, isAnimated, loadPart, resolveProps } from '../registry';
 import type { PartModule, PartProps } from '../types';
-import { Annotations, visibleAnnotations } from './Annotations';
+import { AnnotationPins, Annotations, visibleAnnotations } from './Annotations';
 import { FrameRateMonitor, KeyboardOrbit, ReadySignal, ViewerErrorBoundary } from './helpers';
 import { useReducedMotion } from './motion';
 import { guessQuality, QUALITY, QUALITY_LABELS, useQuality, type QualityLevel } from './quality';
@@ -72,6 +73,7 @@ export default function Viewer({
 }: ViewerProps) {
   const root = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
+  const pins = useRef<HTMLDivElement>(null);
   const descriptionId = useId();
   const legendId = useId();
   const reducedMotion = useReducedMotion();
@@ -213,10 +215,6 @@ export default function Viewer({
               onCreated={({ gl }) => {
                 const context = gl.getContext();
                 if (isSoftwareRenderer(context) && !fixed) useQuality.setState({ level: 'baixa' });
-                gl.domElement.addEventListener('webglcontextlost', (event) => {
-                  event.preventDefault();
-                  setStatus('error');
-                });
               }}
             >
               <Suspense fallback={null}>
@@ -237,17 +235,20 @@ export default function Viewer({
                     onBounds={(bounds) => setExtent(bounds.radius * 1.05)}
                   >
                     {module && createElement(module.default, resolved)}
-                    {showNotes && <Annotations items={notes} />}
+                    {showNotes && <Annotations items={notes} layer={pins} />}
                   </Stage>
                   <ContinuousRender active={animated} />
                 </ViewProvider>
                 <ReadySignal onReady={handleReady} />
               </Suspense>
+              <ContextLossWatch onLost={() => setStatus('error')} />
               <KeyboardOrbit element={viewport} onReset={reframe} />
               {!fixed && <FrameRateMonitor ceiling={ceiling} />}
             </Canvas>
           </ViewerErrorBoundary>
         )}
+
+        {showCanvas && showNotes && <AnnotationPins items={notes} layer={pins} />}
 
         {(unsupported || status === 'error') && fallback}
         {!unsupported && status === 'loading' && inView && (
@@ -342,6 +343,29 @@ export default function Viewer({
 
 const noSubscription = () => () => undefined;
 const isCoarsePointer = () => matchMedia('(pointer: coarse)').matches;
+
+/**
+ * Marks the view as failed when the browser drops the WebGL context. The
+ * listener goes away when the canvas unmounts, before R3F forces the context
+ * loss of a disposed canvas (switching quality, or scrolling away), which is
+ * not a failure.
+ */
+function ContextLossWatch({ onLost }: { onLost: () => void }) {
+  const canvas = useThree((s) => s.gl.domElement);
+  const onLostRef = useRef(onLost);
+  useLayoutEffect(() => {
+    onLostRef.current = onLost;
+  });
+  useEffect(() => {
+    const lost = (event: Event) => {
+      event.preventDefault();
+      onLostRef.current();
+    };
+    canvas.addEventListener('webglcontextlost', lost);
+    return () => canvas.removeEventListener('webglcontextlost', lost);
+  }, [canvas]);
+  return null;
+}
 
 function ContinuousRender({ active }: { active: boolean }) {
   useContinuousRender(active);

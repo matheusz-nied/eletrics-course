@@ -59,7 +59,7 @@ export const meta: PartMeta = {
     'Transistor bipolar de baixa potência no encapsulamento TO-92 (como o BC548), com a face plana impressa e, por dentro, o chip sobre o terminal do coletor.',
   defaults: {
     code: 'BC548',
-    pinout: 'EBC',
+    pinout: 'CBE',
     type: 'npn',
     pitch: 2.54,
     dateCode: 'C23',
@@ -72,8 +72,8 @@ export const meta: PartMeta = {
       kind: 'select',
       label: 'Ordem dos terminais',
       options: [
-        { value: 'EBC', label: 'E B C (BC548, 2N2222)' },
-        { value: 'CBE', label: 'C B E (BC337, BD139)' },
+        { value: 'EBC', label: 'E B C (2N2222, 2N3904)' },
+        { value: 'CBE', label: 'C B E (BC547, BC548, BC337)' },
         { value: 'ECB', label: 'E C B' },
       ],
     },
@@ -143,7 +143,7 @@ export const meta: PartMeta = {
 };
 
 function pinsOf(p: PartProps): ['E' | 'B' | 'C', 'E' | 'B' | 'C', 'E' | 'B' | 'C'] {
-  const order = ['EBC', 'CBE', 'ECB'].includes(String(p.pinout)) ? String(p.pinout) : 'EBC';
+  const order = ['EBC', 'CBE', 'ECB'].includes(String(p.pinout)) ? String(p.pinout) : 'CBE';
   return order.split('') as ['E' | 'B' | 'C', 'E' | 'B' | 'C', 'E' | 'B' | 'C'];
 }
 
