@@ -193,6 +193,8 @@ export const meta: PartMeta = {
   },
   explode: true,
   cutaway: true,
+  // Discs are cut across their thickness (coating, electrodes, ceramic); beads through the wires.
+  cut: (p) => (p.variant === 'gota' ? {} : { normal: [-1, 0, 0] }),
   describe: (p) => {
     const r25 = Number(p.ohms25);
     const t = Number(p.temperature);
@@ -208,7 +210,7 @@ export const meta: PartMeta = {
       power ? ' Este modelo de potência limita o pico de corrente ao ligar fontes e motores.' : ''
     }`;
   },
-  view: [0.5, 0.4, 1.6],
+  view: [0.95, 0.45, 1.35],
 };
 
 type V2 = [number, number];
@@ -366,7 +368,8 @@ function Disc(p: Required<NtcProps>) {
 
   const leadPath = (side: number): Vec3[] => {
     const x0 = (side * s.pitch) / 2;
-    const xc = side * Math.min(s.pitch / 2, s.core * 0.22);
+    // Formed to the centre of each face.
+    const xc = 0;
     const z = side * (faceZ + leadR);
     return [
       [x0, 0, 0],
