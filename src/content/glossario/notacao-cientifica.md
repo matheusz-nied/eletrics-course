@@ -2,7 +2,7 @@
 termo: Notação científica
 resumo: "Jeito de escrever números muito grandes ou muito pequenos como um número entre 1 e 10 vezes uma potência de dez: 4.700 = 4,7 × 10³."
 sinonimos: [potência de dez, notação de engenharia]
-relacionados: [prefixos-si]
+relacionados: [prefixos-si, coulomb]
 aula: m01-eletricidade-do-zero/06-unidades-e-ordens-de-grandeza
 ---
 O expoente diz quantas casas a vírgula andou: positivo para números grandes, negativo para números pequenos.

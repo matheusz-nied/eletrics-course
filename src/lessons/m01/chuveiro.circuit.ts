@@ -103,7 +103,6 @@ export default defineCircuit({
     { id: 'tensao', kind: 'voltage', plus: 'R1.a', minus: 'GND', label: 'Tensão no chuveiro' },
     { id: 'corrente', kind: 'current', element: 'R1', label: 'Corrente do chuveiro' },
   ],
-  // The goals are live, so only one position is checked at a time.
   goals: [
     {
       id: 'verao',
