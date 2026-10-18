@@ -1,4 +1,5 @@
-import type { DeviceInfo, ParamValue, SimEvent } from './contract';
+import type { AnalysisDoc, DeviceInfo, ParamValue, SimEvent } from './contract';
+import type { Exposed } from './models/mechanics';
 import type { ComplexMna } from './solver/complex';
 import type { MnaSystem } from './solver/mna';
 
@@ -22,6 +23,13 @@ export interface StepInfo {
   method: Method;
   /** Newton-Raphson state of the solve in progress. */
   nl: NewtonState;
+  /**
+   * Quasi-static analysis: this is the DC part of a mechanical step (mode
+   * 'dc'); the AC part is solved after it, and `ac` carries it to update().
+   */
+  quasiStatic?: boolean;
+  /** Quasi-static analysis, in update() only: the phasor solution of this step. */
+  ac?: PhasorView;
 }
 
 export interface NewtonState {
@@ -48,6 +56,31 @@ export interface AcContext {
   source: string;
   /** Id of the element being stamped. */
   id: string;
+  /**
+   * Quasi-static analysis: sources stamp their own RMS phasor (those at
+   * another frequency stamp zero) and power devices their large-signal model.
+   */
+  phasor?: boolean;
+  /**
+   * Quasi-static analysis, second pass: the solution of the first one. A
+   * device that needs it (a TRIAC in phase control needs its open-circuit
+   * voltage) calls `again()` during the first pass.
+   */
+  first?: PhasorView;
+  again?(): void;
+}
+
+/**
+ * Phasor solution of a quasi-static step at `omega`: RMS phasors of node
+ * voltages and branch currents, and of the currents entering the device being
+ * updated through each of its pins.
+ */
+export interface PhasorView {
+  readonly omega: number;
+  re(index: number): number;
+  im(index: number): number;
+  pinRe(pin: number): number;
+  pinIm(pin: number): number;
 }
 
 /** Read access to a solution (the current Newton iterate, or the accepted one). */
@@ -92,13 +125,35 @@ export interface DeviceModel {
   /**
    * Device readouts (without the "id." prefix). Two-terminal devices get
    * `current` (a→b), `voltage` (Va−Vb) and `power` (absorbed) automatically;
-   * writing the same name here overrides them.
+   * writing the same name here overrides them. `ac` is the phasor solution in
+   * the quasi-static analysis.
    */
-  readouts?(x: SolutionView, out: ReadoutSink): void;
+  readouts?(x: SolutionView, out: ReadoutSink, ac?: PhasorView): void;
   /** A parameter changed at run time (already validated and stored in `params`). */
   paramChanged?(name: string): void;
   /** Back to the initial state: undamaged, discharged, cold. Parameters are kept. */
   reset?(): void;
+  /** Mechanical parts other devices couple to (a motor shaft, a gate's position). */
+  readonly exposes?: Exposed;
+  /**
+   * Called once after every device exists, for devices coupled to another by
+   * a parameter (`params.motor = "M1"`): `find` gives the other device's
+   * model. Returns a pt-BR problem when the link does not work. Coupled
+   * devices update after the ones they couple to.
+   */
+  couple?(find: (id: string) => DeviceModel | undefined): string | undefined;
+}
+
+/**
+ * State shared by everything connected to one node, for signals that are not
+ * a voltage: the phase-control fraction from a microcontroller to a TRIAC
+ * gate, the frames from a radio receiver to a microcontroller.
+ */
+export interface NodeSignal {
+  /** TRIAC conduction fraction driven onto this node (0…1), when a `phase-out` pin drives it. */
+  phase?: number;
+  /** Data frames sent on this node since the reader last took them. */
+  frames: unknown[];
 }
 
 export interface SetupContext {
@@ -112,6 +167,10 @@ export interface SetupContext {
   branch(): number;
   /** Allocates an internal node (gets gmin to ground like the circuit nodes). */
   node(): number;
+  /** Analysis the circuit runs. */
+  readonly analysis: AnalysisDoc['kind'];
+  /** Signals shared on a node (-1 = ground, which carries none worth reading). */
+  signal(node: number): NodeSignal;
 }
 
 export interface DeviceDefinition {
@@ -123,7 +182,47 @@ export interface DeviceDefinition {
   readonly referencePin?: string;
   /** Sources report delivered current and power instead of absorbed. */
   readonly source?: boolean;
+  /** Analyses the device runs in (default: all). */
+  readonly analyses?: readonly AnalysisDoc['kind'][];
+  /**
+   * Parameters that name another element (`motor: "M1"`), with the device
+   * types they accept. Empty means not coupled.
+   */
+  readonly links?: Readonly<Record<string, readonly string[]>>;
+  /** Pins (and readouts) that depend on parameters: a microcontroller's firmware, a DIP switch's size. */
+  instance?(params: Record<string, ParamValue>): DeviceInfo;
+  /** Problems with parameter values beyond their range (an unknown firmware id), in pt-BR. */
+  checkParams?(params: Record<string, ParamValue>): string[];
   create(setup: SetupContext): DeviceModel;
+}
+
+/** Parameters with defaults filled in. */
+export function withDefaults(
+  info: DeviceInfo,
+  params: Record<string, ParamValue> = {},
+): Record<string, ParamValue> {
+  const out: Record<string, ParamValue> = {};
+  for (const [name, p] of Object.entries(info.params)) out[name] = p.default;
+  return Object.assign(out, params);
+}
+
+/** Device info of one element: its pins may depend on its parameters. */
+export function infoFor(def: DeviceDefinition, params?: Record<string, ParamValue>): DeviceInfo {
+  return def.instance ? def.instance(withDefaults(def.info, params)) : def.info;
+}
+
+/** RMS of a DC value plus a phasor (RMS) at one frequency. */
+export function rms(dc: number, re = 0, im = 0): number {
+  return Math.sqrt(dc * dc + re * re + im * im);
+}
+
+/** Square of the RMS current entering pin `k` through the AC part (0 outside the quasi-static analysis). */
+export function acSquared(step: StepInfo, k: number): number {
+  const ac = step.ac;
+  if (!ac) return 0;
+  const re = ac.pinRe(k);
+  const im = ac.pinIm(k);
+  return re * re + im * im;
 }
 
 export function defineDevice(def: DeviceDefinition): DeviceDefinition {

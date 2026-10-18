@@ -1,4 +1,4 @@
-import { bool, defineDevice, num } from '../device';
+import { bool, defineDevice, num, str } from '../device';
 import { formatSI } from '../messages';
 import { R_FAILED_SHORT } from '../models/diode';
 import { relax } from '../models/filters';
@@ -11,6 +11,8 @@ const OVERVOLTAGE = 1.2;
 const STRESS_FAIL = 5;
 /** Recovery of the stress once the voltage is back to normal (s). */
 const STRESS_RECOVERY = 30;
+/** A weak (dried out) capacitor keeps this fraction of its capacitance. */
+const WEAK = 0.3;
 
 /**
  * Capacitor. Transient: companion model of the trapezoidal rule (backward
@@ -20,7 +22,13 @@ const STRESS_RECOVERY = 30;
  * Damage: an electrolytic (`polarized`) with more than 1,5 V reversed, or any
  * capacitor above 1,2× its rated voltage, accumulates stress with the square
  * of the excess; it fails short (an electrolytic bulges) after seconds at a
- * small excess and within a fraction of a second at a large one.
+ * small excess and within a fraction of a second at a large one. With AC in
+ * the quasi-static analysis the peak of the sine counts. A motor capacitor
+ * (`acRated`) is rated in AC volts RMS, so it takes √2 times its rating at
+ * the peak.
+ *
+ * `fault` reproduces the usual defects of a motor capacitor: open (no
+ * capacitance), weak (30 % left) or shorted.
  */
 export default defineDevice({
   info: {
@@ -34,8 +42,19 @@ export default defineDevice({
     params: {
       capacitance: { default: 1e-6, label: 'Capacitância', unit: 'F', min: 1e-15 },
       voltage: { default: 50, label: 'Tensão nominal', unit: 'V', min: 0.1 },
+      acRated: { default: false, label: 'Tensão nominal em CA eficaz (capacitor de motor)' },
       polarized: { default: false, label: 'Polarizado (eletrolítico)' },
       ic: { default: 0, label: 'Tensão inicial', unit: 'V' },
+      fault: {
+        default: 'none',
+        label: 'Defeito',
+        options: [
+          { value: 'none', label: 'Nenhum' },
+          { value: 'open', label: 'Aberto' },
+          { value: 'weak', label: 'Fraco (perdeu 70 % da capacitância)' },
+          { value: 'short', label: 'Em curto' },
+        ],
+      },
     },
     readouts: ['current', 'voltage', 'power', 'charge', 'energy', 'bulged'],
     readoutInfo: {
@@ -55,11 +74,16 @@ export default defineDevice({
     let stress = 0;
     let warned = false;
     let failed = false;
+    const fault = () => str(params, 'fault');
+    const shorted = () => failed || fault() === 'short';
+    /** Capacitance with the fault applied (F). */
+    const capacitance = () =>
+      fault() === 'open' ? 0 : num(params, 'capacitance') * (fault() === 'weak' ? WEAK : 1);
     // Companion model i = g·v − h for the step being solved.
     const companion = (step: { mode: string; dt: number; method: string }) => {
-      if (failed) return { g: 1 / R_FAILED_SHORT, h: 0 };
+      if (shorted()) return { g: 1 / R_FAILED_SHORT, h: 0 };
       if (step.mode === 'dc' || step.dt <= 0) return { g: 0, h: 0 };
-      const c = num(params, 'capacitance');
+      const c = capacitance();
       if (step.method === 'be') {
         const g = c / step.dt;
         return { g, h: g * vPrev };
@@ -67,11 +91,16 @@ export default defineDevice({
       const g = (2 * c) / step.dt;
       return { g, h: g * vPrev + iPrev };
     };
-    /** How far past its limits the capacitor is (0 = safe), and why. */
-    const severity = (v: number): { s: number; reverse: boolean } => {
-      const rated = num(params, 'voltage');
-      const over = Math.max(0, (Math.abs(v) - OVERVOLTAGE * rated) / (0.1 * rated));
-      const reverse = bool(params, 'polarized') ? Math.max(0, (-v - REVERSE_OK) / REVERSE_OK) : 0;
+    /** Highest instantaneous voltage the rating allows (V). */
+    const ratedPeak = () => num(params, 'voltage') * (bool(params, 'acRated') ? Math.SQRT2 : 1);
+    /** How far past its limits the capacitor is (0 = safe), and why; `peak` is the AC amplitude on top of v. */
+    const severity = (v: number, peak = 0): { s: number; reverse: boolean } => {
+      const rated = ratedPeak();
+      const over = Math.max(0, (Math.abs(v) + peak - OVERVOLTAGE * rated) / (0.1 * rated));
+      const lowest = v - peak;
+      const reverse = bool(params, 'polarized')
+        ? Math.max(0, (-lowest - REVERSE_OK) / REVERSE_OK)
+        : 0;
       return reverse > over ? { s: reverse, reverse: true } : { s: over, reverse: false };
     };
     return {
@@ -82,8 +111,8 @@ export default defineDevice({
         m.current(b, a, h);
       },
       stampAc(m, { omega }) {
-        if (failed) m.admittance(a, b, 1 / R_FAILED_SHORT);
-        else m.admittance(a, b, 0, omega * num(params, 'capacitance'));
+        if (shorted()) m.admittance(a, b, 1 / R_FAILED_SHORT);
+        else m.admittance(a, b, 0, omega * capacitance());
       },
       update(step, x, ctx) {
         v = x.v(a) - x.v(b);
@@ -93,9 +122,14 @@ export default defineDevice({
         vPrev = v;
         iPrev = i;
         if (failed || step.dt <= 0) return;
-        const { s, reverse } = severity(v);
+        const ac = step.ac;
+        const peak = ac ? Math.SQRT2 * Math.hypot(ac.re(a) - ac.re(b), ac.im(a) - ac.im(b)) : 0;
+        const { s, reverse } = severity(v, peak);
         // Messages are only formatted when emitted: this runs every step.
-        const rated = () => formatSI(num(params, 'voltage'), 'V');
+        const rated = () =>
+          bool(params, 'acRated')
+            ? `${formatSI(num(params, 'voltage'), 'V')} CA (${formatSI(ratedPeak(), 'V')} de pico)`
+            : formatSI(num(params, 'voltage'), 'V');
         if (s > 0) {
           stress += s * s * step.dt;
           if (!warned) {
@@ -104,7 +138,7 @@ export default defineDevice({
               'warning',
               reverse
                 ? `O capacitor ${id} está com a polaridade invertida (${formatSI(v, 'V')}): um eletrolítico ao contrário esquenta e estufa.`
-                : `O capacitor ${id} está acima da tensão nominal: ${formatSI(Math.abs(v), 'V')}, nominal ${rated()}.`,
+                : `O capacitor ${id} está acima da tensão nominal: ${formatSI(Math.abs(v) + peak, 'V')}${peak ? ' de pico' : ''}, nominal ${rated()}.`,
             );
           }
         } else {
@@ -118,7 +152,7 @@ export default defineDevice({
             : 'teve o dielétrico perfurado e entrou em curto';
           ctx.emit(
             'damaged',
-            `O capacitor ${id} ${what}: tensão de ${formatSI(v, 'V')}, nominal ${rated()}${reverse ? ' (polaridade invertida)' : ''}.`,
+            `O capacitor ${id} ${what}: tensão de ${formatSI(Math.abs(v) + peak, 'V')}, nominal ${rated()}${reverse ? ' (polaridade invertida)' : ''}.`,
           );
           ctx.discontinuity();
         }
@@ -128,9 +162,9 @@ export default defineDevice({
         out[1] = -i;
       },
       readouts(_x, out) {
-        const c = num(params, 'capacitance');
-        out('charge', failed ? 0 : c * v);
-        out('energy', failed ? 0 : 0.5 * c * v * v);
+        const c = capacitance();
+        out('charge', shorted() ? 0 : c * v);
+        out('energy', shorted() ? 0 : 0.5 * c * v * v);
         out('bulged', failed);
       },
       reset() {
