@@ -54,6 +54,31 @@ test.describe('módulo 4: componentes passivos', () => {
     });
   }
 
+  test('the colour code game of lesson 4.1 accepts 220 Ω for red, red, brown', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}01-resistores/`);
+    const island = page.locator('astro-island:has([data-widget="codigo-de-cores"])').first();
+    await island.scrollIntoViewIfNeeded();
+    await expect(island).not.toHaveAttribute('ssr');
+    const game = island.locator('[data-widget="codigo-de-cores"]');
+    await game.getByLabel('Valor do resistor').fill('220');
+    await game.getByRole('button', { name: 'Conferir' }).click();
+    await expect(game).toContainText('Certo.');
+    errors.expectClean();
+  });
+
+  test('a 4 A overload blows the 2 A fuse of lesson 4.6', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}06-fusiveis-e-protecao/`);
+    const sim = await simulation(page, 'm04/fusivel-sobrecarga');
+    await sim
+      .locator('.sim-controls')
+      .getByRole('combobox', { name: 'Carga' })
+      .selectOption({ label: 'Sobrecarga (4 A)' });
+    await expect(sim.locator('.sim-events')).toContainText('rompeu', { timeout: 10_000 });
+    errors.expectClean();
+  });
+
   test('the latching switch of lesson 4.7 pulls the relay and lights the headlights', async ({
     page,
   }) => {
@@ -63,9 +88,12 @@ test.describe('módulo 4: componentes passivos', () => {
     await sim.getByRole('button', { name: 'Iniciar simulação', exact: true }).click();
     await sim.locator('.sim-controls').getByRole('switch', { name: 'Chave com retenção' }).click();
     await expect(sim.locator('.dmm[data-probe="IC"] [data-reading]')).toContainText(/1[45]\d\smA/);
-    await expect(sim.locator('.dmm[data-probe="IF"] [data-reading]')).toContainText(/9,[23]\d*\sA/, {
-      timeout: 10_000,
-    });
+    await expect(sim.locator('.dmm[data-probe="IF"] [data-reading]')).toContainText(
+      /9,[23]\d*\sA/,
+      {
+        timeout: 10_000,
+      },
+    );
     errors.expectClean();
   });
 });
