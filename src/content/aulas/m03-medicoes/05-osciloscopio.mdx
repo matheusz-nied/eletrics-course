@@ -14,8 +14,7 @@ prerequisitos:
   - m03-medicoes/01-multimetro
   - m03-medicoes/02-medindo-tensao
 tags: [osciloscópio, base de tempo, trigger, ponta de prova, ondulação, acoplamento]
-seguranca: baixa-tensao
-rascunho: true
+seguranca: rede
 ---
 
 import ScopeScreen from '../../../lessons/m03/figures/ScopeScreen.astro';
@@ -144,7 +143,7 @@ $$
 \frac{2{,}1\,\text{ms}}{16{,}7\,\text{ms}} \cdot 360° \approx 45°
 $$
 
-Agora suba a frequência para 600 Hz. O capacitor não consegue acompanhar a variação rápida, e a tensão nele fica abaixo de 0,6 V de pico. É o princípio dos filtros, que você vai ver no módulo de corrente alternada.
+Agora suba a frequência para 600 Hz. O capacitor não consegue acompanhar a variação rápida, e a tensão nele fica abaixo de 0,6 V de pico. É o princípio dos filtros, que você vai ver na aula <LinkAula id="m06-corrente-alternada/06-ressonancia-e-filtros" />.
 
 ## A ponta de prova ×1 e ×10
 
@@ -200,7 +199,7 @@ O receptor reinicia, a fotocélula falha sem motivo e o multímetro mostra 12,0 
 1. **Desligue a central** e localize os bornes de 12 V (os que alimentam fotocélula e receptor) e o negativo (GND). Fique longe dos bornes do motor e da rede, que estão na mesma placa.
 2. **Confira que o negativo é isolado da rede.** Em centrais com transformador, o lado de 12 V é isolado. Se a placa tiver fonte chaveada e você não tiver certeza, não prenda a garra: use o multímetro em CA, que mostra a ondulação como um número.
 3. **Prenda a garra do terra no GND** e o gancho da ponta no +12 V, com a ponta e o canal em ×10.
-4. **Ligue a central** e ajuste: acoplamento CA, 50 mV/div, 5 ms/div.
+4. **Ligue a central** sem encostar na placa e faça os ajustes só no osciloscópio: acoplamento CA, 50 mV/div, 5 ms/div. Para tirar ou mudar a ponta de lugar, desligue a central antes.
 5. **Compare.** Algumas dezenas de milivolts de ondulação são normais. Centenas de milivolts, ou picos fortes quando o motor parte, apontam para o capacitor de filtro ressecado, que é barato de trocar.
 
 Com o disparo em modo único e o nível um pouco abaixo de 12 V em acoplamento CC, dá até para capturar o instante em que a tensão afunda na partida do motor.

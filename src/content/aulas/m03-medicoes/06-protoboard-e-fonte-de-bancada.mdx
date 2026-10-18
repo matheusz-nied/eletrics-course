@@ -16,7 +16,6 @@ prerequisitos:
   - m03-medicoes/02-medindo-tensao
 tags: [protoboard, fonte de bancada, montagem, limite de corrente, jumper, CV, CC]
 seguranca: baixa-tensao
-rascunho: true
 ---
 
 import Breadboard from '../../../lessons/m03/Breadboard';
@@ -62,7 +61,7 @@ Os três defeitos são os erros mais comuns de quem está começando, e todos t�
 - **Cada perna numa tira diferente.** Duas pernas da mesma peça na mesma coluna deixam a peça em curto: a corrente passa pela tira, não pela peça.
 - **Chips atravessam o canal.** Cada perna fica numa coluna, e sobram quatro furos livres em cada coluna para ligar outras coisas.
 - **Alimentação nos trilhos.** Ligue o + da fonte num trilho vermelho e o − num azul, e leve até as colunas com <Term id="jumper">jumpers</Term> curtos. Use vermelho para o + e preto ou azul para o −, sempre, para bater o olho e saber o que é o quê.
-- **Confira os trilhos divididos** com o multímetro em continuidade (aula 3.4) antes de confiar que eles vão de ponta a ponta.
+- **Confira os trilhos divididos** com o multímetro em continuidade (aula [Resistência, continuidade e teste de diodo](../04-resistencia-continuidade-e-diodo/)) antes de confiar que eles vão de ponta a ponta.
 - **Nada de rede elétrica na protoboard.** Ela é feita para baixa tensão e correntes pequenas. Motores e cargas de vários ampères ficam fora dela, ligados com fios e bornes de verdade.
 - **Não force.** Pernas grossas demais alargam as molas e estragam aquele furo para sempre.
 
@@ -99,7 +98,7 @@ $$
 
 **Exemplo resolvido.** Um resistor de 10 Ω e 5 W ligado em 12 V puxaria $I = 12 / 10 = 1{,}2\,\text{A}$ e dissiparia $P = 12 \cdot 1{,}2 = 14{,}4\,\text{W}$: quase o triplo do que ele aguenta, e ele queima. Com o limite em 0,5 A, a fonte entra em CC e baixa a tensão para $V = 0{,}5 \cdot 10 = 5\,\text{V}$. O resistor dissipa $P = 5 \cdot 0{,}5 = 2{,}5\,\text{W}$ e sobrevive. Confira na fonte virtual abaixo.
 
-Num **curto**, a resistência é quase zero. A fonte entra em CC, a corrente fica no limite e a tensão cai para perto de zero. Nada queima: a fonte foi feita para isso. Compare com a bateria de carro em curto da aula sobre o circuito elétrico, onde a corrente passava de cem ampères.
+Num **curto**, a resistência é quase zero. A fonte entra em CC, a corrente fica no limite e a tensão cai para perto de zero. Nada queima: a fonte foi feita para isso. Compare com a bateria de carro em curto da aula <LinkAula id="m02-circuitos-cc/01-o-circuito-eletrico" />, onde a corrente passava de cem ampères.
 
 ### Ajustando o limite antes de ligar
 
@@ -127,7 +126,7 @@ O limite de corrente só protege se for ajustado **antes** de o circuito receber
 4. **Resistor de potência.** Escolha o resistor de 10 Ω, deixe 12 V e o limite em 2 A, e ligue a saída. Troque a peça, baixe o limite para 0,5 A e ligue de novo.
 5. **LED sem resistor.** Com 5 V e limite de 1 A, o LED queima na hora. Troque, baixe o limite para 0,02 A (20 mA) e ligue: o LED acende com cerca de 2 V. O limite de corrente fez o papel do resistor.
 
-O truque da tarefa 5 é útil na bancada, para testar um LED ou descobrir a cor dele. Num circuito de verdade, o LED sempre leva um resistor, como você vai ver no módulo de semicondutores.
+O truque da tarefa 5 é útil na bancada, para testar um LED ou descobrir a cor dele. Num circuito de verdade, o LED sempre leva um resistor, como você vai ver na aula <LinkAula id="m09-semicondutores/04-leds" />.
 
 ### Duas saídas
 
@@ -170,7 +169,7 @@ A simulação é essa montagem. A chave reproduz o erro do primeiro defeito: R2 
 
 **Tarefa:** confira os 6,19 V em R2 e os 2,81 mA. Depois feche a chave "Mesma coluna": a tensão em R2 vai a zero e a corrente sobe para 9 mA, porque só sobrou R1 no caminho. A fonte, com limite de 20 mA, continua em CV. Se o limite estivesse em 5 mA, a luz CC acenderia: na bancada, a luz CC acesa sem motivo é quase sempre um erro de montagem.
 
-Para medir a corrente na protoboard, abra o circuito tirando uma perna de R1 da coluna 10 para uma coluna vazia, e feche o caminho com o multímetro em série, no borne de mA (aula 3.3).
+Para medir a corrente na protoboard, abra o circuito tirando uma perna de R1 da coluna 10 para uma coluna vazia, e feche o caminho com o multímetro em série, no borne de mA, como na aula [Medindo corrente](../03-medindo-corrente/).
 
 <RealCase title="Testando um acessório antes de ligar na central do portão">
 Você comprou uma fotocélula nova, ou um receptor de controle, para o portão. Antes de ligar na saída de 12 V da central, teste na bancada:
@@ -308,4 +307,4 @@ Se esse curto acontecesse na central, ele poderia queimar a fonte de 12 V da pla
 - Ajuste a tensão e o limite com a saída desligada, um pouco acima do consumo esperado. Luz CC acesa sem motivo é sinal de erro de montagem.
 - Um curto na fonte de bancada não queima nada: a corrente fica no limite e a tensão cai para quase zero.
 
-Com esta aula você fecha o módulo de medições: já sabe medir tensão, corrente e resistência, ver sinais no osciloscópio e montar circuitos com segurança na bancada. O próximo módulo, Componentes passivos, abre cada peça que você encaixou aqui: resistores, capacitores, indutores, fusíveis e relés.
+Com esta aula você fecha o módulo de medições: já sabe medir tensão, corrente e resistência, ver sinais no osciloscópio e montar circuitos com segurança na bancada. O próximo módulo, <LinkAula id="m04-passivos" />, abre cada peça que você encaixou aqui: resistores, capacitores, indutores, fusíveis e relés.
