@@ -1,0 +1,104 @@
+---
+/* 04.3: a motor run capacitor (film, for AC): label with µF, tolerance and VCA, two wires and no polarity. */
+---
+
+<svg viewBox="0 0 520 270" width="520" height="270" class="fig" aria-hidden="true">
+  <path d="M115 56 C115 32 100 22 88 12 M145 56 C145 32 160 22 172 12" class="wire" />
+  <rect x="80" y="4" width="14" height="10" rx="2" class="term" />
+  <rect x="166" y="4" width="14" height="10" rx="2" class="term" />
+
+  <path d="M60 60 V214 A70 16 0 0 0 200 214 V60 Z" class="body" />
+  <ellipse cx="130" cy="60" rx="70" ry="16" class="top" />
+  <rect x="76" y="96" width="108" height="98" rx="4" class="sticker" />
+  <text x="130" y="124" class="mark">
+    35 µF ±5 %
+  </text>
+  <text x="130" y="152" class="mark">
+    250 VCA
+  </text>
+  <text x="130" y="180" class="mark">
+    60 Hz
+  </text>
+
+  <path d="M186 119 H244" class="leader" />
+  <text x="250" y="123" class="small start">
+    capacitância e tolerância
+  </text>
+  <path d="M186 147 H244" class="leader" />
+  <text x="250" y="151" class="small start">
+    tensão máxima, em CA
+  </text>
+  <path d="M178 22 H244" class="leader" />
+  <text x="250" y="26" class="small start">
+    dois fios iguais: sem polaridade
+  </text>
+  <path d="M202 200 H244" class="leader" />
+  <text x="250" y="204" class="small start">
+    dentro: filme plástico metalizado,
+  </text>
+  <text x="250" y="220" class="small start">
+    enrolado; feito para CA
+  </text>
+
+  <text x="260" y="262" class="note">
+    valores de exemplo: use sempre os da etiqueta do motor
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    stroke: var(--fg-muted);
+    stroke-width: 3.5;
+  }
+  .term {
+    fill: color-mix(in oklab, var(--copper) 50%, var(--surface));
+    stroke: var(--copper);
+    stroke-width: 1.2;
+  }
+  .body {
+    fill: color-mix(in oklab, var(--fg-subtle) 40%, var(--surface));
+    stroke: var(--fg-muted);
+  }
+  .top {
+    fill: color-mix(in oklab, var(--fg-subtle) 25%, var(--surface));
+    stroke: var(--fg-muted);
+  }
+  .sticker {
+    fill: var(--surface);
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+  }
+  .leader {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .mark {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .small {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .note {
+    font-size: 12.5px;
+    font-style: italic;
+    fill: var(--fg-subtle);
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>

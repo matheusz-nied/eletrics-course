@@ -1,0 +1,319 @@
+---
+titulo: Circuito RC
+modulo: m04-passivos
+ordem: 4
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Descrever a carga e a descarga de um capacitor através de um resistor
+  - Calcular a constante de tempo τ = R · C e usar as marcas de 63 %, 37 % e 5τ
+  - Calcular a tensão no capacitor num instante qualquer e o tempo para chegar a uma tensão
+  - Explicar o pico de corrente quando um capacitor vazio é ligado
+  - Reconhecer o circuito RC em temporizadores como a minuteria e o fechamento automático do portão
+prerequisitos:
+  - m04-passivos/03-capacitores
+  - m02-circuitos-cc/06-divisores-de-tensao-e-corrente
+tags: [circuito RC, constante de tempo, tau, carga, descarga, temporizador, minuteria]
+seguranca: baixa-tensao
+rascunho: true
+---
+
+import TimeConstant from '../../../lessons/m04/figures/TimeConstant.astro';
+import '../../../lessons/m04/rc-switch.css';
+
+Você aperta o botão no térreo e a luz da escada acende. Sobe sem pressa, e ela apaga sozinha um pouco depois de você chegar ao terceiro andar. No portão da garagem, a mesma ideia: ele abre, espera um tempo e fecha sozinho. Quem conta esse tempo?
+
+Em muitos aparelhos, quem conta é um capacitor enchendo ou esvaziando através de um resistor. Nesta aula você vai ver por que esse processo tem um ritmo previsível, calcular esse ritmo com uma multiplicação e montar um temporizador de luz de escada.
+
+## Encher através de um cano fino
+
+Na aula <LinkAula id="m04-passivos/03-capacitores" />, o capacitor carregava quase na hora, porque nada limitava a corrente. Agora ponha um resistor no caminho. O conjunto, um resistor em série com um capacitor, é um <Term id="circuito-rc">circuito RC</Term>.
+
+Pense em encher um balão de festa com um cilindro de ar por um cano bem fino. No começo, o balão está murcho e o ar entra rápido. Conforme o balão enche, ele empurra de volta, a diferença de pressão diminui e o ar entra cada vez mais devagar. Ele nunca enche "de uma vez": vai chegando perto da pressão do cilindro sem pressa.
+
+No circuito, a bateria é o cilindro, o resistor é o cano fino e o capacitor é o balão. No primeiro instante, o capacitor vazio tem 0 V, a tensão inteira da bateria fica no resistor e a corrente é a maior possível. Conforme a tensão no capacitor sobe, sobra menos tensão para o resistor, a corrente diminui e a carga entra cada vez mais devagar. Na descarga é igual, ao contrário: rápido no começo, devagar no fim.
+
+A comparação falha num ponto: o balão estica de um jeito complicado, e o capacitor é perfeitamente "linear", a tensão dele cresce na proporção exata da carga. É essa regularidade que deixa o ritmo do circuito RC tão previsível.
+
+## A constante de tempo
+
+O ritmo da carga e da descarga é dado por um único número, a <Term id="constante-de-tempo">constante de tempo</Term>, representada pela letra grega $\tau$ (tau):
+
+$$
+\tau = R \cdot C
+$$
+
+com $R$ em ohms (Ω), $C$ em farads (F) e $\tau$ em segundos (s). Ohm vezes farad dá segundo mesmo: um ohm é um volt por ampère, um farad é um coulomb (ampère-segundo) por volt, e o que sobra é o segundo.
+
+Um resistor de 10 kΩ com um capacitor de 100 µF:
+
+$$
+\tau = 10.000\,\Omega \times 0{,}0001\,\text{F} = 1\,\text{s}
+$$
+
+Um atalho para fazer de cabeça: **kΩ vezes µF dá milissegundos**. 10 kΩ × 100 µF = 1.000 ms = 1 s; 1 kΩ × 10 µF = 10 ms.
+
+O que acontece a cada $\tau$ é sempre o mesmo, qualquer que seja o circuito:
+
+| Tempo | Carga: tensão no capacitor | Descarga: tensão que sobra |
+| --- | --- | --- |
+| $1\tau$ | 63 % da final | 37 % da inicial |
+| $2\tau$ | 86 % | 14 % |
+| $3\tau$ | 95 % | 5 % |
+| $4\tau$ | 98 % | 2 % |
+| $5\tau$ | mais de 99 % | menos de 1 % |
+
+Os números da carga e da descarga somam 100 %: é a mesma curva, de cabeça para baixo. Em teoria, o capacitor nunca chega exatamente ao fim. Na prática, depois de $5\tau$ ele é considerado cheio, ou vazio.
+
+<Figure caption="Figura 1. As duas curvas do circuito RC, em porcentagem e em múltiplos de τ. Na carga, a tensão passa por 63 % em τ e por 99 % em 5τ; na descarga, cai a 37 % em τ. A reta tracejada é a inclinação do começo: se a carga continuasse naquele ritmo, terminaria em exatamente um τ.">
+  <TimeConstant />
+</Figure>
+
+## As equações
+
+Na carga, com uma fonte de tensão $V$ e o capacitor começando vazio, a tensão no capacitor é
+
+$$
+v_C(t) = V \cdot \left(1 - e^{-t/\tau}\right)
+$$
+
+Na descarga, começando com a tensão $V_0$,
+
+$$
+v_C(t) = V_0 \cdot e^{-t/\tau}
+$$
+
+E a corrente, nos dois casos, começa em $V/R$ (ou $V_0/R$) e cai no mesmo ritmo:
+
+$$
+i(t) = \frac{V}{R} \cdot e^{-t/\tau}
+$$
+
+Aqui $t$ é o tempo desde o começo, em segundos, e $e \approx 2{,}718$ é a base dos logaritmos naturais, a tecla $e^x$ da calculadora. O termo $e^{-t/\tau}$ vale 1 no começo e encolhe para 37 % a cada $\tau$: $e^{-1} \approx 0{,}37$. Daí vêm o 37 % da descarga e o 63 % da carga ($1 - 0{,}37$).
+
+<DeepDive title="De onde vem a exponencial">
+
+Na carga, a lei das malhas diz que a tensão da fonte se divide entre o resistor e o capacitor: $V = R \cdot i + v_C$. A corrente que entra no capacitor muda a tensão dele no ritmo $i = C \cdot \dfrac{dv_C}{dt}$, a forma "por segundo" de $Q = C \cdot V$. Juntando as duas:
+
+$$
+\frac{dv_C}{dt} = \frac{V - v_C}{R \cdot C} = \frac{V - v_C}{\tau}
+$$
+
+Em palavras: **a velocidade da carga é proporcional ao que falta**. Com o capacitor vazio, falta $V$ inteiro e a tensão sobe a $V/\tau$ volts por segundo: é a reta tracejada da figura, que chegaria ao fim em exatamente um $\tau$. Mas, conforme o capacitor enche, o que falta diminui, e a velocidade também.
+
+A única função que diminui num ritmo proporcional a ela mesma é a exponencial. O que falta, $V - v_C$, encolhe assim: $V - v_C = V \cdot e^{-t/\tau}$. Passando para o outro lado, $v_C = V\,(1 - e^{-t/\tau})$. Na descarga, a fonte sai do circuito ($V = 0$), e o que encolhe é a própria tensão do capacitor: $v_C = V_0 \cdot e^{-t/\tau}$.
+
+</DeepDive>
+
+O gráfico abaixo é a carga do capacitor de 100 µF por 10 kΩ com 10 V, calculada pelo simulador. Compare com a tabela: 6,3 V em 1 s, 8,6 V em 2 s, 9,5 V em 3 s. A corrente começa em 1 mA ($10\,\text{V} / 10\,\text{k}\Omega$) e cai junto.
+
+<Plot circuit="m04/rc-curva" until={5} series={['VC', 'IR']} title="carga de 100 µF por 10 kΩ com 10 V (τ = 1 s)" />
+
+## Explore: carga e descarga
+
+Na simulação, uma chave de duas posições liga a entrada do RC à bateria de 10 V (carregar) ou ao negativo (descarregar). R começa em 10 kΩ e C em 100 µF, então $\tau = 1\,\text{s}$.
+
+<Simulation circuit="m04/rc-carga-descarga" instruments={['grafico', 'multimetro']} />
+
+1. Aperte o play e mude a **Chave** para **Na bateria: carregar**. Na aba **Gráfico**, quanto o capacitor tem depois de 1 s?
+2. Olhe a corrente no resistor logo depois da mudança da chave. De quanto ela parte?
+3. Espere uns 5 s. A tensão chegou a 10 V?
+4. Mude a chave para **No negativo: descarregar**. Quanto sobra depois de 1 s?
+5. Volte a chave para o negativo até esvaziar, ponha **Resistor R** em 20 kΩ e carregue de novo. Quanto tempo leva para chegar a 6,3 V? Depois, experimente o capacitor de 470 µF.
+
+Depois de 1 s, o capacitor tem 6,3 V: 63 % de 10 V. A corrente parte de 1 mA, que é $10\,\text{V} / 10\,\text{k}\Omega$, porque no primeiro instante o capacitor vazio não "segura" tensão nenhuma. Em 5 s, a tensão passa de 9,9 V, e você mal vê a diferença para 10 V. Na descarga, sobram 3,7 V depois de 1 s: 37 % do que havia. Com 20 kΩ, $\tau$ dobra, e os 6,3 V só chegam em 2 s. Com 470 µF e 10 kΩ, $\tau = 4{,}7\,\text{s}$, e a curva fica bem mais lenta.
+
+### Exemplo resolvido: quanto tempo até 9 V
+
+Um circuito com fonte de 12 V, resistor de 22 kΩ e capacitor de 470 µF precisa avisar quando o capacitor chegar a 9 V. Quanto tempo depois de ligar?
+
+**Passo 1: a constante de tempo.**
+
+$$
+\tau = 22.000\,\Omega \times 0{,}000\,47\,\text{F} = 10{,}34\,\text{s}
+$$
+
+**Passo 2: isolar o tempo na equação da carga.** De $v_C = V\,(1 - e^{-t/\tau})$ sai
+
+$$
+t = -\tau \cdot \ln\!\left(1 - \frac{v_C}{V}\right)
+$$
+
+em que $\ln$ é o logaritmo natural, a tecla "ln" da calculadora.
+
+**Passo 3: fazer a conta.**
+
+$$
+\begin{aligned}
+t &= -10{,}34\,\text{s} \times \ln\!\left(1 - \frac{9}{12}\right) = -10{,}34 \times \ln 0{,}25 \\[4pt]
+&= 10{,}34 \times 1{,}386 \approx 14{,}3\,\text{s}
+\end{aligned}
+$$
+
+Confira com a tabela: 9 V são 75 % de 12 V, entre $1\tau$ (63 %, 10,3 s) e $2\tau$ (86 %, 20,7 s). E para chegar a 95 % (11,4 V), bastam $3\tau \approx 31\,\text{s}$.
+
+## O pico de corrente na partida
+
+No primeiro instante da carga, o capacitor vazio se comporta como um fio: toda a tensão fica no resistor e a corrente é $V/R$. Se o resistor for pequeno, essa corrente é enorme.
+
+É o que acontece quando uma fonte chaveada é ligada na tomada: os capacitores da entrada, vazios, puxam por um instante uma corrente muitas vezes maior que a normal. Muitas fontes têm um <Term id="ntc">NTC</Term> em série para amaciar esse pico; a pequena faísca no plugue vem daí. Os capacitores grandes de som automotivo, de 1 F ou mais, são outro exemplo: ligados direto à bateria, fazem uma faísca forte no terminal e podem queimar o fusível. Os manuais orientam carregá-los antes por um resistor, que limita a corrente, e só depois ligar o fio direto.
+
+Esses picos curtos também explicam por que muitos aparelhos usam fusíveis de ação retardada, assunto da aula <LinkAula id="m04-passivos/06-fusiveis-e-protecao" />.
+
+## Explore: o temporizador de escada
+
+Agora o RC vira um temporizador. O botão da escada carrega um capacitor de 100 µF quase na hora, por um resistor de só 1 kΩ. Solto o botão, o capacitor se descarrega devagar pelo **trimpot do tempo**. Um **comparador** (um circuito integrado que compara duas tensões; por enquanto, pense nele como uma caixa-preta) mantém a luz acesa enquanto a tensão do capacitor estiver acima de uma referência, tirada de um divisor de 17,4 kΩ e 10 kΩ.
+
+<Simulation circuit="m04/temporizador-escada" instruments={['grafico', 'multimetro']} />
+
+1. Aperte o play e dê um toque no **Botão da escada**. A luz acende?
+2. Solte e marque o tempo simulado (no topo da simulação, que roda 5 vezes mais rápido que o relógio). Quanto tempo a luz fica acesa?
+3. No **Gráfico**, compare a tensão do capacitor com a referência no instante em que a luz apaga.
+4. Ponha o **Trimpot do tempo** em 600 kΩ e repita.
+
+O capacitor vai a quase 12 V em uma fração de segundo ($\tau = 1\,\text{k}\Omega \times 100\,\mu\text{F} = 0{,}1\,\text{s}$) e a luz acende. Solto o botão, a luz fica acesa uns 30 s e apaga quando a tensão do capacitor cruza a referência, 4,38 V. Com 600 kΩ, uns 60 s.
+
+Por que 30 s? A descarga tem $\tau = 300\,\text{k}\Omega \times 100\,\mu\text{F} = 30\,\text{s}$, e a referência foi escolhida perto de 37 % de 12 V: o divisor dá $12 \times 10 / (17{,}4 + 10) \approx 4{,}38\,\text{V}$. A luz apaga quando a tensão cai a 37 %, que é exatamente depois de um $\tau$. Assim, **o tempo aceso é praticamente $R \cdot C$**, e o trimpot ajusta o tempo direto.
+
+### Exemplo resolvido: dois minutos de luz
+
+O síndico quer a luz acesa por 2 minutos (120 s). Com o capacitor de 100 µF, o trimpot precisa de
+
+$$
+R = \frac{120\,\text{s}}{0{,}0001\,\text{F}} = 1.200.000\,\Omega = 1{,}2\,\text{M}\Omega
+$$
+
+Fora da faixa do trimpot da simulação, que vai até 1 MΩ. Trocando o capacitor por um de 220 µF, basta $120 / 0{,}000\,22 \approx 545\,\text{k}\Omega$.
+
+Por que um trimpot, e não um resistor fixo? Porque o eletrolítico tem tolerância larga, ±20 % é típico, e perde capacitância com os anos. Um capacitor de "100 µF" pode ter 85 µF ou 115 µF, e o tempo erra na mesma proporção. O trimpot corrige isso na instalação.
+
+<RealCase title="A minuteria e o fechamento automático do portão">
+
+A **minuteria** de prédio faz o que a simulação faz: um toque em qualquer botão acende a luz da escada, que apaga sozinha depois do tempo ajustado. As mais antigas eram eletromecânicas. As eletrônicas simples usam o mesmo RC com um comparador, mas no lugar do LED acionam um relé ou um TRIAC que liga as lâmpadas da rede. O ajuste do tempo, de novo, é um trimpot.
+
+No **portão automático**, o fechamento automático segue a mesma ideia com uma diferença importante. Na central didática do curso, a CD-1, o jumper AUT liga a função e o trimpot PAUSA escolhe a espera, de 0 a 120 s. Quem conta o tempo é o **microcontrolador**, pelo relógio dele: o trimpot é só um divisor de tensão que o microcontrolador lê para saber quanto esperar. Temporizadores mais antigos ou mais simples usam o próprio RC para contar, muitas vezes com o CI 555, que você vai conhecer na aula <LinkAula id="m11-digital/05-ci-555" />.
+
+Para quem ajusta: girar o trimpot com a central ligada e testar o tempo com um cronômetro é o procedimento da aula <LinkAula id="m16-portao/08-ajustes-e-testes" />. Se o tempo variar muito de um dia para o outro numa central antiga, desconfie do capacitor eletrolítico do temporizador.
+
+</RealCase>
+
+## O RC em outros lugares
+
+O circuito RC aparece em muito mais coisas que temporizadores:
+
+- **Botões sem repique.** O contato de um botão "quica" por alguns milissegundos ao fechar. Um RC pequeno suaviza esses pulos antes de o sinal chegar a um circuito digital: <LinkAula id="m11-digital/03-pull-up-pull-down-e-debounce" />.
+- **Filtros.** Um RC deixa passar as variações lentas e segura as rápidas, ou o contrário, conforme a posição do capacitor. Você já viu um na aula <LinkAula id="m03-medicoes/05-osciloscopio" />, com o capacitor atrasando e diminuindo uma senoide; a teoria fica para <LinkAula id="m06-corrente-alternada/06-ressonancia-e-filtros" />.
+- **Filtro de fonte.** O capacitor grande da saída de uma fonte se descarrega pela carga entre um pico e outro da tensão retificada. Quanto maior o $R \cdot C$ em relação a esse intervalo, menor a ondulação.
+
+## Erros comuns e segurança
+
+- **Achar que o capacitor está cheio depois de um $\tau$.** Em $1\tau$ ele está em 63 %. Cheio, ou vazio, é depois de uns $5\tau$.
+- **Errar a unidade.** kΩ × µF dá **milissegundos**; MΩ × µF dá **segundos**. 100 kΩ × 10 µF = 1 s, não 1.000 s.
+- **Medir um RC lento com o multímetro ligado o tempo todo.** A entrada do multímetro, tipicamente 10 MΩ, é um resistor a mais em paralelo com o capacitor (veja <LinkAula id="m03-medicoes/02-medindo-tensao" />). Com um trimpot de 1 MΩ, o multímetro encurta o tempo em cerca de 9 %.
+- **Esperar precisão de um eletrolítico.** A tolerância de ±20 % vai direto para o tempo. Para tempos precisos, use capacitor de filme ou um microcontrolador.
+- **Esquecer que o capacitor guarda a carga.** Num RC de baixa tensão, como os desta aula, isso não é perigoso. Em fontes ligadas à rede, a constante de tempo do resistor de descarga diz quanto esperar, como na aula anterior.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Qual é a constante de tempo de um resistor de 47 kΩ com um capacitor de 220 µF, em segundos?',
+      answer: 10.34,
+      tolerance: 0.02,
+      unit: 's',
+      explanation: 'τ = R · C = 47.000 Ω × 0,000 22 F = 10,34 s. Pelo atalho: 47 kΩ × 220 µF = 10.340 ms.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um capacitor vazio começa a carregar, através de um resistor, com uma fonte de 12 V. Que tensão ele tem depois de uma constante de tempo?',
+      answer: 7.58,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation: 'Depois de 1τ, o capacitor tem 63,2 % da tensão final: 12 × 0,632 ≈ 7,6 V.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um RC tem resistor de 4,7 kΩ e capacitor de 100 µF. Depois de quanto tempo o capacitor pode ser considerado carregado (5τ), em segundos?',
+      answer: 2.35,
+      tolerance: 0.02,
+      unit: 's',
+      explanation: 'τ = 4.700 × 0,0001 = 0,47 s. 5τ = 2,35 s.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Num temporizador RC, você troca o capacitor por outro com o dobro da capacitância. O que acontece com o tempo?',
+      options: [
+        {
+          text: 'Dobra',
+          correct: true,
+          feedback: 'τ = R · C: com o dobro de C, a constante de tempo e o tempo do temporizador dobram.',
+        },
+        {
+          text: 'Cai pela metade',
+          feedback: 'Seria o caso se o tempo dependesse de 1/C. Um capacitor maior leva mais tempo para encher e para esvaziar.',
+        },
+        {
+          text: 'Não muda: o tempo só depende do resistor',
+          feedback: 'O tempo depende do produto R · C. Mudar qualquer um dos dois muda o tempo.',
+        },
+        {
+          text: 'Quadruplica',
+          feedback: 'A energia guardada depende do quadrado da tensão, mas a constante de tempo é proporcional a C: só dobra.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um capacitor vazio é ligado a uma fonte de 12 V através de um resistor de 1 kΩ. Qual é a corrente no primeiro instante?',
+      options: [
+        {
+          text: '12 mA',
+          correct: true,
+          feedback: 'Vazio, o capacitor tem 0 V: os 12 V ficam inteiros no resistor, e I = 12 V ÷ 1 kΩ = 12 mA.',
+        },
+        {
+          text: 'Zero, porque o capacitor bloqueia a corrente contínua',
+          feedback: 'Ele bloqueia depois de carregado. No começo da carga, a corrente é a máxima.',
+        },
+        {
+          text: '7,6 mA',
+          feedback: '7,6 é 63 % de 12. A corrente começa em V/R e só depois vai caindo.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Na carga de um RC, associe cada tempo à porcentagem da tensão final no capacitor.',
+      pairs: [
+        ['1τ', '63 %'],
+        ['2τ', '86 %'],
+        ['3τ', '95 %'],
+        ['5τ', 'mais de 99 %'],
+      ],
+      explanation:
+        'A cada τ, o que falta para encher cai para 37 % do que faltava: 37 %, 14 %, 5 %, 2 %, menos de 1 %. A carga é o complemento disso.',
+    },
+    {
+      type: 'vf',
+      prompt: 'Depois de uma constante de tempo, o capacitor está completamente carregado.',
+      answer: false,
+      explanation: 'Depois de 1τ, ele tem 63 % da tensão final. Na prática, considera-se cheio depois de uns 5τ.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Um resistor em série com um capacitor forma um circuito RC: a carga e a descarga são rápidas no começo e lentas no fim.
+- A constante de tempo é $\tau = R \cdot C$, em segundos. kΩ × µF dá milissegundos.
+- Em $1\tau$, a carga chega a 63 % e a descarga cai a 37 %; em $5\tau$, considera-se terminado.
+- A tensão segue $v_C = V\,(1 - e^{-t/\tau})$ na carga e $v_C = V_0\,e^{-t/\tau}$ na descarga; o tempo para uma tensão é $t = -\tau \cdot \ln(1 - v_C/V)$.
+- No primeiro instante, o capacitor vazio é como um fio: a corrente é $V/R$, e sem resistor ela vira um pico.
+- Temporizadores de escada e de portão usam R · C para medir tempo; o trimpot ajusta R e compensa a tolerância do capacitor.
+
+O capacitor guarda energia no campo elétrico. Na próxima aula, você vai conhecer a peça que guarda energia no campo magnético, e que faz o contrário com a corrente: <LinkAula id="m04-passivos/05-indutores-e-circuito-rl" />.
