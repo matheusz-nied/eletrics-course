@@ -126,10 +126,17 @@ const rows = (() => {
       </div>
     )}
     <div class="sim-plot__x" aria-hidden="true">
-      {layout.x.ticks.map((t) => (
-        <span class="num" style={`left: ${(t.pos / BOX) * 100}%`}>
-          {t.label}
-        </span>
+      {layout.x.rows.map((row, i) => (
+        <div
+          class="sim-plot__ticks"
+          style={`--fit: ${row.fit}px${i > 0 ? `; --until: ${layout.x.rows[i - 1]!.fit}px` : ''}`}
+        >
+          {row.ticks.map((t) => (
+            <span class={`num is-${t.align}`} style={`left: ${(t.pos / BOX) * 100}%`}>
+              {t.label}
+            </span>
+          ))}
+        </div>
       ))}
     </div>
   </div>
@@ -272,23 +279,46 @@ const rows = (() => {
   }
 
   .sim-plot__x {
-    position: relative;
+    display: grid;
     grid-column: 2;
     height: 1.5rem;
+    container-type: inline-size;
   }
 
-  .sim-plot__x span {
+  /*
+   * One row of labels per density, stacked. A row shows only while the area
+   * (100cqw) is at least --fit wide and narrower than --until, the width where
+   * the denser row before it fits.
+   */
+  .sim-plot__ticks {
+    position: relative;
+    grid-area: 1 / 1;
+    height: 1.5rem;
+    overflow: visible clip;
+    max-height: min(
+      clamp(0px, (100cqw - var(--fit) + 1px) * 999, 1.5rem),
+      clamp(0px, (var(--until, 100000px) - 100cqw) * 999, 1.5rem)
+    );
+  }
+
+  @supports not (width: 1cqw) {
+    .sim-plot__ticks:not(:first-child) {
+      display: none;
+    }
+  }
+
+  .sim-plot__ticks span {
     position: absolute;
     top: 0.35rem;
     white-space: nowrap;
     transform: translateX(-50%);
   }
 
-  .sim-plot__x span:first-child {
+  .sim-plot__ticks .is-start {
     transform: none;
   }
 
-  .sim-plot__x span:last-child {
+  .sim-plot__ticks .is-end {
     transform: translateX(-100%);
   }
 
