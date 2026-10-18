@@ -12,33 +12,43 @@ const LEADS = [
 <svg viewBox="0 0 360 270" width="360" height="270" class="fig" aria-hidden="true">
   <!-- Front: the flat face, printed -->
   <path d="M56 40H144L148 48V122H52V48Z" class="body" />
-  <text x="100" y="78" class="print">BC548</text>
-  <text x="100" y="98" class="print small">C23</text>
-  {LEADS.map((l) => <path d={`M${l.x} 122V206`} class="lead" />)}
-  {
-    LEADS.map((l) => (
-      <text x={l.x} y="228" class="pin">
-        {l.pin}
-      </text>
-    ))
-  }
-  <text x="100" y="22" class="title">de frente (face plana)</text>
+  <text x="100" y="78" class="print">
+    BC548
+  </text>
+  <text x="100" y="98" class="print small">
+    C23
+  </text>
+  {LEADS.map((l) => (
+    <path d={`M${l.x} 122V206`} class="lead" />
+  ))}
+  {LEADS.map((l) => (
+    <text x={l.x} y="228" class="pin">
+      {l.pin}
+    </text>
+  ))}
+  <text x="100" y="22" class="title">
+    de frente (face plana)
+  </text>
 
   <!-- From above: the D shape, flat side towards you -->
   <path d="M222 150H318A48 48 0 0 0 222 150Z" class="body" />
-  {[74, 100, 126].map((x) => <circle cx={x + 170} cy="136" r="4.5" class="dot" />)}
+  {[74, 100, 126].map((x) => (
+    <circle cx={x + 170} cy="136" r="4.5" class="dot" />
+  ))}
   <path d="M222 162H318" class="mark" />
-  <text x="270" y="182" class="note">face plana</text>
-  <text x="270" y="22" class="title">vista de cima</text>
+  <text x="270" y="182" class="note">
+    face plana
+  </text>
+  <text x="270" y="22" class="title">
+    vista de cima
+  </text>
 
   <g transform="translate(36 254)">
-    {
-      LEADS.map((l, k) => (
-        <text x={k * 104} y="0" class="legend">
-          <tspan class="legend-pin">{l.pin}</tspan> {l.name}
-        </text>
-      ))
-    }
+    {LEADS.map((l, k) => (
+      <text x={k * 104} y="0" class="legend">
+        <tspan class="legend-pin">{l.pin}</tspan> {l.name}
+      </text>
+    ))}
   </g>
 </svg>
 

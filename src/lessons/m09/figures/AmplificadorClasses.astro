@@ -5,11 +5,21 @@
 const W = 140;
 const H = 90;
 const N = 161;
-const path = (f: (s: number, k: number) => number, x0: number, y0: number) =>
-  Array.from({ length: N }, (_, k) => {
-    const s = Math.sin((4 * Math.PI * k) / (N - 1));
-    return `${k ? 'L' : 'M'}${(x0 + (W * k) / (N - 1)).toFixed(1)} ${(y0 - f(s, k)).toFixed(1)}`;
-  }).join('');
+/** Plots f over two cycles; where f is null the pen lifts (the transistor is off). */
+const path = (f: (s: number) => number | null, x0: number, y0: number) => {
+  let d = '';
+  let down = false;
+  for (let k = 0; k < N; k++) {
+    const y = f(Math.sin((4 * Math.PI * k) / (N - 1)));
+    if (y === null) {
+      down = false;
+      continue;
+    }
+    d += `${down ? 'L' : 'M'}${(x0 + (W * k) / (N - 1)).toFixed(1)} ${(y0 - y).toFixed(1)}`;
+    down = true;
+  }
+  return d;
+};
 
 const GAP = 0.25;
 const Q = 0.12;
@@ -25,8 +35,10 @@ const [a, b, ab, d] = PANELS.map((p) => ({ ...p, mid: p.y + H / 2 }));
 // Class A: one transistor, always on, around its rest current.
 const classA = path((s) => SCALE * (0.5 + 0.42 * s), a!.x, a!.mid);
 // Class B: each transistor only past the 0,6 V of its junction.
-const bN = path((s) => SCALE * Math.max(0, s - GAP), b!.x, b!.mid);
-const bP = path((s) => -SCALE * Math.max(0, -s - GAP), b!.x, b!.mid);
+const bN = path((s) => (s > GAP ? SCALE * (s - GAP) : null), b!.x, b!.mid);
+const bP = path((s) => (s < -GAP ? SCALE * (s + GAP) : null), b!.x, b!.mid);
+// The gap: neither conducts, and the output stays at zero.
+const bGap = path((s) => (Math.abs(s) <= GAP ? 0 : null), b!.x, b!.mid);
 // Class AB: both carry a little rest current, the halves overlap at zero.
 const share = (s: number) => (s + Math.sqrt(s * s + 4 * Q * Q)) / 2;
 const abN = path((s) => SCALE * share(s), ab!.x, ab!.mid);
@@ -47,23 +59,22 @@ const dSine = path((s) => SCALE * 0.84 * s, d!.x, d!.mid);
 ---
 
 <svg viewBox="0 0 360 318" width="360" height="318" class="fig" aria-hidden="true">
-  {
-    PANELS.map((p) => (
-      <g>
-        <rect x={p.x - 6} y={p.y - 4} width={W + 12} height={H + 8} rx="6" class="panel" />
-        <text x={p.x - 6} y={p.y - 24} class="title">
-          {p.title}
-        </text>
-        <text x={p.x - 6} y={p.y - 10} class="note">
-          {p.note}
-        </text>
-        <path d={`M${p.x} ${p.y + H / 2}H${p.x + W}`} class="zero" />
-      </g>
-    ))
-  }
+  {PANELS.map((p) => (
+    <g>
+      <rect x={p.x - 6} y={p.y - 4} width={W + 12} height={H + 8} rx="6" class="panel" />
+      <text x={p.x - 6} y={p.y - 24} class="title">
+        {p.title}
+      </text>
+      <text x={p.x - 6} y={p.y - 10} class="note">
+        {p.note}
+      </text>
+      <path d={`M${p.x} ${p.y + H / 2}H${p.x + W}`} class="zero" />
+    </g>
+  ))}
   <path d={classA} class="npn" />
   <path d={bN} class="npn" />
   <path d={bP} class="pnp" />
+  <path d={bGap} class="gap" />
   <path d={abN} class="npn" />
   <path d={abP} class="pnp" />
   <path d={dPulses} class="npn thin" />
@@ -71,11 +82,17 @@ const dSine = path((s) => SCALE * 0.84 * s, d!.x, d!.mid);
 
   <g transform="translate(18 306)">
     <path d="M0 -4H20" class="npn" />
-    <text x="25" y="0" class="legend">de cima (NPN)</text>
+    <text x="25" y="0" class="legend">
+      de cima (NPN)
+    </text>
     <path d="M112 -4H132" class="pnp" />
-    <text x="137" y="0" class="legend">de baixo (PNP)</text>
+    <text x="137" y="0" class="legend">
+      de baixo (PNP)
+    </text>
     <path d="M226 -4H246" class="filtered" />
-    <text x="251" y="0" class="legend">filtrado</text>
+    <text x="251" y="0" class="legend">
+      filtrado
+    </text>
   </g>
 </svg>
 
@@ -105,10 +122,16 @@ const dSine = path((s) => SCALE * 0.84 * s, d!.x, d!.mid);
     stroke: var(--accent);
   }
   .pnp {
-    stroke: var(--info);
+    stroke: var(--copper);
+  }
+  .gap {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 3.5;
   }
   .thin {
-    stroke-width: 1.4;
+    stroke-width: 1.2;
+    opacity: 0.7;
   }
   .filtered {
     stroke: var(--fg);

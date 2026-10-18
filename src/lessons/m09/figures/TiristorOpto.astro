@@ -14,22 +14,34 @@ const arrow = (x: number, y: number) => `M${x - 7} ${y - 4}L${x} ${y}L${x - 7} $
 ---
 
 <svg viewBox="0 0 560 270" width="560" height="270" class="fig" aria-hidden="true">
-  <text x="280" y="18" class="head">isolação: só a luz atravessa</text>
+  <text x="280" y="18" class="head">
+    isolação: só a luz atravessa
+  </text>
   <path d="M280 24V58" class="leader" />
 
   <!-- Pins -->
   <path d="M140 92H108M140 172H108M420 92H452M420 172H452" class="leg" />
-  <text x="102" y="96" class="pin end">1 ânodo</text>
-  <text x="102" y="176" class="pin end">2 cátodo</text>
-  <text x="458" y="96" class="pin">4 coletor</text>
-  <text x="458" y="176" class="pin">3 emissor</text>
+  <text x="102" y="96" class="pin end">
+    1 ânodo
+  </text>
+  <text x="102" y="176" class="pin end">
+    2 cátodo
+  </text>
+  <text x="458" y="96" class="pin">
+    4 coletor
+  </text>
+  <text x="458" y="176" class="pin">
+    3 emissor
+  </text>
 
   <!-- Package and the cut-away top -->
   <rect x="140" y="44" width="280" height="176" rx="6" class="body" />
   <circle cx="156" cy="60" r="5" class="dot" />
   <rect x="166" y="64" width="228" height="136" rx="4" class="window" />
   <rect x="268" y="64" width="24" height="136" class="gap" />
-  <text x="280" y="214" class="code">{code}</text>
+  <text x="280" y="214" class="code">
+    {code}
+  </text>
 
   <!-- Infrared LED -->
   <path d="M166 92H225V112M225 136V172H166" class="wire" />
@@ -44,8 +56,12 @@ const arrow = (x: number, y: number) => `M${x - 7} ${y - 4}L${x} ${y}L${x - 7} $
   <path d="M320 114L345 96V92H394M320 134L345 152V172H394" class="wire" />
   <path d="M345 152L334.5 149.6L339.4 143.1Z" class="arrow-fill" />
 
-  <text x="200" y="250" class="side">lado da rede</text>
-  <text x="360" y="250" class="side">lado da placa</text>
+  <text x="200" y="250" class="side">
+    lado da rede
+  </text>
+  <text x="360" y="250" class="side">
+    lado da placa
+  </text>
 </svg>
 
 <style>

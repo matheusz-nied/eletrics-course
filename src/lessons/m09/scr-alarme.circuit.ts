@@ -99,7 +99,13 @@ export default defineCircuit({
   ],
   probes: [
     { id: 'IS', kind: 'current', element: 'SR1', label: 'Corrente na sirene' },
-    { id: 'VAK', kind: 'voltage', plus: 'X1.a', minus: 'X1.k', label: 'Tensão no SCR (ânodo − cátodo)' },
+    {
+      id: 'VAK',
+      kind: 'voltage',
+      plus: 'X1.a',
+      minus: 'X1.k',
+      label: 'Tensão no SCR (ânodo − cátodo)',
+    },
     { id: 'IG', kind: 'current', element: 'R1', label: 'Corrente no gatilho' },
   ],
   goals: [

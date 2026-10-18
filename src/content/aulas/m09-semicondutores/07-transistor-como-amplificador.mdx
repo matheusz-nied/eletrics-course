@@ -59,7 +59,7 @@ $$
 
 em que $V_\text{B}$ e $V_\text{E}$ são as tensões da base e do emissor em relação ao negativo (o terra), e $I_\text{E}$ a corrente do emissor, quase igual à do coletor. Depois, $V_\text{C} = V_\text{CC} - R_\text{C} \cdot I_\text{C}$.
 
-Repare que β não aparece em nenhuma conta. Esse é o mérito do RE. Os transistores de um mesmo modelo saem da fábrica com β muito diferentes (de 110 a 800 num BC548, conforme a faixa de ganho), e o β muda com a temperatura. Se a corrente de coletor tentar subir, a tensão em RE sobe junto, sobra menos tensão para a junção base-emissor e a corrente volta. É uma **realimentação negativa**: o circuito se corrige sozinho.
+Repare que β não aparece em nenhuma conta. Esse é o mérito do RE. O β varia muito de peça para peça (de 110 a 800 num BC548) e com a temperatura. Se a corrente de coletor tentar subir, a tensão em RE sobe junto, sobra menos tensão para a junção base-emissor e a corrente volta. É uma **realimentação negativa**: o circuito se corrige sozinho.
 
 ## Exemplo resolvido: polarizando o amplificador da simulação
 
@@ -89,7 +89,7 @@ $$
 A_\text{v} \approx -\frac{R_\text{C}}{R_\text{E}}
 $$
 
-O sinal de menos é a inversão. Quando há uma carga ligada na saída por um capacitor, como o resistor de 10 kΩ da simulação, para o sinal ela fica em paralelo com RC: $4{,}7\,\text{k}\Omega$ em paralelo com $10\,\text{k}\Omega$ dá $3{,}2\,\text{k}\Omega$, e o ganho fica em torno de $-3{,}2$. É pouco, mas é estável: depende só de dois resistores.
+O sinal de menos é a inversão. Uma carga ligada na saída por um capacitor, como o resistor de 10 kΩ da simulação, fica em paralelo com RC para o sinal: $4{,}7\,\text{k}\Omega$ com $10\,\text{k}\Omega$ em paralelo dá $3{,}2\,\text{k}\Omega$, e o ganho fica em torno de $-3{,}2$. É pouco, mas estável: depende só de dois resistores.
 
 **Com o capacitor de desvio.** Um capacitor grande em paralelo com RE, o **CE**, segura a tensão do emissor parada para o sinal: para a corrente contínua ele é um circuito aberto, e a polarização continua a mesma; para o sinal de 1 kHz, ele é quase um curto. Agora o sinal inteiro cai sobre a própria junção base-emissor, e o ganho passa a depender da resistência dela, que, em 1,1 mA, é de uns 23 Ω (veja o quadro abaixo). O ganho fica perto de $3{,}2\,\text{k}\Omega / 23\,\Omega \approx 137$. O simulador mostra cerca de 130.
 
@@ -110,7 +110,7 @@ $$
 
 Com $I_\text{C} = 1{,}11\,\text{mA}$, $r_\text{e} \approx 23\,\Omega$. Com CE, $A_\text{v} \approx -(R_\text{C} \parallel R_\text{L}) / r_\text{e}$; sem CE, $A_\text{v} \approx -(R_\text{C} \parallel R_\text{L}) / (R_\text{E} + r_\text{e})$, em que $R_\text{L}$ é a carga e $\parallel$ indica a associação em paralelo. Como $r_\text{e}$ depende de $I_\text{C}$, quando o sinal faz a corrente subir, o ganho aumenta; quando faz descer, o ganho diminui. As duas metades da onda saem de tamanhos diferentes: é a distorção que você vai ver na simulação.
 
-**Impedância de entrada.** Quem entrega o sinal "vê" o divisor em paralelo com a base, e a base parece β vezes maior que o que está no emissor: $\beta \cdot r_\text{e} \approx 4{,}7\,\text{k}\Omega$ com CE e $\beta \cdot (R_\text{E} + r_\text{e}) \approx 205\,\text{k}\Omega$ sem ele. Com o divisor de 8,5 kΩ (56 kΩ em paralelo com 10 kΩ), a entrada fica em cerca de 3 kΩ com CE e 8 kΩ sem CE. O simulador mostra 3,1 kΩ e 8,1 kΩ.
+**Impedância de entrada.** Quem entrega o sinal "vê" o divisor em paralelo com a base, e a base parece β vezes maior que o que está no emissor: $\beta \cdot r_\text{e} \approx 4{,}7\,\text{k}\Omega$ com CE e $\beta \cdot (R_\text{E} + r_\text{e}) \approx 205\,\text{k}\Omega$ sem ele. Com o divisor de 8,5 kΩ, a entrada fica em cerca de 3 kΩ com CE e 8 kΩ sem CE. O simulador mostra 3,1 kΩ e 8,1 kΩ.
 
 **Os capacitores.** A reatância de cada um tem de ser bem menor que a resistência ao lado dele (veja a aula de <LinkAula id="m06-corrente-alternada/04-reatancia-e-impedancia">reatância e impedância</LinkAula>). O de entrada, de 10 µF, tem 16 Ω em 1 kHz, contra os 3 kΩ da entrada. O CE, de 100 µF, tem 1,6 Ω em 1 kHz, contra os 23 Ω de $r_\text{e}$, mas 80 Ω em 20 Hz: o ganho cai nos graves. Por isso o CE costuma ter centenas de microfarads.
 
@@ -138,13 +138,13 @@ Aperte o play (▶) e espere o autoajuste do osciloscópio. Embaixo da tela, ele
 
 No multímetro, a base fica em cerca de 1,77 V, o emissor em 1,12 V e o coletor em 6,78 V, perto da conta. Na tela, a entrada tem 10 mV de pico a pico e a saída cerca de 1,3 V: um ganho de cerca de 130. E, quando a entrada está no pico, a saída está no vale: invertida.
 
-Com 20 mV, a saída cresce para uns 5 V de pico a pico, mas deixa de ser uma senoide: a metade de baixo desce até uns −3,0 V e a de cima só sobe até uns +2,1 V. Com 50 mV, a saída fica achatada nas duas pontas. Embaixo, em uns −5,6 V, o transistor satura: o coletor desce até cerca de 1,2 V, quase encostando no emissor, e não tem mais para onde ir. Em cima, em uns +3,3 V, o transistor quase corta, e o coletor só sobe até onde RC e a carga deixam, perto de 10 V. Esse achatamento é o **<Term id="ceifamento">ceifamento</Term>**.
+Com 20 mV, a saída cresce para uns 5 V de pico a pico, mas deixa de ser uma senoide: a metade de baixo desce até uns −3,0 V e a de cima só sobe até uns +2,1 V. Com 50 mV, a saída fica achatada nas duas pontas. Embaixo, perto de −6 V, o transistor satura: o coletor desce até pouco mais de 1,1 V, quase encostando no emissor. Em cima, perto de +3 V, o transistor quase corta, e o coletor só sobe até onde RC e a carga deixam, perto de 10 V. Esse achatamento é o **<Term id="ceifamento">ceifamento</Term>**.
 
-Sem CE, a saída de 5 mV cai para uns 31 mV de pico a pico: ganho de cerca de 3. Em compensação, com 1 V de pico na entrada, a saída tem uns 6,1 V de pico a pico e continua uma senoide limpa e invertida. Amplificadores reais ficam no meio: dividem o RE em dois, deixam só uma parte sem capacitor e escolhem o ganho pelo tamanho dessa parte. Com 100 Ω sem desvio, por exemplo, o ganho fica em torno de $3{,}2\,\text{k}\Omega / (100 + 23)\,\Omega \approx 26$.
+Sem CE, a saída de 5 mV cai para uns 31 mV de pico a pico: ganho de cerca de 3. Em compensação, com 1 V de pico na entrada, a saída tem uns 6,1 V de pico a pico e continua uma senoide limpa e invertida. Na prática, divide-se o RE em dois e só uma parte recebe o capacitor: com 100 Ω sem desvio, o ganho fica em torno de $3{,}2\,\text{k}\Omega / (100 + 23)\,\Omega \approx 26$.
 
 ## Classes de amplificador
 
-O emissor comum é um amplificador **classe A**: o transistor conduz o ciclo inteiro, com uma corrente de repouso que passa mesmo sem sinal. Na simulação, a fonte entrega cerca de 1,3 mA a 12 V, uns 16 mW, o tempo todo. Com 5 mV na entrada, a carga recebe uns 20 µW. Para um pré-amplificador de microfone, tudo bem. Para um amplificador de 50 W, a classe A gastaria de duas a quatro vezes isso o tempo todo, mesmo em silêncio, e pediria dissipadores enormes. A <Term id="classe-de-amplificador">classe</Term> de um amplificador diz por quanto do ciclo cada transistor conduz, e é ela que decide o rendimento.
+O emissor comum é um amplificador **classe A**: o transistor conduz o ciclo inteiro, com uma corrente de repouso que passa mesmo sem sinal. Na simulação, a fonte entrega cerca de 1,3 mA a 12 V, uns 16 mW, o tempo todo. Com 5 mV na entrada, a carga recebe uns 20 µW. Para um amplificador de 50 W, a classe A gastaria de duas a quatro vezes isso o tempo todo, mesmo em silêncio, e pediria dissipadores enormes. A <Term id="classe-de-amplificador">classe</Term> de um amplificador diz por quanto do ciclo cada transistor conduz, e é ela que decide o rendimento.
 
 <Figure caption="Figura 2. A corrente nos transistores de saída durante dois ciclos de uma senoide (formas fora de escala). Acima da linha, o transistor de cima; abaixo, o de baixo. Na classe A, um transistor só conduz o ciclo todo, em torno da corrente de repouso. Na B, cada um conduz meio ciclo, com um vão perto do zero. Na AB, os dois conduzem um pouco em repouso e as metades se emendam. Na D, os transistores só ligam e desligam, e a largura dos pulsos segue o sinal; um filtro devolve a senoide." alt="Quatro gráficos pequenos. Classe A: uma senoide inteira acima da linha do zero. Classe B: meias ondas alternadas, acima e abaixo da linha, com um trecho parado em zero entre elas. Classe AB: meias ondas acima e abaixo que se emendam no zero sem trecho parado. Classe D: pulsos retangulares de largura variável, com uma senoide tracejada por cima.">
   <AmplificadorClasses />
@@ -171,7 +171,7 @@ Aperte o play e espere o autoajuste. Para comparar a forma das duas ondas, coloq
 2. Baixe a entrada para 0,5 V. O que sai?
 3. Abra S1 (classe AB) e repita as duas medidas.
 
-Na classe B, a saída chega a uns 1,3 V de pico, e não aos 2 V da entrada: cada transistor come os primeiros 0,6 V a 0,7 V de cada meia onda. Perto do zero, a saída fica parada enquanto a entrada passa de cerca de −0,6 V a +0,6 V, e a onda ganha um degrau no meio. Com 0,5 V na entrada, a saída fica abaixo de 1 mV: o sinal inteiro cabe dentro do vão.
+Na classe B, a saída chega a uns 1,3 V de pico, e não aos 2 V da entrada: cada transistor come uns 0,7 V de cada meia onda. Perto do zero, a saída fica parada enquanto a entrada passa de cerca de −0,6 V a +0,6 V, e a onda ganha um degrau no meio. Com 0,5 V na entrada, a saída fica abaixo de 1 mV: o sinal inteiro cabe dentro do vão.
 
 Com S1 aberta, os diodos voltam ao circuito, e cada transistor fica com cerca de 1,4 mA de repouso. A saída acompanha a entrada, com uns 1,9 V a 2,0 V de pico para os 2 V de entrada, e sem degrau. Com 0,5 V na entrada, saem uns 0,46 V.
 

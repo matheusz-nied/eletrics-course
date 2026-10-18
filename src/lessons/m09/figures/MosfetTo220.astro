@@ -25,44 +25,42 @@ const height = stagger ? 316 : 300;
 ---
 
 <svg viewBox={`0 0 420 ${height}`} width="420" height={height} class="fig" aria-hidden="true">
-  {
-    heatsink && (
-      <g class="sink">
-        <rect x={CX - 90} y="18" width="180" height="122" rx="4" />
-        {fins.map((x) => (
-          <path d={`M${x} 24V134`} class="fin" />
-        ))}
-      </g>
-    )
-  }
+  {heatsink && (
+    <g class="sink">
+      <rect x={CX - 90} y="18" width="180" height="122" rx="4" />
+      {fins.map((x) => (
+        <path d={`M${x} 24V134`} class="fin" />
+      ))}
+    </g>
+  )}
   <path
     d={`M${left} 126V64Q${left} 56 ${left + 8} 56H${left + BODY_W - 8}Q${left + BODY_W} 56 ${left + BODY_W} 64V126Z`}
     class="tab"
   />
   <circle cx={CX} cy="86" r="10" class="hole" />
   <rect x={left} y="120" width={BODY_W} height="82" rx="3" class="body" />
-  <text x={CX} y="158" class="code">{code}</text>
-  {legs.map((x) => <rect x={x - 3.5} y="202" width="7" height="66" rx="1.5" class="leg" />)}
-  {
-    legs.map((x, k) => (
-      <text x={x} y={stagger && k === 1 ? 308 : 290} class="pin">
-        {pins[k]}
+  <text x={CX} y="158" class="code">
+    {code}
+  </text>
+  {legs.map((x) => (
+    <rect x={x - 3.5} y="202" width="7" height="66" rx="1.5" class="leg" />
+  ))}
+  {legs.map((x, k) => (
+    <text x={x} y={stagger && k === 1 ? 308 : 290} class="pin">
+      {pins[k]}
+    </text>
+  ))}
+  {tab && (
+    <>
+      <path d={`M${left + BODY_W + 2} 74L${heatsink ? 262 : 232} 74`} class="leader" />
+      <text x={heatsink ? 268 : 238} y="70" class="note">
+        {tab[0]}
       </text>
-    ))
-  }
-  {
-    tab && (
-      <>
-        <path d={`M${left + BODY_W + 2} 74L${heatsink ? 262 : 232} 74`} class="leader" />
-        <text x={heatsink ? 268 : 238} y="70" class="note">
-          {tab[0]}
-        </text>
-        <text x={heatsink ? 268 : 238} y="88" class="note">
-          {tab[1]}
-        </text>
-      </>
-    )
-  }
+      <text x={heatsink ? 268 : 238} y="88" class="note">
+        {tab[1]}
+      </text>
+    </>
+  )}
 </svg>
 
 <style>

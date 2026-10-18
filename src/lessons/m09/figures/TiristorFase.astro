@@ -48,16 +48,26 @@ const delayMs = nf.format((alpha / 180) * (1000 / 120));
 <svg viewBox="0 0 640 262" width="640" height="262" class="fig" aria-hidden="true">
   <!-- Legend -->
   <path d="M440 14H468" class="mains" />
-  <text x="474" y="18" class="legend">tensão da tomada</text>
+  <text x="474" y="18" class="legend">
+    tensão da tomada
+  </text>
   <path d="M440 34H468" class="lamp" />
-  <text x="474" y="38" class="legend">tensão na lâmpada</text>
+  <text x="474" y="38" class="legend">
+    tensão na lâmpada
+  </text>
 
   <!-- Main axes -->
   <path d={`M${X0} ${Y0}H${X0 + W + 8}`} class="axis" />
   <path d={`M${X0} ${Y1}H${X0 + W + 8}`} class="axis" />
-  <text x={X0 - 10} y={Y0 + 4} class="side">0 V</text>
-  <text x={X0 - 10} y={Y1 - 18} class="side">pulsos</text>
-  <text x={X0 - 10} y={Y1 - 4} class="side">no gatilho</text>
+  <text x={X0 - 10} y={Y0 + 4} class="side">
+    0 V
+  </text>
+  <text x={X0 - 10} y={Y1 - 18} class="side">
+    pulsos
+  </text>
+  <text x={X0 - 10} y={Y1 - 4} class="side">
+    no gatilho
+  </text>
 
   <path d={conduction(alpha, 180)} class="area" />
   <path d={conduction(180 + alpha, 360)} class="area" />
@@ -67,7 +77,9 @@ const delayMs = nf.format((alpha / 180) * (1000 / 120));
   <!-- Firing angle -->
   <path d={`M${x(alpha)} ${Y0}V${y(alpha) - 10}`} class="guide" />
   <path d={`M${x(alpha)} ${Y0 + 42}V${Y1 - 26}`} class="guide" />
-  <text x={x(alpha)} y={y(alpha) - 16} class="note">disparo</text>
+  <text x={x(alpha)} y={y(alpha) - 16} class="note">
+    disparo
+  </text>
   <path d={`M${x(0)} ${Y0 + 16}H${x(alpha)}`} class="dim" />
   <path d={`M${x(0)} ${Y0 + 11}V${Y0 + 21}M${x(alpha)} ${Y0 + 11}V${Y0 + 21}`} class="dim" />
   <text x={(x(0) + x(alpha)) / 2} y={Y0 + 34} class="alpha">
@@ -75,18 +87,31 @@ const delayMs = nf.format((alpha / 180) * (1000 / 120));
   </text>
 
   <!-- Turn-off at the zero crossing -->
-  <text x={x(180) + 6} y={Y0 - 24} class="note start">o TRIAC desliga</text>
-  <text x={x(180) + 6} y={Y0 - 9} class="note start">sozinho no zero</text>
+  <text x={x(180) + 6} y={Y0 - 24} class="note start">
+    o TRIAC desliga
+  </text>
+  <text x={x(180) + 6} y={Y0 - 9} class="note start">
+    sozinho no zero
+  </text>
 
   <!-- Gate pulses -->
   <path d={pulse(alpha, true)} class="pulse" />
   <path d={pulse(180 + alpha, false)} class="pulse" />
 
   <!-- Time marks -->
-  <text x={x(0)} y={Y1 + 40} class="tick">0</text>
-  <text x={x(180)} y={Y1 + 40} class="tick">8,33 ms</text>
-  <text x={x(360)} y={Y1 + 40} class="tick">16,67 ms</text>
-  <path d={`M${x(180)} ${Y1 + 26}V${Y1 + 30}M${x(360)} ${Y1 + 26}V${Y1 + 30}M${x(0)} ${Y1 + 26}V${Y1 + 30}`} class="axis" />
+  <text x={x(0)} y={Y1 + 40} class="tick">
+    0
+  </text>
+  <text x={x(180)} y={Y1 + 40} class="tick">
+    8,33 ms
+  </text>
+  <text x={x(360)} y={Y1 + 40} class="tick">
+    16,67 ms
+  </text>
+  <path
+    d={`M${x(180)} ${Y1 + 26}V${Y1 + 30}M${x(360)} ${Y1 + 26}V${Y1 + 30}M${x(0)} ${Y1 + 26}V${Y1 + 30}`}
+    class="axis"
+  />
 </svg>
 
 <style>

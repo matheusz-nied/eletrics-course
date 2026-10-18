@@ -217,14 +217,13 @@ export default defineCircuit({
       id: 'W11',
       type: 'wire',
       points: [
-        [0, 30],
-        [27, 30],
-        [32, 30],
-        [32, 15],
         [36, 15],
+        [32, 15],
       ],
     },
     { id: 'G', type: 'ground', at: [0, 30] },
+    { id: 'G2', type: 'ground', at: [27, 30] },
+    { id: 'G3', type: 'ground', at: [32, 15] },
   ],
   probes: [
     { id: 'VIN', kind: 'voltage', plus: 'V2.a', minus: 'GND', label: 'Entrada' },

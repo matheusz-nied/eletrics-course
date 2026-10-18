@@ -5,8 +5,8 @@
    electrons to the surface under the oxide and they form the channel. */
 const W = 300;
 const panels = [
-  { ox: 10, on: false, title: 'Gate em 0 V: sem canal' },
-  { ox: 330, on: true, title: 'Gate acima do limiar: canal formado' },
+  { on: false, title: 'Gate em 0 V: sem canal' },
+  { on: true, title: 'Gate acima do limiar: canal formado' },
 ];
 const TOP = 112;
 const BODY_H = 128;
@@ -20,10 +20,10 @@ const wellDots = [
 ];
 ---
 
-<svg viewBox="0 0 640 300" width="640" height="300" class="fig" aria-hidden="true">
-  {
-    panels.map((p) => (
-      <g transform={`translate(${p.ox} 0)`}>
+<div class="panels">
+  {panels.map((p) => (
+    <svg viewBox="0 0 320 270" width="320" height="270" class="fig" aria-hidden="true">
+      <g transform="translate(10 0)">
         <text x={W / 2} y="20" class="title">
           {p.title}
         </text>
@@ -90,16 +90,23 @@ const wellDots = [
           </text>
         )}
       </g>
-    ))
-  }
-  <text x="320" y="284" class="foot">
-    O óxido (cinza) isola o gate: nenhuma corrente entra por ele com a tensão parada.
-  </text>
-</svg>
+    </svg>
+  ))}
+</div>
+<p class="foot">
+  O óxido (cinza) isola o gate: nenhuma corrente entra por ele com a tensão parada.
+</p>
 
 <style>
+  .panels {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 0;
+  }
   .fig {
     font-family: var(--font-sans);
+    flex: 0 1 320px;
     max-width: 100%;
     height: auto;
   }
@@ -167,8 +174,10 @@ const wellDots = [
     text-anchor: middle;
   }
   .foot {
-    fill: var(--fg-muted);
-    font-size: 13px;
-    text-anchor: middle;
+    margin: 0.5rem 0 0;
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    text-align: center;
   }
 </style>

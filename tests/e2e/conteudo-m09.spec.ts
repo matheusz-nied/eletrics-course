@@ -70,4 +70,53 @@ test.describe('módulo 9: semicondutores', () => {
     await expect(widget.locator('.jpn__values')).toContainText('11,2 mA');
     errors.expectClean();
   });
+
+  test('the diode curve of lesson 9.2 moves the operating point with the resistor', async ({
+    page,
+  }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}02-diodo/`);
+    const widget = await hydrated(page, '.cdiodo');
+    await expect(widget).toContainText('4,38 mA');
+    await expect(widget).toContainText('0,624 V');
+    await widget.getByLabel('100 Ω', { exact: true }).check({ force: true });
+    await expect(widget).toContainText('42,7 mA');
+    await widget.getByLabel('1N5819 (Schottky)').check({ force: true });
+    await expect(widget).toContainText('0,262 V');
+    errors.expectClean();
+  });
+
+  test('the protection diode of lesson 9.2 blocks a reversed battery', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}02-diodo/`);
+    const sim = page.locator('[data-simulation="m09/diodo-protecao"]');
+    await sim.scrollIntoViewIfNeeded();
+    await expect(sim).toHaveAttribute('data-ready', '');
+    await expect(sim.locator('.dmm[data-probe="IAP"] [data-reading]')).toContainText(/46\d\smA/);
+    await sim
+      .locator('.sim-controls')
+      .getByLabel('Bateria')
+      .selectOption({ label: 'Invertida (positivo embaixo)' });
+    await expect(sim.locator('.dmm[data-probe="VD1"] [data-reading]')).toContainText(/−1[12][\d,]*\sV/);
+    errors.expectClean();
+  });
+
+  test('the LED calculator of lesson 9.4 picks 330 Ω for a red LED', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}04-leds/`);
+    const widget = await hydrated(page, '.ledcalc');
+    await expect(widget).toContainText('330 Ω');
+    await expect(widget).toContainText('9,52 mA');
+    errors.expectClean();
+  });
+
+  test('the zener regulator of lesson 9.5 holds the output near 5,2 V', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}05-diodo-zener/`);
+    const sim = page.locator('[data-simulation="m09/zener-regulador"]');
+    await sim.scrollIntoViewIfNeeded();
+    await expect(sim).toHaveAttribute('data-ready', '');
+    await expect(sim.locator('.dmm[data-probe="VOUT"] [data-reading]')).toContainText('5,19 V');
+    errors.expectClean();
+  });
 });

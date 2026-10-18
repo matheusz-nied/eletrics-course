@@ -126,7 +126,7 @@ Com RB = 1 kΩ, a base recebe cerca de 4,2 mA, a lâmpada recebe os 0,10 A dela 
 
 Aumentando RB, nada muda até uns 10 kΩ: com β = 250, até 0,4 mA na base ainda dá para os 100 mA. Depois disso, a corrente de base não basta, o transistor sai da saturação e entra na região ativa. Com RB = 22 kΩ, a base recebe 0,19 mA, e o transistor deixa passar só cerca de 52 mA. A lâmpada, com metade da corrente, quase não brilha (o filamento de uma lâmpada só brilha bem perto da corrente nominal). E o transistor fica com cerca de 9 V e dissipa quase meio watt, perto do limite de 0,625 W de um BC337. Em poucos segundos, a temperatura da junção passa de 100 °C. É o erro clássico de quem calcula RB "no limite".
 
-Repare também por que a folga importa. O simulado tem β = 250, mas a folha de dados do BC337 admite peças com β de apenas 100. Com essa peça, RB de 10 kΩ daria 43 mA, e a lâmpada nem acenderia.
+Repare também por que a folga importa. O simulado tem β = 250, mas a folha de dados do BC337 admite peças com β de apenas 100. Com essa peça, RB de 10 kΩ daria uns 46 mA, e a lâmpada nem acenderia.
 
 ## Bobinas e o diodo de roda livre
 
@@ -165,7 +165,7 @@ Aperte o play (▶) e espere uns segundos, com o pino desligado: o osciloscópio
 
 Ligado, o transistor satura: o coletor fica em cerca de 0,05 V e a bobina recebe cerca de 30 mA. Com o diodo, ao desligar, o coletor sobe só até cerca de 12,7 V, os 12 V da fonte mais o diodo. A corrente da bobina continua circulando pelo diodo e morre aos poucos, em pouco mais de 1 ms.
 
-Sem o diodo, o coletor dispara para cerca de 29 V num instante, um pico estreito, de uns 0,2 ms: tão depressa a bobina despeja a energia dela. O simulador avisa que o transistor entrou em **avalanche**: a tensão chegou ao limite dele, a junção base-coletor rompeu e passou a conduzir, e foi isso que segurou o pico. Sem esse limite, a bobina levaria o coletor a muito mais que isso.
+Sem o diodo, o coletor dispara para cerca de 29 V num pico estreito, de uns 0,2 ms. O simulador avisa que o transistor entrou em **avalanche**: a tensão chegou ao limite dele, a junção base-coletor rompeu e passou a conduzir, e foi isso que segurou o pico.
 
 No simulador, o transistor sobrevive, porque a energia de um único pico é pequena. Na vida real, ele não foi feito para trabalhar em avalanche. Cada desligamento castiga um ponto do chip, e o transistor pode durar mil ou um milhão de acionamentos, mas um dia falha, quase sempre em curto, e o relé fica atracado para sempre. Com bobinas maiores, como a de uma fechadura elétrica, de um solenoide ou de um contator, a energia é muito maior, e o transistor pode morrer no primeiro desligamento. O pico também espalha ruído pela placa e pode reiniciar o microcontrolador. O diodo custa centavos.
 
@@ -199,7 +199,7 @@ O valor comercial mais próximo, para baixo, é **820 Ω**, que dá $I_\text{B} 
 
 **Passo 5: conferir o pino e o transistor.** O pino fornece 3,2 mA, bem abaixo do que os pinos de um ESP32 ou de um Arduino aguentam (algumas dezenas de miliampères no máximo; o valor exato está na folha de dados). O BC548 aguenta 100 mA no coletor e 30 V entre coletor e emissor; a bobina pede 30 mA e a fonte é de 12 V. Saturado, ele dissipa uns $0{,}05\,\text{V} \times 30\,\text{mA} = 1{,}5\,\text{mW}$.
 
-Completam o circuito o diodo de roda livre (um 1N4148 ou um 1N4007) e um resistor de 10 kΩ entre a base e o emissor. Esse resistor, um **pull-down**, garante o corte enquanto o pino ainda está "flutuando", nos primeiros instantes depois de ligar a placa, antes de o programa configurar o pino (veja o <Term id="pull-up">resistor de pull-up</Term> e a aula <LinkAula id="m11-digital/03-pull-up-pull-down-e-debounce" />). Ele rouba só 0,07 mA da base. É exatamente o circuito da segunda simulação, onde você confere que o transistor satura: o coletor fica em 0,05 V e a bobina recebe 30 mA.
+Completam o circuito o diodo de roda livre (um 1N4148 ou um 1N4007) e um resistor de 10 kΩ entre a base e o emissor. Esse resistor, um **pull-down**, garante o corte enquanto o pino ainda está "flutuando", nos primeiros instantes depois de ligar a placa, antes de o programa configurar o pino (veja o <Term id="pull-up">resistor de pull-up</Term> e a aula <LinkAula id="m11-digital/03-pull-up-pull-down-e-debounce" />). Ele rouba só 0,07 mA da base. É o circuito da segunda simulação.
 
 <RealCase title="O módulo de relé e a central do portão">
 

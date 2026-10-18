@@ -22,25 +22,25 @@ const END = X0 + CYCLES * PERIOD;
 ---
 
 <svg viewBox="0 0 640 262" width="640" height="262" class="fig" aria-hidden="true">
-  <text x={X0} y="16" class="head">ligado (5 V no gate)</text>
-  {
-    rows.map((r) => (
-      <g>
-        <text x="20" y={r.y - 22} class="duty">
-          {r.label}
-        </text>
-        <text x="20" y={r.y - 4} class="sub">
-          de ciclo de trabalho
-        </text>
-        <path d={`M${X0} ${r.y}H${END}`} class="axis" />
-        <path d={wave(r.duty, r.y)} class="wave" />
-        <path d={`M${X0} ${r.y - r.duty * HIGH}H${END}`} class="avg" />
-        <text x={END + 8} y={r.y - r.duty * HIGH + 4} class="avg-label">
-          média {r.label}
-        </text>
-      </g>
-    ))
-  }
+  <text x={X0} y="16" class="head">
+    ligado (5 V no gate)
+  </text>
+  {rows.map((r) => (
+    <g>
+      <text x="20" y={r.y - 22} class="duty">
+        {r.label}
+      </text>
+      <text x="20" y={r.y - 4} class="sub">
+        de ciclo de trabalho
+      </text>
+      <path d={`M${X0} ${r.y}H${END}`} class="axis" />
+      <path d={wave(r.duty, r.y)} class="wave" />
+      <path d={`M${X0} ${r.y - r.duty * HIGH}H${END}`} class="avg" />
+      <text x={END + 8} y={r.y - r.duty * HIGH + 4} class="avg-label">
+        média {r.label}
+      </text>
+    </g>
+  ))}
   <path d={`M${X0} 248V256M${X0 + PERIOD} 248V256M${X0} 252H${X0 + PERIOD}`} class="dim" />
   <text x={X0 + PERIOD + 8} y="257" class="sub">
     um período (2 ms em 500 Hz)
