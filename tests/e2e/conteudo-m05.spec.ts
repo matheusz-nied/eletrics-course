@@ -68,6 +68,8 @@ test.describe('módulo 5: magnetismo e eletromagnetismo', () => {
 
   for (const slug of LESSONS) {
     test(`lesson ${slug} loads its simulations and widgets without errors`, async ({ page }) => {
+      // With software WebGL (CI) each 3D canvas blocks the page while its shaders compile.
+      test.setTimeout(90_000);
       const errors = watchErrors(page);
       await page.goto(`${MODULE}${slug}/`);
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
