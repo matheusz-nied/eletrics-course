@@ -1,0 +1,277 @@
+---
+titulo: Unidades e ordens de grandeza
+modulo: m01-eletricidade-do-zero
+ordem: 6
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Reconhecer as unidades das grandezas elétricas e escrever valores com elas
+  - Usar os prefixos p, n, µ, m, k, M e G para converter valores
+  - Ler e escrever números em notação científica, inclusive no visor da calculadora
+  - Ler os valores impressos em componentes, baterias e plaquetas de equipamentos
+prerequisitos: [m01-eletricidade-do-zero/01-atomos-eletrons-e-carga]
+tags: [unidades, prefixos, notação científica, SI, ordens de grandeza, códigos de componentes]
+seguranca: nenhum
+rascunho: true
+---
+
+import ConversorUnidades from '../../../lessons/m01/ConversorUnidades';
+import JogoGrandezas from '../../../lessons/m01/JogoGrandezas';
+import MarcacoesComponentes from '../../../lessons/m01/figuras/MarcacoesComponentes.astro';
+
+No balcão da loja de eletrônica, o vendedor pergunta: "É um resistor de 4K7 e um capacitor 104?". A bateria do nobreak do portão diz "12 V 7 Ah". A plaqueta do motor fala em "1/4 CV" e "3,8 A". O multímetro mostra "2.55" com um "mA" pequenininho no canto.
+
+Tudo isso é a mesma língua: números, unidades e prefixos. Na eletricidade, os valores vão de trilionésimos de farad, num capacitor minúsculo, a bilhões de watts, numa usina. Esta aula ensina a ler e a escrever esses valores sem tropeçar, e a perceber na hora quando uma conta deu um número absurdo.
+
+## Número sem unidade não diz nada
+
+"A corrente é 25." Vinte e cinco o quê? Se forem 25 mA, é a corrente de um LED. Se forem 25 A, é a de um chuveiro, mil vezes maior. Um valor elétrico só tem sentido com a sua unidade, e muitos erros de montagem e de compra nascem de uma unidade esquecida ou trocada.
+
+As unidades usadas no curso fazem parte do Sistema Internacional de Unidades, o SI, adotado no Brasil e em quase todo o mundo.
+
+## As unidades do curso
+
+| Grandeza | Letra na fórmula | Unidade | Símbolo | Um valor do dia a dia |
+|----------|------------------|---------|---------|-----------------------|
+| Carga | $Q$ | coulomb | C | 1 C passa por um LED de 20 mA em 50 s |
+| <Term id="corrente-eletrica">Corrente</Term> | $I$ | ampère | A | chuveiro de inverno: 25 A |
+| <Term id="tensao">Tensão</Term> | $V$ | volt | V | tomada: 127 V |
+| <Term id="resistencia-eletrica">Resistência</Term> | $R$ | ohm | Ω | resistência do chuveiro: 8,8 Ω |
+| Potência | $P$ | watt | W | lâmpada LED: 9 W |
+| Energia | $E$ | joule (ou kWh) | J | levantar 100 g a 1 m de altura: cerca de 1 J |
+| <Term id="frequencia">Frequência</Term> | $f$ | hertz | Hz | rede elétrica brasileira: 60 Hz |
+| Capacitância | $C$ | farad | F | capacitor do motor do portão: dezenas de µF |
+| Indutância | $L$ | henry | H | bobina de um filtro: alguns mH |
+| Tempo | $t$ | segundo | s | um banho: 600 s |
+
+Algumas regras de escrita evitam confusão:
+
+- **Espaço entre o número e a unidade:** 10 mA, e não 10mA.
+- **Símbolo não é abreviação:** não leva plural nem ponto. Escreva 5 V, e não 5 Vs.
+- **Maiúscula e minúscula fazem diferença.** Os símbolos de unidades com nome de pessoa são maiúsculos (V de Volta, A de Ampère, W de Watt); o nome por extenso é minúsculo (volt, ampère, watt).
+- **Vírgula decimal e ponto de milhar** no texto em português: 1,5 V e 1.000 W.
+
+Repare que a letra da fórmula e o símbolo da unidade às vezes coincidem: em $V = 12\,\text{V}$, o primeiro V é a grandeza (tensão) e o segundo é a unidade (volt).
+
+## Os prefixos
+
+Escrever 0,000000047 F ou 4.700.000 Ω é cansativo e fácil de errar. Os <Term id="prefixos-si">prefixos do SI</Term> resolvem isso: uma letra antes da unidade multiplica o valor. Na eletrônica, os prefixos usados andam de mil em mil:
+
+| Prefixo | Símbolo | Multiplica por | Exemplo |
+|---------|---------|----------------|---------|
+| giga | G | 1.000.000.000 | usina: 14 GW |
+| mega | M | 1.000.000 | resistor: 1 MΩ |
+| quilo | k | 1.000 | chuveiro: 5,5 kW |
+| (nenhum) | | 1 | pilha: 1,5 V |
+| mili | m | 0,001 | LED: 20 mA |
+| micro | µ | 0,000001 | capacitor: 100 µF |
+| nano | n | 0,000000001 | capacitor: 100 nF |
+| pico | p | 0,000000000001 | capacitor: 22 pF |
+
+Cada linha da tabela é **mil vezes** a linha de baixo. Por isso a conversão é sempre andar com a vírgula de três em três casas.
+
+### Convertendo de um prefixo para outro
+
+A regra prática:
+
+- Para um prefixo **menor** (de A para mA, de kΩ para Ω), o número fica **maior**: multiplique por 1.000 a cada degrau, ou ande com a vírgula três casas para a direita.
+- Para um prefixo **maior** (de mA para A, de Ω para kΩ), o número fica **menor**: divida por 1.000 a cada degrau, ou ande com a vírgula três casas para a esquerda.
+
+Alguns exemplos:
+
+- $0{,}25\,\text{A} = 250\,\text{mA}$ (um degrau para baixo: vírgula três casas para a direita).
+- $4.700\,\Omega = 4{,}7\,\text{k}\Omega$ (um degrau para cima: vírgula três casas para a esquerda).
+- $100\,\text{nF} = 0{,}1\,\mu\text{F} = 100.000\,\text{pF}$ (o mesmo capacitor, escrito de três jeitos).
+
+Faça a conta pensando no tamanho: um miliampère é pequeno, então cabem muitos deles num ampère. Se a conversão deu um número menor, você andou para o lado errado.
+
+## Notação científica
+
+Outra forma de escrever números muito grandes ou muito pequenos é a <Term id="notacao-cientifica">notação científica</Term>: um número entre 1 e 10, multiplicado por uma potência de dez.
+
+$$
+4.700 = 4{,}7 \times 10^3 \qquad 0{,}00255 = 2{,}55 \times 10^{-3}
+$$
+
+O expoente conta quantas casas a vírgula andou. Positivo: o número é grande. Negativo: o número é pequeno. Alguns números famosos da eletricidade só são práticos assim:
+
+- a carga de um elétron: $1{,}6 \times 10^{-19}\,\text{C}$;
+- o número de elétrons em 1 coulomb: $6{,}24 \times 10^{18}$.
+
+A notação científica facilita as contas: para multiplicar, somam-se os expoentes; para dividir, subtraem-se. Uma corrente de 12 V num resistor de 4,7 kΩ:
+
+$$
+I = \frac{12}{4{,}7 \times 10^3} = \frac{12}{4{,}7} \times 10^{-3} \approx 2{,}55 \times 10^{-3}\,\text{A}
+$$
+
+### Notação de engenharia
+
+Técnicos preferem uma variação: o expoente é sempre múltiplo de 3, porque cada múltiplo de 3 tem um prefixo. $10^3$ é k, $10^{-3}$ é m, $10^{-6}$ é µ. Assim, $2{,}55 \times 10^{-3}\,\text{A}$ se lê direto como 2,55 mA, e $47 \times 10^{3}\,\Omega$ como 47 kΩ.
+
+### No visor da calculadora
+
+As calculadoras mostram a potência de dez com a letra **E** (de expoente): `2.55E-3` quer dizer $2{,}55 \times 10^{-3}$. Para digitar um número assim, use a tecla **EXP** ou **EE**: 4,7 kΩ entra como `4.7 EXP 3`. Na calculadora do celular, essas teclas aparecem no modo científico, girando o aparelho.
+
+Dois cuidados. Quase toda calculadora usa o **ponto** como vírgula decimal, como os multímetros. E o E de `4.7E3` não tem nada a ver com a tecla $e^x$: é só um jeito curto de escrever "vezes dez elevado a".
+
+## Explore: o conversor
+
+<ConversorUnidades client:visible />
+
+1. Escreva **0,047** com prefixo nenhum e unidade A. Qual é o jeito mais fácil de ler esse valor?
+2. Escreva **100** em **nF**. Quanto dá em µF? E em pF?
+3. Passe para "Ler a marcação de um componente" e leia o resistor **4K7** e o capacitor **104**.
+4. Tente o resistor **2R2** e o capacitor **22**. O que a letra R faz no código?
+
+## Ordens de grandeza
+
+Dizer que dois valores diferem por uma **ordem de grandeza** é dizer que um é cerca de dez vezes o outro. Duas ordens são cem vezes; três, mil vezes. É um jeito de comparar tamanhos sem se prender aos detalhes.
+
+A corrente de um LED (cerca de 10 mA) e a de um chuveiro de inverno (25 A) diferem por um fator de 2.500, pouco mais de três ordens de grandeza. Entre a corrente de um relógio de pulso (cerca de 1 µA) e a de um raio (cerca de 30 kA) há mais de dez ordens de grandeza.
+
+Ter essas referências na cabeça serve para conferir contas. Se o cálculo da corrente de um chuveiro deu 25.000 A, ou 0,025 A, algum prefixo se perdeu no caminho: a resposta certa tem que estar perto de dezenas de ampères.
+
+## Explore: o jogo das grandezas
+
+Ponha os valores de cada rodada em ordem, do menor para o maior, e confira. Depois de cada rodada o jogo mostra os valores típicos e quantas ordens de grandeza separam o menor do maior.
+
+<JogoGrandezas client:visible />
+
+## Lendo os valores nas peças
+
+Componentes pequenos não têm espaço para escrever "4,7 kΩ". Por isso usam códigos, e quem trabalha com placas lê esses códigos o tempo todo.
+
+<MarcacoesComponentes />
+
+- **Código com letra no lugar da vírgula.** Em resistores, a letra R, K ou M ocupa o lugar da vírgula e diz o prefixo: **4K7** é 4,7 kΩ, **2R2** é 2,2 Ω, **1M0** é 1 MΩ. A letra no meio evita um problema real: uma vírgula impressa pode se apagar ou parecer sujeira, e "4,7" viraria "47".
+- **Código de três algarismos.** Os dois primeiros são o número e o terceiro diz quantos zeros acrescentar. Num <Term id="resistor">resistor</Term> SMD, **472** é $47 \times 10^2 = 4.700\,\Omega$. Num <Term id="capacitor">capacitor</Term> cerâmico, o resultado sai em picofarads: **104** é $10 \times 10^4 = 100.000\,\text{pF}$, ou 100 nF. Uma letra depois do código, como em 104K, costuma indicar a tolerância (J, K e M para 5%, 10% e 20%).
+- **Escrito por extenso.** Capacitores eletrolíticos são grandes o bastante para trazer o valor completo, como "1000µF 25V", e uma faixa marca o terminal negativo. A tensão impressa é a máxima que ele aguenta.
+- **Baterias.** "12 V 7 Ah" diz a tensão e a carga: 7 Ah (ampère-hora) é a carga de 7 A durante uma hora, 25.200 coulombs. A energia guardada é tensão vezes carga, perto de $12 \times 7 = 84\,\text{Wh}$. O "mAh" das baterias de celular é a mesma ideia, mil vezes menor.
+- **Plaqueta de motor.** Traz tensão, frequência, corrente, rotação (rpm) e a potência mecânica no eixo, muitas vezes em CV ou HP. Um CV vale cerca de 735,5 W, então um motor de 1/4 CV entrega cerca de 184 W no eixo. A potência elétrica que ele puxa da rede é maior, porque parte da energia vira calor no próprio motor.
+
+A leitura de cores dos resistores e os tipos de capacitores aparecem com calma nas aulas <LinkAula id="m04-passivos/01-resistores" /> e <LinkAula id="m04-passivos/03-capacitores" />. A identificação das peças numa placa de verdade, como a central do portão, fica para a aula <LinkAula id="m14-placas/03-identificando-componentes" />.
+
+## Exemplo resolvido: o mesmo resistor em vários tamanhos
+
+Uma fonte de 12 V alimenta um resistor marcado **4K7**. Qual é a corrente? E se o resistor fosse 470R ou 4M7?
+
+**Passo 1: traduza o código.** 4K7 = 4,7 kΩ = 4.700 Ω.
+
+**Passo 2: converta para a unidade base antes da conta.** A Lei de Ohm funciona com volts, ampères e ohms:
+
+$$
+I = \frac{V}{R} = \frac{12\,\text{V}}{4.700\,\Omega} \approx 0{,}00255\,\text{A}
+$$
+
+**Passo 3: escolha o prefixo para ler.** $0{,}00255\,\text{A} = 2{,}55 \times 10^{-3}\,\text{A} = 2{,}55\,\text{mA}$. Na calculadora: `12 ÷ 4.7 EXP 3 =` mostra `2.553191489E-3` ou `0.002553191`, conforme o modelo.
+
+**Passo 4: os outros resistores.** 470R é dez vezes menor que 4K7, então a corrente é dez vezes maior: 25,5 mA. 4M7 é mil vezes maior, então a corrente é mil vezes menor: 2,55 µA. Os algarismos "255" continuam; só a vírgula e o prefixo mudam.
+
+Confira no simulador. O multímetro escolhe o prefixo sozinho, como os multímetros automáticos de verdade:
+
+<Simulation circuit="m01/prefixos" />
+
+1. Leia a corrente com o resistor 4K7: 2,55 mA.
+2. Troque para 470R e para 47K. Quantas vezes a corrente mudou a cada troca?
+3. Troque para 4M7. Escreva a corrente em notação científica.
+4. Antes de trocar para 470K, preveja a leitura. Acertou?
+
+<RealCase title="Comprando a peça certa para a central do portão">
+A central do portão parou e, abrindo a caixa, você encontra um resistor queimado perto da entrada de energia e um capacitor estufado. O esquema não está à mão, mas as peças trazem códigos.
+
+No corpo do resistor, ainda legível, está "1K5". No capacitor, "2200µF 16V". Antes de sair para a loja:
+
+- **1K5** é 1,5 kΩ, ou 1.500 Ω. Peça "um resistor de 1K5" e confira a potência dele (o tamanho do corpo dá uma pista), assunto da aula <LinkAula id="m04-passivos/01-resistores" />.
+- **2200µF 16V** pede um capacitor de 2.200 µF que aguente **pelo menos** 16 V. Um de 25 V serve; um de 10 V, não.
+- Se o capacitor fosse cerâmico e trouxesse **473**, você pediria 47 nF: $47 \times 10^3\,\text{pF} = 47.000\,\text{pF} = 47\,\text{nF}$.
+
+Um componente queimado quase sempre é sintoma de outro defeito. Trocar a peça sem procurar a causa costuma queimar a peça nova. O caminho do diagnóstico está na aula <LinkAula id="m15-diagnostico/01-metodo-de-diagnostico" />.
+</RealCase>
+
+## Erros comuns
+
+- **Trocar m por M.** Mili (m) é um milésimo; mega (M) é um milhão. Entre 1 mΩ e 1 MΩ há um bilhão de vezes.
+- **Fazer a conta sem converter.** $12 / 4{,}7 = 2{,}55$, mas isso não são 2,55 A. Com a resistência em kΩ, a corrente sai em mA. Na dúvida, converta tudo para a unidade base (V, A, Ω) antes de calcular.
+- **Confundir kW com kWh, ou Ah com Wh.** kW é potência e kWh é energia. Ah é carga e Wh é energia. Para comparar baterias de tensões diferentes, compare os Wh.
+- **Ler o ponto do visor como milhar.** No multímetro e na calculadora, "1.500" pode ser um e meio, não mil e quinhentos. Olhe o prefixo no canto do visor.
+- **Achar que µ e u são coisas diferentes.** "100uF" é 100 µF; a letra u é usada quando não há o símbolo µ.
+- **Achar que o BTU do ar-condicionado é o consumo.** Os "9.000 BTU" de um ar-condicionado são a capacidade de refrigeração (9.000 BTU por hora, cerca de 2,6 kW de calor retirado), não o consumo elétrico, que é bem menor e vem na etiqueta do aparelho.
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Quanto é 0,25 A em miliampères?',
+      answer: 250,
+      tolerance: 0.01,
+      unit: 'mA',
+      explanation: 'Um degrau para baixo (de A para mA): multiplique por 1.000. 0,25 × 1.000 = 250 mA.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Um resistor traz o código 4K7. Qual é a resistência dele?',
+      options: [
+        {
+          text: '4,7 kΩ (4.700 Ω)',
+          correct: true,
+          feedback: 'Isso. A letra K faz o papel da vírgula e do prefixo quilo.',
+        },
+        {
+          text: '47 kΩ',
+          feedback: 'Seria 47K. Em 4K7 a letra está no lugar da vírgula: 4,7 kΩ.',
+        },
+        {
+          text: '4.007 Ω',
+          feedback: 'A letra não separa milhares: ela é a vírgula. 4K7 é 4,7 kΩ = 4.700 Ω.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Um capacitor cerâmico traz o código 104. Qual é a capacitância em nanofarads (nF)?',
+      answer: 100,
+      tolerance: 0.01,
+      unit: 'nF',
+      explanation: '104 = 10 × 10⁴ pF = 100.000 pF. Mil picofarads são 1 nF, então são 100 nF.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Uma bateria de 9 V alimenta um resistor de 4,7 kΩ. Qual é a corrente, em mA?',
+      answer: 1.91,
+      tolerance: 0.02,
+      unit: 'mA',
+      explanation: 'I = 9 V ÷ 4.700 Ω ≈ 0,00191 A = 1,91 mA.',
+    },
+    {
+      type: 'vf',
+      prompt: '1 MΩ é o mesmo que 1.000 kΩ.',
+      answer: true,
+      explanation: 'Mega é mil vezes quilo. 1 MΩ = 1.000.000 Ω = 1.000 kΩ.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Ordene do menor para o maior valor.',
+      items: ['220 nF', '0,47 µF', '1.000 µF', '0,0047 F'],
+      explanation:
+        'Em µF: 220 nF = 0,22 µF; 0,47 µF; 1.000 µF; 0,0047 F = 4.700 µF. Converter tudo para o mesmo prefixo resolve.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada prefixo ao fator que ele multiplica.',
+      pairs: [
+        ['k (quilo)', '1.000'],
+        ['M (mega)', '1.000.000'],
+        ['m (mili)', '0,001'],
+        ['µ (micro)', '0,000001'],
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Todo valor elétrico precisa da sua **unidade**: C, A, V, Ω, W, J, Hz, F e H são as do curso.
+- Os **prefixos** andam de mil em mil: G, M, k, (nenhum), m, µ, n, p. Converter é andar com a vírgula de três em três casas.
+- A **notação científica** escreve um número entre 1 e 10 vezes uma potência de dez. A **de engenharia** usa expoentes múltiplos de 3, que casam com os prefixos. Na calculadora, `E` quer dizer "vezes dez elevado a".
+- **Ordens de grandeza** comparam tamanhos de dez em dez vezes e ajudam a desconfiar de uma conta com o prefixo errado.
+- Os componentes usam **códigos**: 4K7 = 4,7 kΩ, 472 = 4.700 Ω (SMD), 104 = 100 nF (cerâmico). Plaquetas e baterias trazem tensão, corrente, potência e carga com as suas unidades.

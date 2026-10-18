@@ -1,0 +1,37 @@
+/* CustoEnergia.tsx: lesson 1.5, monthly energy and cost of an appliance. */
+
+.custo-en__fields {
+  display: grid;
+  gap: 0.9rem;
+}
+
+@media (min-width: 40rem) {
+  .custo-en__fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.custo-en__pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+}
+
+.custo-en__pair select {
+  width: auto;
+}
+
+.custo-en input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.custo-en__values {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 30rem) {
+  .custo-en__values {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
