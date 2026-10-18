@@ -835,7 +835,8 @@ function useJawGeometry(a0: number, a1: number) {
       arcSweep(
         roundedRectShape(LAM.t, LAM.radial, 0.2),
         { cx: JAW.cx, cy: JAW.cy, radius: R_MID, a0: a0 + 0.012, a1: a1 - 0.012 },
-        40,
+        36,
+        1,
       ),
     [a0, a1],
   );
@@ -1043,7 +1044,10 @@ function InsulatedWire({ points, color }: { points: Vec3[]; color: keyof typeof 
       : new CatmullRomCurve3(v, false, 'centripetal', 0.5);
   }, [points]);
   const insulation = useDisposable(() => tube(curve, WIRE_R, { radial: 14 }), [points]);
-  const core = useDisposable(() => tube(curve, WIRE_R * 0.55, { radial: 10 }), [points]);
+  const core = useDisposable(
+    () => tube(curve, WIRE_R * 0.55, { radial: 8, segments: Math.ceil(curve.getLength() / 3) }),
+    [points],
+  );
   const ends = useMemo(
     () =>
       [0, 1].map((t) => {

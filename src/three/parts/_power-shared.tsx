@@ -28,6 +28,8 @@ import { useView } from '../core/view';
 import { Material, type MaterialProps } from '../materials/Material';
 import { PRESETS, type MaterialPreset, type PresetName } from '../materials/presets';
 import { useCanvasTexture } from '../materials/textures';
+import { FieldLines } from '../fx/FieldLines';
+import type { FieldSource } from '../fx/field';
 import { roundedPath, tube } from '../shapes/geometry';
 import { useDisposable } from '../shapes/Wire';
 import type { Vec3 } from '../types';
@@ -773,4 +775,80 @@ export function useFollow(target: number, apply: (value: number) => void, lambda
     applyRef.current(v);
     if (v !== target) invalidate();
   });
+}
+
+/** Turns the faces of a geometry over (winding and normals), in place. */
+export function flipFaces<T extends BufferGeometry>(geometry: T): T {
+  const index = geometry.index;
+  if (index) {
+    for (let i = 0; i + 2 < index.count; i += 3) {
+      const b = index.getX(i + 1);
+      index.setX(i + 1, index.getX(i + 2));
+      index.setX(i + 2, b);
+    }
+    index.needsUpdate = true;
+  } else {
+    for (const attr of Object.values(geometry.attributes)) {
+      const size = attr.itemSize;
+      const array = attr.array as Float32Array;
+      for (let i = 0; i + 2 < attr.count; i += 3)
+        for (let k = 0; k < size; k++) {
+          const t = array[(i + 1) * size + k]!;
+          array[(i + 1) * size + k] = array[(i + 2) * size + k]!;
+          array[(i + 2) * size + k] = t;
+        }
+      attr.needsUpdate = true;
+    }
+  }
+  const normal = geometry.attributes.normal;
+  if (normal) {
+    for (let i = 0; i < normal.count; i++)
+      normal.setXYZ(i, -normal.getX(i), -normal.getY(i), -normal.getZ(i));
+    normal.needsUpdate = true;
+  }
+  return geometry;
+}
+
+/**
+ * Field lines of a part (in one plane, gliding unless motion is reduced),
+ * hidden in the exploded view and in the cutaway, where they would cross
+ * the pieces.
+ */
+export function PartField({
+  sources,
+  plane,
+  center,
+  extent,
+  count,
+  color = '#2a7fd6',
+}: {
+  sources: FieldSource[];
+  plane: Vec3;
+  center: Vec3;
+  extent: number;
+  count: number;
+  color?: string;
+}) {
+  const { explode, cutaway } = useView();
+  const reduced = useReducedMotion();
+  const ref = useRef<Group>(null);
+  useFrame(() => {
+    if (ref.current) ref.current.visible = (explode.current ?? 0) < 0.02;
+  });
+  if (cutaway) return null;
+  return (
+    <group ref={ref}>
+      <FieldLines
+        sources={sources}
+        count={count}
+        layout="plano"
+        planeNormal={plane}
+        center={center}
+        extent={extent}
+        color={color}
+        opacity={0.8}
+        flow={reduced ? 0 : extent * 0.12}
+      />
+    </group>
+  );
 }

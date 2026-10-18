@@ -13,10 +13,9 @@
  * heatsink, the control board, and the IEC inlet with the 127/220 V
  * selector on the rear panel.
  */
-import { useFrame } from '@react-three/fiber';
-import { useMemo, useRef, type ReactNode } from 'react';
+import { useMemo, useRef } from 'react';
 import { DoubleSide, ExtrudeGeometry, Shape, type Group } from 'three';
-import { Anchor, Explode, useView } from '../core/view';
+import { Anchor, Explode } from '../core/view';
 import { Material } from '../materials/Material';
 import { FONT_SANS, getNoiseTexture, useCanvasTexture } from '../materials/textures';
 import { axialLathe } from '../shapes/geometry';
@@ -24,6 +23,7 @@ import { useDisposable, Wire } from '../shapes/Wire';
 import type { PartMeta, Vec3 } from '../types';
 import { drawLedDisplay } from './_display';
 import {
+  AssembledOnly,
   BindingPost,
   Decal,
   decalGeometry,
@@ -450,16 +450,6 @@ function drawVents(ctx: CanvasRenderingContext2D, w: number, h: number) {
       ctx.fill();
     }
   }
-}
-
-/** Shows its children only while the view is assembled (wires that would stretch). */
-function AssembledOnly({ children }: { children: ReactNode }) {
-  const { explode } = useView();
-  const ref = useRef<Group>(null);
-  useFrame(() => {
-    if (ref.current) ref.current.visible = (explode.current ?? 0) < 0.03;
-  });
-  return <group ref={ref}>{children}</group>;
 }
 
 function Rocker({ on }: { on: boolean }) {
@@ -1220,7 +1210,7 @@ export default function BenchPowerSupply(props: BenchPowerSupplyProps) {
         <mesh geometry={cover}>
           <Material
             preset="absGray"
-            color="#959891"
+            color="#7b7f7a"
             roughness={0.62}
             roughnessMap={noise}
             clip

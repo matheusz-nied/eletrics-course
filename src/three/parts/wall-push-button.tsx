@@ -164,7 +164,12 @@ export const meta: PartMeta = {
         anchor: 'suporte',
         exploded: true,
       },
-      { at: [0, 0, 0], text: 'Bornes de parafuso atrás do módulo', anchor: 'bornes' },
+      {
+        at: [0, 0, 0],
+        text: 'Bornes de parafuso atrás do módulo',
+        anchor: 'bornes',
+        exploded: true,
+      },
       {
         at: [0, 0, 0],
         text: 'Bloco de contato: a ponte encosta nos dois contatos',

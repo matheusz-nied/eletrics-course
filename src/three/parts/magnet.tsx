@@ -11,30 +11,26 @@
  * lined up (schematic) and, on the neodymium disc, the plating layers.
  * Optional field lines computed by `fx/field.ts`.
  */
-import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
 import {
   type BufferGeometry,
-  DoubleSide,
   ExtrudeGeometry,
   LatheGeometry,
   PlaneGeometry,
   Shape,
   ShapeGeometry,
   Vector2,
-  type Group,
   type Texture,
 } from 'three';
-import { useReducedMotion } from '../core/motion';
+import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { Anchor, Explode, useView } from '../core/view';
-import { FieldLines } from '../fx/FieldLines';
-import type { FieldSource } from '../fx/field';
 import { Material } from '../materials/Material';
 import { FONT_SANS, getNoiseTexture, useCanvasTexture } from '../materials/textures';
 import type { PartAnnotation, PartMeta, PartProps, Vec3 } from '../types';
 import {
   dropTriangles,
   ExplodeReveal,
+  flipFaces,
+  PartField,
   planarUv,
   seeded,
   sharpenProfile,
@@ -74,7 +70,6 @@ const RED = '#c4262b';
 const BLUE = '#1d4e9e';
 const HORSESHOE_RED = '#c42a24';
 const FERRITE = '#3e3f42';
-const FIELD = '#2a7fd6';
 
 function variantOf(p: PartProps): Variant {
   const v = String(p.variant);
@@ -374,44 +369,6 @@ function drawDomains(
   }
 }
 
-/** Field lines, hidden while the magnet is broken apart or cut open. */
-function Field({
-  sources,
-  plane,
-  center,
-  extent,
-  count,
-}: {
-  sources: FieldSource[];
-  plane: Vec3;
-  center: Vec3;
-  extent: number;
-  count: number;
-}) {
-  const { explode, cutaway } = useView();
-  const reduced = useReducedMotion();
-  const ref = useRef<Group>(null);
-  useFrame(() => {
-    if (ref.current) ref.current.visible = (explode.current ?? 0) < 0.02;
-  });
-  if (cutaway) return null;
-  return (
-    <group ref={ref}>
-      <FieldLines
-        sources={sources}
-        count={count}
-        layout="plano"
-        planeNormal={plane}
-        center={center}
-        extent={extent}
-        color={FIELD}
-        opacity={0.8}
-        flow={reduced ? 0 : extent * 0.12}
-      />
-    </group>
-  );
-}
-
 // ---------------------------------------------------------------------------
 // Bar magnet: lies along X, north at +X; the pieces break at x = 0.
 
@@ -492,6 +449,8 @@ function Bar({ size, showPoles, fieldLines }: VariantProps) {
               clearcoat={showPoles ? 0.5 : 0}
               clearcoatRoughness={0.35}
               metalness={showPoles ? 0 : 0.15}
+              bumpMap={showPoles ? null : noise}
+              bumpScale={0.6}
               clip
               cutColor="#2f3033"
             />
@@ -532,7 +491,7 @@ function Bar({ size, showPoles, fieldLines }: VariantProps) {
             rotation={[-Math.PI / 2, 0, 0]}
           />
         </ExplodeReveal>
-        <Anchor name={north ? 'new-s' : 'new-n'} position={[(north ? 1 : -1) * xNew, h, 0]} />
+        <Anchor name={north ? 'new-s' : 'new-n'} position={[0, h * 0.6, w / 2]} />
         <Anchor
           name={north ? 'right' : 'left'}
           position={[(north ? 1 : -1) * L * 0.38, h, w / 2]}
@@ -550,7 +509,7 @@ function Bar({ size, showPoles, fieldLines }: VariantProps) {
         {half(false)}
       </Explode>
       {fieldLines && (
-        <Field
+        <PartField
           sources={[{ kind: 'bar', length: L * 0.84, axis: [1, 0, 0], position: [0, h / 2, 0] }]}
           plane={[0, 1, 0]}
           center={[0, h / 2, 0]}
@@ -568,7 +527,7 @@ function SectionFace({ geometry, map }: { geometry: BufferGeometry; map: Texture
   if (!cutaway) return null;
   return (
     <mesh geometry={geometry}>
-      <Material color="#ffffff" map={map} roughness={0.75} metalness={0.1} side={DoubleSide} />
+      <Material color="#ffffff" map={map} roughness={0.75} metalness={0.1} />
     </mesh>
   );
 }
@@ -617,9 +576,13 @@ function Horseshoe({ size, showPoles, fieldLines }: VariantProps) {
     const painted = flat(
       new ExtrudeGeometry(halfU(zPaint), { depth: t, bevelEnabled: false, curveSegments: 4 }),
     );
-    const body = dropTriangles(
-      painted,
-      (a, b, c) => Math.max(Math.abs(a.x), Math.abs(b.x), Math.abs(c.x)) < 1e-4,
+    // Smooth the curved walls, keep the square edges.
+    const body = toCreasedNormals(
+      dropTriangles(
+        painted,
+        (a, b, c) => Math.max(Math.abs(a.x), Math.abs(b.x), Math.abs(c.x)) < 1e-4,
+      ),
+      Math.PI / 5,
     );
     const tipShape = new Shape();
     tipShape.moveTo(ri, zPaint);
@@ -635,14 +598,16 @@ function Horseshoe({ size, showPoles, fieldLines }: VariantProps) {
     const fracture = fractureFace(leg - 0.05, t - 0.05, Math.min(0.9, t * 0.08), 9);
     fracture.translate(0, t / 2, zc - rm);
     // Cut face at mid-thickness, mapped onto the domain drawing (x 0..ro, z).
-    const section = planarUv(new ShapeGeometry(halfU(zTip), 4), [0, ro], [zc - ro, zTip]);
-    section.rotateX(Math.PI / 2);
+    // (Back faces paint flat in the cutaway, so it must face up: flip after laying it flat.)
+    const section = flipFaces(
+      planarUv(new ShapeGeometry(halfU(zTip), 4), [0, ro], [zc - ro, zTip]).rotateX(Math.PI / 2),
+    );
     section.translate(0, t / 2 - 0.01, 0);
     return { body, tip, fracture, section };
   }, [length, width, leg, t]);
 
   const H = 1024;
-  const W = Math.round((H * ro) / (zTip - (zc - ro)));
+  const W = Math.ceil((H * ro) / (zTip - (zc - ro)) / 4) * 4;
   const pxPerMm = H / (zTip - (zc - ro));
   const inside = (x: number, z: number) => {
     if (z >= zc) return x >= ri && x <= ro;
@@ -696,8 +661,8 @@ function Horseshoe({ size, showPoles, fieldLines }: VariantProps) {
           <mesh geometry={geo.tip}>
             <Material
               preset="steel"
-              color="#c3c6ca"
-              roughness={0.3}
+              color="#e4e6e9"
+              roughness={0.34}
               roughnessMap={noise}
               clip
               cutColor="#5d6064"
@@ -746,7 +711,7 @@ function Horseshoe({ size, showPoles, fieldLines }: VariantProps) {
         {half(false)}
       </Explode>
       {fieldLines && (
-        <Field
+        <PartField
           sources={[
             {
               kind: 'bar',
@@ -854,14 +819,19 @@ function Disc({ size, showPoles, fieldLines }: VariantProps) {
       ctx.rect(inner * sx, inner * sy, w - 2 * inner * sx, h - 2 * inner * sy);
       ctx.clip();
       if (domains) {
+        const spacing = Math.max(t / 3.2, 0.9);
         drawDomains(
           ctx,
           sx,
           [-R, R],
           [0, t],
-          (x, y) => Math.abs(x) < R - inner * 1.5 && y > inner * 1.5 && y < t - inner * 1.5,
+          (x, y) =>
+            Math.abs(x) < R - inner * 1.5 &&
+            Math.abs(x) > spacing * 0.35 &&
+            y > inner * 1.5 &&
+            y < t - inner * 1.5,
           () => [0, 1],
-          { background: '#56585c', spacing: Math.max(t / 3.2, 0.9) },
+          { background: '#56585c', spacing },
         );
       } else {
         // Fracture: grey crystalline grain.
@@ -891,7 +861,7 @@ function Disc({ size, showPoles, fieldLines }: VariantProps) {
     <>
       <group scale={[right ? 1 : -1, 1, 1]}>
         <mesh geometry={geo.body}>
-          <Material preset="nickel" color="#d6d4cf" roughness={0.16} clip cutColor="#4f5155" />
+          <Material preset="nickel" color="#dedcd7" roughness={0.3} clip cutColor="#4f5155" />
         </mesh>
         <mesh geometry={geo.fracture}>
           <Material
@@ -931,7 +901,7 @@ function Disc({ size, showPoles, fieldLines }: VariantProps) {
         {half(false)}
       </Explode>
       {fieldLines && (
-        <Field
+        <PartField
           sources={[
             {
               kind: 'solenoid',

@@ -19,6 +19,7 @@ import {
 } from 'three';
 import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { damp } from '../core/motion';
+import { useView } from '../core/view';
 import { Material, type MaterialProps } from '../materials/Material';
 import { getNoiseTexture } from '../materials/textures';
 import { axialLathe } from '../shapes/geometry';
@@ -167,11 +168,12 @@ export function arcSweep(
   section: Shape,
   arc: { cx: number; cy: number; radius: number; a0: number; a1: number; z?: number },
   steps = 40,
+  curveSegments = 6,
 ): ExtrudeGeometry {
   const geometry = new ExtrudeGeometry(section, {
     steps,
     bevelEnabled: false,
-    curveSegments: 6,
+    curveSegments,
     extrudePath: new ArcCurve3(arc.cx, arc.cy, arc.radius, arc.a0, arc.a1, arc.z ?? 0),
   });
   return smooth(geometry);
@@ -250,6 +252,19 @@ export function useSpring(target: number, apply: (value: number) => void, lambda
     applyRef.current(next);
     if (next !== target) invalidate();
   });
+}
+
+/**
+ * Shows its children only while the view is assembled: wires and cables
+ * that join pieces which move apart in the exploded view.
+ */
+export function AssembledOnly({ children }: { children: ReactNode }) {
+  const { explode } = useView();
+  const ref = useRef<Group>(null);
+  useFrame(() => {
+    if (ref.current) ref.current.visible = (explode.current ?? 0) < 0.03;
+  });
+  return <group ref={ref}>{children}</group>;
 }
 
 /** A group rotated about Z by `-angle` (clockwise seen from the front), animated. */
