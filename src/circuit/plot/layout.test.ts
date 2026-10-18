@@ -66,4 +66,49 @@ describe('layoutPlot', () => {
       '100 kHz',
     ]);
   });
+
+  it('offers sparser rows of x labels for narrow charts', () => {
+    const points = Array.from({ length: 11 }, (_, i): [number, number] => [i * 10, 1000 - i]);
+    const layout = layoutPlot([{ label: 'R', unit: 'Ω', points }], { xUnit: '°C' });
+    const rows = layout.x.rows.map((r) => r.ticks.map((t) => nb(t.label)));
+    expect(rows[0]).toEqual(['0 °C', '20 °C', '40 °C', '60 °C', '80 °C', '100 °C']);
+    expect(rows[1]).toEqual(['0 °C', '40 °C', '80 °C']);
+    expect(rows.at(-1)).toEqual(['0 °C', '100 °C']);
+    expect(layout.x.rows[0]!.ticks.map((t) => t.align)).toEqual([
+      'start',
+      'middle',
+      'middle',
+      'middle',
+      'middle',
+      'end',
+    ]);
+    // The phone of lesson 4.2 (about 270 px of plot) needs the second row.
+    const fits = layout.x.rows.map((r) => r.fit);
+    expect(fits[0]).toBeGreaterThan(270);
+    expect(fits[1]).toBeLessThan(270);
+    expect(fits.at(-1)).toBe(0);
+    expect([...fits].sort((a, b) => b - a)).toEqual(fits);
+  });
+
+  it('thins decades on a log axis', () => {
+    const layout = layoutPlot(
+      [
+        {
+          label: 'Ganho',
+          unit: 'dB',
+          points: [
+            [1, 0],
+            [1e6, -60],
+          ],
+        },
+      ],
+      { xUnit: 'Hz', log: true },
+    );
+    expect(layout.x.rows[1]!.ticks.map((t) => nb(t.label))).toEqual([
+      '1 Hz',
+      '100 Hz',
+      '10 kHz',
+      '1 MHz',
+    ]);
+  });
 });

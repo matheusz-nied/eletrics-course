@@ -73,6 +73,43 @@ test.describe('circuit gallery', () => {
   });
 });
 
+test.describe('static charts', () => {
+  /** The x labels shown on screen, per chart. */
+  const xLabels = (page: Page) =>
+    page.locator('.sim-plot__x').evaluateAll((axes) =>
+      axes.map((axis) =>
+        [...axis.querySelectorAll('.sim-plot__ticks')]
+          .filter((row) => row.getBoundingClientRect().height > 0)
+          .flatMap((row) => [...row.querySelectorAll('span')])
+          .map((span) => {
+            const r = span.getBoundingClientRect();
+            return { text: span.textContent ?? '', left: r.left, right: r.right };
+          }),
+      ),
+    );
+
+  test('x labels never overlap and thin out on narrow screens', async ({ page, isMobile }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${GALLERY}graficos/`);
+    const charts = await xLabels(page);
+    expect(charts).toHaveLength(2);
+    for (const labels of charts) {
+      expect(labels.length).toBeGreaterThanOrEqual(3);
+      for (let i = 1; i < labels.length; i++) {
+        expect(labels[i]!.left).toBeGreaterThan(labels[i - 1]!.right);
+      }
+    }
+    // 0 a 100 °C: every 20 °C on a wide screen, every 40 °C on a phone.
+    const ntc = charts[0]!.map((l) => l.text.replace(/\s/g, ' ')).join(' | ');
+    expect(ntc).toBe(
+      isMobile ? '0 °C | 40 °C | 80 °C' : '0 °C | 20 °C | 40 °C | 60 °C | 80 °C | 100 °C',
+    );
+    await expectNoHorizontalOverflow(page);
+    await expectAccessible(page);
+    errors.expectClean();
+  });
+});
+
 test.describe('simulation in a lesson', () => {
   test('the example lesson runs its circuit and shows the static chart', async ({ page }) => {
     const errors = watchErrors(page);
@@ -232,6 +269,20 @@ test.describe('instruments', () => {
     await sim.getByRole('tab', { name: 'Multímetro' }).click();
     // 5 V peak: 3,54 V RMS.
     await expect.poll(() => meter(page, 'VE', 'V')).toBeCloseTo(3.54, 1);
+    errors.expectClean();
+  });
+
+  test('the chart tab works in a browser whose language Intl rejects', async ({ page }) => {
+    // Chromium started without a locale reports "en-US@posix".
+    await page.addInitScript(() =>
+      Object.defineProperty(navigator, 'language', { value: 'en-US@posix', configurable: true }),
+    );
+    const errors = watchErrors(page);
+    const sim = await openSimulation(page, demo('rc-senoide'));
+    await sim.getByRole('button', { name: 'Iniciar simulação', exact: true }).click();
+    await sim.getByRole('tab', { name: 'Gráfico' }).click();
+    await expect(sim.getByRole('tabpanel').locator('canvas').first()).toBeVisible();
+    expect(await page.evaluate(() => navigator.language)).toBe('en-US@posix');
     errors.expectClean();
   });
 
