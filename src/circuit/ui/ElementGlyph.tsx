@@ -176,66 +176,79 @@ export const ElementGlyph = memo(function ElementGlyph({
   const interactive = !!control;
   const label = view.label;
 
+  // The label is drawn outside the focusable group: its text is aria-hidden,
+  // but axe (label-content-name-mismatch) still compares it with the control's
+  // aria-label, and "B13 V" can never match "Pilhas em série: 3 V".
   return (
-    <g
-      className={`sch-el${interactive ? ' sch-el--control' : ''}${focused ? ' is-focused' : ''}${control?.kind === 'slider' ? ' sch-el--slider' : ''}`}
-      data-element={id}
-      data-type={view.el.type}
-      tabIndex={interactive ? 0 : -1}
-      {...a11y}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-      onPointerEnter={() => !interactive && sim.setFocus(id)}
-      onPointerLeave={() => !interactive && focused && sim.setFocus(null)}
-      onFocus={() => interactive && sim.setFocus(id)}
-      onClick={onClick}
-      onKeyDown={onKeyDown}
-      onKeyUp={onKeyUp}
-      onBlur={onBlur}
-    >
-      <rect
-        className="sch-hit"
-        x={bx - pad}
-        y={by - pad}
-        width={Math.max(bw + 2 * pad, 28)}
-        height={Math.max(bh + 2 * pad, 28)}
-        rx={6}
-      />
-      {view.leads.map((l) => (
-        <path
-          key={l.pin}
-          d={l.d}
-          className="sch-wire sch-lead"
-          style={{ ['--wc' as string]: `var(--v${l.node})` }}
+    <>
+      <g
+        className={`sch-el${interactive ? ' sch-el--control' : ''}${focused ? ' is-focused' : ''}${control?.kind === 'slider' ? ' sch-el--slider' : ''}`}
+        data-element={id}
+        data-type={view.el.type}
+        tabIndex={interactive ? 0 : -1}
+        {...a11y}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onPointerEnter={() => !interactive && sim.setFocus(id)}
+        onPointerLeave={() => !interactive && focused && sim.setFocus(null)}
+        onFocus={() => interactive && sim.setFocus(id)}
+        onClick={onClick}
+        onKeyDown={onKeyDown}
+        onKeyUp={onKeyUp}
+        onBlur={onBlur}
+      >
+        <rect
+          className="sch-hit"
+          x={bx - pad}
+          y={by - pad}
+          width={Math.max(bw + 2 * pad, 28)}
+          height={Math.max(bh + 2 * pad, 28)}
+          rx={6}
         />
-      ))}
-      {gradient && view.two && view.symbol.gradientBody && (
-        <defs>
-          <linearGradient
-            id={gradientId}
-            gradientUnits="userSpaceOnUse"
-            x1={-(view.symbol.body ?? 30) / 2}
-            x2={(view.symbol.body ?? 30) / 2}
-            y1={0}
-            y2={0}
-          >
-            <stop offset="0" style={{ stopColor: `var(--v${view.pins[0]!.node})` }} />
-            <stop offset="1" style={{ stopColor: `var(--v${view.pins[1]!.node})` }} />
-          </linearGradient>
-        </defs>
-      )}
-      <g transform={view.transform} className="sym">
-        {view.symbol.draw({
-          el: view.el,
-          params,
-          live,
-          rot: view.rot,
-          flip: view.flip,
-          pins: view.instancePins,
-          gradient: gradient && view.symbol.gradientBody ? `url(#${gradientId})` : undefined,
-        })}
+        {view.leads.map((l) => (
+          <path
+            key={l.pin}
+            d={l.d}
+            className="sch-wire sch-lead"
+            style={{ ['--wc' as string]: `var(--v${l.node})` }}
+          />
+        ))}
+        {gradient && view.two && view.symbol.gradientBody && (
+          <defs>
+            <linearGradient
+              id={gradientId}
+              gradientUnits="userSpaceOnUse"
+              x1={-(view.symbol.body ?? 30) / 2}
+              x2={(view.symbol.body ?? 30) / 2}
+              y1={0}
+              y2={0}
+            >
+              <stop offset="0" style={{ stopColor: `var(--v${view.pins[0]!.node})` }} />
+              <stop offset="1" style={{ stopColor: `var(--v${view.pins[1]!.node})` }} />
+            </linearGradient>
+          </defs>
+        )}
+        <g transform={view.transform} className="sym">
+          {view.symbol.draw({
+            el: view.el,
+            params,
+            live,
+            rot: view.rot,
+            flip: view.flip,
+            pins: view.instancePins,
+            gradient: gradient && view.symbol.gradientBody ? `url(#${gradientId})` : undefined,
+          })}
+        </g>
+        <rect
+          className="sch-focus"
+          x={bx - pad}
+          y={by - pad}
+          width={bw + 2 * pad}
+          height={bh + 2 * pad}
+          rx={6}
+        />
       </g>
       {label && (
         <g className="sch-label" aria-hidden="true">
@@ -267,14 +280,6 @@ export const ElementGlyph = memo(function ElementGlyph({
           )}
         </g>
       )}
-      <rect
-        className="sch-focus"
-        x={bx - pad}
-        y={by - pad}
-        width={bw + 2 * pad}
-        height={bh + 2 * pad}
-        rx={6}
-      />
-    </g>
+    </>
   );
 });
