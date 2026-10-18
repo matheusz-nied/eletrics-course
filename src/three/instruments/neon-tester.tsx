@@ -57,7 +57,7 @@ export const meta: PartMeta = {
   cutaway: true,
   describe: (p) =>
     p.lit
-      ? `Chave de teste neon de ${Number(p.length)} mm, acesa: a ponta está num condutor energizado (fase). A corrente passa pelo resistor, pela lâmpada e pelo seu corpo até o chão, limitada pelo resistor a poucos microampères.`
+      ? `Chave de teste neon de ${Number(p.length)} mm, acesa: a ponta está num condutor energizado (fase). A corrente passa pelo resistor, pela lâmpada e pelo seu corpo até o chão, limitada pelo resistor a cerca de 0,1 mA.`
       : `Chave de teste neon de ${Number(p.length)} mm, apagada: a ponta não tem tensão em relação ao chão (neutro, terra ou circuito desligado). Antes de confiar nela, teste numa tomada que você sabe que está energizada.`,
   view: [0.06, 0.8, 1.3],
 };

@@ -53,6 +53,7 @@ test.describe('circuit gallery', () => {
       'filtro-rc-bode',
       'rele-motor',
       'fim-de-curso',
+      'motor-capacitor',
     ]) {
       await expect(page.locator(`[data-circuit="demo/${name}"]`)).toBeVisible();
     }
@@ -69,6 +70,43 @@ test.describe('circuit gallery', () => {
       await expect(page.locator(`[data-symbol="${type}"] svg`).first()).toBeVisible();
     }
     await expectNoHorizontalOverflow(page);
+    errors.expectClean();
+  });
+});
+
+test.describe('static charts', () => {
+  /** The x labels shown on screen, per chart. */
+  const xLabels = (page: Page) =>
+    page.locator('.sim-plot__x').evaluateAll((axes) =>
+      axes.map((axis) =>
+        [...axis.querySelectorAll('.sim-plot__ticks')]
+          .filter((row) => row.getBoundingClientRect().height > 0)
+          .flatMap((row) => [...row.querySelectorAll('span')])
+          .map((span) => {
+            const r = span.getBoundingClientRect();
+            return { text: span.textContent ?? '', left: r.left, right: r.right };
+          }),
+      ),
+    );
+
+  test('x labels never overlap and thin out on narrow screens', async ({ page, isMobile }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${GALLERY}graficos/`);
+    const charts = await xLabels(page);
+    expect(charts).toHaveLength(2);
+    for (const labels of charts) {
+      expect(labels.length).toBeGreaterThanOrEqual(3);
+      for (let i = 1; i < labels.length; i++) {
+        expect(labels[i]!.left).toBeGreaterThan(labels[i - 1]!.right);
+      }
+    }
+    // 0 a 100 °C: every 20 °C on a wide screen, every 40 °C on a phone.
+    const ntc = charts[0]!.map((l) => l.text.replace(/\s/g, ' ')).join(' | ');
+    expect(ntc).toBe(
+      isMobile ? '0 °C | 40 °C | 80 °C' : '0 °C | 20 °C | 40 °C | 60 °C | 80 °C | 100 °C',
+    );
+    await expectNoHorizontalOverflow(page);
+    await expectAccessible(page);
     errors.expectClean();
   });
 });
@@ -235,6 +273,32 @@ test.describe('instruments', () => {
     errors.expectClean();
   });
 
+  test('the chart tab works in a browser whose language Intl rejects', async ({ page }) => {
+    // Chromium started without a locale reports "en-US@posix".
+    await page.addInitScript(() =>
+      Object.defineProperty(navigator, 'language', { value: 'en-US@posix', configurable: true }),
+    );
+    const errors = watchErrors(page);
+    const sim = await openSimulation(page, demo('rc-senoide'));
+    await sim.getByRole('button', { name: 'Iniciar simulação', exact: true }).click();
+    await sim.getByRole('tab', { name: 'Gráfico' }).click();
+    await expect(sim.getByRole('tabpanel').locator('canvas').first()).toBeVisible();
+    expect(await page.evaluate(() => navigator.language)).toBe('en-US@posix');
+    errors.expectClean();
+  });
+
+  test('the AC meter reads the current of a 3-pin motor', async ({ page }) => {
+    const errors = watchErrors(page);
+    const sim = await openSimulation(page, demo('motor-capacitor'));
+    await sim.getByRole('button', { name: 'Iniciar simulação', exact: true }).click();
+    await sim.getByRole('tab', { name: 'Multímetro' }).click();
+    // About 0,94 A at full speed; the common carries the same current as the fuse.
+    await expect.poll(() => meter(page, 'IF', 'A'), { timeout: 10_000 }).toBeGreaterThan(0.8);
+    const motor = await meter(page, 'IM', 'A');
+    expect(motor).toBeCloseTo(await meter(page, 'IF', 'A'), 1);
+    errors.expectClean();
+  });
+
   test('the Bode plot finds the cut-off frequency', async ({ page }) => {
     const errors = watchErrors(page);
     const sim = await openSimulation(page, demo('filtro-rc-bode'));
@@ -273,6 +337,22 @@ test.describe('performance', () => {
     });
     expect(1000 / median).toBeGreaterThan(55);
     errors.expectClean();
+  });
+});
+
+test.describe('layout', () => {
+  test('the head is drawn and the 3D view sits beside the schematic on a wide screen', async ({
+    page,
+    isMobile,
+  }) => {
+    const sim = await openSimulation(page, demo('lampada-3d'));
+    const head = sim.locator('.sim-head');
+    await expect(head).toBeVisible();
+    expect(await head.evaluate((el) => el.getClientRects().length)).toBe(1);
+    const columns = await sim
+      .locator('.sim-stage')
+      .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+    expect(columns).toBe(isMobile ? 1 : 2);
   });
 });
 

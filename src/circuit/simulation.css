@@ -11,7 +11,6 @@
   --sim-flow-electrons: light-dark(#0e7490, #22d3ee);
   --sim-gap: 0.75rem;
 
-  container-type: inline-size;
   display: grid;
   gap: var(--sim-gap);
   margin: 1.75em 0;
@@ -249,11 +248,15 @@
   gap: var(--sim-gap);
 }
 
-@container (min-width: 46rem) {
-  .sim-stage--split {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: stretch;
-  }
+/*
+ * Schematic and 3D side by side once each gets about 23rem, stacked below
+ * that. No container query here: with .sim as a size container, Chromium
+ * sometimes left the first children of a large island (the head, the stage)
+ * without a layout box when it parsed the page.
+ */
+.sim-stage--split {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22.625rem), 1fr));
+  align-items: stretch;
 }
 
 .sim-schematic {
