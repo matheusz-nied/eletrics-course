@@ -1,7 +1,7 @@
 /**
  * Camera framing math, kept free of React and WebGL so it can be unit-tested.
  */
-import { Box3, InstancedMesh, Mesh, Vector3, type Object3D } from 'three';
+import { Box3, InstancedMesh, Mesh, Vector3, type Object3D, type Plane } from 'three';
 
 const UP = new Vector3(0, 1, 0);
 
@@ -68,7 +68,21 @@ export function visibleBounds(root: Object3D, target: Box3): Box3 {
       part.copy(geometry.boundingBox!);
     }
     if (part.isEmpty()) return;
-    target.union(part.applyMatrix4(object.matrixWorld));
+    part.applyMatrix4(object.matrixWorld);
+    // Keep only what an axis-aligned cutaway plane leaves.
+    for (const m of materials) for (const plane of m?.clippingPlanes ?? []) clipBox(part, plane);
+    if (!part.isEmpty()) target.union(part);
   });
   return target;
+}
+
+/** Shrinks a box to the side of an axis-aligned plane that stays drawn (n·p + c ≥ 0). */
+function clipBox(box: Box3, plane: Plane) {
+  const { normal: n, constant: c } = plane;
+  const axes = ['x', 'y', 'z'] as const;
+  const axis = axes.find((a) => Math.abs(n[a]) > 0.999);
+  if (!axis) return;
+  const limit = -c / n[axis];
+  if (n[axis] > 0) box.min[axis] = Math.max(box.min[axis], limit);
+  else box.max[axis] = Math.min(box.max[axis], limit);
 }

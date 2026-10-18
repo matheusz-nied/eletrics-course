@@ -1,4 +1,4 @@
-import { Box3, BoxGeometry, Group, Mesh, MeshBasicMaterial, Vector3 } from 'three';
+import { Box3, BoxGeometry, Group, Mesh, MeshBasicMaterial, Plane, Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
 import { labelSide, spreadLabels } from '../core/Annotations';
 import { resistorBands } from '../core/colorCode';
@@ -99,6 +99,17 @@ describe('visible bounds', () => {
     const box = visibleBounds(root, new Box3());
     expect(box.min.toArray()).toEqual([-1, -1, -1]);
     expect(box.max.toArray()).toEqual([1, 11, 1]);
+  });
+
+  it('keeps only the part a cutaway plane leaves', () => {
+    const material = new MeshBasicMaterial({
+      clippingPlanes: [new Plane(new Vector3(0, 0, -1), 0)],
+    });
+    const root = new Group();
+    root.add(new Mesh(new BoxGeometry(4, 4, 4), material));
+    const box = visibleBounds(root, new Box3());
+    expect(box.min.z).toBe(-2);
+    expect(box.max.z).toBe(0);
   });
 });
 
