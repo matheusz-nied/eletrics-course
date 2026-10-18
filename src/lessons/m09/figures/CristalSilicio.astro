@@ -31,44 +31,45 @@ const LEGEND_Y = Y_END + 32;
 
 <svg viewBox="0 0 512 350" width="512" height="350" class="fig" aria-hidden="true">
   <g class="bond">
-    {bonds.map((b) => <line x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} />)}
+    {bonds.map((b) => (
+      <line x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} />
+    ))}
   </g>
   <g class="pair">
-    {
-      bonds.map((b) => {
-        const mx = (b.x1 + b.x2) / 2;
-        const my = (b.y1 + b.y2) / 2;
-        const horizontal = b.y1 === b.y2;
-        const dx = horizontal ? 6 : 0;
-        const dy = horizontal ? 0 : 6;
-        if (isBroken(b)) return <circle cx={mx - dx} cy={my - dy} r={4.5} />;
-        return (
-          <>
-            <circle cx={mx - dx} cy={my - dy} r={4.5} />
-            <circle cx={mx + dx} cy={my + dy} r={4.5} />
-          </>
-        );
-      })
-    }
+    {bonds.map((b) => {
+      const mx = (b.x1 + b.x2) / 2;
+      const my = (b.y1 + b.y2) / 2;
+      const horizontal = b.y1 === b.y2;
+      const dx = horizontal ? 6 : 0;
+      const dy = horizontal ? 0 : 6;
+      if (isBroken(b)) return <circle cx={mx - dx} cy={my - dy} r={4.5} />;
+      return (
+        <>
+          <circle cx={mx - dx} cy={my - dy} r={4.5} />
+          <circle cx={mx + dx} cy={my + dy} r={4.5} />
+        </>
+      );
+    })}
   </g>
 
   <g class="atom">
-    {
-      atoms.map((a) => (
-        <>
-          <circle cx={a.x} cy={a.y} r={21} />
-          <text x={a.x} y={a.y + 5}>
-            Si
-          </text>
-        </>
-      ))
-    }
+    {atoms.map((a) => (
+      <>
+        <circle cx={a.x} cy={a.y} r={21} />
+        <text x={a.x} y={a.y + 5}>
+          Si
+        </text>
+      </>
+    ))}
   </g>
 
   <!-- The hole left in the broken bond, and the electron that escaped -->
   <circle cx={broken.x + 6} cy={broken.y} r={11} class="halo-hole" />
   <circle cx={broken.x + 6} cy={broken.y} r={5.5} class="hole" />
-  <path d={`M${broken.x + 4} ${broken.y + 12} Q ${broken.x + 10} ${free.y - 22} ${free.x + 2} ${free.y - 10}`} class="trail" />
+  <path
+    d={`M${broken.x + 4} ${broken.y + 12} Q ${broken.x + 10} ${free.y - 22} ${free.x + 2} ${free.y - 10}`}
+    class="trail"
+  />
   <circle cx={free.x} cy={free.y} r={11} class="halo-free" />
   <circle cx={free.x} cy={free.y} r={5.5} class="free" />
 
@@ -76,13 +77,19 @@ const LEGEND_Y = Y_END + 32;
   <g transform={`translate(28 ${LEGEND_Y})`}>
     <circle cx="6" cy="0" r="4.5" class="legend-pair" />
     <circle cx="18" cy="0" r="4.5" class="legend-pair" />
-    <text x="30" y="5" class="lbl">elétrons presos numa ligação</text>
+    <text x="30" y="5" class="lbl">
+      elétrons presos numa ligação
+    </text>
     <circle cx="258" cy="0" r="9" class="halo-free" />
     <circle cx="258" cy="0" r="5" class="free" />
-    <text x="273" y="5" class="lbl">elétron livre</text>
+    <text x="273" y="5" class="lbl">
+      elétron livre
+    </text>
     <circle cx="380" cy="0" r="9" class="halo-hole" />
     <circle cx="380" cy="0" r="5" class="hole" />
-    <text x="395" y="5" class="lbl">lacuna</text>
+    <text x="395" y="5" class="lbl">
+      lacuna
+    </text>
   </g>
 </svg>
 

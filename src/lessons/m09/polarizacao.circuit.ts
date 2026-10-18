@@ -53,8 +53,20 @@ export default defineCircuit({
     { id: 'G', type: 'ground', at: [0, 18] },
   ],
   probes: [
-    { id: 'VD1', kind: 'voltage', plus: 'D1.a', minus: 'D1.b', label: 'Tensão em D1 (anodo − catodo)' },
-    { id: 'VD2', kind: 'voltage', plus: 'D2.a', minus: 'D2.b', label: 'Tensão em D2 (anodo − catodo)' },
+    {
+      id: 'VD1',
+      kind: 'voltage',
+      plus: 'D1.a',
+      minus: 'D1.b',
+      label: 'Tensão em D1 (anodo − catodo)',
+    },
+    {
+      id: 'VD2',
+      kind: 'voltage',
+      plus: 'D2.a',
+      minus: 'D2.b',
+      label: 'Tensão em D2 (anodo − catodo)',
+    },
     { id: 'IL1', kind: 'current', element: 'L1', label: 'Corrente em L1' },
     { id: 'IL2', kind: 'current', element: 'L2', label: 'Corrente em L2' },
   ],
@@ -67,7 +79,8 @@ export default defineCircuit({
     },
     {
       id: 'reversa',
-      description: 'D2 está em polarização reversa: bloqueia e fica com quase toda a tensão da bateria.',
+      description:
+        'D2 está em polarização reversa: bloqueia e fica com quase toda a tensão da bateria.',
       check: { readout: 'VD2', op: '<', value: -11.5 },
     },
     {

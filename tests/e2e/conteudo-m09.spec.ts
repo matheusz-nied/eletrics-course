@@ -97,7 +97,9 @@ test.describe('módulo 9: semicondutores', () => {
       .locator('.sim-controls')
       .getByLabel('Bateria')
       .selectOption({ label: 'Invertida (positivo embaixo)' });
-    await expect(sim.locator('.dmm[data-probe="VD1"] [data-reading]')).toContainText(/−1[12][\d,]*\sV/);
+    await expect(sim.locator('.dmm[data-probe="VD1"] [data-reading]')).toContainText(
+      /−1[12][\d,]*\sV/,
+    );
     errors.expectClean();
   });
 
@@ -117,6 +119,37 @@ test.describe('módulo 9: semicondutores', () => {
     await sim.scrollIntoViewIfNeeded();
     await expect(sim).toHaveAttribute('data-ready', '');
     await expect(sim.locator('.dmm[data-probe="VOUT"] [data-reading]')).toContainText('5,19 V');
+    errors.expectClean();
+  });
+
+  test('the transistor switch of lesson 9.6 saturates and cuts off', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}06-transistor-como-chave/`);
+    const sim = page.locator('[data-simulation="m09/transistor-chave"]');
+    await sim.scrollIntoViewIfNeeded();
+    await expect(sim).toHaveAttribute('data-ready', '');
+    await expect(sim.locator('.dmm[data-probe="VCE"] [data-reading]')).toContainText(/\d+\smV/);
+    await sim
+      .locator('.sim-controls')
+      .getByLabel('Pino do microcontrolador')
+      .selectOption({ label: 'Nível baixo (0 V)' });
+    await expect(sim.locator('.dmm[data-probe="IC"] [data-reading]')).toContainText(': 0 A');
+    await expect(sim.locator('.dmm[data-probe="VCE"] [data-reading]')).toContainText('12 V');
+    errors.expectClean();
+  });
+
+  test('only the logic-level MOSFET of lesson 9.8 turns on at 3,3 V', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}08-mosfet/`);
+    const sim = page.locator('[data-simulation="m09/mosfet-gate"]');
+    await sim.scrollIntoViewIfNeeded();
+    await expect(sim).toHaveAttribute('data-ready', '');
+    await sim
+      .locator('.sim-controls')
+      .getByLabel('Tensão no gate')
+      .selectOption({ label: '3,3 V (saída de um ESP32)' });
+    await expect(sim.locator('.dmm[data-probe="IL2"] [data-reading]')).toContainText(/1,7\d\sA/);
+    await expect(sim.locator('.dmm[data-probe="IL1"] [data-reading]')).toContainText(': 0 A');
     errors.expectClean();
   });
 });

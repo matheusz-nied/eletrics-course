@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import type { CircuitDoc, Readouts, SimEvent } from '../../engine/contract';
+import type { CircuitDoc, SimEvent, SimFrame } from '../../engine/contract';
 import { Simulator } from '../../engine/analysis/simulator';
 import chave from './transistor-chave.circuit';
 import rele from './rele-roda-livre.circuit';
 
 /** Values lesson 9.6 quotes from its two circuits. */
+
+type Readouts = SimFrame['readouts'];
 
 function start(doc: CircuitDoc, params: Record<string, number | boolean> = {}) {
   const sim = new Simulator(doc);

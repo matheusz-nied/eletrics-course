@@ -5,7 +5,7 @@
  * carriers cross (forward); the current is the 1N4148 model of
  * diodo-modelo.ts, the same one the simulations use.
  */
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useState, useSyncExternalStore } from 'react';
 import { NBSP, formatNumber, formatSI } from '../m00/formato';
 import { DIODES, depletionWidth, diodeCurrent } from './diodo-modelo';
 import '../m00/widget.css';
@@ -51,16 +51,20 @@ function formatVolts(volts: number): string {
   return `${volts > 0 ? '+' : ''}${formatNumber(volts, 2)}${NBSP}V`;
 }
 
+const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
+
+function subscribeReducedMotion(onChange: () => void) {
+  const query = window.matchMedia(REDUCED_MOTION);
+  query.addEventListener('change', onChange);
+  return () => query.removeEventListener('change', onChange);
+}
+
 function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduced(query.matches);
-    const onChange = () => setReduced(query.matches);
-    query.addEventListener('change', onChange);
-    return () => query.removeEventListener('change', onChange);
-  }, []);
-  return reduced;
+  return useSyncExternalStore(
+    subscribeReducedMotion,
+    () => window.matchMedia(REDUCED_MOTION).matches,
+    () => false,
+  );
 }
 
 /** Seconds since the animation started, while `running`. */
@@ -147,7 +151,12 @@ export default function JuncaoPN() {
           <text x={(LEFT + MID) / 2} y={TOP - 14} textAnchor="middle" className="jpn__region-label">
             Tipo P (anodo)
           </text>
-          <text x={(MID + RIGHT) / 2} y={TOP - 14} textAnchor="middle" className="jpn__region-label">
+          <text
+            x={(MID + RIGHT) / 2}
+            y={TOP - 14}
+            textAnchor="middle"
+            className="jpn__region-label"
+          >
             Tipo N (catodo)
           </text>
 
@@ -232,7 +241,11 @@ export default function JuncaoPN() {
           <g className="jpn__battery">
             <path d={`M${MID - 34} 266H${MID - 8}M${MID + 8} 266H${MID + 34}`} />
             <path
-              d={forward ? `M${MID - 8} 252V280M${MID + 8} 259V273` : `M${MID - 8} 259V273M${MID + 8} 252V280`}
+              d={
+                forward
+                  ? `M${MID - 8} 252V280M${MID + 8} 259V273`
+                  : `M${MID - 8} 259V273M${MID + 8} 252V280`
+              }
               className="jpn__plates"
             />
           </g>

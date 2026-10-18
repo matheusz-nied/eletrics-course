@@ -40,58 +40,62 @@ function electrons(p: (typeof panels)[number], b: (typeof panels)[number]['bonds
 ---
 
 <svg viewBox="0 0 640 322" width="640" height="322" class="fig" aria-hidden="true">
-  {
-    panels.map((p) => (
-      <g>
-        <text x={p.ox + X0 + DX} y="20" class="title">
-          {p.kind === 'n' ? 'Tipo N: fósforo (5 elétrons)' : 'Tipo P: boro (3 elétrons)'}
-        </text>
-        <g class="bond">
-          {p.bonds.map((b) => (
-            <line x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} />
-          ))}
-        </g>
-        <g class="pair">
-          {p.bonds.map((b) => {
-            const e = electrons(p, b);
-            return e.short ? (
-              <>
-                <circle cx={e.mx - e.dx} cy={e.my - e.dy} r={4.5} />
-                <circle cx={e.mx + e.dx} cy={e.my + e.dy} r={11} class="halo-hole" />
-                <circle cx={e.mx + e.dx} cy={e.my + e.dy} r={5.5} class="hole" />
-              </>
-            ) : (
-              <>
-                <circle cx={e.mx - e.dx} cy={e.my - e.dy} r={4.5} />
-                <circle cx={e.mx + e.dx} cy={e.my + e.dy} r={4.5} />
-              </>
-            );
-          })}
-        </g>
-        <g class="atom">
-          {p.atoms.map((a) => {
-            const dopant = a.x === p.center.x && a.y === p.center.y;
-            return (
-              <>
-                <circle cx={a.x} cy={a.y} r={R} class={dopant ? `dopant dopant-${p.kind}` : ''} />
-                <text x={a.x} y={a.y + 5}>
-                  {dopant ? p.dopant : 'Si'}
-                </text>
-              </>
-            );
-          })}
-        </g>
+  {panels.map((p) => (
+    <g>
+      <text x={p.ox + X0 + DX} y="20" class="title">
+        {p.kind === 'n' ? 'Tipo N: fósforo (5 elétrons)' : 'Tipo P: boro (3 elétrons)'}
+      </text>
+      <g class="bond">
+        {p.bonds.map((b) => (
+          <line x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} />
+        ))}
       </g>
-    ))
-  }
+      <g class="pair">
+        {p.bonds.map((b) => {
+          const e = electrons(p, b);
+          return e.short ? (
+            <>
+              <circle cx={e.mx - e.dx} cy={e.my - e.dy} r={4.5} />
+              <circle cx={e.mx + e.dx} cy={e.my + e.dy} r={11} class="halo-hole" />
+              <circle cx={e.mx + e.dx} cy={e.my + e.dy} r={5.5} class="hole" />
+            </>
+          ) : (
+            <>
+              <circle cx={e.mx - e.dx} cy={e.my - e.dy} r={4.5} />
+              <circle cx={e.mx + e.dx} cy={e.my + e.dy} r={4.5} />
+            </>
+          );
+        })}
+      </g>
+      <g class="atom">
+        {p.atoms.map((a) => {
+          const dopant = a.x === p.center.x && a.y === p.center.y;
+          return (
+            <>
+              <circle cx={a.x} cy={a.y} r={R} class={dopant ? `dopant dopant-${p.kind}` : ''} />
+              <text x={a.x} y={a.y + 5}>
+                {dopant ? p.dopant : 'Si'}
+              </text>
+            </>
+          );
+        })}
+      </g>
+    </g>
+  ))}
 
   <!-- Type N: the fifth electron of phosphorus, loosely held, free to wander -->
   <circle cx="178" cy="124" r="11" class="halo-free" />
   <circle cx="178" cy="124" r="5.5" class="free" />
 
-  <text x="146" y="294" class="note">o 5º elétron do fósforo fica livre</text>
-  <text x="476" y="294" class="note">a ligação com um elétron só tem uma vaga</text>
-  <text x="320" y="314" class="note sub">nos dois casos, o cristal continua eletricamente neutro</text>
+  <text x="146" y="294" class="note">
+    o 5º elétron do fósforo fica livre
+  </text>
+  <text x="476" y="294" class="note">
+    a ligação com um elétron só tem uma vaga
+  </text>
+  <text x="320" y="314" class="note sub">
+    nos dois casos, o cristal continua eletricamente neutro
+  </text>
 </svg>
 
 <style>

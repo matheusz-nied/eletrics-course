@@ -12,7 +12,12 @@ import {
 } from './diodo-modelo';
 
 /** A source, a resistor and a diode (or LED) in series, solved by the engine. */
-function engine(source: number, ohms: number, type: 'diode' | 'led', params: Record<string, string>) {
+function engine(
+  source: number,
+  ohms: number,
+  type: 'diode' | 'led',
+  params: Record<string, string>,
+) {
   const doc: CircuitDoc = {
     id: 'teste/serie',
     title: 'série',
@@ -20,9 +25,28 @@ function engine(source: number, ohms: number, type: 'diode' | 'led', params: Rec
     analysis: { kind: 'dc' },
     elements: [
       { id: 'V1', type: 'dc-voltage', a: [0, 0], b: [0, 10], params: { voltage: source } },
-      { id: 'R1', type: 'resistor', a: [0, 0], b: [10, 0], params: { resistance: ohms, watts: 100 } },
-      { id: 'D1', type, a: [10, 0], b: [10, 10], params: { ...params, ...(type === 'led' ? { imax: 10 } : { power: 100 }) } },
-      { id: 'W1', type: 'wire', points: [[10, 10], [0, 10]] },
+      {
+        id: 'R1',
+        type: 'resistor',
+        a: [0, 0],
+        b: [10, 0],
+        params: { resistance: ohms, watts: 100 },
+      },
+      {
+        id: 'D1',
+        type,
+        a: [10, 0],
+        b: [10, 10],
+        params: { ...params, ...(type === 'led' ? { imax: 10 } : { power: 100 }) },
+      },
+      {
+        id: 'W1',
+        type: 'wire',
+        points: [
+          [10, 10],
+          [0, 10],
+        ],
+      },
       { id: 'G', type: 'ground', at: [0, 10] },
     ],
   };
