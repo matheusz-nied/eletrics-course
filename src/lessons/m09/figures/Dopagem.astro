@@ -1,0 +1,163 @@
+---
+/* 9.1: doping. A phosphorus atom (5 outer electrons) in the silicon crystal leaves one electron
+   free (type N); a boron atom (3 outer electrons) leaves one bond short of an electron, a hole (type P). */
+const GRID = [0, 1, 2];
+const DX = 88;
+const DY = 78;
+const X0 = 58;
+const Y0 = 74;
+const R = 20;
+
+function lattice(ox: number) {
+  const atoms = GRID.flatMap((j) => GRID.map((i) => ({ x: ox + X0 + i * DX, y: Y0 + j * DY })));
+  const bonds: { x1: number; y1: number; x2: number; y2: number }[] = [];
+  for (const a of atoms) {
+    const right = a.x + (a.x === ox + X0 + 2 * DX ? DX / 2 : DX);
+    const down = a.y + (a.y === Y0 + 2 * DY ? DY / 2 : DY);
+    bonds.push({ x1: a.x, y1: a.y, x2: right, y2: a.y });
+    bonds.push({ x1: a.x, y1: a.y, x2: a.x, y2: down });
+    if (a.x === ox + X0) bonds.push({ x1: a.x - DX / 2, y1: a.y, x2: a.x, y2: a.y });
+    if (a.y === Y0) bonds.push({ x1: a.x, y1: a.y - DY / 2, x2: a.x, y2: a.y });
+  }
+  return { atoms, bonds };
+}
+
+const panels = [
+  { ox: 0, dopant: 'P', kind: 'n' },
+  { ox: 330, dopant: 'B', kind: 'p' },
+].map((p) => ({ ...p, ...lattice(p.ox), center: { x: p.ox + X0 + DX, y: Y0 + DY } }));
+
+/* Electrons on a bond, except the half-empty bond of boron (to its right). */
+function electrons(p: (typeof panels)[number], b: (typeof panels)[number]['bonds'][number]) {
+  const mx = (b.x1 + b.x2) / 2;
+  const my = (b.y1 + b.y2) / 2;
+  const h = b.y1 === b.y2;
+  const dx = h ? 6 : 0;
+  const dy = h ? 0 : 6;
+  const short = p.kind === 'p' && h && b.y1 === p.center.y && b.x1 === p.center.x;
+  return { mx, my, dx, dy, short };
+}
+---
+
+<svg viewBox="0 0 640 322" width="640" height="322" class="fig" aria-hidden="true">
+  {
+    panels.map((p) => (
+      <g>
+        <text x={p.ox + X0 + DX} y="20" class="title">
+          {p.kind === 'n' ? 'Tipo N: fósforo (5 elétrons)' : 'Tipo P: boro (3 elétrons)'}
+        </text>
+        <g class="bond">
+          {p.bonds.map((b) => (
+            <line x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2} />
+          ))}
+        </g>
+        <g class="pair">
+          {p.bonds.map((b) => {
+            const e = electrons(p, b);
+            return e.short ? (
+              <>
+                <circle cx={e.mx - e.dx} cy={e.my - e.dy} r={4.5} />
+                <circle cx={e.mx + e.dx} cy={e.my + e.dy} r={11} class="halo-hole" />
+                <circle cx={e.mx + e.dx} cy={e.my + e.dy} r={5.5} class="hole" />
+              </>
+            ) : (
+              <>
+                <circle cx={e.mx - e.dx} cy={e.my - e.dy} r={4.5} />
+                <circle cx={e.mx + e.dx} cy={e.my + e.dy} r={4.5} />
+              </>
+            );
+          })}
+        </g>
+        <g class="atom">
+          {p.atoms.map((a) => {
+            const dopant = a.x === p.center.x && a.y === p.center.y;
+            return (
+              <>
+                <circle cx={a.x} cy={a.y} r={R} class={dopant ? `dopant dopant-${p.kind}` : ''} />
+                <text x={a.x} y={a.y + 5}>
+                  {dopant ? p.dopant : 'Si'}
+                </text>
+              </>
+            );
+          })}
+        </g>
+      </g>
+    ))
+  }
+
+  <!-- Type N: the fifth electron of phosphorus, loosely held, free to wander -->
+  <circle cx="178" cy="124" r="11" class="halo-free" />
+  <circle cx="178" cy="124" r="5.5" class="free" />
+
+  <text x="146" y="294" class="note">o 5º elétron do fósforo fica livre</text>
+  <text x="476" y="294" class="note">a ligação com um elétron só tem uma vaga</text>
+  <text x="320" y="314" class="note sub">nos dois casos, o cristal continua eletricamente neutro</text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .bond line {
+    stroke: var(--border-strong);
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+  .pair circle {
+    fill: var(--info);
+  }
+  .pair .hole {
+    fill: var(--bg);
+    stroke: var(--danger);
+    stroke-width: 2.5;
+  }
+  .atom circle {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .atom .dopant-n {
+    fill: var(--info-soft);
+    stroke: var(--info);
+    stroke-width: 2.5;
+  }
+  .atom .dopant-p {
+    fill: var(--danger-soft);
+    stroke: var(--danger);
+    stroke-width: 2.5;
+  }
+  .atom text {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .pair .halo-hole {
+    fill: var(--danger-soft);
+    stroke: var(--danger-border);
+  }
+  .free {
+    fill: var(--info);
+  }
+  .halo-free {
+    fill: var(--info-soft);
+    stroke: var(--info-border);
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 15px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+  .sub {
+    font-weight: 500;
+  }
+</style>
