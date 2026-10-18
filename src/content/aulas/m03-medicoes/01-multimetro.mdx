@@ -110,7 +110,10 @@ Lá dentro, o multímetro digital mede uma coisa só: **tensão**, numa faixa pe
 Na função de tensão, entre os bornes VΩ e COM fica uma sequência de resistores que soma, tipicamente, **10 MΩ**. Essa sequência funciona como o <Term id="divisor-de-tensao">divisor de tensão</Term> que você viu no módulo 2: o conversor lê só uma fração da tensão, e o aparelho multiplica de volta. Como 10 MΩ é uma resistência enorme, a corrente que o voltímetro puxa é minúscula. Na tomada de 127 V:
 
 $$
-I = \frac{V}{R} = \frac{127\,\text{V}}{10\,000\,000\,\Omega} \approx 0{,}000\,013\,\text{A} = 13\,\mu\text{A}
+\begin{aligned}
+I &= \frac{V}{R} = \frac{127\,\text{V}}{10.000.000\,\Omega} \\[4pt]
+&\approx 0{,}000\,013\,\text{A} = 13\,\mu\text{A}
+\end{aligned}
 $$
 
 Nada esquenta e nada queima. É por isso que encostar as pontas em paralelo com qualquer coisa, na função de tensão, é seguro para o aparelho (sempre respeitando a categoria e a tensão máxima, como você vai ver mais adiante).
@@ -155,9 +158,10 @@ Nenhum instrumento é perfeito. Os 10 MΩ do voltímetro ficam **em paralelo** c
 Com o medidor encostado, R2 passa a ser R2 em paralelo com 10 MΩ:
 
 $$
-R_{2} \parallel R_M = \frac{1 \cdot 10}{1 + 10}\,\text{M}\Omega \approx 0{,}909\,\text{M}\Omega
-\qquad
-V = 10\,\text{V} \cdot \frac{0{,}909}{1 + 0{,}909} \approx 4{,}76\,\text{V}
+\begin{aligned}
+R_2 \parallel R_M &= \frac{1 \cdot 10}{1 + 10}\,\text{M}\Omega \approx 0{,}909\,\text{M}\Omega \\[4pt]
+V &= 10\,\text{V} \cdot \frac{0{,}909}{1 + 0{,}909} \approx 4{,}76\,\text{V}
+\end{aligned}
 $$
 
 O multímetro mostra 4,76 V, e não 5 V: um erro de quase 5 %, causado por ele mesmo. Em instalações elétricas e na maioria dos circuitos, as resistências são muito menores que 10 MΩ e esse efeito some. Ele aparece em circuitos de resistência muito alta, como a entrada de sensores. O amperímetro tem o efeito parecido, ao contrário: o shunt "rouba" um pouquinho de tensão do circuito. A 5 A, o shunt de 0,01 Ω fica com 0,05 V e dissipa $P = I^2 R = 25 \cdot 0{,}01 = 0{,}25\,\text{W}$.
