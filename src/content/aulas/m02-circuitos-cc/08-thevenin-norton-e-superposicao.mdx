@@ -1,0 +1,310 @@
+---
+titulo: Thévenin, Norton e superposição
+modulo: m02-circuitos-cc
+ordem: 8
+nivel: A
+duracaoMin: 30
+objetivos:
+  - Trocar um circuito de fontes e resistores pelo seu equivalente de Thévenin, visto de dois terminais
+  - Calcular a tensão e a resistência de Thévenin, e passar para o equivalente de Norton
+  - Usar a superposição para analisar um circuito com duas fontes
+  - Descobrir o equivalente de uma fonte real com duas medições
+prerequisitos:
+  - m02-circuitos-cc/04-circuitos-mistos
+  - m02-circuitos-cc/05-leis-de-kirchhoff
+  - m02-circuitos-cc/07-fontes-reais-e-baterias
+tags: [thévenin, norton, superposição, análise de circuitos, carregador]
+seguranca: baixa-tensao
+---
+
+import TheveninBox from '../../../lessons/m02/figures/TheveninBox.astro';
+
+<Callout type="nota" title="Aula avançada">
+Esta aula é de nível avançado (A). Ela ensina atalhos de análise que técnicos e engenheiros usam muito, mas você pode pular direto para o módulo 3, Medições e instrumentos, sem perder a sequência do curso.
+</Callout>
+
+O carregador do celular diz "5 V" na etiqueta. Com um cabo curto, o celular carrega rápido. Com aquele cabo fino de 2 metros, carrega devagar, e um medidor USB mostra só 4,4 V na ponta do cabo. Para entender isso não é preciso saber o que tem dentro do carregador: basta descobrir como ele se comporta visto pelos dois fios que chegam ao celular.
+
+Essa é a ideia desta aula. Qualquer circuito de fontes e resistores, por mais complicado que seja, visto de dois terminais, se comporta como **uma fonte e um resistor**. Com isso você calcula o que acontece com qualquer carga em uma linha, em vez de refazer o circuito inteiro.
+
+## A caixa-preta com dois terminais
+
+Imagine um circuito fechado numa caixa, com só dois terminais para fora, A e B. Você pode ligar qualquer carga entre A e B e medir a tensão e a corrente nela. Do lado de fora, nada mais importa: a carga não "sabe" quantos resistores e fontes existem lá dentro.
+
+O engenheiro francês Léon Thévenin mostrou, no século XIX, que essa caixa sempre pode ser trocada por uma fonte de tensão em série com um resistor, sem que nenhuma carga perceba a troca. Décadas depois, o engenheiro americano Edward Norton descreveu a versão com uma fonte de corrente em paralelo com um resistor.
+
+<Figure caption="Figura 1. Visto dos terminais A e B, o circuito da esquerda, o equivalente de Thévenin e o equivalente de Norton são indistinguíveis: com qualquer carga ligada entre A e B, os três dão a mesma tensão e a mesma corrente.">
+  <TheveninBox />
+</Figure>
+
+Você já conhece um equivalente de Thévenin: a bateria da [aula sobre fontes reais](../07-fontes-reais-e-baterias/). A força eletromotriz $E$ e a <Term id="resistencia-interna">resistência interna</Term> $r$ são exatamente a fonte e o resistor do <Term id="equivalente-de-thevenin">equivalente de Thévenin</Term> da bateria.
+
+<Callout type="atencao" title="Onde o equivalente deixa de valer">
+O equivalente só vale para **circuitos lineares**: resistores e fontes. Lâmpadas (cuja resistência muda com a temperatura), diodos e transistores não são lineares, e o equivalente vira uma aproximação válida só perto de um ponto de trabalho. E ele só fala do lado de fora da caixa: a potência que esquenta o resistor de Thévenin **não** é a potência que esquenta os resistores do circuito original.
+</Callout>
+
+## Como calcular o equivalente de Thévenin
+
+São dois números, e cada um vem de uma pergunta simples.
+
+**1. Qual é a tensão em aberto?** Tire a carga e calcule (ou meça) a tensão entre A e B. Essa é a **tensão de Thévenin**, $V_\text{Th}$.
+
+No circuito da Figura 1, sem carga não passa corrente pelo resistor de 680 Ω, então ele não tem queda de tensão. Sobra um <Term id="divisor-de-tensao">divisor de tensão</Term> de 2,2 kΩ com 3,3 kΩ:
+
+$$
+\begin{aligned}
+V_\text{Th} &= 12\,\text{V} \cdot \frac{3{,}3\,\text{k}\Omega}{2{,}2\,\text{k}\Omega + 3{,}3\,\text{k}\Omega} \\[4pt]
+&= 12 \cdot 0{,}6 = 7{,}2\,\text{V}
+\end{aligned}
+$$
+
+**2. Qual é a resistência vista de dentro?** "Desligue" as fontes e calcule a resistência entre A e B. Essa é a **resistência de Thévenin**, $R_\text{Th}$. Desligar uma fonte de tensão ideal é trocá-la por um **fio** (ela mantém 0 V); desligar uma fonte de corrente ideal é trocá-la por um **circuito aberto** (ela mantém 0 A).
+
+Com a fonte de 12 V virando fio, olhando de A para dentro você vê o resistor de 680 Ω em série com a combinação em paralelo de 2,2 kΩ e 3,3 kΩ:
+
+$$
+\begin{aligned}
+R_\text{Th} &= 680\,\Omega + \frac{2{,}2 \cdot 3{,}3}{2{,}2 + 3{,}3}\,\text{k}\Omega \\[4pt]
+&= 680\,\Omega + 1{,}32\,\text{k}\Omega = 2{,}0\,\text{k}\Omega
+\end{aligned}
+$$
+
+**3. Use com qualquer carga.** Com uma carga $R_L$ entre A e B, o circuito vira uma série simples:
+
+$$
+\begin{aligned}
+I_L &= \frac{V_\text{Th}}{R_\text{Th} + R_L} \\[4pt]
+V_L &= V_\text{Th} \cdot \frac{R_L}{R_\text{Th} + R_L}
+\end{aligned}
+$$
+
+em que $I_L$ é a corrente na carga, em ampères, e $V_L$ é a tensão na carga, em volts.
+
+<Callout type="dica" title="Equivalente por medição">
+Numa fonte real, em vez de calcular você mede. A tensão sem carga é $V_\text{Th}$. Depois ligue uma carga conhecida e meça a nova tensão $V_L$ e a corrente $I_L$. A tensão que "sumiu" ficou na resistência interna: $R_\text{Th} = (V_\text{Th} - V_L) / I_L$. Nunca faça isso com um curto direto nos terminais de uma bateria ou de uma tomada.
+</Callout>
+
+## Explore: o original e o equivalente lado a lado
+
+À esquerda está o circuito da Figura 1 com a carga RL1. À direita, o equivalente de Thévenin calculado acima (7,2 V e 2 kΩ) com a carga RL2. As duas cargas começam em 1 kΩ.
+
+<Simulation circuit="m02/thevenin-comparar" instruments={['multimetro']} />
+
+1. Compare os quatro multímetros. A tensão e a corrente nas duas cargas são iguais?
+2. Leve RL1 e RL2 para 10 kΩ. Quanto as duas cargas recebem agora?
+3. Coloque RL2 em 2 kΩ, o mesmo valor de $R_\text{Th}$. Que fração dos 7,2 V fica na carga? Faça o mesmo com RL1.
+4. Leve as duas cargas ao máximo (1 MΩ). De que valor a tensão se aproxima?
+5. Leve as duas ao mínimo (100 Ω). A corrente se aproxima de quanto? Compare com $V_\text{Th} / R_\text{Th}$.
+
+Em todos os casos, os dois lados mostram os mesmos números: 2,4 V e 2,4 mA com 1 kΩ; 6 V com 10 kΩ; 3,6 V (metade de 7,2 V) com 2 kΩ. Com 1 MΩ, a tensão chega a 7,19 V, quase a tensão de Thévenin. Com 100 Ω, a corrente fica em 3,43 mA, perto dos 3,6 mA que passariam num curto. Os dois extremos são as duas medições que definem a caixa.
+
+## Exemplo resolvido: o caminho longo e o atalho
+
+**Pelo caminho longo**, sem Thévenin, com $R_L = 1\,\text{k}\Omega$: o resistor de 680 Ω fica em série com a carga ($680 + 1.000 = 1.680\,\Omega$), e esse conjunto fica em paralelo com os 3,3 kΩ:
+
+$$
+\frac{3.300 \cdot 1.680}{3.300 + 1.680} \approx 1.113\,\Omega
+$$
+
+Somando os 2,2 kΩ de cima, a fonte de 12 V vê 3.313 Ω e entrega $12 / 3.313 \approx 3{,}622\,\text{mA}$. A tensão no ponto do meio é $3{,}622\,\text{mA} \cdot 1.113\,\Omega \approx 4{,}03\,\text{V}$, e a corrente na carga é $4{,}03\,\text{V} / 1.680\,\Omega \approx 2{,}40\,\text{mA}$.
+
+**Pelo atalho**, com o equivalente:
+
+$$
+I_L = \frac{7{,}2\,\text{V}}{2\,\text{k}\Omega + 1\,\text{k}\Omega} = 2{,}4\,\text{mA}
+$$
+
+O mesmo resultado em uma linha. E a vantagem cresce com cada carga nova: para $R_L = 10\,\text{k}\Omega$, o caminho longo começa do zero; o atalho dá $V_L = 7{,}2 \cdot 10/12 = 6\,\text{V}$ na hora. Foi o que a simulação mostrou.
+
+## Norton: a mesma caixa com uma fonte de corrente
+
+O <Term id="equivalente-de-norton">equivalente de Norton</Term> troca a fonte de tensão em série por uma **fonte de corrente em paralelo** com o mesmo resistor. A corrente da fonte é a corrente que passaria num curto entre A e B:
+
+$$
+\begin{aligned}
+I_N &= \frac{V_\text{Th}}{R_\text{Th}} = \frac{7{,}2\,\text{V}}{2\,\text{k}\Omega} = 3{,}6\,\text{mA} \\[4pt]
+R_N &= R_\text{Th} = 2\,\text{k}\Omega
+\end{aligned}
+$$
+
+Na simulação abaixo, a fonte de corrente empurra sempre 3,6 mA, e eles se dividem entre o resistor de Norton e a carga.
+
+<Simulation circuit="m02/norton" instruments={['multimetro']} />
+
+1. Com RL = 1 kΩ, quanto passa pela carga e quanto pelo resistor de Norton? A soma dá 3,6 mA?
+2. Compare a corrente na carga com a da simulação anterior para o mesmo valor de carga.
+3. Leve RL a 100 Ω e depois a 10 kΩ. Para onde vai a maior parte da corrente em cada caso?
+
+Com 1 kΩ, a carga recebe 2,4 mA e o resistor de Norton fica com 1,2 mA, exatamente como no circuito original. Thévenin e Norton são duas formas de escrever a mesma caixa. Norton é mais natural quando a fonte se comporta como fonte de corrente, como os sensores industriais de 4 a 20 mA, que informam a medição pela corrente no fio, e não pela tensão.
+
+## Superposição: uma fonte de cada vez
+
+Quando um circuito tem mais de uma fonte, existe outro atalho. Num circuito linear, o efeito de todas as fontes juntas é a **soma** dos efeitos de cada fonte sozinha, com as outras desligadas (fonte de tensão vira fio, fonte de corrente vira circuito aberto). Esse é o princípio da <Term id="superposicao">superposição</Term>.
+
+No circuito abaixo, a fonte V1 (12 V) e a fonte V2 (6 V) alimentam juntas o resistor R3 de 2 kΩ, através de R1 (1 kΩ) e R2 (2 kΩ). O seletor de cada fonte permite desligá-la. Uma fonte de tensão ideal desligada mantém 0 V entre os terminais, então se comporta como um fio.
+
+<Simulation circuit="m02/superposicao" instruments={['multimetro']} />
+
+1. Com as duas fontes ligadas, leia a tensão em R3.
+2. Desligue **só V2**. Quanto fica em R3 com V1 sozinha?
+3. Ligue V2 de novo e desligue **só V1**. Quanto fica em R3 com V2 sozinha?
+4. Some os resultados dos passos 2 e 3 e compare com o passo 1.
+
+## Exemplo resolvido: a superposição na conta
+
+**Só V1** (V2 desligada, virou fio): R2 e R3 ficam em paralelo, $2\,\text{k}\Omega \parallel 2\,\text{k}\Omega = 1\,\text{k}\Omega$, e formam um divisor com R1:
+
+$$
+V_3' = 12\,\text{V} \cdot \frac{1\,\text{k}\Omega}{1\,\text{k}\Omega + 1\,\text{k}\Omega} = 6\,\text{V}
+$$
+
+**Só V2** (V1 desligada, virou fio): agora R1 e R3 ficam em paralelo, $1\,\text{k}\Omega \parallel 2\,\text{k}\Omega \approx 667\,\Omega$, e formam um divisor com R2:
+
+$$
+\begin{aligned}
+V_3'' &= 6\,\text{V} \cdot \frac{667\,\Omega}{2.000\,\Omega + 667\,\Omega} \\[4pt]
+&= 6 \cdot 0{,}25 = 1{,}5\,\text{V}
+\end{aligned}
+$$
+
+**As duas juntas:** $V_3 = 6\,\text{V} + 1{,}5\,\text{V} = 7{,}5\,\text{V}$, o mesmo valor que a simulação mostrou com as duas fontes ligadas. Para conferir pelas [leis de Kirchhoff](../05-leis-de-kirchhoff/): no nó de cima de R3, a corrente que chega por R1 é $(12 - 7{,}5)/1.000 = 4{,}5\,\text{mA}$, a que chega por R2 é $(6 - 7{,}5)/2.000 = -0{,}75\,\text{mA}$ (ela na verdade sai do nó em direção a V2), e a que desce por R3 é $7{,}5/2.000 = 3{,}75\,\text{mA}$. De fato, $4{,}5 - 0{,}75 = 3{,}75$.
+
+<Callout type="atencao" title="Superposição não soma potências">
+A potência depende do **quadrado** da corrente, então não se soma. Em R3, com as duas fontes, a potência é $7{,}5^2 / 2.000 \approx 28\,\text{mW}$. Somando as potências de cada fonte sozinha daria $6^2/2.000 + 1{,}5^2/2.000 \approx 19\,\text{mW}$, um valor errado. Some as tensões ou as correntes primeiro e calcule a potência no fim.
+</Callout>
+
+<DeepDive title="Por que a superposição e o Thévenin funcionam">
+Na análise nodal (a mesma que o simulador usa), um circuito de resistores e fontes vira um sistema de equações lineares $G \cdot x = b$. A matriz $G$ só depende dos resistores; o vetor $b$ só depende das fontes; $x$ são as tensões dos nós e as correntes das fontes de tensão.
+
+Como a solução é $x = G^{-1} b$, e o vetor $b$ é a soma das contribuições de cada fonte ($b = b_1 + b_2 + \dots$), a solução também é uma soma: $x = G^{-1} b_1 + G^{-1} b_2 + \dots$. Isso é a superposição.
+
+O teorema de Thévenin sai daí. Ligue nos terminais uma fonte de corrente de teste $I$ puxando corrente para fora do terminal A. Pela superposição, a tensão nos terminais é a soma de duas partes: a que as fontes internas produzem sozinhas, com os terminais em aberto ($V_\text{Th}$), e a que a fonte de teste produz sozinha, com as internas desligadas ($-R_\text{Th} \cdot I$). Então $V = V_\text{Th} - R_\text{Th} \cdot I$, que é exatamente a equação de uma fonte $V_\text{Th}$ em série com um resistor $R_\text{Th}$.
+</DeepDive>
+
+<RealCase title="O cabo comprido que carrega devagar">
+
+Visto pelos dois fios que chegam ao celular, o carregador com o cabo é uma caixa com dois terminais: tem um equivalente de Thévenin. A tensão de Thévenin é a tensão sem carga, perto de 5 V. A resistência de Thévenin soma a resistência interna do carregador e a dos dois fios do cabo, ida e volta.
+
+Um medidor USB (aquele adaptador barato que mostra tensão e corrente) permite descobrir esse equivalente com duas leituras. Por exemplo, se ele mostra 5,1 V sem nada ligado e 4,6 V com o celular puxando 1 A:
+
+$$
+R_\text{Th} = \frac{5{,}1\,\text{V} - 4{,}6\,\text{V}}{1\,\text{A}} = 0{,}5\,\Omega
+$$
+
+Com esse equivalente dá para prever o que acontece se o celular tentar puxar 2 A: $5{,}1 - 0{,}5 \cdot 2 = 4{,}1\,\text{V}$ na ponta do cabo. O celular percebe a tensão caindo e reduz a corrente de carga para se proteger, e a carga fica lenta. A solução não está no carregador: é um cabo mais curto, com fios mais grossos, que diminui a resistência de Thévenin. Esses valores são só um exemplo; cada carregador e cada cabo tem os seus, e é justamente isso que as duas medições revelam.
+
+</RealCase>
+
+## Erros comuns
+
+- **Desligar a fonte do jeito errado.** Ao calcular $R_\text{Th}$, fonte de tensão vira **fio** e fonte de corrente vira **aberto**. Trocar uma pela outra dá uma resistência completamente diferente.
+- **Achar que o equivalente diz o que acontece dentro.** O equivalente acerta tudo o que se mede **nos terminais**. A potência dissipada no resistor de Thévenin não é a potência que esquenta os resistores do circuito original.
+- **Somar potências na superposição.** Some tensões ou correntes; a potência se calcula no final.
+- **Usar Thévenin com lâmpadas e diodos como se fossem resistores.** Eles não são lineares. O equivalente vale como aproximação só perto do ponto em que você mediu.
+- **Medir a resistência de Thévenin com o ohmímetro num circuito energizado.** O ohmímetro só funciona com o circuito desligado e as fontes retiradas ou substituídas, como você verá no módulo de medições. Com o circuito ligado, use o método das duas medições de tensão.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Um circuito tem tensão de Thévenin de 9 V e resistência de Thévenin de 3 kΩ. Qual é a tensão numa carga de 6 kΩ ligada aos terminais?',
+      answer: 6,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation: 'V = 9 V × 6 kΩ ÷ (3 kΩ + 6 kΩ) = 9 × 6/9 = 6 V.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma bateria mostra 12,6 V sem carga e 12,0 V fornecendo 6 A ao farol. Qual é a resistência de Thévenin (resistência interna) dela?',
+      answer: 0.1,
+      tolerance: 0.02,
+      unit: 'Ω',
+      explanation: 'R = (12,6 V − 12,0 V) ÷ 6 A = 0,6 ÷ 6 = 0,1 Ω.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Ao calcular a resistência de Thévenin, o que você faz com uma fonte de tensão ideal do circuito?',
+      options: [
+        {
+          text: 'Troca por um fio',
+          correct: true,
+          feedback: 'Uma fonte de tensão desligada mantém 0 V entre os terminais, como um fio.',
+        },
+        {
+          text: 'Troca por um circuito aberto',
+          feedback:
+            'Isso é o que se faz com uma fonte de corrente. A fonte de tensão desligada mantém 0 V, então vira fio.',
+        },
+        {
+          text: 'Deixa como está',
+          feedback:
+            'Com a fonte ligada, você mediria tensão, e não a resistência vista dos terminais. As fontes precisam ser desligadas.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Qual é o equivalente de Norton de uma fonte de 10 V em série com 5 Ω?',
+      options: [
+        {
+          text: 'Fonte de corrente de 2 A em paralelo com 5 Ω',
+          correct: true,
+          feedback: 'I = 10 V ÷ 5 Ω = 2 A, e o resistor é o mesmo, agora em paralelo.',
+        },
+        {
+          text: 'Fonte de corrente de 2 A em série com 5 Ω',
+          feedback:
+            'No equivalente de Norton o resistor fica em paralelo com a fonte de corrente. Em série, ele não mudaria nada na carga.',
+        },
+        {
+          text: 'Fonte de corrente de 50 A em paralelo com 5 Ω',
+          feedback: 'A corrente é V ÷ R = 10 ÷ 5 = 2 A, não V × R.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Num circuito com duas fontes, a fonte A sozinha produz +4 V num resistor e a fonte B sozinha produz −1 V no mesmo resistor. Qual é a tensão com as duas ligadas?',
+      answer: 3,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation: 'Pela superposição, as contribuições se somam com sinal: 4 V + (−1 V) = 3 V.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Pela superposição, a potência num resistor com duas fontes é a soma das potências que cada fonte produziria sozinha.',
+      answer: false,
+      explanation:
+        'A potência depende do quadrado da corrente e não se soma. Some as tensões ou as correntes e calcule a potência no final.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem os passos para descobrir o equivalente de uma fonte real por medição.',
+      items: [
+        'Medir a tensão nos terminais sem carga',
+        'Ligar uma carga conhecida',
+        'Medir a tensão e a corrente com a carga',
+        'Dividir a queda de tensão pela corrente',
+      ],
+      explanation:
+        'A tensão sem carga é a de Thévenin. A diferença entre ela e a tensão com carga, dividida pela corrente, é a resistência de Thévenin.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Visto de dois terminais, qualquer circuito linear de fontes e resistores equivale a **uma fonte de tensão em série com um resistor** (Thévenin) ou a **uma fonte de corrente em paralelo com um resistor** (Norton).
+- $V_\text{Th}$ é a tensão em aberto; $R_\text{Th}$ é a resistência vista dos terminais com as fontes desligadas (tensão vira fio, corrente vira aberto); $I_N = V_\text{Th} / R_\text{Th}$.
+- Numa fonte real, dá para achar o equivalente com **duas medições**: sem carga e com uma carga conhecida.
+- **Superposição:** num circuito linear, cada tensão ou corrente é a soma das contribuições de cada fonte sozinha. Não vale para potência.
+- O equivalente só descreve o que acontece **nos terminais**, e só vale com exatidão para componentes lineares.
+
+Na próxima aula, a última do módulo, você vai usar o equivalente de Thévenin para responder uma pergunta prática: que carga tira a maior potência possível de uma fonte? É a [máxima transferência de potência](../09-maxima-transferencia-de-potencia/).

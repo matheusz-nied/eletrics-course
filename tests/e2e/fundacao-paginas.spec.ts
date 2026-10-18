@@ -39,6 +39,8 @@ test.describe('every page', () => {
   }) => {
     const paths = await crawl(page);
     expect(paths).toContain(BASE);
+    // The site grows with every module: allow about a second per page.
+    test.setTimeout(30_000 + paths.length * 1_000);
 
     for (const path of paths) {
       await test.step(path, async () => {

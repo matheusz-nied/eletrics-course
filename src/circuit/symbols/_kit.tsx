@@ -117,8 +117,11 @@ export function Arrow({
   filled?: boolean;
 }) {
   const a = Math.atan2(y2 - y1, x2 - x1);
-  const p1 = [x2 - size * Math.cos(a - 0.45), y2 - size * Math.sin(a - 0.45)];
-  const p2 = [x2 - size * Math.cos(a + 0.45), y2 - size * Math.sin(a + 0.45)];
+  // Rounded so the server and the browser print the same path: their sin/cos
+  // can differ in the last digit, which React reports as a hydration mismatch.
+  const r = (n: number) => Math.round(n * 1000) / 1000;
+  const p1 = [r(x2 - size * Math.cos(a - 0.45)), r(y2 - size * Math.sin(a - 0.45))];
+  const p2 = [r(x2 - size * Math.cos(a + 0.45)), r(y2 - size * Math.sin(a + 0.45))];
   return (
     <>
       <path d={`M${x1} ${y1}L${x2} ${y2}`} />
