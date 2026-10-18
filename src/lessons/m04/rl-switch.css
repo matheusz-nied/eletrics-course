@@ -1,0 +1,9 @@
+/*
+ * Lesson 4.5 uses the changeover switch to put the battery in or take it out
+ * of the RL loop. Its NF/NA contact names mean nothing here, and visible text
+ * inside a schematic control fails axe's label-content-name-mismatch check,
+ * so they are hidden in this circuit (as in ../m03/probe-switch.css).
+ */
+[data-simulation='m04/rl-carga'] .sch-el[data-type='switch-spdt'] .sym-pin-text {
+  display: none;
+}
