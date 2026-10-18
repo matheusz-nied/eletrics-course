@@ -148,6 +148,12 @@ Componentes pequenos não têm espaço para escrever "4,7 kΩ". Por isso usam c�
 - **Baterias.** "12 V 7 Ah" diz a tensão e a carga: 7 Ah (ampère-hora) é a carga de 7 A durante uma hora, 25.200 coulombs. A energia guardada é tensão vezes carga, perto de $12 \times 7 = 84\,\text{Wh}$. O "mAh" das baterias de celular é a mesma ideia, mil vezes menor.
 - **Plaqueta de motor.** Traz tensão, frequência, corrente, rotação (rpm) e a potência mecânica no eixo, muitas vezes em CV ou HP. Um CV vale cerca de 735,5 W, então um motor de 1/4 CV entrega cerca de 184 W no eixo. A potência elétrica que ele puxa da rede é maior, porque parte da energia vira calor no próprio motor.
 
+<Model3D
+  part="ceramic-capacitor"
+  props={{ farads: 1e-7 }}
+  caption="Capacitor cerâmico de 100 nF. Gire a peça e procure o código 104 impresso no disco: 10 seguido de quatro zeros, em picofarads."
+/>
+
 A leitura de cores dos resistores e os tipos de capacitores aparecem com calma nas aulas <LinkAula id="m04-passivos/01-resistores" /> e <LinkAula id="m04-passivos/03-capacitores" />. A identificação das peças numa placa de verdade, como a central do portão, fica para a aula <LinkAula id="m14-placas/03-identificando-componentes" />.
 
 ## Exemplo resolvido: o mesmo resistor em vários tamanhos
