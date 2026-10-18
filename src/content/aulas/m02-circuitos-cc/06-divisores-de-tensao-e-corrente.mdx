@@ -159,15 +159,15 @@ No programa, o microcontrolador lê a tensão na entrada e multiplica por 5 para
 
 A luz de jardim que acende sozinha ao anoitecer, e o relé fotoelétrico vendido em loja de material elétrico para postes e fachadas, têm um sensor de luz. O mais simples é o <Term id="ldr">LDR</Term>, um resistor cuja resistência cai quando recebe luz: algumas centenas de ohms sob luz forte, centenas de quilo-ohms ou mais no escuro (valores típicos; mudam bastante de um modelo para outro).
 
-Sozinho, o LDR só muda de resistência. Para virar um sinal que um circuito consegue usar, ele entra num divisor de tensão. Na simulação, o LDR está embaixo, entre a saída e o negativo, com um resistor fixo de 10 kΩ em cima, tudo em 5 V.
+Sozinho, o LDR só muda de resistência. Para virar um sinal que um circuito consegue usar, ele entra num divisor de tensão. Na simulação, o LDR está embaixo, entre a saída e o negativo, com um resistor fixo de 10 kΩ em cima, tudo em 5 V. O controle muda a quantidade de luz que chega ao LDR, em lux (lx): cerca de 2.000 lx num dia nublado, algumas dezenas no fim da tarde, menos de 1 lx numa noite de lua.
 
 <Simulation circuit="m02/luz-noturna" instruments={['multimetro']} />
 
-1. Com o LDR em 500 Ω (dia claro), leia a tensão no ponto do meio.
-2. Arraste a resistência do LDR para cima, como se estivesse escurecendo. Em que valor do LDR a saída chega a 2,5 V?
-3. Leve o LDR a 1 MΩ (noite). Quanto vale a saída?
+1. Com 2.000 lx (dia), leia a tensão no ponto do meio. Abra a "Tabela de valores" e veja a resistência do LDR.
+2. Arraste a luz para baixo, como se estivesse escurecendo. Com quanta luz a saída chega a 2,5 V? Quanto vale o LDR nesse ponto?
+3. Leve a luz ao mínimo (noite escura). Quanto vale a saída?
 
-De dia, a saída fica em cerca de 0,24 V. A 2,5 V, o LDR vale 10 kΩ, igual ao resistor de cima (metade da tensão para cada um). À noite, a saída passa de 4,9 V.
+De dia, o LDR fica perto de 490 Ω e a saída em cerca de 0,23 V. A saída chega a 2,5 V por volta de 27 lx, a luz do fim da tarde, quando o LDR vale 10 kΩ, igual ao resistor de cima (metade da tensão para cada um). No escuro, o LDR chega a 1 MΩ e a saída passa de 4,9 V. O LDR da simulação segue uma curva típica; o de verdade muda bastante de um modelo para outro, e é por isso que os circuitos reais têm um ajuste.
 
 O resto da luz noturna é um circuito de comando: um transistor ou um comparador "olha" essa tensão e, quando ela passa de um limite (2,5 V no nosso exemplo), liga um relé que acende a lâmpada. Você vai montar essa parte nos módulos de semicondutores. Os circuitos reais têm também uma pequena folga (a luz acende com uma tensão e só apaga com outra um pouco diferente) para não ficar piscando no lusco-fusco.
 

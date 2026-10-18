@@ -1,8 +1,8 @@
 import { defineCircuit } from '../../engine';
 
 /**
- * 02.6, real case: the sensing half of an automatic night light. The LDR is
- * a resistor with a log slider until the engine has the `ldr` device.
+ * 02.6, real case: the sensing half of an automatic night light, with the
+ * light level on the LDR as a log slider.
  */
 export default defineCircuit({
   id: 'm02/luz-noturna',
@@ -23,19 +23,19 @@ export default defineCircuit({
     { id: 'R1', type: 'resistor', a: [12, 0], b: [12, 8], params: { resistance: 10000 } },
     {
       id: 'LDR',
-      type: 'resistor',
+      type: 'ldr',
       a: [12, 8],
       b: [12, 16],
       label: 'LDR',
-      params: { resistance: 500 },
+      params: { lux: 2000 },
       control: {
-        param: 'resistance',
-        label: 'Resistência do LDR (cai com a luz)',
+        param: 'lux',
+        label: 'Luz sobre o LDR',
         kind: 'slider',
-        min: 200,
-        max: 1000000,
+        min: 0.01,
+        max: 100000,
         log: true,
-        unit: 'Ω',
+        unit: 'lx',
       },
     },
     {
@@ -62,21 +62,22 @@ export default defineCircuit({
   goals: [
     {
       id: 'dia',
-      description: 'De dia (LDR em 500 Ω), a saída fica em cerca de 0,24 V: lâmpada apagada.',
-      check: { readout: 'VS', op: 'between', value: [0.23, 0.25] },
+      description:
+        'De dia (2.000 lx, LDR perto de 500 Ω), a saída fica em cerca de 0,23 V: lâmpada apagada.',
+      check: { readout: 'VS', op: 'between', value: [0.22, 0.25] },
     },
     {
       id: 'limiar',
       description:
-        'Encontre a resistência do LDR em que a saída chega a 2,5 V, o ponto de acender.',
+        'Diminua a luz até a saída chegar a 2,5 V, o ponto de acender. Quanto vale o LDR nesse ponto?',
       check: { readout: 'VS', op: 'between', value: [2.45, 2.55] },
-      solution: { 'LDR.resistance': 10000 },
+      solution: { 'LDR.lux': 26.9 },
     },
     {
       id: 'noite',
-      description: 'No escuro (LDR em 1 MΩ), a saída passa de 4,9 V.',
+      description: 'No escuro (luz no mínimo, LDR em 1 MΩ), a saída passa de 4,9 V.',
       check: { readout: 'VS', op: '>', value: 4.9 },
-      solution: { 'LDR.resistance': 1000000 },
+      solution: { 'LDR.lux': 0.01 },
     },
   ],
 });
