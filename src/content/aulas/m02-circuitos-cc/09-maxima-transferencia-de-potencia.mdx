@@ -21,7 +21,7 @@ import PowerExtremes from '../../../lessons/m02/figures/PowerExtremes.astro';
 import { LESSON_CURVE } from '../../../lessons/m02/power-curve';
 
 <Callout type="nota" title="Aula avançada">
-Esta aula é de nível avançado (A). Ela responde uma pergunta clássica de projeto, mas você pode pular direto para o módulo 3, Medições e instrumentos, sem perder a sequência do curso.
+Esta aula é de nível avançado (A). Ela responde uma pergunta clássica de projeto, mas você pode pular direto para o módulo <LinkAula id="m03-medicoes" />, sem perder a sequência do curso.
 </Callout>
 
 Na [primeira aula do módulo](../01-o-circuito-eletrico/), uma bateria de 9 V em curto com moedas entregava mais de 5 A, mas as moedas recebiam só 1,3 W; quase toda a energia virava calor dentro da bateria. Com a carga aberta, ao contrário, a tensão é máxima e a corrente é zero: potência nenhuma. Se os dois extremos dão zero, existe uma carga, no meio do caminho, que tira **a maior potência possível** da fonte. Qual é ela? E será que vale a pena trabalhar nesse ponto?
@@ -141,7 +141,7 @@ Aqui o raciocínio se inverte em relação à rede elétrica: a luz do sol é de
 ## Erros comuns
 
 - **Achar que máxima potência é a mesma coisa que máxima eficiência.** No pico de potência, metade da energia se perde dentro da fonte. A eficiência só cresce com a carga.
-- **"Casar" o alto-falante com o amplificador.** O "4 Ω" ou "8 Ω" impresso num amplificador é a **menor** impedância de alto-falante que ele aguenta, não um pedido de casamento. A resistência de saída de um amplificador moderno é muito menor que isso, de propósito, para controlar bem o alto-falante. Ligar um alto-falante de impedância menor que a indicada sobrecarrega o amplificador e pode queimá-lo. (Impedância é a "resistência" em corrente alternada; você vai vê-la no módulo de corrente alternada.)
+- **"Casar" o alto-falante com o amplificador.** O "4 Ω" ou "8 Ω" impresso num amplificador é a **menor** impedância de alto-falante que ele aguenta, não um pedido de casamento. A resistência de saída de um amplificador moderno é muito menor que isso, de propósito, para controlar bem o alto-falante. Ligar um alto-falante de impedância menor que a indicada sobrecarrega o amplificador e pode queimá-lo. Impedância é a "resistência" em corrente alternada, assunto da aula <LinkAula id="m06-corrente-alternada/04-reatancia-e-impedancia" />.
 - **Achar que um curto "tira o máximo" da bateria.** No curto, a corrente é máxima, mas a potência vai toda para o calor dentro da própria bateria e nos fios, não para nenhuma carga útil. É perigoso e não aproveita nada.
 - **Aplicar o teorema com a carga fixa.** O teorema diz qual **carga** tira mais potência de uma **fonte** dada. Se a carga é fixa e você pode escolher a fonte, a melhor fonte é a de menor resistência interna possível, nunca uma "casada".
 
@@ -244,4 +244,4 @@ Aqui o raciocínio se inverte em relação à rede elétrica: a luz do sol é de
 - **Em energia** (rede, baterias, carregadores), as fontes têm resistência interna muito menor que as cargas, para desperdiçar pouco e manter a tensão estável.
 - **Em sinais** (antenas, sensores) e onde a fonte é de graça (painel solar com MPPT), procura-se o ponto de máxima potência.
 
-Esta é a última aula do módulo de circuitos de corrente contínua. No próximo módulo, Medições e instrumentos, você vai aprender a conferir tudo isso na bancada, começando pelo multímetro: como ele é por dentro e como medir tensão, corrente e resistência sem se machucar nem queimar o instrumento.
+Esta é a última aula do módulo de circuitos de corrente contínua. No próximo módulo, <LinkAula id="m03-medicoes" />, você vai aprender a conferir tudo isso na bancada, começando pelo multímetro: como ele é por dentro e como medir tensão, corrente e resistência sem se machucar nem queimar o instrumento.
