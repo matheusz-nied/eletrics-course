@@ -35,12 +35,12 @@ export default defineDevice({
   links: { gate: ['gate-mechanics'] },
   create({ params, pins: [a, b] }) {
     let track: Track | undefined;
-    let closed = false;
     const sense = () => {
       if (bool(params, 'defective')) return false;
       if (!track) return bool(params, 'closed');
       return Math.abs(track.position - num(params, 'magnet')) <= num(params, 'zone');
     };
+    let closed = sense();
     const g = () => 1 / (closed ? R_REED : R_OPEN);
     let current = 0;
     return {

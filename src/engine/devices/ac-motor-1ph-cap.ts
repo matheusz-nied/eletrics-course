@@ -113,7 +113,8 @@ export default defineDevice({
     let protector = false;
     let humming = false;
 
-    const scale = () => (num(params, 'voltage') / REF.voltage) ** 2 * (REF.power / num(params, 'power'));
+    const scale = () =>
+      (num(params, 'voltage') / REF.voltage) ** 2 * (REF.power / num(params, 'power'));
     const circuit = (w: number): EquivalentCircuit => {
       const k = scale();
       const x = (k * w) / REF_OMEGA;
@@ -191,8 +192,12 @@ export default defineDevice({
         const m = twoPhase(circuit(omega), slip(speed));
         torque = protector ? 0 : twoPhaseTorque(m, ia, ib, syncSpeed());
         power =
-          va.re * ia.re + va.im * ia.im + vb.re * ib.re + vb.im * ib.im +
-          (x.v(w1) - x.v(star)) * iaDc + (x.v(w2) - x.v(star)) * ibDc;
+          va.re * ia.re +
+          va.im * ia.im +
+          vb.re * ib.re +
+          vb.im * ib.im +
+          (x.v(w1) - x.v(star)) * iaDc +
+          (x.v(w2) - x.v(star)) * ibDc;
         if (!ctx.commit || step.dt <= 0) return;
         const dt = step.dt;
 
@@ -232,11 +237,15 @@ export default defineDevice({
           );
         } else if (protector && tWinding <= PROTECTOR_CLOSE) {
           protector = false;
-          ctx.emit('info', `O protetor térmico do motor ${id} fechou de novo: o enrolamento esfriou.`);
+          ctx.emit(
+            'info',
+            `O protetor térmico do motor ${id} fechou de novo: o enrolamento esfriou.`,
+          );
         }
         const rated = num(params, 'voltage');
         const energized =
-          !protector && Math.max(Math.hypot(va.re, va.im), Math.hypot(vb.re, vb.im)) > ENERGIZED * rated;
+          !protector &&
+          Math.max(Math.hypot(va.re, va.im), Math.hypot(vb.re, vb.im)) > ENERGIZED * rated;
         humming = energized && Math.abs(speed) < HUM_SPEED * syncSpeed();
       },
       pinCurrents(_x, out) {

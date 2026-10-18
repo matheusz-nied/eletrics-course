@@ -72,7 +72,8 @@ export default defineDevice({
       },
     };
     /** Motor speed (rad/s) per gate speed (m/s), with the mounting side. */
-    const k = () => (num(params, 'ratio') / num(params, 'pinion')) * (bool(params, 'invert') ? -1 : 1);
+    const k = () =>
+      (num(params, 'ratio') / num(params, 'pinion')) * (bool(params, 'invert') ? -1 : 1);
     /** Force of the motor at the rack (N) at gate speed `vel`, fan losses taken. */
     const drive = (vel: number) => {
       if (!shaft) return 0;
@@ -148,7 +149,12 @@ export default defineDevice({
         if (shaft && !released) shaft.speed = v * kk;
         if (blocked && !warned) {
           warned = true;
-          const where = x <= AT_END ? 'no batente de fechamento' : x >= num(params, 'length') - AT_END ? 'no batente de abertura' : `a ${formatNumber(x, 3)} m`;
+          const where =
+            x <= AT_END
+              ? 'no batente de fechamento'
+              : x >= num(params, 'length') - AT_END
+                ? 'no batente de abertura'
+                : `a ${formatNumber(x, 3)} m`;
           ctx.emit('info', `O portão ${id} está parado ${where} com o motor empurrando.`);
         } else if (!blocked) warned = false;
       },

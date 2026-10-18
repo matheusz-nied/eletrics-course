@@ -88,7 +88,12 @@ export function gateCircuit(opts: Options = {}): CircuitDoc {
     // The lock takes 1 A: a medium-power transistor with more base current.
     ...driver('TR', 'LK', 220, { beta: 100, power: 1.25, vceo: 80 }),
     { id: 'LOCK', type: 'electric-lock', nodes: ['V12', 'LK'] },
-    { id: 'G1', type: 'gate-mechanics', nodes: {}, params: { motor: 'M1', position: opts.position ?? 0 } },
+    {
+      id: 'G1',
+      type: 'gate-mechanics',
+      nodes: {},
+      params: { motor: 'M1', position: opts.position ?? 0 },
+    },
     {
       id: 'FCA',
       type: 'reed-switch',
@@ -101,7 +106,11 @@ export function gateCircuit(opts: Options = {}): CircuitDoc {
       nodes: ['FCF', '0'],
       params: { gate: 'G1', magnet: 0.03 },
     },
-    { id: 'PH', type: 'photocell', nodes: { vp: 'V12', gnd: '0', nc: 'FOTO', com: '0', no: 'PHNO' } },
+    {
+      id: 'PH',
+      type: 'photocell',
+      nodes: { vp: 'V12', gnd: '0', nc: 'FOTO', com: '0', no: 'PHNO' },
+    },
     { id: 'BOT', type: 'push-button', nodes: ['BOT', '0'] },
     { id: 'PROG', type: 'push-button', nodes: ['PROG', '0'] },
     { id: 'J1', type: 'jumper', nodes: ['J1', '0'], params: { fitted: false } },
@@ -112,7 +121,12 @@ export function gateCircuit(opts: Options = {}): CircuitDoc {
       nodes: { a1: 'INV', b1: '0', a2: 'LUZ', b2: '0' },
       params: { s1: opts.inv ?? false },
     },
-    { id: 'PAUSA', type: 'trimpot', nodes: { a: '0', w: 'PAUSA', b: 'V5' }, params: { position: 0 } },
+    {
+      id: 'PAUSA',
+      type: 'trimpot',
+      nodes: { a: '0', w: 'PAUSA', b: 'V5' },
+      params: { position: 0 },
+    },
     {
       id: 'FORCA',
       type: 'trimpot',

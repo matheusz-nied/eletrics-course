@@ -513,7 +513,8 @@ export class Simulator {
     }
     this.acRe.set(cm.xRe);
     this.acIm.set(cm.xIm);
-    for (const el of this.elements) el.log!.pinCurrents(el.pins, cm.xRe, cm.xIm, el.acRe!, el.acIm!);
+    for (const el of this.elements)
+      el.log!.pinCurrents(el.pins, cm.xRe, cm.xIm, el.acRe!, el.acIm!);
   }
 
   /** A phasor solution; `pins` reads the pin currents of the element in `acElement`. */

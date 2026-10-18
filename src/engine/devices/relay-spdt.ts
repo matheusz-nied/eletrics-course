@@ -108,7 +108,9 @@ export default defineDevice({
         const travel = step.dt / num(params, 'travelTime');
         position = energized ? Math.min(1, position + travel) : Math.max(0, position - travel);
         // Contacts: heating with the square of the current; too much welds them shut.
-        const ic = Math.sqrt(Math.max(iNc ** 2 + acSquared(step, 3), iNo ** 2 + acSquared(step, 4)));
+        const ic = Math.sqrt(
+          Math.max(iNc ** 2 + acSquared(step, 3), iNo ** 2 + acSquared(step, 4)),
+        );
         contactHeat = relax(contactHeat, ic * ic, step.dt, CONTACT_TAU);
         const rating = num(params, 'contactRating');
         if (!welded && noClosed() && contactHeat >= (K_WELD * rating) ** 2) {

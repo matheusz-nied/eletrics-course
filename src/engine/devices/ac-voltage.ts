@@ -57,7 +57,10 @@ export default defineDevice({
         let im = 0;
         if (ctx.phasor) {
           const omega = 2 * Math.PI * num(params, 'frequency');
-          const rms = Math.abs(omega - ctx.omega) <= 1e-6 * ctx.omega ? num(params, 'amplitude') / Math.SQRT2 : 0;
+          const rms =
+            Math.abs(omega - ctx.omega) <= 1e-6 * ctx.omega
+              ? num(params, 'amplitude') / Math.SQRT2
+              : 0;
           const phase = (num(params, 'phase') * Math.PI) / 180;
           re = rms * Math.cos(phase);
           im = rms * Math.sin(phase);

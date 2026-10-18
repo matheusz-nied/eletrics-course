@@ -51,8 +51,8 @@ export function implicitStep(
   const k = mass / dt;
   const g = (v: number) => k * (v - v0) - drive(v) + Math.sign(v) * coulomb(v);
   // Sticking: the residual changes sign across zero.
-  const below = k * (-v0) - drive(0) - coulomb(0);
-  const above = k * (-v0) - drive(0) + coulomb(0);
+  const below = k * -v0 - drive(0) - coulomb(0);
+  const above = k * -v0 - drive(0) + coulomb(0);
   if (below <= 0 && above >= 0) return 0;
   let lo: number;
   let hi: number;

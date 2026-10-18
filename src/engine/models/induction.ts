@@ -63,7 +63,11 @@ export function twoPhaseCurrents(m: TwoPhase, va: Complex, vb: Complex): [Comple
   const dr = zs.re * zs.re - zs.im * zs.im - (zd.re * zd.re - zd.im * zd.im);
   const di = 2 * zs.re * zs.im - 2 * zd.re * zd.im;
   const d = dr * dr + di * di;
-  if (!(d > 0)) return [{ re: 0, im: 0 }, { re: 0, im: 0 }];
+  if (!(d > 0))
+    return [
+      { re: 0, im: 0 },
+      { re: 0, im: 0 },
+    ];
   // Ia = (zs·Va + j·zd·Vb)/det, Ib = (zs·Vb − j·zd·Va)/det
   const jzdVbRe = -(zd.re * vb.im + zd.im * vb.re);
   const jzdVbIm = zd.re * vb.re - zd.im * vb.im;

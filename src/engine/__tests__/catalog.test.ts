@@ -136,7 +136,8 @@ describe('every device in each analysis it runs in', () => {
         for (let i = 0; i < (analysis.kind === 'transient' ? 200 : 20); i++) sim.step();
         const { readouts, nodeVoltages } = sim.frame();
         for (const [key, value] of Object.entries(readouts))
-          if (typeof value === 'number') expect(Number.isNaN(value), `${analysis.kind} ${key}`).toBe(false);
+          if (typeof value === 'number')
+            expect(Number.isNaN(value), `${analysis.kind} ${key}`).toBe(false);
         for (const v of Object.values(nodeVoltages)) expect(Number.isFinite(v)).toBe(true);
       }
       if (!runs.includes('ac-sweep')) return;

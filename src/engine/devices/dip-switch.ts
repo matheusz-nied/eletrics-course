@@ -5,7 +5,8 @@ import { R_CLOSED, R_OPEN } from '../models/constants';
 const MAX = 8;
 
 const switchParams: Record<string, ParamInfo> = {};
-for (let i = 1; i <= MAX; i++) switchParams[`s${i}`] = { default: false, label: `Chave ${i} ligada` };
+for (let i = 1; i <= MAX; i++)
+  switchParams[`s${i}`] = { default: false, label: `Chave ${i} ligada` };
 
 function pinsFor(n: number): PinInfo[] {
   const pins: PinInfo[] = [];
