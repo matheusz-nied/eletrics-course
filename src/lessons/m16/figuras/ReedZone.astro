@@ -1,0 +1,316 @@
+---
+/**
+ * Lesson 16.4: the reed switch in the motor cover and the magnet on the
+ * rack, far (contact open, pin at 5 V) and near (contact closed, pin at
+ * 0 V), and the reed zone along the travel. The 3 cm zone is the one of the
+ * central virtual (src/lessons/m16/central/plant.ts, `zonaReed`).
+ */
+import Figure from '../../../components/Figure.astro';
+
+interface Props {
+  caption?: string;
+}
+
+const { caption } = Astro.props;
+
+const panels = [
+  { ox: 0, title: 'Ímã longe', mx: 78, closed: false },
+  { ox: 370, title: 'Ímã perto', mx: 175, closed: true },
+];
+const teeth = Array.from({ length: 25 }, (_, i) => 26 + i * 12);
+const ticks = [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6];
+const cm = (k: number) => 360 + k * 40;
+
+const alt =
+  'Dois desenhos lado a lado e uma escala embaixo. Em cada desenho, a cremalheira presa no portão passa por cima da tampa do motor, e dentro da tampa fica o reed switch, uma ampola de vidro com duas lâminas de metal. À esquerda, o ímã preso na cremalheira está longe do reed: as lâminas ficam separadas, o contato está aberto e o pino da central lê 5 volts. À direita, o ímã está logo acima do reed: o campo magnético atravessa a ampola, as lâminas se encostam, o contato fecha e o pino lê 0 volt. Uma seta marca a folga entre o ímã e a tampa do motor, que o manual define. Embaixo, uma escala da posição do ímã em relação ao reed, de 6 centímetros para um lado a 6 para o outro, mostra uma faixa de 3 centímetros para cada lado em que o contato fica fechado; fora dela, aberto.';
+---
+
+<Figure alt={alt} caption={caption}>
+  <svg class="rz" viewBox="0 0 720 344" width="720" height="344">
+    <defs>
+      <marker
+        id="rz-arrow"
+        viewBox="0 0 10 10"
+        refX="5"
+        refY="5"
+        markerWidth="6"
+        markerHeight="6"
+        orient="auto-start-reverse"
+      >
+        <path d="M0 0L10 5L0 10z" class="rz-arrowhead"></path>
+      </marker>
+    </defs>
+
+    {panels.map(({ ox, title, mx, closed }) => {
+      const rx = ox + 175;
+      const m = ox + mx;
+      return (
+        <g>
+          <text class="rz-title" x={ox + 175} y="20" text-anchor="middle">
+            {title}
+          </text>
+
+          {/* rack */}
+          <rect class="rz-rack" x={ox + 20} y="32" width="310" height="26" rx="2" />
+          {teeth.map((t) => (
+            <rect class="rz-tooth" x={ox + t} y="58" width="6" height="6" />
+          ))}
+          <text class="rz-note" x={ox + 30} y="50">
+            cremalheira (anda com o portão)
+          </text>
+
+          {/* magnet on its bracket */}
+          <rect class="rz-bracket" x={m - 3} y="64" width="6" height="12" />
+          <rect class="rz-north" x={m - 24} y="76" width="24" height="18" rx="2" />
+          <rect class="rz-south" x={m} y="76" width="24" height="18" rx="2" />
+          <text class="rz-pole" x={m - 12} y="89" text-anchor="middle">
+            N
+          </text>
+          <text class="rz-pole" x={m + 12} y="89" text-anchor="middle">
+            S
+          </text>
+          <text class="rz-note" x={m + 30} y="90">
+            ímã
+          </text>
+
+          {/* gap between magnet and cover */}
+          {closed && (
+            <>
+              <line
+                class="rz-dim"
+                x1={m + 62}
+                y1="96"
+                x2={m + 62}
+                y2="122"
+                marker-start="url(#rz-arrow)"
+                marker-end="url(#rz-arrow)"
+              />
+              <text class="rz-note" x={m + 70} y="106">
+                folga até
+              </text>
+              <text class="rz-note" x={m + 70} y="120">
+                a tampa
+              </text>
+            </>
+          )}
+
+          {/* motor cover with the reed inside */}
+          <rect class="rz-cover" x={ox + 40} y="126" width="270" height="88" rx="10" />
+          <text class="rz-muted" x={ox + 300} y="207" text-anchor="end">
+            tampa do motor
+          </text>
+          <rect class="rz-glass" x={rx - 46} y="138" width="92" height="16" rx="8" />
+          {/* field lines through the reed when it is near */}
+          {closed && (
+            <>
+              <path
+                class="rz-field"
+                d={`M${m - 20} 94 C${m - 80} 136 ${m - 50} 160 ${m} 160 C${m + 50} 160 ${m + 80} 136 ${m + 20} 94`}
+              />
+              <path
+                class="rz-field"
+                d={`M${m - 12} 94 C${m - 46} 124 ${m - 30} 152 ${m} 152 C${m + 30} 152 ${m + 46} 124 ${m + 12} 94`}
+              />
+            </>
+          )}
+
+          {closed ? (
+            <>
+              <line class="rz-blade" x1={rx - 62} y1="146" x2={rx + 8} y2="146" />
+              <line class="rz-blade" x1={rx + 62} y1="146" x2={rx - 8} y2="146" />
+              <circle class="rz-contact" cx={rx} cy="146" r="3.5" />
+            </>
+          ) : (
+            <>
+              <line class="rz-blade" x1={rx - 62} y1="146" x2={rx + 8} y2="143" />
+              <line class="rz-blade" x1={rx + 62} y1="146" x2={rx - 8} y2="149" />
+            </>
+          )}
+          <polyline class="rz-wire" points={`${rx - 62},146 ${rx - 74},146 ${rx - 74},176`} />
+          <polyline class="rz-wire" points={`${rx + 62},146 ${rx + 74},146 ${rx + 74},176`} />
+          <text class="rz-note" x={rx} y="174" text-anchor="middle">
+            reed switch
+          </text>
+          <text class="rz-muted" x={rx} y="190" text-anchor="middle">
+            fios para a central
+          </text>
+
+          <circle class={closed ? 'rz-dot rz-dot--on' : 'rz-dot'} cx={ox + 88} cy="230" r="6" />
+          <text class="rz-state" x={ox + 100} y="235">
+            {closed ? 'contato fechado: o pino lê 0 V' : 'contato aberto: o pino lê 5 V'}
+          </text>
+        </g>
+      );
+    })}
+
+    <line class="rz-divider" x1="360" y1="8" x2="360" y2="240"></line>
+
+    <!-- reed zone along the travel -->
+    <text class="rz-title" x="20" y="270">
+      Zona do reed
+    </text>
+    <text class="rz-muted" x="124" y="270">
+      (onde o contato fica fechado enquanto o ímã passa)
+    </text>
+    <rect class="rz-zone" x={cm(-3)} y="284" width={cm(3) - cm(-3)} height="20" rx="3"></rect>
+    <text class="rz-zone-label" x="360" y="298" text-anchor="middle">
+      fechado
+    </text>
+    <text class="rz-muted" x={cm(-5)} y="298" text-anchor="middle">
+      aberto
+    </text>
+    <text class="rz-muted" x={cm(5)} y="298" text-anchor="middle">
+      aberto
+    </text>
+    <line class="rz-axis" x1={cm(-6) - 10} y1="306" x2={cm(6) + 10} y2="306"></line>
+    {ticks.map((k) => (
+      <>
+        <line class="rz-axis" x1={cm(k)} y1="306" x2={cm(k)} y2={k % 3 === 0 ? 314 : 311} />
+        {k % 3 === 0 && (
+          <text class="rz-tick" x={cm(k)} y="326" text-anchor="middle">
+            {k < 0 ? `−${-k}` : `${k}`}
+          </text>
+        )}
+      </>
+    ))}
+    <text class="rz-muted" x="360" y="340" text-anchor="middle">
+      posição do ímã em relação ao reed (cm)
+    </text>
+  </svg>
+</Figure>
+
+<style>
+  .rz {
+    width: 100%;
+    min-width: 34rem;
+    height: auto;
+  }
+
+  .rz-title {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .rz-note,
+  .rz-tick {
+    fill: var(--fg);
+    font-size: 11px;
+  }
+
+  .rz-muted {
+    fill: var(--fg-muted);
+    font-size: 11px;
+  }
+
+  .rz-state {
+    fill: var(--fg);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .rz-rack {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .rz-tooth {
+    fill: var(--fg-muted);
+  }
+
+  .rz-bracket {
+    fill: var(--fg-subtle);
+  }
+
+  .rz-north {
+    fill: color-mix(in oklab, var(--danger) 40%, var(--surface));
+    stroke: var(--danger);
+  }
+
+  .rz-south {
+    fill: color-mix(in oklab, var(--accent) 40%, var(--surface));
+    stroke: var(--accent);
+  }
+
+  .rz-pole {
+    fill: var(--fg);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .rz-field {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 4;
+  }
+
+  .rz-dim {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .rz-arrowhead {
+    fill: var(--fg-muted);
+  }
+
+  .rz-cover {
+    fill: var(--surface);
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+  }
+
+  .rz-glass {
+    fill: var(--accent-soft);
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+
+  .rz-blade,
+  .rz-wire {
+    fill: none;
+    stroke: var(--copper);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+
+  .rz-wire {
+    stroke-width: 2;
+  }
+
+  .rz-contact {
+    fill: var(--success);
+  }
+
+  .rz-dot {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+  }
+
+  .rz-dot--on {
+    fill: var(--success);
+    stroke: var(--success);
+  }
+
+  .rz-divider {
+    stroke: var(--border);
+    stroke-dasharray: 4 4;
+  }
+
+  .rz-zone {
+    fill: color-mix(in oklab, var(--success) 28%, var(--surface));
+    stroke: var(--success);
+  }
+
+  .rz-zone-label {
+    fill: var(--fg);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .rz-axis {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+</style>

@@ -1,0 +1,27 @@
+---
+/**
+ * Placeholder for an interactive part that another front has not delivered
+ * yet (3D part, 3D scene, wiring exercise on the bench). It renders the same
+ * "em construção" block as the course stubs, so it can be swapped for the
+ * real component once the part, scene or scenario exists, without breaking
+ * the build in the meantime.
+ */
+import UnderConstruction from '../../../components/UnderConstruction.astro';
+
+interface Props {
+  component: 'Model3D' | 'Scene3D' | 'WiringExercise';
+  /** Part, scene or scenario id it will show. */
+  id: string;
+  height?: number;
+}
+
+const LABELS = {
+  Model3D: 'Modelo 3D',
+  Scene3D: 'Cena 3D',
+  WiringExercise: 'Exercício de ligação',
+} as const;
+
+const { component, id, height = 320 } = Astro.props;
+---
+
+<UnderConstruction component={component} label={LABELS[component]} detail={id} height={height} />

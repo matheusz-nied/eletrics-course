@@ -1,0 +1,304 @@
+---
+titulo: Controle remoto e receptor
+modulo: m16-portao
+ordem: 6
+nivel: I
+duracaoMin: 35
+objetivos:
+  - Explicar o que o controle manda pelo rádio de 433,92 MHz e o que vai num quadro
+  - Diferenciar code learning de rolling code e explicar por que um código copiado é recusado
+  - Calcular o comprimento de uma antena de um quarto de onda
+  - Cadastrar e apagar controles na CD-1 e achar o procedimento no manual de uma central real
+  - Diagnosticar um controle que só funciona de perto
+prerequisitos:
+  - m13-sem-fio/01-ondas-eletromagneticas
+  - m13-sem-fio/02-antenas
+  - m13-sem-fio/03-controles-remotos
+  - m16-portao/03-a-central-por-dentro
+tags: [portão, controle remoto, 433 MHz, OOK, rolling code, code learning, antena, receptor]
+seguranca: rede
+---
+
+import { lessonUrl } from '../../../lib/url';
+import CentralVirtual from '../../../lessons/m16/ui/CentralVirtual';
+import PlacaCD1 from '../../../lessons/m16/figuras/PlacaCD1.astro';
+import RemoteCodeFrames from '../../../lessons/m16/figuras/RemoteCodeFrames.astro';
+
+Você aperta o controle na esquina e nada acontece. Chega na frente do portão, aperta de novo, e ele abre. Ou então compra um controle novo, aperta e nada: ninguém ensinou a central a reconhecer esse controle. Por trás do botão de plástico há um rádio, um código e uma memória, e cada um deles explica um desses problemas.
+
+## O controle é um pequeno rádio
+
+O controle do portão é um transmissor de rádio de baixa potência. Todas as centrais lidas para este curso que informam a frequência usam **433,92 MHz** (a Rossi escreve "433 MHz"). O receptor fica na central, e a <a href={lessonUrl('m16-portao/03-a-central-por-dentro')}>aula 16.3</a> mostrou onde ele está na placa.
+
+Para mandar informação, o controle precisa "desenhar" bits na onda de rádio. O jeito mais simples se chama **OOK** (*on-off keying*, liga e desliga): a portadora de 433,92 MHz fica ligada para o bit 1 e desligada para o bit 0. A Peccinin informa no manual da CP 4010F que usa OOK a 2,5 kbps (2.500 bits por segundo). A Intelbras CP-1000 aceita dois tipos: OOK, para controles comuns, e FSK (que muda a frequência em vez de ligar e desligar), para os controles da própria marca.
+
+Cada aperto manda um **quadro**: um pacote curto de bits. O conteúdo varia de fabricante para fabricante, mas a ideia é a mesma:
+
+- **Serial:** o número do controle, gravado na fábrica. É o "nome" dele.
+- **Botão:** qual botão foi apertado (um controle de dois botões pode abrir dois portões).
+- **Contador:** só nos controles *rolling code*. Um número que avança a cada aperto.
+
+Enquanto você segura o botão, o controle costuma repetir o quadro várias vezes. Assim, se uma cópia chegar com ruído, a próxima chega inteira.
+
+<RemoteCodeFrames caption="Figura 1. No alto, o OOK: a portadora liga para cada bit 1 e desliga para cada 0. Embaixo, três apertos de um controle de código fixo e de um controle rolling code, e o que acontece quando um copiador repete o terceiro aperto. Na figura o contador aparece aberto para você ver a ideia; num controle real ele vai criptografado." />
+
+## Code learning: o mesmo código toda vez
+
+No controle de código fixo, todo aperto manda o mesmo quadro. A central "aprende" esse código no cadastro e, depois, abre o portão sempre que recebe o mesmo quadro. Esse esquema se chama <Term id="code-learning">code learning</Term> (ou *learning code*). É simples e barato, e qualquer controle compatível pode ser cadastrado. A Omegasat CT30A, por exemplo, trabalha com transmissores *learning code*, e a Intelbras CP-1000 aceita controles "OOK, code learning, código aberto".
+
+O problema também é a simplicidade. Um aparelho copiador (os técnicos chamam de *code grabber* ou clonador) grava o quadro quando você aperta o controle na rua e repete depois. Para a central, a cópia é idêntica ao original. Os "controles copiadores" vendidos em loja usam o mesmo princípio, só que para o bem: copiam um controle de código fixo que você já tem.
+
+## Rolling code: um contador que só anda para a frente
+
+No <Term id="rolling-code">rolling code</Term> (código rolante), o quadro leva também um contador. A cada aperto, o controle soma 1. A central guarda, para cada controle cadastrado, o último contador que aceitou, e só aceita um número **maior** que ele.
+
+Volte à Figura 1. O copiador gravou o aperto 3, com o contador 103. Quando ele repete esse quadro, a central já recebeu o 103: a cópia é recusada. Para abrir o portão, o ladrão precisaria do 104, que o controle ainda não mandou.
+
+Duas perguntas aparecem logo.
+
+**E se o controle for apertado longe da central?** Uma criança brincando com o controle no bolso pode avançar o contador dezenas de vezes sem a central ouvir. Por isso a central aceita um salto para a frente, dentro de uma janela. Na CD-1, a janela é de até 1.000 apertos à frente do último aceito. Passou disso, o controle precisa ser cadastrado de novo.
+
+**O ladrão não pode só somar 1?** Não, porque nos controles reais o contador vai **criptografado**, com uma chave que só o controle e a central conhecem. Quem grava o quadro vê um número embaralhado e não consegue fabricar o próximo. Os manuais citam sistemas diferentes: "Rolling Code Peccinin", código rolante da PPA, código HCS com proteção anticlonagem na Rossi e, nos controles FSK da Intelbras, criptografia AES de 128 bits.
+
+## O receptor e a antena de 17 cm
+
+O receptor da central é um rádio sintonizado em 433,92 MHz, com uma antena de fio. Na CD-1, o fio tem 17 cm. Esse número não é aleatório: é um **quarto do comprimento de onda**.
+
+O comprimento de onda $\lambda$ (lambda) é a distância que a onda percorre durante um ciclo:
+
+$$
+\lambda = \frac{c}{f}
+$$
+
+em que $c$ é a velocidade da luz, cerca de $3{,}00 \times 10^8\,\text{m/s}$ (a velocidade das ondas de rádio no ar), e $f$ é a frequência em hertz. Uma antena de fio reto com um quarto desse comprimento, $\lambda/4$, ressoa na frequência certa e capta bem o sinal (a <LinkAula id="m13-sem-fio/02-antenas">aula 13.2</LinkAula> explica por quê). A conta está no exemplo resolvido logo abaixo, e o resultado bate com os manuais: a Peccinin CP 4010F usa antena *whip* (de fio rígido) de 17 cm, e a Rossi KXH1024FS manda ligar um fio de 16 cm no borne `ANT`. Na prática, as antenas costumam ficar um pouco mais curtas que a conta.
+
+O que estraga a antena:
+
+- **Cortar, enrolar ou dobrar o fio.** O comprimento muda e a antena deixa de ressoar.
+- **Encostar em metal.** A caixa metálica da central ou o próprio portão bloqueiam e desviam o sinal.
+- **Borne solto ou oxidado.** O sinal chega fraco ao receptor.
+
+Para ganhar alcance, a Rossi sugere levar a antena para fora com cabo coaxial: o fio central no borne `ANT` e a malha no `GND`.
+
+<PlacaCD1
+  destaque={['rf', 'ajustes', 'leds']}
+  caption="Figura 2. Na CD-1, o receptor de 433,92 MHz fica no alto da placa, com a antena de fio de 17 cm. O botão PROG e o LED PROG ficam do lado da baixa tensão."
+/>
+
+## Cadastrar e apagar controles
+
+A central só obedece aos controles que estão na memória dela. Na CD-1, o cadastro usa o botão `PROG`:
+
+<Steps>
+  <Step title="Toque no PROG">
+    Um toque curto. O LED PROG acende: a central está esperando um controle por até 10 s.
+  </Step>
+  <Step title="Aperte o botão do controle">
+    Aperte o botão que você quer gravar. O LED pisca 3 vezes: gravado. Se passarem 10 s sem
+    controle, a central sai do modo de cadastro sozinha.
+  </Step>
+  <Step title="Repita para cada botão">
+    A memória da CD-1 guarda 32 botões. Cada botão de cada controle ocupa um lugar.
+  </Step>
+  <Step title="Teste de longe">
+    Feche a tampa e teste o controle da distância em que ele vai ser usado.
+  </Step>
+</Steps>
+
+Para **apagar todos**, segure o PROG por 10 s. O LED pisca rápido e o buzzer apita. Os controles cadastrados ficam numa memória que não se perde ao desligar o disjuntor.
+
+<Callout type="atencao" title="Você vai mexer numa placa ligada">
+O cadastro só funciona com a central energizada. Abra só a tampa necessária, com as mãos secas, e toque só no botão. Na CD-1, o PROG fica do lado da baixa tensão, mas os bornes de rede, motor e capacitor estão na mesma placa, com tensão. Não encoste em mais nada. Se na sua central o botão fica perto dos bornes da rede, peça ajuda a um eletricista.
+</Callout>
+
+Nas centrais reais, a ideia é a mesma, mas os nomes, os tempos e o tamanho da memória mudam:
+
+| Central | Botão de cadastro | Apagar todos | Memória | Código, segundo o manual |
+|---|---|---|---|---|
+| CD-1 (curso) | `PROG` (um toque) | Segurar `PROG` 10 s | 32 botões | Aceita os dois; o controle da central virtual é rolling code |
+| Intelbras CP-1000 | Teclas `Esc` e `Ok` (cadastro rápido) | Menu `Res`, que apaga também as configurações | 800 botões | FSK com AES de 128 bits (controles Intelbras) ou OOK code learning |
+| Peccinin CP 4010F | `LEARN` | Segurar `LEARN` até o LED piscar rápido | 250 controles de 2 botões | Rolling Code Peccinin |
+| Nice Pro S10 | `LEARN`, com os jumpers das duas primeiras fileiras retirados | Segurar `LEARN` 3 s | 250 controles | O manual não informa |
+| Omegasat CT30A | `PROG` | Segurar `PROG` até o LED apagar | 39 botões | Learning code |
+| Rossi KXH1024FS | `APRENDER` | Segurar `APRENDER` até o LED ST apagar | 1.024 botões, memória removível | HCS, anticlonagem |
+| Garen Wave Connect | `TX (−)`; confirmar com `TX (−)` de novo | Segurar `TX (−)` 5 s | 512 | O manual não informa |
+| PPA Facility Connect | Jumper `PROG` fechado e botão `GRV` | Apertar juntos os dois botões de um controle gravado, 3 vezes, e confirmar | 160 transmissores | Código fixo ou rolante |
+
+Repare nos tempos para apagar tudo: 10 s na CD-1, 5 s na Garen e só 3 s na Nice Pro S10. Segurar o botão "só mais um pouco" pode apagar a memória inteira. A tabela completa, central por central, está na <a href={lessonUrl('m16-portao/10-do-generico-para-a-sua-central')}>aula 16.10</a>.
+
+## Explore: cadastre um controle na central virtual
+
+Esta central virtual começa com a memória **vazia**: nenhum controle cadastrado.
+
+<CentralVirtual
+  client:visible
+  titulo="Central virtual: cadastro de controles"
+  mostrar={['comandos', 'cadastro']}
+  controleCadastrado={false}
+/>
+
+1. Aperte **Controle remoto**. Nada acontece: a central recebe o quadro, mas o serial não está na memória. Aperte **Controle novo**, que faz o papel do controle do vizinho: também nada.
+2. Toque em **PROG**. O LED PROG acende e o registro mostra "Modo de cadastro". Aperte **Controle remoto**. O LED pisca 3 vezes e o registro mostra "1 de 32 botões na memória".
+3. Aperte **Controle remoto** de novo. Agora o portão abre.
+4. Aperte **Repetir código copiado**. Esse botão faz o papel do copiador: repete o último quadro que o controle mandou. A central recusa, e o registro explica por quê.
+5. Toque em **PROG** e não aperte nada. Depois de 10 s (no relógio da simulação), o LED apaga e o registro diz que o tempo de cadastro esgotou.
+6. Agora **segure** o PROG até o LED piscar rápido e o buzzer apitar (10 s no relógio da simulação; na velocidade 2×, uns 5 s de verdade). O registro mostra que todos os controles foram apagados. Aperte **Controle remoto**: nada de novo.
+
+## Exemplo resolvido: o tamanho da antena e da memória
+
+**1. Comprimento de onda em 433,92 MHz.** Com $f = 433{,}92 \times 10^6\,\text{Hz}$:
+
+$$
+\lambda = \frac{3{,}00 \times 10^8\,\text{m/s}}{433{,}92 \times 10^6\,\text{Hz}} \approx 0{,}691\,\text{m}
+$$
+
+**2. Um quarto de onda.**
+
+$$
+\frac{\lambda}{4} = \frac{0{,}691\,\text{m}}{4} \approx 0{,}173\,\text{m} = 17{,}3\,\text{cm}
+$$
+
+É o fio de 17 cm da CD-1 e da Peccinin. Os 16 cm da Rossi ficam um pouco mais curtos, como costuma acontecer nas antenas reais.
+
+**3. Quantos controles cabem?** Um prédio pequeno tem 20 apartamentos, com 2 controles de um botão em cada. São $20 \times 2 = 40$ botões. A CD-1 (32 botões) não dá conta. A Omegasat CT30A (39 botões) também não, por um. A Peccinin CP 4010F (250 controles) e a Garen Wave Connect (512) sobram. Antes de comprar a central, conte os controles que vão existir, e não os que existem hoje.
+
+## Bateria fraca e interferência
+
+O defeito mais comum do controle não é o código: é a bateria. Com a bateria fraca, o transmissor manda menos potência, e o sinal só chega de perto. Um LED do controle mais fraco que o normal é uma pista. A outra causa do mesmo sintoma é a antena da central solta, oxidada ou encostada em metal.
+
+<CentralVirtual
+  client:visible
+  titulo="Central virtual: controle com bateria fraca"
+  mostrar={['comandos', 'energia']}
+  defeitos={{ bateriaFraca: true }}
+/>
+
+Aperte **Controle remoto**: aparece o aviso de que o sinal não chegou à central. Marque **Controle perto da central** e aperte de novo: o portão abre. Depois, desligue o **Disjuntor do portão**, ligue de novo e teste outra vez: o controle continua cadastrado, porque a memória guarda os controles sem energia.
+
+Outras causas de alcance curto ou de controle que falha de vez em quando:
+
+- **Outro aparelho em 433 MHz.** Alarmes, sensores sem fio e outros controles usam a mesma faixa. Um controle com o botão preso (dentro de uma bolsa, por exemplo) transmite sem parar e pode "tampar" o canal de todos os outros.
+- **Metal no caminho.** Portão de chapa, caixa metálica e o próprio carro diminuem o alcance.
+- **Antena fora do lugar.** Depois de trocar a central, confira se a antena foi ligada no borne certo e ficou esticada.
+
+<RealCase title="O controle perdido">
+Uma moradora perdeu o controle do portão na rua. Ela tinha mais dois controles em casa. O controle era rolling code, então uma cópia do sinal não abriria o portão. Mas quem achasse o **próprio controle** abriria: para a central, ele continua sendo um controle cadastrado, com o contador andando para a frente.
+
+A solução foi apagar todos os controles e cadastrar de novo os dois que sobraram. Algumas centrais permitem apagar um botão só, como a Rossi (segurando o `APRENDER` e apertando o botão do controle) e a Intelbras (função "Apaga"). Só que, nos dois casos, o procedimento pede o controle na mão: com o controle perdido, o caminho é apagar tudo. Leva cinco minutos e fecha a porta para quem achou o controle.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Apagar a memória sem querer.** Segurar o botão de cadastro por tempo demais apaga tudo (3 s já bastam na Nice Pro S10). Leia o manual antes de apertar.
+- **Comprar um controle que a central não entende.** Uma central de code learning não aprende um controle rolling code de outra marca, e vice-versa. Confira no manual da central quais controles ela aceita.
+- **Cortar ou enrolar a antena para "arrumar" a fiação.** O comprimento é parte do projeto: deixe o fio esticado, longe de metal.
+- **Trocar a bateria e não testar de longe.** O teste de alcance é o que mostra se o problema era mesmo a bateria.
+- **Cadastrar com a tampa aberta e esquecer de fechar.** Placa exposta pega água e poeira, e alguém pode encostar nela. Feche a tampa assim que terminar.
+- **Encostar em outras partes da placa durante o cadastro.** A central está ligada. Toque só no botão.
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Qual o comprimento de uma antena de um quarto de onda para 433,92 MHz, em centímetros? Use c = 3,00 × 10⁸ m/s.',
+      answer: 17.3,
+      tolerance: 0.02,
+      unit: 'cm',
+      explanation:
+        'λ = c/f = 3,00 × 10⁸ / 433,92 × 10⁶ ≈ 0,691 m; λ/4 ≈ 0,173 m = 17,3 cm. Os manuais usam 17 cm (Peccinin) e 16 cm (Rossi).',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um copiador gravou o sinal de um controle rolling code e repete esse sinal depois. O que a central faz?',
+      options: [
+        {
+          text: 'Recusa, porque aquele contador já foi usado',
+          correct: true,
+        },
+        {
+          text: 'Abre o portão, porque o serial é de um controle cadastrado',
+          feedback:
+            'Isso acontece com código fixo. No rolling code, a central confere também o contador, e ele precisa ser maior que o último aceito.',
+        },
+        {
+          text: 'Apaga o controle original da memória',
+          feedback: 'A central só recusa o quadro. O controle original continua funcionando.',
+        },
+        {
+          text: 'Entra em modo de cadastro',
+          feedback: 'O modo de cadastro só começa pelo botão PROG da central.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'O controle só abre o portão quando você está bem perto. Quais são causas prováveis? Marque todas.',
+      options: [
+        { text: 'Bateria do controle fraca', correct: true },
+        { text: 'Antena da central solta, cortada ou encostada em metal', correct: true },
+        {
+          text: 'Controle não cadastrado',
+          feedback: 'Um controle não cadastrado não abre nem de perto.',
+        },
+        {
+          text: 'Fotocélula desalinhada',
+          feedback: 'A fotocélula impede o fechamento. Ela não tem nada a ver com o alcance do rádio.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Na CD-1, segurar o PROG por 10 s apaga só o último controle cadastrado.',
+      answer: false,
+      explanation: 'Segurar o PROG por 10 s apaga todos os controles. Um toque curto é que inicia o cadastro.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem o cadastro de um controle na CD-1.',
+      items: [
+        'Tocar no PROG',
+        'Ver o LED PROG acender',
+        'Apertar o botão do controle',
+        'Ver o LED PROG piscar 3 vezes',
+        'Testar o controle de longe',
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que a central rolling code aceita um contador alguns números à frente do último, e não só o seguinte?',
+      options: [
+        {
+          text: 'Porque o controle pode ter sido apertado longe da central, sem ela ouvir',
+          correct: true,
+        },
+        {
+          text: 'Porque o contador avança sozinho com o tempo',
+          feedback: 'O contador só avança quando o botão é apertado.',
+        },
+        {
+          text: 'Porque assim um copiador consegue abrir o portão',
+          feedback: 'O copiador repete um contador antigo, que fica para trás, e não à frente.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Se o rádio do portão fosse de 315 MHz, qual seria o comprimento de um quarto de onda, em centímetros?',
+      answer: 23.8,
+      tolerance: 0.02,
+      unit: 'cm',
+      explanation: 'λ = 3,00 × 10⁸ / 315 × 10⁶ ≈ 0,952 m; λ/4 ≈ 0,238 m = 23,8 cm. Frequência menor, antena maior.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O controle é um transmissor de 433,92 MHz. No OOK, a portadora liga e desliga para formar os bits de um quadro com serial, botão e, no rolling code, um contador.
+- Code learning manda sempre o mesmo código: um copiador consegue gravar e repetir. Rolling code manda um contador criptografado que só anda para a frente: a cópia é recusada.
+- A antena de fio tem um quarto de onda: $\lambda/4 = c/(4f) \approx 17{,}3\,\text{cm}$ em 433,92 MHz. Não corte, não enrole e mantenha longe de metal.
+- Na CD-1, um toque no PROG cadastra (LED aceso, aperta o controle, 3 piscadas) e segurar 10 s apaga todos. Nas centrais reais, botões, tempos e memória mudam: leia o manual.
+- Controle que só funciona de perto: bateria fraca ou antena com problema. Controle perdido: apague todos e cadastre de novo os que ficaram.

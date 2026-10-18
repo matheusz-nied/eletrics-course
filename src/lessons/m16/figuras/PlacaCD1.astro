@@ -1,0 +1,537 @@
+---
+/**
+ * Top view of the generic CD-1 central (docs/plano/05-portao.md, section 3):
+ * the blocks and the screen-printed terminals. `destaque` highlights groups
+ * and dims the rest, so each lesson can point at the part it explains.
+ */
+import Figure from '../../../components/Figure.astro';
+
+export type Grupo =
+  | 'rede'
+  | 'fonte'
+  | 'potencia'
+  | 'motor'
+  | 'mcu'
+  | 'rf'
+  | 'entradas'
+  | 'ajustes'
+  | 'leds'
+  | 'saidas';
+
+interface Props {
+  destaque?: Grupo[];
+  caption?: string;
+}
+
+const { destaque = [], caption } = Astro.props;
+const on = (g: Grupo) => destaque.length === 0 || destaque.includes(g);
+const cls = (g: Grupo) => (on(g) ? 'pl-on' : 'pl-off');
+const strong = (g: Grupo) => destaque.includes(g);
+
+const power = ['F', 'N', '⏚', 'COM', 'ABRE', 'FECHA', 'CAP', 'CAP'];
+const powerGroup = (i: number): Grupo => (i < 3 ? 'rede' : 'motor');
+const low: { label: string; group: Grupo }[] = [
+  { label: '+12V', group: 'entradas' },
+  { label: 'GND', group: 'entradas' },
+  { label: 'FOTO', group: 'entradas' },
+  { label: 'BOT', group: 'entradas' },
+  { label: 'GND', group: 'entradas' },
+  { label: 'TRAVA+', group: 'saidas' },
+  { label: 'TRAVA−', group: 'saidas' },
+  { label: 'AUX NA', group: 'saidas' },
+  { label: 'AUX C', group: 'saidas' },
+];
+const leds = [
+  { label: 'REDE', color: 'verde' },
+  { label: 'FCA', color: 'verde' },
+  { label: 'FCF', color: 'vermelho' },
+  { label: 'FOTO', color: 'amarelo' },
+  { label: 'PROG', color: 'azul' },
+];
+
+const alt =
+  'Placa da central genérica CD-1 vista de cima. Na borda de baixo, à esquerda, os bornes de força: F, N e terra da rede, COM, ABRE e FECHA do motor e os dois CAP do capacitor. Na borda direita, os bornes de baixa tensão: +12V, GND, FOTO, BOT, GND, TRAVA+, TRAVA−, AUX NA e AUX C. No meio da placa: fusível de 10 A, fonte de 12 V, TRIAC com dissipador, relés K1 (abre) e K2 (fecha), microcontrolador, receptor de 433,92 MHz com antena de fio, conector de fim de curso FCA, GND e FCF, LEDs REDE, FCA, FCF, FOTO e PROG, botão PROG, buzzer, jumpers J1 FOTO e J2 AUT, chave DIP com INV e LUZ, e trimpots PAUSA e FORÇA.';
+---
+
+<Figure alt={alt} caption={caption}>
+  <svg class="pl" viewBox="0 0 720 440" width="720" height="440">
+    <rect class="pl-board" x="16" y="16" width="688" height="408" rx="14"></rect>
+    {[
+      [36, 36],
+      [684, 36],
+      [36, 404],
+      [684, 404],
+    ].map(([x, y]) => (
+      <circle class="pl-hole" cx={x} cy={y} r="7" />
+    ))}
+
+    <!-- mains side, separated from the low-voltage side by an isolation slot -->
+    <path class="pl-slot" d="M374 232v176"></path>
+
+    <g class={cls('rede')}>
+      <rect
+        class:list={['pl-part', { 'pl-strong': strong('rede') }]}
+        x="52"
+        y="52"
+        width="104"
+        height="30"
+        rx="4"
+      ></rect>
+      <rect class="pl-glass" x="64" y="60" width="80" height="14" rx="7"></rect>
+      <text class="pl-label" x="104" y="102" text-anchor="middle">
+        FUSÍVEL 10 A
+      </text>
+    </g>
+
+    <g class={cls('fonte')}>
+      <rect
+        class:list={['pl-part', { 'pl-strong': strong('fonte') }]}
+        x="52"
+        y="118"
+        width="170"
+        height="96"
+        rx="6"
+      ></rect>
+      <rect class="pl-core" x="66" y="132" width="56" height="44" rx="4"></rect>
+      <circle class="pl-cap" cx="150" cy="150" r="16"></circle>
+      <circle class="pl-cap" cx="196" cy="150" r="11"></circle>
+      <text class="pl-label" x="137" y="204" text-anchor="middle">
+        FONTE 12 V
+      </text>
+    </g>
+
+    <g class={cls('potencia')}>
+      <rect
+        class:list={['pl-part', { 'pl-strong': strong('potencia') }]}
+        x="52"
+        y="236"
+        width="70"
+        height="88"
+        rx="4"
+      ></rect>
+      {[248, 262, 276, 290, 304].map((y) => (
+        <line class="pl-fin" x1="60" y1={y} x2="114" y2={y} />
+      ))}
+      <text class="pl-label" x="87" y="342" text-anchor="middle">
+        TRIAC
+      </text>
+      <rect
+        class:list={['pl-relay', { 'pl-strong': strong('potencia') }]}
+        x="138"
+        y="240"
+        width="92"
+        height="64"
+        rx="4"
+      ></rect>
+      <text class="pl-tag" x="184" y="268" text-anchor="middle">
+        K1
+      </text>
+      <text class="pl-small" x="184" y="288" text-anchor="middle">
+        ABRE
+      </text>
+      <rect
+        class:list={['pl-relay', { 'pl-strong': strong('potencia') }]}
+        x="244"
+        y="240"
+        width="92"
+        height="64"
+        rx="4"
+      ></rect>
+      <text class="pl-tag" x="290" y="268" text-anchor="middle">
+        K2
+      </text>
+      <text class="pl-small" x="290" y="288" text-anchor="middle">
+        FECHA
+      </text>
+      <text class="pl-label" x="237" y="324" text-anchor="middle">
+        RELÉS DE SENTIDO
+      </text>
+    </g>
+
+    <g class={cls('mcu')}>
+      <rect
+        class:list={['pl-chip', { 'pl-strong': strong('mcu') }]}
+        x="282"
+        y="128"
+        width="118"
+        height="80"
+        rx="4"
+      ></rect>
+      {Array.from({ length: 8 }, (_, i) => 290 + i * 14).map((x) => (
+        <>
+          <line class="pl-pin" x1={x} y1="120" x2={x} y2="128" />
+          <line class="pl-pin" x1={x} y1="208" x2={x} y2="216" />
+        </>
+      ))}
+      <text class="pl-chip-text" x="341" y="164" text-anchor="middle">
+        MICRO-
+      </text>
+      <text class="pl-chip-text" x="341" y="182" text-anchor="middle">
+        CONTROLADOR
+      </text>
+    </g>
+
+    <g class={cls('rf')}>
+      <rect
+        class:list={['pl-part', { 'pl-strong': strong('rf') }]}
+        x="262"
+        y="44"
+        width="160"
+        height="50"
+        rx="4"
+      ></rect>
+      <path class="pl-coil" d="M276 69c4-10 8 10 12 0s8 10 12 0 8 10 12 0"></path>
+      <text class="pl-small" x="372" y="64" text-anchor="middle">
+        RECEPTOR
+      </text>
+      <text class="pl-small" x="372" y="82" text-anchor="middle">
+        433,92 MHz
+      </text>
+      <path class="pl-antenna" d="M422 56h40"></path>
+      <text class="pl-small" x="466" y="52">
+        ANTENA 17 cm
+      </text>
+    </g>
+
+    <g class={cls('leds')}>
+      {leds.map((l, i) => (
+        <>
+          <circle class={`pl-led pl-led--${l.color}`} cx={444 + i * 34} cy="132" r="8" />
+          <text class="pl-tiny" x={444 + i * 34} y="156" text-anchor="middle">
+            {l.label}
+          </text>
+        </>
+      ))}
+    </g>
+
+    <g class={cls('ajustes')}>
+      <rect
+        class:list={['pl-part', { 'pl-strong': strong('ajustes') }]}
+        x="430"
+        y="176"
+        width="34"
+        height="34"
+        rx="4"
+      ></rect>
+      <circle class="pl-button" cx="447" cy="193" r="10"></circle>
+      <text class="pl-tiny" x="447" y="228" text-anchor="middle">
+        PROG
+      </text>
+      {[
+        ['J1', 'FOTO', 492],
+        ['J2', 'AUT', 544],
+      ].map(([name, fn, x]) => (
+        <>
+          <rect class="pl-header" x={Number(x) - 14} y="180" width="28" height="18" rx="2" />
+          <circle class="pl-pinhead" cx={Number(x) - 6} cy="189" r="3" />
+          <circle class="pl-pinhead" cx={Number(x) + 6} cy="189" r="3" />
+          <text class="pl-tiny" x={x} y="214" text-anchor="middle">
+            {name}
+          </text>
+          <text class="pl-tiny" x={x} y="228" text-anchor="middle">
+            {fn}
+          </text>
+        </>
+      ))}
+      <rect
+        class:list={['pl-dip', { 'pl-strong': strong('ajustes') }]}
+        x="430"
+        y="246"
+        width="54"
+        height="30"
+        rx="3"
+      ></rect>
+      <rect class="pl-dip-key" x="438" y="252" width="14" height="18" rx="2"></rect>
+      <rect class="pl-dip-key" x="462" y="252" width="14" height="18" rx="2"></rect>
+      <text class="pl-tiny" x="445" y="292" text-anchor="middle">
+        INV
+      </text>
+      <text class="pl-tiny" x="469" y="292" text-anchor="middle">
+        LUZ
+      </text>
+      <text class="pl-tiny" x="457" y="306" text-anchor="middle">
+        DIP
+      </text>
+      {[
+        ['PAUSA', 514],
+        ['FORÇA', 566],
+      ].map(([name, x]) => (
+        <>
+          <rect class="pl-trim-body" x={Number(x) - 18} y="244" width="36" height="36" rx="4" />
+          <circle class="pl-trim" cx={x} cy="262" r="12" />
+          <line class="pl-trim-slot" x1={Number(x) - 7} y1="269" x2={Number(x) + 7} y2="255" />
+          <text class="pl-tiny" x={x} y="300" text-anchor="middle">
+            {name}
+          </text>
+        </>
+      ))}
+    </g>
+
+    <g class={cls('saidas')}>
+      <circle
+        class:list={['pl-buzzer', { 'pl-strong': strong('saidas') }]}
+        cx="604"
+        cy="70"
+        r="22"
+      ></circle>
+      <circle class="pl-buzzer-hole" cx="604" cy="70" r="4"></circle>
+      <text class="pl-tiny" x="604" y="108" text-anchor="middle">
+        BUZZER
+      </text>
+    </g>
+
+    <g class={cls('entradas')}>
+      <rect
+        class:list={['pl-conn', { 'pl-strong': strong('entradas') }]}
+        x="390"
+        y="340"
+        width="96"
+        height="34"
+        rx="3"
+      ></rect>
+      {[406, 438, 470].map((x) => (
+        <rect class="pl-conn-pin" x={x - 6} y="350" width="12" height="14" rx="1" />
+      ))}
+      <text class="pl-tiny" x="406" y="392" text-anchor="middle">
+        FCA
+      </text>
+      <text class="pl-tiny" x="438" y="392" text-anchor="middle">
+        GND
+      </text>
+      <text class="pl-tiny" x="470" y="392" text-anchor="middle">
+        FCF
+      </text>
+      <text class="pl-small" x="438" y="330" text-anchor="middle">
+        FIM DE CURSO
+      </text>
+    </g>
+
+    <!-- terminal strips -->
+    {power.map((label, i) => (
+      <g class={cls(powerGroup(i))}>
+        <rect
+          class:list={['pl-term', { 'pl-strong': strong(powerGroup(i)) }]}
+          x={40 + i * 40}
+          y="368"
+          width="38"
+          height="40"
+          rx="3"
+        />
+        <circle class="pl-screw" cx={59 + i * 40} cy="388" r="9" />
+        <line class="pl-screw-slot" x1={53 + i * 40} y1="388" x2={65 + i * 40} y2="388" />
+        <text class="pl-term-label" x={59 + i * 40} y="360" text-anchor="middle">
+          {label}
+        </text>
+      </g>
+    ))}
+    {low.map((t, i) => (
+      <g class={cls(t.group)}>
+        <rect
+          class:list={['pl-term', { 'pl-strong': strong(t.group) }]}
+          x="652"
+          y={118 + i * 32}
+          width="40"
+          height="30"
+          rx="3"
+        />
+        <circle class="pl-screw" cx="672" cy={133 + i * 32} r="8" />
+        <line class="pl-screw-slot" x1="667" y1={133 + i * 32} x2="677" y2={133 + i * 32} />
+        <text class="pl-term-label" x="644" y={138 + i * 32} text-anchor="end">
+          {t.label}
+        </text>
+      </g>
+    ))}
+    <text class="pl-zone" x="200" y="230" text-anchor="middle">
+      LADO DA REDE
+    </text>
+    <text class="pl-zone" x="540" y="372" text-anchor="middle">
+      BAIXA TENSÃO
+    </text>
+  </svg>
+</Figure>
+
+<style>
+  .pl {
+    width: 100%;
+    min-width: 34rem;
+    height: auto;
+    font-family: var(--font-mono);
+  }
+
+  .pl-board {
+    fill: color-mix(in oklab, var(--success) 14%, var(--surface));
+    stroke: color-mix(in oklab, var(--success) 45%, var(--border-strong));
+    stroke-width: 2;
+  }
+
+  .pl-hole {
+    fill: var(--bg);
+    stroke: var(--border-strong);
+  }
+
+  .pl-slot {
+    stroke: var(--bg);
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+
+  .pl-part,
+  .pl-relay,
+  .pl-chip,
+  .pl-conn,
+  .pl-dip,
+  .pl-term,
+  .pl-buzzer,
+  .pl-trim-body,
+  .pl-header {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .pl-relay {
+    fill: color-mix(in oklab, var(--accent) 16%, var(--surface));
+  }
+
+  .pl-chip {
+    fill: var(--fg);
+    stroke: none;
+  }
+
+  .pl-chip-text {
+    fill: var(--bg);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .pl-pin,
+  .pl-fin {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+
+  .pl-glass {
+    fill: color-mix(in oklab, var(--fg) 8%, transparent);
+    stroke: var(--fg-muted);
+  }
+
+  .pl-core {
+    fill: var(--fg-subtle);
+  }
+
+  .pl-cap {
+    fill: color-mix(in oklab, var(--accent) 30%, var(--surface));
+    stroke: var(--fg-muted);
+  }
+
+  .pl-coil,
+  .pl-antenna {
+    fill: none;
+    stroke: var(--copper);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+
+  .pl-button,
+  .pl-trim {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .pl-trim-slot,
+  .pl-screw-slot {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+
+  .pl-pinhead,
+  .pl-conn-pin {
+    fill: var(--copper);
+  }
+
+  .pl-dip-key {
+    fill: var(--fg-subtle);
+  }
+
+  .pl-buzzer {
+    fill: var(--fg);
+    stroke: none;
+  }
+
+  .pl-buzzer-hole {
+    fill: var(--bg);
+  }
+
+  .pl-screw {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+  }
+
+  .pl-led {
+    stroke: var(--border-strong);
+  }
+
+  .pl-led--verde {
+    fill: #22c55e;
+  }
+
+  .pl-led--vermelho {
+    fill: #ef4444;
+  }
+
+  .pl-led--amarelo {
+    fill: #f59e0b;
+  }
+
+  .pl-led--azul {
+    fill: #3b82f6;
+  }
+
+  .pl-label,
+  .pl-tag,
+  .pl-small,
+  .pl-tiny,
+  .pl-term-label,
+  .pl-zone {
+    fill: var(--fg);
+  }
+
+  .pl-label {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .pl-tag {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .pl-small {
+    font-size: 12px;
+  }
+
+  .pl-tiny {
+    font-size: 11px;
+  }
+
+  .pl-term-label {
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .pl-zone {
+    fill: var(--fg-subtle);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+
+  .pl-off {
+    opacity: 0.3;
+  }
+
+  .pl-strong {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+</style>

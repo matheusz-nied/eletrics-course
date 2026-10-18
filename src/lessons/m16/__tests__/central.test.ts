@@ -86,9 +86,9 @@ describe('central genérica CD-1', () => {
 
     const took = w.until((s) => s.estado === 'ABERTO');
     expect(w.sys.estado).toBe('ABERTO');
-    // 4 m at about 10 m/min, a little slower with FORÇA at half.
-    expect(took).toBeGreaterThan(20);
-    expect(took).toBeLessThan(35);
+    // 4 m at about 15 m/min, a little slower with FORÇA at half.
+    expect(took).toBeGreaterThan(15);
+    expect(took).toBeLessThan(25);
     w.run(1);
     expect(w.sys.pins.K1).toBe(false);
     expect(w.sys.pins.TRIAC).toBe(0);
@@ -255,7 +255,7 @@ describe('central genérica CD-1', () => {
     // A long gate, so the 40 s run out before the mechanical end.
     const w = watched({
       faults: { reedDefeituoso: true },
-      params: { curso: 10, imaFca: 9.98 },
+      params: { curso: 14, imaFca: 13.98 },
       settings: { j2: false },
     });
     w.run(0.1);

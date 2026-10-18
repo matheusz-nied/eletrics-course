@@ -1,0 +1,269 @@
+---
+titulo: Diagnóstico de defeitos do portão
+modulo: m16-portao
+ordem: 9
+nivel: I
+duracaoMin: 45
+objetivos:
+  - Aplicar o método sintoma, hipóteses, medição, conserto e teste a um portão com defeito
+  - Escolher a medição que separa duas causas possíveis para o mesmo sintoma
+  - Reconhecer pelo sintoma os defeitos mais comuns do automatizador
+  - Saber o que se mede com a central ligada e o que só se mede com o disjuntor desligado
+prerequisitos:
+  - m03-medicoes/02-medindo-tensao
+  - m03-medicoes/04-resistencia-continuidade-e-diodo
+  - m15-diagnostico/01-metodo-de-diagnostico
+  - m16-portao/02-o-motor-do-portao
+  - m16-portao/04-fim-de-curso-e-sensores
+  - m16-portao/08-ajustes-e-testes
+tags: [portão, diagnóstico, defeitos, manutenção, multímetro]
+seguranca: rede
+---
+
+import { lessonUrl } from '../../../lib/url';
+import DiagnosticoPortao from '../../../lessons/m16/ui/DiagnosticoPortao';
+
+O telefone toca: "o portão parou". Essa frase cobre uns dez defeitos diferentes, de um <Term id="fusivel">fusível</Term> barato a um motor queimado. Quem sai trocando peças até acertar gasta dinheiro e tempo e, às vezes, troca a central inteira por causa de um <Term id="capacitor">capacitor</Term>.
+
+Esta aula ensina a chegar à causa com poucas medições, na ordem certa, e com o disjuntor na posição certa para cada uma. No fim, oito portões com defeito esperam por você na central virtual.
+
+## O método, aplicado ao portão
+
+Diagnosticar é eliminar possibilidades. O método é o mesmo da <LinkAula id="m15-diagnostico/01-metodo-de-diagnostico">aula 15.1</LinkAula>, e no portão ele fica assim:
+
+<Steps>
+  <Step title="Sintoma: veja com os próprios olhos">
+    Pergunte o que acontece e o que mudou (falta de energia, batida, chuva, alguém mexeu). Depois reproduza: aperte o controle e a <Term id="botoeira">botoeira</Term>, olhe os LEDs da placa, ouça o motor e os <Term id="rele">relés</Term>, veja onde o portão para. Anote o que funciona, não só o que falha.
+  </Step>
+  <Step title="Hipóteses: liste as causas que explicam tudo">
+    Cada hipótese tem que explicar todos os sintomas, inclusive o que funciona. Se a botoeira abre o portão e o controle não, a central e o motor estão bons: a suspeita fica no controle ou no rádio.
+  </Step>
+  <Step title="Medição que separa: escolha a que dá resultados diferentes">
+    Uma boa medição dá um resultado se for a hipótese A e outro se for a B. Comece pelo que é seguro e rápido de olhar: LEDs, alavanca do desbloqueio, portão à mão.
+  </Step>
+  <Step title="Conserto: uma mudança por vez">
+    Conserte a causa, não o sintoma. Se mudar duas coisas ao mesmo tempo, você não sabe qual resolveu, nem se a outra criou um defeito novo.
+  </Step>
+  <Step title="Teste: o sintoma sumiu, e a segurança continua">
+    Repita o que mostrava o defeito. Depois refaça os testes de segurança da <LinkAula id="m16-portao/08-ajustes-e-testes">aula 16.8</LinkAula>: <Term id="fotocelula">fotocélula</Term>, obstáculo e desbloqueio.
+  </Step>
+</Steps>
+
+O passo mais importante é o terceiro. Um técnico experiente não é quem sabe mais causas, é quem escolhe a medição que divide a lista no meio.
+
+## O que se mede ligado e o que só se mede desligado
+
+Algumas medições só fazem sentido com a central ligada; outras só podem ser feitas com ela desligada. Errar a ordem estraga a leitura e, às vezes, o instrumento.
+
+| Medição | Disjuntor | Por quê |
+|---|---|---|
+| Tensão entre F e N na entrada da central | Ligado | É o único jeito de saber se a energia chega à placa |
+| LEDs da placa, ímã encostado no sensor, tensão entre FOTO e GND | Ligado | A placa precisa estar alimentada para mostrar alguma coisa |
+| Continuidade do fusível | Desligado | Com o fusível fora do porta-fusível |
+| Resistência entre os fios do motor | Desligado, fios do motor soltos | O ohmímetro mede com a própria pilha; com a rede ligada, a leitura não vale e o multímetro pode queimar |
+| Capacitância do capacitor | Desligado, capacitor descarregado e com um fio solto | Ligado ao motor, o multímetro mede o capacitor junto com os enrolamentos |
+| Empurrar o portão à mão | Desligado, desbloqueio aberto | Assim ninguém aciona o motor com a sua mão perto do pinhão |
+
+Medir tensão na central ligada é trabalho perto da rede: pontas com protetor de dedo, uma mão só e nada de encostar nos bornes, como na <LinkAula id="m03-medicoes/02-medindo-tensao">aula 3.2</LinkAula>. Cada vez que for desligar, use a ordem segura da aula <a href={lessonUrl('m16-portao/07-trocar-motor-e-central')}>16.7</a>: desligar, testar o multímetro na tomada, medir a ausência de tensão, testar de novo e sinalizar o quadro.
+
+## Números que ajudam a decidir
+
+Duas contas simples separam muitas hipóteses.
+
+**O tempo de percurso.** Um portão anda a uma velocidade quase constante, então o tempo para abrir é
+
+$$
+t = \frac{d}{v}
+$$
+
+em que $d$ é o comprimento do percurso, em metros, e $v$ é a velocidade, em metros por segundo. Os manuais citam velocidades de 13 a 23 m/min. Um portão de 4 m a 15 m/min (0,25 m/s) leva $t = 4 / 0{,}25 = 16\,\text{s}$. Por isso a CD-1 desiste depois de 40 s sem <Term id="fim-de-curso">fim de curso</Term>: em funcionamento normal, o portão nunca chega perto disso. Se a central entra em ERRO por tempo, o portão não chegou ao fim (desbloqueio aberto, motor travado) ou chegou e ela não viu (fim de curso).
+
+**Os <Term id="enrolamento">enrolamentos</Term>.** Com os fios do motor soltos, a leitura entre as duas pontas é a soma das outras duas:
+
+$$
+R_\text{AF} \approx R_\text{CA} + R_\text{CF}
+$$
+
+Aqui $R_\text{CA}$ é a resistência entre o comum e o fio ABRE, $R_\text{CF}$ entre o comum e o FECHA, e $R_\text{AF}$ entre ABRE e FECHA, em ohms. Com 4,8 Ω e 4,9 Ω, espera-se cerca de 9,7 Ω (uma estimativa para um motor de 127 V). Uma leitura OL indica enrolamento aberto; perto de 0 Ω, curto. Já a capacitância se compara com a etiqueta: um capacitor que mede bem abaixo do valor impresso está fraco, e um que mede quase zero está aberto.
+
+## A tabela de defeitos
+
+Os defeitos abaixo respondem pela maior parte das chamadas. A terceira coluna é o que você faz no portão de verdade.
+
+| Sintoma | Causas prováveis | O que medir ou olhar |
+|---|---|---|
+| Motor zumbe e não gira; com um empurrão, gira | Capacitor aberto ou fraco; enrolamento aberto | Capacitância, com tudo desligado; resistência dos três pares de fios do motor |
+| Nada funciona, LED REDE apagado | Falta de energia (disjuntor, cabo) ou fusível queimado | Tensão entre F e N com o disjuntor ligado; continuidade do fusível com ele desligado |
+| Primeiro comando fecha em vez de abrir | Fios ABRE e FECHA trocados, ou DIP INV na posição errada | Sentido do primeiro comando com o portão no meio; posição do DIP |
+| Não para no fim: bate e volta, ou para sozinho depois de 40 s | <Term id="reed-switch">Reed</Term> com defeito, ímã fora do lugar ou conector do fim de curso invertido | LEDs FCA e FCF ao encostar um ímã no sensor e quando o portão chega a cada ponta |
+| Abre, mas não fecha | Fotocélula desalinhada ou entrada FOTO aberta sem fotocélula | LED FOTO; tensão entre FOTO e GND com o caminho livre |
+| Para ou volta sozinho no meio do percurso | FORÇA baixa demais ou atrito no trilho | Portão à mão, com o desbloqueio aberto; depois o ajuste da FORÇA |
+| Controle só funciona de perto | Bateria do controle fraca ou antena solta | Tensão da bateria; antena da central; outro controle da casa |
+| Portão abre sozinho ou não para | Contato de relé colado; fio da botoeira encostando no GND | Som do relé; tensão entre COM e ABRE e entre COM e FECHA com o motor parado; cabo da botoeira |
+| Motor esquenta, desliga e volta depois de um tempo | <Term id="protetor-termico">Protetor térmico</Term> atuando: uso seguido, capacitor errado, atrito | Carcaça muito quente; valor do capacitor contra a etiqueta; portão à mão |
+| Disjuntor desarma ao acionar | Capacitor em curto ou ligação errada do comum | Resistências do motor e do capacitor, com tudo desligado |
+| Motor gira e o portão não anda | Desbloqueio aberto, embreagem patinando ou pinhão gasto | Alavanca do desbloqueio; pinhão e cremalheira |
+
+Três linhas merecem um comentário.
+
+- **O protetor térmico** é uma chavinha dentro do motor, encostada no enrolamento, que abre quando ele esquenta demais e fecha de novo quando esfria. Os manuais de motor citam protetores de 130 °C a 150 °C. Ele não é o defeito: é o aviso. O protetor que desarma sempre aponta para o que faz o motor esquentar.
+- **O capacitor em curto** aparece na escala de resistência. Um capacitor bom começa com uma leitura baixa e vai subindo até OL, enquanto o multímetro o carrega; um em curto fica perto de 0 Ω.
+- **O relé colado** é medido com a central ligada, perto da rede. Com a central em repouso, sem nenhum comando, a tensão entre COM e ABRE e entre COM e FECHA tem que ser zero; se uma delas mostra a tensão da rede, a central está mandando energia para o motor sem comando.
+
+## Explore: oito portões com defeito
+
+<DiagnosticoPortao client:visible />
+
+Cada caso traz a queixa de quem mora na casa e uma central virtual com um defeito escondido. Para cada um:
+
+1. Reproduza o sintoma na central: aperte o controle, a botoeira, observe o motor, os LEDs e o registro "O que a central fez".
+2. Antes de medir, pense em duas ou três hipóteses.
+3. Escolha a medição que separa as hipóteses. Algumas só funcionam com o disjuntor desligado; ligue e desligue em "Energia e alcance", dentro da central.
+4. Marque a causa e confira. Se errar, a mensagem diz qual medição separa a sua escolha da causa certa. Se acertar, ela explica o conserto e o teste.
+
+No primeiro caso, tente medir a continuidade do fusível com o disjuntor ligado e veja o que acontece. Nos casos com espera longa, use a velocidade 5× da central.
+
+## Exemplo resolvido: o portão que abre e não fecha
+
+Dona Lúcia conta que o portão abre normal, mas não fecha, nem sozinho nem pelo controle.
+
+1. **Sintoma.** Você aperta o controle: o portão abre e para no fim, com o LED FCA aceso. Aperta de novo: nada. Espera a pausa: nada. O que funciona diz muito: o controle chega à central, o motor gira e o fim de curso de abertura funciona.
+2. **Hipóteses.** (a) A central vê a fotocélula interrompida (desalinhada, suja ou com fio partido) e se recusa a fechar. (b) O fim de curso de fechamento está sempre ativo, e a central acha que o portão já está fechado. (c) O fechamento automático está desligado. A hipótese (c) explica a pausa, mas não explica o controle; ela sai da lista.
+3. **Medição que separa.** Com a central ligada e o caminho livre, olhe o LED FOTO e meça entre FOTO e GND. Com o <Term id="pull-up">pull-up</Term> de 10 kΩ da entrada (aula <a href={lessonUrl('m16-portao/05-seguranca-e-acessorios')}>16.5</a>), o contato NF fechado dá 0 V e o aberto dá 5 V. O multímetro mostra 5 V, e o LED está apagado. O LED FCF também está apagado com o portão aberto, então o fim de curso de fechamento não está preso. É a fotocélula.
+4. **Conserto.** O suporte do receptor levou uma batida. Você realinha transmissor e receptor até o LED FOTO acender, e firma o suporte.
+5. **Teste.** O portão fecha. No meio do fechamento, você passa uma caixa pelo feixe: ele volta a abrir. Agora, sim, está pronto.
+
+Repare no que não foi feito: ninguém colocou o J1 nem um fio no lugar da fotocélula "para ver se era ela". Esse atalho deixaria o portão fechar sobre quem estivesse no vão.
+
+<RealCase title="O portão que pedia um empurrãozinho">
+Na casa do Paulo, o portão começou a demorar para sair. O motor zumbia um instante e só então arrancava. A família descobriu que um empurrão na folha ajudava a partida, e passou a fazer isso todo dia.
+
+Semanas depois, o portão começou a parar no meio do caminho e a voltar a funcionar meia hora depois. Era o protetor térmico: o motor, zumbindo parado a cada partida, esquentava até o protetor abrir.
+
+O técnico desligou o disjuntor, descarregou o capacitor e mediu: 22 µF, num capacitor de 40 µF na etiqueta. Trocou por um novo, do mesmo valor e da mesma tensão, e o portão voltou a sair suave, sem zumbido. O capacitor custou bem menos que um motor novo, que é o que o empurrão diário estava encomendando. E empurrar um portão com o motor zumbindo é perigoso: ele pode arrancar de repente, com a sua mão na folha.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Trocar peça sem medir.** A central nova não conserta um capacitor aberto, e o motor novo não conserta um trilho torto.
+- **Medir continuidade, resistência ou capacitância com a central ligada.** A leitura não vale e o multímetro pode queimar.
+- **"Jumpear" a fotocélula ou o fim de curso para testar.** Um jumper esquecido tira a proteção de quem passa no vão.
+- **Trocar o fusível por um maior.** Ele queimou por algum motivo; procure o motivo.
+- **Confundir LED FOTO apagado com fotocélula quebrada.** Antes, confira se há algo no feixe e se a fotocélula está alimentada.
+- **Mexer em várias coisas de uma vez.** Uma mudança por vez, um teste depois de cada uma.
+- **Empurrar o portão com o motor zumbindo.** Desligue o disjuntor e meça o capacitor.
+- **Esquecer o desbloqueio aberto depois do teste à mão.** O motor gira, o portão não, e a central entra em ERRO.
+- **Liberar o portão sem os testes de segurança.** Todo conserto termina com fotocélula, obstáculo e desbloqueio testados.
+
+<Quiz
+  questions={[
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem os passos do diagnóstico.',
+      items: [
+        'Ver e reproduzir o sintoma, anotando o que funciona',
+        'Listar as hipóteses que explicam tudo o que foi visto',
+        'Fazer a medição que separa as hipóteses',
+        'Consertar a causa, uma mudança por vez',
+        'Testar o sintoma e refazer os testes de segurança',
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Com os fios do motor soltos, você mediu COM–ABRE = 5,1 Ω e COM–FECHA = 5,0 Ω. Quanto deve dar entre ABRE e FECHA, em ohms, se os enrolamentos estão bons?',
+      answer: 10.1,
+      tolerance: 0.03,
+      unit: 'Ω',
+      explanation:
+        'Entre ABRE e FECHA, os dois enrolamentos ficam em série: 5,1 + 5,0 = 10,1 Ω. OL indicaria um enrolamento aberto.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um portão de 4,5 m anda a 15 m/min (0,25 m/s). Quantos segundos ele leva para abrir?',
+      answer: 18,
+      tolerance: 0.02,
+      unit: 's',
+      explanation:
+        't = d / v = 4,5 m ÷ 0,25 m/s = 18 s. Bem abaixo dos 40 s em que a CD-1 desiste.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Nada funciona e o LED REDE está apagado. Com o disjuntor ligado, você mediu 127 V entre F e N. Qual é a próxima medição?',
+      options: [
+        {
+          text: 'Desligar o disjuntor, confirmar a ausência de tensão e medir a continuidade do fusível',
+          correct: true,
+          feedback:
+            'Isso. A energia chega aos bornes; o próximo suspeito é o fusível, e continuidade se mede com tudo desligado.',
+        },
+        {
+          text: 'Medir a continuidade do fusível com a central ligada, para ganhar tempo',
+          feedback:
+            'Continuidade nunca se mede em circuito energizado: a leitura não vale e o multímetro pode queimar.',
+        },
+        {
+          text: 'Trocar a central',
+          feedback:
+            'Ainda não há motivo. Um fusível aberto explica tudo, e custa muito menos. Meça antes de trocar.',
+        },
+        {
+          text: 'Medir a capacitância do capacitor do motor',
+          feedback:
+            'O capacitor não alimenta a placa. Com ele aberto, o LED REDE acenderia e o motor zumbiria.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'O motor zumbe e não gira. Qual conjunto de medições separa "capacitor aberto" de "enrolamento aberto"?',
+      options: [
+        {
+          text: 'Com tudo desligado: a capacitância do capacitor e a resistência dos três pares de fios do motor',
+          correct: true,
+          feedback:
+            'Isso. Capacitor aberto mede quase zero de capacitância com os enrolamentos normais; enrolamento aberto dá OL num dos pares.',
+        },
+        {
+          text: 'A tensão entre F e N na entrada',
+          feedback:
+            'Ela só mostra que a energia chega. As duas hipóteses têm a rede presente.',
+        },
+        {
+          text: 'O LED FOTO',
+          feedback: 'A fotocélula não faz o motor zumbir. Ela só impede o fechamento.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada sintoma à primeira medição que você faria.',
+      pairs: [
+        ['Controle só funciona de perto', 'Tensão da bateria do controle'],
+        ['Abre, mas não fecha', 'Tensão entre FOTO e GND com o caminho livre'],
+        ['Motor gira e o portão não anda', 'Olhar a alavanca do desbloqueio'],
+        ['Não para no fim do percurso', 'Ímã encostado no sensor e LEDs FCA e FCF'],
+        ['Nada funciona, LED REDE apagado', 'Tensão entre F e N na entrada'],
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Se o fusível da central queimou, o certo é colocar um de corrente maior, para ele não queimar de novo.',
+      answer: false,
+      explanation:
+        'Use um fusível do mesmo tamanho e da mesma corrente, e procure por que ele queimou: motor, capacitor ou ligação. Um fusível maior só deixa o defeito crescer.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Diagnóstico é eliminar hipóteses: sintoma (inclusive o que funciona), hipóteses, a medição que separa, conserto de uma coisa por vez, teste.
+- Tensão e LEDs se medem com a central ligada; continuidade, resistência e capacitância, só com o disjuntor desligado, a ausência de tensão confirmada e o capacitor descarregado.
+- Contas rápidas ajudam: o percurso normal leva $d / v$ (16 s num portão de 4 m a 15 m/min), e entre ABRE e FECHA a resistência é a soma das outras duas.
+- Os sintomas mais comuns têm causas típicas: zumbido sem giro é capacitor, LED REDE apagado é falta de energia ou fusível, abre e não fecha é fotocélula, bate e volta no fim é fim de curso, motor que gira sem levar o portão é desbloqueio.
+- Nunca "jumpeie" um dispositivo de segurança para testar, e termine todo conserto refazendo os testes da aula 16.8.

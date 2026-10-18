@@ -1,0 +1,261 @@
+---
+/**
+ * Lesson 16.5: the photocell on the two posts (transmitter, receiver and
+ * the infrared beam across the opening) and the receiver's contacts with
+ * the beam free and interrupted, wired as the CD-1 expects (C to GND, NF to
+ * FOTO). "Normal" for a photocell is the beam free.
+ */
+import Figure from '../../../components/Figure.astro';
+
+interface Props {
+  caption?: string;
+}
+
+const { caption } = Astro.props;
+
+const bars = Array.from({ length: 9 }, (_, i) => 240 + i * 14);
+const states = [
+  { y0: 40, title: 'Feixe livre', free: true },
+  { y0: 184, title: 'Feixe interrompido', free: false },
+];
+
+const alt =
+  'À esquerda, a abertura do portão vista de dentro: dois pilares, o portão deslizante fechando da direita para a esquerda, o transmissor TX preso no pilar da esquerda e o receptor RX no pilar da direita, um de frente para o outro, e entre eles uma linha tracejada que representa o feixe infravermelho, invisível. Os dois aparelhos recebem +12V e GND da central, e o receptor leva o seu contato até a entrada FOTO. À direita, os contatos do receptor, C, NA e NF, em duas situações. Com o feixe livre, a lâmina liga C ao NF: o NF está fechado, o NA aberto, e na central do curso o pino FOTO fica em 0 volt. Com o feixe interrompido, a lâmina passa para o NA: o NF abre e o pino FOTO vai a 5 volts. Uma nota lembra que um fio partido também deixa o NF aberto, e a central lê 5 volts, como se houvesse alguém no caminho.';
+---
+
+<Figure alt={alt} caption={caption}>
+  <svg class="fo" viewBox="0 0 720 356" width="720" height="356">
+    <defs>
+      <marker
+        id="fo-arrow"
+        viewBox="0 0 10 10"
+        refX="5"
+        refY="5"
+        markerWidth="7"
+        markerHeight="7"
+        orient="auto-start-reverse"
+      >
+        <path d="M0 0L10 5L0 10z" class="fo-arrowhead"></path>
+      </marker>
+    </defs>
+
+    <text class="fo-title" x="220" y="20" text-anchor="middle">
+      Os dois pilares, vistos de dentro
+    </text>
+
+    <!-- gate closing from the right -->
+    <g class="fo-gate">
+      <rect x="232" y="104" width="128" height="184" rx="2"></rect>
+      {bars.map((x) => (
+        <line x1={x} y1="110" x2={x} y2="282" />
+      ))}
+    </g>
+    <line class="fo-move" x1="344" y1="92" x2="254" y2="92" marker-end="url(#fo-arrow)"></line>
+    <text class="fo-note" x="300" y="82" text-anchor="middle">
+      portão fechando
+    </text>
+
+    <!-- posts and ground -->
+    <line class="fo-ground" x1="16" y1="300" x2="436" y2="300"></line>
+    <rect class="fo-post" x="40" y="50" width="40" height="250"></rect>
+    <rect class="fo-post" x="360" y="50" width="40" height="250"></rect>
+    <text class="fo-muted" x="60" y="318" text-anchor="middle">
+      pilar
+    </text>
+    <text class="fo-muted" x="380" y="318" text-anchor="middle">
+      pilar
+    </text>
+
+    <!-- transmitter, receiver and beam -->
+    <rect class="fo-box" x="80" y="196" width="24" height="36" rx="3"></rect>
+    <circle class="fo-lens" cx="98" cy="214" r="4"></circle>
+    <rect class="fo-box" x="336" y="196" width="24" height="36" rx="3"></rect>
+    <circle class="fo-lens" cx="342" cy="214" r="4"></circle>
+    <text class="fo-tag" x="92" y="188" text-anchor="middle">
+      TX
+    </text>
+    <text class="fo-tag" x="348" y="188" text-anchor="middle">
+      RX
+    </text>
+    <text class="fo-note" x="110" y="252">
+      transmissor
+    </text>
+    <text class="fo-note fo-on-gate" x="330" y="252" text-anchor="end">
+      receptor
+    </text>
+    <line class="fo-beam" x1="104" y1="214" x2="336" y2="214"></line>
+    <text class="fo-note fo-on-gate" x="220" y="206" text-anchor="middle">
+      feixe infravermelho (invisível)
+    </text>
+
+    <!-- cables down the posts -->
+    <polyline class="fo-cable" points="92,232 92,296"></polyline>
+    <polyline class="fo-cable" points="348,232 348,296"></polyline>
+    <text class="fo-muted" x="24" y="340">
+      cabos para a central: +12V e GND nos dois; C e NF do RX
+    </text>
+
+    <line class="fo-divider" x1="448" y1="8" x2="448" y2="348"></line>
+
+    <!-- receiver contacts -->
+    <text class="fo-title" x="588" y="20" text-anchor="middle">
+      Contatos do receptor
+    </text>
+    {states.map(({ y0, title, free }) => (
+      <g>
+        <text class="fo-sub" x="470" y={y0 + 18}>
+          {title}
+        </text>
+        <line class="fo-blade" x1="500" y1={y0 + 62} x2="603" y2={free ? y0 + 42 : y0 + 80} />
+        <circle class="fo-term" cx="500" cy={y0 + 62} r="5" />
+        <circle class={free ? 'fo-term fo-term--on' : 'fo-term'} cx="610" cy={y0 + 40} r="5" />
+        <circle class={free ? 'fo-term' : 'fo-term fo-term--on'} cx="610" cy={y0 + 82} r="5" />
+        <text class="fo-tag" x="488" y={y0 + 67} text-anchor="end">
+          C
+        </text>
+        <text class="fo-tag" x="622" y={y0 + 45}>
+          NF
+        </text>
+        <text class="fo-tag" x="622" y={y0 + 87}>
+          NA
+        </text>
+        <text class="fo-state" x="470" y={y0 + 112}>
+          {free ? 'NF fechado, NA aberto' : 'NF aberto, NA fechado'}
+        </text>
+        <text class="fo-note" x="470" y={y0 + 128}>
+          {free ? 'na CD-1: FOTO em 0 V (livre)' : 'na CD-1: FOTO em 5 V (alguém)'}
+        </text>
+      </g>
+    ))}
+    <text class="fo-note" x="470" y="332">
+      CD-1: C no GND e NF no borne FOTO
+    </text>
+    <text class="fo-warn" x="470" y="348">
+      Fio partido: NF aberto, FOTO em 5 V
+    </text>
+  </svg>
+</Figure>
+
+<style>
+  .fo {
+    width: 100%;
+    min-width: 34rem;
+    height: auto;
+  }
+
+  .fo-title {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .fo-sub,
+  .fo-state {
+    fill: var(--fg);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .fo-tag {
+    fill: var(--fg);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .fo-note {
+    fill: var(--fg);
+    font-size: 11px;
+  }
+
+  .fo-on-gate {
+    paint-order: stroke;
+    stroke: var(--surface);
+    stroke-width: 4px;
+  }
+
+  .fo-muted {
+    fill: var(--fg-muted);
+    font-size: 11px;
+  }
+
+  .fo-warn {
+    fill: var(--danger);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .fo-gate rect {
+    fill: color-mix(in oklab, var(--fg-subtle) 14%, transparent);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .fo-gate line {
+    stroke: var(--fg-subtle);
+    stroke-width: 2;
+  }
+
+  .fo-move {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .fo-arrowhead {
+    fill: var(--fg-muted);
+  }
+
+  .fo-ground {
+    stroke: var(--border-strong);
+    stroke-width: 3;
+  }
+
+  .fo-post {
+    fill: var(--surface-2);
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+  }
+
+  .fo-box {
+    fill: var(--fg);
+    stroke: none;
+  }
+
+  .fo-lens {
+    fill: var(--danger);
+  }
+
+  .fo-beam {
+    stroke: var(--danger);
+    stroke-width: 2.5;
+    stroke-dasharray: 7 5;
+  }
+
+  .fo-cable {
+    fill: none;
+    stroke: var(--copper);
+    stroke-width: 2;
+    stroke-dasharray: 3 3;
+  }
+
+  .fo-divider {
+    stroke: var(--border);
+    stroke-dasharray: 4 4;
+  }
+
+  .fo-blade {
+    stroke: var(--copper);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  .fo-term {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .fo-term--on {
+    fill: var(--success);
+    stroke: var(--success);
+  }
+</style>
