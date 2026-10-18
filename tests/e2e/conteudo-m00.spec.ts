@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 import { expectAccessible, expectNoHorizontalOverflow, watchErrors } from './helpers';
 
 const LESSONS = [
@@ -17,6 +17,14 @@ async function scrollThrough(page: Page) {
   });
   await expect(page.locator('astro-island[ssr]')).toHaveCount(0);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+}
+
+/** Scrolls to a `client:visible` widget and waits until React has hydrated it. */
+async function hydrated(page: Page, widget: Locator): Promise<Locator> {
+  const island = page.locator('astro-island', { has: widget }).last();
+  await island.scrollIntoViewIfNeeded();
+  await expect(island).not.toHaveAttribute('ssr');
+  return widget;
 }
 
 for (const path of LESSONS) {
@@ -50,8 +58,10 @@ test.describe('accessibility', () => {
 test('the shock calculator recomputes the current through the body', async ({ page }) => {
   const errors = watchErrors(page);
   await page.goto(LESSONS[1]!);
-  const calculator = page.getByRole('region', { name: 'Calculadora do choque' });
-  await calculator.scrollIntoViewIfNeeded();
+  const calculator = await hydrated(
+    page,
+    page.getByRole('region', { name: 'Calculadora do choque' }),
+  );
   const current = calculator.locator('.lw__value');
   await expect(current).toHaveText('1,26 mA');
   await calculator.locator('label', { hasText: 'Mão molhada' }).click();
@@ -63,8 +73,7 @@ test('the shock calculator recomputes the current through the body', async ({ pa
 test('the multimeter dial explains each position', async ({ page }) => {
   const errors = watchErrors(page);
   await page.goto(LESSONS[2]!);
-  const meter = page.getByRole('region', { name: 'O seletor do multímetro' });
-  await meter.scrollIntoViewIfNeeded();
+  const meter = await hydrated(page, page.getByRole('region', { name: 'O seletor do multímetro' }));
   const name = meter.locator('.mmi__name');
   await expect(name).toHaveText('Tensão contínua (CC)');
   await meter.locator('label', { hasText: 'Corrente pequena' }).click();
