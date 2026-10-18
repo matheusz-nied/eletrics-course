@@ -12,8 +12,32 @@ type UPlotCtor = typeof uPlot;
 
 let loading: Promise<UPlotCtor> | null = null;
 
+/**
+ * uPlot creates `Intl.NumberFormat(navigator.language)` when its module loads,
+ * and Intl throws on tags such as "en-US@posix" (Chromium started without a
+ * locale). Such a browser reads pt-BR while the module loads.
+ */
+async function importUPlot(): Promise<UPlotCtor> {
+  let restore: (() => void) | null = null;
+  try {
+    new Intl.NumberFormat(navigator.language);
+  } catch {
+    const own = Object.getOwnPropertyDescriptor(navigator, 'language');
+    Object.defineProperty(navigator, 'language', { value: 'pt-BR', configurable: true });
+    restore = () =>
+      own
+        ? Object.defineProperty(navigator, 'language', own)
+        : Reflect.deleteProperty(navigator, 'language');
+  }
+  try {
+    return (await import('uplot')).default;
+  } finally {
+    restore?.();
+  }
+}
+
 export function loadUPlot(): Promise<UPlotCtor> {
-  loading ??= import('uplot').then((m) => m.default);
+  loading ??= importUPlot();
   return loading;
 }
 

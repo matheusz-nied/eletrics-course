@@ -1,0 +1,62 @@
+---
+/*
+ * Static charts drawn from fixed data, to check axes and labels at every
+ * width. Not linked from the course.
+ */
+import Plot from '../../../circuit/Plot.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { withBase } from '../../../lib/url';
+
+// NTC de 10 kΩ a 25 °C, B = 3950 K.
+const ntc = Array.from({ length: 21 }, (_, i): [number, number] => {
+  const c = i * 5;
+  return [c, 10_000 * Math.exp(3950 * (1 / (c + 273.15) - 1 / 298.15))];
+});
+
+// Capacitor de 100 µF carregando por 1 kΩ até 12 V, e a corrente.
+const tau = 0.1;
+const times = Array.from({ length: 51 }, (_, i) => (i * 5 * tau) / 50);
+const charge = times.map((t): [number, number] => [t, 12 * (1 - Math.exp(-t / tau))]);
+const current = times.map((t): [number, number] => [t, 0.012 * Math.exp(-t / tau)]);
+---
+
+<BaseLayout title="Gráficos estáticos" noindex>
+  <main id="conteudo" tabindex="-1" class="charts">
+    <p class="eyebrow">
+      <a href={withBase('dev/circuitos/')}>Circuitos</a>
+    </p>
+    <h1>Gráficos estáticos</h1>
+    <p class="lead">
+      Gráficos feitos com dados fixos. Num celular, o eixo horizontal mostra menos marcas para que
+      os números não se sobreponham.
+    </p>
+    <Plot
+      data={[{ label: 'Resistência do NTC', unit: 'Ω', points: ntc }]}
+      xUnit="°C"
+      title="resistência de um NTC de 10 kΩ"
+    />
+    <Plot
+      data={[
+        { label: 'Tensão no capacitor', unit: 'V', points: charge },
+        { label: 'Corrente', unit: 'A', points: current },
+      ]}
+      title="carga de um capacitor de 100 µF por 1 kΩ"
+    />
+  </main>
+</BaseLayout>
+
+<style>
+  .charts {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 3rem 1rem 4rem;
+  }
+
+  .charts:focus {
+    outline: none;
+  }
+
+  .eyebrow a {
+    color: var(--accent);
+  }
+</style>
