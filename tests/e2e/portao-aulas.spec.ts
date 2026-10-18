@@ -97,6 +97,34 @@ test.describe('central virtual', () => {
   });
 });
 
+test.describe('the full gate circuit', () => {
+  test('the push button starts the motor on the real engine', async ({ page }) => {
+    // The lesson page is long and the engine loads the whole circuit in a worker.
+    test.setTimeout(90_000);
+    const errors = watchErrors(page);
+    await page.goto(lesson('03-a-central-por-dentro'));
+    const sim = page.locator('[data-simulation="m16/portao-completo"]');
+    await sim.scrollIntoViewIfNeeded();
+    await expect(sim).toHaveAttribute('data-ready', '', { timeout: 20_000 });
+    await expect(sim).toHaveAttribute('data-engine', 'motor');
+    // It starts on its own: the firmware reads the limit switches and finds the gate closed.
+    await expect(sim.getByText('Central ligada com o portão fechado')).toBeVisible();
+
+    const button = sim.locator('.sim-controls').getByRole('button', { name: /^Botoeira/ });
+    await button.hover();
+    await page.mouse.down();
+    await expect(button).toHaveAttribute('aria-pressed', 'true');
+    await page.waitForTimeout(300);
+    await page.mouse.up();
+
+    // Current flows through the motor once K1 and the TRIAC are on.
+    const reading = sim.locator('.dmm[data-probe="IM"] [data-reading]');
+    await expect(reading).toHaveText(/Corrente do motor: [1-9][\d,]*\s(m)?A/, { timeout: 15_000 });
+    await expect(sim.getByText('Comando (botoeira): abrindo.')).toBeVisible();
+    errors.expectClean();
+  });
+});
+
 test.describe('finding the common wire', () => {
   test('the three readings point to the common wire', async ({ page }) => {
     const errors = watchErrors(page);

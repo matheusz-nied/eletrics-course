@@ -128,7 +128,7 @@ O portão também começa fechado. **Antes de apertar o controle, olhe os LEDs.*
 <DeepDive title="O que aconteceu na segunda central">
 O conector do fim de curso estava invertido. Com o portão fechado, o ímã de fechamento estava no reed, mas o sinal chegava ao pino FCA: acendeu o LED verde, e a central começou o dia achando que o portão estava aberto. O primeiro comando, então, foi **fechar**. O motor empurrou um portão que já estava fechado contra o batente: o campo Motor mostra "zumbindo, sem girar" e a corrente fica perto de 5 A.
 
-Por que a detecção de obstáculo não parou o motor? A CD-1 aprende a corrente normal de trabalho no primeiro meio segundo do movimento e depois vigia se ela sobe muito. Como o portão já começou travado, a corrente alta pareceu "normal". Quem desligou o motor foi a última proteção: o **tempo máximo de 40 s** sem chegar ao fim de curso. A central entrou em erro, com o LED PROG piscando e o buzzer apitando.
+Por que a detecção de obstáculo não parou o motor? A CD-1 aprende a corrente normal de trabalho no começo do movimento e depois vigia se ela sobe muito. Como o portão já começou travado, a corrente alta pareceu "normal". Quem desligou o motor foi a última proteção: o **tempo máximo de 40 s** sem chegar ao fim de curso. A central entrou em erro, com o LED PROG piscando e o buzzer apitando.
 
 A correção, nesta central e nos manuais da Peccinin e da Omegasat, é a mesma: com o disjuntor desligado, inverter o conector do fim de curso. Depois, ligar de novo e conferir os LEDs com o portão parado numa ponta.
 </DeepDive>
