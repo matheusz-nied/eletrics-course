@@ -1,0 +1,348 @@
+---
+titulo: Fontes reais e baterias
+modulo: m02-circuitos-cc
+ordem: 7
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Representar uma pilha ou bateria real como uma fonte ideal em série com uma resistência interna
+  - Calcular a queda da tensão nos terminais quando a bateria entrega corrente
+  - Medir a resistência interna de uma bateria com um resistor e um voltímetro
+  - Interpretar a capacidade de uma bateria em Ah e em Wh
+  - Explicar por que uma bateria com tensão normal em repouso pode não dar partida no carro
+prerequisitos:
+  - m02-circuitos-cc/01-o-circuito-eletrico
+  - m02-circuitos-cc/06-divisores-de-tensao-e-corrente
+tags: [bateria, pilha, resistência interna, capacidade, Ah, carro, partida]
+seguranca: baixa-tensao
+---
+
+import BatteryModel from '../../../lessons/m02/figures/BatteryModel.astro';
+import CarBatteryCutaway from '../../../lessons/m02/figures/CarBatteryCutaway.astro';
+import Part3D from '../../../lessons/m02/Part3D.astro';
+
+Numa manhã fria, você gira a chave e o carro só faz "tec". As luzes do painel quase apagam. Um minuto antes, o multímetro marcava 12,4 V na bateria, um valor que parecia bom. Como uma bateria pode mostrar tensão normal e não conseguir girar o motor?
+
+A resposta está num resistor que não aparece em lugar nenhum, mas que existe dentro de toda pilha e de toda bateria: a **resistência interna**. Nesta aula você vai ver como ela derruba a tensão quando a bateria trabalha, aprender a medi-la e entender o que significam os números do rótulo de uma bateria.
+
+## Fonte ideal e fonte real
+
+Até aqui, as fontes das simulações eram quase ideais: a tensão ficava a mesma, não importava a corrente. Uma fonte **ideal** de 12 V daria 12 V com 1 mA ou com 1.000 A.
+
+Nenhuma fonte real é assim. Dentro de uma pilha, a corrente precisa atravessar a pasta química, as placas, as soldas e os terminais, e tudo isso tem resistência. O jeito mais simples de representar uma fonte real é uma fonte ideal em série com um resistor pequeno, a <Term id="resistencia-interna">resistência interna</Term> $r$:
+
+<Figure caption="Figura 1. Modelo de uma bateria real: uma fonte ideal (a força eletromotriz E) em série com a resistência interna r, tudo dentro da caixa. Por fora, só se tem acesso aos dois terminais.">
+  <BatteryModel />
+</Figure>
+
+A tensão da fonte ideal, $E$, se chama **força eletromotriz** (fem). É o que a bateria mostra quando não está entregando corrente nenhuma: a tensão de circuito aberto. A resistência interna fica escondida dentro da caixa; você nunca consegue encostar a ponta do multímetro entre ela e a fonte ideal.
+
+Olhe de novo para a figura: a resistência interna e a carga formam um [divisor de tensão](../06-divisores-de-tensao-e-corrente/). Quanto mais corrente a carga puxa, maior a fatia de tensão que fica "presa" dentro da bateria, e menor a tensão que sobra nos terminais.
+
+## As equações da fonte real
+
+A corrente que passa pelo circuito depende das duas resistências em série, a da carga $R$ e a interna $r$:
+
+$$
+I = \frac{E}{R + r}
+$$
+
+A tensão nos terminais é a fem menos a <Term id="queda-de-tensao">queda de tensão</Term> dentro da bateria:
+
+$$
+V_\text{terminais} = E - r \cdot I
+$$
+
+E a potência que vira calor dentro da própria bateria é
+
+$$
+P_\text{perdida} = r \cdot I^2
+$$
+
+Em todas elas, $E$ e $V_\text{terminais}$ estão em volts (V), $I$ em ampères (A), $R$ e $r$ em ohms (Ω) e $P$ em watts (W).
+
+A segunda equação é uma reta: a tensão nos terminais cai igualmente para cada ampère a mais. O gráfico abaixo mostra duas baterias de 9 V, uma nova (resistência interna típica de 1,7 Ω) e uma velha (4 Ω).
+
+<Plot
+  title="tensão nos terminais de uma bateria de 9 V conforme a corrente"
+  xUnit="A"
+  data={[
+    {
+      label: 'Bateria nova (r = 1,7 Ω)',
+      unit: 'V',
+      points: [
+        [0, 9],
+        [1, 7.3],
+        [2, 5.6],
+        [3, 3.9],
+        [4, 2.2],
+        [5, 0.5],
+        [5.29, 0],
+      ],
+    },
+    {
+      label: 'Bateria velha (r = 4 Ω)',
+      unit: 'V',
+      points: [
+        [0, 9],
+        [1, 5],
+        [2, 1],
+        [2.25, 0],
+      ],
+    },
+  ]}
+/>
+
+As duas marcam 9 V em aberto (corrente zero, à esquerda do gráfico). A diferença só aparece quando você pede corrente. Na ponta direita de cada reta, a tensão nos terminais chega a zero: é a **corrente de curto-circuito**, $I_\text{curto} = E / r$. Foi essa corrente, de cerca de 5 A, que esquentou a bateria de 9 V com as moedas no bolso, na [primeira aula do módulo](../01-o-circuito-eletrico/).
+
+## Explore: descubra a resistência interna
+
+Na simulação abaixo, uma bateria de 9 V alimenta uma carga ajustável. A resistência interna está lá dentro, mas o seu trabalho é descobri-la só com as leituras dos instrumentos, como você faria na bancada.
+
+<Simulation circuit="m02/resistencia-interna" instruments={['multimetro']} />
+
+1. Com a carga desligada, leia a tensão nos terminais. Essa é a fem, $E$.
+2. Ligue a carga com RL = 10 Ω. Anote a tensão nos terminais e a corrente.
+3. Mude RL para 100 Ω. A tensão caiu muito ou pouco? E com 1 Ω?
+4. Procure o valor de RL em que a tensão nos terminais fica exatamente na metade de $E$.
+
+Em aberto, a bateria marca 9 V. Com 10 Ω, a tensão cai para cerca de 7,7 V e a corrente fica perto de 0,77 A. Com 100 Ω (carga leve, menos de 0,1 A), a queda é pequena: 8,85 V. Com 1 Ω, os terminais ficam com só 3,3 V. A tensão cai para a metade (4,5 V) quando RL vale 1,7 Ω, igual à resistência interna: nesse ponto, a carga e a resistência interna formam um divisor com duas partes iguais. Guarde essa observação, ela é o assunto da aula sobre máxima transferência de potência.
+
+## Exemplo resolvido: medir a resistência interna de uma bateria de 9 V
+
+Você só tem um multímetro e um resistor de 10 Ω. Dá para descobrir a resistência interna da bateria assim:
+
+**Passo 1: medir a fem.** Com nada ligado, o multímetro na escala de tensão contínua marca $E = 9{,}00\,\text{V}$. (O multímetro puxa uma corrente minúscula, então essa leitura é praticamente a fem.)
+
+**Passo 2: medir com carga.** Com o resistor de 10 Ω ligado nos terminais, o multímetro marca $V_\text{terminais} = 7{,}69\,\text{V}$.
+
+**Passo 3: calcular a corrente.** Não precisa de amperímetro, porque você conhece o resistor:
+
+$$
+I = \frac{V_\text{terminais}}{R} = \frac{7{,}69\,\text{V}}{10\,\Omega} = 0{,}769\,\text{A}
+$$
+
+**Passo 4: calcular a resistência interna.** A tensão que "sumiu" ficou dentro da bateria:
+
+$$
+\begin{aligned}
+r &= \frac{E - V_\text{terminais}}{I} = \frac{9{,}00 - 7{,}69}{0{,}769} \\[4pt]
+&= \frac{1{,}31\,\text{V}}{0{,}769\,\text{A}} \approx 1{,}70\,\Omega
+\end{aligned}
+$$
+
+É o valor que está escondido na simulação. Na bancada, use um resistor de potência adequada (aqui ele dissipa quase 6 W; um de 10 W serve) e faça a medida em poucos segundos, porque a bateria e o resistor esquentam.
+
+## Capacidade: ampère-hora e watt-hora
+
+A resistência interna diz **quanta corrente** a bateria consegue entregar sem a tensão desabar. A **capacidade** diz **por quanto tempo**.
+
+A capacidade é dada em <Term id="ampere-hora">ampère-hora</Term> (Ah): uma bateria de 60 Ah, um valor típico de carro popular, entrega em teoria 3 A por 20 horas, ou 1 A por 60 horas. Celulares e power banks usam miliampère-hora (mAh): 5.000 mAh são 5 Ah.
+
+Para saber a **energia** guardada, multiplique pela tensão. A unidade é o watt-hora (Wh):
+
+$$
+\begin{aligned}
+\text{Energia} &= V \cdot \text{capacidade} \\[4pt]
+&= 12\,\text{V} \times 60\,\text{Ah} = 720\,\text{Wh}
+\end{aligned}
+$$
+
+Três detalhes que fazem diferença na prática:
+
+- **A capacidade do rótulo é medida devagar.** Em baterias de carro, costuma ser a carga entregue numa descarga de 20 horas. Com correntes maiores, a bateria entrega menos ampères-hora que o rótulo.
+- **Bateria de chumbo não deve ser esvaziada.** Descargas profundas encurtam a vida dela. Muito antes de "acabar", uma bateria de carro já não tem força para a partida.
+- **Comparar mAh só vale com a mesma tensão.** A célula de lítio de um power bank trabalha perto de 3,7 V (típico), mas o cabo USB entrega 5 V, e parte da energia se perde na conversão e no próprio celular. Por isso um power bank de 10.000 mAh carrega um celular de 5.000 mAh bem menos que duas vezes.
+
+Baterias de carro trazem também a **corrente de partida a frio**, em inglês *cold cranking amps* (CCA). Pela definição mais usada, da SAE (a sociedade norte-americana de engenheiros automotivos), é a corrente que a bateria nova e carregada entrega por 30 segundos a −18 °C sem a tensão cair abaixo de 7,2 V. Ela mede exatamente o que esta aula discute: quanta corrente sai antes de a resistência interna derrubar a tensão.
+
+## A bateria de carro por dentro
+
+<Part3D
+  part="car-battery"
+  cutaway
+  annotations
+  alt="Corte de uma bateria de carro de 12 V: seis células em fila, cada uma com placas positivas e negativas intercaladas e separadores, mergulhadas no eletrólito; tampas de respiro em cima; terminal positivo à esquerda e negativo à direita; ligações de chumbo entre as células."
+  caption="Bateria de chumbo-ácido de 12 V em corte."
+>
+  <CarBatteryCutaway />
+</Part3D>
+
+Uma bateria de carro tem **seis células** em série. Cada célula é um conjunto de placas positivas (dióxido de chumbo, escuras) intercaladas com placas negativas (chumbo esponjoso, cinzentas), separadas por folhas porosas e mergulhadas no eletrólito, ácido sulfúrico diluído em água. Cada célula dá cerca de 2,1 V quando carregada; as seis em série somam os 12,6 V de uma bateria cheia.
+
+Quando a bateria descarrega, as placas viram sulfato de chumbo e o eletrólito fica mais fraco. Recarregar desfaz a reação. Se a bateria ficar descarregada por muito tempo, o sulfato endurece em cristais que não se desfazem mais (a bateria "sulfatou"): a capacidade cai e a resistência interna sobe para sempre.
+
+O terminal positivo costuma ser um pouco mais grosso que o negativo, justamente para dificultar a ligação invertida. Muitas baterias "sem manutenção" são seladas e têm um indicador de carga, uma janelinha colorida em cima.
+
+<Callout type="nota" title="Tensão em repouso e estado de carga (típico)">
+Com a bateria parada há algumas horas, a 25 °C, a tensão nos terminais dá uma ideia da carga: perto de 12,6 V a 12,7 V, cheia; cerca de 12,4 V, uns 75 %; cerca de 12,2 V, metade; perto de 12,0 V, um quarto; abaixo disso, descarregada. São valores típicos de baterias de chumbo-ácido comuns. Eles indicam **carga**, não **saúde**: uma bateria cheia com resistência interna alta mostra 12,6 V e mesmo assim não dá partida.
+</Callout>
+
+## Explore: a partida do carro
+
+Na partida, o motor de arranque puxa uma corrente enorme, perto de 200 A em muitos carros de passeio (valor típico; motores maiores e diesel puxam mais). Na simulação, ele é representado por uma resistência de 0,05 Ω que entra no circuito enquanto você segura o botão. Os dois faróis de 55 W ficam acesos o tempo todo, e a resistência interna da bateria (com os cabos e bornes) é ajustável. Comece com 0,015 Ω, uma bateria boa.
+
+<Simulation circuit="m02/bateria-partida" instruments={['multimetro']} />
+
+1. Só com os faróis acesos, leia a tensão nos terminais e a corrente de um farol.
+2. Segure **Girar a chave (partida)**. Para quanto cai a tensão? Qual é a corrente no motor de partida? O que acontece com o brilho dos faróis?
+3. Solte o botão e suba a resistência interna para 0,05 Ω, como numa bateria velha, fria ou com bornes oxidados. Com só os faróis acesos, a tensão parece ruim?
+4. Agora gire a chave com a bateria fraca. Quanto sobra nos terminais? E a corrente do motor?
+
+Com a bateria boa, os faróis acesos deixam cerca de 12,5 V nos terminais (cada farol puxa uns 4,7 A). Na partida, a tensão cai para cerca de 9,6 V, o motor recebe uns 190 A e os faróis perdem metade do brilho. É por isso que a luz do painel "pisca" toda vez que você dá a partida.
+
+Com a resistência interna em 0,05 Ω, a bateria ainda mostra 12,1 V com os faróis acesos: nada alarmante. Mas, na partida, a tensão despenca para cerca de 6,1 V, o motor recebe só uns 120 A e os faróis quase apagam. O motor de arranque gira devagar (ou nem gira), e a central eletrônica, que precisa de uma tensão mínima para funcionar, pode desligar no meio da partida. É o "tec" da manhã fria.
+
+### Exemplo resolvido: a conta da partida
+
+Com a bateria boa, $E = 12{,}6\,\text{V}$ e $r = 0{,}015\,\Omega$. Os dois faróis acesos têm, juntos, cerca de 1,3 Ω, e o motor de partida 0,05 Ω. Em paralelo, a carga total fica em
+
+$$
+R = \frac{1}{\dfrac{1}{1{,}3\,\Omega} + \dfrac{1}{0{,}05\,\Omega}} \approx 0{,}048\,\Omega
+$$
+
+A corrente total e a tensão nos terminais são
+
+$$
+\begin{aligned}
+I &= \frac{12{,}6\,\text{V}}{0{,}048\,\Omega + 0{,}015\,\Omega} \\[4pt]
+&\approx 200\,\text{A} \\[4pt]
+V_\text{terminais} &= 12{,}6 - 0{,}015 \times 200 \\[4pt]
+&\approx 9{,}6\,\text{V}
+\end{aligned}
+$$
+
+Com $r = 0{,}05\,\Omega$, a mesma conta dá $I \approx 12{,}6 / 0{,}098 \approx 129\,\text{A}$ e $V_\text{terminais} \approx 12{,}6 - 0{,}05 \times 129 \approx 6{,}1\,\text{V}$. Quase metade da tensão da bateria fica presa dentro dela, virando calor em vez de girar o motor.
+
+<RealCase title="O carro que só faz “tec”">
+
+Antes de comprar uma bateria nova, dá para separar três causas com o multímetro, usando a ideia de resistência interna:
+
+1. **Tensão em repouso.** Com o carro parado há algumas horas, meça nos polos da bateria. Abaixo de uns 12,2 V, ela está descarregada: recarregue antes de tirar conclusões (e descubra por que descarregou).
+2. **Tensão durante a partida.** Com alguém girando a chave, meça de novo nos polos. Como referência prática, muitas oficinas consideram que uma bateria boa e carregada não deve cair abaixo de uns 9,6 V durante a partida (valor típico; o critério exato depende do teste e da temperatura). Se cair muito abaixo disso, a resistência interna está alta.
+3. **Os contatos.** Ainda durante a partida, compare a tensão medida **nos polos de chumbo** com a medida **nas braçadeiras dos cabos**. Se nos polos houver 10 V e nas braçadeiras só 7 V, os 3 V que faltam estão ficando no contato frouxo ou com zinabre (aquela crosta esbranquiçada ou esverdeada). É uma resistência em série escondida, e a solução é limpar e apertar, não trocar a bateria.
+
+O jeito seguro de medir tensão com o carro e o passo a passo com o multímetro estão no módulo de medições, na aula sobre medir tensão.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Confiar só na tensão em repouso.** Ela mostra a carga, não a resistência interna. Uma bateria só se revela quando entrega corrente.
+- **Medir logo depois de rodar ou de recarregar.** Logo após a recarga, a bateria mostra uma tensão um pouco mais alta que a real (a "carga superficial"). Espere algumas horas, ou acenda os faróis por um minuto e apague antes de medir.
+- **Misturar pilhas novas e velhas.** A pilha gasta tem resistência interna alta e derruba a tensão do conjunto inteiro. Pior: as pilhas boas podem forçar corrente ao contrário pela gasta, que esquenta e vaza. Troque todas juntas, do mesmo tipo.
+- **Deixar a bateria descarregada.** Bateria de chumbo parada descarregada sulfata. Se o carro vai ficar parado muito tempo, desligue o cabo negativo ou use um mantenedor de carga.
+
+<Callout type="perigo" title="Cuidados com a bateria de carro">
+O eletrólito é ácido sulfúrico: queima a pele e pode cegar. Use óculos de proteção e luvas, e lave com muita água se respingar. Durante a carga, a bateria solta hidrogênio, que explode com uma faísca: nada de fogo, cigarro ou faísca perto, e mantenha o local ventilado. Ao tirar a bateria, solte primeiro o cabo **negativo** e depois o positivo; para ligar, o positivo primeiro e o negativo por último. Assim a chave de boca nunca fecha curto entre o positivo e a lataria.
+</Callout>
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Uma bateria tem fem de 12 V e resistência interna de 0,5 Ω. Ela alimenta uma carga de 5,5 Ω. Qual é a tensão nos terminais?',
+      answer: 11,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation:
+        'I = 12 ÷ (5,5 + 0,5) = 2 A. A queda interna é 0,5 × 2 = 1 V, então sobram 12 − 1 = 11 V nos terminais.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma pilha marca 1,58 V sem carga. Com um resistor de 4,7 Ω ligado, ela marca 1,41 V. Qual é a resistência interna da pilha?',
+      answer: 0.567,
+      tolerance: 0.03,
+      unit: 'Ω',
+      explanation:
+        'A corrente é 1,41 V ÷ 4,7 Ω = 0,3 A. A tensão perdida dentro da pilha é 1,58 − 1,41 = 0,17 V. Então r = 0,17 ÷ 0,3 ≈ 0,57 Ω.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Quanta energia guarda uma bateria de 12 V e 45 Ah, em watt-hora?',
+      answer: 540,
+      tolerance: 0.01,
+      unit: 'Wh',
+      explanation: 'Energia = 12 V × 45 Ah = 540 Wh (em teoria; na prática, menos que isso é aproveitável).',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma bateria marca 12,5 V em repouso, mas a tensão cai para 6 V quando você gira a chave e o carro não pega. Qual é a causa mais provável?',
+      options: [
+        {
+          text: 'Resistência alta: dentro da bateria ou num contato frouxo ou oxidado',
+          correct: true,
+          feedback:
+            'A tensão em repouso está boa, então a bateria tem carga. O que derruba a tensão sob corrente é resistência: a interna ou a de um contato ruim.',
+        },
+        {
+          text: 'A bateria está descarregada',
+          feedback:
+            'Uma bateria descarregada mostraria tensão baixa já em repouso (perto de 12,0 V ou menos). Aqui o problema só aparece com corrente.',
+        },
+        {
+          text: 'O motor de partida está puxando corrente de menos',
+          feedback:
+            'Com pouca corrente, a queda de tensão seria pequena. A queda grande mostra que há muita corrente passando por uma resistência alta no caminho.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Uma bateria com 12,6 V nos terminais, em repouso, com certeza consegue dar a partida no carro.',
+      answer: false,
+      explanation:
+        'Em repouso não passa corrente, e a resistência interna não aparece. Uma bateria velha ou sulfatada pode mostrar 12,6 V e desabar na partida.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Por que um power bank de 10.000 mAh não carrega duas vezes um celular de bateria de 5.000 mAh?',
+      options: [
+        {
+          text: 'Por causa das perdas na conversão de tensão e no próprio carregamento',
+          correct: true,
+          feedback:
+            'As células do power bank trabalham perto de 3,7 V e a saída USB é de 5 V. A conversão, os cabos e o circuito de carga do celular perdem parte da energia.',
+        },
+        {
+          text: 'Porque o mAh do power bank é medido em outra unidade',
+          feedback:
+            'A unidade é a mesma. O problema é que mAh só compara bem baterias com a mesma tensão, e ainda há perdas no caminho.',
+        },
+        {
+          text: 'Porque o celular gasta a carga enquanto está desligado',
+          feedback: 'Isso existe, mas é pequeno. A maior parte da diferença está nas perdas de conversão e de carga.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem segura os passos para tirar a bateria de um carro.',
+      items: [
+        'Desligar tudo e tirar a chave do contato',
+        'Soltar o cabo do polo negativo',
+        'Soltar o cabo do polo positivo',
+        'Soltar a fixação e retirar a bateria',
+      ],
+      explanation:
+        'O negativo sai primeiro: depois disso, encostar a chave de boca na lataria enquanto solta o positivo não fecha curto, porque a lataria já não está ligada à bateria.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Toda fonte real é uma **fonte ideal** (a fem, $E$) em série com uma **resistência interna** $r$.
+- A tensão nos terminais cai com a corrente: $V_\text{terminais} = E - r \cdot I$. Sem corrente, você só vê a fem.
+- Dá para medir $r$ com um resistor conhecido e um voltímetro: $r = (E - V_\text{terminais}) / I$.
+- **Capacidade** (Ah) diz por quanto tempo a bateria entrega corrente; a **energia** (Wh) é tensão vezes capacidade.
+- Na partida do carro, uma resistência interna alta (bateria velha, fria, sulfatada) ou um contato oxidado derruba a tensão, mesmo que a bateria mostre tensão normal em repouso.
+- Bateria de carro: ácido e hidrogênio pedem óculos, luvas e nada de faísca; negativo sai primeiro e entra por último.
+
+As duas próximas aulas são avançadas e podem ser puladas. Na primeira, você vai ver que **qualquer** circuito de fontes e resistores, visto de dois terminais, se comporta como uma bateria com resistência interna: [Thévenin, Norton e superposição](../08-thevenin-norton-e-superposicao/).

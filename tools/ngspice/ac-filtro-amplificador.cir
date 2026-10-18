@@ -1,0 +1,30 @@
+* Varredura CA de 10 Hz a 1 MHz: filtro RC passa-baixas e amplificador emissor comum com capacitor de desvio
+V1 1 0 DC 0 AC 1
+R1 1 2 1k
+C1 2 0 100n
+C2 1 3 10u
+R3 5 3 47k
+R4 3 0 10k
+RC 5 6 2.2k
+RE 7 0 1k
+CE 7 0 100u
+Q1 6 3 7 QN
+VCC 5 0 12
+L1 2 8 10m
+R8 8 0 1k
+.model QN NPN(IS=1e-14 BF=200 BR=2 VAF=100)
+.options reltol=1e-7 abstol=1e-14 vntol=1e-10
+.control
+set wr_singlescale
+set wr_vecnames
+ac dec 10 10 1meg
+let m2 = mag(v(2))
+let p2 = cph(v(2)) * 180 / pi
+let m6 = mag(v(6))
+let p6 = cph(v(6)) * 180 / pi
+let m8 = mag(v(8))
+let p8 = cph(v(8)) * 180 / pi
+wrdata out.txt m2 p2 m6 p6 m8 p8
+quit
+.endc
+.end

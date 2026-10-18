@@ -1,0 +1,20 @@
+* Transistor NPN chaveando uma bobina de 120 ohms / 0,2 H em 12 V, com diodo de roda livre; base excitada por senoide de 5 V, 50 Hz
+V1 1 0 SIN(0 5 50)
+RB 1 2 4.7k
+Q1 3 2 0 QN
+VCC 4 0 12
+RL 4 5 120
+L1 5 3 0.2
+D1 3 4 DRET
+.model QN NPN(IS=1e-14 BF=200 BR=2 VAF=100)
+.model DRET D(IS=7.03n N=1.808 RS=0.0342 BV=1000 IBV=5u)
+.options reltol=1e-6 abstol=1e-12 vntol=1e-9
+.control
+set wr_singlescale
+set wr_vecnames
+tran 50u 60m 0 2u uic
+linearize v(3) i(VCC) i(L1)
+wrdata out.txt v(3) i(VCC) i(L1)
+quit
+.endc
+.end

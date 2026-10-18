@@ -1,38 +1,55 @@
 ---
 /*
- * Placeholder created by the Fundação. The Experiência front replaces this file
- * with the real quiz; the props are the public API used by lessons
- * (docs/plano/02-arquitetura.md, section 4.3; docs/plano/03-guia-de-conteudo.md).
+ * Exercises at the end of a lesson (docs/plano/03-guia-de-conteudo.md):
+ * multiple choice, number, true/false, put in order and matching, with
+ * feedback per alternative. Wrong questions fail the build. The score is
+ * saved in the student's progress for the lesson this page belongs to.
  */
-import UnderConstruction from '../components/UnderConstruction.astro';
+import './quiz/quiz.css';
+import { checkQuestions, hash, quizKey, shuffledOrder, type QuizQuestion } from './quiz/grade';
+import QuizIsland, { type PreparedQuestion } from './quiz/QuizIsland';
 
-interface Base {
-  prompt: string;
-  /** Shown after answering, right or wrong. */
-  explanation?: string;
-}
-
-export type QuizQuestion =
-  | (Base & {
-      type: 'multipla';
-      options: { text: string; correct?: boolean; feedback?: string }[];
-    })
-  | (Base & { type: 'numerica'; answer: number; tolerance?: number; unit?: string })
-  | (Base & { type: 'vf'; answer: boolean })
-  | (Base & { type: 'ordenar'; items: string[] })
-  | (Base & { type: 'associar'; pairs: [string, string][] });
+export type { QuizQuestion } from './quiz/grade';
 
 export interface Props {
   questions: QuizQuestion[];
+  /** Heading of the block (default "Teste o que você aprendeu"). */
   title?: string;
 }
 
-const { questions } = Astro.props;
-const count = questions.length;
+const { questions, title = 'Teste o que você aprendeu' } = Astro.props;
+
+const errors = checkQuestions(questions);
+if (errors.length > 0) {
+  throw new Error(`<Quiz> em ${Astro.url.pathname} tem problemas:\n- ${errors.join('\n- ')}`);
+}
+
+const key = quizKey(questions);
+const prepared: PreparedQuestion[] = questions.map((q, i) => {
+  const seed = hash(`${key}:${i}`);
+  switch (q.type) {
+    case 'multipla':
+      return {
+        ...q,
+        order:
+          q.shuffle === false ? q.options.map((_, j) => j) : shuffledOrder(q.options.length, seed),
+      };
+    case 'ordenar':
+      return { ...q, order: shuffledOrder(q.items.length, seed, true) };
+    case 'associar':
+      return { ...q, order: shuffledOrder(q.pairs.length, seed, true) };
+    default:
+      return { ...q, order: [] };
+  }
+});
+
+// Lesson pages live at <base><module>/<lesson>/ (src/lib/url.ts).
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const path = decodeURI(Astro.url.pathname);
+const rest = path.startsWith(base) ? path.slice(base.length).replace(/\/$/, '') : '';
+const lessonId = /^m\d{2}-[^/]+\/[^/]+$/.test(rest) ? rest : undefined;
 ---
 
-<UnderConstruction
-  component="Quiz"
-  label="Exercícios"
-  detail={`${count} ${count === 1 ? 'questão' : 'questões'}`}
-/>
+<div class="quiz-wrap breakout" data-pagefind-ignore>
+  <QuizIsland client:visible questions={prepared} title={title} quizKey={key} lessonId={lessonId} />
+</div>

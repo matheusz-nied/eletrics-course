@@ -1,0 +1,169 @@
+---
+/* 02.2: three resistors in series and the potential along the path, step by step. */
+---
+
+<svg viewBox="0 0 680 330" width="680" height="330" class="fig" aria-hidden="true">
+  <!-- Circuit -->
+  <g class="cond">
+    <path d="M60 58 V40 H140 M220 40 H280 M360 40 H420 M500 40 H620 V132 H60 V102" />
+  </g>
+  <g class="src">
+    <path d="M44 62 H76 M52 72 H68 M44 82 H76 M52 92 H68" />
+    <path d="M60 58 V62 M60 92 V102" />
+    <text x="86" y="68" class="sign">
+      +
+    </text>
+    <text x="34" y="82" class="val end">
+      12 V
+    </text>
+  </g>
+  <g class="res">
+    <rect x="140" y="30" width="80" height="20" rx="2" />
+    <rect x="280" y="30" width="80" height="20" rx="2" />
+    <rect x="420" y="30" width="80" height="20" rx="2" />
+  </g>
+  <text x="180" y="22" class="label">
+    R1 · 1 kΩ
+  </text>
+  <text x="320" y="22" class="label">
+    R2 · 2,2 kΩ
+  </text>
+  <text x="460" y="22" class="label">
+    R3 · 4,7 kΩ
+  </text>
+  <g class="arrow">
+    <path d="M232 64 H268 M262 59 L268 64 L262 69" />
+    <path d="M534 64 H570 M564 59 L570 64 L564 69" />
+    <path d="M300 122 H264 M270 117 L264 122 L270 127" />
+  </g>
+  <text x="250" y="86" class="cur">
+    1,52 mA
+  </text>
+  <text x="552" y="86" class="cur">
+    1,52 mA
+  </text>
+  <text x="282" y="110" class="cur">
+    1,52 mA
+  </text>
+  <text x="430" y="110" class="sub">
+    a mesma corrente em todo o caminho
+  </text>
+
+  <!-- Potential along the path -->
+  <text x="40" y="168" class="sub start">
+    Tensão em cada ponto, medida em relação ao negativo da bateria
+  </text>
+  <g class="grid">
+    <path d="M100 190 H580 M100 310 H580" />
+    <path
+      d="M140 132 V310 M220 132 V310 M280 132 V310 M360 132 V310 M420 132 V310 M500 132 V310"
+      class="guide"
+    />
+  </g>
+  <text x="92" y="195" class="axis end">
+    12 V
+  </text>
+  <text x="92" y="315" class="axis end">
+    0 V
+  </text>
+  <path d="M100 190 H140 L220 205.2 H280 L360 238.6 H420 L500 310 H580 V310 H100 Z" class="area" />
+  <path d="M100 190 H140 L220 205.2 H280 L360 238.6 H420 L500 310 H580" class="curve" />
+  <text x="250" y="198" class="pt">
+    10,48 V
+  </text>
+  <text x="390" y="231" class="pt">
+    7,14 V
+  </text>
+  <text x="180" y="236" class="drop">
+    cai 1,52 V
+  </text>
+  <text x="320" y="270" class="drop">
+    cai 3,34 V
+  </text>
+  <text x="510" y="276" class="drop start">
+    cai 7,14 V
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .cond {
+    stroke: var(--copper);
+  }
+  .src {
+    stroke: var(--accent);
+  }
+  .res rect {
+    stroke: var(--fg);
+    fill: var(--surface);
+  }
+  .arrow {
+    stroke: var(--danger);
+    stroke-width: 2;
+  }
+  .grid {
+    stroke: var(--border-strong);
+    stroke-width: 1;
+  }
+  .grid .guide {
+    stroke-dasharray: 3 4;
+  }
+  .area {
+    fill: color-mix(in oklab, var(--accent) 12%, transparent);
+    stroke: none;
+  }
+  .curve {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  text {
+    stroke: none;
+    font-size: 14px;
+    text-anchor: middle;
+    fill: var(--fg);
+  }
+  .label {
+    font-weight: 600;
+  }
+  .sign {
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .val,
+  .pt {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    fill: var(--accent);
+  }
+  .cur {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    fill: var(--danger);
+  }
+  .axis {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    fill: var(--fg-muted);
+  }
+  .drop {
+    font-size: 13px;
+    font-weight: 600;
+    fill: var(--fg-muted);
+  }
+  .sub {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

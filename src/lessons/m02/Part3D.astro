@@ -1,0 +1,108 @@
+---
+/*
+ * A part of the 3D kit in a lesson, or an illustration until the part exists.
+ *
+ * The real <Model3D> fails the build for a part id the Kit 3D front has not
+ * delivered yet. Lessons of modules 2 and 3 reference parts through this
+ * component instead: when src/three/parts/<id>.tsx (or instruments/<id>.tsx)
+ * exists it renders <Model3D>; otherwise it renders the SVG passed as children,
+ * with a note that the 3D model is coming. Once the part lands, the lesson
+ * shows it with no change to the lesson.
+ */
+import Model3D from '../../three/Model3D.astro';
+
+export interface Props {
+  /** Part id in the 3D kit: "multimeter", "car-battery". */
+  part: string;
+  /** Part parameters for the 3D view. */
+  props?: Record<string, unknown>;
+  explode?: boolean;
+  cutaway?: boolean;
+  annotations?: boolean;
+  height?: number;
+  /** What the illustration shows, for screen readers (required). */
+  alt: string;
+  /** Caption under the illustration. */
+  caption?: string;
+}
+
+const {
+  part,
+  props,
+  explode = false,
+  cutaway = false,
+  annotations = false,
+  height = 360,
+  alt,
+  caption,
+} = Astro.props;
+
+const kit = import.meta.glob(['/src/three/parts/*.tsx', '/src/three/instruments/*.tsx']);
+const available = new Set(
+  Object.keys(kit).map((path) =>
+    path
+      .split('/')
+      .pop()!
+      .replace(/\.tsx$/, ''),
+  ),
+);
+const has3D = available.has(part);
+
+if (!has3D && !Astro.slots.has('default')) {
+  throw new Error(
+    `<Part3D part="${part}">: a peça ainda não existe no kit 3D; passe um SVG como filho.`,
+  );
+}
+---
+
+{has3D ? (
+  <Model3D
+    part={part}
+    props={props}
+    explode={explode}
+    cutaway={cutaway}
+    annotations={annotations}
+    height={height}
+  />
+) : (
+  <figure class="part3d" data-part={part}>
+    <div class="part3d__media" role="img" aria-label={alt}>
+      <slot />
+    </div>
+    <figcaption>
+      {caption && <span>{caption} </span>}
+      <span class="part3d__note">O modelo 3D interativo desta peça está em preparação.</span>
+    </figcaption>
+  </figure>
+)}
+
+<style>
+  .part3d {
+    margin: 1.75em 0;
+  }
+
+  .part3d__media {
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .part3d__media :global(svg) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  figcaption {
+    margin-top: 0.6rem;
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .part3d__note {
+    color: var(--fg-subtle);
+  }
+</style>

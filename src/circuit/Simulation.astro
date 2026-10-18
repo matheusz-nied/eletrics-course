@@ -1,20 +1,40 @@
 ---
 /*
- * Placeholder created by the Fundação. The Esquemático front replaces this file
- * with the real simulation; the props are the public API used by lessons
- * (docs/plano/02-arquitetura.md, section 4.3).
+ * A live circuit simulation in a lesson (docs/plano/02-arquitetura.md,
+ * sections 4.3 and 6). The schematic is rendered into the HTML at build time;
+ * the island hydrates when it scrolls into view and starts the engine.
  */
-import UnderConstruction from '../components/UnderConstruction.astro';
+import type { InstrumentSpec } from './instruments/Instruments';
+import { loadCircuit } from './registry';
+import SimulationApp from './SimulationApp';
 
 export interface Props {
   /** Circuit id, the path under src/lessons without `.circuit.ts`: "m02/serie-lampadas". */
   circuit: string;
+  /** Maximum height of the schematic in px. */
   height?: number;
   layout?: 'esquema' | 'esquema+3d' | '3d';
+  /** Starts running on its own (default: only DC circuits). */
   autoplay?: boolean;
+  /**
+   * Instruments under the schematic: "multimetro", "osciloscopio", "grafico",
+   * "bode", optionally with the series they show ({ kind: "osciloscopio",
+   * series: ["VE", "VS"] }). Default: what fits the analysis, with every probe.
+   */
+  instruments?: InstrumentSpec[];
 }
 
-const { circuit, height = 360 } = Astro.props;
+const { circuit, height = 360, layout = 'esquema', autoplay, instruments } = Astro.props;
+const doc = await loadCircuit(circuit);
 ---
 
-<UnderConstruction component="Simulation" label="Simulação" detail={circuit} height={height} />
+<div class="sim-island breakout" data-sim-island={circuit}>
+  <SimulationApp
+    client:visible
+    doc={doc}
+    height={height}
+    layout={doc.scene3d ? layout : 'esquema'}
+    autoplay={autoplay ?? doc.analysis.kind === 'dc'}
+    instruments={instruments}
+  />
+</div>

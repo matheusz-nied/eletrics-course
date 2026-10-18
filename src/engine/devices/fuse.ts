@@ -60,6 +60,9 @@ export default defineDevice({
       stamp(m) {
         m.conductance(a, b, 1 / resistance());
       },
+      stampAc(m) {
+        m.admittance(a, b, 1 / resistance());
+      },
       update(step, x, ctx) {
         current = (x.v(a) - x.v(b)) / resistance();
         if (!ctx.commit || blown) return;

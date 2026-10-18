@@ -1,11 +1,214 @@
 ---
 /*
- * Placeholder created by the Fundação: the lesson footer renders this
- * component, so the Experiência front can show the lesson's progress
- * ("marcar como lida") by replacing this file, without editing the layout.
+ * Lesson footer (rendered by LessonLayout.astro): "Concluí esta aula", the
+ * lesson's exercise score and the module's progress, all from the browser's
+ * progress (src/course/progress/). Opening the lesson records the visit for
+ * "continuar de onde parou". It also tags the page for the site search.
  */
+import { available } from './catalog';
+import { getCourseData } from './data';
+import CourseIcon from './ui/CourseIcon.astro';
+import ProgressBar from './ui/ProgressBar.astro';
+
 export interface Props {
   lessonId: string;
   moduleId: string;
 }
+
+const { lessonId, moduleId } = Astro.props;
+const { modules } = await getCourseData();
+const module = modules.find((m) => m.id === moduleId);
+const moduleLessons = module ? available(module.lessons).map((l) => l.id) : [];
 ---
+
+<section
+  class="lprog"
+  aria-labelledby="progresso-da-aula"
+  data-lesson-progress={lessonId}
+  data-pagefind-ignore
+>
+  <span hidden data-pagefind-filter="tipo:Aula" data-pagefind-meta="tipo:Aula"></span>
+  {module && (
+    <span hidden data-pagefind-meta="modulo">
+      Módulo {module.numero} · {module.titulo}
+    </span>
+  )}
+  <div class="lprog__main">
+    <h2 id="progresso-da-aula" class="lprog__title">
+      Seu progresso
+    </h2>
+    <p class="lprog__status" data-lesson-status>
+      Quando terminar de estudar, marque a aula como concluída.
+    </p>
+    <p class="lprog__quiz" data-lesson-quiz hidden></p>
+  </div>
+  <button type="button" class="lprog__toggle" aria-pressed="false" data-lesson-read disabled>
+    <span class="lprog__box" aria-hidden="true">
+      <CourseIcon name="check" size={18} />
+    </span>
+    Concluí esta aula
+  </button>
+  {module && moduleLessons.length > 0 && (
+    <div class="lprog__module">
+      <p class="lprog__module-name">
+        Módulo {module.numero} · {module.titulo}
+      </p>
+      <ProgressBar lessons={moduleLessons} label={`Progresso no módulo ${module.numero}`} />
+    </div>
+  )}
+  <p class="sr-only" aria-live="polite" data-lesson-live></p>
+</section>
+
+<script>
+  import { getProgress } from './progress/store';
+
+  const date = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-lesson-progress]')) {
+    const id = root.dataset.lessonProgress ?? '';
+    const store = getProgress();
+    const button = root.querySelector<HTMLButtonElement>('[data-lesson-read]');
+    const status = root.querySelector<HTMLElement>('[data-lesson-status]');
+    const quiz = root.querySelector<HTMLElement>('[data-lesson-quiz]');
+    const live = root.querySelector<HTMLElement>('[data-lesson-live]');
+
+    const render = () => {
+      const record = store.lesson(id);
+      const read = record.lida !== undefined;
+      root.toggleAttribute('data-read', read);
+      if (button) button.setAttribute('aria-pressed', String(read));
+      if (status) {
+        status.textContent = read
+          ? `Você concluiu esta aula em ${date.format(new Date(record.lida ?? ''))}.`
+          : 'Quando terminar de estudar, marque a aula como concluída.';
+      }
+      const score = store.quizScore(id);
+      if (quiz) {
+        quiz.hidden = !score;
+        if (score) {
+          const best =
+            score.melhor > score.acertos ? ` Seu melhor resultado: ${score.melhor}.` : '';
+          quiz.textContent = `Exercícios: ${score.acertos} de ${score.total} ${score.total === 1 ? 'acerto' : 'acertos'} na última tentativa.${best}`;
+        }
+      }
+    };
+
+    button?.addEventListener('click', () => {
+      const read = !store.isRead(id);
+      store.setRead(id, read);
+      if (live) {
+        live.textContent = read ? 'Aula marcada como concluída.' : 'Aula desmarcada.';
+      }
+    });
+
+    store.visit(id);
+    store.subscribe(render);
+    render();
+    if (button) button.disabled = false;
+  }
+</script>
+
+<style>
+  .lprog {
+    display: grid;
+    gap: 1rem 1.5rem;
+    align-items: center;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  @media (min-width: 40rem) {
+    .lprog {
+      grid-template-columns: 1fr auto;
+    }
+
+    .lprog__module {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .lprog[data-read] {
+    border-color: var(--success-border);
+  }
+
+  .lprog__main {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .lprog__title {
+    font-size: 1.0625rem;
+    font-weight: 650;
+  }
+
+  .lprog__status,
+  .lprog__quiz {
+    color: var(--fg-muted);
+    font-size: 0.9375rem;
+  }
+
+  .lprog__quiz[hidden] {
+    display: none;
+  }
+
+  .lprog__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 0.625rem;
+    min-height: 3rem;
+    padding: 0 1.125rem 0 0.75rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.75rem;
+    background: var(--bg);
+    color: var(--fg);
+    font-weight: 600;
+    transition:
+      background-color 150ms,
+      border-color 150ms;
+  }
+
+  .lprog__toggle:hover:not(:disabled) {
+    border-color: var(--success);
+  }
+
+  .lprog__toggle:disabled {
+    opacity: 0.6;
+  }
+
+  .lprog__box {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--border-strong);
+    border-radius: 0.4rem;
+    color: transparent;
+  }
+
+  .lprog__toggle[aria-pressed='true'] {
+    border-color: var(--success-border);
+    background: var(--success-soft);
+    color: var(--success);
+  }
+
+  .lprog__toggle[aria-pressed='true'] .lprog__box {
+    border-color: var(--success);
+    background: var(--success);
+    color: light-dark(#fff, #0b0e13);
+  }
+
+  .lprog__module {
+    display: grid;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .lprog__module-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+</style>

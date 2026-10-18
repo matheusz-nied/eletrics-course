@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { EXAMPLE_LESSON, expectNoHorizontalOverflow, watchErrors } from './helpers';
+import {
+  EXAMPLE_LESSON,
+  expectAccessible,
+  expectNoHorizontalOverflow,
+  watchErrors,
+} from './helpers';
 
 test.describe('example lesson', () => {
   test.beforeEach(async ({ page }) => {
@@ -38,8 +43,16 @@ test.describe('example lesson', () => {
 
   test('renders formulas with KaTeX at build time', async ({ page }) => {
     await expect(page.locator('.katex').first()).toBeVisible();
-    await expect(page.locator('.katex-display')).toHaveCount(1);
     await expect(page.locator('.katex-error')).toHaveCount(0);
+
+    // Display formulas can scroll sideways, so each one takes keyboard focus.
+    const formulas = page.locator('.katex-display');
+    await expect(formulas).toHaveCount(2);
+    for (const formula of await formulas.all()) {
+      await expect(formula).toHaveRole('group');
+      await expect(formula).toHaveAccessibleName('Fórmula');
+      await expect(formula).toHaveAttribute('tabindex', '0');
+    }
   });
 
   test('renders the content components', async ({ page }) => {
@@ -53,7 +66,7 @@ test.describe('example lesson', () => {
       await expect(page.getByRole('note', { name, exact: true })).toBeVisible();
     }
 
-    const figure = page.getByRole('figure');
+    const figure = page.getByRole('figure', { name: /^Figura 1\./ });
     await expect(figure).toContainText('Figura 1.');
     await expect(
       figure.getByRole('img', { name: /bateria de 12 volts ligada a um resistor/ }),
@@ -81,12 +94,11 @@ test.describe('example lesson', () => {
   test('shows placeholders for the interactive components still in construction', async ({
     page,
   }) => {
-    for (const stub of ['Simulation', 'Plot', 'Scene3D', 'WiringExercise', 'Workshop', 'Quiz']) {
+    for (const stub of ['Scene3D', 'WiringExercise']) {
       const box = page.locator(`[data-stub="${stub}"]`);
       await expect(box, stub).toHaveCount(1);
       await expect(box, stub).toContainText('em construção');
     }
-    await expect(page.locator('[data-stub="Quiz"]')).toContainText('5 questões');
   });
 
   test('table of contents links to the sections', async ({ page, isMobile }) => {
@@ -127,6 +139,25 @@ test.describe('on a phone', () => {
     await expect(sidebar).toBeHidden();
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
     await expect(toggle).toBeFocused();
+  });
+
+  test('formulas and tables wider than the screen scroll with the keyboard', async ({ page }) => {
+    await page.goto(EXAMPLE_LESSON);
+    const formula = page.locator('.katex-display').filter({ hasText: 'mW' });
+    expect(await formula.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(
+      true,
+    );
+
+    await formula.focus();
+    await expect(formula).toBeFocused();
+    await page.keyboard.press('ArrowRight');
+    await expect.poll(() => formula.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+
+    const table = page.getByRole('group', { name: 'Tabela' }).first();
+    await expect(table).toHaveAttribute('tabindex', '0');
+
+    // axe `scrollable-region-focusable`: every sideways-scrolling block takes focus.
+    await expectAccessible(page);
   });
 
   for (const path of ['', 'm00-comece-aqui/', EXAMPLE_LESSON]) {

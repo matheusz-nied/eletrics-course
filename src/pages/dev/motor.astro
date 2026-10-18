@@ -50,8 +50,9 @@ const show = (v: number | boolean | string) =>
     <section aria-labelledby="desempenho-titulo">
       <h2 id="desempenho-titulo">Desempenho</h2>
       <p>
-        Circuito de 50 nós com passo de 10 µs. Meta do plano: 1.000 passos por segundo a 60 quadros
-        por segundo num celular intermediário.
+        Circuito de 50 nós com passo de 10 µs, só com componentes lineares e também com diodos e
+        LEDs (Newton-Raphson a cada passo). Meta do plano: 1.000 passos por segundo a 60 quadros por
+        segundo num celular intermediário.
       </p>
       <button type="button" class="btn" id="medir" disabled>
         Medir desempenho
@@ -185,9 +186,8 @@ const show = (v: number | boolean | string) =>
     });
   }
 
-  /** Steps per second on this thread, then the real-time rate in the worker. */
-  async function measure(): Promise<{ raw: number; worker: number; fps: number }> {
-    const doc = ladderCircuit(50);
+  /** Steps per second of a circuit on this thread. */
+  async function stepsPerSecond(doc: CircuitDoc): Promise<number> {
     const local = createSimulation({ worker: false });
     await local.load(doc);
     await local.runUntil(0.002, { maxFrames: 1 });
@@ -196,6 +196,19 @@ const show = (v: number | boolean | string) =>
     await local.runUntil(0.002 + steps * 1e-5, { maxFrames: 1 });
     const raw = steps / ((performance.now() - start) / 1000);
     local.dispose();
+    return raw;
+  }
+
+  /** Steps per second on this thread (linear and nonlinear), then the real-time rate in the worker. */
+  async function measure(): Promise<{
+    raw: number;
+    nonlinear: number;
+    worker: number;
+    fps: number;
+  }> {
+    const doc = ladderCircuit(50);
+    const raw = await stepsPerSecond(doc);
+    const nonlinear = await stepsPerSecond(ladderCircuit(50, true));
 
     const sim = createSimulation();
     await sim.load(doc);
@@ -219,7 +232,7 @@ const show = (v: number | boolean | string) =>
     sim.dispose();
     const seconds = (lastAt - firstAt) / 1000;
     const simulated = (last?.t ?? 0) - (first?.t ?? 0);
-    return { raw, worker: simulated / 1e-5 / seconds, fps: (frames - 1) / seconds };
+    return { raw, nonlinear, worker: simulated / 1e-5 / seconds, fps: (frames - 1) / seconds };
   }
 
   function setupBenchmark() {
@@ -229,12 +242,13 @@ const show = (v: number | boolean | string) =>
     button.addEventListener('click', async () => {
       button.disabled = true;
       out.textContent = 'Medindo…';
-      const { raw, worker, fps } = await measure();
+      const { raw, nonlinear, worker, fps } = await measure();
       const n = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
       out.dataset.raw = String(Math.round(raw));
+      out.dataset.nonlinear = String(Math.round(nonlinear));
       out.dataset.worker = String(Math.round(worker));
       out.dataset.fps = String(Math.round(fps));
-      out.textContent = `Página: ${n.format(raw)} passos/s. Worker em tempo real: ${n.format(worker)} passos/s a ${n.format(fps)} quadros/s.`;
+      out.textContent = `Página: ${n.format(raw)} passos/s (com diodos e LEDs: ${n.format(nonlinear)} passos/s). Worker em tempo real: ${n.format(worker)} passos/s a ${n.format(fps)} quadros/s.`;
       button.disabled = false;
     });
   }

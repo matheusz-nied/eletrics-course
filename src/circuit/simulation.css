@@ -1,0 +1,1304 @@
+/*
+ * Styles of the simulation island (<Simulation>): schematic, controls and
+ * instruments. Uses the site tokens (src/styles/global.css), so light and
+ * dark themes come for free. Every class starts with sim-, sch-, sym-,
+ * scope- or dmm-.
+ */
+
+.sim {
+  --sch-ink: var(--fg);
+  --sim-flow: light-dark(#c2410c, #fbbf24);
+  --sim-flow-electrons: light-dark(#0e7490, #22d3ee);
+  --sim-gap: 0.75rem;
+
+  container-type: inline-size;
+  display: grid;
+  gap: var(--sim-gap);
+  margin: 1.75em 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.sim p,
+.sim ul,
+.sim dl,
+.sim figure {
+  margin: 0;
+}
+
+.sim ul {
+  padding: 0;
+  list-style: none;
+}
+
+.sim-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.sim-empty {
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+}
+
+/* ── head and toolbar ─────────────────────────────────────────────── */
+
+.sim-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.sim-head__title {
+  font-weight: 600;
+}
+
+.sim-toolbar,
+.sim-toolbar__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.sim-toolbar {
+  gap: 0.375rem 0.75rem;
+}
+
+.sim-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sim-btn:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+
+.sim-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.sim-btn[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.sim-btn--primary,
+.sim-btn--primary:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.sim-btn--ghost {
+  min-width: 2rem;
+  min-height: 2rem;
+  border-color: transparent;
+  background: transparent;
+}
+
+.sim-btn--small {
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 1rem;
+}
+
+.sim :is(button, select, input, summary, [tabindex]):focus-visible,
+.sim-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sim-select,
+.sim-speed select {
+  min-height: 2.5rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.sim-time {
+  min-width: 6.5rem;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.sim-menu {
+  position: relative;
+}
+
+.sim-menu > summary {
+  list-style: none;
+}
+
+.sim-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.sim-menu__panel {
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  right: 0;
+  z-index: 30;
+  display: grid;
+  gap: 0.25rem;
+  width: max-content;
+  max-width: min(18rem, 80vw);
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  background: var(--bg);
+  box-shadow: var(--shadow-md);
+}
+
+.sim-menu__title {
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sim-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.sim-check input {
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.sim-check:has(input:disabled) {
+  opacity: 0.55;
+}
+
+.sim-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.sim-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.8125rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.sim-error {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--danger-border);
+  border-radius: 0.5rem;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* ── stage: schematic and 3D ─────────────────────────────────────── */
+
+.sim-stage {
+  display: grid;
+  gap: var(--sim-gap);
+}
+
+@container (min-width: 46rem) {
+  .sim-stage--split {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+}
+
+.sim-schematic {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 0.25rem;
+  border-radius: 0.625rem;
+  background:
+    radial-gradient(
+        circle,
+        light-dark(rgb(17 21 27 / 0.07), rgb(231 234 239 / 0.07)) 1px,
+        transparent 1.2px
+      )
+      0 0 / 20px 20px,
+    var(--surface);
+}
+
+.sim-3d {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  border-radius: 0.625rem;
+  background: var(--surface);
+}
+
+.sim-3d--placeholder {
+  place-content: center;
+  justify-items: center;
+  gap: 0.375rem;
+  padding: 1rem;
+  border: 1.5px dashed var(--border-strong);
+  color: var(--fg-muted);
+  text-align: center;
+}
+
+.sim-3d__title {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.sim-3d__id {
+  padding: 0.1rem 0.5rem;
+  border-radius: 0.375rem;
+  background: var(--surface-2);
+  font-size: 0.8125rem;
+}
+
+.sim-3d__values {
+  display: grid;
+  gap: 0.125rem;
+  font-size: 0.8125rem;
+}
+
+.sim-3d__values div {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.sim-3d__values dd {
+  margin: 0;
+  color: var(--fg);
+}
+
+.sim-3d__message {
+  place-self: center;
+  padding: 1rem;
+  color: var(--fg-muted);
+  text-align: center;
+}
+
+/* ── schematic (SVG) ─────────────────────────────────────────────── */
+
+.sch {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  color: var(--sch-ink);
+  font-family: var(--font-sans);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.sch-wire {
+  fill: none;
+  stroke: var(--sch-ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sch--voltage .sch-wire {
+  stroke: var(--wc, var(--sch-ink));
+  stroke-width: 2.6;
+}
+
+.sch-junctions circle {
+  fill: var(--sch-ink);
+}
+
+.sch-junctions .sch-open {
+  fill: var(--surface);
+  stroke: var(--sch-ink);
+  stroke-width: 1.5;
+}
+
+.sch-flow path {
+  fill: none;
+  stroke: var(--sim-flow);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.sch--electrons .sch-flow path {
+  stroke: var(--sim-flow-electrons);
+}
+
+.sch-node-labels text {
+  fill: var(--fg);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.sch-label text {
+  fill: var(--fg);
+  stroke: none;
+  font-size: 11px;
+}
+
+.sch-label__id {
+  font-weight: 600;
+}
+
+.sch-label__value {
+  fill: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sch-hit {
+  fill: transparent;
+  stroke: none;
+}
+
+.sch-focus {
+  fill: none;
+  stroke: none;
+  pointer-events: none;
+}
+
+.sch-el {
+  outline: none;
+}
+
+.sch-el--control {
+  cursor: pointer;
+}
+
+.sch-el--slider {
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.sch-el--control:hover .sch-hit {
+  fill: light-dark(rgb(26 91 208 / 0.08), rgb(116 171 255 / 0.1));
+}
+
+.sch-el.is-focused .sch-hit {
+  fill: light-dark(rgb(17 21 27 / 0.05), rgb(231 234 239 / 0.06));
+}
+
+.sch-el:focus-visible .sch-focus {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+/* symbols */
+
+.sym {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sym .sym-body {
+  fill: var(--surface);
+}
+
+.sym .sym-fill {
+  fill: currentColor;
+}
+
+.sym text,
+.sym .sym-text,
+.sym .sym-pin,
+.sym .sym-pin-text {
+  fill: currentColor;
+  stroke: none;
+  font-family: var(--font-sans);
+}
+
+.sym .sym-pin,
+.sym .sym-pin-text {
+  fill: var(--fg-muted);
+}
+
+.sym .sym-muted {
+  stroke: var(--fg-subtle);
+}
+
+.sym .sym-accent {
+  stroke: var(--accent);
+}
+
+.sym .sym-fill.sym-accent {
+  fill: var(--accent);
+}
+
+.sym .sym-wiper {
+  stroke: var(--accent);
+}
+
+.sym .sym-fill.sym-wiper {
+  fill: var(--accent);
+}
+
+.sym .sym-blade {
+  stroke-width: 2.2;
+}
+
+.sym .sym-burned {
+  fill: light-dark(#3b2a20, #2a1d16);
+  stroke: var(--danger);
+}
+
+.sym .sym-crack {
+  stroke: var(--danger);
+  stroke-width: 1.4;
+}
+
+.sym .sym-danger {
+  stroke: var(--danger);
+}
+
+.sym .sym-danger-fill {
+  fill: var(--danger-soft);
+  stroke: var(--danger);
+}
+
+.sym .sym-energized {
+  fill: var(--warning-soft);
+  stroke: var(--warning);
+}
+
+.sym .sym-high {
+  stroke: var(--danger);
+}
+
+.sym .sym-beam {
+  stroke: #e53935;
+}
+
+.sym .sym-jumper {
+  fill: light-dark(#1f2937, #4b5563);
+  stroke: currentColor;
+}
+
+.sym .sym-glow {
+  fill: rgb(255 196 64 / 0.55);
+  stroke: none;
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.sym .sym-glass {
+  fill: rgb(255 214 102);
+  stroke: none;
+}
+
+.sym .sym-glass-tube {
+  fill: light-dark(rgb(26 91 208 / 0.06), rgb(116 171 255 / 0.08));
+}
+
+.sym .sym-filament {
+  stroke: #d97706;
+}
+
+.sym .sym-led-glow {
+  stroke: none;
+  filter: blur(5px);
+  pointer-events: none;
+}
+
+.sym-spin {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: sim-spin 1s linear infinite;
+}
+
+.sym-hum {
+  animation: sim-hum 0.12s ease-in-out infinite alternate;
+}
+
+@keyframes sim-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes sim-hum {
+  to {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sym-spin,
+  .sym-hum {
+    animation: none;
+  }
+}
+
+/* ── inspector card ──────────────────────────────────────────────── */
+
+.sim-inspector {
+  position: absolute;
+  z-index: 20;
+  width: min(16rem, calc(100% - 1rem));
+  padding: 0.625rem 0.75rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  background: var(--bg);
+  box-shadow: var(--shadow-md);
+  font-size: 0.8125rem;
+  transform: translateX(-50%);
+}
+
+.sim-inspector:not([style]) {
+  right: 0.5rem;
+  bottom: 0.5rem;
+  transform: none;
+}
+
+.sim-inspector__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.sim-inspector__name {
+  font-weight: 600;
+}
+
+.sim-inspector__type {
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+}
+
+.sim-inspector__values {
+  display: grid;
+  gap: 0.125rem;
+  margin-top: 0.5rem;
+}
+
+.sim-inspector__values div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sim-inspector__values dt {
+  color: var(--fg-muted);
+}
+
+.sim-inspector__values dd {
+  margin: 0;
+  text-align: right;
+}
+
+.sim-inspector__edit {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.625rem;
+  padding-top: 0.625rem;
+  border-top: 1px solid var(--border);
+}
+
+.sim-field {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.sim-field__input {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.sim-field__input input {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.375rem;
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.sim-field__input input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.sim-field__unit {
+  color: var(--fg-muted);
+}
+
+.sim-field__error {
+  color: var(--danger);
+  font-size: 0.75rem;
+}
+
+/* ── legend ──────────────────────────────────────────────────────── */
+
+.sim-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 1.25rem;
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+}
+
+.sim-legend__scale {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sim-legend__bar {
+  width: 7rem;
+  height: 0.5rem;
+  border-radius: 999px;
+}
+
+.sim-legend__dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.sim-legend__dots i {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--sim-flow);
+}
+
+.sim-legend__dots.is-electrons i {
+  background: var(--sim-flow-electrons);
+}
+
+/* ── control panel ───────────────────────────────────────────────── */
+
+.sim-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 0.5rem 1rem;
+}
+
+.sim-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.375rem 0.75rem;
+  min-height: 2.75rem;
+}
+
+.sim-control__label {
+  font-weight: 500;
+}
+
+.sim-control--slider {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+
+.sim-control--slider input[type='range'] {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 2rem;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.sim-control--slider .sim-control__value {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.sim-control__value {
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+}
+
+.sim-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.sim-switch__track {
+  position: relative;
+  width: 2.75rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--border-strong);
+  transition: background 0.15s;
+}
+
+.sim-switch__thumb {
+  position: absolute;
+  top: 0.1875rem;
+  left: 0.1875rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s;
+}
+
+.sim-switch.is-on .sim-switch__track {
+  background: var(--accent);
+}
+
+.sim-switch.is-on .sim-switch__thumb {
+  transform: translateX(1.25rem);
+}
+
+.sim-switch__text {
+  min-width: 5.5rem;
+  text-align: left;
+}
+
+.sim-hold {
+  min-height: 2.75rem;
+  padding: 0.375rem 0.875rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.sim-hold.is-on {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* ── challenges and messages ─────────────────────────────────────── */
+
+.sim-goals {
+  display: grid;
+  gap: 0.375rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--info-border);
+  border-radius: 0.625rem;
+  background: var(--info-soft);
+}
+
+.sim-goals__title {
+  font-weight: 600;
+}
+
+.sim-goals li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.sim-goals__mark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.15rem;
+  border: 1.5px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+.sim-goals li.is-done .sim-goals__mark {
+  border-color: var(--success);
+  background: var(--success);
+  color: var(--bg);
+}
+
+.sim-events {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.sim-events:empty {
+  display: none;
+}
+
+.sim-events ul {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.sim-event {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  font-size: 0.875rem;
+}
+
+.sim-event > svg {
+  flex: none;
+  margin-top: 0.15rem;
+}
+
+.sim-event > span:first-of-type {
+  flex: 1;
+}
+
+.sim-event--damaged,
+.sim-event--tripped {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.sim-event--warning {
+  border-color: var(--warning-border);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.sim-event--info {
+  border-color: var(--info-border);
+  background: var(--info-soft);
+}
+
+.sim-event__t {
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.sim-events__hint {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+
+/* ── values table ────────────────────────────────────────────────── */
+
+.sim-table > summary {
+  width: fit-content;
+  padding: 0.25rem 0;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.sim-table__wrap {
+  overflow-x: auto;
+  margin-top: 0.375rem;
+}
+
+.sim-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.sim-table th,
+.sim-table td {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sim-table th:first-child,
+.sim-table td:first-child {
+  text-align: left;
+}
+
+.sim-table__type {
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+}
+
+/* ── instruments ─────────────────────────────────────────────────── */
+
+.sim-instruments {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.sim-tabs {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.sim-tab {
+  min-height: 2.5rem;
+  padding: 0.375rem 0.875rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--fg-muted);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.sim-tab[aria-selected='true'] {
+  border-bottom-color: var(--accent);
+  color: var(--fg);
+}
+
+.sim-chart-box {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.sim-chart-box__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.375rem 1rem;
+}
+
+.sim-chart-box__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.sim-chart-box__note {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+
+/* uPlot reads the canvas colours from these two properties. */
+.sim-chart {
+  min-height: 220px;
+  border-top: 1px solid var(--border);
+  color: var(--fg-muted);
+}
+
+.sim-chart .uplot {
+  font-family: var(--font-sans);
+}
+
+.sim-chart .u-legend {
+  margin-top: 0.25rem;
+  color: var(--fg);
+  font-size: 0.75rem;
+  text-align: left;
+}
+
+.sim-chart .u-legend .u-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.sim-chart .u-legend th {
+  font-weight: 500;
+}
+
+.sim-chart .u-legend .u-series > * {
+  padding: 0.125rem 0.25rem;
+}
+
+.sim-chart .u-legend .u-series:first-child .u-marker {
+  display: none;
+}
+
+/* A short line in the series colour (dashed for dashed series) instead of a hollow square. */
+.sim-chart .u-legend .u-marker {
+  width: 1rem;
+  height: 0;
+  margin-right: 0.375rem;
+  border-width: 2px 0 0 !important;
+  background: none !important;
+  vertical-align: middle;
+}
+
+/* multimeter */
+
+.dmm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+  gap: 0.75rem;
+}
+
+.dmm {
+  display: grid;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 18rem;
+  padding: 0.75rem;
+  border-radius: 1rem;
+  background: linear-gradient(160deg, #2c3138, #1c1f24);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+  color: #e8eaed;
+}
+
+.dmm__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.dmm__lcd {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 0.25rem;
+  padding: 0.5rem 0.625rem 0.375rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(180deg, #b9c7a6, #a4b38f);
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.35);
+  color: #1d2318;
+}
+
+.dmm__flags {
+  position: absolute;
+  top: 0.3rem;
+  left: 0.625rem;
+  display: flex;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+
+.dmm-digits {
+  width: 100%;
+  max-width: 11rem;
+  height: auto;
+  margin-top: 0.75rem;
+}
+
+.dmm-digits .on {
+  fill: #1d2318;
+}
+
+.dmm-digits .off {
+  fill: rgb(29 35 24 / 0.07);
+}
+
+.dmm__unit {
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.dmm__modes {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.dmm__modes button {
+  flex: 1;
+  min-height: 2.25rem;
+  border: 1px solid rgb(255 255 255 / 0.15);
+  border-radius: 0.5rem;
+  background: rgb(255 255 255 / 0.06);
+  color: inherit;
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.dmm__modes button.is-on {
+  border-color: #f5c518;
+  background: rgb(245 197 24 / 0.18);
+}
+
+/* oscilloscope */
+
+.scope {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.scope__screen {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border: 6px solid light-dark(#2b2f35, #22262c);
+  border-radius: 0.75rem;
+  background: #0a0f0c;
+  color: #cfd8d2;
+}
+
+.scope__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.scope__badge--state {
+  margin-left: auto;
+}
+
+.scope__badge--state.is-triggered {
+  color: #4ade80;
+}
+
+.scope__badge--state.is-waiting,
+.scope__badge--state.is-stopped {
+  color: #f87171;
+}
+
+.scope__plot {
+  position: relative;
+  min-height: 240px;
+}
+
+.scope__marker,
+.scope__trigger {
+  position: absolute;
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.scope__marker {
+  left: 0;
+}
+
+.scope__trigger {
+  right: 0;
+}
+
+.scope__legend {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.scope__measure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.scope__chip {
+  width: 0.75rem;
+  height: 0.25rem;
+  border-radius: 999px;
+}
+
+.scope__name {
+  font-weight: 500;
+}
+
+.scope__values {
+  color: var(--fg-muted);
+}
+
+.scope__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.scope__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.scope__channel {
+  padding-left: 0.5rem;
+  border-left: 3px solid var(--trace);
+}
+
+.scope-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.scope-step__label {
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+}
+
+.scope-step__value {
+  min-width: 5rem;
+  font-size: 0.8125rem;
+  text-align: center;
+}

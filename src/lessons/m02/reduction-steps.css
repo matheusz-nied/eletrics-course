@@ -1,0 +1,310 @@
+/* <ReductionSteps> (lesson 02.4). Unlayered, so it wins over .prose. */
+
+.rs {
+  margin: 2em 0;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--bg);
+  box-shadow: var(--shadow-sm);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.rs :where(p, ul, ol, h3) {
+  margin: 0;
+  padding: 0;
+}
+
+.rs :where(ul, ol) {
+  list-style: none;
+}
+
+.rs :where(li + li) {
+  margin-top: 0;
+}
+
+.rs-head {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  border-radius: 1rem 1rem 0 0;
+  background: var(--surface);
+}
+
+.rs-kicker {
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rs-title {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.rs-body {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.rs-figure {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: center;
+}
+
+.rs-svg {
+  width: 100%;
+  max-width: 30rem;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.rs-wire,
+.rs-part path,
+.rs-source path {
+  fill: none;
+  stroke: var(--fg-muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rs-part rect {
+  fill: var(--bg);
+  stroke: var(--fg-muted);
+  stroke-width: 2;
+}
+
+.rs-source circle {
+  fill: var(--bg);
+  stroke: var(--fg-muted);
+  stroke-width: 2;
+}
+
+.rs-part.is-hl path,
+.rs-part.is-hl rect {
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.rs-part.is-hl rect {
+  fill: var(--accent-soft);
+}
+
+.rs-part.is-fresh path,
+.rs-part.is-fresh rect {
+  stroke: var(--success);
+  stroke-width: 3;
+}
+
+.rs-part.is-fresh rect {
+  fill: var(--success-soft);
+}
+
+.rs-node circle {
+  fill: var(--fg-muted);
+}
+
+.rs-svg text {
+  fill: var(--fg);
+  font-size: 13px;
+  text-anchor: middle;
+}
+
+.rs-svg .rs-start {
+  text-anchor: start;
+}
+
+.rs-svg .rs-end {
+  text-anchor: end;
+}
+
+.rs-svg .rs-name {
+  font-weight: 600;
+}
+
+.rs-svg .rs-value {
+  fill: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.rs-part.is-hl .rs-name {
+  fill: var(--accent);
+}
+
+.rs-part.is-fresh .rs-name {
+  fill: var(--success);
+}
+
+.rs-svg .rs-node-label {
+  fill: var(--fg-subtle);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rs-svg .rs-note {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rs-svg .rs-note.is-current {
+  fill: var(--copper);
+}
+
+.rs-svg .rs-note.is-voltage {
+  fill: var(--accent);
+}
+
+.rs-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  justify-content: center;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+
+.rs-swatch {
+  display: inline-block;
+  width: 0.875rem;
+  height: 0.625rem;
+  margin-right: 0.25rem;
+  border: 2px solid;
+  border-radius: 2px;
+  vertical-align: -0.05em;
+}
+
+.rs-swatch.is-hl {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.rs-swatch.is-fresh {
+  border-color: var(--success);
+  background: var(--success-soft);
+}
+
+.rs-text {
+  display: grid;
+  gap: 0.375rem;
+  min-height: 9rem;
+}
+
+.rs-stage {
+  color: var(--fg-subtle);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.rs-stage-title {
+  font-weight: 600;
+}
+
+.rs-formula {
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 0.25rem;
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.rs-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rs-btn {
+  min-height: 2.5rem;
+  padding: 0.375rem 0.875rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rs-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.rs-btn--primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.rs-btn--primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+
+.rs-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.rs-btn:focus-visible,
+.rs-dot:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.rs-dots {
+  display: flex;
+  gap: 0.125rem;
+  align-items: center;
+}
+
+.rs-dot {
+  display: block;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.rs-dot::before {
+  content: '';
+  display: block;
+  width: 0.625rem;
+  height: 0.625rem;
+  margin: auto;
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+}
+
+.rs-dot[aria-current='step']::before {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+@media (max-width: 30rem) {
+  .rs-body {
+    padding: 0.875rem;
+  }
+
+  .rs-dots {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+}

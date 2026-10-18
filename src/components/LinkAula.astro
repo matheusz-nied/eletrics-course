@@ -1,0 +1,88 @@
+---
+/*
+ * Internal link for lesson text: <LinkAula id="m01-eletricidade-do-zero/04-lei-de-ohm" />.
+ *
+ * Goes through the site base, so it works under /eletrics-course/. A lesson or
+ * module that is not published yet renders as plain text with "(em breve)",
+ * so a lesson can point to the lessons that go deeper before they exist, and
+ * the page never links to a 404. When the lesson is published, the text turns
+ * into a link on the next build. An id that is neither in the content nor in
+ * the curriculum (src/course/curriculum.ts) fails the build.
+ *
+ * It is in the MDX map (src/components/mdx.ts), so lessons use it without imports.
+ */
+import { getCourseData } from '../course/data';
+import { withBase } from '../lib/url';
+
+export interface Props {
+  /**
+   * Lesson id ("m03-medicoes/02-medindo-tensao") or module id ("m07-instalacoes"),
+   * optionally with an anchor: "m00-comece-aqui/02-seguranca-em-eletricidade#a-regra-de-ouro".
+   * Without children, the link text is the lesson or module title, in quotes.
+   */
+  id?: string;
+  /** A page of the site, relative to the base: "trilhas/", "glossario/dr/", "progresso/". */
+  pagina?: string;
+}
+
+const { id, pagina } = Astro.props;
+if ((id === undefined) === (pagina === undefined)) {
+  throw new Error('<LinkAula>: use id (aula ou módulo) ou pagina, um dos dois.');
+}
+
+let href: string | undefined;
+let title = '';
+
+if (pagina !== undefined) {
+  if (/^[a-z][a-z0-9+.-]*:/i.test(pagina) || pagina.startsWith('//')) {
+    throw new Error(`<LinkAula pagina="${pagina}">: use só caminhos internos do site.`);
+  }
+  href = withBase(pagina);
+} else {
+  const [target = '', hash] = id!.split('#');
+  const { lessons, modules } = await getCourseData();
+  const anchor = hash ? `#${hash}` : '';
+  if (target.includes('/')) {
+    const lesson = lessons.find((l) => l.id === target);
+    if (!lesson) {
+      throw new Error(
+        `<LinkAula id="${id}">: a aula "${target}" não existe nem no conteúdo nem no currículo (src/course/curriculum.ts).`,
+      );
+    }
+    title = lesson.titulo;
+    href = lesson.href && `${lesson.href}${anchor}`;
+  } else {
+    const module = modules.find((m) => m.id === target);
+    if (!module) {
+      throw new Error(`<LinkAula id="${id}">: o módulo "${target}" não existe no currículo.`);
+    }
+    title = module.titulo;
+    href = module.published && module.href ? `${module.href}${anchor}` : undefined;
+  }
+}
+
+const hasText = Astro.slots.has('default');
+---
+
+{href ? (
+  hasText ? (
+    <a href={href}>
+      <slot />
+    </a>
+  ) : (
+    <>
+      “<a href={href}>{title}</a>”
+    </>
+  )
+) : (
+  <span class="link-aula-em-breve">
+    {hasText ? <slot /> : `“${title}”`} <span class="link-aula-em-breve__tag">(em breve)</span>
+  </span>
+)}
+
+<style>
+  .link-aula-em-breve__tag {
+    color: var(--fg-subtle);
+    font-size: 0.9em;
+  }
+</style>

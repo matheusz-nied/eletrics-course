@@ -1,0 +1,131 @@
+---
+/*
+ * Shown by the service worker (src/course/pwa/options.mjs) when a page that
+ * was never opened is requested without internet. Lists the pages that are
+ * saved on this device.
+ */
+import CourseIcon from '../course/ui/CourseIcon.astro';
+import CoursePage from '../course/ui/CoursePage.astro';
+import { withBase } from '../lib/url';
+---
+
+<CoursePage
+  title="Sem internet"
+  icon="offline"
+  lead="Esta página ainda não foi aberta neste aparelho, então ela não está guardada. Quando a internet voltar, ela abre normalmente."
+  width="narrow"
+  noindex
+>
+  <div class="offline">
+    <a class="btn btn--primary" href={withBase('')}>
+      <CourseIcon name="inicio" size={18} />
+      Ir para o início
+    </a>
+    <section class="offline__saved" aria-labelledby="guardadas" data-saved hidden>
+      <h2 id="guardadas" class="offline__h2">
+        Páginas guardadas neste aparelho
+      </h2>
+      <ul class="offline__list" data-saved-list></ul>
+    </section>
+    <p class="offline__tip">
+      Dica: abra antes as aulas e oficinas que vai usar em um lugar sem sinal. Elas ficam guardadas
+      e abrem sem internet.
+    </p>
+  </div>
+</CoursePage>
+
+<script>
+  const SITE_SUFFIX = / · Curso de Eletrônica$/;
+
+  async function savedPages(): Promise<{ title: string; href: string }[]> {
+    if (!('caches' in window)) return [];
+    const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+    const pages = new Map<string, string>();
+    for (const name of await caches.keys()) {
+      const cache = await caches.open(name);
+      for (const request of await cache.keys()) {
+        const url = new URL(request.url);
+        if (url.origin !== location.origin || !url.pathname.startsWith(base)) continue;
+        if (!url.pathname.endsWith('/') || url.pathname.endsWith('/offline/')) continue;
+        if (pages.has(url.pathname) || pages.size >= 60) continue;
+        const response = await cache.match(request);
+        if (!response?.headers.get('content-type')?.includes('text/html')) continue;
+        const html = await response.text();
+        const title = /<title>([^<]*)<\/title>/.exec(html)?.[1] ?? url.pathname;
+        const text =
+          new DOMParser().parseFromString(title, 'text/html').documentElement.textContent ?? title;
+        pages.set(url.pathname, text.replace(SITE_SUFFIX, ''));
+      }
+    }
+    return [...pages]
+      .map(([href, title]) => ({ href, title }))
+      .sort((a, b) => a.href.localeCompare(b.href));
+  }
+
+  savedPages()
+    .then((pages) => {
+      const list = document.querySelector('[data-saved-list]');
+      const box = document.querySelector<HTMLElement>('[data-saved]');
+      if (!list || !box || pages.length === 0) return;
+      for (const page of pages) {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = page.href;
+        a.textContent = page.title;
+        li.append(a);
+        list.append(li);
+      }
+      box.hidden = false;
+    })
+    .catch(() => {
+      // No cache access: the list stays hidden.
+    });
+</script>
+
+<style>
+  .offline {
+    display: grid;
+    justify-items: start;
+    gap: 2rem;
+  }
+
+  .offline__saved {
+    display: grid;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .offline__saved[hidden] {
+    display: none;
+  }
+
+  .offline__h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .offline__list {
+    display: grid;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .offline__list :global(li + li) {
+    border-top: 1px solid var(--border);
+  }
+
+  .offline__list :global(a) {
+    display: block;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+  }
+
+  .offline__list :global(a:hover) {
+    background: var(--surface);
+    color: var(--accent);
+  }
+
+  .offline__tip {
+    color: var(--fg-muted);
+  }
+</style>

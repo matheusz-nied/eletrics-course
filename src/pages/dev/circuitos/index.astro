@@ -1,0 +1,134 @@
+---
+/*
+ * Internal gallery of every circuit (lessons and schematic demos), for review.
+ * Not linked from the course.
+ */
+import { ANALYSIS_LABELS, galleryEntries } from '../../../circuit/dev/catalog';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { withBase } from '../../../lib/url';
+
+const entries = await galleryEntries();
+const groups = [
+  { title: 'Circuitos das aulas', items: entries.filter((e) => e.lesson) },
+  { title: 'Demonstrações do esquemático', items: entries.filter((e) => !e.lesson) },
+];
+---
+
+<BaseLayout title="Circuitos" noindex>
+  <main id="conteudo" tabindex="-1" class="gallery">
+    <p class="eyebrow">Interno</p>
+    <h1>Circuitos</h1>
+    <p class="lead">
+      Todos os circuitos de <code>src/lessons/</code> e as demonstrações do esquemático, com a
+      simulação ao vivo. Veja também a{' '}
+      <a href={withBase('dev/circuitos/simbolos/')}>folha de símbolos</a>.
+    </p>
+    {groups.map((g) => (
+      <section>
+        <h2>{g.title}</h2>
+        {g.items.length === 0 ? (
+          <p class="empty">Nenhum circuito ainda.</p>
+        ) : (
+          <ul class="cards">
+            {g.items.map((e) => (
+              <li class="card" data-circuit={e.id}>
+                <a href={withBase(`dev/circuitos/${e.id}/`)} class="card__link">
+                  {e.doc.title}
+                </a>
+                <p class="card__id num">{e.id}</p>
+                <p class="card__meta">
+                  {ANALYSIS_LABELS[e.doc.analysis.kind]} · {e.parts} componentes ·{' '}
+                  {e.realEngine ? 'motor' : 'motor provisório'}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    ))}
+  </main>
+</BaseLayout>
+
+<style>
+  .gallery {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 3rem 1rem 4rem;
+  }
+
+  .gallery:focus {
+    outline: none;
+  }
+
+  h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  h2 {
+    margin: 2.5rem 0 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 650;
+  }
+
+  .lead,
+  .empty {
+    margin: 0.5rem 0 1rem;
+    color: var(--fg-muted);
+  }
+
+  .lead a {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .card {
+    position: relative;
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.625rem;
+    background: var(--surface);
+  }
+
+  .card:hover {
+    border-color: var(--border-strong);
+  }
+
+  .card__link {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .card__id {
+    color: var(--accent);
+    font-size: 0.8125rem;
+  }
+
+  .card__meta {
+    color: var(--fg-muted);
+    font-size: 0.8125rem;
+  }
+</style>

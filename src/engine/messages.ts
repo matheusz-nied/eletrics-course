@@ -46,3 +46,32 @@ export function formatSI(value: number, unit: string, digits = 3): string {
 export function formatNumber(value: number, digits = 3): string {
   return formatter(digits).format(value);
 }
+
+/** Where heating results are reported (a device update context). */
+interface Reporter {
+  emit(kind: 'damaged' | 'warning', message: string): void;
+  discontinuity(): void;
+}
+
+/**
+ * Reports a heating result in pt-BR: `subject` with its article ("O diodo
+ * D1"), the power it dissipates and its rating, and what the failure did
+ * ("e entrou em curto").
+ */
+export function reportHeating(
+  ctx: Reporter,
+  result: 'ok' | 'hot' | 'burned',
+  subject: string,
+  power: number,
+  rating: number,
+  failure = '',
+): void {
+  if (result === 'ok') return;
+  const values = `${formatSI(power, 'W')}, máximo ${formatSI(rating, 'W')}`;
+  if (result === 'hot') {
+    ctx.emit('warning', `${subject} está esquentando demais: dissipa ${values}.`);
+    return;
+  }
+  ctx.emit('damaged', `${subject} queimou${failure ? ` ${failure}` : ''}: dissipava ${values}.`);
+  ctx.discontinuity();
+}

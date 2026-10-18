@@ -1,12 +1,130 @@
 ---
 /*
- * Placeholder created by the Fundação: the module page renders this component
- * under its header, so the Experiência front can show the module's progress by
- * replacing this file, without editing the page.
+ * Module page progress (rendered by ModuleLayout.astro under the header): the
+ * module's progress bar, a "Continuar" link to the first lesson not concluded,
+ * and the done/started mark on each lesson row of the page.
  */
+import { lessonUrl } from '../lib/url';
+import { getCourseData } from './data';
+import LessonState from './ui/LessonState.astro';
+import ProgressBar from './ui/ProgressBar.astro';
+
 export interface Props {
   moduleId: string;
   /** Listed lessons of the module, in order. */
   lessonIds: string[];
 }
+
+const { moduleId, lessonIds } = Astro.props;
+const { lessons } = await getCourseData();
+const byId = new Map(lessons.map((l) => [l.id, l]));
+const rows = lessonIds.map((id) => ({
+  id,
+  href: lessonUrl(id),
+  number: byId.get(id)?.number ?? '',
+  titulo: byId.get(id)?.titulo ?? '',
+}));
 ---
+
+{lessonIds.length > 0 && (
+  <section class="mprog" aria-label="Seu progresso no módulo" data-module-progress={moduleId}>
+    <ProgressBar lessons={lessonIds} label="Progresso no módulo" />
+    <a class="mprog__next" href={rows[0]?.href} data-module-next hidden>
+      <span class="mprog__next-kicker" data-module-next-kicker>
+        Continuar
+      </span>
+      <span class="mprog__next-title" data-module-next-title />
+    </a>
+    <div hidden data-module-marks>
+      {rows.map((row) => (
+        <span data-mark-for={row.href}>
+          <LessonState lessonId={row.id} />
+        </span>
+      ))}
+    </div>
+    <script is:inline type="application/json" data-module-lessons set:html={JSON.stringify(rows)} />
+  </section>
+)}
+
+<script>
+  import { getProgress } from './progress/store';
+
+  interface Row {
+    id: string;
+    href: string;
+    number: string;
+    titulo: string;
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-module-progress]')) {
+    const store = getProgress();
+    const rows = JSON.parse(
+      root.querySelector('[data-module-lessons]')?.textContent ?? '[]',
+    ) as Row[];
+
+    // Moves each lesson mark into its row of the module page.
+    for (const mark of root.querySelectorAll<HTMLElement>('[data-mark-for]')) {
+      const row = document.querySelector(
+        `a.lesson-row[href="${CSS.escape(mark.dataset.markFor ?? '')}"]`,
+      );
+      const state = mark.firstElementChild;
+      if (!row || !state) continue;
+      row.insertBefore(state, row.querySelector('.lesson-row__arrow'));
+    }
+
+    const next = root.querySelector<HTMLAnchorElement>('[data-module-next]');
+    const kicker = root.querySelector('[data-module-next-kicker]');
+    const title = root.querySelector('[data-module-next-title]');
+
+    const render = () => {
+      const started = rows.some((r) => Object.keys(store.lesson(r.id)).length > 0);
+      const target = rows.find((r) => !store.isRead(r.id));
+      if (!next || !target) {
+        if (next) next.hidden = true;
+        return;
+      }
+      next.hidden = false;
+      next.href = target.href;
+      if (kicker) kicker.textContent = started ? 'Continuar' : 'Começar';
+      if (title) title.textContent = `${target.number} · ${target.titulo}`;
+    };
+    store.subscribe(render);
+    render();
+  }
+</script>
+
+<style>
+  .mprog {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .mprog__next {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-self: start;
+    gap: 0.25rem 0.625rem;
+    padding: 0.75rem 1.125rem;
+    border-radius: 0.75rem;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+  }
+
+  .mprog__next[hidden] {
+    display: none;
+  }
+
+  .mprog__next:hover {
+    background: var(--accent-strong);
+  }
+
+  .mprog__next-kicker {
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+</style>

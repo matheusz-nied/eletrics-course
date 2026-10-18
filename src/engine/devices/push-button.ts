@@ -27,6 +27,9 @@ export default defineDevice({
       stamp(m) {
         m.conductance(a, b, g());
       },
+      stampAc(m) {
+        m.admittance(a, b, g());
+      },
       pinCurrents(x, out) {
         out[0] = g() * (x.v(a) - x.v(b));
         out[1] = -out[0];

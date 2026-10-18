@@ -62,7 +62,7 @@ export class LocalSimulation implements SimHandle {
   }
 
   play(): void {
-    if (!this.sim || this.playing || this.disposed) return;
+    if (!this.sim || this.playing || this.disposed || this.sim.isSweep) return;
     if (this.sim.finished) this.reset();
     this.playing = true;
     this.anchor();
@@ -99,6 +99,7 @@ export class LocalSimulation implements SimHandle {
   async runUntil(t: number, opts: { maxFrames?: number } = {}): Promise<SimFrame[]> {
     const sim = this.sim;
     if (!sim) return [];
+    if (sim.isSweep) return this.lastFrame ? [this.lastFrame] : [];
     const maxFrames = Math.max(1, Math.floor(opts.maxFrames ?? DEFAULT_MAX_FRAMES));
     const total = Math.max(0, Math.ceil((t - sim.t) / sim.dt - 1e-9));
     const stride = Math.max(1, Math.ceil(total / maxFrames));

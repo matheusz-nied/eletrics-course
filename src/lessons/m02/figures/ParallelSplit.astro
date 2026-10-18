@@ -1,0 +1,142 @@
+---
+/* 02.3: three resistors in parallel; the current splits at each node and joins again. */
+---
+
+<svg viewBox="0 0 680 280" width="680" height="280" class="fig" aria-hidden="true">
+  <g class="cond">
+    <path d="M70 100 V40 H560 V100 M70 160 V230 H560 V160" />
+    <path d="M240 40 V100 M240 160 V230 M400 40 V100 M400 160 V230" />
+  </g>
+  <circle cx="240" cy="40" r="4.5" class="node" />
+  <circle cx="400" cy="40" r="4.5" class="node" />
+  <circle cx="240" cy="230" r="4.5" class="node" />
+  <circle cx="400" cy="230" r="4.5" class="node" />
+  <g class="src">
+    <path d="M54 110 H86 M62 120 H78 M54 130 H86 M62 140 H78" />
+    <path d="M70 100 V110 M70 140 V160" />
+    <text x="96" y="116" class="sign">
+      +
+    </text>
+    <text x="44" y="130" class="val end">
+      12 V
+    </text>
+  </g>
+  <g class="res">
+    <rect x="230" y="100" width="20" height="60" rx="2" />
+    <rect x="390" y="100" width="20" height="60" rx="2" />
+    <rect x="550" y="100" width="20" height="60" rx="2" />
+  </g>
+  <text x="262" y="126" class="label start">
+    R1 · 1 kΩ
+  </text>
+  <text x="422" y="126" class="label start">
+    R2 · 2,2 kΩ
+  </text>
+  <text x="582" y="126" class="label start">
+    R3 · 4,7 kΩ
+  </text>
+  <text x="262" y="146" class="val start">
+    12 V
+  </text>
+  <text x="422" y="146" class="val start">
+    12 V
+  </text>
+  <text x="582" y="146" class="val start">
+    12 V
+  </text>
+
+  <g class="arrow">
+    <path d="M110 40 H170 M164 35 L170 40 L164 45" />
+    <path d="M290 40 H350 M344 35 L350 40 L344 45" />
+    <path d="M450 40 H510 M504 35 L510 40 L504 45" />
+    <path d="M240 58 V84 M235 78 L240 84 L245 78" />
+    <path d="M400 58 V84 M395 78 L400 84 L405 78" />
+    <path d="M560 58 V84 M555 78 L560 84 L565 78" />
+    <path d="M170 230 H110 M116 225 L110 230 L116 235" />
+  </g>
+  <text x="140" y="28" class="cur">
+    20 mA
+  </text>
+  <text x="320" y="28" class="cur">
+    8 mA
+  </text>
+  <text x="480" y="28" class="cur">
+    2,55 mA
+  </text>
+  <text x="222" y="76" class="cur end">
+    12 mA
+  </text>
+  <text x="382" y="76" class="cur end">
+    5,45 mA
+  </text>
+  <text x="542" y="76" class="cur end">
+    2,55 mA
+  </text>
+  <text x="140" y="252" class="cur">
+    20 mA
+  </text>
+  <text x="400" y="268" class="sub">
+    As correntes dos ramos se juntam de novo na volta para a fonte.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .cond {
+    stroke: var(--copper);
+  }
+  .node {
+    fill: var(--copper);
+    stroke: none;
+  }
+  .src {
+    stroke: var(--accent);
+  }
+  .res rect {
+    stroke: var(--fg);
+    fill: var(--surface);
+  }
+  .arrow {
+    stroke: var(--danger);
+    stroke-width: 2;
+  }
+  text {
+    stroke: none;
+    font-size: 14px;
+    text-anchor: middle;
+    fill: var(--fg);
+  }
+  .label {
+    font-weight: 600;
+  }
+  .sign {
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .val {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    fill: var(--accent);
+  }
+  .cur {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    fill: var(--danger);
+  }
+  .sub {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

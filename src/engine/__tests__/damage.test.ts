@@ -76,9 +76,13 @@ describe('fuse', () => {
   it('is restored by reset', () => {
     const sim = new Simulator(fuseCircuit(10, 'fast'));
     runUntilTrue(sim, () => sim.frame({ samples: false }).readouts['F1.blown'] === true, 1);
+    // Any damaged element also gets the generic flag.
+    expect(sim.frame().readouts['F1.damaged']).toBe(true);
+    expect(sim.frame().readouts['R1.damaged']).toBeUndefined();
     sim.reset();
     sim.refresh();
     expect(sim.frame().readouts['F1.blown']).toBe(false);
+    expect(sim.frame().readouts['F1.damaged']).toBeUndefined();
     expect(sim.frame().readouts['R1.current']).toBeCloseTo(10, 1);
   });
 });

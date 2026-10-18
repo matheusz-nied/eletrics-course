@@ -1,0 +1,238 @@
+---
+titulo: Como usar este curso
+modulo: m00-comece-aqui
+ordem: 1
+nivel: B
+duracaoMin: 15
+objetivos:
+  - Entender como o curso está organizado em partes, módulos, aulas e trilhas
+  - Usar os controles das simulações e dos modelos 3D
+  - Acompanhar o seu progresso e usar o modo oficina ao lado do equipamento
+prerequisitos: []
+tags: [introdução, simulação, modelo 3D, trilhas, progresso, modo oficina]
+seguranca: nenhum
+---
+
+Imagine que o motor do portão da sua casa queimou e você decidiu trocar o motor e a central. Você vai precisar desligar e soltar os cabos com segurança, descobrir qual fio é qual com o multímetro, ligar a central nova, acertar os jumpers e cadastrar os controles. E vai querer entender por que cada ligação é feita daquele jeito, para não depender de sorte.
+
+Este curso foi feito para isso. Ele começa do zero, com o que é tensão e corrente, e chega até tarefas reais como essa. No caminho, você vai mexer em circuitos que se comportam como os de verdade, girar componentes em 3D e treinar procedimentos passo a passo. Esta aula mostra como tirar o máximo de cada uma dessas ferramentas.
+
+## Como o curso está organizado
+
+O curso tem quatro partes, e cada parte tem módulos:
+
+| Parte | Módulos | O que você aprende |
+|-------|---------|--------------------|
+| 1 · Fundamentos | 0 a 4 | Segurança, as grandezas elétricas, circuitos, medições e componentes básicos |
+| 2 · Eletromagnetismo, corrente alternada e instalações | 5 a 8 | Ímãs e bobinas, a energia da tomada, a instalação da casa e os motores |
+| 3 · Eletrônica | 9 a 13 | Diodos e transistores, fontes, eletrônica digital, microcontroladores e controle sem fio |
+| 4 · Oficina | 14 a 17 | Placas, diagnóstico de defeitos, o portão eletrônico completo e outros projetos reais |
+
+Cada módulo tem várias aulas, numeradas pelo módulo: a aula 1.4 é a quarta aula do Módulo 1. Cada aula mostra no topo o tempo estimado e um nível:
+
+- **Básico**: o essencial, para todo mundo.
+- **Intermediário**: aprofunda o assunto e prepara para as aulas práticas.
+- **Avançado**: matemática ou teoria a mais. Pode ser pulado sem perder a sequência.
+
+A lista completa está em <LinkAula pagina="modulos/">Módulos</LinkAula>. As aulas que ainda estão sendo escritas aparecem lá como "em breve" e são publicadas assim que ficam prontas.
+
+### Trilhas: caminhos curtos para um objetivo
+
+Nem todo mundo precisa do curso inteiro. As trilhas escolhem, dentro do currículo, só as aulas que levam a um objetivo prático:
+
+- <LinkAula pagina="trilhas/portao-eletronico/">Portão eletrônico</LinkAula>: para instalar, trocar ou consertar um automatizador de portão.
+- <LinkAula pagina="trilhas/eletricista-residencial/">Eletricista residencial</LinkAula>: tomadas, interruptores, chuveiro e quadro de distribuição.
+- <LinkAula pagina="trilhas/eletronica-maker/">Eletrônica maker</LinkAula>: Arduino, ESP32, LEDs, sensores e motores.
+- <LinkAula pagina="trilhas/curso-completo/">Curso completo</LinkAula>: todos os módulos, em ordem.
+
+Todas as trilhas passam pela aula de segurança, que vem logo depois desta.
+
+## O que tem em cada aula
+
+As aulas seguem quase sempre a mesma ordem, para você saber onde encontrar cada coisa:
+
+1. **Objetivos**, no topo: o que você vai conseguir fazer no fim.
+2. **Um caso real** para começar: o disjuntor que desarma, o motor que só zumbe.
+3. **A ideia**, explicada com figuras e analogias, antes dos nomes técnicos.
+4. **As fórmulas**, com cada símbolo explicado. Partes de matemática pesada ficam dentro de caixas recolhíveis, que você pode pular.
+5. **Explore**: uma simulação ou um modelo 3D com uma tarefa para você fazer.
+6. **Exemplo resolvido**, com números reais, passo a passo.
+7. **Na prática**: onde aquilo aparece na sua casa, no carro, no portão.
+8. **Erros comuns e segurança**.
+9. **Exercícios**, com explicação em cada alternativa.
+10. **Resumo**.
+
+Palavras técnicas aparecem sublinhadas com pontinhos na primeira vez em que surgem, como <Term id="borne">borne</Term>. Passe o mouse ou toque na palavra para ver a definição; o link leva ao <LinkAula pagina="glossario/">glossário</LinkAula> completo.
+
+<DeepDive title="Exemplo de caixa recolhível">
+Caixas como esta guardam a parte mais matemática ou mais aprofundada de um assunto. Abra quando tiver curiosidade; o resto da aula funciona sem elas.
+</DeepDive>
+
+As caixas coloridas têm significados fixos:
+
+<Callout type="dica" title="Dica">
+Um atalho, um truque de bancada ou um jeito mais fácil de fazer algo.
+</Callout>
+
+<Callout type="atencao" title="Atenção">
+Um erro comum, que estraga um componente ou dá resultado errado.
+</Callout>
+
+<Callout type="perigo" title="Perigo">
+Algo que pode machucar você ou outra pessoa. Leia sempre.
+</Callout>
+
+As aulas que envolvem a rede elétrica da casa (127 V ou 220 V) começam com uma caixa de **segurança na rede elétrica**, sempre com as mesmas regras. Elas aparecem em todas essas aulas de propósito: repetição é o que transforma regra em hábito.
+
+## Simulações: circuitos que se comportam como os de verdade
+
+As simulações do curso não são animações gravadas. Um programa calcula, muitas vezes por segundo, a tensão e a corrente em cada ponto do circuito, do mesmo jeito que os programas usados por engenheiros. Por isso dá para mexer em tudo e ver o resultado na hora, inclusive o que acontece quando algo dá errado: lâmpadas queimam, fusíveis rompem, motores zumbem.
+
+Abaixo está o circuito de uma lanterna: pilhas, uma chave e uma lâmpada de 3 V.
+
+<Simulation circuit="m00/lanterna" />
+
+Siga este roteiro para conhecer os controles:
+
+1. **Ligue a chave.** Clique ou toque na chave do desenho, ou use o controle "Chave liga/desliga" abaixo dele. A lâmpada acende.
+2. **Olhe os fios.** Os pontinhos que andam mostram a corrente: quanto mais rápidos, maior a corrente. As cores mostram a tensão: vermelho é o ponto mais positivo e azul o mais negativo, como na legenda.
+3. **Passe o mouse ou toque na lâmpada.** Aparece um cartão com a tensão, a corrente e a potência dela naquele instante.
+4. **Troque para 1 pilha.** A lâmpada fica bem fraca: com metade da tensão ela mal esquenta.
+5. **Troque para 4 pilhas.** A lâmpada recebe o dobro da tensão para a qual foi feita e queima. Uma mensagem explica o que aconteceu.
+6. **Clique em Reiniciar.** Ele conserta o que queimou e recomeça a simulação. Volte para 2 pilhas.
+
+No botão **Exibir** (o ícone de olho) você liga ou desliga a corrente andando, as cores de tensão e a tensão escrita em cada ponto. Lá também dá para trocar o sentido da corrente pelo sentido em que os elétrons andam, uma diferença que você vai entender na aula <LinkAula id="m01-eletricidade-do-zero/02-corrente-eletrica" />. Algumas simulações mostram um multímetro, um osciloscópio ou um gráfico logo abaixo do desenho, e muitas trazem **desafios**: metas que se marcam sozinhas quando você chega lá.
+
+Tudo funciona também pelo teclado: a tecla Tab percorre os controles, e Espaço ou Enter acionam o que está selecionado.
+
+<Callout type="nota" title="Simulação não é bancada">
+A simulação usa modelos que imitam bem os componentes reais, mas nenhum modelo é perfeito. Ela serve para entender e treinar. No mundo real, valem sempre o manual do equipamento e as medições feitas com o instrumento.
+</Callout>
+
+## Modelos 3D: veja como as peças são por fora e por dentro
+
+Quando você for comprar um componente ou abrir um equipamento, precisa reconhecer o que está vendo. Os modelos 3D do curso têm o tamanho e a aparência das peças reais, e muitos abrem para mostrar o que tem dentro.
+
+<Model3D part="resistor" props={{ ohms: 4700 }} />
+
+Experimente com o resistor acima:
+
+- **Girar:** arraste com o mouse ou com um dedo. No celular, toque antes em "Toque para girar o modelo", para a página continuar rolando normalmente.
+- **Aproximar:** roda do mouse ou movimento de pinça com dois dedos.
+- **Vista explodida:** separa as partes da peça, para você ver como ela é montada.
+- **Corte:** corta a peça ao meio e mostra o interior.
+- **Anotações:** numera e dá nome a cada parte.
+- **Centralizar:** volta ao enquadramento inicial. A tela cheia ajuda no celular.
+
+Pelo teclado, as setas giram, as teclas + e − aproximam e afastam, e o 0 centraliza. Em módulos mais adiante, cenas inteiras, como o portão com motor, central e fotocélulas, reagem à simulação: o portão anda quando o circuito manda.
+
+## Exercícios e progresso
+
+Cada aula termina com exercícios. Você pode errar à vontade: cada alternativa explica por que está certa ou errada, e dá para refazer quando quiser. Nas questões numéricas, escreva o número do jeito brasileiro, com vírgula (0,5), e pode usar prefixos: "20 mA" e "0,02 A" valem a mesma coisa.
+
+No fim de cada aula, o botão **Concluí esta aula** marca a aula como lida. O curso guarda isso e a nota dos exercícios para mostrar o quanto falta em cada módulo e em cada trilha. Não existe cadastro: o progresso fica guardado **neste navegador, neste aparelho**. Para levar para outro aparelho ou guardar uma cópia, use a página <LinkAula pagina="progresso/">Meu progresso</LinkAula>, que exporta e importa um arquivo.
+
+## Modo oficina: o passo a passo ao lado do equipamento
+
+Ler uma aula sentado é uma coisa. Seguir um procedimento com uma chave de fenda na mão, ao lado do portão, é outra. Para isso existe o **modo oficina**: os procedimentos práticos do curso aparecem em letras grandes, um passo por vez, com um botão "Feito" para marcar o que você já fez. O curso lembra onde você parou, mantém a tela acesa e funciona sem internet nas páginas que você já abriu.
+
+Experimente com o procedimento curto abaixo: abra o modo oficina e siga os passos com um multímetro e uma pilha, se tiver. Se não tiver, só navegue pelos passos para conhecer o formato.
+
+<Workshop id="exemplo" />
+
+<Callout type="dica" title="Instale o curso no celular">
+No navegador do celular, use a opção "Adicionar à tela inicial" (ou "Instalar app"). O curso abre como um aplicativo, e as aulas e oficinas que você já visitou continuam disponíveis no quintal, onde o sinal de internet às vezes não chega.
+</Callout>
+
+## Busca e glossário
+
+A lupa no topo da página procura em todas as aulas publicadas (no computador, o atalho é Ctrl+K). Procure pelo nome de uma peça, de um defeito ou de uma grandeza: "capacitor", "motor zumbindo", "jumper". O <LinkAula pagina="glossario/">glossário</LinkAula> reúne os termos técnicos com uma explicação curta e um link para a aula que trata de cada um.
+
+<RealCase title="Do zero ao portão">
+Quem chega aqui por causa do portão pode ir direto pela trilha <LinkAula pagina="trilhas/portao-eletronico/">Portão eletrônico</LinkAula>. Ela passa pela segurança e pelas ferramentas deste módulo, pelas grandezas do Módulo 1, pelo multímetro, pelos capacitores e relés, pela corrente alternada, pelo motor com capacitor e pelos jumpers de placa, e termina no módulo do portão. Lá está o procedimento completo de troca, em modo oficina, e um exercício de ligação em 3D em que cada erro tem a consequência que teria de verdade, sem risco para você nem para o equipamento.
+</RealCase>
+
+## Como estudar
+
+- **Siga a ordem.** Cada aula usa as anteriores. Se uma palavra não fizer sentido, a definição dela está a um toque.
+- **Faça as tarefas das simulações.** Elas são a parte mais importante: você aprende muito mais mexendo do que lendo.
+- **Não pule a segurança.** A próxima aula é a mais importante do curso.
+- **Volte quando precisar.** O curso também é material de consulta. A busca e o glossário existem para isso.
+
+## Erros comuns
+
+- **Ler sem mexer.** Quem pula as simulações e os exercícios acha que entendeu, até ter um multímetro na mão.
+- **Tratar a simulação como garantia.** Ela ensina o princípio. No equipamento real, siga o manual do fabricante e confirme com medições.
+- **Ir direto para a prática.** Os procedimentos da Parte 4 dependem do que vem antes, principalmente da segurança e das medições.
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Na simulação da lanterna, o que aconteceu com a lâmpada de 3 V ligada em 4 pilhas (6 V)?',
+      options: [
+        {
+          text: 'Queimou, porque recebeu o dobro da tensão para a qual foi feita',
+          correct: true,
+          feedback:
+            'Isso. O filamento esquentou além do que aguenta e se rompeu. Reiniciar conserta a lâmpada virtual.',
+        },
+        {
+          text: 'Ficou fraca, porque pilhas demais se atrapalham',
+          feedback: 'Foi o contrário: mais pilhas em série dão mais tensão, e a lâmpada recebeu demais.',
+        },
+        {
+          text: 'Nada mudou, porque a chave controla o brilho',
+          feedback: 'A chave só liga e desliga. O brilho depende da tensão nas pilhas.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Uma aula marcada como nível Avançado pode ser pulada?',
+      options: [
+        {
+          text: 'Sim, sem perder a sequência do curso',
+          correct: true,
+          feedback: 'Isso. Elas aprofundam a teoria, mas as aulas seguintes não dependem delas.',
+        },
+        {
+          text: 'Não, todas as aulas são pré-requisito das seguintes',
+          feedback: 'As aulas de nível Avançado foram feitas justamente para poderem ser puladas.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'O seu progresso fica salvo numa conta e aparece em qualquer aparelho.',
+      answer: false,
+      explanation:
+        'Não há cadastro: o progresso fica neste navegador. Para levar a outro aparelho, exporte o arquivo na página Meu progresso e importe no outro.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada ferramenta do curso ao que ela faz.',
+      pairs: [
+        ['Simulação', 'Calcula tensões e correntes enquanto você mexe no circuito'],
+        ['Modelo 3D', 'Mostra a peça real por fora, explodida e em corte'],
+        ['Modo oficina', 'Guia um procedimento um passo por vez, ao lado do equipamento'],
+        ['Trilha', 'Escolhe as aulas que levam a um objetivo prático'],
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Se a simulação mostra que uma ligação funciona, não é preciso conferir o manual do equipamento real.',
+      answer: false,
+      explanation:
+        'A simulação ensina o princípio com modelos. No equipamento real, o manual do fabricante e as medições com o instrumento têm a palavra final.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O curso tem 4 partes e 18 módulos, do zero até casos reais; as trilhas escolhem as aulas para um objetivo, como trocar o motor do portão.
+- Toda aula tem objetivos, um caso real, a ideia, as fórmulas, uma tarefa para explorar, exemplo resolvido, erros comuns, exercícios e resumo.
+- As simulações calculam o circuito de verdade: mexa, queime, reinicie. Os modelos 3D giram, explodem e mostram o interior das peças.
+- O progresso fica no navegador e pode ser exportado; o modo oficina guia procedimentos passo a passo e funciona offline.
+- A próxima aula, sobre segurança, vale para todo o resto do curso.

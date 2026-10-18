@@ -1,0 +1,26 @@
+titulo: Curso completo
+paraQuem: Quem quer entender eletricidade e eletrônica de ponta a ponta.
+resumo: >-
+  Todos os módulos em ordem: fundamentos, corrente alternada e instalações, eletrônica e a oficina
+  com casos reais, do primeiro circuito ao automatizador de portão.
+ordem: 4
+icone: livro
+itens:
+  - m00-comece-aqui
+  - m01-eletricidade-do-zero
+  - m02-circuitos-cc
+  - m03-medicoes
+  - m04-passivos
+  - m05-magnetismo
+  - m06-corrente-alternada
+  - m07-instalacoes
+  - m08-motores
+  - m09-semicondutores
+  - m10-fontes
+  - m11-digital
+  - m12-microcontroladores
+  - m13-sem-fio
+  - m14-placas
+  - m15-diagnostico
+  - m16-portao
+  - m17-projetos

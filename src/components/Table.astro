@@ -1,8 +1,11 @@
 ---
-/** MDX override for Markdown tables: scrolls sideways on narrow screens. */
+/**
+ * MDX override for Markdown tables: scrolls sideways on narrow screens. The
+ * wrapper takes keyboard focus so it can be scrolled with the arrow keys.
+ */
 ---
 
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="group" aria-label="Tabela">
   <table>
     <slot />
   </table>
