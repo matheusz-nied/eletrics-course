@@ -99,15 +99,16 @@ test.describe('central virtual', () => {
 
 test.describe('the full gate circuit', () => {
   test('the push button starts the motor on the real engine', async ({ page }) => {
+    // The lesson page is long and the engine loads the whole circuit in a worker.
+    test.setTimeout(90_000);
     const errors = watchErrors(page);
     await page.goto(lesson('03-a-central-por-dentro'));
     const sim = page.locator('[data-simulation="m16/portao-completo"]');
     await sim.scrollIntoViewIfNeeded();
-    await expect(sim).toHaveAttribute('data-ready', '');
+    await expect(sim).toHaveAttribute('data-ready', '', { timeout: 20_000 });
     await expect(sim).toHaveAttribute('data-engine', 'motor');
-    await sim.getByRole('button', { name: 'Iniciar simulação', exact: true }).click();
-    // The firmware reads the limit switches first: the gate is closed.
-    await expect(sim.locator('.sim-time')).toHaveText(/t\s=\s[1-9]/);
+    // It starts on its own: the firmware reads the limit switches and finds the gate closed.
+    await expect(sim.getByText('Central ligada com o portão fechado')).toBeVisible();
 
     const button = sim.locator('.sim-controls').getByRole('button', { name: /^Botoeira/ });
     await button.hover();

@@ -208,9 +208,9 @@ No passo 5 aparece a troca da seção anterior: mais força, limite mais alto, b
 
 ## O circuito completo no simulador
 
-A central virtual acima resume a placa em linhas de texto. Aqui está o circuito inteiro, peça por peça, com o mesmo programa rodando no microcontrolador: os trimpots, o receptor, a fotocélula, o jumper J2, os botões, os reed switches, os transistores e os relés, o TRIAC, o fusível, o motor com o capacitor e o sensor de corrente. Aperte **Iniciar** e acompanhe as setas de corrente no esquema e o multímetro **Corrente do motor** embaixo. Um percurso completo leva uns 17 s; se quiser ir mais rápido, troque a velocidade de 1× para 2× ou 5×.
+A central virtual acima resume a placa em linhas de texto. Aqui está o circuito inteiro, peça por peça, com o mesmo programa rodando no microcontrolador: os trimpots, o receptor, a fotocélula, o jumper J2, os botões, os reed switches, os transistores e os relés, o TRIAC, o fusível, o motor com o capacitor e o sensor de corrente. A simulação já começa rodando, com o portão fechado. Acompanhe as setas de corrente no esquema e o multímetro **Corrente do motor** embaixo. Um percurso completo leva uns 17 s; se quiser ir mais rápido, troque a velocidade de 1× para 2× ou 5×.
 
-<Simulation circuit="m16/portao-completo" height={460} />
+<Simulation circuit="m16/portao-completo" height={460} autoplay />
 
 1. Segure **Botoeira** por um instante. O transistor Q2 liga a bobina de K1, o contato de K1 passa para o fio ABRE e só então o TRIAC começa a conduzir. A corrente salta na partida e depois assenta. O portão anda até o ímã chegar ao reed **FCA**, e aí o TRIAC para de conduzir e K1 desliga.
 2. Segure **Apertar o botão do controle remoto**. Nada acontece: esse controle ainda não está cadastrado. Segure **Botão PROG da central**: o LED PROG acende. Aperte o controle uma vez para gravar o código e, depois, mais uma vez. Agora o portão obedece ao controle.
