@@ -2,8 +2,8 @@
 termo: NTC
 resumo: Resistor que muda de valor com a temperatura. Quanto mais quente, menor a resistência.
 sinonimos: [termistor NTC, termistor]
-relacionados: [ldr, divisor-de-tensao, resistor]
-aula: m02-circuitos-cc/06-divisores-de-tensao-e-corrente
+relacionados: [ldr, ptc, divisor-de-tensao, resistor]
+aula: m04-passivos/02-resistores-variaveis
 ---
 NTC vem do inglês *negative temperature coefficient* (coeficiente de temperatura negativo). É o sensor de temperatura mais comum: está no carregador do celular, na geladeira, no ar-condicionado e no motor do carro.
 
