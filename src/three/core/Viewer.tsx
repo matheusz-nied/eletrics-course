@@ -4,13 +4,14 @@
  * quality, full screen), keyboard and touch handling, and a fallback when the
  * browser has no WebGL.
  */
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import {
   Suspense,
   createElement,
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -214,10 +215,6 @@ export default function Viewer({
               onCreated={({ gl }) => {
                 const context = gl.getContext();
                 if (isSoftwareRenderer(context) && !fixed) useQuality.setState({ level: 'baixa' });
-                gl.domElement.addEventListener('webglcontextlost', (event) => {
-                  event.preventDefault();
-                  setStatus('error');
-                });
               }}
             >
               <Suspense fallback={null}>
@@ -244,6 +241,7 @@ export default function Viewer({
                 </ViewProvider>
                 <ReadySignal onReady={handleReady} />
               </Suspense>
+              <ContextLossWatch onLost={() => setStatus('error')} />
               <KeyboardOrbit element={viewport} onReset={reframe} />
               {!fixed && <FrameRateMonitor ceiling={ceiling} />}
             </Canvas>
@@ -345,6 +343,29 @@ export default function Viewer({
 
 const noSubscription = () => () => undefined;
 const isCoarsePointer = () => matchMedia('(pointer: coarse)').matches;
+
+/**
+ * Marks the view as failed when the browser drops the WebGL context. The
+ * listener goes away when the canvas unmounts, before R3F forces the context
+ * loss of a disposed canvas (switching quality, or scrolling away), which is
+ * not a failure.
+ */
+function ContextLossWatch({ onLost }: { onLost: () => void }) {
+  const canvas = useThree((s) => s.gl.domElement);
+  const onLostRef = useRef(onLost);
+  useLayoutEffect(() => {
+    onLostRef.current = onLost;
+  });
+  useEffect(() => {
+    const lost = (event: Event) => {
+      event.preventDefault();
+      onLostRef.current();
+    };
+    canvas.addEventListener('webglcontextlost', lost);
+    return () => canvas.removeEventListener('webglcontextlost', lost);
+  }, [canvas]);
+  return null;
+}
 
 function ContinuousRender({ active }: { active: boolean }) {
   useContinuousRender(active);
