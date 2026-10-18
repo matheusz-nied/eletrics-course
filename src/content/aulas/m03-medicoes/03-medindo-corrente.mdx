@@ -1,0 +1,279 @@
+---
+titulo: Medindo corrente
+modulo: m03-medicoes
+ordem: 3
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Medir corrente com o multímetro em série, abrindo o circuito e escolhendo o borne certo
+  - Explicar por que o amperímetro em paralelo com uma fonte é um curto e queima o fusível do multímetro
+  - Usar o alicate amperímetro abraçando um condutor só, e entender por que o cabo inteiro mostra zero
+  - Calcular a corrente esperada de um aparelho pela potência e conferir com a medida
+prerequisitos:
+  - m03-medicoes/01-multimetro
+  - m02-circuitos-cc/01-o-circuito-eletrico
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+tags: [corrente, amperímetro, alicate amperímetro, shunt, fusível, corrente de partida]
+seguranca: rede
+rascunho: true
+---
+
+import ClampMeter from '../../../lessons/m03/ClampMeter';
+import AmmeterSteps from '../../../lessons/m03/figures/AmmeterSteps.astro';
+
+O disjuntor do portão desarma toda vez que o motor tenta abrir. O motor está puxando corrente demais, ou o disjuntor é que está fraco? Para responder, você precisa **medir a corrente**: quantos ampères passam pelo fio enquanto o portão se move.
+
+Medir corrente é diferente de medir tensão. A tensão se mede encostando as pontas por fora; a corrente precisa passar **por dentro** do instrumento, ou ser "sentida" pelo campo magnético que ela cria em volta do fio. Nesta aula você vai fazer as duas coisas: medir com o multímetro em série e com o alicate amperímetro, a ferramenta de quem mede corrente na rede elétrica.
+
+## A corrente precisa atravessar o amperímetro
+
+A <Term id="corrente-eletrica">corrente</Term> é o que passa pelo fio. Para o multímetro contar quantos ampères passam, ele precisa ficar **no caminho**, como se fosse mais um pedaço de fio. Isso se chama ligar **em série**: você abre o circuito num ponto e fecha de novo pelo multímetro.
+
+<Figure caption="Figura 1. Medindo corrente em três passos: o circuito funcionando, o circuito aberto entre A e B (com tudo desligado) e o multímetro fechando a abertura. Agora toda a corrente da lâmpada passa por dentro dele.">
+  <AmmeterSteps />
+</Figure>
+
+Lembre o que tem dentro do multímetro nos bornes de corrente: um <Term id="shunt">shunt</Term>, um resistor de resistência muito baixa (tipicamente cerca de 1 Ω no borne mA e 0,01 Ω no borne 10A), e um fusível. A corrente atravessa o shunt e cria nele uma tensão pequena, que o aparelho converte em ampères. Um amperímetro bom é quase um fio, e é isso que ele precisa ser para não atrapalhar o circuito.
+
+O passo a passo, sempre na mesma ordem:
+
+<Steps>
+  <Step title="Desligue o circuito">
+    Sem energia, abra o circuito no ponto onde quer medir: solte um fio de um borne, tire um jumper, abra uma emenda.
+  </Step>
+  <Step title="Escolha o borne pela corrente esperada">
+    Até algumas centenas de miliampères (LEDs, sensores, placas), vermelha no **mA**. Acima disso ou sem saber, vermelha no **10A**. Na dúvida, comece pelo 10A: se o valor for pequeno, você muda depois.
+  </Step>
+  <Step title="Gire o seletor para a função de corrente certa">
+    mA para o borne mA, A para o borne 10A. Corrente contínua ou alternada, conforme o circuito.
+  </Step>
+  <Step title="Ligue as pontas nos dois lados da abertura">
+    A vermelha no lado que vem da fonte (o positivo) e a preta no lado que vai para a carga. Invertidas, só aparece um sinal de menos.
+  </Step>
+  <Step title="Ligue o circuito e leia">
+    Respeite o tempo máximo do borne 10A, que costuma vir impresso ao lado dele.
+  </Step>
+  <Step title="Desligue, desfaça e devolva a ponta vermelha ao VΩ">
+    Refaça a ligação original do circuito e, antes de qualquer outra medida, volte a ponta vermelha para o borne VΩ.
+  </Step>
+</Steps>
+
+## Explore: o amperímetro no lugar do fio
+
+Na simulação, uma bateria de 12 V acende uma lâmpada de 12 V e 3 W. Entre os pontos A e B passa o fio original. Em cima está o multímetro no borne mA: um fusível de 400 mA e um shunt de 1 Ω. A ponta vermelha está em A, e a preta pode ir a B ou ao negativo da bateria.
+
+<Simulation circuit="m03/amperimetro" instruments={['multimetro']} height={400} />
+
+**Tarefas:**
+
+1. Com o fio original no lugar e a ponta preta em B, quanto o multímetro mostra? E a lâmpada?
+2. Abra o fio original. Quanto o multímetro mostra agora? Compare com a corrente da lâmpada.
+3. Recomece a simulação e leve a ponta preta para o negativo da bateria, como se fosse medir a tensão. O que acontece com o fusível do multímetro?
+
+### Exemplo resolvido
+
+A lâmpada é de 12 V e 3 W. A corrente esperada é
+
+$$
+I = \frac{P}{V} = \frac{3\,\text{W}}{12\,\text{V}} = 0{,}25\,\text{A} = 250\,\text{mA}
+$$
+
+Abaixo de 400 mA, então o borne mA serve. Com o fio original ainda no lugar (tarefa 1), o multímetro fica em paralelo com um fio quase perfeito: a corrente prefere o fio e o visor mostra praticamente zero. Esse é um engano comum: o circuito precisa estar **aberto** para a corrente passar pelo medidor.
+
+Com o fio aberto (tarefa 2), o visor mostra cerca de 0,246 A, um pouco menos que os 0,250 A de antes. A diferença é o próprio multímetro: o shunt e o fusível ficam com uma pequena parte da tensão. A $0{,}25\,\text{A}$, cerca de 1,2 Ω de shunt e fusível ficam com
+
+$$
+V = R \cdot I \approx 1{,}2\,\Omega \cdot 0{,}25\,\text{A} = 0{,}3\,\text{V}
+$$
+
+que deixam de chegar à lâmpada. Em circuitos de 12 V, isso é pouco. Num circuito de 3,3 V, os mesmos 0,3 V podem fazer uma placa reiniciar enquanto você mede. Por isso o borne 10A, com shunt menor, atrapalha menos, e o borne mA, com shunt maior, mostra mais casas decimais.
+
+## O erro clássico: amperímetro em paralelo
+
+Na tarefa 3, o multímetro ficou entre os dois polos da bateria. Ali não existe nenhuma carga para limitar a corrente: só a resistência interna da bateria, o shunt e o fusível, pouco mais de 1 Ω. Pela Lei de Ohm, passam cerca de 9 A, mais de vinte vezes o limite do borne, e o fusível de 400 mA rompe em cerca de 2 milésimos de segundo.
+
+<Callout type="perigo" title="Corrente na rede elétrica: use o alicate">
+Na tomada, o mesmo erro é um <Term id="curto-circuito">curto-circuito</Term> na rede, com centenas de ampères e um arco elétrico dentro do multímetro. Medir corrente da rede com o multímetro em série também obriga a abrir um circuito energizado e a manter o aparelho no caminho de toda a corrente. Para aparelhos ligados em 127 V ou 220 V, meça corrente com o alicate amperímetro. O multímetro em série fica para circuitos de baixa tensão: pilhas, baterias, fontes e placas.
+</Callout>
+
+## A corrente de partida
+
+Algumas cargas puxam muito mais corrente no instante em que ligam. O filamento frio de uma lâmpada incandescente tem resistência bem menor que o quente, e a lâmpada puxa várias vezes a corrente normal até esquentar, em frações de segundo. Um motor parado puxa, na partida, tipicamente algumas vezes a corrente de trabalho, até ganhar velocidade.
+
+Essa <Term id="corrente-de-partida">corrente de partida</Term> explica por que o disjuntor de um motor tolera picos curtos e por que um fusível rápido pode romper ao ligar uma lâmpada fria. O multímetro comum atualiza o visor poucas vezes por segundo e não mostra o pico. Alguns alicates têm uma função própria (INRUSH) que registra o maior valor no momento da partida.
+
+## O alicate amperímetro
+
+O <Term id="alicate-amperimetro">alicate amperímetro</Term> mede corrente sem abrir o circuito e sem encostar em metal. Toda corrente cria um campo magnético em volta do fio; a garra do alicate, um anel de ferro que abre e fecha, concentra esse campo e mede quanto ele vale.
+
+O detalhe que mais confunde: a garra precisa abraçar **um condutor só**. Num cabo de aparelho, a mesma corrente vai por um fio e volta pelo outro. Os campos dos dois fios têm sentidos opostos e se anulam, e o alicate mostra quase zero com o aparelho funcionando. Para medir aparelhos de tomada sem cortar o cabo, existe o **separador de linha**: um adaptador que fica entre a tomada e o plugue e deixa um fio separado para a garra. Muitos têm também uma abertura que passa o fio dez vezes pela garra, para medir correntes pequenas com mais precisão (aí a leitura é dez vezes a corrente real).
+
+Os alicates também se dividem em dois tipos:
+
+- **Alicate só CA:** a garra funciona como um transformador. Mede só corrente alternada; numa bateria, mostra zero.
+- **Alicate CA/CC:** usa um sensor de efeito Hall e mede também corrente contínua (bateria do carro, painel solar, motor de 24 V). Antes de medir corrente contínua, aperte o botão de zerar com a garra vazia e fechada.
+
+### Explore: o alicate virtual
+
+<ClampMeter client:visible />
+
+**Tarefas:**
+
+1. O alicate começa abraçando o cabo inteiro do chuveiro. Quanto ele mostra? Agora abrace um condutor só.
+2. Passe para o ferro de passar e para o motor do portão. Use o separador de linha na abertura ×10 com o motor e divida a leitura por 10.
+3. Escolha o cabo da bateria do carro. O que o alicate só CA mostra? Que alicate e que modo medem essa corrente?
+4. Com o chuveiro, coloque o alicate CA/CC no modo A⎓. Por que a leitura cai para zero?
+
+### Exemplo resolvido: o chuveiro
+
+Um chuveiro de 5.500 W em 220 V puxa
+
+$$
+I = \frac{P}{V} = \frac{5\,500\,\text{W}}{220\,\text{V}} = 25\,\text{A}
+$$
+
+É o que o alicate mostra quando abraça um dos dois fios do chuveiro. É também por isso que o chuveiro tem circuito e disjuntor só para ele, com fios mais grossos que os das tomadas: 25 A esquentariam demais um fio fino. Se o alicate mostrar bem mais que a conta, a resistência pode estar com defeito; se mostrar zero com a água quente saindo, confira se a garra está abraçando o cabo inteiro.
+
+<RealCase title="Medindo a corrente do motor do portão">
+O disjuntor desarma quando o portão abre. Medir a corrente diz se o motor está puxando mais do que deveria.
+
+1. **Leia a etiqueta do motor.** A plaqueta traz a tensão e a corrente nominal, em ampères. Esse é o valor de comparação.
+2. **Com o disjuntor da central desligado**, abra a caixa e escolha um trecho isolado de um dos fios de alimentação (a fase), longe dos bornes, onde a garra entre sem encostar em nada. Se for preciso, afaste esse fio dos outros agora, com tudo desligado. Nunca puxe fios de bornes energizados para fazer espaço.
+3. **Religue o disjuntor** e abrace só o fio escolhido com o alicate em A~, sem encostar as mãos nos bornes nem na placa.
+4. **Acione o portão** e observe a leitura durante o movimento. Se o alicate tiver INRUSH, registre também o pico da partida.
+5. **Compare com a etiqueta.** Em movimento, a corrente deve ficar perto da nominal. Bem acima disso, o motor está fazendo força demais: portão pesado ou travando, trilho sujo, roldanas gastas ou um defeito no próprio motor ou no capacitor dele.
+
+Se o motor puxa o normal e mesmo assim o disjuntor desarma, o suspeito passa a ser o disjuntor, ou um disjuntor pequeno demais para a partida do motor. Trocar disjuntor e dimensionar circuito é trabalho para eletricista.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Ligar o amperímetro em paralelo**, como um voltímetro. Numa fonte, é curto e queima o fusível; na rede, pode explodir o multímetro.
+- **Esquecer a ponta vermelha no borne de corrente** e depois medir tensão. É o erro que mais queima fusível e mais causa acidente com multímetro.
+- **Medir sem abrir o circuito.** Com o fio original no lugar, a corrente desvia pelo fio e o multímetro mostra quase zero.
+- **Usar o borne mA para corrente alta.** O fusível rompe. Na dúvida, comece pelo 10A, e respeite o tempo máximo impresso ao lado dele.
+- **Abraçar o cabo inteiro com o alicate.** Os campos se anulam e a leitura fica perto de zero. Um condutor só.
+- **Medir corrente contínua com alicate só CA**, ou com o alicate CA/CC no modo errado. A leitura fica em zero.
+- **Esquecer de dividir por 10** a leitura feita na abertura ×10 do separador de linha.
+- **Trocar o fusível do multímetro por um qualquer.** Use o modelo indicado no manual, com a mesma corrente e a mesma capacidade de interrupção.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'Você quer medir a corrente de um sensor alimentado por uma fonte de 12 V. Como o multímetro deve ser ligado?',
+      options: [
+        {
+          text: 'Em série: abrir um fio do sensor e ligar as pontas nos dois lados da abertura',
+          correct: true,
+          feedback:
+            'Isso. A corrente precisa passar por dentro do multímetro, que entra no lugar de um pedaço de fio.',
+        },
+        {
+          text: 'Em paralelo: uma ponta no positivo e outra no negativo da fonte',
+          feedback:
+            'Assim o multímetro vira um curto na fonte. Com a ponta no borne de corrente, o fusível rompe.',
+        },
+        {
+          text: 'Com as pontas nos dois terminais do sensor, sem abrir nada',
+          feedback:
+            'Isso também é paralelo: o multímetro desvia a corrente do sensor e fica em curto com a alimentação dele.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Com o fio original ainda ligado entre A e B, encostar as pontas do amperímetro em A e em B mostra a corrente do circuito.',
+      answer: false,
+      explanation:
+        'A corrente prefere o fio, que tem resistência ainda menor que o shunt. O multímetro mostra quase zero. É preciso abrir o fio original.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Um chuveiro de 7.500 W está ligado em 220 V. Qual é a corrente que ele puxa?',
+      answer: 34.09,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation: 'I = P ÷ V = 7.500 W ÷ 220 V ≈ 34,1 A.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'O borne mA de um multímetro tem 1,2 Ω de shunt e fusível. Medindo 0,25 A, quanta tensão fica no multímetro?',
+      answer: 0.3,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        'V = R × I = 1,2 Ω × 0,25 A = 0,3 V. Essa tensão deixa de chegar à carga enquanto o multímetro está no circuito.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você abraça com o alicate o cabo de um secador de cabelo ligado e o visor mostra 0,02 A. Qual é a explicação mais provável?',
+      options: [
+        {
+          text: 'A garra abraçou os dois fios do cabo, e os campos se anularam',
+          correct: true,
+          feedback:
+            'Isso. A corrente que vai por um fio volta pelo outro. Use um separador de linha ou abrace um condutor só.',
+        },
+        {
+          text: 'O secador está gastando muito pouca energia',
+          feedback:
+            'Um secador puxa vários ampères. A leitura baixa vem da garra abraçando o cabo inteiro.',
+        },
+        {
+          text: 'O alicate precisa estar no modo A⎓',
+          feedback:
+            'O secador é ligado na tomada, de corrente alternada: o modo certo é A~. O problema é a garra abraçar os dois fios.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Usando a abertura ×10 do separador de linha, o alicate mostra 8,4 A. Qual é a corrente real do aparelho?',
+      answer: 0.84,
+      tolerance: 0.01,
+      unit: 'A',
+      explanation: 'O fio passa dez vezes pela garra: 8,4 A ÷ 10 = 0,84 A.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um alicate só CA abraça o cabo positivo da bateria do carro durante a partida e mostra zero. Por quê?',
+      options: [
+        {
+          text: 'Ele funciona como transformador e não sente corrente contínua',
+          correct: true,
+          feedback:
+            'Isso. Para corrente contínua é preciso um alicate CA/CC, com sensor Hall, no modo A⎓ e zerado antes.',
+        },
+        {
+          text: 'A corrente da partida é pequena demais para o alicate',
+          feedback: 'A partida puxa tipicamente mais de 100 A. O problema é o tipo de corrente.',
+        },
+        {
+          text: 'O cabo positivo não leva corrente; só o negativo',
+          feedback:
+            'A mesma corrente passa pelos dois cabos, num sentido no positivo e no outro no negativo.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Corrente se mede em série: desligue, abra o circuito, feche pelo multímetro, ligue e leia. Depois, devolva a ponta vermelha ao VΩ.
+- O borne mA serve para correntes pequenas; o 10A, para as grandes ou desconhecidas. Os dois têm fusível, e o amperímetro também "rouba" um pouco de tensão do circuito.
+- Amperímetro em paralelo com uma fonte é curto-circuito: na bateria queima o fusível; na rede é perigoso.
+- Na rede elétrica, corrente se mede com o alicate amperímetro, abraçando um condutor só. O cabo inteiro mostra quase zero.
+- Alicate só CA não mede corrente contínua; para isso, use um alicate CA/CC, zerado, no modo A⎓.
+- A corrente esperada sai da potência: I = P ÷ V. O chuveiro de 5.500 W em 220 V puxa 25 A.
+
+Na próxima aula, você vai medir [resistência, continuidade e diodos](../04-resistencia-continuidade-e-diodo/), as medidas feitas com tudo desligado.

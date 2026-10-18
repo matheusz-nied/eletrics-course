@@ -13,7 +13,17 @@
 export type Fn = 'off' | 'vdc' | 'vac' | 'ohm' | 'cont' | 'ma' | 'a';
 export type Jack = '10a' | 'ma' | 'vohm';
 export type Target =
-  'ar' | 'pilha' | 'bateria9' | 'tomada' | 'resistor' | 'fio' | 'serie-lampada' | 'serie-led';
+  | 'ar'
+  | 'pilha'
+  | 'bateria9'
+  | 'bateria-carro'
+  | 'tomada'
+  | 'tomada-ft'
+  | 'tomada-nt'
+  | 'resistor'
+  | 'fio'
+  | 'serie-lampada'
+  | 'serie-led';
 
 export const FUNCTIONS: { id: Fn; label: string; symbol: string }[] = [
   { id: 'off', label: 'Desligado', symbol: 'OFF' },
@@ -56,9 +66,24 @@ export const TARGETS: { id: Target; label: string; detail: string }[] = [
     detail: 'Bateria alcalina nova.',
   },
   {
+    id: 'bateria-carro',
+    label: 'Polos da bateria de um carro',
+    detail: 'Bateria de 12 V carregada, com o motor desligado.',
+  },
+  {
     id: 'tomada',
     label: 'Furos de uma tomada de 127 V',
     detail: 'Fase e neutro de uma tomada energizada.',
+  },
+  {
+    id: 'tomada-ft',
+    label: 'Fase e terra da tomada de 127 V',
+    detail: 'A ponta vermelha no furo da fase e a preta no furo do meio (terra).',
+  },
+  {
+    id: 'tomada-nt',
+    label: 'Neutro e terra da tomada de 127 V',
+    detail: 'A ponta vermelha no furo do neutro e a preta no furo do meio (terra).',
   },
   {
     id: 'resistor',
@@ -109,7 +134,10 @@ export interface MeterState {
 const SOURCES: Record<string, { volts: number; r: number; name: string }> = {
   pilha: { volts: 1.58, r: 0.15, name: 'a pilha' },
   bateria9: { volts: 9.42, r: 1.7, name: 'a bateria' },
+  'bateria-carro': { volts: 12.62, r: 0.01, name: 'a bateria do carro' },
   tomada: { volts: 127, r: 0.3, name: 'a tomada' },
+  'tomada-ft': { volts: 127.4, r: 0.3, name: 'a tomada' },
+  'tomada-nt': { volts: 0.4, r: 0.3, name: 'a tomada' },
 };
 
 /** Shunt plus fuse resistance of each current jack (typical). */
@@ -119,6 +147,18 @@ const JACK_LIMIT: Record<'ma' | '10a', number> = { ma: 0.4, '10a': 10 };
 const SERIES: Record<string, { volts: number; amps: number; name: string }> = {
   'serie-lampada': { volts: 12, amps: 0.417, name: 'a lâmpada' },
   'serie-led': { volts: 5, amps: 0.02, name: 'o LED' },
+};
+
+/** Outlet targets: alternating voltage, and a short through a current jack is a short on the grid. */
+const MAINS = new Set<Target>(['tomada', 'tomada-ft', 'tomada-nt']);
+
+const MAINS_OK: Partial<Record<Target, string>> = {
+  tomada:
+    'Certo: 127 V eficazes entre fase e neutro. Medir a tomada exige multímetro com categoria CAT II ou maior, pontas em bom estado e dedos atrás das proteções das pontas.',
+  'tomada-ft':
+    'Certo: fase e terra mostram praticamente a mesma tensão que fase e neutro, porque neutro e terra se encontram no quadro ou no padrão de entrada. Se der zero aqui e 127 V entre fase e neutro, o terra dessa tomada não está ligado.',
+  'tomada-nt':
+    'Poucos décimos de volt: normal. Neutro e terra quase não têm tensão entre si, porque se encontram no quadro ou no padrão de entrada. Alguns volts indicam um neutro sobrecarregado ou mal conectado; uma leitura alta é sinal de defeito, e o caso é de eletricista.',
 };
 
 /** 4-digit autorange display: 1.580 V, 127.0 V, 4.700 kΩ, 20.00 mA. */
@@ -176,6 +216,16 @@ export function read(s: MeterState): Reading {
   if (red !== 'vohm' && source) {
     const jack = red;
     const jackName = jack === 'ma' ? 'mA' : '10A';
+    if (target === 'tomada-nt' && !blown[jack]) {
+      return {
+        digits: fn === 'off' ? '' : ' 0.000',
+        unit: fn === 'ma' ? 'mA' : fn === 'a' ? 'A' : fn === 'off' ? '' : 'V',
+        flags,
+        beep: false,
+        status: 'danger',
+        message: `Com a ponta vermelha no borne ${jackName}, o multímetro liga o neutro direto no terra. A tensão entre eles é pequena, mas a corrente que passa pode desarmar o DR da casa, e um neutro com defeito pode estar com tensão alta. Volte a ponta vermelha para o VΩ.`,
+      };
+    }
     if (blown[jack]) {
       return {
         digits: fn === 'off' ? '' : fn === 'ma' || fn === 'a' ? ' 0.000' : ' 0.000',
@@ -187,11 +237,10 @@ export function read(s: MeterState): Reading {
       };
     }
     const current = source.volts / (source.r + JACK_R[jack]);
-    if (current > JACK_LIMIT[jack] * 1.5 || target === 'tomada') {
-      const arc =
-        target === 'tomada'
-          ? ' Na tomada isso é um curto na rede: um arco elétrico com centenas de ampères. Multímetros baratos, sem fusível de alta capacidade, podem explodir na mão.'
-          : '';
+    if (current > JACK_LIMIT[jack] * 1.5 || MAINS.has(target)) {
+      const arc = MAINS.has(target)
+        ? ' Na tomada isso é um curto na rede: um arco elétrico com centenas de ampères. Multímetros baratos, sem fusível de alta capacidade, podem explodir na mão.'
+        : '';
       return {
         digits: fn === 'off' ? '' : ' 0.000',
         unit: fn === 'ma' ? 'mA' : fn === 'a' ? 'A' : fn === 'off' ? '' : 'V',
@@ -333,13 +382,12 @@ export function read(s: MeterState): Reading {
   if (fn === 'vdc' || fn === 'vac') {
     const ac = fn === 'vac';
     if (source) {
-      if (target === 'tomada') {
+      if (MAINS.has(target)) {
         return ac
-          ? show(127, 'V', flags, {
+          ? show(source.volts, 'V', flags, {
               beep: false,
               status: 'ok',
-              message:
-                'Certo: 127 V eficazes entre fase e neutro. Medir a tomada exige multímetro com categoria CAT II ou maior, pontas em bom estado e dedos atrás das proteções das pontas.',
+              message: MAINS_OK[target]!,
             })
           : show(0, 'V', flags, {
               beep: false,
@@ -388,7 +436,7 @@ export function read(s: MeterState): Reading {
   const cont = fn === 'cont';
   const unit = 'Ω';
   if (source) {
-    const danger = target === 'tomada';
+    const danger = MAINS.has(target);
     return {
       digits: danger ? ' OL' : '----',
       unit,

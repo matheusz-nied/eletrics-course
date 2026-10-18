@@ -75,6 +75,24 @@ describe('multimeter rules', () => {
     expect(r.loadOn).toBeFalsy();
   });
 
+  it('reads phase–ground like phase–neutral and almost nothing between neutral and ground', () => {
+    expect(read({ ...base, target: 'tomada-ft', fn: 'vac' }).digits).toBe(' 127.4');
+    expect(read({ ...base, target: 'tomada-nt', fn: 'vac' }).digits).toBe(' 400.0');
+    expect(read({ ...base, target: 'tomada-nt', fn: 'vac' }).unit).toBe('mV');
+    expect(read({ ...base, target: 'tomada-ft', fn: 'ohm' }).status).toBe('danger');
+  });
+
+  it('warns without blowing a fuse for a current jack between neutral and ground', () => {
+    const r = read({ ...base, red: '10a', target: 'tomada-nt' });
+    expect(r.status).toBe('danger');
+    expect(r.blows).toBeUndefined();
+  });
+
+  it('measures a car battery and blows the 10 A fuse across it', () => {
+    expect(read({ ...base, target: 'bateria-carro' }).digits).toBe(' 12.62');
+    expect(read({ ...base, red: '10a', fn: 'a', target: 'bateria-carro' }).blows).toBe('10a');
+  });
+
   it('has a pt-BR message for every combination', () => {
     for (const f of FUNCTIONS)
       for (const red of ['10a', 'ma', 'vohm'] as const)

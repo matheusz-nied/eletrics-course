@@ -1,0 +1,297 @@
+---
+titulo: Medindo tensão CC e CA com segurança
+modulo: m03-medicoes
+ordem: 2
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Medir tensão em paralelo, escolhendo onde fica a ponta preta (a referência) e interpretando o sinal de menos
+  - Medir pilhas, baterias e fontes em V⎓ e a tomada em V~, sem confundir os dois modos
+  - Entender por que a tomada de 127 V tem pico de cerca de 180 V e o que é o valor eficaz
+  - Reconhecer a tensão fantasma num fio desligado e confirmar a ausência de tensão pelo método testar, medir e testar de novo
+prerequisitos:
+  - m03-medicoes/01-multimetro
+  - m01-eletricidade-do-zero/03-tensao
+tags: [tensão, voltímetro, tomada, valor eficaz, RMS, tensão fantasma, LoZ]
+seguranca: rede
+rascunho: true
+---
+
+import MultimeterTrainer from '../../../lessons/m03/MultimeterTrainer';
+import SinePeakRms from '../../../lessons/m03/figures/SinePeakRms.astro';
+import Outlet from '../../../lessons/m03/figures/Outlet.astro';
+
+Antes de trocar o motor do portão, a pergunta mais importante é simples: **ainda tem tensão nesses fios?** Você desligou o disjuntor, mas será que era o disjuntor certo? E aquele fio que mostra 60 V mesmo com tudo desligado, está ligado ou não? Medir tensão é a medida que você mais vai fazer na vida, e é a única que pode provar que um fio está seguro para pegar com a mão.
+
+Nesta aula você vai aprender a escolher onde ficam as pontas, medir corrente contínua e alternada sem confundir os modos, entender o que significa "127 V" e reconhecer a tensão fantasma, que engana muita gente.
+
+## Tensão é sempre entre dois pontos
+
+A <Term id="tensao">tensão</Term> não existe num ponto sozinho: ela é a diferença entre dois pontos. Por isso o voltímetro tem duas pontas, e as duas encostam no circuito **em paralelo** com o que você quer medir, sem abrir nada.
+
+A ponta preta (no COM) é a **referência**: o ponto que o multímetro considera como zero. A ponta vermelha é o ponto que você está medindo. O visor mostra quanto o ponto da vermelha está acima do ponto da preta:
+
+$$
+V_\text{visor} = V_\text{vermelha} - V_\text{preta}
+$$
+
+- $V_\text{visor}$: o número que aparece no multímetro, em volts (V);
+- $V_\text{vermelha}$ e $V_\text{preta}$: a tensão de cada ponto, medida em relação a uma mesma referência.
+
+Se a vermelha estiver num ponto **mais baixo** que a preta, a conta dá negativa e aparece um sinal de menos no visor. Isso não estraga nada: o multímetro digital só avisa que as pontas estão "ao contrário". Nos multímetros de ponteiro, antigos, o ponteiro batia para trás, e por isso ainda se ouve que inverter as pontas é perigoso. No digital, não é.
+
+Em circuitos eletrônicos, é comum deixar a ponta preta presa no **negativo** da fonte (o "GND", ou terra do circuito) e passear com a vermelha pelos pontos. Assim cada leitura diz a tensão daquele ponto em relação ao negativo, que é como os esquemas e os manuais de conserto informam os valores.
+
+## Explore: onde ficam as pontas
+
+Na simulação, uma bateria de 12 V alimenta três resistores em série: R1 de 2 kΩ, R2 de 1 kΩ e R3 de 3 kΩ. Chame de **A** o ponto em cima de R1 (ligado ao positivo), de **B** o ponto entre R1 e R2 e de **C** o ponto entre R2 e R3. O voltímetro, à esquerda, é o resistor de 10 MΩ, e cada ponta pode ir a dois lugares.
+
+<Simulation circuit="m03/tensao-pontos" instruments={['multimetro']} height={380} />
+
+**Tarefa:** comece com a ponta preta no negativo e a vermelha no ponto B. Depois passe a preta para o ponto C. Por fim, deixe a preta em C e leve a vermelha para o negativo. Antes de cada mudança, tente prever o número.
+
+### Exemplo resolvido
+
+A resistência total é $2 + 1 + 3 = 6\,\text{k}\Omega$, então a corrente é
+
+$$
+I = \frac{12\,\text{V}}{6\,000\,\Omega} = 0{,}002\,\text{A} = 2\,\text{mA}
+$$
+
+Cada resistor fica com $V = R \cdot I$: 4 V no de 2 kΩ, 2 V no de 1 kΩ e 6 V no de 3 kΩ. Medindo a partir do negativo, o ponto C (acima do resistor de 3 kΩ) está em 6 V, o ponto B está em $6 + 2 = 8\,\text{V}$ e o ponto A, ligado direto no positivo, em 12 V.
+
+1. **Preta no negativo, vermelha em B:** $8 - 0 = 8\,\text{V}$.
+2. **Preta em C, vermelha em B:** $8 - 6 = 2\,\text{V}$, a tensão só do resistor do meio. Para medir a tensão de um componente, as pontas vão uma em cada terminal dele.
+3. **Preta em C, vermelha no negativo:** $0 - 6 = -6\,\text{V}$. O mesmo 6 V do ponto C, com sinal trocado porque as pontas estão invertidas.
+
+Se você deixar as duas pontas no mesmo ponto (as duas no negativo, por exemplo), o visor mostra zero: não existe diferença entre um ponto e ele mesmo. É por isso que um fio inteiro, medido de ponta a ponta, mostra quase zero volt mesmo quando está levando corrente.
+
+## Escala, CC e CA
+
+Num multímetro com escala automática (AUTO), você só escolhe o tipo de tensão. Num manual, escolha a escala **acima** do valor esperado: para uma bateria de 12 V, a escala de 20 V; para a tomada, a de 200 V em V~ (para 127 V) ou a de 600 V (para 220 V). Na dúvida, comece pela maior.
+
+O tipo de tensão é o que mais engana:
+
+- **V⎓ (CC, DC):** tensão contínua, que fica sempre do mesmo lado. Pilhas, baterias, fontes de celular e de notebook, a saída da placa do portão para os sensores, a bateria do carro.
+- **V~ (CA, AC):** tensão alternada, que troca de sentido o tempo todo. A tomada, o quadro de luz, a saída de um transformador.
+
+Medindo a tomada em V⎓, o multímetro faz a média de uma onda que passa metade do tempo positiva e metade negativa. O resultado é perto de zero, **com a tomada ligada**. Medindo uma bateria em V~, o multímetro procura uma variação que não existe e também mostra zero. Um zero no visor só quer dizer alguma coisa se o modo estiver certo.
+
+## A tensão da tomada: pico e valor eficaz
+
+A tomada brasileira tem <Term id="corrente-alternada">corrente alternada</Term> de 60 Hz: a tensão sobe, desce, troca de sinal e volta, 60 vezes por segundo. Um ciclo inteiro dura $1/60\,\text{s} \approx 16{,}7\,\text{ms}$.
+
+<Figure caption="Figura 1. Dois ciclos da tomada de 127 V. A tensão chega a 179,6 V nos picos; o multímetro em V~ mostra o valor eficaz, 127 V; a média de um ciclo inteiro é zero.">
+  <SinePeakRms />
+</Figure>
+
+Então de onde vêm os 127 V? Eles são o <Term id="valor-eficaz">valor eficaz</Term> (em inglês, RMS): o valor de uma tensão contínua que esquentaria uma resistência do mesmo jeito. Para uma senoide, o pico é o valor eficaz multiplicado por $\sqrt{2}$:
+
+$$
+\begin{aligned}
+V_\text{pico} &= V_\text{eficaz} \cdot \sqrt{2} \\[4pt]
+&= 127\,\text{V} \cdot 1{,}414 \approx 179{,}6\,\text{V}
+\end{aligned}
+$$
+
+Na rede de 220 V, o pico chega a $220 \cdot 1{,}414 \approx 311\,\text{V}$. É por isso que um capacitor ligado na saída de um retificador de 127 V carrega com cerca de 180 V, e não 127 V. Você vai ver isso de novo no módulo de corrente alternada.
+
+O povo ainda chama a rede de 127 V de "110", nome que ficou de quando a tensão padrão era essa. Em todo o curso usamos 127 V, que é o valor real.
+
+### Explore: a tomada no simulador
+
+A simulação liga uma lâmpada incandescente de 127 V e 60 W numa tomada. Os instrumentos têm duas abas: o multímetro e o osciloscópio, que desenha a tensão ao longo do tempo (ele é o assunto da aula 3.5).
+
+<Simulation circuit="m03/tomada-127" instruments={['multimetro', 'osciloscopio']} autoplay />
+
+**Tarefas:**
+
+1. No multímetro, veja a tensão da tomada em CA. Depois mude o multímetro para CC. O que acontece com a leitura?
+2. No osciloscópio, encontre o pico da senoide. Ele bate com os 179,6 V da conta?
+3. Calcule a corrente da lâmpada: $I = P / V = 60\,\text{W} \div 127\,\text{V} \approx 0{,}47\,\text{A}$. Confira no multímetro, em CA. Acesa, a lâmpada tem cerca de $127 \div 0{,}47 \approx 269\,\Omega$, o valor que o simulador confere no segundo desafio.
+4. Mude a rede para 220 V e observe a lâmpada de 127 V.
+
+Na tarefa 4, a lâmpada recebe $(220/127)^2 \approx 3$ vezes a potência para a qual foi feita, cerca de 180 W, e o filamento rompe. Aparelhos de 127 V ligados em 220 V queimam; aparelhos de 220 V ligados em 127 V só funcionam fracos. Por isso, antes de ligar qualquer coisa numa casa que você não conhece, meça a tomada.
+
+## Medindo a tomada
+
+A tomada brasileira (padrão NBR 14136) tem três furos: dois laterais e um no meio, deslocado, que é o terra. Dos laterais, um é a fase e o outro é o neutro, e a ordem não é garantida: depende de quem instalou. Com três medidas você descobre quem é quem e se a tomada está bem ligada.
+
+<Figure caption="Figura 2. Os furos de uma tomada de três pinos. A fase é o furo lateral que mostra tensão contra o terra; as três medidas em V~ estão logo abaixo.">
+  <Outlet />
+</Figure>
+
+- **Fase e neutro:** a tensão da tomada, 127 V ou 220 V.
+- **Fase e terra:** praticamente o mesmo valor, porque o neutro e o terra se encontram no quadro ou no padrão de entrada. Se der zero aqui e 127 V entre fase e neutro, o fio terra dessa tomada não está ligado.
+- **Neutro e terra:** perto de zero, normalmente menos de alguns volts. Uma leitura alta indica neutro mal conectado ou sobrecarregado, um defeito que pede um eletricista.
+
+O 220 V também varia de cidade para cidade. Em muitas, a rede é 127/220 V: 127 V entre fase e neutro e 220 V entre duas fases (o chuveiro de 220 V usa duas fases). Em outras, a rede é 220/380 V, e a tomada comum já tem 220 V entre fase e neutro. Nunca suponha: meça.
+
+### Explore: as medidas da tomada no multímetro virtual
+
+<MultimeterTrainer client:visible targets={['tomada', 'tomada-ft', 'tomada-nt', 'bateria-carro', 'pilha']} target="tomada" />
+
+**Tarefa:** com a vermelha em VΩ, meça a tomada de fase a neutro, de fase a terra e de neutro a terra, primeiro em V⎓ e depois em V~. Depois meça a bateria do carro e a pilha. Por fim, tente o erro de medir a bateria do carro com a ponta vermelha no borne de 10A, e leia o que acontece com o fusível.
+
+Uma bateria de carro de 12 V carregada e em repouso (motor desligado há algumas horas) mostra tipicamente cerca de 12,6 V; perto de 12,2 V ela está pela metade, e abaixo de 12 V está descarregada. Com o motor ligado, o alternador carrega a bateria e a leitura sobe para algo como 13,8 V a 14,4 V. São valores típicos, que variam com o tipo de bateria e a temperatura.
+
+## A tensão fantasma
+
+Você desliga o disjuntor, mede o fio que vai para o motor do portão e o multímetro mostra 60 V, 80 V. O disjuntor está com defeito? Na maioria das vezes, não: é a <Term id="tensao-fantasma">tensão fantasma</Term>.
+
+Dois fios correndo lado a lado no mesmo eletroduto funcionam como um <Term id="capacitor">capacitor</Term> pequeno: são dois condutores separados por um isolante. O fio desligado "pega" um pouco da tensão do vizinho que continua ligado. Essa ligação é muito fraca e não consegue alimentar nada, mas o multímetro comum tem 10 MΩ de entrada e quase não puxa corrente, então ele mostra uma tensão alta.
+
+<Simulation circuit="m03/tensao-fantasma" instruments={['multimetro', 'osciloscopio']} autoplay />
+
+**Tarefa:** com o multímetro comum (10 MΩ), veja quanto o fio desligado mostra em CA. Depois mude a entrada para baixa impedância (LoZ) e compare. Olhe também a corrente: quantos microampères esse fio consegue fornecer?
+
+Com a entrada de 10 MΩ, o fio mostra perto de 76 V, embora a corrente disponível seja de cerca de 8 µA, nada perto do que uma lâmpada precisa. Alguns multímetros têm a função **LoZ** (*low impedance*, baixa impedância), que coloca uma resistência de alguns quilo-ohms entre as pontas (tipicamente cerca de 3 kΩ). A tensão fantasma não aguenta essa carga e cai para perto de zero, enquanto um fio realmente ligado continua mostrando a tensão da rede.
+
+Sem a função LoZ, a regra é: **na dúvida, o fio está energizado.** Confirme com o disjuntor certo desligado, procure de onde vem a tensão e, se não tiver certeza, chame um eletricista.
+
+## Testar, medir e testar de novo
+
+Um multímetro com bateria fraca, fusível queimado no lugar errado, ponta partida por dentro ou no modo errado mostra **zero** numa tomada ligada. Por isso, para provar que um circuito está **desligado**, use o método do teste antes e depois:
+
+<Steps>
+  <Step title="Teste o multímetro numa tomada que você sabe que está ligada">
+    Em V~, com a vermelha no VΩ. Ele precisa mostrar a tensão da rede. Isso prova que o aparelho, as pontas e o modo estão bons.
+  </Step>
+  <Step title="Meça o circuito que você desligou">
+    Entre fase e neutro, entre fase e terra e entre neutro e terra. Todas as leituras devem ficar perto de zero.
+  </Step>
+  <Step title="Teste o multímetro de novo na tomada ligada">
+    Se ele continua mostrando a tensão da rede, a leitura zero do passo 2 é verdadeira. Se não mostra, o problema estava no multímetro, e o circuito pode estar ligado.
+  </Step>
+</Steps>
+
+Na língua dos eletricistas, é o teste "vivo, morto, vivo". A caneta de teste (aquela chave de fenda com lâmpada neon) ajuda a achar a fase, mas não substitui o multímetro para provar que um fio está desligado: ela depende do seu corpo, do calçado e do piso para acender.
+
+<RealCase title="Chega energia na central do portão?">
+O portão parou. Antes de culpar a placa ou o motor, confira se a energia chega até a central. Você vai medir com a central **ligada**, então faça com calma e sem pressa:
+
+1. **Prepare o multímetro** como na aula anterior: CAT III, pontas inteiras, vermelha no VΩ, seletor em V~. Teste numa tomada ligada.
+2. **Abra a tampa da central** e localize os bornes de entrada da rede, geralmente marcados com F e N (ou L e N), perto do fusível da placa.
+3. **Encoste a ponta preta primeiro**, no borne N. Depois encoste a vermelha no borne F. Segure as pontas atrás das proteções e não encoste em mais nada.
+4. **Leia o visor** e retire a **vermelha primeiro**, depois a preta.
+
+Se mostrar 127 V ou 220 V, a energia chega, e o problema está depois: no fusível da placa, na placa ou no motor. Se mostrar zero, volte até o disjuntor e a tomada que alimentam a central.
+
+Para trocar o motor, desligue o disjuntor da central, faça o teste vivo, morto, vivo nos bornes F e N e só então solte os fios. Se algum fio do motor mostrar dezenas de volts com tudo desligado, desconfie de tensão fantasma, mas trate o fio como energizado até descobrir a origem.
+</RealCase>
+
+## Erros comuns e segurança
+
+<Callout type="perigo" title="Pontas de prova e dedos">
+Na rede, segure as pontas só pela empunhadura, atrás do ressalto de proteção. Quando possível, prenda a ponta preta (com garra jacaré ou encaixe) e use uma mão só para a vermelha. Isso evita que a corrente de um choque atravesse o peito, de uma mão para a outra.
+</Callout>
+
+- **Medir a tomada em V⎓.** O visor mostra perto de zero com a tomada ligada. Na rede, sempre V~.
+- **Concluir "desligado" sem testar o multímetro antes e depois.** Bateria fraca, ponta partida ou modo errado também dão zero.
+- **Deixar a ponta vermelha no borne de corrente** depois de medir corrente. Na tomada, isso vira um curto na sua mão.
+- **Confiar numa tensão fantasma ou desprezá-la.** Ela não acende nada, mas só dá para saber que é fantasma com LoZ, com uma carga ou descobrindo a origem. Até lá, o fio está energizado.
+- **Supor que a tomada é de 127 V.** Meça antes de ligar um aparelho, principalmente em casa alheia, sítio ou cidade diferente.
+- **Encostar a ponta de prova em dois bornes ao mesmo tempo.** Numa régua de bornes apertada, a agulha pode fazer um curto entre fase e neutro. Use as capinhas que deixam pouco metal exposto.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Num circuito, o ponto B está em 9 V e o ponto C em 3,5 V, os dois medidos em relação ao negativo. Com a ponta vermelha em B e a preta em C, quanto o multímetro mostra?',
+      answer: 5.5,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation:
+        'O visor mostra a vermelha menos a preta: 9 − 3,5 = 5,5 V. É a tensão do trecho entre B e C.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você mede uma bateria e o visor mostra -12.48 V. O que isso quer dizer?',
+      options: [
+        {
+          text: 'As pontas estão invertidas: a bateria tem 12,48 V',
+          correct: true,
+          feedback:
+            'Isso. A vermelha está no negativo e a preta no positivo. O valor está certo; só o sinal indica a inversão.',
+        },
+        {
+          text: 'A bateria está ligada ao contrário no carro',
+          feedback:
+            'O sinal fala das pontas do multímetro, não da instalação. Basta trocar as pontas para ver 12,48 V.',
+        },
+        {
+          text: 'O multímetro vai queimar e é preciso tirar as pontas rápido',
+          feedback:
+            'Num multímetro digital, inverter as pontas em tensão não estraga nada. O visor só mostra o sinal de menos.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Numa rede de 220 V eficazes, qual é o pico da senoide?',
+      answer: 311,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation: 'V pico = 220 × √2 ≈ 220 × 1,414 ≈ 311 V.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Com o disjuntor do portão desligado, o multímetro comum mostra 70 V entre um fio do motor e o neutro. Qual é a atitude certa?',
+      options: [
+        {
+          text: 'Tratar o fio como energizado e confirmar: LoZ, outro disjuntor ou um eletricista',
+          correct: true,
+          feedback:
+            'Pode ser tensão fantasma, mas também pode ser um fio ligado em outro disjuntor. Só se mexe no fio depois de saber.',
+        },
+        {
+          text: 'Ignorar: com o disjuntor desligado, deve ser tensão fantasma',
+          feedback:
+            'É a hipótese mais comum, mas não é prova. Se o fio vier de outro circuito, ele está ligado de verdade.',
+        },
+        {
+          text: 'Medir em V⎓ para ver se a tensão some',
+          feedback:
+            'Em V⎓ uma tensão alternada mostra perto de zero, fantasma ou não. Isso não prova nada.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Uma tomada mostra 127 V entre fase e neutro e 0 V entre fase e terra. O terra dessa tomada provavelmente não está ligado.',
+      answer: true,
+      explanation:
+        'Num terra ligado, fase e terra mostram quase a mesma tensão que fase e neutro, porque neutro e terra se encontram no quadro ou na entrada.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem o procedimento para provar que um circuito está desligado.',
+      items: [
+        'Desligar o disjuntor do circuito',
+        'Testar o multímetro numa tomada que está ligada',
+        'Medir o circuito desligado entre todos os pares de fios',
+        'Testar o multímetro de novo na tomada ligada',
+        'Soltar os fios',
+      ],
+      explanation:
+        'O teste antes e depois garante que o zero da medida veio do circuito, e não de um multímetro com defeito.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Tensão é a diferença entre dois pontos: o visor mostra a vermelha menos a preta. O sinal de menos só indica pontas invertidas.
+- Pilhas, baterias e fontes se medem em V⎓; a tomada, em V~. No modo errado, o visor mostra perto de zero com a tensão presente.
+- Os 127 V da tomada são o valor eficaz; o pico é cerca de 179,6 V (311 V na rede de 220 V).
+- Na tomada, fase e terra mostram quase o mesmo que fase e neutro, e neutro e terra ficam perto de zero.
+- Um fio desligado ao lado de um ligado pode mostrar tensão fantasma. A função LoZ separa o fantasma do real; sem ela, trate o fio como energizado.
+- Para provar que algo está desligado: testar o multímetro, medir, testar de novo.
+
+Na próxima aula, você vai [medir corrente](../03-medindo-corrente/), com o multímetro em série e com o alicate amperímetro.
