@@ -117,7 +117,7 @@ test.describe('the full gate circuit', () => {
     await page.waitForTimeout(300);
     await page.mouse.up();
 
-    // Current flows through the fuse and the motor once K1 and the TRIAC are on.
+    // Current flows through the motor once K1 and the TRIAC are on.
     const reading = sim.locator('.dmm[data-probe="IM"] [data-reading]');
     await expect(reading).toHaveText(/Corrente do motor: [1-9][\d,]*\s(m)?A/, { timeout: 15_000 });
     await expect(sim.getByText('Comando (botoeira): abrindo.')).toBeVisible();
