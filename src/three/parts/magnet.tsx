@@ -14,7 +14,7 @@
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import {
-  BufferGeometry,
+  type BufferGeometry,
   DoubleSide,
   ExtrudeGeometry,
   LatheGeometry,
