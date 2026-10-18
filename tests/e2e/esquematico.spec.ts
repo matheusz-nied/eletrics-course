@@ -47,7 +47,13 @@ test.describe('circuit gallery', () => {
     await page.goto(GALLERY);
     await expect(page.getByRole('heading', { level: 1, name: 'Circuitos' })).toBeVisible();
     await expect(page.locator('[data-circuit="m00/exemplo"]')).toBeVisible();
-    for (const name of ['lampada-potenciometro', 'rc-senoide', 'filtro-rc-bode', 'rele-motor']) {
+    for (const name of [
+      'lampada-potenciometro',
+      'rc-senoide',
+      'filtro-rc-bode',
+      'rele-motor',
+      'fim-de-curso',
+    ]) {
       await expect(page.locator(`[data-circuit="demo/${name}"]`)).toBeVisible();
     }
     await page.locator('[data-circuit="demo/lampada-potenciometro"] a').click();
@@ -180,6 +186,32 @@ test.describe('interaction', () => {
     // which a select control ("R1100 kΩ" vs "Resistência: 100 kΩ") can never pass.
     await expect(sim.locator('.sch-el .sch-label')).toHaveCount(0);
     await expectAccessible(page);
+  });
+});
+
+test.describe('pin texts', () => {
+  test('a changeover switch held by hand keeps NF/NA out of its accessible name', async ({
+    page,
+  }) => {
+    const errors = watchErrors(page);
+    const sim = await openSimulation(page, demo('fim-de-curso'));
+    const lever = sim.locator('.sim-schematic').getByRole('button', {
+      name: 'Chave fim de curso S1',
+    });
+    // The pin texts are drawn, but not inside the focusable part.
+    await expect(sim.locator('.sym-pin-text')).toHaveCount(2);
+    await expect(lever.locator('text')).toHaveCount(0);
+    await expectAccessible(page);
+
+    // At rest the NF contact feeds the green LED; held, the NA contact the red one.
+    await expect.poll(() => meter(page, 'IV', 'A')).toBeGreaterThan(0.005);
+    await lever.focus();
+    await page.keyboard.down('Space');
+    await expect.poll(() => meter(page, 'IR', 'A')).toBeGreaterThan(0.005);
+    await expect.poll(() => meter(page, 'IV', 'A')).toBe(0);
+    await page.keyboard.up('Space');
+    await expect.poll(() => meter(page, 'IR', 'A')).toBe(0);
+    errors.expectClean();
   });
 });
 
