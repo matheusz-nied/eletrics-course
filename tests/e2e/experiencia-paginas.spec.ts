@@ -43,10 +43,10 @@ test('module catalog lists every planned lesson', async ({ page }) => {
   await page.goto('modulos/');
   const modules = page.locator('details');
   await expect(modules).toHaveCount(18);
-  const gate = page.locator('details#m16-portao');
-  await gate.locator('summary').click();
-  await expect(gate).toHaveAttribute('open', '');
-  await expect(gate.getByText('Em breve').first()).toBeVisible();
+  const planned = page.locator('details#m17-projetos');
+  await planned.locator('summary').click();
+  await expect(planned).toHaveAttribute('open', '');
+  await expect(planned.getByText('Em breve').first()).toBeVisible();
 
   // A link to a module opens its row.
   await page.goto('modulos/#m08-motores');

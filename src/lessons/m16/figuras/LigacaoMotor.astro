@@ -1,0 +1,300 @@
+---
+/**
+ * Lesson 16.2: how the central drives the gate motor. The phase passes the
+ * fuse and the TRIAC, and one of the two direction relays puts it on ABRE
+ * or on FECHA; the capacitor joins ABRE and FECHA; the common goes to the
+ * neutral through the thermal protector inside the motor.
+ */
+import Figure from '../../../components/Figure.astro';
+
+interface Props {
+  caption?: string;
+}
+
+const { caption } = Astro.props;
+
+/** A winding drawn as bumps from x = 500 to 600. */
+const coil = (y: number) => `M500 ${y}${' a10 10 0 0 1 20 0'.repeat(5)}`;
+
+const alt =
+  'Esquema de ligação do motor do portão. À esquerda, a central: a fase entra no borne F, passa pelo fusível e pelo TRIAC e chega a dois contatos de relé. O contato de K1 leva a fase ao borne ABRE; o de K2, ao borne FECHA. O neutro entra no borne N e vai direto ao borne COM. Três fios saem da central para o motor: ABRE, FECHA e comum. Entre os fios ABRE e FECHA fica o capacitor. Dentro do motor, o fio ABRE alimenta o enrolamento ABRE e o fio FECHA alimenta o enrolamento FECHA; as outras pontas dos dois enrolamentos se juntam na ponta comum, que passa pelo protetor térmico e sai pelo fio comum. A carcaça do motor vai ao terra. Com K1 fechado, a fase vai direto ao enrolamento ABRE e o enrolamento FECHA recebe corrente pelo capacitor: o portão abre. Com K2 fechado, acontece o contrário e o portão fecha. K1 e K2 nunca fecham juntos.';
+---
+
+<Figure alt={alt} caption={caption}>
+  <svg class="lm" viewBox="0 0 720 440" width="720" height="440">
+    <!-- central -->
+    <rect class="lm-box" x="14" y="36" width="282" height="330" rx="10"></rect>
+    <text class="lm-title" x="30" y="60">
+      CENTRAL
+    </text>
+
+    <!-- mains terminals -->
+    <rect class="lm-term" x="28" y="99" width="22" height="22" rx="3"></rect>
+    <text class="lm-term-label" x="39" y="92" text-anchor="middle">
+      F
+    </text>
+    <rect class="lm-term" x="28" y="319" width="22" height="22" rx="3"></rect>
+    <text class="lm-term-label" x="39" y="312" text-anchor="middle">
+      N
+    </text>
+
+    <!-- fuse and TRIAC on the phase -->
+    <path class="lm-wire" d="M50 110H62M98 110H122M146 110H176"></path>
+    <rect class="lm-fuse" x="62" y="103" width="36" height="14" rx="3"></rect>
+    <line class="lm-wire" x1="62" y1="110" x2="98" y2="110"></line>
+    <text class="lm-small" x="80" y="136" text-anchor="middle">
+      fusível
+    </text>
+    <path class="lm-triac-bar" d="M122 96V124M146 96V124"></path>
+    <path class="lm-triac" d="M122 98L145 104L122 110Z M146 110L123 116L146 122Z"></path>
+    <path class="lm-wire" d="M122 123L112 136"></path>
+    <text class="lm-small" x="134" y="152" text-anchor="middle">
+      TRIAC
+    </text>
+
+    <!-- direction relays -->
+    <path class="lm-wire" d="M176 110V190M176 110H193M176 190H193M233 110H270M233 190H270"></path>
+    <circle class="lm-dot" cx="176" cy="110" r="3.5"></circle>
+    {[110, 190].map((y) => (
+      <>
+        <circle class="lm-pin" cx="196" cy={y} r="3" />
+        <circle class="lm-pin" cx="230" cy={y} r="3" />
+        <line class="lm-contact" x1="196" y1={y} x2="228" y2={y - 13} />
+      </>
+    ))}
+    <text class="lm-label" x="213" y="134" text-anchor="middle">
+      K1
+    </text>
+    <text class="lm-small" x="213" y="150" text-anchor="middle">
+      relé de abrir
+    </text>
+    <text class="lm-label" x="213" y="214" text-anchor="middle">
+      K2
+    </text>
+    <text class="lm-small" x="213" y="230" text-anchor="middle">
+      relé de fechar
+    </text>
+
+    <!-- neutral straight to COM -->
+    <path class="lm-wire" d="M50 330H270"></path>
+
+    <!-- motor terminals on the central -->
+    {[
+      ['ABRE', 110],
+      ['FECHA', 190],
+      ['COM', 330],
+    ].map(([label, y]) => (
+      <>
+        <rect class="lm-term" x="270" y={Number(y) - 11} width="24" height="22" rx="3" />
+        <text class="lm-term-label" x="282" y={Number(y) - 17} text-anchor="middle">
+          {label}
+        </text>
+      </>
+    ))}
+
+    <!-- the three wires and the capacitor between ABRE and FECHA -->
+    <path class="lm-wire" d="M294 110H500M294 190H500M294 330H620"></path>
+    <path class="lm-wire" d="M344 110V143M344 157V190"></path>
+    <path class="lm-cap" d="M328 143H360M328 157H360"></path>
+    <circle class="lm-dot" cx="344" cy="110" r="3.5"></circle>
+    <circle class="lm-dot" cx="344" cy="190" r="3.5"></circle>
+    <text class="lm-label" x="368" y="146">
+      capacitor
+    </text>
+    <text class="lm-small" x="368" y="162">
+      µF e VCA
+    </text>
+    <text class="lm-small" x="368" y="176">
+      na etiqueta
+    </text>
+    <text class="lm-small" x="368" y="102">
+      fio ABRE
+    </text>
+    <text class="lm-small" x="368" y="208">
+      fio FECHA
+    </text>
+    <text class="lm-small" x="306" y="322">
+      fio comum (a cor varia)
+    </text>
+
+    <!-- motor -->
+    <rect class="lm-motor" x="470" y="60" width="236" height="306" rx="12"></rect>
+    <text class="lm-title" x="486" y="84">
+      MOTOR
+    </text>
+    <path class="lm-coil" d={coil(110)}></path>
+    <path class="lm-coil" d={coil(190)}></path>
+    <text class="lm-small" x="550" y="134" text-anchor="middle">
+      enrolamento ABRE
+    </text>
+    <text class="lm-small" x="550" y="214" text-anchor="middle">
+      enrolamento FECHA
+    </text>
+    <path class="lm-wire" d="M600 110H620V262M600 190H620"></path>
+    <circle class="lm-dot" cx="620" cy="190" r="3.5"></circle>
+    <text class="lm-small" x="628" y="242">
+      ponta
+    </text>
+    <text class="lm-small" x="628" y="256">
+      comum
+    </text>
+    <rect class="lm-protector" x="608" y="262" width="24" height="26" rx="4"></rect>
+    <path class="lm-bimetal" d="M613 282C618 270 622 280 627 268"></path>
+    <text class="lm-small" x="600" y="274" text-anchor="end">
+      protetor
+    </text>
+    <text class="lm-small" x="600" y="288" text-anchor="end">
+      térmico
+    </text>
+    <path class="lm-wire" d="M620 288V330"></path>
+
+    <!-- earth on the frame -->
+    <path class="lm-earth" d="M690 316V334M680 334H700M684 340H696M688 346H692"></path>
+    <text class="lm-small" x="682" y="358" text-anchor="end">
+      terra na carcaça
+    </text>
+
+    <!-- how it works -->
+    <text class="lm-note" x="14" y="392">
+      K1 fechado: a fase vai direto ao enrolamento ABRE; o FECHA recebe corrente pelo capacitor. O
+      portão abre.
+    </text>
+    <text class="lm-note" x="14" y="412">
+      K2 fechado: a fase vai direto ao FECHA; o ABRE recebe pelo capacitor. O portão fecha.
+    </text>
+    <text class="lm-note lm-note--strong" x="14" y="428">
+      K1 e K2 nunca fecham juntos.
+    </text>
+  </svg>
+</Figure>
+
+<style>
+  .lm {
+    width: 100%;
+    min-width: 36rem;
+    height: auto;
+  }
+
+  .lm-box {
+    fill: none;
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+  }
+
+  .lm-motor {
+    fill: color-mix(in oklab, var(--accent) 8%, var(--surface));
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+
+  .lm-title {
+    fill: var(--fg-subtle);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .lm-term {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .lm-term-label {
+    fill: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .lm-wire {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+
+  .lm-dot {
+    fill: var(--fg);
+  }
+
+  .lm-fuse {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .lm-triac-bar {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+
+  .lm-triac {
+    fill: var(--fg);
+  }
+
+  .lm-pin {
+    fill: var(--surface);
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+
+  .lm-contact {
+    stroke: var(--accent);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+
+  .lm-cap {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3.5;
+  }
+
+  .lm-coil {
+    fill: none;
+    stroke: var(--copper);
+    stroke-width: 3;
+  }
+
+  .lm-protector {
+    fill: var(--surface);
+    stroke: var(--warning);
+    stroke-width: 2;
+  }
+
+  .lm-bimetal {
+    fill: none;
+    stroke: var(--warning);
+    stroke-width: 2;
+  }
+
+  .lm-earth {
+    fill: none;
+    stroke: var(--success);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .lm-label {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .lm-small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+
+  .lm-note {
+    fill: var(--fg);
+    font-size: 13px;
+  }
+
+  .lm-note--strong {
+    font-weight: 700;
+  }
+</style>

@@ -3,7 +3,7 @@
  * photocell, simple enough to run in a lesson widget and in the firmware
  * tests without the circuit simulator. The engine (S3) has the physical
  * model; this one only needs the right shape: the gate moves at about
- * 10 m/min, the current rises when the motor is loaded or stalls, the reed
+ * 15 m/min (typical of 1/4 to 1/2 CV sliding motors, src/lessons/m16/FONTES.md), the current rises when the motor is loaded or stalls, the reed
  * closes near its magnet, and the faults of docs/plano/05-portao.md
  * (section 7) behave like the real ones. Values are typical, not a
  * manufacturer's.
@@ -33,7 +33,7 @@ export interface GateParams {
 
 export const GATE_PARAMS: GateParams = {
   curso: 4,
-  velocidade: 0.17,
+  velocidade: 0.25,
   forcaMaxima: 600,
   atrito: 90,
   imaFca: 3.98,

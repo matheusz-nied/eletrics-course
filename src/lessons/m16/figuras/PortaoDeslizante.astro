@@ -1,0 +1,409 @@
+---
+/**
+ * Lesson 16.1: a sliding gate installation seen from inside the property,
+ * gate closed, with every part of the automation named. Generic drawing,
+ * no brand.
+ */
+import Figure from '../../../components/Figure.astro';
+
+interface Props {
+  caption?: string;
+}
+
+const { caption } = Astro.props;
+
+/** Vertical bars of the gate leaf. */
+const bars = Array.from({ length: 19 }, (_, i) => 88 + i * 22);
+
+/** Teeth under the rack, 8 units each. */
+const teeth = `M96 296${' l4 6 l4 -6'.repeat(51)}`;
+
+/** Radio waves leaving the remote towards the motor. */
+const waves = [10, 18, 26].map((r) => `M${612 - r} 66 A${r} ${r} 0 0 0 612 ${66 + r}`);
+
+const alt =
+  'Portão deslizante fechado, visto de dentro do terreno. A folha de grade fica entre dois pilares e corre sobre um trilho no chão apoiada em roldanas; no alto do pilar direito há uma guia superior que segura a folha e uma sinaleira. Presa à parte de baixo da folha, uma cremalheira (barra dentada) corre por cima do motor, que fica no chão, ao lado do vão, sobre uma base. O pinhão do motor engrena na cremalheira. Na cremalheira há dois ímãs: o de abertura, na ponta esquerda, e o de fechamento, que neste momento está sobre o sensor reed do motor. A central fica sob a tampa do motor, que tem também a chave de desbloqueio. Nos pilares, o emissor e o receptor da fotocélula formam um feixe que atravessa o vão. Na parede ficam a botoeira e o quadro com o disjuntor, de onde sai o cabo da rede, por um eletroduto no chão, até o motor. No alto, um controle remoto envia o sinal de rádio. Uma seta indica que o portão abre para a direita.';
+---
+
+<Figure alt={alt} caption={caption}>
+  <svg class="pd" viewBox="0 0 720 470" width="720" height="470">
+    <!-- ground, wall and posts -->
+    <rect class="pd-ground" x="0" y="380" width="720" height="24"></rect>
+    <line class="pd-groundline" x1="0" y1="380" x2="720" y2="380"></line>
+    <rect class="pd-wall" x="406" y="200" width="314" height="180"></rect>
+    <rect class="pd-post" x="40" y="120" width="26" height="260"></rect>
+    <rect class="pd-post" x="380" y="120" width="26" height="260"></rect>
+    <rect class="pd-track" x="30" y="373" width="690" height="7" rx="2"></rect>
+
+    <!-- gate leaf -->
+    <rect class="pd-leaf" x="66" y="140" width="440" height="206"></rect>
+    {bars.map((x) => (
+      <line class="pd-bar" x1={x} y1="143" x2={x} y2="343" />
+    ))}
+    <rect class="pd-rail" x="66" y="344" width="440" height="10"></rect>
+    {[100, 356].map((x) => (
+      <>
+        <circle class="pd-wheel" cx={x} cy="363" r="10" />
+        <circle class="pd-hub" cx={x} cy="363" r="3" />
+      </>
+    ))}
+
+    <!-- rack, magnets -->
+    <rect class="pd-rack" x="96" y="284" width="410" height="12"></rect>
+    <path class="pd-teeth" d={teeth}></path>
+    <rect class="pd-magnet pd-magnet--fca" x="104" y="286" width="14" height="8" rx="1"></rect>
+    <rect class="pd-magnet pd-magnet--fcf" x="472" y="286" width="14" height="8" rx="1"></rect>
+
+    <!-- upper guide and flashing light on the right post -->
+    <rect class="pd-guide" x="374" y="128" width="40" height="8" rx="2"></rect>
+    <circle class="pd-guide" cx="386" cy="140" r="4"></circle>
+    <circle class="pd-guide" cx="402" cy="140" r="4"></circle>
+    <path class="pd-lamp" d="M383 120v-6a10 10 0 0 1 20 0v6z"></path>
+    <path class="pd-ray" d="M393 98v-8M380 104l-6-5M406 104l6-5"></path>
+
+    <!-- photocell -->
+    <rect class="pd-photo" x="66" y="208" width="10" height="20" rx="2"></rect>
+    <rect class="pd-photo" x="370" y="208" width="10" height="20" rx="2"></rect>
+    <line class="pd-beam" x1="76" y1="218" x2="370" y2="218"></line>
+
+    <!-- motor with reducer and central, on its base -->
+    <rect class="pd-base" x="402" y="375" width="112" height="5"></rect>
+    <rect class="pd-motor" x="412" y="314" width="92" height="61" rx="8"></rect>
+    <rect class="pd-inner" x="420" y="328" width="46" height="32" rx="3"></rect>
+    <circle class="pd-pinion" cx="446" cy="309" r="9"></circle>
+    <circle class="pd-hub" cx="446" cy="309" r="3"></circle>
+    <rect class="pd-reed" x="473" y="309" width="12" height="5" rx="1"></rect>
+    <circle class="pd-key" cx="490" cy="352" r="6"></circle>
+    <rect class="pd-key-slot" x="488.5" y="348" width="3" height="8"></rect>
+
+    <!-- push button, distribution board and mains cable -->
+    <rect class="pd-box" x="548" y="246" width="18" height="26" rx="3"></rect>
+    <circle class="pd-button" cx="557" cy="259" r="5"></circle>
+    <rect class="pd-box" x="666" y="222" width="44" height="54" rx="3"></rect>
+    <rect class="pd-breaker" x="680" y="232" width="16" height="30" rx="2"></rect>
+    <line class="pd-lever" x1="688" y1="238" x2="688" y2="248"></line>
+    <path class="pd-cable" d="M700 276V393H470V375"></path>
+
+    <!-- remote control -->
+    <rect class="pd-box" x="616" y="26" width="24" height="42" rx="7"></rect>
+    <circle class="pd-button" cx="628" cy="40" r="5"></circle>
+    {waves.map((d) => (
+      <path class="pd-wave" d={d} />
+    ))}
+
+    <!-- direction -->
+    <path class="pd-arrow" d="M180 124h108"></path>
+    <path class="pd-arrowhead" d="M296 124l-10-6v12z"></path>
+    <text class="pd-label" x="236" y="115" text-anchor="middle">
+      abre
+    </text>
+
+    <!-- labels: sky -->
+    <text class="pd-label" x="66" y="104">
+      folha do portão
+    </text>
+    <path class="pd-leader" d="M96 109V140"></path>
+    <text class="pd-label" x="432" y="84">
+      sinaleira
+    </text>
+    <path class="pd-leader" d="M428 80L404 106"></path>
+    <text class="pd-label" x="432" y="114">
+      guia superior
+    </text>
+    <path class="pd-leader" d="M428 110L415 130"></path>
+    <text class="pd-label" x="628" y="110" text-anchor="middle">
+      controle remoto
+    </text>
+
+    <!-- labels: inside the gate, on chips -->
+    <rect class="pd-chip" x="160" y="193" width="126" height="18" rx="4"></rect>
+    <text class="pd-label" x="223" y="206" text-anchor="middle">
+      feixe da fotocélula
+    </text>
+    <rect class="pd-chip" x="80" y="232" width="62" height="18" rx="4"></rect>
+    <text class="pd-small" x="111" y="245" text-anchor="middle">
+      emissor
+    </text>
+    <rect class="pd-chip" x="302" y="232" width="66" height="18" rx="4"></rect>
+    <text class="pd-small" x="335" y="245" text-anchor="middle">
+      receptor
+    </text>
+    <rect class="pd-chip" x="104" y="261" width="140" height="18" rx="4"></rect>
+    <text class="pd-label" x="174" y="274" text-anchor="middle">
+      ímã FCA (abertura)
+    </text>
+    <path class="pd-leader" d="M112 279V286"></path>
+    <rect class="pd-chip" x="262" y="261" width="88" height="18" rx="4"></rect>
+    <text class="pd-label" x="306" y="274" text-anchor="middle">
+      cremalheira
+    </text>
+    <path class="pd-leader" d="M306 279V284"></path>
+    <rect class="pd-chip" x="346" y="314" width="58" height="18" rx="4"></rect>
+    <text class="pd-label" x="375" y="327" text-anchor="middle">
+      pinhão
+    </text>
+    <path class="pd-leader" d="M404 322L438 312"></path>
+
+    <!-- labels: wall, right of the motor -->
+    <text class="pd-label" x="557" y="238" text-anchor="middle">
+      botoeira
+    </text>
+    <text class="pd-label" x="712" y="212" text-anchor="end">
+      quadro e disjuntor
+    </text>
+    <text class="pd-label" x="526" y="296">
+      ímã FCF (fechamento)
+    </text>
+    <path class="pd-leader" d="M522 292H487"></path>
+    <text class="pd-label" x="526" y="318">
+      reed do fim de curso
+    </text>
+    <path class="pd-leader" d="M522 314L486 312"></path>
+    <text class="pd-label" x="526" y="342">
+      motor e redutor,
+    </text>
+    <text class="pd-small" x="526" y="358">
+      com a central sob a tampa
+    </text>
+    <path class="pd-leader" d="M522 338H505"></path>
+
+    <!-- labels: floor -->
+    <text class="pd-label" x="100" y="428" text-anchor="middle">
+      roldana
+    </text>
+    <path class="pd-leader" d="M100 414V373"></path>
+    <text class="pd-label" x="230" y="428" text-anchor="middle">
+      trilho no chão
+    </text>
+    <path class="pd-leader" d="M230 414V377"></path>
+    <text class="pd-label" x="446" y="428" text-anchor="middle">
+      desbloqueio
+    </text>
+    <path class="pd-leader" d="M458 414L488 358"></path>
+    <text class="pd-label" x="620" y="428" text-anchor="middle">
+      cabo da rede, no eletroduto
+    </text>
+    <path class="pd-leader" d="M620 414V394"></path>
+    <text class="pd-small" x="360" y="458" text-anchor="middle">
+      Portão fechado: o ímã de fechamento está sobre o reed. Abrindo, a folha corre para a direita.
+    </text>
+  </svg>
+</Figure>
+
+<style>
+  .pd {
+    width: 100%;
+    min-width: 36rem;
+    height: auto;
+  }
+
+  .pd-ground {
+    fill: var(--surface-2);
+  }
+
+  .pd-groundline {
+    stroke: var(--border-strong);
+    stroke-width: 2;
+  }
+
+  .pd-wall {
+    fill: color-mix(in oklab, var(--surface-2) 60%, var(--bg));
+    stroke: var(--border-strong);
+  }
+
+  .pd-post {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .pd-track {
+    fill: var(--fg-subtle);
+  }
+
+  .pd-leaf {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 3;
+  }
+
+  .pd-bar {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+    opacity: 0.7;
+  }
+
+  .pd-rail {
+    fill: var(--fg-muted);
+  }
+
+  .pd-wheel {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+
+  .pd-hub {
+    fill: var(--fg);
+  }
+
+  .pd-rack {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+
+  .pd-teeth {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+
+  .pd-magnet {
+    stroke: var(--fg);
+    stroke-width: 1;
+  }
+
+  .pd-magnet--fca {
+    fill: var(--success);
+  }
+
+  .pd-magnet--fcf {
+    fill: var(--danger);
+  }
+
+  .pd-guide {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .pd-lamp {
+    fill: var(--warning);
+    stroke: var(--fg-muted);
+  }
+
+  .pd-ray {
+    fill: none;
+    stroke: var(--warning);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .pd-photo {
+    fill: var(--fg);
+  }
+
+  .pd-beam {
+    stroke: var(--danger);
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+  }
+
+  .pd-base {
+    fill: var(--fg-subtle);
+  }
+
+  .pd-motor {
+    fill: color-mix(in oklab, var(--accent) 16%, var(--surface));
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+
+  .pd-inner {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.2;
+    stroke-dasharray: 3 3;
+  }
+
+  .pd-pinion {
+    fill: var(--surface);
+    stroke: var(--copper);
+    stroke-width: 4;
+    stroke-dasharray: 3 2;
+  }
+
+  .pd-reed {
+    fill: var(--warning);
+    stroke: var(--fg);
+    stroke-width: 1;
+  }
+
+  .pd-key {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+
+  .pd-key-slot {
+    fill: var(--fg);
+  }
+
+  .pd-box {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+
+  .pd-button {
+    fill: var(--accent);
+  }
+
+  .pd-breaker {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+  }
+
+  .pd-lever {
+    stroke: var(--fg);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+
+  .pd-cable {
+    fill: none;
+    stroke: var(--copper);
+    stroke-width: 2;
+    stroke-dasharray: 5 3;
+  }
+
+  .pd-wave {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .pd-arrow {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.5;
+  }
+
+  .pd-arrowhead {
+    fill: var(--accent);
+  }
+
+  .pd-leader {
+    fill: none;
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+  }
+
+  .pd-chip {
+    fill: var(--surface);
+    stroke: var(--border-strong);
+  }
+
+  .pd-label {
+    fill: var(--fg);
+    font-size: 13px;
+  }
+
+  .pd-small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+</style>

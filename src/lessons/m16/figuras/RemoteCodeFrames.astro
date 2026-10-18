@@ -1,0 +1,241 @@
+---
+/**
+ * Lesson 16.6: what a remote sends. On top, OOK (the carrier switched on
+ * and off by the bits); below, three presses of a fixed-code remote and of
+ * a rolling-code one, and what happens when a code grabber plays back the
+ * third press. The counter is shown in clear on purpose: a real rolling-code
+ * remote encrypts it.
+ */
+import Figure from '../../../components/Figure.astro';
+
+interface Props {
+  caption?: string;
+}
+
+const { caption } = Astro.props;
+
+const bits = [1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1];
+const bitX = (i: number) => 150 + i * 44;
+const zigzag = (x: number) =>
+  Array.from({ length: 23 }, (_, k) => `${x + k * 2},${k % 2 === 0 ? 62 : 86}`).join(' ');
+const rows = [
+  { y: 152, label: 'aperto 1', counter: 101 },
+  { y: 188, label: 'aperto 2', counter: 102 },
+  { y: 224, label: 'aperto 3', counter: 103 },
+];
+const copyY = 284;
+
+const alt =
+  'No alto, o sinal de um controle remoto em OOK: uma sequência de bits em que cada 1 é um trecho com a portadora de 433,92 megahertz ligada e cada 0 é um trecho desligado. Embaixo, dois quadros lado a lado. À esquerda, o código fixo, ou code learning: os apertos 1, 2 e 3 mandam o mesmo conteúdo, serial 5A3C91 e botão 1; um copiador grava o aperto 3 e repete, e a central aceita, abrindo o portão. À direita, o rolling code: cada aperto manda o serial, o botão e um contador que avança, 101, 102 e 103; a central guarda o último contador recebido, 103; quando o copiador repete o aperto 3, com o contador 103, a central recusa, porque espera 104 ou mais.';
+---
+
+<Figure alt={alt} caption={caption}>
+  <svg class="qc" viewBox="0 0 720 360" width="720" height="360">
+    <text class="qc-title" x="20" y="20">
+      OOK: a portadora liga e desliga
+    </text>
+    <text class="qc-muted" x="20" y="46">
+      bit
+    </text>
+    <text class="qc-muted" x="20" y="78">
+      sinal
+    </text>
+    {bits.map((b, i) => (
+      <>
+        <text class="qc-bit" x={bitX(i) + 22} y="46" text-anchor="middle">
+          {b}
+        </text>
+        {b === 1 ? (
+          <polyline class="qc-carrier" points={zigzag(bitX(i))} />
+        ) : (
+          <line class="qc-off" x1={bitX(i)} y1="74" x2={bitX(i) + 44} y2="74" />
+        )}
+        <line class="qc-slot" x1={bitX(i)} y1="56" x2={bitX(i)} y2="92" />
+      </>
+    ))}
+    <line class="qc-slot" x1={bitX(bits.length)} y1="56" x2={bitX(bits.length)} y2="92"></line>
+    <text class="qc-muted" x="150" y="108">
+      1 = portadora de 433,92 MHz ligada · 0 = desligada
+    </text>
+
+    <line class="qc-divider" x1="360" y1="124" x2="360" y2="352"></line>
+
+    <!-- fixed code -->
+    <text class="qc-title" x="184" y="140" text-anchor="middle">
+      Código fixo (code learning)
+    </text>
+    {rows.map((r) => (
+      <>
+        <text class="qc-label" x="24" y={r.y + 17}>
+          {r.label}
+        </text>
+        <rect class="qc-field" x="96" y={r.y} width="120" height="26" rx="3" />
+        <rect class="qc-field" x="222" y={r.y} width="80" height="26" rx="3" />
+        <text class="qc-text" x="156" y={r.y + 17} text-anchor="middle">
+          serial 5A3C91
+        </text>
+        <text class="qc-text" x="262" y={r.y + 17} text-anchor="middle">
+          botão 1
+        </text>
+      </>
+    ))}
+    <text class="qc-muted" x="24" y="268">
+      o mesmo conteúdo em todo aperto
+    </text>
+    <text class="qc-label" x="24" y={copyY + 12}>
+      cópia
+    </text>
+    <text class="qc-label" x="24" y={copyY + 25}>
+      do 3
+    </text>
+    <rect class="qc-field qc-copy" x="96" y={copyY} width="120" height="26" rx="3"></rect>
+    <rect class="qc-field qc-copy" x="222" y={copyY} width="80" height="26" rx="3"></rect>
+    <text class="qc-text" x="156" y={copyY + 17} text-anchor="middle">
+      serial 5A3C91
+    </text>
+    <text class="qc-text" x="262" y={copyY + 17} text-anchor="middle">
+      botão 1
+    </text>
+    <text class="qc-bad" x="24" y="330">
+      aceito: o portão abre
+    </text>
+    <text class="qc-muted" x="24" y="346">
+      a central não distingue a cópia
+    </text>
+
+    <!-- rolling code -->
+    <text class="qc-title" x="540" y="140" text-anchor="middle">
+      Rolling code
+    </text>
+    {rows.map((r) => (
+      <>
+        <text class="qc-label" x="376" y={r.y + 17}>
+          {r.label}
+        </text>
+        <rect class="qc-field" x="436" y={r.y} width="100" height="26" rx="3" />
+        <rect class="qc-field" x="540" y={r.y} width="60" height="26" rx="3" />
+        <rect class="qc-field qc-counter" x="604" y={r.y} width="100" height="26" rx="3" />
+        <text class="qc-text" x="486" y={r.y + 17} text-anchor="middle">
+          serial 5A3C91
+        </text>
+        <text class="qc-text" x="570" y={r.y + 17} text-anchor="middle">
+          botão 1
+        </text>
+        <text class="qc-text" x="654" y={r.y + 17} text-anchor="middle">
+          contador {r.counter}
+        </text>
+      </>
+    ))}
+    <text class="qc-muted" x="376" y="268">
+      a central guarda o último: 103
+    </text>
+    <text class="qc-label" x="376" y={copyY + 12}>
+      cópia
+    </text>
+    <text class="qc-label" x="376" y={copyY + 25}>
+      do 3
+    </text>
+    <rect class="qc-field qc-copy" x="436" y={copyY} width="100" height="26" rx="3"></rect>
+    <rect class="qc-field qc-copy" x="540" y={copyY} width="60" height="26" rx="3"></rect>
+    <rect class="qc-field qc-copy" x="604" y={copyY} width="100" height="26" rx="3"></rect>
+    <text class="qc-text" x="486" y={copyY + 17} text-anchor="middle">
+      serial 5A3C91
+    </text>
+    <text class="qc-text" x="570" y={copyY + 17} text-anchor="middle">
+      botão 1
+    </text>
+    <text class="qc-text" x="654" y={copyY + 17} text-anchor="middle">
+      contador 103
+    </text>
+    <text class="qc-good" x="376" y="330">
+      recusado: o 103 já foi usado
+    </text>
+    <text class="qc-muted" x="376" y="346">
+      a central espera 104 ou mais
+    </text>
+  </svg>
+</Figure>
+
+<style>
+  .qc {
+    width: 100%;
+    min-width: 34rem;
+    height: auto;
+  }
+
+  .qc-title {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .qc-bit,
+  .qc-label {
+    fill: var(--fg);
+    font-size: 11px;
+  }
+
+  .qc-bit {
+    font-weight: 700;
+  }
+
+  .qc-text {
+    fill: var(--fg);
+    font-size: 11px;
+  }
+
+  .qc-muted {
+    fill: var(--fg-muted);
+    font-size: 11px;
+  }
+
+  .qc-carrier {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.2;
+  }
+
+  .qc-off {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+
+  .qc-slot {
+    stroke: var(--border);
+    stroke-dasharray: 2 3;
+  }
+
+  .qc-divider {
+    stroke: var(--border);
+    stroke-dasharray: 4 4;
+  }
+
+  .qc-field {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+  }
+
+  .qc-counter {
+    fill: var(--accent-soft);
+    stroke: var(--accent);
+  }
+
+  .qc-copy {
+    stroke: var(--warning);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+  }
+
+  .qc-bad {
+    fill: var(--danger);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .qc-good {
+    fill: var(--success);
+    font-size: 12px;
+    font-weight: 700;
+  }
+</style>
