@@ -60,12 +60,14 @@ export default defineCircuit({
       params: { resistance: 8.8, watts: NO_DAMAGE, tolerance: 0 },
     },
     {
+      // The tap skips the second stretch: the winter path.
       id: 'W2',
       type: 'wire',
       points: [
         [24, 0],
-        [24, 7],
-        [27, 7],
+        [24, -6],
+        [40, -6],
+        [40, 7],
       ],
     },
     {
@@ -73,17 +75,16 @@ export default defineCircuit({
       type: 'wire',
       points: [
         [34, 0],
-        [34, 7],
-        [31, 7],
+        [36, 0],
+        [36, 7],
       ],
     },
     {
       // At rest the common touches NF (summer, whole wire); actuated, NA (winter).
       id: 'S2',
       type: 'switch-spdt',
-      at: [29, 10],
-      rot: 90,
-      flip: true,
+      at: [38, 10],
+      rot: 270,
       label: 'Verão/Inverno',
       params: { actuated: false },
       control: { param: 'actuated', label: 'Posição inverno', kind: 'toggle' },
@@ -92,8 +93,8 @@ export default defineCircuit({
       id: 'W4',
       type: 'wire',
       points: [
-        [29, 13],
-        [29, 20],
+        [38, 13],
+        [38, 20],
         [0, 20],
       ],
     },
