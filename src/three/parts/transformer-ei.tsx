@@ -10,9 +10,16 @@
  * windings sawn through, with their wire cross-sections and tape layers.
  */
 import { useMemo } from 'react';
-import { BufferAttribute, BufferGeometry, ExtrudeGeometry, Path, Shape } from 'three';
+import {
+  BufferAttribute,
+  BufferGeometry,
+  ExtrudeGeometry,
+  Path,
+  Shape,
+  ShapeGeometry,
+} from 'three';
 import { formatNumber } from '../core/format';
-import { Anchor, Explode } from '../core/view';
+import { Anchor, Explode, useView } from '../core/view';
 import { Material } from '../materials/Material';
 import { FONT_SANS, fitText, getNoiseTexture, useCanvasTexture } from '../materials/textures';
 import type { PartAnnotation, PartMeta, PartProps, Vec3 } from '../types';
@@ -215,6 +222,7 @@ export default function TransformerEi(props: TransformerEiProps) {
   const { a, stack: S } = sizeOf(p as unknown as PartProps);
   const H = 2.5 * a;
   const noise = getNoiseTexture();
+  const { cutaway } = useView();
 
   // Window geometry: the coil fills the two windows (a/2 wide, 1,5a tall).
   const tubeIn = { w: a + 0.6, d: S + 0.6 };
@@ -385,8 +393,11 @@ export default function TransformerEi(props: TransformerEiProps) {
       roughness={0.6}
       metalness={0.85}
       clip
-      cutColor="#ff0000"
+      cutColor="#6d7176"
     />
+  );
+  const cutFace = (
+    <Material preset="siliconSteel" color="#9a9ea4" roughness={0.38} roughnessMap={noise} />
   );
   const coreFace = (
     <Material
@@ -395,7 +406,7 @@ export default function TransformerEi(props: TransformerEiProps) {
       roughness={0.42}
       roughnessMap={noise}
       clip
-      cutColor="#ff0000"
+      cutColor="#6d7176"
     />
   );
 
@@ -405,6 +416,7 @@ export default function TransformerEi(props: TransformerEiProps) {
       <group>
         <mesh geometry={core.eSides}>{coreSides}</mesh>
         <mesh geometry={core.eCaps}>{coreFace}</mesh>
+        {cutaway && <mesh geometry={core.eCut}>{cutFace}</mesh>}
         <Anchor name="e" position={[-1.25 * a, a * 0.25, S / 2]} />
       </group>
 
@@ -412,6 +424,7 @@ export default function TransformerEi(props: TransformerEiProps) {
       <Explode offset={[0, 3.7 * a, 0]} delay={0.1}>
         <mesh geometry={core.iSides}>{coreSides}</mesh>
         <mesh geometry={core.iCaps}>{coreFace}</mesh>
+        {cutaway && <mesh geometry={core.iCut}>{cutFace}</mesh>}
         <Anchor name="i" position={[a, H, S / 2]} />
       </Explode>
 
@@ -574,7 +587,27 @@ function useCoreGeometry(a: number, S: number) {
     roundedRect(i, 3 * a, a / 2 - 0.08, 0.2, 0, 2 * a + 0.04 + (a / 2 - 0.08) / 2);
     const eStack = stack(e, S);
     const iStack = stack(i, S);
-    return { eCaps: eStack.caps, eSides: eStack.sides, iCaps: iStack.caps, iSides: iStack.sides };
+    // Flat faces drawn on the cut plane (the stacks touch, so their own back
+    // faces would show the inside of the neighbouring solid), with rivet holes.
+    const withRivets = (shape: Shape, y: number) => {
+      const face = new Shape().copy(shape);
+      for (const x of [-1.25 * a, 1.25 * a]) {
+        const hole = new Path();
+        hole.absarc(x, y, 1.5, 0, Math.PI * 2, true);
+        face.holes.push(hole);
+      }
+      const g = new ShapeGeometry(face, 4);
+      g.translate(0, 0, 0.03);
+      return g;
+    };
+    return {
+      eCaps: eStack.caps,
+      eSides: eStack.sides,
+      iCaps: iStack.caps,
+      iSides: iStack.sides,
+      eCut: withRivets(e, a / 4),
+      iCut: withRivets(i, 2.5 * a - a / 4),
+    };
   }, [a, S]);
 }
 
