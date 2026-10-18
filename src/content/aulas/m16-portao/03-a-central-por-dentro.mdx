@@ -1,0 +1,396 @@
+---
+titulo: A central por dentro
+modulo: m16-portao
+ordem: 3
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Reconhecer os blocos da central e seguir o caminho da energia da rede até o motor
+  - Explicar a divisão de tarefas entre os relés de sentido e o TRIAC
+  - Ler a tabela de bornes da central e saber o que vai ligado em cada um
+  - Acompanhar a máquina de estados do programa da central
+  - Entender como a central percebe um obstáculo pela corrente do motor
+prerequisitos:
+  - m04-passivos/07-chaves-botoes-e-reles
+  - m09-semicondutores/09-tiristores-e-isolamento
+  - m10-fontes/02-fontes-chaveadas
+  - m12-microcontroladores/02-maquinas-de-estado
+  - m14-placas/02-anatomia-da-placa
+  - m16-portao/02-o-motor-do-portao
+tags: [central, TRIAC, relé, microcontrolador, máquina de estados, bornes, portão]
+seguranca: rede
+---
+
+import CentralVirtual from '../../../lessons/m16/ui/CentralVirtual';
+import EmBreve from '../../../lessons/m16/ui/EmBreve.astro';
+import PlacaCD1 from '../../../lessons/m16/figuras/PlacaCD1.astro';
+import ControleDeFase from '../../../lessons/m16/figuras/ControleDeFase.astro';
+import { lessonUrl } from '../../../lib/url';
+
+Tire a tampa de uma central de portão, com o disjuntor desligado e a ausência de tensão confirmada, e você vê uma placa cheia de peças: dois <Term id="rele">relés</Term> que estalam, um chip, um componente preso num dissipador de alumínio, uma antena de fio e uma fileira de bornes com siglas. Parece um labirinto, mas cada canto da placa tem uma tarefa. Nesta aula você segue o caminho da energia e da informação pela CD-1, a central genérica do curso, e entende por que ela foi desenhada assim.
+
+## A placa em blocos
+
+<PlacaCD1 caption="Figura 1. A central genérica CD-1 vista de cima. Os bornes de força ficam na borda de baixo; os de baixa tensão, na borda direita." />
+
+A placa tem dois lados. À esquerda e embaixo fica o **lado da rede**: <Term id="fusivel">fusível</Term>, <Term id="triac">TRIAC</Term>, relés e os bornes de força, tudo ligado aos 127 V ou 220 V. À direita fica o **lado de baixa tensão**: o <Term id="microcontrolador">microcontrolador</Term>, o receptor, as entradas, os LEDs e os ajustes, tudo em 12 V ou 5 V. Um rasgo na placa (o traço vertical na parte de baixo, perto do meio) aumenta a distância entre os dois lados, para a rede não "pular" para a baixa tensão. A fonte faz a ponte entre eles.
+
+Antes de mexer em qualquer coisa, saiba onde fica cada lado: relés, TRIAC, fusível e até o dissipador do TRIAC podem estar ligados à rede.
+
+<EmBreve component="Model3D" id="central-generica" />
+
+## Rede, fusível e fonte
+
+<PlacaCD1 destaque={['rede', 'fonte']} caption="Figura 2. A entrada da rede: o fusível de 10 A e a fonte de 12 V." />
+
+A rede chega nos bornes `F`, `N` e `⏚` (fase, neutro e terra), vindos do disjuntor do portão. Numa instalação de 220 V entre duas fases, o borne `N` recebe a segunda fase, e os dois bornes ficam com tensão.
+
+Logo depois vem o fusível de vidro, de 5×20 mm. Na CD-1, ele é de 10 A. Nos manuais consultados para o curso, há centrais com 10 A e outras com 5 A: troque sempre pelo valor que está na placa e no manual, nunca por um maior.
+
+A **fonte chaveada** transforma a tensão da rede em 12 V de corrente contínua. Ela aceita de 90 V a 240 V, então a mesma placa funciona em 127 V e em 220 V sem chave de seleção (a <LinkAula id="m10-fontes/02-fontes-chaveadas">aula 10.2</LinkAula> explica como). Dos 12 V saem a alimentação das bobinas dos relés, do receptor, da trava e do borne `+12V`, que alimenta a fotocélula. Esse borne aguenta no máximo 300 mA na CD-1. Dos 12 V a placa tira ainda 5 V para o microcontrolador.
+
+A fonte também isola os 12 V da rede. Mesmo assim, trate a placa inteira como energizada enquanto o disjuntor estiver ligado: um defeito pode levar a tensão da rede ao lado de baixa tensão.
+
+## O microcontrolador e as entradas
+
+<PlacaCD1
+  destaque={['mcu', 'entradas', 'rf']}
+  caption="Figura 3. O microcontrolador, o receptor de 433,92 MHz com a antena de fio e as entradas: fotocélula, botoeira e o conector do fim de curso."
+/>
+
+O microcontrolador é um pequeno computador num chip só, com processador, memória e pinos de entrada e saída. Na CD-1, ele roda um passo do programa a cada 10 ms. Em cada passo, lê as entradas, decide e atualiza as saídas.
+
+As entradas digitais (fim de curso, botoeira, fotocélula, botão PROG, <Term id="jumper">jumpers</Term> e <Term id="dip-switch">chave DIP</Term>) usam todas o mesmo truque, o <Term id="pull-up">pull-up</Term>. Um resistor liga o pino aos 5 V. Com o contato aberto, ou com o fio solto, o pino fica em 5 V (nível alto). Quando o contato fecha para o GND, o pino cai para 0 V (nível baixo). O programa sabe o que cada nível quer dizer:
+
+- **Fim de curso** (`FCA` e `FCF`, num conector de três vias com `GND` no meio): ímã perto, reed fechado, pino baixo, "chegou".
+- **Botoeira** (`BOT`): contato NA. Fechado é "comando". Fio partido parece botão solto, e nada acontece.
+- **Fotocélula** (`FOTO`): a CD-1 espera um contato **NF**. Feixe livre, contato fechado, pino baixo. Pessoa no feixe ou fio partido deixam o pino alto, e as duas coisas são lidas como "tem alguém ali". Assim, um cabo partido, o defeito mais comum, faz a central se recusar a fechar, e não fechar sobre alguém. Um curto entre os dois fios, ao contrário, pareceria feixe livre: é por isso que algumas centrais testam a fotocélula.
+
+As entradas analógicas medem tensão: os <Term id="trimpot">trimpots</Term> `PAUSA` e `FORÇA` (de 0 a 5 V) e o **sensor de corrente** do motor, que entrega 0,5 V para cada ampère. Os LEDs `FCA`, `FCF` e `FOTO` ficam no próprio circuito das entradas e mostram o estado do contato, o que ajuda muito no diagnóstico. As aulas <a href={lessonUrl('m16-portao/04-fim-de-curso-e-sensores')}>16.4</a> e <a href={lessonUrl('m16-portao/05-seguranca-e-acessorios')}>16.5</a> detalham essas entradas.
+
+O **receptor** de 433,92 MHz recebe o sinal do controle e entrega ao microcontrolador o código de cada aperto. A antena é um fio de cerca de 17 cm. Não corte, não enrole e não encoste esse fio em metal. Cadastro de controles, code learning e rolling code ficam para a aula <a href={lessonUrl('m16-portao/06-controle-remoto-e-receptor')}>16.6</a>.
+
+## Relés e TRIAC: quem escolhe o sentido e quem dá a força
+
+<PlacaCD1
+  destaque={['potencia', 'motor']}
+  caption="Figura 4. A parte de potência: o TRIAC no dissipador, os relés K1 (abre) e K2 (fecha) e os bornes do motor e do capacitor."
+/>
+
+A fase passa pelo fusível e chega ao TRIAC. Do TRIAC, ela vai a dois relés: o K1 leva a fase ao borne `ABRE`, e o K2, ao borne `FECHA`. O neutro vai direto ao `COM`. Os bornes `CAP` são ligados por dentro a `ABRE` e `FECHA`. É o esquema que você viu na aula <a href={lessonUrl('m16-portao/02-o-motor-do-portao')}>16.2</a>.
+
+Cada peça tem uma tarefa:
+
+- **Os relés escolhem o sentido.** K1 fechado, o portão abre. K2 fechado, o portão fecha.
+- **O TRIAC liga, desliga e dosa a força.** Ele faz a partida suave e limita a força do motor.
+
+### K1 e K2 nunca juntos
+
+Com os dois relés fechados, a fase chegaria a `ABRE` e a `FECHA` ao mesmo tempo. Os dois terminais do capacitor ficariam ligados no mesmo ponto: o capacitor entraria em curto pelos contatos, com faísca. E os dois enrolamentos receberiam a mesma corrente, sem defasagem: o campo não giraria, e o motor só zumbiria e esquentaria. O programa da CD-1 nunca liga os dois.
+
+Para inverter o sentido, a central desliga um relé e espera **300 ms** com os dois desligados antes de ligar o outro. Esse **tempo morto** garante que o contato do primeiro abriu de vez e dá ao motor um instante para perder velocidade antes do comando contrário.
+
+### Os relés não cortam corrente
+
+A CD-1 tem mais um cuidado: os relés só mudam de posição sem corrente. Para ligar, o relé fecha primeiro e, 50 ms depois, o TRIAC começa a conduzir. Para desligar, o TRIAC para primeiro e, 50 ms depois, o relé abre. Quem liga e corta a corrente do motor é sempre o TRIAC. O contato do relé não faz faísca e dura muito mais. E se o TRIAC queimar em curto, o motor continua parado enquanto nenhum relé fechar.
+
+### Controle de fase: a força do motor
+
+O TRIAC é uma chave eletrônica para corrente alternada. Um pulso no terminal de disparo (o gate) faz ele conduzir, e ele continua conduzindo até a corrente passar por zero, no fim de cada meio ciclo. Então ele desliga sozinho e espera o próximo pulso.
+
+Se o pulso vem logo no começo de cada meio ciclo, o motor recebe quase toda a tensão. Se vem mais tarde, o motor recebe só o pedaço final. Isso é o **controle de fase**, o mesmo princípio do dimmer de lâmpada (<LinkAula id="m09-semicondutores/09-tiristores-e-isolamento">aula 9.9</LinkAula>).
+
+<ControleDeFase caption="Figura 5. Controle de fase. À esquerda, o começo da partida suave: o TRIAC conduz só os 30 % finais de cada meio ciclo. À direita, com o trimpot FORÇA no meio: 70 %." />
+
+A CD-1 usa o controle de fase de dois jeitos:
+
+- **Partida suave.** O motor começa com 30 % de cada meio ciclo, e o TRIAC vai aumentando até o nível da força em 1 s. O portão sai sem tranco, e o redutor agradece.
+- **Força.** O trimpot `FORÇA` escolhe o nível de trabalho, de 40 % (mínimo) a 100 % (máximo). No meio, 70 %. Força menor deixa o portão mais seguro e o motor mais "sensível" a obstáculos. Os manuais chamam esse ajuste de <Term id="embreagem-eletronica">embreagem eletrônica</Term>.
+
+Há centrais com dois TRIACs, um por sentido, e centrais só com relés, sem controle de força. A combinação da CD-1 é a mais comum nas centrais nacionais.
+
+## Saídas, LEDs e ajustes
+
+<PlacaCD1
+  destaque={['saidas', 'leds', 'ajustes']}
+  caption="Figura 6. Saídas, sinais e ajustes: bornes da trava e da luz auxiliar, LEDs, buzzer, botão PROG, jumpers J1 e J2, chave DIP e trimpots PAUSA e FORÇA."
+/>
+
+- **Trava** (`TRAVA+` e `TRAVA−`): 12 V para uma fechadura eletromagnética, num pulso de 1 s no começo da abertura, quando o portão sai de fechado.
+- **Luz auxiliar** (`AUX NA` e `AUX C`): um contato seco de relé, ou seja, um contato que só fecha o circuito, sem tensão própria. A luz de garagem tem a alimentação dela, e o contato faz o papel do interruptor. Fecha durante o movimento e, com a DIP LUZ ligada, por mais 60 s. Com uma lâmpada de 127 V ou 220 V, esses dois bornes passam a ter tensão da rede, mesmo estando na borda de baixa tensão.
+- **LEDs**: `REDE` (placa energizada), `FCA`, `FCF` e `FOTO` (estado dos contatos) e `PROG` (cadastro e erros).
+- **Buzzer**: apita para avisar erro e para confirmar que os controles foram apagados.
+
+Os ajustes, em resumo (os detalhes ficam para as aulas 16.5, 16.6 e 16.8):
+
+| Item | Na placa | O que faz |
+|------|----------|-----------|
+| Jumper | `J1 FOTO` | Colocado, a central ignora a fotocélula. Veja o aviso abaixo |
+| Jumper | `J2 AUT` | Colocado, liga o fechamento automático, com o tempo do trimpot PAUSA |
+| DIP 1 | `INV` | Inverte o sentido pelo programa, no lugar de trocar os fios ABRE e FECHA |
+| DIP 2 | `LUZ` | Luz de garagem durante o movimento e mais 60 s, ou só durante o movimento |
+| Trimpot | `PAUSA` | De 0 a 120 s de espera antes de fechar sozinho; no mínimo, desliga o fechamento automático |
+| Trimpot | `FORÇA` | Nível do TRIAC: força do motor e sensibilidade a obstáculos |
+| Botão | `PROG` | Um toque: cadastra um controle. Segurado por 10 s: apaga todos |
+
+<Callout type="perigo" title="O jumper J1 FOTO deixa a central cega">
+Com o J1 colocado, a central lê a fotocélula sempre como "feixe livre" e fecha o portão sobre quem estiver na passagem. Ele representa um atalho: fazer a central funcionar sem fotocélula. Os manuais de central consultados para o curso chamam a fotocélula de obrigatória, e nenhum deles prevê um jumper para dispensá-la. A CD-1 tem o J1 para você entender o que esse atalho faz e reconhecê-lo numa instalação, não para usar. A <LinkAula id="m16-portao/05-seguranca-e-acessorios">aula 16.5</LinkAula> mostra por quê.
+</Callout>
+
+## Os bornes da CD-1
+
+| Grupo | Na placa | Liga em | Observação |
+|-------|----------|---------|------------|
+| Rede | `F` `N` `⏚` | Fase, neutro e terra vindos do disjuntor | Em 220 V entre fases, `N` recebe a segunda fase |
+| Motor | `COM` `ABRE` `FECHA` | Fio comum e os dois enrolamentos | Trocar ABRE e FECHA inverte o sentido |
+| Capacitor | `CAP` `CAP` | Os dois terminais do capacitor | Na placa, ligados por dentro a ABRE e FECHA |
+| Fonte auxiliar | `+12V` `GND` | Alimentação da fotocélula | Máximo de 300 mA |
+| Fotocélula | `FOTO` | Saída do receptor da fotocélula | Espera contato NF (feixe livre, fechado para o GND) |
+| Botoeira | `BOT` `GND` | Botão pulsador NA | |
+| Fim de curso | conector de 3 vias `FCA` `GND` `FCF` | Sensor reed | Ímã perto, contato fechado |
+| Trava | `TRAVA+` `TRAVA−` | Fechadura eletromagnética de 12 V | Pulso no início da abertura |
+| Auxiliar | `AUX NA` `AUX C` | Luz de garagem | Contato seco |
+
+## O programa: uma máquina de estados
+
+O programa da central não é uma lista de passos que roda do começo ao fim. É uma **máquina de estados** (<LinkAula id="m12-microcontroladores/02-maquinas-de-estado">aula 12.2</LinkAula>): a central está sempre em um de seis estados e, a cada evento, decide para qual estado vai e o que faz. "Comando" quer dizer um toque na botoeira ou um aperto de controle cadastrado.
+
+| Estado | Evento | Próximo estado | Ação |
+|--------|--------|----------------|------|
+| FECHADO | comando | ABRINDO | pulso na TRAVA, liga AUX |
+| ABRINDO | FCA ativo | ABERTO | desliga o motor; começa a PAUSA, se J2 estiver colocado |
+| ABRINDO | comando | PARADO | lembra o último sentido |
+| ABRINDO | força acima do limite | PARADO | recua 0,5 s |
+| ABERTO | comando, ou PAUSA acabou com o feixe livre | FECHANDO | |
+| FECHANDO | FCF ativo | FECHADO | desliga o motor |
+| FECHANDO | comando | ABRINDO | tempo morto de 300 ms |
+| FECHANDO | feixe interrompido (e J1 ausente) | ABRINDO | tempo morto de 300 ms |
+| FECHANDO | força acima do limite | ABRINDO | tempo morto de 300 ms |
+| PARADO | comando | sentido oposto ao último | |
+| qualquer movimento | 40 s sem fim de curso | ERRO | desliga o motor, LED PROG pisca, buzzer |
+| ligada sem saber a posição | primeiro comando | ABRINDO | |
+
+Em palavras: fechado, um comando abre. Abrindo, o FCA para o motor. Aberto, um comando fecha; com o J2, o portão fecha sozinho ao fim da pausa, mas só com o feixe livre (alguém parado no feixe faz a contagem recomeçar). Fechando, o FCF para o motor.
+
+As exceções contam a história da segurança. Um comando durante a abertura **para** o portão; o seguinte vai no sentido oposto. Durante o fechamento, qualquer sinal de problema (comando, feixe cortado, força alta) faz o portão **voltar a abrir**. Se a central é ligada com o portão no meio do caminho, ela não sabe onde ele está, e o primeiro comando abre. Depois de um erro, também.
+
+O programa da CD-1 é uma função: recebe o estado, as entradas e o tempo, e devolve o próximo estado e as saídas. Assim ele é testado sem placa, e os testes do curso conferem a cada passo que K1 e K2 nunca ficam ligados juntos.
+
+## Como a central percebe um obstáculo
+
+A central não tem sensor de toque no portão. Ela "sente" o obstáculo pela **corrente do motor**. Quando o portão encosta em algo, o rotor freia, e um motor de indução freado puxa muito mais corrente (você viu o porquê no aprofundamento da <LinkAula id="m16-portao/02-o-motor-do-portao">aula 16.2</LinkAula>).
+
+A CD-1 faz assim:
+
+1. Depois da partida suave, ela mede a corrente por 0,5 s e guarda essa média como **corrente normal**.
+2. Enquanto o portão anda, ela compara a corrente com um **limite**: a corrente normal vezes um fator. O fator vai de 1,25 (FORÇA no mínimo) a 2,25 (FORÇA no máximo).
+3. Se a corrente passa do limite por mais de 0,25 s, é obstáculo. Fechando, o portão volta a abrir. Abrindo, ele para e recua 0,5 s.
+
+Repare na troca: com a FORÇA alta, o motor empurra mais e o limite fica mais alto, então o portão bate com mais força antes de voltar. Por isso a regra de ajuste é usar a menor força que move o portão com folga (aula <a href={lessonUrl('m16-portao/08-ajustes-e-testes')}>16.8</a>).
+
+## O limite de 40 s
+
+Se o motor fica 40 s ligado sem chegar a um fim de curso, a CD-1 desliga tudo e entra em **ERRO**: LED PROG piscando e buzzer. Um portão de 4 m leva uns 17 s, então 40 s é mais que o dobro. Se passou disso, algo está errado: um ímã caiu, o reed queimou, o conector do fim de curso está solto ou o motor só zumbe. Sem esse limite, um motor que só zumbe, ou um portão desbloqueado, ficaria com o motor ligado até o protetor térmico desligar. Outras centrais usam outros tempos: nos manuais consultados aparecem 40 s, 60 s, 90 s e até "4 vezes o percurso aprendido".
+
+## Explore: relés, TRIAC e corrente
+
+<CentralVirtual client:visible />
+
+Deixe a **Velocidade** em 1× para ver os detalhes. Fique de olho nas linhas **Motor** e **Corrente**.
+
+1. Aperte **Controle remoto**. Repare que o relé liga um instante antes do TRIAC: por um momento aparece "relé K1 ligado", sem TRIAC. Logo depois o TRIAC aparece com cerca de 30 % e sobe até 70 % em 1 s: é a partida suave. A corrente chega perto de 2,7 A na partida e assenta em cerca de 1,4 A.
+2. Com o portão no meio, aperte **Botoeira**. A linha Motor mostra "relés desligados". Aperte de novo: "relé K2 ligado", e o portão fecha.
+3. Durante o fechamento, aperte o controle. Por um instante aparece "relés desligados" (os 300 ms de tempo morto). Depois vem "relé K1 ligado" e uma nova rampa do TRIAC.
+4. Abra o portão, ligue **Obstáculo no caminho do portão** e deixe-o fechar. Quando ele encosta, a corrente passa de 4 A e, um quarto de segundo depois, o portão volta a abrir. Leia o registro "O que a central fez".
+5. Leve o trimpot **FORÇA** ao máximo (TRIAC 100 %) e repita o passo 4. Desta vez a corrente chega perto de 7 A antes de o portão voltar.
+
+No passo 5 aparece a troca da seção anterior: mais força, limite mais alto, batida mais forte antes de reverter.
+
+## Exemplo resolvido: o trimpot FORÇA no meio
+
+O trimpot `FORÇA` está no meio do curso (posição 0,5, numa escala de 0 a 1). O que a central faz com isso?
+
+**Passo 1: o nível do TRIAC.** A CD-1 vai de 40 % a 100 %:
+
+$$
+n = 0{,}4 + 0{,}6 \times p = 0{,}4 + 0{,}6 \times 0{,}5 = 0{,}7
+$$
+
+em que $n$ é a fração de cada meio ciclo em que o TRIAC conduz e $p$ é a posição do trimpot. São 70 %.
+
+**Passo 2: quando o TRIAC dispara.** Em 60 Hz, cada meio ciclo dura $1/120\,\text{s} \approx 8{,}33\,\text{ms}$. O TRIAC espera os 30 % iniciais:
+
+$$
+t_d = (1 - n) \times 8{,}33\,\text{ms} = 0{,}3 \times 8{,}33\,\text{ms} = 2{,}5\,\text{ms}
+$$
+
+Ou seja, 2,5 ms depois de cada passagem por zero, o que equivale a um ângulo de disparo de $0{,}3 \times 180^\circ = 54^\circ$ (a Figura 5, à direita).
+
+**Passo 3: a força.** No modelo da central virtual, a força do motor cresce com o quadrado do nível: $0{,}7^2 \approx 0{,}49$. Com a FORÇA no meio, o motor empurra com cerca de metade da força máxima.
+
+**Passo 4: o limite de obstáculo.** O fator vai de 1,25 a 2,25:
+
+$$
+k = 1{,}25 + (2{,}25 - 1{,}25) \times 0{,}5 = 1{,}75 \qquad I_\text{lim} = k \times I_\text{normal} = 1{,}75 \times 1{,}43\,\text{A} \approx 2{,}5\,\text{A}
+$$
+
+em que $k$ é o fator e $I_\text{normal}$ a corrente que a central mediu depois da partida. Na central virtual, com o portão andando a 1,43 A, acima de 2,5 A por 0,25 s é obstáculo.
+
+**Um bônus: o tamanho da antena.** O comprimento de onda é a velocidade da luz dividida pela frequência:
+
+$$
+\lambda = \frac{c}{f} = \frac{300.000.000\,\text{m/s}}{433.920.000\,\text{Hz}} \approx 0{,}691\,\text{m}
+$$
+
+Um quarto disso dá 17,3 cm. É por isso que a antena de fio da central tem uns 17 cm, e os manuais consultados indicam de 16 a 17 cm.
+
+<RealCase title="Da CD-1 para uma central de verdade">
+Os blocos da CD-1 aparecem em quase toda central de motor com capacitor, mas nomes e ajustes mudam. Exemplos dos manuais lidos para o curso:
+
+- **Bornes do motor**: `C`, `A`, `F` na Intelbras CP-1000 (onde a letra `F` aparece também para a fase da rede, em outro borne); `CM`, `AB`, `FC` na Omegasat CT30A; `COMUM`, `ABRE`, `FECHA` na Nice Pro S10.
+- **Ajustes**: a Omegasat CT30A tem trimpots de pausa, força e desaceleração. A Intelbras CP-1000 não tem trimpot: tudo é ajustado num menu com teclas e LEDs, e no menu de força dela o valor menor dá **mais** força, o contrário do que se espera.
+- **Fotocélula**: a maioria das centrais lidas espera um contato NA, e não NF como a CD-1. A Rossi, com o modo Fail Safe ligado, exige NF e testa a fotocélula.
+- **Tempo máximo**: 40 s na Omegasat CT30A, como na CD-1, mas 90 s na Nice Pro S10.
+
+O método não muda: ache o lado da rede, os relés, o TRIAC (quando houver), a fonte, as entradas e os ajustes, e confira no manual da sua central. A <LinkAula id="m16-portao/10-do-generico-para-a-sua-central">aula 16.10</LinkAula> traz a tabela completa.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Achar que LED REDE apagado é placa sem tensão.** Com o fusível queimado, o LED apaga, mas `F` e `N` continuam energizados. Só a medição com o disjuntor desligado confirma.
+- **Testar só a fase em 220 V entre fases.** Ali o borne `N` também tem tensão. Meça entre `F` e `N` e entre cada um deles e o terra.
+- **Encostar no dissipador do TRIAC.** Em muitos TRIACs, a parte metálica é ligada a um dos terminais de força. Trate o dissipador como parte da rede.
+- **Trocar o fusível por um maior, ou por um fio.** Se ele queima de novo, procure a causa: capacitor em curto, comum ligado errado, motor com defeito.
+- **Pendurar acessórios demais no `+12V`.** Na CD-1, o máximo é 300 mA.
+- **Colocar o J1 FOTO para "fazer o portão fechar".** O problema continua (fotocélula desalinhada, cabo partido) e a central fica cega.
+- **Confiar só na detecção por corrente.** Ela só percebe depois que o portão já encostou, e na CD-1 só depois da partida suave. A fotocélula é quem evita o toque.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Na CD-1, qual é a tarefa dos relés K1 e K2?',
+      options: [
+        { text: 'Escolher o sentido do motor: K1 abre, K2 fecha', correct: true },
+        {
+          text: 'Limitar a força do motor',
+          feedback: 'Quem dosa a força é o TRIAC, pelo controle de fase. Os relés só escolhem o sentido.',
+        },
+        {
+          text: 'Transformar a rede em 12 V',
+          feedback: 'Isso é trabalho da fonte chaveada.',
+        },
+        {
+          text: 'Ligar os dois juntos, para dobrar a força',
+          feedback: 'K1 e K2 nunca ficam ligados juntos. Com os dois, o capacitor entra em curto e o motor só zumbe.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'O que aconteceria se K1 e K2 fechassem ao mesmo tempo?',
+      options: [
+        {
+          text: 'O capacitor ficaria em curto pelos contatos e o motor, sem campo girante, só zumbiria',
+          correct: true,
+        },
+        {
+          text: 'O portão andaria com o dobro da velocidade',
+          feedback: 'Com a fase nos dois enrolamentos, não há defasagem entre as correntes e o campo não gira.',
+        },
+        {
+          text: 'Nada, porque o TRIAC escolhe o sentido',
+          feedback: 'O TRIAC não escolhe o sentido. Com os dois relés fechados, a fase chega a ABRE e a FECHA juntos.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Na CD-1, o nível do TRIAC é 0,4 + 0,6 × (posição do trimpot FORÇA). Com o trimpot em 0,25, qual é o nível, em porcentagem?',
+      answer: 55,
+      tolerance: 0.01,
+      unit: '%',
+      explanation: '0,4 + 0,6 × 0,25 = 0,4 + 0,15 = 0,55, ou seja, 55 % de cada meio ciclo.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Qual o comprimento de um quarto de onda em 433,92 MHz, em centímetros? Use c = 300.000.000 m/s.',
+      answer: 17.3,
+      tolerance: 0.02,
+      unit: 'cm',
+      explanation: 'λ = c/f ≈ 0,691 m. Um quarto: 0,173 m, ou 17,3 cm.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Com o fusível da central queimado e o LED REDE apagado, os bornes F e N estão sem tensão.',
+      answer: false,
+      explanation:
+        'O fusível fica depois dos bornes. Com ele aberto, a placa apaga, mas F e N continuam ligados à rede. Só a medição com o disjuntor desligado confirma.',
+    },
+    {
+      type: 'ordenar',
+      prompt:
+        'O portão está fechando e você aperta o controle. Coloque na ordem o que a CD-1 faz até o portão voltar a abrir.',
+      items: [
+        'O TRIAC para de conduzir',
+        'O relé K2 abre, sem corrente',
+        'Os dois relés ficam desligados por 300 ms',
+        'O relé K1 fecha',
+        'O TRIAC parte de 30 % e sobe até o nível da FORÇA',
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'O portão está fechando, o J1 está retirado e uma pessoa entra no feixe da fotocélula. O que a central faz?',
+      options: [
+        { text: 'Volta a abrir o portão', correct: true },
+        {
+          text: 'Para o portão onde está',
+          feedback:
+            'Na CD-1, o feixe cortado durante o fechamento leva ao estado ABRINDO, depois do tempo morto.',
+        },
+        {
+          text: 'Continua fechando, porque a corrente ainda está normal',
+          feedback:
+            'A fotocélula age antes de qualquer toque. Com o J1 retirado, feixe cortado durante o fechamento faz o portão reabrir.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que a corrente do motor sobe quando o portão encosta num obstáculo?',
+      options: [
+        {
+          text: 'O rotor freia e o motor de indução freado puxa muito mais corrente',
+          correct: true,
+        },
+        {
+          text: 'A central aumenta o TRIAC para vencer o obstáculo',
+          feedback:
+            'O nível do TRIAC continua o da FORÇA. É o motor que, freado, puxa mais corrente.',
+        },
+        {
+          text: 'O capacitor descarrega no motor',
+          feedback: 'O capacitor continua no circuito do mesmo jeito. A subida vem do rotor que perde velocidade.',
+        },
+      ],
+      explanation:
+        'Freado, o motor deixa de transformar energia em trabalho no eixo; a impedância cai e a corrente sobe. A CD-1 compara essa corrente com a que mediu depois da partida.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- A central tem um lado da rede (fusível, TRIAC, relés, bornes de força) e um lado de baixa tensão (microcontrolador, receptor, entradas, LEDs, ajustes). A fonte chaveada de 90 a 240 V para 12 V faz a ponte e isola os dois.
+- Os relés K1 e K2 escolhem o sentido, nunca juntos, com 300 ms de tempo morto ao inverter. O TRIAC liga, desliga e dosa a força por controle de fase, com partida suave.
+- As entradas usam pull-up: contato fechado para o GND é nível baixo. A fotocélula NF faz um fio partido ser lido como "tem alguém ali".
+- O programa é uma máquina de estados de seis estados. Fechando, qualquer problema faz o portão voltar a abrir.
+- A central percebe obstáculo pela subida da corrente do motor, e a FORÇA alta deixa essa detecção menos sensível. 40 s sem fim de curso levam ao ERRO.
+- LED REDE apagado não prova ausência de tensão: meça com o disjuntor desligado.

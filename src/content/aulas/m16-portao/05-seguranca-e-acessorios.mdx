@@ -1,0 +1,314 @@
+---
+titulo: Segurança e acessórios
+modulo: m16-portao
+ordem: 5
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Explicar como a fotocélula protege o fechamento e por que o contato NF é mais seguro que o NA
+  - Explicar o que o jumper J1 FOTO faz e por que ele não deve ser usado
+  - Calcular o limite de corrente da reversão por obstáculo a partir do ajuste de FORÇA
+  - Ligar botoeira, trava eletromagnética, sinaleira e luz de garagem nos bornes certos
+  - Testar a fotocélula e a reversão sem se colocar no caminho do portão
+prerequisitos:
+  - m04-passivos/07-chaves-botoes-e-reles
+  - m12-microcontroladores/03-sensores
+  - m14-placas/04-jumpers-e-dip-switches
+  - m16-portao/04-fim-de-curso-e-sensores
+tags: [portão, fotocélula, segurança, contato NA, contato NF, jumper, reversão, botoeira, trava, luz de garagem]
+seguranca: rede
+---
+
+import { lessonUrl } from '../../../lib/url';
+import CentralVirtual from '../../../lessons/m16/ui/CentralVirtual';
+import PlacaCD1 from '../../../lessons/m16/figuras/PlacaCD1.astro';
+import PhotocellPosts from '../../../lessons/m16/figuras/PhotocellPosts.astro';
+
+Um carro está saindo da garagem e o portão começa a fechar antes da hora. O motorista freia, mas não precisa: o portão para e volta a abrir antes de encostar. Quem fez isso foi um par de caixinhas presas nos pilares, a fotocélula. Ela é o dispositivo de segurança mais importante do portão e, justamente por ser invisível quando funciona, é o que mais gente instala errado ou nem instala.
+
+Nesta aula você vai ver as duas proteções contra esmagamento (a fotocélula e a reversão por obstáculo) e os acessórios que a central comanda: botoeira, trava, sinaleira e luz de garagem.
+
+## A fotocélula: um feixe que você não vê
+
+A <Term id="fotocelula">fotocélula</Term> é um par de aparelhos. O **transmissor** (TX) fica num pilar e manda um feixe de luz infravermelha, invisível para o olho. O **receptor** (RX) fica no outro pilar, de frente para ele, e vigia se o feixe está chegando. Os dois recebem alimentação da central, pelos bornes `+12V` e `GND` (na CD-1, a fonte auxiliar aguenta até 300 mA).
+
+O receptor tem um pequeno relé com três contatos: `C` (comum), `NA` e `NF`. Na fotocélula, "normal" quer dizer **feixe livre**. Com o feixe livre, o contato NF está fechado e o NA está aberto. Quando alguém (ou um carro) corta o feixe, os dois trocam de estado.
+
+<PhotocellPosts caption="Figura 1. O transmissor e o receptor ficam um de frente para o outro, na linha por onde o portão passa. À direita, os contatos do receptor: com o feixe livre, C fica ligado ao NF; com o feixe interrompido, ao NA. A CD-1 liga o C no GND e o NF na entrada FOTO." />
+
+A central não precisa entender infravermelho. Ela só lê um contato, como fez com o reed na <a href={lessonUrl('m16-portao/04-fim-de-curso-e-sensores')}>aula 16.4</a>: a entrada `FOTO` tem um resistor de pull-up de 10 kΩ para 5 V, e o contato do receptor fecha esse pino para o GND.
+
+## NA ou NF: o que acontece quando o fio parte
+
+A CD-1 espera o contato **NF** do receptor. Com o feixe livre, o NF está fechado, o pino FOTO vai a 0 V e passa $I = 5\,\text{V} / 10\,\text{k}\Omega = 0{,}5\,\text{mA}$. Com o feixe interrompido, o NF abre, e o pull-up leva o pino a 5 V: a central entende "tem alguém no caminho" e não fecha o portão.
+
+A maioria das centrais reais faz o contrário: a entrada da fotocélula é **NA** na Intelbras CP-1000, na Peccinin CP 4010F, na Nice Pro S10 e na Omegasat CT30A. Aí o receptor fecha o contato quando alguém corta o feixe. Com o feixe livre, as duas ligações funcionam igual. A diferença aparece quando alguma coisa dá errado:
+
+| Situação | Entrada NF (CD-1) | Entrada NA (a maioria das centrais) |
+|---|---|---|
+| Feixe livre | Contato fechado: "livre" | Contato aberto: "livre" |
+| Pessoa no feixe | Contato aberto: "alguém", não fecha | Contato fechado: "alguém", não fecha |
+| Fio partido ou borne solto | Contato aberto: "alguém". O portão não fecha, e você percebe | Contato aberto: "livre". O portão fecha sem proteção, e ninguém percebe |
+| Nada ligado na entrada | "Alguém": o portão não fecha | "Livre": o portão funciona como se tivesse fotocélula |
+
+Com NF, uma falha na fiação deixa o portão **parado aberto**, que é incômodo, mas seguro. Com NA, a mesma falha deixa o portão **funcionando sem proteção**, e o defeito só aparece no dia em que alguém precisar dela. Num dispositivo de segurança, o que você quer é que a falha leve ao estado seguro. É por isso que a CD-1 usa NF, de propósito.
+
+Compare com o fim de curso da aula passada: lá, um fio partido parece "ímã longe", e a central não percebe a falha sozinha. Na fotocélula NF, o fio partido parece "alguém no caminho". Isso é o que se espera de um dispositivo de segurança.
+
+<Simulation circuit="m16/fotocelula-nf" />
+
+Na simulação, o feixe começa livre e o pino FOTO está em 0 V. Faça três testes, voltando ao normal depois de cada um:
+
+1. Ligue **Pessoa no feixe**. O contato NF abre e o pino vai a 5 V.
+2. Com o feixe livre, desligue **Cabo da fotocélula inteiro**, como se o fio tivesse partido. O pino também vai a 5 V: a central não distingue o fio partido de uma pessoa, e trata os dois como "alguém no caminho".
+3. Ligue **Jumper J1 colocado** e, em seguida, **Pessoa no feixe**. O pino fica em 0 V. A corrente de 0,5 mA passa pelo jumper, e a central não vê a pessoa.
+
+## A fotocélula que se testa
+
+Uma fotocélula pode falhar de um jeito que nem o NF percebe: o relé do receptor pode grudar fechado, ou alguém pode ter ligado um fio direto na entrada. Algumas centrais vão além e **testam** a fotocélula.
+
+A Rossi KXH1024FS tem a função *Fail Safe* (DIP 6 ligado). Com ela, o manual exige a fotocélula em **NF** e diz que a central testa o sensor. O transmissor recebe o negativo por um borne próprio da central, `TX(−)`. Pela forma da ligação, dá para entender como um teste desses funciona (essa explicação é nossa; o manual não descreve o passo a passo): a central corta a alimentação do transmissor por um instante e confere se o contato do receptor muda. Se não mudar, alguma coisa está errada, e o portão não opera. A tabela de defeitos do manual traz exatamente esse caso: função FS habilitada e fotocélula não instalada corretamente.
+
+Outras centrais usam ideias parecidas. A Garen Wave Connect aceita, pelo jumper JP1, uma fotocélula do tipo PWM, e a PPA Triflex Full Range aceita fotocélula NA, NF, resistiva ou pulsante. Num sinal que pulsa o tempo todo, um fio partido ou um contato grudado para de pulsar, e a central consegue perceber.
+
+## O que os manuais dizem
+
+Os manuais lidos para este curso são claros:
+
+- Intelbras (manual do motor deslizante): "É obrigatório a instalação e uso de fotocélula (anti-aprisionamento) para evitar acidentes de colisão com pessoas."
+- Peccinin CP 4010F e Omegasat CT30A: "O uso de fotocélula como dispositivo de segurança é obrigatório!" A Nice Pro S10 também declara a fotocélula obrigatória.
+- Garen TSi Pro: "É obrigatório o uso de fotocélula de segurança." O manual do motor Garen KDZ diz o mesmo do sensor anti-esmagamento.
+- PPA Triflex Full Range: "é obrigatório o uso de Fotocélulas nos automatizadores".
+- Rossi: "É obrigatório o uso do sensor infravermelho Ativo - SIA 30 FS".
+
+Só os manuais técnicos de três motores da PPA (DZ Stark, DZ Hub e DZ Home) chamam a fotocélula de "opcional". **Nenhum manual descreve um jumper para dispensar a fotocélula.**
+
+Mas repare na tabela de NA e NF. Numa central com entrada NA, sem nada ligado, a entrada lê "feixe livre", e o portão funciona normalmente. Os manuais não dizem isso com essas palavras; é uma consequência de como a entrada NA funciona. E é assim que muita gente acaba instalando o portão sem fotocélula: a central não reclama, o portão abre e fecha, e a única proteção que sobra é a reversão por obstáculo, que só age **depois** que o portão já encostou em alguém.
+
+## O jumper J1 FOTO da CD-1
+
+A CD-1 tem um <Term id="jumper">jumper</Term> chamado `J1 FOTO`. Com ele **colocado**, a central ignora a entrada da fotocélula. Ele existe na placa do curso para representar esse "atalho": fazer a central funcionar sem fotocélula. Não é um item comum das centrais atuais: nas de entrada NA, o "atalho" é deixar os bornes sem nada ligado.
+
+<PlacaCD1
+  destaque={['entradas', 'ajustes']}
+  caption="Figura 2. Na CD-1, a fotocélula entra pelos bornes +12V, GND e FOTO, e o jumper J1 FOTO fica ao lado do J2 AUT."
+/>
+
+Por que não usar:
+
+- **A central fica cega.** Com J1, ela fecha o portão por cima de quem estiver no feixe. A simulação acima mostrou: o pino fica em 0 V com a pessoa lá.
+- **O LED engana.** O LED FOTO continua mostrando o contato do receptor. Ele apaga quando alguém corta o feixe, e quem olha acha que a fotocélula está protegendo. Não está.
+- **Os manuais exigem a fotocélula.** Um portão deslizante residencial pesa centenas de quilos (os motores dos manuais lidos são para portões de 300 kg a 1.000 kg, ou mais) e anda a uns 15 m/min.
+
+Se a fotocélula está com defeito, a solução é consertar, alinhar ou trocar. Enquanto isso, o portão fica sem fechamento automático, e não com a segurança desligada.
+
+## Reversão por obstáculo
+
+A fotocélula vigia uma linha, numa altura. Uma criança abaixada, a roda de uma bicicleta ou uma mão no vão perto do pilar podem ficar fora do feixe. A segunda proteção é a **reversão por obstáculo**: quando o portão encosta em alguma coisa, o motor faz mais força, e a corrente sobe.
+
+A CD-1 tem um sensor de corrente no fio comum do motor. No começo de cada movimento, depois da partida suave, ela aprende a corrente normal de trabalho, $I_\text{trab}$, durante meio segundo. A partir daí, se a corrente passar de um limite por mais de 0,25 s, é obstáculo:
+
+$$
+I_\text{lim} = k \cdot I_\text{trab}, \qquad k = 1{,}25 + 1{,}0 \cdot f
+$$
+
+em que $I_\text{lim}$ é o limite de corrente (em ampères), $k$ é um fator sem unidade e $f$ é a posição do <Term id="trimpot">trimpot</Term> FORÇA, de 0 (mínimo) a 1 (máximo). O mesmo trimpot ajusta quanto o <Term id="triac">TRIAC</Term> conduz: de 40 % no mínimo a 100 % no máximo (70 % no meio). Esses números são da CD-1; cada central real tem o seu jeito.
+
+O que a central faz depois depende do sentido:
+
+- **Fechando:** desliga, espera o tempo morto de 300 ms entre os relés e **reverte**, abrindo o portão.
+- **Abrindo:** **para** e recua 0,5 s, só para aliviar o aperto. Reverter, nesse caso, seria fechar o portão em direção ao vão, onde estão as pessoas e os carros.
+
+Repare na contrapartida do trimpot: mais FORÇA dá mais força ao motor **e** deixa a central menos sensível, porque o limite sobe. O ajuste certo é o mínimo que move o portão com folga em todo o percurso (a <a href={lessonUrl('m16-portao/08-ajustes-e-testes')}>aula 16.8</a> mostra como fazer). Nas centrais reais, esse ajuste se chama <Term id="embreagem-eletronica">embreagem eletrônica</Term>: o manual da Peccinin pede que o motor "não tenha torque suficiente para causar lesões sérias à uma pessoa em contato com o portão", e os manuais da Peccinin e da PPA mandam conferir a força tentando segurar o portão.
+
+Muitos motores têm também uma **embreagem mecânica**, que patina quando o esforço passa do ajustado. O manual dos deslizantes Nice (Peccinin) a descreve como item de segurança, ajustada ao peso do portão. Ela não substitui a eletrônica nem a fotocélula: é mais uma camada.
+
+## Explore: teste a segurança na central virtual
+
+A central virtual abaixo começa com o portão fechado, o fechamento automático ligado (pausa de 30 s) e o FORÇA no meio. O LED FOTO aceso quer dizer feixe livre.
+
+<CentralVirtual
+  client:visible
+  titulo="Central virtual: segurança"
+  mostrar={['comandos', 'seguranca', 'ajustes']}
+/>
+
+1. **Fotocélula no fechamento.** Aperte **Controle remoto** e espere o portão abrir (use 5× se quiser). Aperte de novo para fechar. No meio do fechamento, marque **Pessoa no feixe da fotocélula**. O LED FOTO apaga e o portão volta a abrir. Leia a mensagem no registro.
+2. **Pessoa parada no feixe.** Deixe a pessoa lá, com o portão aberto. Repare no campo "Fecha sozinho em": ele não anda. Desmarque a pessoa: a contagem recomeça do início, e o portão fecha quando ela acaba.
+3. **O J1.** Marque **J1 FOTO** e repita o teste 1. Agora o portão fecha por cima da pessoa. O LED FOTO apaga, mas a central não faz nada. Desmarque o J1 antes de seguir.
+4. **Obstáculo.** Com o portão aberto, marque **Obstáculo no caminho do portão** (a caixa no desenho) e mande fechar. Ponha a velocidade em 1× e olhe a **Corrente**: perto de 1,4 A com o portão andando livre, e um salto quando ele encosta na caixa. A central reverte e reabre.
+5. **Mais força.** Gire o trimpot **FORÇA** até o máximo (TRIAC 100 %) e repita o teste 4. O portão ainda reverte, mas empurra a caixa com bem mais força antes disso.
+
+Repare também nas linhas **Trava** e **Luz da garagem**. No teste 1, a trava recebe um pulso de 12 V de 1 s logo no início da abertura, e a luz fica acesa durante todo o movimento. Com a DIP **LUZ** ligada, ela continua acesa por mais 60 s depois que o portão para.
+
+## Exemplo resolvido: o limite de corrente da CD-1
+
+**Com o FORÇA no meio** ($f = 0{,}5$), o TRIAC conduz 70 % e o portão da central virtual anda com cerca de 1,43 A.
+
+$$
+k = 1{,}25 + 1{,}0 \cdot 0{,}5 = 1{,}75
+$$
+
+$$
+I_\text{lim} = 1{,}75 \cdot 1{,}43\,\text{A} \approx 2{,}5\,\text{A}
+$$
+
+Quando o portão encosta na caixa, a corrente sobe para perto de 5 A em uma fração de segundo. Passou de 2,5 A por 0,25 s: obstáculo.
+
+**Com o FORÇA no máximo** ($f = 1$), o TRIAC conduz 100 %. Com mais tensão no motor, a corrente de trabalho sobe para perto de 1,92 A.
+
+$$
+k = 1{,}25 + 1{,}0 \cdot 1 = 2{,}25 \qquad I_\text{lim} = 2{,}25 \cdot 1{,}92\,\text{A} \approx 4{,}3\,\text{A}
+$$
+
+No encosto, a corrente chega a 7 A antes de a central perceber. O limite quase dobrou, e a força do motor parado contra a caixa também. Esses são os valores que a central virtual calcula; numa central real, os números mudam, mas a lógica é a mesma: **mais força, menos sensibilidade**.
+
+## Botoeira
+
+A <Term id="botoeira">botoeira</Term> é um botão de pulso, como o de campainha: contato **NA, sem retenção**. Ela vai nos bornes `BOT` e `GND` da CD-1. Cada toque é um comando, igual a um aperto do controle: com o portão fechado, abre; abrindo, para; parado, segue no sentido contrário ao último; aberto, fecha; fechando, reabre. O botão do interfone e um botão dentro da garagem são botoeiras.
+
+Teste na central virtual acima: toque em **Botoeira** para abrir, toque de novo durante a abertura (o portão para) e uma terceira vez (o portão fecha).
+
+Use botão sem retenção. Um interruptor que fica ligado deixa a entrada sempre acionada, e a central não vê os toques seguintes. Nas centrais reais os nomes mudam: `BOT` e `GND` na Peccinin; `BotA` (abertura) e `BotF` (fechamento) na Intelbras; "tipo NA sem retenção", nas palavras do manual da Omegasat.
+
+## Trava, sinaleira e luz de garagem
+
+**Trava eletromagnética.** Segura o portão fechado. A CD-1 dá um pulso de 12 V de 1 s nos bornes `TRAVA+` e `TRAVA−` no início de cada abertura que parte do portão fechado. A partida suave do motor ajuda: o portão começa devagar enquanto a trava solta. Nas centrais reais, o tempo muda: a Peccinin dá 2 s no início da abertura, a Garen TSi Pro tem retardo de trava de 1 s ou 0,5 s, e a PPA Facility Connect espera a trava antes de ligar o motor.
+
+**Sinaleira e luz de garagem.** Na CD-1, os dois usam a saída auxiliar, um contato seco de relé (`AUX NA` e `AUX C`). "Contato seco" quer dizer que a central só fecha um contato: ela não manda tensão nenhuma. A lâmpada é alimentada pelo próprio circuito dela, que passa por esse contato. A <Term id="dip-switch">chave DIP</Term> `LUZ` escolhe o modo: desligada, a luz acende só durante o movimento; ligada, fica acesa durante o movimento e mais 60 s.
+
+Se a lâmpada for de 127 V, os fios que vão ao `AUX` levam tensão da rede, com todas as regras de segurança da rede. E o contato tem limite: o manual da Peccinin, por exemplo, informa lâmpada de até 180 W em 127 VCA no relé auxiliar dela. A Intelbras lembra que cargas externas, como sinaleira e fechadura de 12 V, precisam de fonte própria. Confira sempre a capacidade no manual da sua central.
+
+<RealCase title="O portão que abria e não fechava">
+Depois que um carro raspou no pilar, o portão de uma casa passou a abrir normalmente e a não fechar mais: nem pelo controle, nem sozinho. A dona pediu ao técnico para "tirar a fotocélula, que está dando problema".
+
+O técnico olhou primeiro a central: o LED FOTO estava apagado com o feixe livre. A central estava fazendo exatamente o que devia: sem ver o feixe, não fechava. Ele soltou o receptor, que tinha girado no suporte, alinhou de novo com o transmissor até o LED acender e apertou os parafusos. Depois testou do jeito seguro: mandou fechar e, de fora do vão, pôs uma caixa de papelão no feixe. O portão reverteu.
+
+Ele explicou à dona que o defeito era a prova de que a fotocélula estava funcionando. Se a central tivesse entrada NA e o fio tivesse partido na batida, o portão teria continuado a fechar, sem proteção, e ninguém saberia.
+</RealCase>
+
+## Erros comuns e segurança
+
+<Callout type="perigo" title="Teste com objetos, nunca com o corpo">
+Para testar a fotocélula e a reversão, fique fora do vão do portão. Corte o feixe com uma caixa e use, como obstáculo, um objeto firme apoiado no chão. Nunca ponha a mão, o pé ou uma criança no caminho. Se o portão não reverter, desligue o disjuntor e corrija antes de usar.
+</Callout>
+
+- **Fotocélula desalinhada.** O LED FOTO fica apagado com o feixe livre e o portão abre e não fecha. Alinhe o receptor até o LED acender. Sol batendo de frente no receptor em certas horas do dia também pode atrapalhar.
+- **Jumper ou fio na entrada da fotocélula.** É anular um dispositivo de segurança. Não faça, nem "só para testar".
+- **Fotocélula ligada no contato errado.** Numa central que espera NF, o contato NA deixa o portão sem fechar (parece sempre "alguém"); numa que espera NA, o NF faz o mesmo. Siga o manual da central e o da fotocélula.
+- **Fonte auxiliar sobrecarregada.** Fotocélula, receptor avulso e outros acessórios somam corrente. A CD-1 fornece até 300 mA; a Intelbras manda conferir se a fotocélula é compatível com a fonte auxiliar.
+- **FORÇA no máximo "para garantir".** O motor fica mais forte e a central, menos sensível. Ajuste para o mínimo que move o portão com folga.
+- **Mexer no AUX com o disjuntor ligado.** Se a luz de garagem é de 127 V, aqueles bornes têm tensão da rede. Desligue o disjuntor, teste a ausência de tensão e só então mexa.
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'Na CD-1, que espera a fotocélula em NF, o fio entre o receptor e o borne FOTO partiu. O que acontece?',
+      options: [
+        {
+          text: 'A central lê "alguém no caminho" e não fecha o portão',
+          correct: true,
+        },
+        {
+          text: 'O portão fecha normalmente, sem proteção',
+          feedback:
+            'Isso aconteceria numa entrada NA. No NF, o fio partido abre o contato, e o pull-up leva o pino a 5 V: "alguém no caminho".',
+        },
+        {
+          text: 'A central entra em erro pelo tempo máximo de 40 s',
+          feedback: 'O tempo máximo vigia o fim de curso. Aqui o portão nem começa a fechar.',
+        },
+        {
+          text: 'O motor zumbe sem girar',
+          feedback: 'Zumbido é sintoma de capacitor aberto. A fotocélula não mexe no motor.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Numa central com entrada NA, o portão funciona sem nada ligado na entrada da fotocélula. Isso mostra que a fotocélula é opcional.',
+      answer: false,
+      explanation:
+        'A entrada NA lê "livre" com nada ligado, então a central não reclama. Mas os manuais da Intelbras, Peccinin, Nice, Omegasat, Garen, PPA Triflex e Rossi declaram a fotocélula obrigatória.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que não se deve deixar o jumper J1 FOTO colocado?',
+      options: [
+        {
+          text: 'A central passa a ignorar a fotocélula e fecha o portão por cima de quem estiver no feixe',
+          correct: true,
+        },
+        {
+          text: 'Porque ele queima o receptor da fotocélula',
+          feedback: 'O J1 só liga a entrada FOTO ao GND. Nada queima, e é isso que o torna perigoso: tudo parece normal.',
+        },
+        {
+          text: 'Porque ele desliga o fechamento automático',
+          feedback: 'Quem liga o fechamento automático é o J2 AUT. O J1 deixa a central cega para a fotocélula.',
+        },
+        {
+          text: 'Porque o LED FOTO para de funcionar',
+          feedback: 'O LED continua mostrando o contato do receptor, e isso engana quem olha.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Na CD-1, com o FORÇA no máximo (f = 1), o portão anda com 1,92 A. Qual o limite de corrente para a central considerar obstáculo, em ampères? Use k = 1,25 + 1,0 · f.',
+      answer: 4.32,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation: 'k = 1,25 + 1,0 · 1 = 2,25; I_lim = 2,25 · 1,92 A ≈ 4,32 A.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Na CD-1, o que a central faz quando detecta um obstáculo durante a ABERTURA?',
+      options: [
+        { text: 'Para e recua 0,5 s para aliviar o aperto', correct: true },
+        {
+          text: 'Reverte e fecha o portão',
+          feedback: 'Reverter na abertura seria fechar o portão em direção ao vão, onde estão as pessoas.',
+        },
+        {
+          text: 'Ignora, porque a reversão só vale no fechamento',
+          feedback: 'A CD-1 vigia a corrente nos dois sentidos. Só a resposta muda.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt:
+        'Alguém entra no feixe durante o fechamento. Coloque na ordem o que acontece na CD-1.',
+      items: [
+        'O contato NF do receptor abre',
+        'O pull-up leva o pino FOTO a 5 V',
+        'O programa entende "feixe interrompido"',
+        'O relé de fechamento desliga e os dois relés ficam desligados 300 ms',
+        'O relé de abertura liga e o portão reabre',
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'O relé auxiliar de uma central aceita lâmpada de até 180 W em 127 V. Qual a corrente nessa lâmpada, em ampères?',
+      answer: 1.42,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation: 'I = P/V = 180 W / 127 V ≈ 1,42 A. Essa corrente passa pelo contato seco do relé.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- A fotocélula é um par TX/RX nos pilares. A central lê o contato do receptor: na CD-1, o NF, que fica fechado com o feixe livre.
+- Com contato NF, um fio partido ou nada ligado na entrada parece "alguém no caminho" e o portão não fecha. Com NA, a mesma falha deixa o portão funcionando sem proteção.
+- Os manuais declaram a fotocélula obrigatória, e nenhum descreve jumper para dispensá-la. O J1 FOTO da CD-1 existe para ser entendido e não para ser usado: ele deixa a central cega.
+- A reversão por obstáculo vigia a corrente do motor: na CD-1, $I_\text{lim} = k \cdot I_\text{trab}$, com $k$ de 1,25 a 2,25 conforme o FORÇA. Fechando, reverte; abrindo, para e recua.
+- Mais FORÇA dá mais força e menos sensibilidade. Ajuste para o mínimo que move o portão com folga e teste com objetos, nunca com o corpo.
+- Botoeira é um botão NA de pulso; a trava recebe um pulso no início da abertura; sinaleira e luz usam um contato seco, que pode estar ligado à rede.

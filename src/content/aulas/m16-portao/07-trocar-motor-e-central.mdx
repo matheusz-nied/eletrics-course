@@ -1,0 +1,344 @@
+---
+titulo: 'Prática: trocar o motor e a central'
+modulo: m16-portao
+ordem: 7
+nivel: I
+duracaoMin: 50
+objetivos:
+  - Escolher o motor e a central novos a partir dos dados do portão e do motor antigo
+  - Desligar, confirmar a ausência de tensão e descarregar o capacitor antes de mexer
+  - Registrar e soltar as ligações da central antiga sem perder nenhuma informação
+  - Ligar a central nova na ordem segura, com o terra primeiro e a rede por último
+  - Fazer o primeiro teste e corrigir o sentido do motor quando ele fecha em vez de abrir
+prerequisitos:
+  - m00-comece-aqui/02-seguranca-em-eletricidade
+  - m00-comece-aqui/03-ferramentas-essenciais
+  - m03-medicoes/02-medindo-tensao
+  - m03-medicoes/04-resistencia-continuidade-e-diodo
+  - m07-instalacoes/03-disjuntores-dr-e-dps
+  - m14-placas/06-bornes-conectores-e-emendas
+  - m16-portao/02-o-motor-do-portao
+  - m16-portao/03-a-central-por-dentro
+tags: [portão, motor, central, troca, oficina, capacitor, segurança]
+seguranca: rede
+---
+
+import { lessonUrl } from '../../../lib/url';
+import PlacaCD1 from '../../../lessons/m16/figuras/PlacaCD1.astro';
+import EmBreve from '../../../lessons/m16/ui/EmBreve.astro';
+
+O motor do portão começou a zumbir, a central já foi consertada duas vezes e o técnico disse que não compensa mexer de novo. Você decidiu trocar o conjunto: motor e central. É um serviço de meio dia, mas tem três riscos no caminho: a rede elétrica, um capacitor que pode estar carregado e um portão pesado que se move sozinho se alguém apertar o controle na hora errada.
+
+Esta aula organiza a troca para que nenhum deles pegue você de surpresa. No meio dela está o passo a passo completo em modo oficina, para seguir ao lado do portão.
+
+## Planeje antes de comprar
+
+O erro mais caro acontece antes de abrir a caixa da central: comprar o conjunto errado. Por isso o primeiro passo é anotar tudo o que o motor antigo e o portão dizem sobre si mesmos. A etiqueta do motor (aquela plaquinha colada na carcaça) traz a maior parte. O resto você mede ou olha.
+
+| O que anotar | Onde achar | Por que importa |
+|---|---|---|
+| Tensão: 127 V ou 220 V | Etiqueta do motor; tensão entre F e N na central | Motor de 127 V ligado em 220 V esquenta e queima; o contrário fica sem força |
+| Potência: 1/4, 1/3 ou 1/2 CV | Etiqueta do motor | O manual do motor novo diz o peso e o comprimento de portão que cada potência aguenta |
+| Tipo, peso e comprimento do portão | Olhar e medir; estimar o peso | Define o modelo de motor (deslizante, basculante, pivotante) e a potência |
+| Tipo de fim de curso | Ímãs presos na cremalheira indicam sensor reed | A central nova precisa aceitar esse sensor |
+| Módulo da cremalheira | Tamanho do dente; manual do motor antigo | O pinhão do motor novo precisa casar com a cremalheira que fica |
+| Capacitor | Etiqueta do capacitor: µF e VCA | Confirma o valor que o motor novo deve usar |
+
+Lembre que 127 V é a tensão que muita gente chama de "110". Em casas com 220 V entre duas fases, o borne N da central recebe a segunda fase, e o motor tem que ser de 220 V.
+
+Alguns números ajudam a reconhecer o que você está vendo. Nos manuais consultados para este curso, o capacitor de motores de portão de 127 V fica tipicamente entre 25 e 40 µF, e o de 220 V, entre 12 e 15 µF. A corrente fica tipicamente entre 2 e 5 A, e o portão anda de 13 a 23 m/min. São valores típicos: o que vale é a etiqueta do seu motor.
+
+### Central para motor com capacitor ou inversora?
+
+Existem dois tipos de central no mercado, e eles não se trocam um pelo outro.
+
+- **Central para motor com capacitor.** É a maioria das centrais residenciais e é a do curso, a CD-1. Ela tem três bornes para o motor (comum, abre e fecha, com nomes que mudam de marca para marca) e os bornes ou fios do capacitor.
+- **Central inversora.** Aciona motores de três fios U, V e W **sem capacitor** e ajusta a velocidade em hertz (Hz). A Garen TSi Pro e a PPA Triflex Full Range são exemplos. O manual da TSi Pro manda retirar o capacitor quando ela é usada com motor monofásico: ela aciona o motor de outro jeito.
+
+As letras U, V e W não bastam para saber o tipo. A central Rossi para motor com capacitor também chama os fios do motor de U, V e W. Quem diz o tipo é o manual. A aula <a href={lessonUrl('m16-portao/01-anatomia-do-automatizador')}>16.1</a> mostra os dois tipos de motor, e a aula <a href={lessonUrl('m16-portao/10-do-generico-para-a-sua-central')}>16.10</a> compara os bornes das centrais reais com os da CD-1.
+
+### O disjuntor e o terra
+
+Antes de comprar, abra o quadro e procure o <Term id="disjuntor">disjuntor</Term> do portão. O ideal é um circuito só dele, com o disjuntor identificado e um <Term id="dr">DR</Term> protegendo. Os manuais de motor da PPA pedem DR. Os manuais da Rossi e da Garen pedem que a alimentação siga a NBR 5410, a norma brasileira de instalações elétricas de baixa tensão, com disjuntor, um jeito de desligar só o automatizador (o seccionamento) e cabos adequados.
+
+Confira também se há fio de <Term id="aterramento">terra</Term> chegando à central e indo até a carcaça do motor. Sem disjuntor próprio, sem terra ou com cabos ressecados, a troca do motor fica para depois: primeiro um eletricista habilitado acerta a instalação.
+
+## A ordem segura
+
+Toda vez que você for mexer nos fios da central, a sequência é a mesma. Ela parece repetitiva, e é de propósito: cada passo cobre a falha do anterior.
+
+<Steps>
+  <Step title="Desligue o disjuntor do portão e sinalize o quadro">
+    Trave a alavanca com um cadeado, se tiver, e cole um aviso: "Não ligue: manutenção no portão". Alguém da casa pode estranhar a falta de energia e religar.
+  </Step>
+  <Step title="Teste o multímetro numa tomada energizada">
+    Na escala de tensão CA (V~), a tomada deve mostrar perto de 127 V ou 220 V. Isso prova que o <Term id="multimetro">multímetro</Term>, as pontas e o fusível dele funcionam.
+  </Step>
+  <Step title="Meça a ausência de tensão na central">
+    Meça entre F e N, entre F e o terra e entre N e o terra. Os três pares têm que dar 0 V.
+  </Step>
+  <Step title="Teste o multímetro de novo na tomada">
+    Se ele continua medindo a tomada, o zero da central era verdadeiro. Um multímetro com a ponta partida mostra 0 V em tudo, inclusive num borne energizado.
+  </Step>
+</Steps>
+
+O segundo teste na tomada é o que mais se pula, e pega o erro mais traiçoeiro: o instrumento que quebrou no meio da medição. Se a central mostrar tensão com o disjuntor desligado, pare: ou aquele não é o disjuntor do portão, ou há outra alimentação chegando.
+
+<Callout type="atencao" title="Bateria e nobreak">
+Algumas centrais têm bateria ou nobreak próprio para funcionar na falta de energia. Com eles, a placa continua energizada mesmo com o disjuntor desligado. Desconecte a bateria também, depois do disjuntor.
+</Callout>
+
+A NR-10, a norma regulamentadora de segurança em instalações e serviços em eletricidade, organiza essas mesmas ideias para quem trabalha com eletricidade por profissão: desligar, impedir que religuem, confirmar a ausência de tensão e sinalizar. O manual dos motores deslizantes da Intelbras cita a NR-10 junto com a NR-35, a de trabalho em altura. Em casa valem as mesmas ideias, e mais três: nunca trabalhar sozinho, nunca com chuva sobre a central, e chamar um eletricista habilitado quando faltar segurança.
+
+## Fotografe e etiquete antes de soltar
+
+Depois que os fios saem dos <Term id="borne">bornes</Term>, a única memória da ligação antiga é o que você registrou. Fotografe a placa inteira e, de perto, cada fileira de bornes com os nomes legíveis. Fotografe também os <Term id="jumper">jumpers</Term>, as chaves <Term id="dip-switch">DIP</Term> e a posição dos <Term id="trimpot">trimpots</Term>: eles guardam ajustes, como o tempo de pausa, que você vai querer repetir.
+
+Antes de soltar cada fio, enrole nele um pedaço de fita crepe com o nome do borne em que ele está, escrito do jeito que está na placa antiga. Isso importa porque os nomes mudam. A Intelbras chama os fios do motor de C, A e F, e a letra F aparece também no borne da fase da rede, em outro lugar da placa. A Omegasat usa CM, AB e FC; a Rossi, U, V e W. Com a etiqueta, você não depende da memória: depois só procura, no manual da central nova, qual borne corresponde a cada nome.
+
+## O capacitor pode estar carregado
+
+O <Term id="capacitor">capacitor</Term> do motor guarda carga elétrica. Enquanto ele está ligado aos <Term id="enrolamento">enrolamentos</Term>, a carga escoa por eles em uma fração de segundo depois que a rede é desligada. Mas um capacitor solto, ou com um fio desligado, não tem por onde descarregar. Ele pode ficar com a tensão do último instante, que pode chegar ao pico da rede.
+
+Em 127 V, o pico é
+
+$$
+V_\text{pico} = 127\,\text{V} \cdot \sqrt{2} \approx 180\,\text{V}
+$$
+
+É mais do que a tensão "da tomada" que as pessoas têm em mente. Por isso, antes de pegar nos terminais, você mede a tensão contínua (V⎓) entre eles e, se houver, descarrega por um resistor, nunca em curto com uma chave de fenda. O curto solta uma faísca que marca a ferramenta, pode danificar o capacitor e espirrar pedacinhos de metal.
+
+Pelo resistor, a tensão cai depressa no começo e cada vez mais devagar, numa curva exponencial:
+
+$$
+V(t) = V_0 \cdot e^{-t/\tau}, \qquad \tau = R \cdot C
+$$
+
+Aqui $V(t)$ é a tensão no capacitor (em volts) depois de $t$ segundos, $V_0$ é a tensão no início da descarga, $R$ é a resistência do resistor (em ohms), $C$ é a capacitância (em farads) e $\tau$ (a letra grega "tau") é a constante de tempo, em segundos. A cada $\tau$, a tensão cai para cerca de 37 % do que era. A corrente no primeiro instante é $I_0 = V_0 / R$, e a energia guardada é $E = \tfrac{1}{2} C V_0^2$, em joules.
+
+### Explore: descarregue o capacitor
+
+<Simulation circuit="m16/descarga-capacitor" />
+
+O capacitor da simulação é de 40 µF e ficou com 180 V. Aperte o play e feche a chave "Resistor encostado nos terminais". Observe a tensão: quanto tempo ela leva para cair de 180 V para 90 V, a metade? E para ficar abaixo de 5 V? Compare com as contas do exemplo abaixo.
+
+### Exemplo resolvido: quanto tempo o resistor precisa ficar encostado?
+
+Um motor de 127 V usa um capacitor de 40 µF, que ficou carregado com 180 V. Você vai descarregar com um resistor de 10 kΩ e 5 W.
+
+1. **Constante de tempo.** $\tau = R \cdot C = 10.000\,\Omega \cdot 0{,}000040\,\text{F} = 0{,}4\,\text{s}$.
+2. **Corrente inicial.** $I_0 = 180\,\text{V} / 10.000\,\Omega = 0{,}018\,\text{A} = 18\,\text{mA}$.
+3. **Potência no resistor no primeiro instante.** $P_0 = V_0^2 / R = 180^2 / 10.000 = 3{,}24\,\text{W}$, abaixo dos 5 W do resistor. Depois ela cai muito rápido.
+4. **Meia-vida.** A tensão cai pela metade a cada $\tau \cdot \ln 2 = 0{,}4 \cdot 0{,}69 \approx 0{,}28\,\text{s}$.
+5. **Tempo até 5 V.** $t = \tau \cdot \ln(V_0 / 5\,\text{V}) = 0{,}4 \cdot \ln 36 \approx 0{,}4 \cdot 3{,}58 \approx 1{,}4\,\text{s}$.
+6. **Energia.** $E = \tfrac{1}{2} \cdot 0{,}000040 \cdot 180^2 \approx 0{,}65\,\text{J}$.
+
+Na simulação, a tensão passa de 5 V para baixo um pouco depois de 1 s e chega perto de 1,2 V em 2 s. Na prática, segure o resistor encostado por alguns segundos e meça de novo antes de tocar. A energia é pequena, mas um choque de 180 V faz você puxar a mão com força, e é aí que a pessoa se corta na carcaça ou cai da escada.
+
+<DeepDive title="E num motor de 220 V?">
+O pico de 220 V é $220 \cdot \sqrt{2} \approx 311\,\text{V}$. Com um capacitor típico de 15 µF e o mesmo resistor de 10 kΩ, $\tau = 10.000 \cdot 0{,}000015 = 0{,}15\,\text{s}$ e a tensão fica abaixo de 5 V em $0{,}15 \cdot \ln(311/5) \approx 0{,}6\,\text{s}$.
+
+A potência no primeiro instante passa de 5 W ($311^2 / 10.000 \approx 9{,}7\,\text{W}$), mas só por uma fração de segundo. A energia total é $\tfrac{1}{2} \cdot 0{,}000015 \cdot 311^2 \approx 0{,}73\,\text{J}$, que o resistor absorve sem esquentar de verdade. O que estraga um resistor é potência alta por muito tempo, não um pulso curto como esse.
+</DeepDive>
+
+## Desmonte na ordem inversa da montagem
+
+Com a ausência de tensão confirmada, as fotos tiradas e o capacitor descarregado, solte primeiro a fase e o neutro e isole as pontas com conectores ou fita isolante. Depois solte o motor, o capacitor e os fios de baixa tensão (fim de curso, <Term id="fotocelula">fotocélula</Term>, <Term id="botoeira">botoeira</Term>). O terra sai por último: ele é a proteção, então é o último a ser desfeito.
+
+Com o motor fora, abra o desbloqueio e corra o portão à mão de uma ponta à outra. Ele tem que correr leve, sem enroscar. Se ficar pesado ou travar num ponto, o problema é mecânico (trilho torto, roldana gasta, portão desalinhado), e motor novo nenhum resolve. Conserte antes de montar, ou o motor novo vai trabalhar forçado desde o primeiro dia.
+
+## Ligue a central nova: terra primeiro, rede por último
+
+A montagem é o caminho inverso, com uma regra que vale para qualquer equipamento ligado à rede: o terra é o primeiro a ser ligado, e a fase e o neutro são os últimos.
+
+<PlacaCD1 destaque={['rede', 'motor']} caption="Figura 1. O lado da rede da central CD-1: F, N e terra recebem a alimentação; COM, ABRE e FECHA recebem os fios do motor; os dois CAP recebem o capacitor. Na montagem, o terra é ligado primeiro, e F e N por último." />
+
+1. **Terra.** O fio de terra vai à carcaça do motor e ao borne ⏚ da central. A partir daí, qualquer fio que encoste numa parte metálica encontra o caminho de proteção.
+2. **Motor.** O fio comum vai ao borne COM, e as duas pontas dos enrolamentos vão aos bornes ABRE e FECHA.
+3. **Capacitor.** Os dois fios do capacitor vão aos bornes CAP. Ele não tem polaridade. Use o valor em µF e a tensão em VCA pedidos na etiqueta do motor.
+4. **Baixa tensão.** Conector do fim de curso (FCA, GND, FCF), fotocélula (+12V, GND, FOTO) e botoeira (BOT, GND), com os fios longe dos fios da rede.
+5. **Revisão.** Confira cada fio contra as fotos, as etiquetas e o manual.
+6. **Rede.** Só agora, com o disjuntor ainda desligado, ligue a fase em F e o neutro (ou a segunda fase) em N.
+
+Por que a rede por último? Enquanto F e N estão soltos e isolados, a central não tem como receber energia, mesmo que alguém religue o disjuntor por engano. Você monta tudo com uma segunda barreira além do disjuntor desligado.
+
+O comum do motor novo se acha medindo, não pela cor, que muda de fabricante para fabricante. Meça a resistência dos três pares de fios, como na aula <a href={lessonUrl('m16-portao/02-o-motor-do-portao')}>16.2</a>: a maior leitura é entre as duas pontas dos enrolamentos, e o fio que fica de fora é o comum (estimativa para 1/4 CV em 127 V: 3 a 7 Ω por enrolamento). Qual ponta é ABRE e qual é FECHA a medida não diz, porque os enrolamentos são iguais. Quem decide é o primeiro teste.
+
+## O primeiro comando tem que abrir
+
+Antes de ligar o disjuntor, deixe o portão no meio do percurso, longe das duas pontas, e trave o desbloqueio. Com o portão no meio, nenhum fim de curso está ativo, e a CD-1 não sabe onde ele está. Nessa situação, o primeiro comando é sempre de abrir. É um teste limpo: se o portão sair fechando, você vê na hora, sem ele bater em nada.
+
+Ligue o disjuntor e confira o LED REDE aceso. Saia do caminho do portão e fique com o controle ou a botoeira na mão, porque um comando durante o movimento para o portão. Dê o primeiro comando.
+
+- **Abriu:** os fios ABRE e FECHA estão certos. Siga para os ajustes.
+- **Fechou:** pare o portão com outro comando, desligue o disjuntor, confirme a ausência de tensão e troque de lugar os fios dos bornes ABRE e FECHA. A outra saída é ligar a chave DIP INV, que inverte o sentido pelo programa, também com o disjuntor desligado.
+
+Trocar os dois fios funciona porque o sentido de giro depende de qual enrolamento recebe a fase direto e qual recebe a corrente pelo capacitor, defasada. Trocar ABRE com FECHA troca esses papéis. Nunca troque o comum com uma das pontas para "inverter": aí os enrolamentos ficam ligados de outro jeito, o motor perde o campo girante e não parte direito.
+
+Depois do primeiro teste vêm os ajustes de força, de pausa e dos ímãs, e os testes de segurança. Eles estão na aula <a href={lessonUrl('m16-portao/08-ajustes-e-testes')}>16.8</a>, e também no fim do passo a passo abaixo.
+
+## O passo a passo completo
+
+O modo oficina reúne os 22 passos da troca, do planejamento ao teste final. Toque em "Abrir modo oficina" para ver um passo por vez, em letra grande, e marcar cada um como feito. A página fica guardada no aparelho e funciona sem internet, ao lado do portão.
+
+<Workshop id="trocar-motor-portao" />
+
+## Monte na bancada
+
+<EmBreve component="WiringExercise" id="m16/troca-central" />
+
+Quando o exercício de ligação estiver pronto, você vai montar a central nova numa bancada virtual. Ele não deixa soltar fio com o disjuntor ligado e mostra a consequência de cada erro, como o motor que sai fechando com ABRE e FECHA trocados.
+
+<RealCase title="A central que não tinha onde ligar o capacitor">
+Marcos comprou pela internet uma central "para motor de portão", mais barata que as outras, sem ler o manual antes. Quando abriu a caixa, ela tinha três bornes para o motor marcados U, V e W e nenhum borne de capacitor. O manual falava em ajustar a velocidade em hertz.
+
+Era uma central inversora. Ela aciona motores sem capacitor, de outro jeito, e não é a troca direta da central antiga dele, feita para motor com capacitor. Marcos devolveu a central e comprou uma para motor com capacitor, conferindo no manual os bornes do motor e do capacitor e o tipo de fim de curso aceito.
+
+O que ele aprendeu vale para qualquer compra: leia o manual da central antes de pagar. Se não achar o manual no site do fabricante, peça à loja. Uma central sem manual é uma central que você não vai conseguir ligar nem ajustar direito.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Medir sem testar o multímetro antes e depois.** Com a ponta partida, ele mostra 0 V num borne energizado.
+- **Esquecer a bateria ou o nobreak da central.** A placa continua energizada com o disjuntor desligado.
+- **Soltar fios sem fotografar e etiquetar.** Os nomes mudam de central para central, e a memória falha.
+- **Pegar no capacitor sem medir.** Solto, ele pode guardar perto de 180 V. Descarregue pelo resistor, nunca em curto.
+- **Confiar na cor dos fios do motor.** Meça os três pares e confira com o manual.
+- **Ligar F e N primeiro "para ver se a placa acende".** A rede é a última ligação.
+- **Colocar jumper ou fio no lugar da fotocélula "só para testar".** Esquecido ali, ele deixa o portão fechar sobre quem estiver no caminho. Os manuais tratam a fotocélula como obrigatória.
+- **Trocar o <Term id="fusivel">fusível</Term> da central por um maior.** Se ele queima, há uma causa; um fusível maior só deixa o defeito crescer.
+- **Montar o motor sem testar o portão à mão.** Trilho pesado faz o motor trabalhar forçado e o portão parar sozinho.
+- **Trabalhar sozinho ou com pressa.** Tenha alguém por perto e chame um eletricista habilitado se faltar segurança.
+
+<Quiz
+  questions={[
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem o começo da troca da central.',
+      items: [
+        'Desligar o disjuntor do portão e sinalizar o quadro',
+        'Testar o multímetro numa tomada energizada',
+        'Medir a ausência de tensão entre F, N e terra na central',
+        'Testar o multímetro de novo na tomada',
+        'Fotografar a placa e etiquetar os fios',
+        'Descarregar o capacitor e soltar os fios',
+      ],
+      explanation:
+        'Primeiro a energia sai e o quadro fica sinalizado. O multímetro é provado antes e depois da medição, para o zero da central valer. Só então você registra a ligação e solta os fios, com o capacitor já descarregado.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um capacitor de 30 µF vai ser descarregado por um resistor de 10 kΩ. Qual é a constante de tempo τ = R · C, em segundos?',
+      answer: 0.3,
+      tolerance: 0.02,
+      unit: 's',
+      explanation: 'τ = 10.000 Ω × 0,000030 F = 0,3 s. A tensão cai para cerca de 37 % a cada 0,3 s.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Qual é, aproximadamente, a tensão de pico de uma rede de 127 V, em volts?',
+      answer: 180,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        'V pico = 127 × √2 ≈ 180 V. É até essa tensão que um capacitor solto pode ficar carregado.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você mediu os fios do motor novo: fio 1–fio 2 = 4,6 Ω; fio 1–fio 3 = 4,8 Ω; fio 2–fio 3 = 9,4 Ω. Qual é o comum?',
+      options: [
+        {
+          text: 'Fio 1',
+          correct: true,
+          feedback:
+            'Isso. A maior leitura (9,4 Ω) é entre os fios 2 e 3, as duas pontas dos enrolamentos em série. O fio que fica de fora é o comum.',
+        },
+        {
+          text: 'Fio 2',
+          feedback:
+            'O fio 2 está no par com a maior leitura (2–3), então ele é a ponta de um enrolamento, não o comum.',
+        },
+        {
+          text: 'Fio 3',
+          feedback:
+            'O fio 3 está no par com a maior leitura (2–3), então ele é a ponta de um enrolamento, não o comum.',
+        },
+        {
+          text: 'Não dá para saber sem a cor dos fios',
+          feedback:
+            'Dá, e é melhor assim: a cor do comum muda de fabricante para fabricante. A medida decide; o manual confirma.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'A central que chegou tem bornes U, V e W para o motor, nenhum borne de capacitor, e o manual fala em ajustar a velocidade em Hz. O que isso indica?',
+      options: [
+        {
+          text: 'Provavelmente é uma central inversora; confirme no manual antes de ligar o motor com capacitor nela',
+          correct: true,
+          feedback:
+            'Isso. Centrais inversoras acionam o motor sem capacitor e ajustam a velocidade em Hz. Não são a troca direta de uma central para motor com capacitor.',
+        },
+        {
+          text: 'É uma central comum; basta ligar o capacitor junto com os fios V e W',
+          feedback:
+            'Numa central inversora o capacitor não entra: o manual da Garen TSi Pro, por exemplo, manda retirá-lo. Leia o manual da sua.',
+        },
+        {
+          text: 'Qualquer central com U, V e W é inversora',
+          feedback:
+            'Não: a central Rossi para motor com capacitor também chama os fios do motor de U, V e W. O que indica a inversora é o manual (sem capacitor, velocidade em Hz).',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Com o portão no meio, o primeiro comando fez o portão fechar. O que você faz?',
+      options: [
+        {
+          text: 'Para o portão, desliga o disjuntor, confirma a ausência de tensão e troca os fios ABRE e FECHA (ou liga o DIP INV)',
+          correct: true,
+          feedback:
+            'Isso. O sentido depende de qual enrolamento recebe a fase direto; trocar ABRE com FECHA troca esses papéis.',
+        },
+        {
+          text: 'Troca o fio comum com o fio do borne ABRE',
+          feedback:
+            'Assim os enrolamentos ficam ligados de outro jeito e o motor perde o campo girante. Quem se troca é ABRE com FECHA.',
+        },
+        {
+          text: 'Inverte a fase e o neutro na entrada da central',
+          feedback:
+            'Trocar F com N não muda qual enrolamento recebe a corrente direto e qual a recebe pelo capacitor: o motor continua girando para o mesmo lado. E ainda deixa a fase no fio comum do motor, mesmo com o portão parado.',
+        },
+        {
+          text: 'Troca os fios com a central ligada, para ver o resultado na hora',
+          feedback:
+            'Nunca. Toda mudança nos bornes é feita com o disjuntor desligado e a ausência de tensão confirmada.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Ligar F e N antes do resto ajuda a conferir se a placa acende enquanto você termina a montagem.',
+      answer: false,
+      explanation:
+        'A rede é a última ligação. Com F e N soltos e isolados, a central não recebe energia nem se alguém religar o disjuntor por engano.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Antes de comprar, anote tensão, potência, tipo e peso do portão, tipo de fim de curso, módulo da cremalheira e o capacitor. Compre uma central para motor **com capacitor**, conferindo no manual: a inversora não é troca direta.
+- A ordem segura é sempre a mesma: desligar e sinalizar, testar o multímetro, medir a ausência de tensão, testar de novo. Bateria ou nobreak da central também saem.
+- Fotografe e etiquete cada fio com o nome do borne antigo; os nomes mudam de central para central.
+- Um capacitor solto pode guardar perto de 180 V. Meça e descarregue por um resistor: com 40 µF e 10 kΩ, $\tau = 0{,}4\,\text{s}$, e a tensão fica abaixo de 5 V em cerca de 1,4 s.
+- Na montagem, o terra é o primeiro e a rede é a última. Identifique o comum medindo, não pela cor.
+- Com o portão no meio, o primeiro comando tem que abrir. Se fechar, desligue e troque ABRE com FECHA, ou use o DIP INV.
