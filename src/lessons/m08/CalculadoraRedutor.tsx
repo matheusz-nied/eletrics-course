@@ -176,7 +176,9 @@ export default function CalculadoraRedutor() {
               </p>
             </>
           ) : (
-            <p className="lw__note">Preencha potência, rotação, redução e rendimento maiores que zero.</p>
+            <p className="lw__note">
+              Preencha potência, rotação, redução e rendimento maiores que zero.
+            </p>
           )}
         </div>
       </div>

@@ -17,11 +17,17 @@ const readings = [
 
 <svg viewBox="0 0 660 270" width="660" height="270" class="fig" aria-hidden="true">
   <rect x="20" y="30" width="270" height="200" rx="14" class="motor" />
-  <text x="155" y="52" class="title">dentro do motor</text>
+  <text x="155" y="52" class="title">
+    dentro do motor
+  </text>
   <path d={bumps(70, 110)} class="coil" />
   <path d={bumps(70, 180)} class="coil aux" />
-  <text x="115" y="96" class="lbl">principal, 12 Ω</text>
-  <text x="115" y="166" class="lbl">auxiliar, 20 Ω</text>
+  <text x="115" y="96" class="lbl">
+    principal, 12 Ω
+  </text>
+  <text x="115" y="166" class="lbl">
+    auxiliar, 20 Ω
+  </text>
   <path d="M70 110 H50 V180 H70" class="wire" />
   <circle cx="50" cy="145" r="4" class="node" />
   <path d="M50 145 H40 V246 H330" class="wire" />
@@ -30,26 +36,30 @@ const readings = [
   <circle cx="336" cy="80" r="7" class="term" />
   <circle cx="336" cy="160" r="7" class="term" />
   <circle cx="336" cy="246" r="7" class="term" />
-  <text x="352" y="85" class="wire-t">A</text>
-  <text x="352" y="165" class="wire-t">B</text>
-  <text x="352" y="251" class="wire-t">C (comum)</text>
+  <text x="352" y="85" class="wire-t">
+    A
+  </text>
+  <text x="352" y="165" class="wire-t">
+    B
+  </text>
+  <text x="352" y="251" class="wire-t">
+    C (comum)
+  </text>
 
-  {
-    readings.map((r, i) => (
-      <g transform={`translate(430 ${44 + i * 70})`}>
-        <rect x="0" y="0" width="214" height="56" rx="8" class="meter" />
-        <text x="12" y="22" class="pair">
-          entre {r.pair}
-        </text>
-        <text x="202" y="24" class="value">
-          {r.value}
-        </text>
-        <text x="12" y="44" class="note">
-          {r.note}
-        </text>
-      </g>
-    ))
-  }
+  {readings.map((r, i) => (
+    <g transform={`translate(430 ${44 + i * 70})`}>
+      <rect x="0" y="0" width="214" height="56" rx="8" class="meter" />
+      <text x="12" y="22" class="pair">
+        entre {r.pair}
+      </text>
+      <text x="202" y="24" class="value">
+        {r.value}
+      </text>
+      <text x="12" y="44" class="note">
+        {r.note}
+      </text>
+    </g>
+  ))}
 </svg>
 
 <style>

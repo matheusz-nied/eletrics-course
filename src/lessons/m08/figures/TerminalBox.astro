@@ -52,96 +52,120 @@ const starArms = [
 ---
 
 <svg viewBox="0 0 660 380" width="660" height="380" class="fig" aria-hidden="true">
-  {
-    ['delta', 'star'].map((kind, panel) => (
-      <g transform={`translate(${panel * 340 + 10} 0)`}>
-        <text x="130" y="20" class="title">
-          {kind === 'delta' ? 'Triângulo (Δ): rede de 220 V' : 'Estrela (Y): rede de 380 V'}
-        </text>
-        <rect x="20" y="36" width="220" height="130" rx="10" class="box" />
-        {kind === 'delta' &&
-          XS.map((x) => <path d={`M${x} ${Y_TOP} V${Y_BOT}`} class="jumper" />)}
-        {kind === 'star' && <path d={`M${XS[0]} ${Y_TOP} H${XS[2]}`} class="jumper" />}
-        {XS.map((x, i) => (
-          <g>
-            <circle cx={x} cy={Y_TOP} r="11" class="terminal" />
-            <text x={x} y={Y_TOP + 4.5} class="num">
-              {top[i]}
-            </text>
-            <circle cx={x} cy={Y_BOT} r="11" class="terminal" />
-            <text x={x} y={Y_BOT + 4.5} class="num">
-              {bottom[i]}
-            </text>
-            <path d={`M${x} ${Y_BOT + 11} V${190}`} class="line" />
-            <text x={x} y="206" class="line-t">
-              L{i + 1}
-            </text>
-          </g>
-        ))}
-      </g>
-    ))
-  }
+  {['delta', 'star'].map((kind, panel) => (
+    <g transform={`translate(${panel * 340 + 10} 0)`}>
+      <text x="130" y="20" class="title">
+        {kind === 'delta' ? 'Triângulo (Δ): rede de 220 V' : 'Estrela (Y): rede de 380 V'}
+      </text>
+      <rect x="20" y="36" width="220" height="130" rx="10" class="box" />
+      {kind === 'delta' && XS.map((x) => <path d={`M${x} ${Y_TOP} V${Y_BOT}`} class="jumper" />)}
+      {kind === 'star' && <path d={`M${XS[0]} ${Y_TOP} H${XS[2]}`} class="jumper" />}
+      {XS.map((x, i) => (
+        <g>
+          <circle cx={x} cy={Y_TOP} r="11" class="terminal" />
+          <text x={x} y={Y_TOP + 4.5} class="num">
+            {top[i]}
+          </text>
+          <circle cx={x} cy={Y_BOT} r="11" class="terminal" />
+          <text x={x} y={Y_BOT + 4.5} class="num">
+            {bottom[i]}
+          </text>
+          <path d={`M${x} ${Y_BOT + 11} V${190}`} class="line" />
+          <text x={x} y="206" class="line-t">
+            L{i + 1}
+          </text>
+        </g>
+      ))}
+    </g>
+  ))}
 
   <g transform="translate(10 0)">
-    <path d={`M${D.l1[0]} ${D.l1[1]} L${D.l2[0]} ${D.l2[1]} L${D.l3[0]} ${D.l3[1]} Z`} class="wire" />
-    {
-      deltaSides.map((s) => (
-        <g>
-          <rect
-            x={s.c.mx - 17}
-            y={s.c.my - 7}
-            width="34"
-            height="14"
-            rx="3"
-            class="coil"
-            transform={`rotate(${s.c.angle} ${s.c.mx} ${s.c.my})`}
-          />
-          {s.labels.map((l, k) => (
-            <text x={l.x} y={l.y} class="end">
-              {s.ends[k]}
-            </text>
-          ))}
-        </g>
-      ))
-    }
+    <path
+      d={`M${D.l1[0]} ${D.l1[1]} L${D.l2[0]} ${D.l2[1]} L${D.l3[0]} ${D.l3[1]} Z`}
+      class="wire"
+    />
+    {deltaSides.map((s) => (
+      <g>
+        <rect
+          x={s.c.mx - 17}
+          y={s.c.my - 7}
+          width="34"
+          height="14"
+          rx="3"
+          class="coil"
+          transform={`rotate(${s.c.angle} ${s.c.mx} ${s.c.my})`}
+        />
+        {s.labels.map((l, k) => (
+          <text x={l.x} y={l.y} class="end">
+            {s.ends[k]}
+          </text>
+        ))}
+      </g>
+    ))}
     <circle cx={D.l1[0]} cy={D.l1[1]} r="3.5" class="node" />
     <circle cx={D.l2[0]} cy={D.l2[1]} r="3.5" class="node" />
     <circle cx={D.l3[0]} cy={D.l3[1]} r="3.5" class="node" />
-    <text x={D.l1[0]} y={D.l1[1] - 9} class="line-t">L1</text>
-    <text x={D.l2[0] - 12} y={D.l2[1] + 5} class="line-t right">L2</text>
-    <text x={D.l3[0] + 12} y={D.l3[1] + 5} class="line-t left">L3</text>
-    <text x="150" y="362" class="note">cada bobina fica entre duas fases: 220 V</text>
+    <text x={D.l1[0]} y={D.l1[1] - 9} class="line-t">
+      L1
+    </text>
+    <text x={D.l2[0] - 12} y={D.l2[1] + 5} class="line-t right">
+      L2
+    </text>
+    <text x={D.l3[0] + 12} y={D.l3[1] + 5} class="line-t left">
+      L3
+    </text>
+    <text x="150" y="362" class="note">
+      cada bobina fica entre duas fases: 220 V
+    </text>
   </g>
 
   <g transform="translate(350 0)">
-    {
-      starArms.map((a) => (
-        <g>
-          <path d={`M${a.out[0]} ${a.out[1]} L${S.c[0]} ${S.c[1]}`} class="wire" />
-          <rect
-            x={a.c.mx - 15}
-            y={a.c.my - 7}
-            width="30"
-            height="14"
-            rx="3"
-            class="coil"
-            transform={`rotate(${a.c.angle} ${a.c.mx} ${a.c.my})`}
-          />
-          <circle cx={a.out[0]} cy={a.out[1]} r="3.5" class="node" />
-        </g>
-      ))
-    }
+    {starArms.map((a) => (
+      <g>
+        <path d={`M${a.out[0]} ${a.out[1]} L${S.c[0]} ${S.c[1]}`} class="wire" />
+        <rect
+          x={a.c.mx - 15}
+          y={a.c.my - 7}
+          width="30"
+          height="14"
+          rx="3"
+          class="coil"
+          transform={`rotate(${a.c.angle} ${a.c.mx} ${a.c.my})`}
+        />
+        <circle cx={a.out[0]} cy={a.out[1]} r="3.5" class="node" />
+      </g>
+    ))}
     <circle cx={S.c[0]} cy={S.c[1]} r="4" class="node" />
-    <text x={S.l1[0] + 14} y={S.l1[1] + 14} class="end">1</text>
-    <text x={S.c[0] + 14} y={S.c[1] - 12} class="end">4</text>
-    <text x={S.l2[0] - 4} y={S.l2[1] - 14} class="end">2</text>
-    <text x={S.c[0] - 22} y={S.c[1] + 4} class="end">5</text>
-    <text x={S.l3[0] + 4} y={S.l3[1] - 14} class="end">3</text>
-    <text x={S.c[0] + 20} y={S.c[1] + 16} class="end">6</text>
-    <text x={S.l1[0]} y={S.l1[1] - 9} class="line-t">L1</text>
-    <text x={S.l2[0] - 12} y={S.l2[1] + 5} class="line-t right">L2</text>
-    <text x={S.l3[0] + 12} y={S.l3[1] + 5} class="line-t left">L3</text>
-    <text x="150" y="362" class="note">cada bobina recebe 380 ÷ √3 = 220 V</text>
+    <text x={S.l1[0] + 14} y={S.l1[1] + 14} class="end">
+      1
+    </text>
+    <text x={S.c[0] + 14} y={S.c[1] - 12} class="end">
+      4
+    </text>
+    <text x={S.l2[0] - 4} y={S.l2[1] - 14} class="end">
+      2
+    </text>
+    <text x={S.c[0] - 22} y={S.c[1] + 4} class="end">
+      5
+    </text>
+    <text x={S.l3[0] + 4} y={S.l3[1] - 14} class="end">
+      3
+    </text>
+    <text x={S.c[0] + 20} y={S.c[1] + 16} class="end">
+      6
+    </text>
+    <text x={S.l1[0]} y={S.l1[1] - 9} class="line-t">
+      L1
+    </text>
+    <text x={S.l2[0] - 12} y={S.l2[1] + 5} class="line-t right">
+      L2
+    </text>
+    <text x={S.l3[0] + 12} y={S.l3[1] + 5} class="line-t left">
+      L3
+    </text>
+    <text x="150" y="362" class="note">
+      cada bobina recebe 380 ÷ √3 = 220 V
+    </text>
   </g>
 </svg>
 

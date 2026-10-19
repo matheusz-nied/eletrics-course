@@ -102,7 +102,13 @@ describe('ac-motor-3ph', () => {
     // Half load, then line L3 opens (a blown fuse) while running.
     const doc = network({ load: 2 }, ['L1', 'L2', 'W']);
     // Nodes sit at x = 10·index on the line: L3 at 30, W at 40.
-    doc.elements.push({ id: 'S3', type: 'switch', a: [30, 0], b: [40, 0], params: { closed: true } });
+    doc.elements.push({
+      id: 'S3',
+      type: 'switch',
+      a: [30, 0],
+      b: [40, 0],
+      params: { closed: true },
+    });
     const b = new Bench(doc);
     const both = b.run(3);
     b.sim.setParam('S3', 'closed', false);
@@ -128,7 +134,12 @@ describe('ac-motor-3ph', () => {
     const ohm = (connection: string) => {
       const doc = netlist('motor-3f-ohm', [
         { id: 'V1', type: 'dc-voltage', nodes: ['A', '0'], params: { voltage: 1 } },
-        { id: 'M1', type: 'ac-motor-3ph', nodes: { u: 'A', v: '0', w: 'X' }, params: { connection } },
+        {
+          id: 'M1',
+          type: 'ac-motor-3ph',
+          nodes: { u: 'A', v: '0', w: 'X' },
+          params: { connection },
+        },
       ]);
       return 1 / r(runFor(doc).frame, 'V1.current');
     };

@@ -23,33 +23,39 @@ const rows: [string, string, string, string][] = [
   <circle cx="530" cy="30" r="5" class="rivet" />
   <circle cx="30" cy="300" r="5" class="rivet" />
   <circle cx="530" cy="300" r="5" class="rivet" />
-  <text x="280" y="44" class="head">MOTOR DE INDUÇÃO TRIFÁSICO</text>
-  <text x="280" y="64" class="small">rotor de gaiola · nº de série 000000</text>
-  {
-    rows.map((r, i) => (
-      <g transform={`translate(0 ${86 + i * 30})`}>
-        <rect x="40" y="0" width="166" height="24" rx="3" class="cell" />
-        <rect x="216" y="0" width="166" height="24" rx="3" class="cell" />
-        <text x="50" y="17" class="key">
-          {r[0]}
-        </text>
-        <text x="196" y="17" class="val">
-          {r[1]}
-        </text>
-        <text x="226" y="17" class="key">
-          {r[2]}
-        </text>
-        <text x="372" y="17" class="val">
-          {r[3]}
-        </text>
-      </g>
-    ))
-  }
+  <text x="280" y="44" class="head">
+    MOTOR DE INDUÇÃO TRIFÁSICO
+  </text>
+  <text x="280" y="64" class="small">
+    rotor de gaiola · nº de série 000000
+  </text>
+  {rows.map((r, i) => (
+    <g transform={`translate(0 ${86 + i * 30})`}>
+      <rect x="40" y="0" width="166" height="24" rx="3" class="cell" />
+      <rect x="216" y="0" width="166" height="24" rx="3" class="cell" />
+      <text x="50" y="17" class="key">
+        {r[0]}
+      </text>
+      <text x="196" y="17" class="val">
+        {r[1]}
+      </text>
+      <text x="226" y="17" class="key">
+        {r[2]}
+      </text>
+      <text x="372" y="17" class="val">
+        {r[3]}
+      </text>
+    </g>
+  ))}
   <g transform="translate(400 86)">
     <rect x="0" y="0" width="122" height="204" rx="4" class="cell" />
-    <text x="61" y="22" class="key mid">220 V Δ</text>
+    <text x="61" y="22" class="key mid">
+      220 V Δ
+    </text>
     <g transform="translate(16 32)">
-      {[0, 1, 2].map((k) => <path d={`M${15 + k * 30} 12 V48`} class="bar" />)}
+      {[0, 1, 2].map((k) => (
+        <path d={`M${15 + k * 30} 12 V48`} class="bar" />
+      ))}
       {[6, 4, 5].map((n, k) => (
         <g>
           <circle cx={15 + k * 30} cy="12" r="9" class="term" />
@@ -67,7 +73,9 @@ const rows: [string, string, string, string][] = [
         </g>
       ))}
     </g>
-    <text x="61" y="118" class="key mid">380 V Y</text>
+    <text x="61" y="118" class="key mid">
+      380 V Y
+    </text>
     <g transform="translate(16 128)">
       <path d="M15 12 H75" class="bar" />
       {[6, 4, 5].map((n, k) => (

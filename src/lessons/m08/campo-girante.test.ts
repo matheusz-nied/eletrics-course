@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { coilCurrents, direction, fieldLocus, magnitude, rotation, statorField } from './campo-girante';
+import {
+  coilCurrents,
+  direction,
+  fieldLocus,
+  magnitude,
+  rotation,
+  statorField,
+} from './campo-girante';
 
 describe('campo girante', () => {
   it('has three balanced currents that add up to zero', () => {

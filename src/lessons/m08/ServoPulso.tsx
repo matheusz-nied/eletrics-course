@@ -5,6 +5,7 @@
  */
 import { useEffect, useId, useRef, useState } from 'react';
 import { formatNumber } from '../m00/formato';
+import { usePrefersReducedMotion } from './reduced-motion';
 import { SERVO, servoAngle, servoDuty, servoMove } from './passo-servo';
 import '../m00/widget.css';
 import './passo-servo.css';
@@ -20,12 +21,6 @@ const HIGH = 36;
 const LOW = 104;
 const sx = (ms: number) => SX0 + (ms / (2 * SERVO.period)) * (SX1 - SX0);
 
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  );
-}
-
 export default function ServoPulso() {
   const id = useId();
   const [pulse, setPulse] = useState(1.5);
@@ -33,12 +28,13 @@ export default function ServoPulso() {
   const hornRef = useRef(horn);
   const raf = useRef(0);
   const target = servoAngle(pulse);
+  const reduced = usePrefersReducedMotion();
+  const shown = reduced ? target : horn;
 
   useEffect(() => {
     cancelAnimationFrame(raf.current);
-    if (prefersReducedMotion()) {
+    if (reduced) {
       hornRef.current = target;
-      setHorn(target);
       return;
     }
     let last: number | undefined;
@@ -52,14 +48,14 @@ export default function ServoPulso() {
     };
     raf.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf.current);
-  }, [target]);
+  }, [target, reduced]);
 
   const wave = [0, SERVO.period]
     .map((t0) => `H${sx(t0).toFixed(1)}V${HIGH}H${sx(t0 + pulse).toFixed(1)}V${LOW}`)
     .join('');
   const path = `M${SX0} ${LOW}${wave}H${SX1}`;
   // 0° points left, 90° up, 180° right.
-  const rad = (Math.PI * (180 - horn)) / 180;
+  const rad = (Math.PI * (180 - shown)) / 180;
   const tipX = HX + Math.cos(rad) * 70;
   const tipY = HY - Math.sin(rad) * 70;
   const ms = `${formatNumber(pulse, 2)} ms`;
@@ -72,8 +68,8 @@ export default function ServoPulso() {
           O pulso que diz o ângulo
         </h3>
         <p className="lw__lead">
-          Mude a largura do pulso e veja o braço do servo ir para o ângulo pedido. O pulso se
-          repete a cada 20 ms; só a largura dele muda.
+          Mude a largura do pulso e veja o braço do servo ir para o ângulo pedido. O pulso se repete
+          a cada 20 ms; só a largura dele muda.
         </p>
       </header>
 
@@ -83,7 +79,7 @@ export default function ServoPulso() {
             className="servo__top"
             viewBox="0 0 260 200"
             role="img"
-            aria-label={`Servo visto de cima, com o braço a ${formatNumber(horn, 0)}°. 0° fica à esquerda, 90° para cima e 180° à direita.`}
+            aria-label={`Servo visto de cima, com o braço a ${formatNumber(shown, 0)}°. 0° fica à esquerda, 90° para cima e 180° à direita.`}
           >
             <path d={`M${HX - 90} ${HY} A90 90 0 0 1 ${HX + 90} ${HY}`} className="servo__scale" />
             {[0, 45, 90, 135, 180].map((a) => {
@@ -97,14 +93,25 @@ export default function ServoPulso() {
                     y2={HY - Math.sin(r) * 94}
                     className="servo__tick"
                   />
-                  <text x={HX + Math.cos(r) * 108} y={HY - Math.sin(r) * 108 + 4} className="servo__tick-t">
+                  <text
+                    x={HX + Math.cos(r) * 108}
+                    y={HY - Math.sin(r) * 108 + 4}
+                    className="servo__tick-t"
+                  >
                     {a}°
                   </text>
                 </g>
               );
             })}
             <rect x={HX - 58} y={HY - 22} width={116} height={64} rx={6} className="servo__case" />
-            <rect x={HX - 74} y={HY - 8} width={148} height={20} rx={4} className="servo__case servo__ears" />
+            <rect
+              x={HX - 74}
+              y={HY - 8}
+              width={148}
+              height={20}
+              rx={4}
+              className="servo__case servo__ears"
+            />
             <line x1={HX} y1={HY} x2={tipX} y2={tipY} className="servo__horn" />
             <circle cx={tipX} cy={tipY} r={7} className="servo__horn-end" />
             <circle cx={HX} cy={HY} r={13} className="servo__hub" />
@@ -127,7 +134,10 @@ export default function ServoPulso() {
             <text x={SX0 - 4} y={LOW + 4} className="servo__tick-t servo__tick-t--end">
               0
             </text>
-            <path d={`M${sx(0)} 122 H${sx(SERVO.period)} M${sx(0)} 116 V128 M${sx(SERVO.period)} 116 V128`} className="servo__dim" />
+            <path
+              d={`M${sx(0)} 122 H${sx(SERVO.period)} M${sx(0)} 116 V128 M${sx(SERVO.period)} 116 V128`}
+              className="servo__dim"
+            />
             <text x={(sx(0) + sx(SERVO.period)) / 2} y={142} className="servo__tick-t">
               20 ms (50 Hz)
             </text>

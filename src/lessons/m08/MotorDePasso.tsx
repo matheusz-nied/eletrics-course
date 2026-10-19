@@ -8,6 +8,7 @@
  */
 import { useEffect, useId, useState } from 'react';
 import { formatNumber } from '../m00/formato';
+import { usePrefersReducedMotion } from './reduced-motion';
 import {
   coilState,
   fieldAngle,
@@ -40,22 +41,14 @@ const POLES = [
 
 const sign = (v: number) => (v > 0 ? '+' : v < 0 ? '−' : '0');
 
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  );
-}
-
 export default function MotorDePasso() {
   const id = useId();
   const [mode, setMode] = useState<StepMode>('onda');
   const [steps, setSteps] = useState(0);
   const [running, setRunning] = useState(false);
-  const [reduced, setReduced] = useState(false);
+  const reduced = usePrefersReducedMotion();
   /** Unwrapped rotor angle, so the drawing turns the short way. */
   const [rotor, setRotor] = useState(0);
-
-  useEffect(() => setReduced(prefersReducedMotion()), []);
 
   useEffect(() => {
     if (!running) return;
@@ -63,13 +56,10 @@ export default function MotorDePasso() {
     return () => clearInterval(timer);
   }, [running]);
 
-  useEffect(() => {
-    const target = fieldAngle(mode, steps);
-    setRotor((r) => {
-      const d = ((((target - r) % 360) + 540) % 360) - 180;
-      return r + d;
-    });
-  }, [mode, steps]);
+  // Follow the field the short way round, adjusting state while rendering.
+  const target = fieldAngle(mode, steps);
+  const offset = ((((target - rotor) % 360) + 540) % 360) - 180;
+  if (Math.abs(offset) > 1e-9) setRotor(rotor + offset);
 
   const [ia, ib] = coilState(mode, steps);
   const row = sequenceIndex(mode, steps);
@@ -82,7 +72,9 @@ export default function MotorDePasso() {
   };
 
   const coilText = (v: number, name: string) =>
-    v === 0 ? `bobina ${name} desligada` : `bobina ${name} com corrente ${v > 0 ? 'positiva' : 'negativa'}`;
+    v === 0
+      ? `bobina ${name} desligada`
+      : `bobina ${name} com corrente ${v > 0 ? 'positiva' : 'negativa'}`;
   const label = `Motor de passo simplificado: ${coilText(ia, 'A')}, ${coilText(ib, 'B')}. O ímã do rotor aponta o norte para ${formatNumber(fieldAngle(mode, steps), 0)}°.`;
 
   return (
@@ -154,8 +146,22 @@ export default function MotorDePasso() {
             className={reduced ? 'passo__rotor' : 'passo__rotor passo__rotor--anim'}
             style={{ transform: `rotate(${-rotor}deg)`, transformOrigin: `${C}px ${C}px` }}
           >
-            <rect x={C - 40} y={C - 10} width={40} height={20} rx={3} className="passo__mag passo__mag--s" />
-            <rect x={C} y={C - 10} width={40} height={20} rx={3} className="passo__mag passo__mag--n" />
+            <rect
+              x={C - 40}
+              y={C - 10}
+              width={40}
+              height={20}
+              rx={3}
+              className="passo__mag passo__mag--s"
+            />
+            <rect
+              x={C}
+              y={C - 10}
+              width={40}
+              height={20}
+              rx={3}
+              className="passo__mag passo__mag--n"
+            />
             <text x={C + 20} y={C + 5} className="passo__mag-t">
               N
             </text>
@@ -218,7 +224,11 @@ export default function MotorDePasso() {
             </thead>
             <tbody>
               {sequence(mode).map(([a, b], k) => (
-                <tr key={k} className={k === row ? 'passo__row--on' : undefined} aria-current={k === row ? 'step' : undefined}>
+                <tr
+                  key={k}
+                  className={k === row ? 'passo__row--on' : undefined}
+                  aria-current={k === row ? 'step' : undefined}
+                >
                   <td>{k + 1}</td>
                   <td>{sign(a)}</td>
                   <td>{sign(b)}</td>

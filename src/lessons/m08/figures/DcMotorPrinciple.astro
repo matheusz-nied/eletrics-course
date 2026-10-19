@@ -18,12 +18,20 @@ const KR = 46;
 ---
 
 <svg viewBox="0 0 660 300" width="660" height="300" class="fig" aria-hidden="true">
-  <text x={CX} y="22" class="title">Força no condutor</text>
+  <text x={CX} y="22" class="title">
+    Força no condutor
+  </text>
   <rect x="20" y={CY - 70} width="34" height="140" rx="4" class="pole n" />
   <rect x="286" y={CY - 70} width="34" height="140" rx="4" class="pole s" />
-  <text x="37" y={CY + 5} class="pole-t">N</text>
-  <text x="303" y={CY + 5} class="pole-t">S</text>
-  {field.map((dy) => <path d={`M62 ${CY + dy} H274`} class="field" marker-end="url(#m08-arrow-f)" />)}
+  <text x="37" y={CY + 5} class="pole-t">
+    N
+  </text>
+  <text x="303" y={CY + 5} class="pole-t">
+    S
+  </text>
+  {field.map((dy) => (
+    <path d={`M62 ${CY + dy} H274`} class="field" marker-end="url(#m08-arrow-f)" />
+  ))}
 
   <circle cx={CX} cy={CY} r={R + 10} class="rotor" />
   <path d={`M${CX - R} ${CY} H${CX + R}`} class="loop" />
@@ -35,41 +43,99 @@ const KR = 46;
 
   <path d={`M${CX - R} ${CY - 16} V${CY - 66}`} class="force" marker-end="url(#m08-arrow-force)" />
   <path d={`M${CX + R} ${CY + 16} V${CY + 66}`} class="force" marker-end="url(#m08-arrow-force)" />
-  <text x={CX - R - 10} y={CY - 72} class="lbl end">F</text>
-  <text x={CX + R + 10} y={CY + 82} class="lbl start">F</text>
-  <path d={`M${CX + 30} ${CY - 46} A 55 55 0 0 1 ${CX + 48} ${CY - 26}`} class="spin" marker-end="url(#m08-arrow-spin)" />
+  <text x={CX - R - 10} y={CY - 72} class="lbl end">
+    F
+  </text>
+  <text x={CX + R + 10} y={CY + 82} class="lbl start">
+    F
+  </text>
+  <path
+    d={`M${CX + 30} ${CY - 46} A 55 55 0 0 1 ${CX + 48} ${CY - 26}`}
+    class="spin"
+    marker-end="url(#m08-arrow-spin)"
+  />
 
-  <text x={CX} y={CY + 108} class="note">corrente saindo (•) e entrando (×) do papel</text>
-  <text x={CX} y={CY + 126} class="note">campo do ímã: de N para S</text>
+  <text x={CX} y={CY + 108} class="note">
+    corrente saindo (•) e entrando (×) do papel
+  </text>
+  <text x={CX} y={CY + 126} class="note">
+    campo do ímã: de N para S
+  </text>
 
-  <text x={KX} y="22" class="title">Comutador e escovas</text>
+  <text x={KX} y="22" class="title">
+    Comutador e escovas
+  </text>
   <path d={`M${KX - 6} ${KY - KR} A ${KR} ${KR} 0 0 0 ${KX - 6} ${KY + KR}`} class="segment" />
   <path d={`M${KX + 6} ${KY - KR} A ${KR} ${KR} 0 0 1 ${KX + 6} ${KY + KR}`} class="segment" />
   <circle cx={KX} cy={KY} r="9" class="shaft" />
-  <path d={`M${KX - 30} ${KY - 34} L${KX - 70} ${KY - 92} M${KX + 30} ${KY - 34} L${KX + 70} ${KY - 92}`} class="lead" />
-  <text x={KX} y={KY - 98} class="small">para as pontas da bobina</text>
+  <path
+    d={`M${KX - 30} ${KY - 34} L${KX - 70} ${KY - 92} M${KX + 30} ${KY - 34} L${KX + 70} ${KY - 92}`}
+    class="lead"
+  />
+  <text x={KX} y={KY - 98} class="small">
+    para as pontas da bobina
+  </text>
 
   <rect x={KX - KR - 38} y={KY - 12} width="34" height="24" rx="3" class="brush" />
   <rect x={KX + KR + 4} y={KY - 12} width="34" height="24" rx="3" class="brush" />
   <path d={`M${KX - KR - 38} ${KY} H${KX - KR - 70} V${KY + 98} H${KX - 22}`} class="supply" />
   <path d={`M${KX + KR + 38} ${KY} H${KX + KR + 70} V${KY + 98} H${KX + 22}`} class="supply" />
-  <path d={`M${KX - 22} ${KY + 86} V${KY + 110} M${KX - 10} ${KY + 92} V${KY + 104}`} class="battery" />
+  <path
+    d={`M${KX - 22} ${KY + 86} V${KY + 110} M${KX - 10} ${KY + 92} V${KY + 104}`}
+    class="battery"
+  />
   <path d={`M${KX + 22} ${KY + 98} H${KX - 10}`} class="supply" />
-  <text x={KX - KR - 21} y={KY - 20} class="lbl">+</text>
-  <text x={KX + KR + 21} y={KY - 20} class="lbl">−</text>
-  <text x={KX - KR - 24} y={KY + 30} class="small end">escova</text>
-  <text x={KX + KR + 24} y={KY + 30} class="small start">escova</text>
-  <text x={KX} y={KY + 62} class="small">comutador</text>
-  <text x={KX} y={KY + 128} class="note">a cada meia volta, cada segmento troca de escova</text>
+  <text x={KX - KR - 21} y={KY - 20} class="lbl">
+    +
+  </text>
+  <text x={KX + KR + 21} y={KY - 20} class="lbl">
+    −
+  </text>
+  <text x={KX - KR - 24} y={KY + 30} class="small end">
+    escova
+  </text>
+  <text x={KX + KR + 24} y={KY + 30} class="small start">
+    escova
+  </text>
+  <text x={KX} y={KY + 62} class="small">
+    comutador
+  </text>
+  <text x={KX} y={KY + 128} class="note">
+    a cada meia volta, cada segmento troca de escova
+  </text>
 
   <defs>
-    <marker id="m08-arrow-f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <marker
+      id="m08-arrow-f"
+      viewBox="0 0 10 10"
+      refX="9"
+      refY="5"
+      markerWidth="6"
+      markerHeight="6"
+      orient="auto"
+    >
       <path d="M0 0 L10 5 L0 10 z" class="head-field" />
     </marker>
-    <marker id="m08-arrow-force" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    <marker
+      id="m08-arrow-force"
+      viewBox="0 0 10 10"
+      refX="8"
+      refY="5"
+      markerWidth="5"
+      markerHeight="5"
+      orient="auto"
+    >
       <path d="M0 0 L10 5 L0 10 z" class="head-force" />
     </marker>
-    <marker id="m08-arrow-spin" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <marker
+      id="m08-arrow-spin"
+      viewBox="0 0 10 10"
+      refX="8"
+      refY="5"
+      markerWidth="6"
+      markerHeight="6"
+      orient="auto"
+    >
       <path d="M0 0 L10 5 L0 10 z" class="head-spin" />
     </marker>
   </defs>

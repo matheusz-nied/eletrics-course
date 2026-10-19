@@ -71,8 +71,12 @@ function sw(x: number, y0: number, y1: number, closed: boolean) {
       </text>
       <path d={`M${L - 8} ${TOP} H${R + 8}`} class="rail" />
       <path d={`M${L - 8} ${BOT} H${R + 8}`} class="rail" />
-      <text x={L - 12} y={TOP + 4} class="pol end">+</text>
-      <text x={L - 12} y={BOT + 4} class="pol end">−</text>
+      <text x={L - 12} y={TOP + 4} class="pol end">
+        +
+      </text>
+      <text x={L - 12} y={BOT + 4} class="pol end">
+        −
+      </text>
       <path d={s.path} class:list={['path', { danger: s.danger }]} />
       <path d={sw(L, TOP, MID, s.closed[0])} class="leg" />
       <path d={sw(L, MID, BOT, s.closed[1])} class="leg" />
@@ -80,24 +84,50 @@ function sw(x: number, y0: number, y1: number, closed: boolean) {
       <path d={sw(R, MID, BOT, s.closed[3])} class="leg" />
       <path d={`M${L} ${MID} H${W / 2 - 18} M${W / 2 + 18} ${MID} H${R}`} class="leg" />
       <circle cx={W / 2} cy={MID} r="17" class="motor" />
-      <text x={W / 2} y={MID + 5} class="m">M</text>
+      <text x={W / 2} y={MID + 5} class="m">
+        M
+      </text>
       {s.spin === 1 && (
-        <path d={`M${W / 2 - 10} ${MID - 26} A 26 26 0 0 1 ${W / 2 + 14} ${MID - 22}`} class="spin" marker-end="url(#m08-h-spin)" />
+        <path
+          d={`M${W / 2 - 10} ${MID - 26} A 26 26 0 0 1 ${W / 2 + 14} ${MID - 22}`}
+          class="spin"
+          marker-end="url(#m08-h-spin)"
+        />
       )}
       {s.spin === -1 && (
-        <path d={`M${W / 2 + 10} ${MID - 26} A 26 26 0 0 0 ${W / 2 - 14} ${MID - 22}`} class="spin" marker-end="url(#m08-h-spin)" />
+        <path
+          d={`M${W / 2 + 10} ${MID - 26} A 26 26 0 0 0 ${W / 2 - 14} ${MID - 22}`}
+          class="spin"
+          marker-end="url(#m08-h-spin)"
+        />
       )}
-      <text x={L + 9} y={TOP + 32} class="sw start">S1</text>
-      <text x={L + 9} y={BOT - 22} class="sw start">S2</text>
-      <text x={R - 9} y={TOP + 32} class="sw end">S3</text>
-      <text x={R - 9} y={BOT - 22} class="sw end">S4</text>
+      <text x={L + 9} y={TOP + 32} class="sw start">
+        S1
+      </text>
+      <text x={L + 9} y={BOT - 22} class="sw start">
+        S2
+      </text>
+      <text x={R - 9} y={TOP + 32} class="sw end">
+        S3
+      </text>
+      <text x={R - 9} y={BOT - 22} class="sw end">
+        S4
+      </text>
       <text x={W / 2} y={BOT + 26} class="note">
         {s.note}
       </text>
     </g>
   ))}
   <defs>
-    <marker id="m08-h-spin" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <marker
+      id="m08-h-spin"
+      viewBox="0 0 10 10"
+      refX="8"
+      refY="5"
+      markerWidth="6"
+      markerHeight="6"
+      orient="auto"
+    >
       <path d="M0 0 L10 5 L0 10 z" class="head" />
     </marker>
   </defs>

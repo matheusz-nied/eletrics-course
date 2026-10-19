@@ -8,6 +8,7 @@
  */
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { formatNumber } from '../m00/formato';
+import { usePrefersReducedMotion } from './reduced-motion';
 import {
   COIL_AXES,
   PHASES,
@@ -53,12 +54,6 @@ const SPEEDS = [
 const DEG = Math.PI / 180;
 const px = (v: { x: number; y: number }) => ({ x: C + v.x * SCALE, y: C - v.y * SCALE });
 
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  );
-}
-
 function wavePath(k: 0 | 1 | 2, feed: Feed): string {
   let d = '';
   for (let t = 0; t <= 360; t += 4) {
@@ -103,10 +98,8 @@ export default function CampoGirante() {
   const [feed, setFeed] = useState<Feed>('normal');
   const [speed, setSpeed] = useState<(typeof SPEEDS)[number]['id']>('lento');
   const [playing, setPlaying] = useState(false);
-  const [reduced, setReduced] = useState(false);
+  const reduced = usePrefersReducedMotion();
   const raf = useRef(0);
-
-  useEffect(() => setReduced(prefersReducedMotion()), []);
 
   useEffect(() => {
     if (!playing) return;
@@ -258,9 +251,7 @@ export default function CampoGirante() {
               >
                 {playing ? 'Pausar' : 'Girar'}
               </button>
-              {reduced && (
-                <p className="lw__note">Animação desligada: use a barra do instante.</p>
-              )}
+              {reduced && <p className="lw__note">Animação desligada: use a barra do instante.</p>}
             </div>
 
             <label className="lw__range">

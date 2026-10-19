@@ -15,7 +15,12 @@ function gear(cx: number, cy: number, teeth: number, phase = 0): string {
     const w = (2 * Math.PI) / teeth;
     const at = (ang: number, rad: number) =>
       `${(cx + Math.cos(ang) * rad).toFixed(1)} ${(cy + Math.sin(ang) * rad).toFixed(1)}`;
-    pts.push(at(a - w * 0.25, inner), at(a - w * 0.14, outer), at(a + w * 0.14, outer), at(a + w * 0.25, inner));
+    pts.push(
+      at(a - w * 0.25, inner),
+      at(a - w * 0.14, outer),
+      at(a + w * 0.14, outer),
+      at(a + w * 0.25, inner),
+    );
   }
   return `M${pts.join('L')}Z`;
 }
@@ -28,14 +33,38 @@ const G = { x: 170 + (MODULE * (12 + 36)) / 2, y: 150, n: 36 };
   <path d={gear(P.x, P.y, P.n)} class="gear small" />
   <circle cx={P.x} cy={P.y} r="6" class="axle" />
   <circle cx={G.x} cy={G.y} r="9" class="axle" />
-  <path d={`M${P.x - 22} ${P.y - 62} A 64 64 0 0 0 ${P.x - 62} ${P.y - 20}`} class="spin" marker-end="url(#m08-g-arrow)" />
-  <path d={`M${G.x + 70} ${G.y - 112} A 130 130 0 0 1 ${G.x + 120} ${G.y - 52}`} class="spin" marker-end="url(#m08-g-arrow)" />
-  <text x={P.x + 30} y="292" class="lbl end">pinhão de 12 dentes</text>
-  <text x={P.x + 30} y="310" class="small end">no motor: 3 voltas, rápido e fraco</text>
-  <text x={G.x + 20} y="292" class="lbl">engrenagem de 36 dentes</text>
-  <text x={G.x + 20} y="310" class="small">na saída: 1 volta, lenta e forte</text>
+  <path
+    d={`M${P.x - 22} ${P.y - 62} A 64 64 0 0 0 ${P.x - 62} ${P.y - 20}`}
+    class="spin"
+    marker-end="url(#m08-g-arrow)"
+  />
+  <path
+    d={`M${G.x + 70} ${G.y - 112} A 130 130 0 0 1 ${G.x + 120} ${G.y - 52}`}
+    class="spin"
+    marker-end="url(#m08-g-arrow)"
+  />
+  <text x={P.x + 30} y="292" class="lbl end">
+    pinhão de 12 dentes
+  </text>
+  <text x={P.x + 30} y="310" class="small end">
+    no motor: 3 voltas, rápido e fraco
+  </text>
+  <text x={G.x + 20} y="292" class="lbl">
+    engrenagem de 36 dentes
+  </text>
+  <text x={G.x + 20} y="310" class="small">
+    na saída: 1 volta, lenta e forte
+  </text>
   <defs>
-    <marker id="m08-g-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <marker
+      id="m08-g-arrow"
+      viewBox="0 0 10 10"
+      refX="8"
+      refY="5"
+      markerWidth="6"
+      markerHeight="6"
+      orient="auto"
+    >
       <path d="M0 0 L10 5 L0 10 z" class="head" />
     </marker>
   </defs>

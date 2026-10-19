@@ -81,9 +81,7 @@ test.describe('módulo 8: motores elétricos', () => {
     errors.expectClean();
   });
 
-  test('the three-phase motor of lesson 8.3 draws more current on two phases', async ({
-    page,
-  }) => {
+  test('the three-phase motor of lesson 8.3 draws more current on two phases', async ({ page }) => {
     test.setTimeout(90_000);
     const errors = watchErrors(page);
     await page.goto(`${MODULE}03-motor-de-inducao-trifasico/`);

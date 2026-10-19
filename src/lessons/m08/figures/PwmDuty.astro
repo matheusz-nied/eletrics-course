@@ -32,8 +32,12 @@ const rows = [0.25, 0.5, 0.75].map((d, i) => {
         {r.label}
       </text>
       <path d={`M${X0 - 6} ${r.base} H${X1 + 8}`} class="axis" />
-      <text x={X0 - 10} y={r.base + 4} class="v end">0</text>
-      <text x={X0 - 10} y={r.base - H + 4} class="v end">12 V</text>
+      <text x={X0 - 10} y={r.base + 4} class="v end">
+        0
+      </text>
+      <text x={X0 - 10} y={r.base - H + 4} class="v end">
+        12 V
+      </text>
       <path d={r.path} class="wave" />
       <path d={`M${X0} ${r.avg} H${X1}`} class="avg" />
       <text x={X1 + 12} y={r.avg + 4} class="avg-t start">
@@ -43,7 +47,9 @@ const rows = [0.25, 0.5, 0.75].map((d, i) => {
   ))}
   <path d={`M${X0} 272 H${X0 + (X1 - X0) / PERIODS}`} class="dim" />
   <path d={`M${X0} 266 V278 M${X0 + (X1 - X0) / PERIODS} 266 V278`} class="dim" />
-  <text x={X0 + (X1 - X0) / (2 * PERIODS)} y="264" class="note">um período</text>
+  <text x={X0 + (X1 - X0) / (2 * PERIODS)} y="264" class="note">
+    um período
+  </text>
 </svg>
 
 <style>

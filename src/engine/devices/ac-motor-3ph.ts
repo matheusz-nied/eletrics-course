@@ -150,7 +150,8 @@ export default defineDevice({
     let burned = false;
     let humming = false;
 
-    const k = () => (num(params, 'voltage') / REF.voltage) ** 2 * (REF.power / num(params, 'power'));
+    const k = () =>
+      (num(params, 'voltage') / REF.voltage) ** 2 * (REF.power / num(params, 'power'));
     const circuit = (wAc: number): EquivalentCircuit => {
       const kk = k();
       const x = (kk * wAc) / REF_OMEGA;
@@ -259,9 +260,7 @@ export default defineDevice({
           iw = [zero(), zero(), zero()];
         }
         // Line currents: what enters each terminal.
-        const line = delta()
-          ? [0, 1, 2].map((j) => add(iw[j]!, scale(iw[(j + 2) % 3]!, -1)))
-          : iw;
+        const line = delta() ? [0, 1, 2].map((j) => add(iw[j]!, scale(iw[(j + 2) % 3]!, -1))) : iw;
         const lineDc = delta() ? [0, 1, 2].map((j) => iDc[j]! - iDc[(j + 2) % 3]!) : [...iDc];
         lineRms = line.map((l, j) => Math.sqrt(lineDc[j]! ** 2 + abs2(l)));
 

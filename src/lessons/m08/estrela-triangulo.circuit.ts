@@ -139,7 +139,8 @@ export default defineCircuit({
     },
     {
       id: 'estrela-carga-cheia',
-      description: 'Em estrela, com 4,25 N·m no eixo, pouco acima da carga nominal, o motor nem sai do lugar.',
+      description:
+        'Em estrela, com 4,25 N·m no eixo, pouco acima da carga nominal, o motor nem sai do lugar.',
       check: { readout: 'M1.rpm', op: '<', value: 50 },
       at: 3,
       solution: { 'M1.connection': 'estrela', 'M1.load': 4.25 },
