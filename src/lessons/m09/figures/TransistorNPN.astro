@@ -1,0 +1,239 @@
+---
+/* 9.6: inside an NPN transistor (emitter, thin base, collector, with the
+   electrons crossing the base) and the NPN and PNP symbols. Two drawings that
+   sit side by side on a wide screen and stack on a phone. */
+const LANES = [78, 100, 122];
+---
+
+<div class="npn-fig">
+  <svg viewBox="0 0 340 262" width="340" height="262" class="fig" aria-hidden="true">
+    <text x="75" y="34" class="lbl">
+      emissor
+    </text>
+    <text x="145" y="18" class="lbl">
+      base
+    </text>
+    <text x="245" y="34" class="lbl">
+      coletor
+    </text>
+    <path d="M145 23V44" class="leader" />
+
+    <rect x="20" y="48" width="110" height="104" class="n" />
+    <rect x="130" y="48" width="30" height="104" class="p" />
+    <rect x="160" y="48" width="170" height="104" class="n" />
+    <text x="38" y="66" class="doping">
+      N
+    </text>
+    <text x="145" y="66" class="doping mid">
+      P
+    </text>
+    <text x="312" y="66" class="doping">
+      N
+    </text>
+
+    <!-- Electrons leave the emitter, almost all cross the base, the collector collects them -->
+    {LANES.map((y) => (
+      <>
+        <path d={`M44 ${y}H292`} class="e-path" />
+        <path d={`M286 ${y - 5}L294 ${y}L286 ${y + 5}`} class="e-head" />
+        {[52, 84, 116, 176, 216, 256].map((x) => (
+          <circle cx={x} cy={y} r={4} class="e" />
+        ))}
+      </>
+    ))}
+    <!-- One of them stays in the base: the base current -->
+    <path d="M140 132V170" class="e-path" />
+    <path d="M135 164L140 172L145 164" class="e-head" />
+    <circle cx="140" cy="140" r="4" class="e" />
+
+    <!-- Leads, with the conventional currents -->
+    <path d="M75 152V206M145 152V206M245 152V206" class="lead" />
+    <text x="75" y="226" class="pin">
+      E
+    </text>
+    <text x="145" y="226" class="pin">
+      B
+    </text>
+    <text x="245" y="226" class="pin">
+      C
+    </text>
+    <path d="M60 176V196M54 188L60 197L66 188" class="i-big" />
+    <text x="52" y="190" class="i-lbl end">
+      IE
+    </text>
+    <path d="M160 196V182M156 188L160 181L164 188" class="i-small" />
+    <text x="168" y="194" class="i-lbl">
+      IB
+    </text>
+    <path d="M260 196V176M254 184L260 175L266 184" class="i-big" />
+    <text x="270" y="190" class="i-lbl">
+      IC
+    </text>
+
+    <g transform="translate(20 246)">
+      <circle cx="6" cy="0" r="4" class="e" />
+      <text x="16" y="4" class="legend">
+        elétrons
+      </text>
+      <path d="M96 0H118M112 -4L119 0L112 4" class="i-big" />
+      <text x="126" y="4" class="legend">
+        corrente (sentido convencional)
+      </text>
+    </g>
+  </svg>
+
+  <svg viewBox="0 0 280 262" width="280" height="262" class="fig" aria-hidden="true">
+    {[
+      { x: 70, name: 'NPN', note: 'seta para fora', out: true },
+      { x: 210, name: 'PNP', note: 'seta para dentro', out: false },
+    ].map((s) => (
+      <g transform={`translate(${s.x} 112)`}>
+        <circle cx="4" cy="0" r="34" class="body" />
+        <path d="M-50 0H-12" class="sym" />
+        <path d="M-12 -22V22" class="bar" />
+        <path d="M-12 -10L24 -30V-62" class="sym" />
+        <path d="M-12 10L24 30V62" class="sym" />
+        {s.out ? (
+          <path d="M18.6 27L5.2 26.4L11 16Z" class="arrow" />
+        ) : (
+          <path d="M-3 15L4.6 26L10.4 15.6Z" class="arrow" />
+        )}
+        <text x="-50" y="-8" class="pin start">
+          B
+        </text>
+        <text x="34" y="-50" class="pin start">
+          C
+        </text>
+        <text x="34" y="58" class="pin start">
+          E
+        </text>
+        <text x="0" y="104" class="name">
+          {s.name}
+        </text>
+        <text x="0" y="126" class="legend mid">
+          {s.note}
+        </text>
+      </g>
+    ))}
+  </svg>
+</div>
+
+<style>
+  .npn-fig {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 2rem;
+  }
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .n {
+    fill: var(--info-soft);
+    stroke: var(--info-border);
+  }
+  .p {
+    fill: var(--danger-soft);
+    stroke: var(--danger-border);
+  }
+  .doping {
+    fill: var(--fg-muted);
+    font-size: 15px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .lbl {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .leader {
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+  }
+  .e {
+    fill: var(--info);
+  }
+  .e-path {
+    fill: none;
+    stroke: var(--info);
+    stroke-width: 1.6;
+    stroke-dasharray: 5 4;
+  }
+  .e-head {
+    fill: none;
+    stroke: var(--info);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .lead {
+    stroke: var(--fg-subtle);
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+  .pin {
+    fill: var(--fg);
+    font-size: 16px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .i-big,
+  .i-small {
+    fill: none;
+    stroke: var(--success);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .i-big {
+    stroke-width: 3.5;
+  }
+  .i-small {
+    stroke-width: 1.6;
+  }
+  .i-lbl {
+    fill: var(--success);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .legend {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .body {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .sym {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+  }
+  .bar {
+    stroke: var(--fg);
+    stroke-width: 6;
+  }
+  .arrow {
+    fill: var(--fg);
+  }
+  .name {
+    fill: var(--fg);
+    font-size: 16px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+</style>

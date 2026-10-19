@@ -1,0 +1,82 @@
+---
+/*
+ * 9.3: a bridge rectifier in a single package (KBP style, 2 A): four leads
+ * marked +, ~, ~ and −, the + corner chamfered. Generic drawing, no brand.
+ * Fallback of <Part3D part="bridge-rectifier">.
+ */
+const PINS = [
+  { x: 128, mark: '+' },
+  { x: 168, mark: '~' },
+  { x: 208, mark: '~' },
+  { x: 248, mark: '−' },
+];
+---
+
+<svg viewBox="0 0 380 270" width="380" height="270" class="fig" aria-hidden="true">
+  <path d="M112 34H286a8 8 0 0 1 8 8V146a8 8 0 0 1 -8 8H96a8 8 0 0 1 -8 -8V58Z" class="body" />
+  <text x="190" y="80" class="print">
+    KBP206
+  </text>
+  {PINS.map((p) => (
+    <>
+      <text x={p.x} y="134" class="mark">
+        {p.mark}
+      </text>
+      <rect x={p.x - 3} y="154" width="6" height="64" rx="2" class="lead" />
+    </>
+  ))}
+  <text x="190" y="104" class="print small">
+    2 A · 600 V
+  </text>
+  <text x="128" y="240" class="lbl">
+    saída +
+  </text>
+  <text x="188" y="262" class="lbl">
+    entrada CA (~)
+  </text>
+  <text x="250" y="240" class="lbl">
+    saída −
+  </text>
+  <path d="M168 226V246M208 226V246M168 246H208" class="brace" />
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .body {
+    fill: var(--fg);
+  }
+  .print {
+    fill: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 17px;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+  .small {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .mark {
+    fill: var(--bg);
+    font-size: 20px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .lead {
+    fill: var(--fg-subtle);
+  }
+  .lbl {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .brace {
+    fill: none;
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+</style>

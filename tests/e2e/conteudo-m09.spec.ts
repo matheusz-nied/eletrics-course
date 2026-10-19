@@ -1,0 +1,161 @@
+import { expect, test, type Locator, type Page } from '@playwright/test';
+import { expectAccessible, expectNoHorizontalOverflow, watchErrors } from './helpers';
+
+const MODULE = 'm09-semicondutores/';
+
+const LESSONS = [
+  '01-juncao-pn',
+  '02-diodo',
+  '03-retificadores',
+  '04-leds',
+  '05-diodo-zener',
+  '06-transistor-como-chave',
+  '07-transistor-como-amplificador',
+  '08-mosfet',
+  '09-tiristores-e-isolamento',
+];
+
+/**
+ * How long an island may take to hydrate. Lessons with two 3D models and
+ * simulations take up to about 9 s on a loaded runner (software WebGL).
+ */
+const HYDRATION = { timeout: 20_000 };
+
+/** Scrolls through the page so every island hydrates, and waits for the simulations. */
+async function hydrateAll(page: Page) {
+  for (const island of await page.locator('astro-island').all()) {
+    await island.scrollIntoViewIfNeeded();
+    await expect(island).not.toHaveAttribute('ssr', HYDRATION);
+  }
+  for (const sim of await page.locator('[data-simulation]').all()) {
+    await expect(sim).toHaveAttribute('data-ready', '');
+  }
+}
+
+/** The hydrated island that contains `inner`. */
+async function hydrated(page: Page, inner: string): Promise<Locator> {
+  const island = page.locator(`astro-island:has(${inner})`).first();
+  await island.scrollIntoViewIfNeeded();
+  await expect(island).not.toHaveAttribute('ssr', HYDRATION);
+  return island.locator(inner).first();
+}
+
+test.describe('módulo 9: semicondutores', () => {
+  test('the module page lists the nine lessons', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(MODULE);
+    for (const slug of LESSONS) {
+      await expect(page.locator(`a[href$="/${MODULE}${slug}/"]`).first()).toBeVisible();
+    }
+    errors.expectClean();
+  });
+
+  for (const slug of LESSONS) {
+    test(`lesson ${slug} loads its simulations and widgets without errors`, async ({ page }) => {
+      const errors = watchErrors(page);
+      await page.goto(`${MODULE}${slug}/`);
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await hydrateAll(page);
+      await expectNoHorizontalOverflow(page);
+      await expectAccessible(page);
+      errors.expectClean();
+    });
+  }
+
+  test('the PN junction of lesson 9.1 blocks in reverse and conducts at +0,7 V', async ({
+    page,
+  }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}01-juncao-pn/`);
+    const widget = await hydrated(page, '.jpn');
+    await widget.getByRole('button', { name: '−10 V', exact: true }).click();
+    await expect(widget.locator('.lw__status')).toContainText('Bloqueia');
+    await expect(widget.locator('.jpn__values')).toContainText('1,67 µm');
+    await widget.getByRole('button', { name: '+0,7 V', exact: true }).click();
+    await expect(widget.locator('.lw__status')).toContainText('Conduz');
+    await expect(widget.locator('.jpn__values')).toContainText('11,2 mA');
+    errors.expectClean();
+  });
+
+  test('the diode curve of lesson 9.2 moves the operating point with the resistor', async ({
+    page,
+  }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}02-diodo/`);
+    const widget = await hydrated(page, '.cdiodo');
+    await expect(widget).toContainText('4,38 mA');
+    await expect(widget).toContainText('0,624 V');
+    await widget.getByLabel('100 Ω', { exact: true }).check({ force: true });
+    await expect(widget).toContainText('42,7 mA');
+    await widget.getByLabel('1N5819 (Schottky)').check({ force: true });
+    await expect(widget).toContainText('0,262 V');
+    errors.expectClean();
+  });
+
+  test('the protection diode of lesson 9.2 blocks a reversed battery', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}02-diodo/`);
+    const sim = page.locator('[data-simulation="m09/diodo-protecao"]');
+    await sim.scrollIntoViewIfNeeded();
+    await expect(sim).toHaveAttribute('data-ready', '');
+    await expect(sim.locator('.dmm[data-probe="IAP"] [data-reading]')).toContainText(/46\d\smA/);
+    await sim
+      .locator('.sim-controls')
+      .getByLabel('Bateria')
+      .selectOption({ label: 'Invertida (positivo embaixo)' });
+    await expect(sim.locator('.dmm[data-probe="VD1"] [data-reading]')).toContainText(
+      /−1[12][\d,]*\sV/,
+    );
+    errors.expectClean();
+  });
+
+  test('the LED calculator of lesson 9.4 picks 330 Ω for a red LED', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}04-leds/`);
+    const widget = await hydrated(page, '.ledcalc');
+    await expect(widget).toContainText('330 Ω');
+    await expect(widget).toContainText('9,52 mA');
+    errors.expectClean();
+  });
+
+  test('the zener regulator of lesson 9.5 holds the output near 5,2 V', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}05-diodo-zener/`);
+    const sim = page.locator('[data-simulation="m09/zener-regulador"]');
+    await sim.scrollIntoViewIfNeeded();
+    await expect(sim).toHaveAttribute('data-ready', '');
+    await expect(sim.locator('.dmm[data-probe="VOUT"] [data-reading]')).toContainText('5,19 V');
+    errors.expectClean();
+  });
+
+  test('the transistor switch of lesson 9.6 saturates and cuts off', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}06-transistor-como-chave/`);
+    const sim = page.locator('[data-simulation="m09/transistor-chave"]');
+    await sim.scrollIntoViewIfNeeded();
+    await expect(sim).toHaveAttribute('data-ready', '');
+    await expect(sim.locator('.dmm[data-probe="VCE"] [data-reading]')).toContainText(/\d+\smV/);
+    await sim
+      .locator('.sim-controls')
+      .getByLabel('Pino do microcontrolador')
+      .selectOption({ label: 'Nível baixo (0 V)' });
+    await expect(sim.locator('.dmm[data-probe="IC"] [data-reading]')).toContainText(': 0 A');
+    await expect(sim.locator('.dmm[data-probe="VCE"] [data-reading]')).toContainText('12 V');
+    errors.expectClean();
+  });
+
+  test('only the logic-level MOSFET of lesson 9.8 turns on at 3,3 V', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}08-mosfet/`);
+    const sim = page.locator('[data-simulation="m09/mosfet-gate"]');
+    await sim.scrollIntoViewIfNeeded();
+    await expect(sim).toHaveAttribute('data-ready', '');
+    await sim
+      .locator('.sim-controls')
+      .getByLabel('Tensão no gate')
+      .selectOption({ label: '3,3 V (saída de um ESP32)' });
+    await expect(sim.locator('.dmm[data-probe="IL2"] [data-reading]')).toContainText(/1,7\d\sA/);
+    await expect(sim.locator('.dmm[data-probe="IL1"] [data-reading]')).toContainText(': 0 A');
+    errors.expectClean();
+  });
+});

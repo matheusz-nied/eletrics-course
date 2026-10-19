@@ -1,0 +1,319 @@
+---
+titulo: Semicondutores e junção PN
+modulo: m09-semicondutores
+ordem: 1
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Explicar por que o silício puro conduz pouco e por que conduz mais quando esquenta
+  - Descrever os dois portadores de carga de um semicondutor, o elétron livre e a lacuna
+  - Explicar como a dopagem cria o silício tipo N e o tipo P
+  - Descrever a camada de depleção e o potencial de barreira de uma junção PN
+  - Prever se uma junção PN conduz ou bloqueia pela polaridade da tensão aplicada
+prerequisitos:
+  - m01-eletricidade-do-zero/01-atomos-eletrons-e-carga
+  - m01-eletricidade-do-zero/02-corrente-eletrica
+tags: [semicondutor, silício, dopagem, lacuna, junção PN, camada de depleção, polarização]
+seguranca: baixa-tensao
+---
+
+import CristalSilicio from '../../../lessons/m09/figures/CristalSilicio.astro';
+import Dopagem from '../../../lessons/m09/figures/Dopagem.astro';
+import JuncaoPN from '../../../lessons/m09/JuncaoPN';
+
+Abra um carregador de celular, uma lâmpada LED ou a central de um portão eletrônico e você vai encontrar dezenas de peças pretas com perninhas de metal. Dentro de cada uma há um pedacinho de **silício**, o mesmo elemento que forma a areia da praia. Sozinho, o silício puro é um condutor ruim. Com uma pitada de impurezas escolhidas a dedo, ele vira uma peça que deixa a corrente passar num sentido e bloqueia no outro, que acende, que amplifica, que liga e desliga motores.
+
+Nesta aula você vai ver o que acontece dentro do silício: por que ele conduz pouco, como as impurezas mudam isso e o que surge quando um pedaço "tipo P" encosta num pedaço "tipo N". Essa fronteira, a **junção PN**, é a base de todos os componentes do resto do módulo.
+
+## Nem condutor, nem isolante
+
+Na aula sobre <LinkAula id="m01-eletricidade-do-zero/01-atomos-eletrons-e-carga">átomos e carga</LinkAula> você viu que um metal conduz porque tem elétrons livres de sobra, e que um isolante quase não tem nenhum. Entre os dois existe uma terceira família de materiais, os <Term id="semicondutor">semicondutores</Term>. O silício é o mais usado de longe; o germânio foi o primeiro a ser usado em transistores, e compostos como o arseneto de gálio e o nitreto de gálio aparecem nos LEDs.
+
+A <Term id="resistividade">resistividade</Term> mostra onde cada um fica. Os valores são típicos, a 25 °C:
+
+| Material | Resistividade (Ω·m) | Comportamento |
+|----------|---------------------|---------------|
+| Cobre | 1,7 × 10⁻⁸ | Condutor: um elétron livre por átomo |
+| Silício dopado (tipo N, do exemplo desta aula) | cerca de 10⁻³ | Semicondutor com portadores sob medida |
+| Silício puro | cerca de 2 × 10³ | Semicondutor: pouquíssimos elétrons livres |
+| Vidro | 10¹⁰ a 10¹⁴ | Isolante |
+
+Repare em duas coisas. O silício puro conduz cerca de cem bilhões de vezes pior que o cobre, mas ainda conduz de milhões a bilhões de vezes melhor que o vidro. E o mesmo silício, depois de dopado, conduz milhões de vezes melhor que o puro. É esse controle que interessa.
+
+## O cristal de silício
+
+O átomo de silício tem quatro elétrons na camada mais externa, a que participa das ligações. No cristal, cada átomo fica cercado por quatro vizinhos e **divide um elétron com cada um**: cada ligação entre dois átomos é feita por um par de elétrons, um de cada. Com isso, todos os elétrons externos ficam presos nas ligações, e nenhum sobra para andar pelo material.
+
+<Figure caption="Figura 1. O cristal de silício desenhado no plano (na realidade ele é tridimensional). Cada linha cinza é uma ligação com dois elétrons, um de cada átomo. O calor quebrou uma ligação: um elétron escapou e deixou uma vaga, a lacuna." alt="Doze átomos de silício em grade, cada um ligado a quatro vizinhos por pares de elétrons. Numa das ligações falta um elétron, marcado como lacuna; o elétron que escapou aparece solto entre os átomos.">
+  <CristalSilicio />
+</Figure>
+
+Só que os átomos vibram, e quanto mais quente o material, mais forte a vibração. De vez em quando, um elétron ganha energia suficiente para escapar da ligação. Ele vira um **elétron livre**, que pode andar pelo cristal e carregar corrente. No lugar dele fica uma ligação incompleta.
+
+À temperatura ambiente isso é raríssimo: o silício puro tem cerca de **10¹⁰ elétrons livres por cm³** (dez bilhões), contra cerca de 5 × 10²² átomos no mesmo volume. É um elétron livre para cada cinco trilhões de átomos. O cobre tem um por átomo.
+
+Aqui aparece uma diferença importante em relação aos metais. Quando o metal esquenta, a vibração atrapalha os elétrons e a resistência **sobe**. No semicondutor, o calor quebra mais ligações e cria mais portadores, e a resistência **cai**: no silício puro, o número de elétrons livres aproximadamente dobra a cada 10 °C. É assim que funciona o <Term id="ntc">NTC</Term>, o sensor de temperatura feito de material semicondutor que você viu no módulo de circuitos. E é por isso que todo componente de silício muda de comportamento com a temperatura.
+
+## A lacuna: a vaga que anda
+
+A ligação que perdeu o elétron ficou com uma vaga, a <Term id="lacuna">lacuna</Term>. Um elétron de uma ligação vizinha pode pular para essa vaga, sem precisar de muita energia. Mas aí a vaga passa para a ligação de onde ele saiu. Outro elétron pula, e a vaga anda de novo.
+
+Pense numa fileira de cinema lotada com uma cadeira vazia na ponta direita. Cada pessoa passa uma cadeira para a direita, uma de cada vez. Cada pessoa andou só um lugar, mas a cadeira vazia atravessou a fileira inteira para a esquerda.
+
+A lacuna se comporta exatamente assim: ela anda no sentido contrário ao dos elétrons que pulam, e por isso se comporta como uma **carga positiva** em movimento. A analogia tem limites: a lacuna não é uma partícula, é a falta de um elétron numa ligação, e ela anda cerca de três vezes mais devagar que um elétron livre no silício. Mas, para entender os componentes, vale tratá-la como uma carga positiva que se move.
+
+Por isso se diz que um semicondutor tem **dois portadores de carga**: os elétrons livres, negativos, e as lacunas, positivas. No silício puro, os dois aparecem sempre aos pares, na mesma quantidade.
+
+## Dopagem: temperando o silício
+
+Silício puro não serve para fazer componentes: tem poucos portadores e muda demais com a temperatura. A solução é misturar, de propósito e em quantidade controlada, átomos de outro elemento. Isso se chama <Term id="dopagem">dopagem</Term>, e a quantidade é minúscula: por exemplo, um átomo de impureza para cada milhão de átomos de silício.
+
+- **Tipo N:** a impureza é um átomo com **cinco** elétrons externos, como o fósforo. Quatro deles entram nas ligações com os vizinhos; o quinto sobra, preso tão fraco que, à temperatura ambiente, praticamente todos ficam livres. Cada átomo de fósforo dá um elétron livre ao cristal.
+- **Tipo P:** a impureza é um átomo com **três** elétrons externos, como o boro. Ele só completa três ligações; a quarta fica com uma vaga. Cada átomo de boro dá uma lacuna ao cristal.
+
+<Figure caption="Figura 2. Dopagem. À esquerda, o fósforo (P) entra no lugar de um silício e sobra um elétron, que fica livre: silício tipo N. À direita, o boro (B) deixa uma ligação com um elétron só, e a vaga é uma lacuna: silício tipo P." alt="Dois pedaços de cristal lado a lado. No da esquerda, um átomo de fósforo no centro tem um elétron a mais, solto. No da direita, um átomo de boro no centro tem uma ligação com apenas um elétron e uma lacuna.">
+  <Dopagem />
+</Figure>
+
+No tipo N, os elétrons livres são os **portadores majoritários** e as poucas lacunas que o calor ainda cria são os minoritários. No tipo P é o contrário.
+
+<Callout type="atencao" title="O tipo N não tem carga negativa">
+O "N" quer dizer que os portadores que sobram são negativos, não que o material está carregado. Cada átomo de fósforo trouxe um elétron a mais, mas também um próton a mais no núcleo. O pedaço de silício tipo N, inteiro, continua eletricamente neutro, e o tipo P também.
+</Callout>
+
+## Exemplo resolvido: quanto a dopagem muda o silício
+
+Um fabricante dopa silício com um átomo de fósforo para cada milhão de átomos de silício. Quantos elétrons livres passam a existir, e quanto isso muda a resistividade?
+
+**Passo 1: contar as impurezas.** O silício tem $5 \times 10^{22}$ átomos por cm³. Um em cada milhão é fósforo:
+
+$$
+N_D = \frac{5 \times 10^{22}}{10^{6}} = 5 \times 10^{16}\ \text{átomos de fósforo por cm}^3
+$$
+
+em que $N_D$ é a concentração de átomos doadores (os que doam um elétron).
+
+**Passo 2: contar os elétrons livres.** Cada fósforo libera um elétron, e os poucos pares criados pelo calor quase não contam. Então a concentração de elétrons livres $n$ fica:
+
+$$
+n \approx N_D = 5 \times 10^{16}\ \text{por cm}^3
+$$
+
+**Passo 3: comparar com o silício puro.** Eram $10^{10}$ elétrons livres por cm³:
+
+$$
+\frac{5 \times 10^{16}}{10^{10}} = 5 \times 10^{6}
+$$
+
+Cinco milhões de vezes mais portadores, com uma impureza que nenhuma análise química comum detectaria.
+
+**Passo 4: a resistividade.** Ela cai quase na mesma proporção (um pouco menos, porque os átomos de impureza também atrapalham o caminho dos elétrons): de cerca de 2 × 10³ Ω·m para cerca de 10⁻³ Ω·m, uns dois milhões de vezes menos. O silício dopado ainda conduz dezenas de milhares de vezes pior que o cobre, mas agora com a quantidade de portadores escolhida pelo fabricante, e muito menos sensível à temperatura.
+
+<DeepDive title="E quantas lacunas sobram no lado N?">
+Elétrons livres e lacunas se encontram o tempo todo e se recombinam: o elétron cai na vaga e os dois somem. Em equilíbrio, vale a **lei da ação das massas**:
+
+$$
+n \cdot p = n_i^2
+$$
+
+em que $n$ é a concentração de elétrons livres, $p$ a de lacunas e $n_i$ a de cada um no silício puro ($10^{10}$ por cm³ a 25 °C). No silício do exemplo:
+
+$$
+p = \frac{(10^{10})^2}{5 \times 10^{16}} = 2 \times 10^{3}\ \text{lacunas por cm}^3
+$$
+
+Duas mil lacunas por cm³, contra $5 \times 10^{16}$ elétrons livres. Essas poucas lacunas, os portadores minoritários, explicam a pequena corrente de fuga de um diodo bloqueando. Como $n_i$ cresce depressa com a temperatura, a fuga também cresce: em diodos de silício, ela costuma dobrar a cada 10 °C, aproximadamente.
+</DeepDive>
+
+## A junção PN
+
+Agora a parte importante. Num mesmo cristal, o fabricante faz uma região tipo P encostada numa região tipo N. Não são duas peças coladas: é um cristal só, dopado de um jeito de um lado e de outro jeito do outro. A fronteira entre as duas regiões é a <Term id="juncao-pn">junção PN</Term>.
+
+No instante em que as duas regiões existem lado a lado, acontece o mesmo que com uma gota de tinta num copo d'água: o que está concentrado se espalha. Elétrons livres do lado N, onde há muitos, atravessam para o lado P, onde há poucos. Lá encontram lacunas e se recombinam. Lacunas do lado P fazem o caminho inverso.
+
+Só que cada elétron que sai do lado N deixa para trás um átomo de fósforo com um próton a mais e sem o elétron extra: um **íon positivo**, preso no cristal. Cada lacuna preenchida no lado P deixa um átomo de boro com um elétron a mais: um **íon negativo**. Perto da fronteira surge uma faixa sem portadores livres, só com íons presos: a <Term id="camada-de-deplecao">camada de depleção</Term>.
+
+Os íons positivos de um lado e negativos do outro criam um campo elétrico que empurra os elétrons de volta para o N e as lacunas de volta para o P. A travessia continua até esse campo ficar forte o bastante para equilibrar a tendência de se espalhar. Nesse ponto, existe uma tensão interna na junção, o **potencial de barreira**: cerca de **0,7 V no silício** e cerca de 0,3 V no germânio.
+
+<Callout type="nota" title="Dá para medir a barreira com o multímetro?">
+Não. Nas pontas do componente, os contatos de metal com o silício criam tensões que cancelam exatamente a da junção, e um diodo parado mede 0 V entre os terminais. Senão, seria possível tirar energia de um diodo na gaveta. A barreira só aparece quando você tenta empurrar corrente pela junção, como vai ver agora.
+</Callout>
+
+A camada de depleção é finíssima. Numa junção típica, ela tem menos de meio micrômetro de largura, mais de cem vezes mais fina que um fio de cabelo.
+
+## Polarização direta e reversa
+
+Ligue uma bateria nas duas pontas da junção. O lado P ganha o nome de **anodo** e o lado N, de **catodo**. Há duas formas de ligar, e elas têm resultados opostos. Ligar uma tensão num componente para colocá-lo num modo de funcionamento se chama <Term id="polarizacao">polarização</Term>.
+
+**Polarização direta: positivo no P (anodo), negativo no N (catodo).** O positivo empurra as lacunas do lado P em direção à junção, e o negativo empurra os elétrons do lado N também em direção a ela. A camada de depleção estreita e a barreira baixa. Com uns 0,6 V no silício, a barreira está tão baixa que elétrons e lacunas atravessam em quantidade, e a corrente cresce muito depressa a cada décimo de volt a mais. A bateria repõe os elétrons do lado N e recolhe os do lado P, e a corrente circula.
+
+**Polarização reversa: positivo no N (catodo), negativo no P (anodo).** Agora a bateria puxa os elétrons do N e as lacunas do P para longe da junção. A camada de depleção se alarga, a barreira sobe e quase nada atravessa. Passa só uma corrente de fuga minúscula, de nanoampères, feita pelos poucos portadores minoritários. Se a tensão reversa for grande demais, a junção rompe e passa a conduzir; isso tem utilidade, e você vai ver como na aula sobre o [diodo Zener](../05-diodo-zener/).
+
+Esse pedaço de silício com uma junção e dois terminais já é um componente: o <Term id="diodo">diodo</Term>, que deixa a corrente passar num sentido só, do anodo para o catodo.
+
+## Explore: a junção por dentro
+
+A figura abaixo mostra a junção com a bateria ligada. Os círculos vazados vermelhos são lacunas, os pontos azuis são elétrons livres, e os quadradinhos com sinal são os íons presos na camada de depleção. A corrente é calculada com o modelo de um diodo de sinal, o mesmo das simulações do curso.
+
+<JuncaoPN client:visible />
+
+1. Com 0 V, qual é a largura da camada de depleção? Existe corrente?
+2. Leve a tensão a −2 V e depois a −10 V. O que acontece com a camada? E com a corrente?
+3. Agora vá de +0,4 V para +0,5 V, +0,6 V e +0,7 V. Anote a corrente em cada passo. Quantas vezes ela cresce a cada 0,1 V?
+
+Com 0 V, a camada tem cerca de 0,43 µm e não há corrente. Em −2 V ela chega a 0,84 µm e, em −10 V, a 1,67 µm, mas a corrente fica parada em cerca de −2,5 nA: a fuga não depende da tensão reversa, depende de quantos portadores minoritários existem. Em polarização direta, a corrente vai de cerca de 17 µA em 0,4 V para 0,16 mA em 0,5 V, 1,4 mA em 0,6 V e 11 mA em 0,7 V. Cada 0,1 V a mais multiplica a corrente por cerca de nove. É esse crescimento explosivo que faz a junção parecer uma porta que "abre" perto de 0,6 a 0,7 V.
+
+## Explore: a polarização num circuito
+
+No circuito abaixo, uma bateria de 12 V alimenta duas lâmpadas iguais, cada uma com um diodo em série. O diodo D1 está com o anodo virado para o positivo; o D2, ao contrário.
+
+<Simulation circuit="m09/polarizacao" />
+
+1. Com a bateria normal, qual lâmpada acende? Quanto marca a tensão em D1?
+2. Quanto marca a tensão em D2? Por que ela é negativa?
+3. Inverta a bateria. O que muda?
+
+Com a bateria normal, D1 está em polarização direta: conduz, L1 acende com cerca de 0,40 A, e D1 fica com cerca de 0,85 V. O valor passa um pouco dos 0,7 V porque a corrente é grande; na [próxima aula](../02-diodo/) você vai ver como a tensão do diodo depende da corrente. Já o D2 está em polarização reversa: bloqueia e fica com quase toda a tensão da bateria, −11,98 V (negativa porque o anodo dele está no lado negativo). L2 fica apagada. Invertendo a bateria, os papéis se trocam.
+
+<RealCase title="A placa solar é uma junção PN do tamanho de um azulejo">
+
+Uma célula solar de silício é uma junção PN enorme e fininha, com a camada N bem rasa para a luz chegar até a junção. A luz faz o mesmo que o calor faz no cristal: quebra ligações e cria pares de elétron livre e lacuna. Os pares criados perto da camada de depleção são separados pelo campo elétrico da junção, que joga os elétrons para o lado N e as lacunas para o lado P. Aparece uma tensão entre as faces da célula, e, com uma carga ligada, uma corrente proporcional à quantidade de luz.
+
+Cada célula de silício dá cerca de 0,6 V em aberto (valor típico), pouco para qualquer aparelho. Por isso o painel liga dezenas de células em série: os painéis de 36 células, vendidos para carregar baterias de 12 V, dão cerca de 21 V em aberto, e os de 60 células, usados em telhados, perto de 37 V (valores típicos). Como no silício puro, o calor muda tudo: a tensão do painel cai alguns décimos de por cento para cada grau de aquecimento, e um painel muito quente ao meio-dia de verão rende menos do que numa manhã fria e ensolarada.
+
+A mesma junção funciona ao contrário no <Term id="led">LED</Term>: em vez de a luz criar pares, os pares que se recombinam na junção emitem luz. E o receptor do controle remoto da TV e muitos sensores de luz usam uma junção pequena, o fotodiodo, que deixa passar uma corrente proporcional à luz que recebe. Os painéis aparecem em detalhe na aula <LinkAula id="m10-fontes/04-energia-solar" /> e os LEDs, na aula de [LEDs](../04-leds/) deste módulo.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Achar que "semicondutor" quer dizer "meio condutor", como um resistor de valor médio.** O que importa não é conduzir mais ou menos, é que dá para controlar quanto e em que sentido ele conduz.
+- **Achar que o silício tipo N é negativo e o tipo P é positivo.** Os dois são neutros. As letras indicam o sinal dos portadores majoritários.
+- **Imaginar a lacuna como uma partícula de verdade, um próton solto.** Ela é a falta de um elétron numa ligação, que anda porque os elétrons vizinhos pulam para a vaga.
+- **Esquecer o calor.** Todo componente de silício muda com a temperatura: a fuga cresce, a tensão direta cai (cerca de 2 mV por grau num diodo de silício, valor típico), e acima de cerca de 150 °C na junção (o limite exato vem na folha de dados) o componente se danifica. Na solda, encoste o ferro só o tempo de fazer a junta, poucos segundos.
+- **Pegar chips sem cuidado com a eletricidade estática.** Uma <Term id="descarga-eletrostatica">descarga eletrostática</Term> fraca demais para você sentir pode perfurar a camada isolante finíssima de um MOSFET ou de um circuito integrado. Guarde os componentes na embalagem antiestática, toque numa parte de metal aterrada antes de pegá-los e segure pelo corpo, não pelos terminais. Quem monta placas com frequência usa a pulseira antiestática.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Por que o silício puro conduz tão pouco à temperatura ambiente?',
+      options: [
+        {
+          text: 'Porque quase todos os elétrons externos estão presos nas ligações entre os átomos',
+          correct: true,
+          feedback:
+            'Isso. Cada átomo divide seus quatro elétrons externos com quatro vizinhos. Só as poucas ligações que o calor quebra liberam elétrons.',
+        },
+        {
+          text: 'Porque o silício não tem elétrons na camada externa',
+          feedback: 'Tem quatro. O problema é que eles estão ocupados nas ligações do cristal.',
+        },
+        {
+          text: 'Porque o silício é um metal muito resistente',
+          feedback: 'O silício não é metal. Nos metais sobra um elétron livre por átomo.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Um pedaço de silício puro é aquecido de 25 °C para 60 °C. O que acontece com a resistência dele?',
+      options: [
+        {
+          text: 'Diminui, porque o calor quebra mais ligações e cria mais portadores',
+          correct: true,
+          feedback:
+            'Isso. Ao contrário dos metais, o semicondutor conduz mais quando esquenta. É o princípio do NTC.',
+        },
+        {
+          text: 'Aumenta, como num fio de cobre',
+          feedback:
+            'No metal a vibração atrapalha os elétrons que já são livres. No semicondutor, o efeito que manda é a criação de novos portadores.',
+        },
+        {
+          text: 'Não muda',
+          feedback: 'Muda muito: no silício puro, os portadores aproximadamente dobram a cada 10 °C.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada item ao que ele faz ou contém.',
+      pairs: [
+        ['Fósforo (5 elétrons externos)', 'Sobra um elétron livre: silício tipo N'],
+        ['Boro (3 elétrons externos)', 'Falta um elétron numa ligação: silício tipo P'],
+        ['Calor no silício puro', 'Cria pares de elétron livre e lacuna'],
+        ['Camada de depleção', 'Faixa sem portadores livres, só com íons presos'],
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Um pedaço de silício tipo N tem carga elétrica negativa.',
+      answer: false,
+      explanation:
+        'Ele é neutro. Cada átomo de fósforo trouxe um elétron a mais, mas também um próton a mais no núcleo. O "N" indica que os portadores majoritários são negativos.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'O que existe na camada de depleção de uma junção PN?',
+      options: [
+        {
+          text: 'Íons presos no cristal, positivos do lado N e negativos do lado P, e quase nenhum portador livre',
+          correct: true,
+          feedback:
+            'Isso. Os portadores atravessaram e se recombinaram, e ficaram os íons, que criam o campo elétrico e o potencial de barreira.',
+        },
+        {
+          text: 'Um acúmulo de elétrons livres e lacunas',
+          feedback: 'É o contrário: a camada é justamente a faixa que ficou sem portadores livres.',
+        },
+        {
+          text: 'Uma fina camada de cola entre o silício P e o N',
+          feedback:
+            'Não há cola: é um cristal só, dopado de um jeito de um lado e de outro jeito do outro.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma bateria é ligada com o positivo no lado N e o negativo no lado P de uma junção de silício. O que acontece?',
+      options: [
+        {
+          text: 'A camada de depleção se alarga e só passa uma corrente de fuga minúscula',
+          correct: true,
+          feedback: 'Isso: é a polarização reversa. A junção bloqueia.',
+        },
+        {
+          text: 'A camada de depleção estreita e a corrente dispara',
+          feedback: 'Isso acontece na polarização direta, com o positivo no lado P (anodo).',
+        },
+        {
+          text: 'A junção conduz igual nos dois sentidos',
+          feedback: 'A graça da junção PN é justamente conduzir num sentido e bloquear no outro.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'O silício tem 5 × 10²² átomos por cm³. Se um em cada 100 mil átomos for de fósforo, quantos elétrons livres por cm³ o cristal terá, aproximadamente? (Pode responder como 5e17.)',
+      answer: 5e17,
+      tolerance: 0.02,
+      explanation:
+        'N = 5 × 10²² ÷ 10⁵ = 5 × 10¹⁷ átomos de fósforo por cm³, e cada um libera um elétron: cerca de 5 × 10¹⁷ elétrons livres por cm³.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- **Semicondutores** como o silício ficam entre condutores e isolantes. No cristal puro, quase todos os elétrons estão presos nas ligações, e o calor cria uns poucos **elétrons livres** e **lacunas**, que conduzem mais quando o material esquenta.
+- A **lacuna** é a vaga de um elétron numa ligação. Ela anda no sentido contrário ao dos elétrons e se comporta como uma carga positiva.
+- A **dopagem** controla os portadores: fósforo (5 elétrons) cria o **tipo N**, com elétrons livres; boro (3 elétrons) cria o **tipo P**, com lacunas. Os dois continuam eletricamente neutros.
+- Na **junção PN**, os portadores atravessam a fronteira e se recombinam, deixando a **camada de depleção**, com íons presos e um **potencial de barreira** de cerca de 0,7 V no silício.
+- **Polarização direta** (positivo no P, o anodo) estreita a camada, e a corrente cresce muito depressa a partir de uns 0,6 V. **Polarização reversa** (positivo no N, o catodo) alarga a camada, e só passa uma fuga de nanoampères.
+
+Na próxima aula, a junção vira um componente que você pode segurar na mão e medir: o [diodo](../02-diodo/).

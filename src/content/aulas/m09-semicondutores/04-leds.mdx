@@ -1,0 +1,338 @@
+---
+titulo: LEDs
+modulo: m09-semicondutores
+ordem: 4
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Explicar por que a tensão direta de um LED depende da cor
+  - Reconhecer o anodo e o catodo de um LED pelas pernas e pelo corpo
+  - Calcular o resistor limitador e a potência dele para um ou mais LEDs em série
+  - Relacionar a corrente do LED com o brilho e com a vida útil
+  - Explicar como é feita uma fita de LED de 12 V e por que ela sofre com a tensão errada
+prerequisitos:
+  - m09-semicondutores/01-juncao-pn
+  - m01-eletricidade-do-zero/04-lei-de-ohm
+  - m02-circuitos-cc/02-associacao-em-serie
+tags: [LED, resistor limitador, tensão direta, brilho, fita de LED, cor]
+seguranca: baixa-tensao
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import LedPeca from '../../../lessons/m09/figures/LedPeca.astro';
+import LedCalculadora from '../../../lessons/m09/LedCalculadora';
+
+Você pega um LED vermelho, encosta as pernas numa bateria de 9 V e ele dá um clarão e apaga para sempre. O mesmo LED, com um resistor de alguns centavos no caminho, ficaria aceso por dezenas de milhares de horas. A diferença está numa conta de uma linha, e é ela que faz funcionar as luzes de painel, os indicadores dos aparelhos e as fitas de LED da sua casa.
+
+Nesta aula você vai ver de onde vem a luz do LED, por que cada cor pede uma tensão diferente, como calcular o resistor e o que tem dentro de uma fita de LED de 12 V.
+
+## Uma junção PN que acende
+
+O <Term id="led">LED</Term> (diodo emissor de luz) é uma <Term id="juncao-pn">junção PN</Term>, igual à da [primeira aula do módulo](../01-juncao-pn/). Em polarização direta, elétrons do lado N atravessam a junção e caem nas <Term id="lacuna">lacunas</Term> do lado P. Cada vez que um elétron cai numa lacuna, ele perde um pouco de energia. No silício, essa energia vira calor. Em outros materiais, ela sai como um pacotinho de luz, um **fóton**.
+
+A cor da luz depende de quanta energia cada elétron perde ao cair, e isso depende do material do cristal. Os LEDs vermelhos e amarelos usam fosfeto de alumínio, gálio e índio; os azuis e os verdes de alto brilho usam nitreto de índio e gálio; os infravermelhos, arseneto de gálio. Quanto mais energia por fóton, mais para o azul vai a luz, e maior é a tensão que a junção pede para conduzir. Essa tensão, com o LED aceso, é a <Term id="tensao-direta">tensão direta</Term>.
+
+Valores típicos de LEDs comuns de 5 mm, a 20 mA:
+
+| Cor | Tensão direta típica | Onde aparece |
+|-----|---------------------|--------------|
+| Infravermelho | cerca de 1,2 V | Controle remoto, sensor de barreira do portão |
+| Vermelho | cerca de 2,0 V | Indicadores, painéis |
+| Amarelo | cerca de 2,1 V | Indicadores, sinalização |
+| Verde comum (verde-amarelado) | cerca de 2,2 V | Indicadores antigos |
+| Verde de alto brilho | cerca de 3,0 V | Indicadores modernos, semáforos |
+| Azul | cerca de 3,1 V | Indicadores, iluminação decorativa |
+| Branco | cerca de 3,1 V | Lanternas, lâmpadas, fitas |
+
+Repare que existem dois verdes: o comum, do mesmo material dos vermelhos, e o de alto brilho, do mesmo material dos azuis. Na dúvida, a folha de dados do LED ou a loja informam a tensão.
+
+E o branco? Não existe um cristal que emita branco. O LED branco comum é um **LED azul** coberto por uma camada de pó amarelo, o fósforo. Parte da luz azul atravessa, parte faz o fósforo brilhar em amarelo, e a mistura parece branca. Por isso a tensão do branco é a mesma do azul.
+
+<DeepDive title="A conta da cor: energia do fóton e tensão">
+A energia de um fóton depende do comprimento de onda da luz, $\lambda$. Medindo a energia em elétron-volts (eV, a energia que um elétron ganha ao atravessar 1 V) e o comprimento de onda em nanômetros:
+
+$$
+E \approx \frac{1240}{\lambda}
+$$
+
+A luz vermelha de um LED típico tem cerca de 630 nm, o que dá $E \approx 1240/630 \approx 1{,}97\ \text{eV}$. Cada elétron precisa ganhar pelo menos cerca de 2 eV para produzir esse fóton, e por isso o LED vermelho pede cerca de 2 V. A luz azul, perto de 470 nm, dá $E \approx 2{,}6\ \text{eV}$. O LED azul pede um pouco mais que isso, cerca de 3,1 V, porque o material dele tem mais resistência interna e outras perdas.
+
+O silício, com o cristal que tem, só poderia emitir no infravermelho, e de um jeito tão ineficiente que a energia vira calor. É por isso que não existe LED de silício.
+</DeepDive>
+
+## Anodo, catodo e o que tem dentro
+
+O LED só acende num sentido, então você precisa saber qual perna é qual. Num LED novo:
+
+- A **perna mais longa** é o **anodo** (+), que vai para o lado positivo.
+- A **perna mais curta** é o **catodo** (−). O corpo de plástico tem um **lado chanfrado** (achatado) do lado do catodo.
+- Olhando contra a luz, dá para ver duas peças de metal dentro da lente. A maior, em forma de bigorna com um copinho em cima, costuma ser o catodo, mas há fabricantes que fazem diferente; confie mais no chanfro e nas pernas.
+
+<Part3D
+  part="led"
+  props={{ color: 'vermelho', size: 5 }}
+  annotations
+  alt="LED vermelho de 5 mm visto de lado. A perna longa é o anodo e a curta, o catodo, do lado chanfrado da base. Dentro da lente de epóxi, o terminal do catodo termina num copo refletor com o chip, e um fio finíssimo liga o chip ao terminal do anodo."
+  caption="LED vermelho de 5 mm, ampliado. O chip que acende é um quadradinho de menos de meio milímetro, no fundo do copo refletor."
+>
+  <LedPeca />
+</Part3D>
+
+O LED de verdade é o chip, um quadradinho de menos de meio milímetro de lado. Ele fica num copo refletor que joga a luz para cima, e um fio de ouro ou de cobre mais fino que um cabelo liga o chip à outra perna. A lente de epóxi protege tudo e concentra a luz.
+
+Se as pernas foram cortadas, o multímetro resolve: na escala de teste de diodo, que você viu na aula sobre <LinkAula id="m03-medicoes/04-resistencia-continuidade-e-diodo">resistência, continuidade e diodo</LinkAula>, muitos multímetros acendem de leve um LED vermelho quando a ponta vermelha está no anodo. Azuis e brancos às vezes ficam apagados, mas o visor mostra um valor num sentido e circuito aberto no outro.
+
+## Por que o LED precisa de um resistor
+
+Na aula sobre a junção PN você viu que, acima de certa tensão, a corrente cresce de forma explosiva: cada décimo de volt a mais multiplica a corrente. No LED é igual. Um LED vermelho que conduz 20 mA com 2,0 V passa de 50 mA com 2,4 V, e queima pouco acima disso. O LED não tem como segurar a própria corrente; quem define a corrente é o resto do circuito.
+
+Pense num ralo de pia que só começa a engolir água quando o nível passa de uma marca, e daí em diante engole tudo o que chegar. Quem decide quanta água passa é a torneira. No circuito, a torneira é um resistor em série, o <Term id="resistor-limitador">resistor limitador</Term>. A analogia para aí: o ralo não esquenta, e o LED sim. Toda corrente a mais vira calor num chip minúsculo.
+
+O resistor fica com a tensão que sobra da fonte depois da tensão direta do LED. Pela <LinkAula id="m01-eletricidade-do-zero/04-lei-de-ohm">lei de Ohm</LinkAula>, o resistor para uma corrente $I$ é:
+
+$$
+R = \frac{V_\text{fonte} - V_\text{LED}}{I}
+$$
+
+em que $V_\text{fonte}$ é a tensão da fonte, $V_\text{LED}$ a tensão direta do LED (da tabela ou da folha de dados) e $I$ a corrente que você quer, em ampères. O resistor esquenta, e a <Term id="potencia-eletrica">potência</Term> dele é:
+
+$$
+P = (V_\text{fonte} - V_\text{LED}) \cdot I
+$$
+
+Escolha um resistor que aguente pelo menos o dobro dessa potência.
+
+## Exemplo resolvido: LED vermelho em 5 V
+
+Você quer acender um LED vermelho com 10 mA numa saída de 5 V, como a de um carregador USB ou a de um Arduino.
+
+**Passo 1: a tensão que sobra para o resistor.** O LED vermelho fica com cerca de 2,0 V:
+
+$$
+5\ \text{V} - 2{,}0\ \text{V} = 3{,}0\ \text{V}
+$$
+
+**Passo 2: o resistor.**
+
+$$
+R = \frac{3{,}0\ \text{V}}{0{,}010\ \text{A}} = 300\ \Omega
+$$
+
+**Passo 3: o valor comercial.** Resistores são vendidos em valores padronizados, as séries de valores que você vai ver na aula sobre <LinkAula id="m04-passivos/01-resistores">resistores</LinkAula>. 300 Ω não está na série mais comum, a E12; os vizinhos são 270 Ω e 330 Ω. Escolha o de cima, **330 Ω**: a corrente fica um pouco menor que a planejada, nunca maior.
+
+**Passo 4: a corrente real.** Com 330 Ω, a corrente fica perto de 9,5 mA, e o LED, com essa corrente um pouco menor, fica com 1,86 V. A calculadora mais abaixo e o simulador dão esses mesmos números.
+
+**Passo 5: a potência no resistor.**
+
+$$
+P = 3{,}14\ \text{V} \times 0{,}0095\ \text{A} \approx 0{,}03\ \text{W}
+$$
+
+Trinta miliwatts. Um resistor comum de 1/4 W (0,25 W) sobra.
+
+Faça a mesma conta para um LED azul em 12 V com 15 mA e você chega a $(12 - 3{,}1)/0{,}015 \approx 593\ \Omega$. O valor de cima na série E12 é 680 Ω, que dá uns 13 mA e cerca de 0,12 W no resistor: ainda cabe num de 1/4 W, mas já esquenta.
+
+## Explore: o LED com e sem resistor
+
+No circuito abaixo, uma fonte de 9 V acende um LED através do resistor R1. O jumper S1 fica em paralelo com o resistor: ligado, ele tira o resistor do caminho.
+
+<Simulation circuit="m09/led-resistor" />
+
+1. Com R1 em 330 Ω e o LED vermelho, quanto marcam a corrente e a tensão no LED? Confira com a fórmula.
+2. Suba R1 para 1 kΩ. O que acontece com a corrente e com o brilho?
+3. Volte para 330 Ω e troque o LED por um azul. Por que a corrente cai?
+4. Abaixe R1 aos poucos até aparecer o aviso de corrente acima do máximo. Em que valor isso acontece?
+5. Por último, ligue o jumper.
+
+Com 330 Ω, o LED vermelho fica com 2,01 V e o resistor com 6,99 V, e passam 21,2 mA: a conta dá $(9 - 2{,}0)/330 \approx 21\ \text{mA}$. O resistor dissipa 0,15 W. Com 1 kΩ, a corrente cai para 7,2 mA e o LED fica bem mais fraco, mas continua visível. O LED azul fica com 3,07 V; sobra menos tensão para o resistor, e a corrente cai para 18 mA. O aviso aparece perto de 230 Ω, quando a corrente passa dos 30 mA, o máximo deste LED. Abaixo disso o LED esquenta além da conta e, na simulação, queima quando a corrente chega a umas duas vezes e meia o máximo.
+
+Com o jumper ligado, o LED fica direto na fonte de 9 V. A corrente dispara para centenas de miliampères e o LED queima em uma fração de segundo. Repare no que o medidor mostra depois: corrente zero e 9 V no LED. O LED queimado fica **aberto**, como um fio cortado, e a tensão inteira da fonte aparece entre as pernas dele.
+
+<Part3D
+  part="led"
+  props={{ color: 'vermelho', size: 5, burned: true }}
+  annotations
+  alt="O mesmo LED de 5 mm depois de queimar por excesso de corrente. Por fora, a lente parece inteira. Por dentro, o chip está escurecido e o fio de ligação, rompido."
+  caption="O LED queimado por fora quase não muda. Por dentro, o chip escurece e o fio de ligação derrete: o circuito fica aberto."
+>
+  <LedPeca burned />
+</Part3D>
+
+## Brilho e vida útil
+
+O brilho do LED acompanha a corrente: com o dobro da corrente, ele emite perto do dobro de luz. A corrente nominal dos LEDs comuns de 5 mm é de cerca de 20 mA, com máximo perto de 30 mA (valores típicos; a folha de dados manda). Os LEDs modernos são tão eficientes que, para um indicador de painel, de 2 a 10 mA costumam bastar.
+
+Dois detalhes ajudam na hora de escolher a corrente:
+
+- **O olho engana.** O dobro de luz não parece o dobro do brilho, e um LED com metade da corrente parece só um pouco mais fraco. Muitas vezes dá para usar bem menos corrente do que você imagina.
+- **Calor encurta a vida.** O LED quase nunca "queima" de repente quando trabalha dentro da corrente nominal; ele vai perdendo brilho ao longo de dezenas de milhares de horas. Corrente alta e calor aceleram muito esse desgaste.
+
+Para controlar o brilho sem desperdiçar energia no resistor, os circuitos ligam e desligam o LED centenas de vezes por segundo, mais rápido do que o olho percebe. Isso se chama PWM e aparece na aula sobre <LinkAula id="m11-digital/06-conversao-ad-da-e-pwm">conversão AD/DA e PWM</LinkAula>; neste módulo, você vai usar a técnica com uma fita de LED na aula sobre o [MOSFET](../08-mosfet/).
+
+## Explore: calcule o resistor
+
+Use a calculadora para conferir o exemplo resolvido e responder às perguntas abaixo.
+
+<LedCalculadora client:visible />
+
+1. Confira o exemplo: LED vermelho em 5 V com 10 mA.
+2. Três LEDs brancos em série numa fonte de 12 V, com 20 mA. Que resistor sai?
+3. E se você tentar quatro LEDs brancos em série nos mesmos 12 V?
+4. Dois LEDs vermelhos em série em 5 V, com 10 mA. O que a calculadora avisa?
+
+O exemplo dá 300 Ω calculados, 330 Ω na série E12 e 9,5 mA de corrente real. Os três brancos em 12 V somam 9,3 V; sobram 2,7 V para o resistor, e a conta dá 135 Ω, que vira 150 Ω, com 18,5 mA. A calculadora já avisa que sobra pouca tensão para o resistor. Guarde esse caso: é exatamente o segmento de uma fita de LED, e daqui a pouco você vai ver o que essa folga pequena causa. Quatro brancos pedem 12,4 V, mais do que a fonte tem, e não acendem direito. Dois vermelhos em 5 V funcionam, mas sobra só 1 V para o resistor, e a calculadora avisa de novo: uma pequena variação da fonte ou da tensão dos LEDs muda bastante a corrente.
+
+## Vários LEDs: série ou paralelo?
+
+**Em série**, como na <LinkAula id="m02-circuitos-cc/02-associacao-em-serie">associação em série</LinkAula>, todos os LEDs recebem a mesma corrente, e um resistor só basta. As tensões diretas se somam, então a fonte precisa ter uma boa sobra acima da soma. Se um LED queimar aberto, todos apagam.
+
+**Em paralelo**, cada LED precisa do **próprio resistor**. A tentação é ligar vários LEDs em paralelo e um resistor só para todos. O problema é que dois LEDs "iguais" nunca têm a mesma tensão direta. Se um deles conduzir com 0,1 V a menos, ele puxa várias vezes mais corrente que os outros, esquenta, e a tensão dele cai mais ainda. Ele pode queimar, e aí a corrente toda vai para os que sobraram. Com um resistor por LED, cada resistor segura a corrente do seu LED, e as diferenças entre LEDs quase não importam.
+
+<RealCase title="A fita de LED de 12 V">
+
+Olhe de perto uma <Term id="fita-de-led">fita de LED</Term> de 12 V e você vai ver um padrão que se repete: três LEDs, um resistor pequenininho e uma marca de corte com uma tesourinha desenhada. Cada um desses trechos é um **segmento**: três LEDs brancos em série com um resistor limitador, exatamente a conta da calculadora. A fita inteira é um monte de segmentos ligados em paralelo nas duas trilhas de cobre que correm pelas bordas, a de +12 V e a de 0 V.
+
+Por isso você pode cortar a fita **nas marcas** e o resto continua funcionando. Cortando no meio de um segmento, aquele segmento apaga, porque a série de três LEDs fica aberta.
+
+O circuito abaixo tem dois segmentos de uma fita com resistores de 150 Ω, alimentados por uma fonte ajustável.
+
+<Simulation circuit="m09/fita-led" />
+
+1. Com 12 V, quanto consome cada segmento? Quanto fica em cada LED e no resistor?
+2. Suba a fonte para 14,4 V, a tensão de um carro com o motor ligado. Quanto subiu a tensão, em porcentagem? E a corrente?
+3. Baixe a fonte para 10 V. O que acontece com o brilho?
+
+Com 12 V, cada segmento consome 18,5 mA, cada LED fica com 3,08 V e o resistor com 2,77 V. Em 14,4 V, a tensão subiu 20%, mas a corrente foi para 30,9 mA, **67% a mais**, e os LEDs passam do máximo. O motivo é que a tensão a mais vai toda para o resistor, que tinha só 2,77 V e passou a ter 4,64 V. Em 10 V acontece o contrário: sobra pouco para o resistor, a corrente cai para 8,4 mA e o brilho, para menos da metade.
+
+Essa é a explicação de duas queixas comuns. A fita de 12 V instalada direto no carro funciona, mas esquenta e escurece antes do tempo, porque com o motor ligado o sistema elétrico trabalha perto de 14 V. E a fita muito comprida fica mais fraca na ponta: as trilhas de cobre têm resistência, a <Term id="queda-de-tensao">queda de tensão</Term> ao longo delas tira tensão dos últimos segmentos, e eles perdem brilho. Uma fita de 5 m com 60 LEDs por metro tem 100 segmentos; com os valores da simulação, ela puxa cerca de 1,9 A da fonte. Para fitas longas, alimente pelas duas pontas ou pelo meio, e escolha uma fonte com folga de corrente.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Ligar o LED direto na bateria ou na fonte.** Sem resistor, nada limita a corrente, e o LED queima na hora, mesmo numa bateria de 9 V. A exceção são as baterias de moeda de 3 V, que têm resistência interna alta e acabam fazendo o papel do resistor; não conte com isso em nenhuma outra fonte.
+- **Ligar o LED ao contrário.** Ele não acende, e não aguenta muita tensão reversa: cerca de 5 V é o máximo típico. Numa fonte maior que isso, ligado ao contrário, ele pode entrar em ruptura e se danificar, mesmo com o resistor.
+- **Um resistor só para vários LEDs em paralelo.** Um LED puxa mais corrente que os outros e queima primeiro. Use um resistor por LED, ou ponha os LEDs em série.
+- **Esquecer a potência do resistor.** Um LED vermelho com 20 mA em 24 V deixa 0,44 W no resistor, quase o dobro do que um resistor de 1/4 W aguenta. Calcule $P = (V_\text{fonte} - V_\text{LED}) \cdot I$.
+- **Achar que todo LED precisa de resistor.** LEDs vendidos como "LED 12 V" para painel, lâmpadas LED e fitas já vêm com o circuito de limitação embutido. Ponha outro resistor em série e o brilho cai.
+- **Usar fita de 12 V em fonte de tensão maior.** Fita de 12 V em 24 V queima em segundos. E, como você viu, até 14,4 V já é demais para uso contínuo.
+- **Olhar direto para LEDs de alta potência.** LEDs de lanterna e de iluminação são fortes o bastante para ofuscar e cansar a vista, e os ultravioleta podem machucar os olhos sem que você perceba o brilho. LEDs de potência também esquentam muito e precisam de dissipador e de um circuito próprio que controla a corrente.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Por que um LED ligado direto numa bateria de 9 V queima?',
+      options: [
+        {
+          text: 'Porque acima da tensão direta a corrente cresce muito depressa, e nada no circuito limita essa corrente',
+          correct: true,
+          feedback:
+            'Isso. O LED é uma junção PN: alguns décimos de volt acima da tensão direta já multiplicam a corrente. Quem limita a corrente é o resistor em série.',
+        },
+        {
+          text: 'Porque o LED só funciona com corrente alternada',
+          feedback: 'O LED funciona em corrente contínua, como qualquer diodo, desde que a corrente seja limitada.',
+        },
+        {
+          text: 'Porque 9 V é pouca tensão para um LED',
+          feedback: 'É o contrário: o LED vermelho pede só cerca de 2 V, e os 7 V que sobram, sem resistor, viram corrente demais.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um LED azul (tensão direta de 3,1 V) vai ser ligado numa fonte de 9 V com 20 mA. Qual o resistor calculado, em ohms?',
+      answer: 295,
+      tolerance: 0.03,
+      unit: 'Ω',
+      explanation:
+        'R = (9 − 3,1) ÷ 0,020 = 5,9 ÷ 0,020 = 295 Ω. Na série E12, o valor de cima é 330 Ω, que dá um pouco menos de 20 mA.',
+    },
+    {
+      type: 'vf',
+      prompt: 'Num LED novo, a perna mais longa é o catodo.',
+      answer: false,
+      explanation:
+        'A perna mais longa é o anodo, que vai para o positivo. O catodo é a perna curta, do lado chanfrado do corpo.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um LED vermelho (2 V) funciona com 20 mA numa fonte de 12 V. Quanta potência o resistor limitador dissipa, em watts?',
+      answer: 0.2,
+      tolerance: 0.03,
+      unit: 'W',
+      explanation:
+        'O resistor fica com 12 − 2 = 10 V. P = 10 V × 0,020 A = 0,2 W. Um resistor de 1/4 W ficaria no limite; com folga, use um de 1/2 W.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Três LEDs vermelhos foram ligados em paralelo, todos com um único resistor em série. O que tende a acontecer?',
+      options: [
+        {
+          text: 'O LED com a menor tensão direta puxa a maior parte da corrente, esquenta e pode queimar',
+          correct: true,
+          feedback:
+            'Isso. Pequenas diferenças de tensão direta viram grandes diferenças de corrente. Use um resistor por LED.',
+        },
+        {
+          text: 'A corrente se divide igualmente entre os três',
+          feedback:
+            'Só se os três tivessem exatamente a mesma tensão direta, o que nunca acontece. Um deles sempre puxa mais.',
+        },
+        {
+          text: 'Nenhum acende, porque o resistor bloqueia a corrente',
+          feedback: 'Eles acendem, mas com brilhos diferentes, e o que puxa mais corrente sofre.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma fita de LED de 12 V (segmentos de três LEDs brancos e um resistor) é ligada em 14,4 V. O que acontece com a corrente?',
+      options: [
+        {
+          text: 'Sobe bem mais que os 20% da tensão, porque a tensão a mais vai toda para o resistor',
+          correct: true,
+          feedback:
+            'Isso. Na simulação, a corrente subiu 67%: o resistor passou de 2,77 V para 4,64 V, e a corrente acompanha a tensão do resistor.',
+        },
+        {
+          text: 'Sobe 20%, igual à tensão',
+          feedback:
+            'Seria assim num resistor sozinho. Aqui, os LEDs ficam com quase a mesma tensão, e todo o aumento cai no resistor.',
+        },
+        {
+          text: 'Não muda, porque o resistor limita a corrente',
+          feedback: 'O resistor limita, mas a corrente que ele deixa passar depende da tensão sobre ele, que aumentou.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada LED à característica dele.',
+      pairs: [
+        ['LED infravermelho', 'Cerca de 1,2 V, luz invisível do controle remoto'],
+        ['LED vermelho', 'Cerca de 2 V de tensão direta'],
+        ['LED azul', 'Cerca de 3,1 V de tensão direta'],
+        ['LED branco', 'LED azul coberto por uma camada de fósforo amarelo'],
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **LED** é uma junção PN feita de um material em que a recombinação de elétrons e lacunas solta luz. A **cor** depende do material, e a **tensão direta** acompanha a energia da luz: cerca de 2 V no vermelho, cerca de 3 V no azul e no branco.
+- A **perna longa** é o anodo (+); a **curta**, do lado chanfrado, é o catodo (−).
+- O LED não limita a própria corrente. O **resistor limitador** faz isso: $R = (V_\text{fonte} - V_\text{LED}) / I$, com o valor comercial logo acima do calculado e potência com folga.
+- O **brilho** acompanha a corrente; de 2 a 10 mA bastam para indicadores, e 20 mA é a corrente nominal típica dos LEDs de 5 mm.
+- LEDs em **série** dividem a mesma corrente e um resistor; em **paralelo**, cada um precisa do seu resistor.
+- A **fita de LED** de 12 V é feita de segmentos de três LEDs e um resistor, em paralelo. Com tensão maior, a corrente sobe muito mais que a tensão; com tensão menor, o brilho cai.
+
+Na próxima aula, um diodo que trabalha justamente na região em que os outros quebram: o [diodo Zener](../05-diodo-zener/), que segura a tensão num valor fixo.

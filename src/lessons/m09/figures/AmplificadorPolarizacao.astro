@@ -1,0 +1,147 @@
+---
+/* 9.7: why an amplifier needs bias. The base-emitter curve (IC against VBE,
+   drawn as a sketch, not to scale): a signal on its own, around 0 V, never
+   reaches the knee; the same signal riding on the bias point Q moves the
+   collector current up and down, a bigger copy of it. */
+const X0 = 40;
+const Y0 = 200;
+const vx = (v: number) => X0 + 260 * v;
+const iy = (i: number) => Y0 - 50 * i;
+// Sketch of the exponential, with a softer knee than the real one so it reads.
+const ic = (v: number) => 1.1 * Math.exp((v - 0.66) / 0.045);
+const VQ = 0.66;
+const AMP = 0.02;
+
+const curve = Array.from({ length: 80 }, (_, k) => {
+  const v = (0.709 * k) / 79;
+  return `${k ? 'L' : 'M'}${vx(v).toFixed(1)} ${iy(ic(v)).toFixed(1)}`;
+}).join('');
+
+const wave = (n: number, f: (s: number, k: number) => [number, number]) =>
+  Array.from({ length: n }, (_, k) => {
+    const [x, y] = f(Math.sin((4 * Math.PI * k) / (n - 1)), k);
+    return `${k ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`;
+  }).join('');
+
+// Input on the bias point, time going down; output current, time going right.
+const input = wave(61, (s, k) => [vx(VQ + AMP * s), 212 + (72 * k) / 60]);
+const output = wave(61, (s, k) => [236 + (84 * k) / 60, iy(ic(VQ + AMP * s))]);
+// The same signal with no bias, around 0 V: nothing comes out.
+const alone = wave(61, (s, k) => [vx(0.1 * s), 212 + (72 * k) / 60]);
+const qx = vx(VQ);
+const qy = iy(ic(VQ));
+---
+
+<svg viewBox="0 0 360 310" width="360" height="310" class="fig" aria-hidden="true">
+  <path d={`M${X0} 26V${Y0}H262`} class="axis" />
+  <path
+    d={`M${X0 - 4} 32L${X0} 24L${X0 + 4} 32M256 ${Y0 - 4}L264 ${Y0}L256 ${Y0 + 4}`}
+    class="axis"
+  />
+  <text x={X0 + 8} y="30" class="ax">
+    IC
+  </text>
+  <text x="262" y={Y0 + 18} class="ax end">
+    VBE
+  </text>
+  <text x={X0 - 8} y={Y0 + 5} class="tick end">
+    0
+  </text>
+
+  <path d={curve} class="curve" />
+
+  <path d={`M${qx} ${qy}V212M${qx} ${qy}H236`} class="guide" />
+  <circle cx={qx} cy={qy} r="5" class="q" />
+  <text x={qx - 10} y={qy - 10} class="note end">
+    ponto de repouso Q
+  </text>
+
+  <path d={input} class="sig" />
+  <path d={output} class="sig strong" />
+  <text x="292" y="88" class="note mid">
+    corrente no coletor:
+  </text>
+  <text x="292" y="104" class="note mid">
+    uma cópia maior
+  </text>
+  <text x={qx} y="302" class="note mid">
+    sinal sobre a polarização
+  </text>
+
+  <path d={alone} class="sig muted" />
+  <text x="80" y="232" class="note">
+    sinal sozinho,
+  </text>
+  <text x="80" y="248" class="note">
+    em 0 V: a junção
+  </text>
+  <text x="80" y="264" class="note">
+    nem conduz
+  </text>
+  <path d={`M${X0} ${Y0}H140`} class="flat" />
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .axis {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+  }
+  .ax {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .curve {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2.5;
+  }
+  .guide {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+    stroke-dasharray: 4 4;
+  }
+  .q {
+    fill: var(--accent);
+  }
+  .sig {
+    fill: none;
+    stroke: var(--info);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .strong {
+    stroke: var(--accent);
+    stroke-width: 2.5;
+  }
+  .muted {
+    stroke: var(--fg-subtle);
+  }
+  .flat {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

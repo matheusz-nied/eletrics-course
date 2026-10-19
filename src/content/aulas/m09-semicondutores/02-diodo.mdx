@@ -1,0 +1,322 @@
+---
+titulo: Diodo
+modulo: m09-semicondutores
+ordem: 2
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Identificar o anodo e o catodo de um diodo pela faixa no corpo e pelo símbolo
+  - Ler a curva característica (I×V) e explicar o joelho perto de 0,6 a 0,7 V
+  - Escolher entre o modelo ideal, o de queda fixa e a curva real para fazer as contas
+  - Calcular a corrente, a tensão e a potência num circuito com fonte, resistor e diodo
+  - Escolher um diodo pela folha de dados e testá-lo com o multímetro
+prerequisitos:
+  - m09-semicondutores/01-juncao-pn
+  - m01-eletricidade-do-zero/04-lei-de-ohm
+  - m03-medicoes/04-resistencia-continuidade-e-diodo
+tags: [diodo, curva característica, anodo, catodo, Schottky, 1N4007, 1N4148, proteção de polaridade]
+seguranca: baixa-tensao
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import DiodoPeca from '../../../lessons/m09/figures/DiodoPeca.astro';
+import DiodoModelos from '../../../lessons/m09/figures/DiodoModelos.astro';
+import CurvaDiodo from '../../../lessons/m09/CurvaDiodo';
+
+Na pressa, o fio vermelho vai no negativo da bateria. Em muitos aparelhos de 12 V, como o som do carro, a central de alarme ou um rastreador, o resultado é nenhum: o aparelho simplesmente não liga, e volta a funcionar quando você desfaz o engano. Quem salvou a placa foi uma peça de poucos centavos no fio de entrada, um diodo.
+
+Na aula anterior você viu a junção PN por dentro. Agora ela vira um componente que você segura na mão, mede e escolhe pela folha de dados. Você vai ver como a corrente depende da tensão no diodo, que contas simples dá para fazer com ele e quanto ele cobra de pedágio para deixar a corrente passar.
+
+## O diodo por fora
+
+Um <Term id="diodo">diodo</Term> é uma junção PN com dois terminais. O lado P é o **anodo** (A) e o lado N é o **catodo** (K, da grafia alemã *Kathode*). A corrente, no sentido convencional, passa do anodo para o catodo e é bloqueada no sentido contrário.
+
+<Part3D
+  part="diode"
+  props={{ variant: 'retificador', code: '1N4007' }}
+  annotations
+  alt="Diodo retificador 1N4007: corpo cilíndrico preto com uma faixa prateada perto de uma das pontas e um terminal de cada lado. Embaixo, o símbolo do diodo, com o triângulo do lado do anodo e a barra do lado do catodo, alinhados com os terminais da peça."
+  caption="Diodo retificador 1N4007 e o seu símbolo. A faixa no corpo fica do lado do catodo, como a barra no símbolo."
+>
+  <DiodoPeca />
+</Part3D>
+
+Duas regras resolvem quase tudo:
+
+- **Na peça, a faixa marca o catodo.** Vale para o diodo preto de fonte, para o de vidro com faixa preta e para os de montagem em superfície (SMD), que trazem uma faixa do lado do catodo.
+- **No símbolo, o triângulo aponta o sentido em que a corrente passa**, e a barra é a faixa. Se você imaginar a corrente andando pelo fio, ela entra pela base do triângulo e sai pela barra.
+
+Os diodos mais comuns numa bancada são poucos. Os valores abaixo são os da folha de dados dos modelos mais vendidos; confira sempre a do fabricante da peça que você tem.
+
+| Diodo | Tipo | Corrente direta média | Tensão reversa máxima | Onde aparece |
+|-------|------|-----------------------|-----------------------|--------------|
+| 1N4148 | Sinal, corpo de vidro | 150 a 200 mA, conforme o fabricante | 100 V | Circuitos de sinal e de lógica, proteção de entradas |
+| 1N4001 a 1N4007 | Retificador, corpo preto | 1 A | de 50 V (1N4001) a 1.000 V (1N4007) | Fontes, proteção, roda livre de relé |
+| 1N5408 | Retificador de potência | 3 A | 1.000 V | Fontes maiores, carregadores |
+| 1N5819 | Schottky | 1 A | 40 V | Fontes chaveadas, proteção em baixa tensão |
+
+O 1N4007 custa praticamente o mesmo que o 1N4001 e aguenta vinte vezes mais tensão reversa, por isso é o que quase todo mundo compra e o que você vai encontrar na maioria das placas.
+
+## A curva característica
+
+Na aula sobre a <LinkAula id="m01-eletricidade-do-zero/04-lei-de-ohm">lei de Ohm</LinkAula> você viu o gráfico I×V de um resistor: uma reta que sai do zero. O mesmo gráfico para um diodo, a <Term id="curva-caracteristica">curva característica</Term>, é bem diferente:
+
+- **Em polarização direta** (positivo no anodo), a corrente fica praticamente zero até uns 0,5 V e então dispara. A dobra da curva é o **joelho**. É dela que vem o "0,7 V" que se repete tanto: é a tensão em que um diodo de silício já conduz correntes úteis, de miliampères a ampères.
+- **Em polarização reversa** (positivo no catodo), passa só uma corrente de fuga de nanoampères, até a **tensão de ruptura**. Acima dela, a junção rompe e a corrente dispara; num diodo comum, isso costuma destruí-lo. Diodos feitos para trabalhar nessa região são os [Zener](../05-diodo-zener/).
+
+O que mais importa na prática: depois do joelho, a tensão do diodo muda **pouco**. A tabela mostra a tensão direta do modelo de 1N4007 usado nas simulações do curso:
+
+| Corrente | Tensão no 1N4007 |
+|---------------------|------------------|
+| 1 mA | 0,55 V |
+| 10 mA | 0,66 V |
+| 100 mA | 0,77 V |
+| 1 A | 0,91 V |
+
+Cada vez que a corrente fica dez vezes maior, a tensão sobe só cerca de 0,1 V. É como uma porta de mola: precisa de um empurrão para abrir, mas, depois de aberta, empurrar com mais força faz passar muito mais gente sem que a porta abra muito mais. A analogia falha em um ponto: a porta do diodo não tem um ângulo exato em que "abre"; a curva é suave, e o joelho é só a região em que ela começa a subir rápido.
+
+<DeepDive title="A equação do diodo">
+A curva segue a **equação de Shockley**:
+
+$$
+I = I_S \left( e^{\,V/(n \cdot V_T)} - 1 \right)
+$$
+
+em que $I$ é a corrente no diodo (A), $V$ a tensão na junção (V), $I_S$ a corrente de saturação, uma corrente minúscula que depende da peça (cerca de 7 nA no modelo do 1N4007), $n$ o coeficiente de emissão, entre 1 e 2 (1,8 no 1N4007), e $V_T$ a tensão térmica, cerca de 25,9 mV a 27 °C.
+
+Para cada década de corrente (dez vezes mais), a tensão sobe:
+
+$$
+\Delta V = n \cdot V_T \cdot \ln 10 = 1{,}8 \cdot 0{,}0259\,\text{V} \cdot 2{,}30 \approx 0{,}11\,\text{V}
+$$
+
+São os 0,1 V por década da tabela. Em correntes altas aparece também a resistência dos contatos e do silício, que soma $I \cdot r_S$ à tensão: no 1N4007, cerca de 0,03 Ω, ou 30 mV a 1 A. Com tensão reversa, a exponencial vai a zero e sobra $I \approx -I_S$, a fuga. A equação não inclui a ruptura, que é outro fenômeno.
+</DeepDive>
+
+## Explore: a curva do diodo ao vivo
+
+No widget abaixo, uma fonte ajustável e um resistor alimentam o diodo. A curva azul é a do diodo escolhido e a linha tracejada é a **reta do resistor**: todos os pares de tensão e corrente que o resistor permite com aquela fonte. O diodo só pode trabalhar onde as duas se cruzam, o **ponto de operação**.
+
+<CurvaDiodo client:visible />
+
+1. Com o 1N4007, a fonte em 5 V e o resistor de 1 kΩ, quanto vale a corrente? E a tensão no diodo?
+2. Troque o resistor por 100 Ω. Quantas vezes a corrente aumentou? Quanto subiu a tensão no diodo?
+3. Ainda com 5 V e 100 Ω, compare o 1N4148, o 1N4007 e o 1N5819.
+4. Ponha a fonte em −5 V. Quanto passa pelo 1N4007? E pelo 1N5819?
+5. Escolha o LED vermelho, com 5 V e 330 Ω. Compare a corrente com a conta do modelo de queda fixa, que aparece embaixo.
+
+Com 5 V e 1 kΩ, passam 4,38 mA e o diodo fica com 0,624 V. Com 100 Ω, a corrente vai a 42,7 mA, quase dez vezes mais, e a tensão no diodo sobe só para 0,732 V. Com 5 V e 100 Ω, o 1N4148 fica com 0,778 V, o 1N4007 com 0,732 V e o Schottky 1N5819 com apenas 0,262 V. Em −5 V, o 1N4007 deixa passar −7,03 nA, e o Schottky, −31,7 µA, cerca de 4.500 vezes mais: é o preço da queda baixa. O LED vermelho conduz 9,52 mA com 1,86 V; a conta com 2,0 V fixos dá 9,09 mA, perto o bastante para escolher um resistor.
+
+## Três modelos para fazer contas
+
+Ninguém resolve a equação de Shockley para escolher um resistor. Na prática, você usa o modelo mais simples que dá a precisão de que precisa.
+
+<Figure caption="Figura 1. Três modelos do mesmo diodo, como curvas I×V. O ideal conduz com 0 V; o de queda fixa, com 0,7 V; a curva real sobe aos poucos depois do joelho." alt="Três gráficos de corrente por tensão lado a lado. No primeiro, a curva sobe na vertical exatamente no zero. No segundo, sobe na vertical em 0,7 V. No terceiro, a curva é arredondada, começa a subir antes de 0,7 V e continua inclinada depois dele.">
+  <DiodoModelos />
+</Figure>
+
+- **Ideal: uma chave.** Conduz sem perder tensão num sentido e bloqueia no outro. Serve quando as tensões do circuito são muito maiores que 0,7 V, como num retificador ligado direto na rede de 127 V: perder 0,7 V em 180 V de pico não muda nada.
+- **Queda fixa.** Quando conduz, o diodo é uma "bateria ao contrário" de 0,7 V (silício), cerca de 0,3 V (Schottky) ou a tensão direta do LED. É o modelo do dia a dia, e erra pouco quando a fonte tem alguns volts ou mais.
+- **Curva real.** Quando a fonte é pequena, perto do próprio joelho, ou quando você quer saber quanto o diodo esquenta numa corrente alta.
+
+Veja a diferença no widget: com o 1N4007, ponha a fonte em 1 V e o resistor de 100 Ω. A conta de queda fixa dá $(1 - 0{,}7)/100 = 3{,}0\ \text{mA}$, mas passam 3,82 mA, porque com essa corrente o diodo fica com só 0,618 V. Um erro de mais de 20 %, porque 0,7 V é quase toda a tensão da fonte. Com 12 V, a mesma conta erra menos de 1 %.
+
+## Exemplo resolvido: proteção contra bateria invertida
+
+Um aparelho de 12 V puxa 0,5 A (ele se comporta como um resistor de 24 Ω). Para protegê-lo contra a bateria ligada ao contrário, você põe um 1N4007 em série no fio positivo, com o anodo virado para a bateria. Quanto o aparelho recebe, e quanto o diodo esquenta?
+
+**Passo 1: primeira estimativa, com queda fixa.**
+
+$$
+\begin{aligned}
+V_{ap} &\approx 12 - 0{,}7 = 11{,}3\ \text{V} \\[4pt]
+I &\approx \frac{11{,}3\ \text{V}}{24\ \Omega} \approx 0{,}47\ \text{A}
+\end{aligned}
+$$
+
+em que $V_{ap}$ é a tensão que chega ao aparelho e $I$ a corrente.
+
+**Passo 2: corrigir com a curva.** Com quase meio ampère, o 1N4007 está bem acima do joelho: pela tabela, entre 0,77 V (100 mA) e 0,91 V (1 A). No modelo do curso, com 0,46 A ele fica com 0,86 V. Então:
+
+$$
+\begin{aligned}
+V_{ap} &= 12 - 0{,}86 = 11{,}14\ \text{V} \\[4pt]
+I &= \frac{11{,}14\ \text{V}}{24\ \Omega} \approx 0{,}464\ \text{A}
+\end{aligned}
+$$
+
+**Passo 3: a potência no diodo.**
+
+$$
+P = V \cdot I = 0{,}86\ \text{V} \cdot 0{,}464\ \text{A} \approx 0{,}40\ \text{W}
+$$
+
+O 1N4007 aguenta 1 A, então está folgado, mas esquenta: 0,4 W num corpinho de 5 mm deixa a peça quente ao toque. Por isso a folha de dados pede espaço e terminais com algum comprimento para dissipar o calor.
+
+**Passo 4: e com um Schottky?** O 1N5819 conduz meio ampère com cerca de 0,37 V. O aparelho recebe cerca de 11,6 V, e o diodo dissipa menos da metade, uns 0,18 W.
+
+**Passo 5: bateria invertida.** O diodo fica com os 12 V ao contrário, longe dos 1.000 V que o 1N4007 aguenta (e dos 40 V do 1N5819). Passa só a fuga, de nanoampères, e o aparelho fica desligado e intacto.
+
+Confira tudo na simulação:
+
+<Simulation circuit="m09/diodo-protecao" />
+
+1. Com a bateria ligada certo e o 1N4007, leia a tensão e a corrente no aparelho, a tensão no diodo e a potência nele.
+2. Inverta a bateria. O que o aparelho recebe?
+3. Volte a bateria e troque o diodo pelo Schottky.
+
+Com o 1N4007, o aparelho recebe 11,13 V e 0,464 A; o diodo fica com 0,858 V e dissipa 0,40 W. Invertendo a bateria, o diodo fica com −12 V e o aparelho, com praticamente nada: só a fuga do diodo, de nanoampères. Com o Schottky, o aparelho recebe 11,62 V e o diodo fica com 0,367 V e 0,18 W.
+
+## O que mais a folha de dados diz
+
+Além da corrente média e da tensão reversa da tabela do começo, quatro números aparecem em toda folha de dados de diodo:
+
+- **Corrente de surto:** um pico curto que o diodo aguenta de vez em quando, como o de quando a fonte é ligada e o capacitor está descarregado. No 1N4007, 30 A durante meio ciclo da rede, na maioria das folhas de dados. Você vai precisar disso na próxima aula.
+- **Tensão direta máxima:** no 1N4007, 1,1 V com 1 A na maioria das folhas de dados. É o pior caso garantido; uma peça comum fica abaixo disso.
+- **Temperatura máxima da junção:** tipicamente 150 °C. A potência que o diodo aguenta depende de quanto calor ele consegue jogar fora.
+- **Tempo de recuperação reversa:** quanto tempo o diodo leva para parar de conduzir quando a tensão inverte. O 1N4148 leva poucos nanossegundos; o 1N4007, alguns microssegundos. Para os 60 Hz da rede, tanto faz. Numa fonte chaveada, que liga e desliga dezenas de milhares de vezes por segundo, um diodo lento esquenta e perde rendimento. Lá se usam diodos rápidos (como o UF4007) ou Schottky.
+
+O <Term id="diodo-schottky">diodo Schottky</Term> merece uma nota. Ele não tem junção PN: a junção é de metal com silício tipo N. Por isso conduz com menos tensão, tipicamente 0,2 a 0,5 V, e é muito rápido. O preço, que você viu no widget, é uma fuga reversa muito maior, que cresce com a temperatura, e uma tensão reversa máxima pequena, de algumas dezenas de volts.
+
+## Testando com o multímetro
+
+Na aula sobre o <LinkAula id="m03-medicoes/04-resistencia-continuidade-e-diodo">teste de diodo</LinkAula> você aprendeu a ler o multímetro: um valor num sentido e `OL` no outro é diodo bom; perto de zero nos dois sentidos é curto; `OL` nos dois é diodo aberto. Agora dá para entender o número que aparece.
+
+No <Term id="teste-de-diodo">teste de diodo</Term>, o multímetro empurra uma corrente pequena, perto de 1 mA (típico), e mostra a tensão. É um ponto da curva característica, bem no começo do joelho. Pela tabela, o 1N4007 fica perto de 0,55 V com 1 mA, e é isso que a maioria dos multímetros mostra para ele: algo entre 0,5 e 0,6 V. Um Schottky mostra bem menos, tipicamente entre 0,1 e 0,3 V. Um diodo de potência grande também mostra menos que um pequeno, porque 1 mA é uma corrente ínfima para ele.
+
+Duas dicas de bancada:
+
+- **Faixa apagada?** O multímetro descobre o catodo: no sentido em que aparece a queda de tensão, a ponta preta está no catodo.
+- **Diodo na placa** pode mostrar um valor mais baixo que o normal nos dois sentidos, porque outros componentes ficam em paralelo com ele. Antes de condenar a peça, solte um dos terminais da placa e meça de novo. E, como em toda medida com a bateria do multímetro, só com o circuito desligado.
+
+<RealCase title="Diodos que escolhem a fonte">
+
+Uma central de alarme precisa continuar funcionando quando falta energia. Uma solução simples usa dois diodos: um traz a fonte de 13,8 V da central, outro traz a bateria de 12 V, e os dois catodos se encontram na entrada do circuito. É o chamado "OU de diodos".
+
+Com energia, o circuito recebe cerca de 13,8 − 0,7 = 13,1 V pelo diodo da fonte. O diodo da bateria fica com o catodo em 13,1 V e o anodo nos cerca de 12,6 V de uma bateria carregada: está reverso e não conduz. Quando a energia cai, a tensão no catodo começa a baixar; assim que fica abaixo de uns 11,9 V, o diodo da bateria conduz, e o circuito passa a ser alimentado por ela sem relé, sem chave e sem piscar. Quem projeta usa Schottky para perder menos tensão no caminho da bateria, que é o que mais pesa quando ela está fraca. (A recarga da bateria é feita por outro caminho, fora deste exemplo.)
+
+O mesmo componente aparece em mais dois lugares dessa central. Na entrada, um diodo em série protege contra a bateria ligada ao contrário, como no exemplo resolvido. E, ao lado de cada relé, um diodo ligado ao contrário sobre a bobina absorve o pico de tensão que a bobina gera quando é desligada. Esse diodo de roda livre aparece na aula sobre o [transistor como chave](../06-transistor-como-chave/).
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Montar o diodo invertido.** O circuito não funciona ou, pior, o diodo vira um curto onde deveria bloquear. Confira a faixa antes de soldar: no símbolo, a barra; na peça, a faixa.
+- **Ligar um diodo direto numa fonte, sem nada que limite a corrente.** Pela curva, cada 0,1 V a mais multiplica a corrente por cerca de dez. Um diodo ligado direto numa pilha ou numa fonte vira quase um curto: a corrente só é limitada pela resistência interna da fonte, e o diodo esquenta até queimar. Sempre há um resistor ou uma carga em série.
+- **Trocar um diodo por outro "parecido".** Um 1N4148 no lugar de um 1N4007 numa fonte queima pela corrente; um 1N4001 no lugar de um 1N4007 pode romper numa tensão reversa alta; um Schottky de 40 V não serve onde o diodo vê centenas de volts. Confira corrente, tensão reversa e velocidade na folha de dados.
+- **Achar que o diodo não gasta nada.** Ele perde cerca de 0,7 V em qualquer corrente, e isso é potência: com 3 A, são mais de 2 W, que pedem um diodo de potência e espaço para o calor.
+- **Medir o diodo com o circuito ligado.** O teste de diodo usa a bateria do multímetro: só com tudo desligado e a ausência de tensão confirmada.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Num diodo retificador de corpo preto, o que a faixa prateada indica?',
+      options: [
+        {
+          text: 'O catodo, o terminal por onde a corrente sai quando o diodo conduz',
+          correct: true,
+          feedback: 'Isso. A faixa corresponde à barra do símbolo.',
+        },
+        {
+          text: 'O anodo',
+          feedback: 'O anodo é o terminal do outro lado. A faixa fica no catodo.',
+        },
+        {
+          text: 'A potência do diodo',
+          feedback: 'A faixa marca o terminal; as especificações ficam no código impresso.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma fonte de 9 V, um resistor de 1 kΩ e um diodo de silício estão em série, e o diodo conduz. Pelo modelo de queda fixa (0,7 V), qual é a corrente?',
+      answer: 8.3,
+      tolerance: 0.03,
+      unit: 'mA',
+      explanation:
+        'I = (9 − 0,7) V ÷ 1.000 Ω = 8,3 mA. Com a curva real de um 1N4007, passam cerca de 8,35 mA, com 0,65 V no diodo: a diferença é pequena porque a fonte é muito maior que 0,7 V.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Num diodo de silício conduzindo, quando a corrente fica 10 vezes maior, a tensão nele também fica 10 vezes maior.',
+      answer: false,
+      explanation:
+        'Depois do joelho, a tensão muda pouco: sobe só cerca de 0,1 V para cada vez que a corrente fica dez vezes maior. É por isso que o modelo de queda fixa funciona bem.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um diodo de proteção conduz 0,5 A com 0,86 V entre os terminais. Quanta potência ele transforma em calor?',
+      answer: 0.43,
+      tolerance: 0.03,
+      unit: 'W',
+      explanation: 'P = V × I = 0,86 V × 0,5 A = 0,43 W.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada diodo ao que ele é.',
+      pairs: [
+        ['1N4148', 'Diodo de sinal rápido, para correntes pequenas'],
+        ['1N4007', 'Retificador de 1 A e 1.000 V'],
+        ['1N5819', 'Schottky: queda baixa, mas só 40 V de tensão reversa'],
+        ['LED', 'Diodo que emite luz, com queda de cerca de 2 a 3 V'],
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'No teste de diodo, um diodo mostra 0,002 V nos dois sentidos. Como ele está?',
+      options: [
+        {
+          text: 'Em curto',
+          correct: true,
+          feedback:
+            'Isso. Um diodo bom mostra a queda de tensão num sentido e OL no outro. Perto de zero nos dois indica curto (ou outro componente em curto em paralelo, se ele estiver na placa).',
+        },
+        {
+          text: 'Bom',
+          feedback: 'Um diodo bom bloqueia num dos sentidos e mostra OL nele.',
+        },
+        {
+          text: 'Aberto',
+          feedback: 'Aberto mostraria OL nos dois sentidos.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Por que trocar o 1N4007 da proteção de polaridade de um aparelho de 12 V por um Schottky 1N5819?',
+      options: [
+        {
+          text: 'Porque ele perde menos tensão e esquenta menos',
+          correct: true,
+          feedback:
+            'Isso. Com meio ampère, cerca de 0,37 V em vez de 0,86 V: o aparelho recebe mais tensão, e o diodo dissipa menos da metade.',
+        },
+        {
+          text: 'Porque ele aguenta mais tensão reversa',
+          feedback: 'É o contrário: o 1N5819 aguenta 40 V, e o 1N4007, 1.000 V. Em 12 V, os dois servem.',
+        },
+        {
+          text: 'Porque ele conduz nos dois sentidos',
+          feedback: 'Não. O Schottky também bloqueia ao contrário, só que com uma fuga maior.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **diodo** deixa a corrente passar do **anodo** para o **catodo**. Na peça, a **faixa** marca o catodo; no símbolo, a barra, e o triângulo aponta o sentido da corrente.
+- A **curva característica** fica perto de zero até uns 0,5 V e então dispara. Depois do joelho, cada 0,1 V a mais multiplica a corrente por cerca de dez, e por isso a tensão do diodo conduzindo varia pouco: cerca de 0,6 a 0,9 V num diodo de silício comum.
+- Para fazer contas, use o modelo **ideal** quando as tensões forem grandes, o de **queda fixa** (0,7 V no silício, cerca de 0,3 V no Schottky) no dia a dia, e a **curva real** quando a fonte for pequena ou a corrente for alta.
+- Num circuito com fonte e resistor, o diodo trabalha onde a curva dele cruza a **reta do resistor**. A potência no diodo é P = V × I.
+- Escolha pela **folha de dados**: corrente média, tensão reversa máxima, corrente de surto e velocidade. O **Schottky** perde menos tensão, mas aguenta pouca tensão reversa e tem mais fuga.
+
+Na próxima aula, quatro diodos transformam a corrente alternada da tomada na contínua de que os circuitos precisam: os [retificadores](../03-retificadores/).

@@ -1,0 +1,144 @@
+---
+/*
+ * 9.3: the full-wave rectifier with a centre-tapped transformer. Each diode
+ * uses one half of the secondary; the centre tap is the − of the output.
+ */
+const CX = 150;
+const TOP = 50;
+const CT = 140;
+const BOT = 230;
+const RX = 430;
+const OUT = 480;
+
+/* A winding drawn as bumps on a vertical line, from y1 to y2, bulging to `side`. */
+function coil(x: number, y1: number, y2: number, side: 1 | -1, turns: number) {
+  const h = (y2 - y1) / turns;
+  let d = `M${x} ${y1}`;
+  for (let k = 0; k < turns; k++) d += `a ${h / 2} ${h / 2} 0 0 ${side === 1 ? 1 : 0} 0 ${h}`;
+  return d;
+}
+
+const diodeH = (x: number, y: number) => ({
+  body: `M${x - 11} ${y - 11}L${x - 11} ${y + 11}L${x + 9} ${y}Z`,
+  bar: `M${x + 9} ${y - 11}V${y + 11}`,
+});
+const d1 = diodeH(250, TOP);
+const d2 = diodeH(250, BOT);
+
+const ZIG = Array.from({ length: 6 }, (_, k) => (k % 2 === 0 ? 9 : -9));
+const midR = (TOP + CT) / 2;
+const resistor =
+  `M${RX} ${midR - 30}` +
+  ZIG.map((dx, k) => `L${RX + dx} ${midR - 25 + k * 10}`).join('') +
+  `L${RX} ${midR + 30}`;
+---
+
+<svg viewBox="0 20 540 248" width="540" height="248" class="fig" aria-hidden="true">
+  <!-- Primary, core and secondary -->
+  <path d={coil(CX - 46, TOP + 20, BOT - 20, -1, 7)} class="coil" />
+  <line x1={CX - 18} y1={TOP} x2={CX - 18} y2={BOT} class="core" />
+  <line x1={CX - 12} y1={TOP} x2={CX - 12} y2={BOT} class="core" />
+  <path d={coil(CX + 16, TOP, CT, 1, 4)} class="coil" />
+  <path d={coil(CX + 16, CT, BOT, 1, 4)} class="coil" />
+  <path d={`M${CX - 46} ${TOP + 20}H${CX - 80}M${CX - 46} ${BOT - 20}H${CX - 80}`} class="wire" />
+  <text x={CX - 86} y={(TOP + BOT) / 2 + 5} class="lbl end">
+    127 V
+  </text>
+  <text x={CX + 48} y={(TOP + CT) / 2 + 5} class="small start">
+    12 V
+  </text>
+  <text x={CX + 48} y={(CT + BOT) / 2 + 5} class="small start">
+    12 V
+  </text>
+
+  <!-- Diodes to the + rail; the centre tap to the − -->
+  <path
+    d={`M${CX + 16} ${TOP}H${250 - 11}M${250 + 9} ${TOP}H${OUT}V${BOT}H${250 + 9}M${250 - 11} ${BOT}H${CX + 16}`}
+    class="wire"
+  />
+  <path d={`M${CX + 16} ${CT}H${RX}V${midR + 30}M${RX} ${midR - 30}V${TOP}`} class="wire" />
+  <path d={d1.body} class="diode" />
+  <path d={d1.bar} class="bar" />
+  <path d={d2.body} class="diode" />
+  <path d={d2.bar} class="bar" />
+  <text x="250" y={TOP - 18} class="lbl">
+    D1
+  </text>
+  <text x="250" y={BOT + 30} class="lbl">
+    D2
+  </text>
+  <path d={resistor} class="wire" />
+  <circle cx={RX} cy={TOP} r="3.5" class="dot" />
+  <circle cx={CX + 16} cy={CT} r="3.5" class="dot" />
+  <text x={RX + 16} y={midR + 5} class="small start">
+    carga
+  </text>
+  <text x={RX - 12} y={TOP + 24} class="pol">
+    +
+  </text>
+  <text x={RX - 12} y={CT - 8} class="pol">
+    −
+  </text>
+  <text x="290" y={CT - 10} class="small">
+    derivação central
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .coil {
+    fill: none;
+    stroke: var(--copper);
+    stroke-width: 2.5;
+  }
+  .core {
+    stroke: var(--fg-muted);
+    stroke-width: 2.5;
+  }
+  .wire {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .diode {
+    fill: var(--fg);
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .bar {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .dot {
+    fill: var(--fg);
+  }
+  .lbl {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .pol {
+    fill: var(--fg);
+    font-size: 16px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+</style>

@@ -2,8 +2,8 @@
 termo: TRIAC
 resumo: "Chave eletrônica para corrente alternada. Um pulso no terminal de disparo (gate) faz o TRIAC conduzir até a corrente passar por zero; disparando mais cedo ou mais tarde em cada meio ciclo, ele controla a potência entregue à carga."
 sinonimos: [triac, tiristor bidirecional]
-relacionados: [rele, microcontrolador, embreagem-eletronica, diodo]
-aula: m16-portao/03-a-central-por-dentro
+relacionados: [tiristor, scr, diac, controle-de-fase, dimmer, optoacoplador, rele, microcontrolador, embreagem-eletronica]
+aula: m09-semicondutores/09-tiristores-e-isolamento
 ---
 O TRIAC conduz nos dois sentidos, então serve para a rede alternada. Depois de disparado, ele só desliga quando a corrente passa por zero, no fim de cada meio ciclo. Esse comportamento permite o controle de fase, o mesmo princípio do dimmer de lâmpada.
 

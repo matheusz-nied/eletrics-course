@@ -1,0 +1,143 @@
+/* CurvaDiodo.tsx: the live I×V curve of lesson 9.2. */
+
+.cdiodo__body {
+  align-items: start;
+}
+
+@media (min-width: 52rem) {
+  .cdiodo__body {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+}
+
+.cdiodo__plot {
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.cdiodo__figure {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.cdiodo__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+}
+
+.cdiodo__key {
+  display: inline-block;
+  width: 1.2rem;
+  height: 0;
+  margin-right: 0.4rem;
+  border-top: 3px solid var(--accent);
+  vertical-align: middle;
+}
+
+.cdiodo__key--load {
+  border-top: 2.5px dashed var(--copper);
+}
+
+.cdiodo__key--other {
+  border-top: 2px solid var(--fg-subtle);
+  opacity: 0.6;
+}
+
+.cdiodo__side {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.cdiodo__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.cdiodo__axis {
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+
+.cdiodo__tick {
+  fill: var(--fg-muted);
+  font-size: 12px;
+}
+
+.cdiodo__axis-label {
+  fill: var(--fg-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* On a phone the plot shrinks to about three quarters: larger type keeps it legible. */
+@media (max-width: 36rem) {
+  .cdiodo__tick {
+    font-size: 14px;
+  }
+
+  .cdiodo__axis-label,
+  .cdiodo__curve-label {
+    font-size: 15px;
+  }
+}
+
+.cdiodo__other {
+  fill: none;
+  stroke: var(--fg-subtle);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+
+.cdiodo__curve {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.cdiodo__curve-label {
+  fill: var(--accent-strong);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.cdiodo__load {
+  fill: none;
+  stroke: var(--copper);
+  stroke-width: 2.5;
+  stroke-dasharray: 7 5;
+  stroke-linecap: round;
+}
+
+.cdiodo__guide {
+  fill: none;
+  stroke: var(--fg-subtle);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.cdiodo__dot {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 2.5;
+}
+
+.cdiodo__off {
+  fill: var(--danger);
+}
+
+.cdiodo__values {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+}
+
+.cdiodo .cdiodo__value {
+  font-size: 1.6rem;
+}
