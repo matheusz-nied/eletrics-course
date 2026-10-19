@@ -733,11 +733,13 @@ function crossedBy(normal: Vec3, through: Vec3): (box: Box3) => boolean {
   };
 }
 
+const NO_HIGHLIGHT: string[] = [];
+
 export interface BatchRootProps {
   /** Block ids, in a fixed order. */
   blocks: string[];
-  /** The block that stays in colour; the others are dimmed. Empty: none dimmed. */
-  highlight?: string;
+  /** The blocks that stay in colour; the others are dimmed. Empty: none dimmed. */
+  highlight?: string[];
   /** Where the cutaway plane ends up (part space), to show the insides it opens. */
   cutNormal?: Vec3;
   cutThrough?: Vec3;
@@ -747,7 +749,7 @@ export interface BatchRootProps {
 /** Owns the merged meshes and bakes the layers inside it. */
 export function BatchRoot({
   blocks,
-  highlight = '',
+  highlight = NO_HIGHLIGHT,
   cutNormal = [0, 0, -1],
   cutThrough = [0, 0, 0],
   children,
@@ -932,18 +934,19 @@ export function BatchRoot({
   const first = useRef(step);
   useLayoutEffect(() => first.current(), []);
 
-  // Dim every block but the highlighted one.
+  // Dim every block but the highlighted ones.
+  const kept = highlight.join(' ');
   useLayoutEffect(() => {
-    const target = highlight ? blocks.indexOf(highlight) : -1;
+    const targets = new Set(kept ? kept.split(' ').map((b) => blocks.indexOf(b)) : []);
     for (const m of merged) {
       const attr = m.geometry.attributes.aDim as BufferAttribute;
       const array = attr.array as Float32Array;
       for (let i = 0; i < array.length; i++)
-        array[i] = target >= 0 && m.blocks[i] !== target ? 1 : 0;
+        array[i] = targets.size > 0 && !targets.has(m.blocks[i]) ? 1 : 0;
       attr.needsUpdate = true;
     }
     invalidate();
-  }, [merged, highlight, blocks, invalidate]);
+  }, [merged, kept, blocks, invalidate]);
 
   // Cutaway: every merged material is cut (the board is shown in section).
   useLayoutEffect(() => {
@@ -957,12 +960,15 @@ export function BatchRoot({
     invalidate();
   }, [merged, cutaway, cutPlanes, invalidate]);
 
-  useEffect(
-    () => () => {
-      for (const material of materials.current.values()) disposeMaterial(material);
-    },
-    [],
-  );
+  useEffect(() => {
+    const live = latest;
+    const owned = materials;
+    return () => {
+      // R3F does not dispose geometry passed as a prop.
+      for (const m of live.current) m.geometry.dispose();
+      for (const material of owned.current.values()) disposeMaterial(material);
+    };
+  }, []);
 
   return (
     <BatchContext.Provider value={api}>

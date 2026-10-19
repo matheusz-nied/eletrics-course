@@ -60,12 +60,15 @@ export type GateBlock =
   | 'leds'
   | 'saidas';
 
+/** A block, or every block that can carry mains voltage. */
+export type GateFocus = GateBlock | 'lado-rede';
+
 export type GateMotion = 'parado' | 'abrindo' | 'fechando';
 export type GateLimit = 'nenhum' | 'fca' | 'fcf';
 
 export interface GateControlBoardProps {
-  /** Block kept in colour while the rest is dimmed ('nenhum': all in colour). */
-  highlight?: GateBlock | 'nenhum';
+  /** Blocks kept in colour while the rest is dimmed ('nenhum': all in colour). */
+  highlight?: GateFocus | 'nenhum';
   /** Motor command: K1 energized while opening, K2 while closing. */
   motion?: GateMotion;
   /** Limit switch closed by the magnet (its LED lights): open end, closed end or none. */
@@ -110,6 +113,14 @@ const BLOCK_LABELS: Record<GateBlock, string> = {
   ajustes: 'Ajustes',
   leds: 'LEDs',
   saidas: 'Saídas',
+};
+
+/** Blocks that can carry mains voltage, the lesson's "lado da rede". */
+const MAINS_SIDE: GateBlock[] = ['rede', 'fonte', 'potencia', 'motor'];
+
+const FOCUS_LABELS: Record<GateFocus, string> = {
+  'lado-rede': 'Lado da rede: tudo que pode estar em 127 V ou 220 V',
+  ...BLOCK_LABELS,
 };
 
 const MOTION_LABELS: Record<GateMotion, string> = {
@@ -549,8 +560,16 @@ function ledStates(p: Required<GateControlBoardProps>): Record<string, boolean> 
   };
 }
 
-function blockOf(value: unknown): GateBlock | 'nenhum' {
-  return BLOCKS.includes(value as GateBlock) ? (value as GateBlock) : 'nenhum';
+function focusOf(value: unknown): GateFocus | 'nenhum' {
+  return value === 'lado-rede' || BLOCKS.includes(value as GateBlock)
+    ? (value as GateFocus)
+    : 'nenhum';
+}
+
+/** The blocks a focus keeps in colour (none: every block is). */
+function focusBlocks(focus: GateFocus | 'nenhum'): GateBlock[] {
+  if (focus === 'nenhum') return [];
+  return focus === 'lado-rede' ? MAINS_SIDE : [focus];
 }
 
 const top = (at: Point, up: number): Vec3 => on(at, up);
@@ -579,6 +598,7 @@ export const meta: PartMeta = {
       label: 'Destaque',
       options: [
         { value: 'nenhum', label: 'Nenhum' },
+        { value: 'lado-rede', label: FOCUS_LABELS['lado-rede'] },
         ...BLOCKS.map((b) => ({ value: b, label: BLOCK_LABELS[b] })),
       ],
     },
@@ -608,7 +628,7 @@ export const meta: PartMeta = {
   },
   annotations: (props) => {
     const p = resolve(props);
-    const focus = blockOf(p.highlight);
+    const focus = focusOf(p.highlight);
     const list: (PartAnnotation & { block?: GateBlock | GateBlock[]; detail?: boolean })[] = [
       {
         block: 'rede',
@@ -653,7 +673,7 @@ export const meta: PartMeta = {
         text: 'Bornes COM, ABRE e FECHA do motor e CAP, CAP do capacitor: tensão da rede',
       },
       {
-        block: ['rede', 'fonte', 'potencia', 'motor'],
+        block: MAINS_SIDE,
         at: [0, 0, 0],
         anchor: 'gate-rasgo',
         text: 'Rasgo na placa: aumenta a distância entre a rede e a baixa tensão',
@@ -742,11 +762,12 @@ export const meta: PartMeta = {
         exploded: true,
       },
     ];
+    const shown = focusBlocks(focus);
     return list
       .filter((a) =>
         focus === 'nenhum'
           ? !a.detail
-          : !a.block || (Array.isArray(a.block) ? a.block.includes(focus) : a.block === focus),
+          : !a.block || [a.block].flat().some((b) => shown.includes(b)),
       )
       .map(({ block: _block, detail: _detail, ...a }) => a);
   },
@@ -755,7 +776,7 @@ export const meta: PartMeta = {
   cut: { normal: [0, 0, -1], through: [0, 0, CUT_Z] },
   describe: (props) => {
     const p = resolve(props);
-    const focus = blockOf(p.highlight);
+    const focus = focusOf(p.highlight);
     const leds = ledStates(p);
     const lit = LEDS.filter((l) => leds[l.label]).map((l) => l.label);
     const pause = Math.round(clamp(Number(p.pause), 0, 120));
@@ -778,7 +799,7 @@ export const meta: PartMeta = {
       `Chave DIP: INV ${p.dipInvert ? 'ligada' : 'desligada'}, LUZ ${p.dipLight ? 'ligada' : 'desligada'}.`,
       `Trimpot PAUSA em ${formatNumber(pause)} s e FORÇA em ${formatNumber(force)} %.`,
     );
-    if (focus !== 'nenhum') parts.push(`Em destaque: ${BLOCK_LABELS[focus].toLowerCase()}.`);
+    if (focus !== 'nenhum') parts.push(`Em destaque: ${FOCUS_LABELS[focus].toLowerCase()}.`);
     return parts.join(' ');
   },
   view: [0.18, 1.5, 0.8],
@@ -786,7 +807,7 @@ export const meta: PartMeta = {
 
 export default function GateControlBoard(props: GateControlBoardProps) {
   const p = resolve(props as PartProps);
-  const focus = blockOf(p.highlight);
+  const focus = focusOf(p.highlight);
   const leds = ledStates(p);
   const k1 = p.powered && p.motion === 'abrindo';
   const k2 = p.powered && p.motion === 'fechando';
@@ -802,7 +823,7 @@ export default function GateControlBoard(props: GateControlBoardProps) {
   return (
     <BatchRoot
       blocks={BLOCKS}
-      highlight={focus === 'nenhum' ? '' : focus}
+      highlight={focusBlocks(focus)}
       cutNormal={[0, 0, -1]}
       cutThrough={[0, 0, CUT_Z]}
     >
@@ -987,7 +1008,13 @@ export default function GateControlBoard(props: GateControlBoardProps) {
       >
         <BakeBlock id="potencia">
           <BakePart {...place(TRIAC, 90, -4)}>
-            <TransistorTo220 code="BTA16-600B" dateCode="2338" heatsink leadLength={5} />
+            <TransistorTo220
+              code="BTB16-600B"
+              dateCode="2338"
+              heatsink
+              insulator={false}
+              leadLength={5}
+            />
           </BakePart>
         </BakeBlock>
         <BakeBlock id="fonte">
