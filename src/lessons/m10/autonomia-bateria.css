@@ -1,0 +1,20 @@
+/* AutonomiaBateria.tsx: battery autonomy of lesson 10.3. */
+
+@media (min-width: 52rem) {
+  .autonomia__body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.autonomia__values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.autonomia__naive {
+  color: var(--fg-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
