@@ -1,0 +1,173 @@
+---
+/*
+ * 07.6: the classic wiring of two three-way switches. Phase to the common of
+ * switch 1, travelers between the 1 and 2 terminals, return from the common
+ * of switch 2 to the lamp, neutral straight to the lamp. Drawn with both
+ * commons on terminal 1: the lamp is on.
+ */
+---
+
+<svg viewBox="0 0 360 262" width="360" height="262" class="fig" aria-hidden="true">
+  <!-- Supply -->
+  <text x="10" y="28" class="small start">
+    do quadro
+  </text>
+  <text x="12" y="104" class="pin start">
+    F
+  </text>
+  <text x="12" y="214" class="pin start">
+    N
+  </text>
+  <path d="M26 100 H58" class="w fase" />
+  <path d="M26 210 H322 V166" class="w neutro" />
+
+  <!-- Switch 1 -->
+  <rect x="58" y="52" width="66" height="96" rx="8" class="box" />
+  <circle cx="72" cy="100" r="3.5" class="pivot" />
+  <path d="M58 100 H72" class="lead" />
+  <circle cx="110" cy="70" r="3.5" class="term" />
+  <circle cx="110" cy="130" r="3.5" class="term" />
+  <path d="M72 100 L106 72" class="blade" />
+  <text x="78" y="88" class="pin">
+    C
+  </text>
+  <text x="116" y="64" class="pin start">
+    1
+  </text>
+  <text x="116" y="146" class="pin start">
+    2
+  </text>
+  <text x="91" y="166" class="small">
+    interruptor 1
+  </text>
+
+  <!-- Travelers -->
+  <path d="M110 70 H236" class="w v1" />
+  <path d="M110 130 H236" class="w v2" />
+  <text x="173" y="62" class="small">
+    viajante 1
+  </text>
+  <text x="173" y="122" class="small">
+    viajante 2
+  </text>
+
+  <!-- Switch 2 (mirrored) -->
+  <rect x="222" y="52" width="66" height="96" rx="8" class="box" />
+  <circle cx="274" cy="100" r="3.5" class="pivot" />
+  <path d="M274 100 H288" class="lead" />
+  <circle cx="236" cy="70" r="3.5" class="term" />
+  <circle cx="236" cy="130" r="3.5" class="term" />
+  <path d="M274 100 L240 72" class="blade" />
+  <text x="268" y="88" class="pin">
+    C
+  </text>
+  <text x="230" y="64" class="pin end">
+    1
+  </text>
+  <text x="230" y="146" class="pin end">
+    2
+  </text>
+  <text x="255" y="166" class="small">
+    interruptor 2
+  </text>
+
+  <!-- Return and lamp -->
+  <path d="M288 100 H322 V134" class="w retorno" />
+  <text x="306" y="92" class="small">
+    retorno
+  </text>
+  <circle cx="322" cy="150" r="16" class="lamp on" />
+  <path d="M311 155 L316 143 L322 155 L328 143 L333 155" class="filament" />
+
+  <text x="180" y="238" class="legend">
+    Os dois comuns no borne 1: a corrente passa
+  </text>
+  <text x="180" y="254" class="legend">
+    pelo viajante 1 e a lâmpada acende.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .w {
+    stroke-width: 3;
+  }
+  .fase {
+    stroke: var(--danger);
+  }
+  .neutro {
+    stroke: var(--info);
+  }
+  .retorno {
+    stroke: var(--warning);
+  }
+  .v1 {
+    stroke: var(--copper);
+    stroke-dasharray: 9 4;
+  }
+  .v2 {
+    stroke: light-dark(#6d3fb0, #c6a4f2);
+    stroke-dasharray: 2 5;
+  }
+  .box {
+    fill: var(--bg);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .lead {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .pivot {
+    fill: var(--fg);
+  }
+  .term {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .blade {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .lamp {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .lamp.on {
+    fill: color-mix(in oklab, var(--warning) 45%, var(--bg));
+  }
+  .filament {
+    stroke: var(--fg);
+    stroke-width: 1.4;
+  }
+  text {
+    fill: var(--fg);
+    stroke: none;
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .pin {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .legend {
+    font-size: 11.5px;
+  }
+</style>
