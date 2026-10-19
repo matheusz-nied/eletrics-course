@@ -1,0 +1,313 @@
+---
+titulo: Reatância e impedância
+modulo: m06-corrente-alternada
+ordem: 4
+nivel: I
+duracaoMin: 30
+objetivos:
+  - Calcular a reatância de um capacitor e de uma bobina numa frequência
+  - Explicar por que o capacitor deixa passar mais corrente quando a frequência sobe, e a bobina menos
+  - Calcular a impedância de um circuito com resistência e reatância e a corrente pela lei de Ohm de CA
+  - Reconhecer a reatância em casos reais, como a fonte capacitiva de lâmpadas LED e a bobina de contator
+prerequisitos:
+  - m06-corrente-alternada/03-fase-e-fasores
+  - m04-passivos/03-capacitores
+  - m04-passivos/05-indutores-e-circuito-rl
+tags: [reatância, impedância, capacitor, bobina, frequência, lei de ohm, fonte capacitiva, lâmpada LED, alto-falante]
+seguranca: rede
+rascunho: false
+---
+
+import { reactanceCurves } from '../../../lessons/m06/reatancia';
+import ImpedanceTriangle from '../../../lessons/m06/figures/ImpedanceTriangle.astro';
+import CapacitiveDropper from '../../../lessons/m06/figures/CapacitiveDropper.astro';
+
+Abra uma lâmpada LED das mais baratas ou uma luz noturna de tomada e você vai achar uma plaquinha sem transformador nenhum. Entre a rede de 127 V e os LEDs, quem limita a corrente é um capacitor amarelo, do tamanho de uma unha. Ele fica frio. Um resistor fazendo o mesmo serviço esquentaria uns 2 W, o bastante para amolecer o plástico em volta.
+
+Como um capacitor limita a corrente sem esquentar? Nesta aula você vai ver que, em corrente alternada, o capacitor e a bobina se opõem à corrente de um jeito diferente do resistor, e que essa oposição muda com a frequência.
+
+## Uma oposição que não esquenta
+
+Em corrente contínua, depois de carregado, o capacitor bloqueia a corrente. Em corrente alternada, a tensão nele sobe e desce o tempo todo, e ele carrega e descarrega a cada meio ciclo. Elétrons entram numa placa e saem da outra, e no fio aparece uma corrente alternada de verdade. Nenhum elétron atravessa o dielétrico, mas para o resto do circuito é como se a corrente passasse pelo capacitor.
+
+Quanto mais alta a frequência, mais vezes por segundo o capacitor carrega e descarrega, e mais carga passa pelo fio a cada segundo: a corrente aumenta. Um capacitor maior guarda mais carga a cada vez: a corrente também aumenta. A oposição do capacitor à corrente alternada se chama <Term id="reatancia">reatância</Term> capacitiva:
+
+$$
+X_C = \frac{1}{2\pi f C}
+$$
+
+- $X_C$ é a reatância capacitiva, em ohms (Ω);
+- $f$ é a frequência, em hertz (Hz);
+- $C$ é a capacitância, em farads (F). Cuidado com os prefixos: 10 µF são $10 \times 10^{-6}\,\text{F}$.
+
+A bobina faz o contrário. Ela segura a mudança da corrente, como você viu na aula <LinkAula id="m04-passivos/05-indutores-e-circuito-rl" />. Quanto mais depressa a corrente tenta mudar, mais tensão contrária a bobina gera, e menos corrente passa. A reatância indutiva **cresce** com a frequência:
+
+$$
+X_L = 2\pi f L
+$$
+
+com $X_L$ em ohms, $f$ em hertz e $L$, a indutância, em henrys (H).
+
+Reatância se mede em ohms e entra na lei de Ohm como uma resistência: $I = V / X$, com valores eficazes. A diferença está na energia. O resistor transforma energia em calor. O capacitor e a bobina **guardam** energia num quarto de ciclo e **devolvem** no quarto seguinte, sem esquentar (fora as pequenas perdas dos componentes reais). Por isso o capacitor da lâmpada LED fica frio. Essa energia que vai e volta é o assunto da próxima aula, <LinkAula id="m06-corrente-alternada/05-potencia-e-fator-de-potencia" />.
+
+E há a diferença de fase da aula anterior, <LinkAula id="m06-corrente-alternada/03-fase-e-fasores" />: no resistor a corrente está em fase com a tensão; no capacitor, adiantada 90°; na bobina, atrasada 90°.
+
+### Os números de um capacitor e de uma bobina
+
+Pegue um capacitor de 10 µF e uma bobina de 100 mH, os componentes da simulação desta aula:
+
+- Em 60 Hz: $X_C = 1 / (2\pi \times 60 \times 10 \times 10^{-6}) \approx 265\,\Omega$ e $X_L = 2\pi \times 60 \times 0{,}1 \approx 37{,}7\,\Omega$.
+- Em 1.000 Hz: $X_C \approx 15{,}9\,\Omega$ e $X_L \approx 628\,\Omega$.
+
+Com a frequência 16,7 vezes maior, a reatância do capacitor ficou 16,7 vezes menor, e a da bobina, 16,7 vezes maior. É por isso que, num amplificador, um capacitor de 10 µF deixa passar o sinal de áudio quase sem perda (uns 16 Ω em 1 kHz), como na aula <LinkAula id="m09-semicondutores/07-transistor-como-amplificador" />.
+
+<Plot
+  data={reactanceCurves()}
+  xUnit="Hz"
+  title="Reatância × frequência: capacitor de 10 µF e bobina de 100 mH"
+/>
+
+No gráfico, a reatância da bobina é uma reta que sobe: dobrou a frequência, dobrou a reatância. A do capacitor é uma curva que despenca nas frequências baixas e vai encostando no zero nas altas. As duas se cruzam em cerca de 159 Hz, onde as duas valem 100 Ω. Guarde esse cruzamento: ele vira ressonância na aula <LinkAula id="m06-corrente-alternada/06-ressonancia-e-filtros" />.
+
+Nos extremos, as fórmulas dizem o que você já sabia:
+
+- **Em CC** ($f = 0$), $X_C$ fica infinita: o capacitor carregado não deixa passar corrente contínua. E $X_L$ é zero: a bobina vira só o fio de cobre.
+- **Em frequências muito altas**, o capacitor quase vira um curto e a bobina quase vira um circuito aberto.
+
+## Explore: varrendo a frequência
+
+Na simulação, um gerador de 10 V de pico (7,07 V eficazes) alimenta três ramos em paralelo: um resistor de 100 Ω, o capacitor de 10 µF, com 0,5 Ω de fios em série, e a bobina de 100 mH, que tem 2 Ω de fio. Cada ramo tem um multímetro de corrente. A barra muda a frequência do gerador de 50 Hz a 1.000 Hz.
+
+<Simulation
+  circuit="m06/reatancia-frequencia"
+  instruments={[
+    { kind: 'multimetro', series: ['IR', 'IC', 'IL'] },
+    { kind: 'osciloscopio', series: ['VE', 'IC'] },
+  ]}
+  height={320}
+/>
+
+1. **Aperte o play (▶) em 60 Hz.** O resistor puxa 70,7 mA, o capacitor 26,7 mA e a bobina 187 mA. Confira o capacitor com a fórmula: $7{,}07\,\text{V} / 265\,\Omega \approx 26{,}7\,\text{mA}$.
+2. **Leve a frequência a 600 Hz**, dez vezes mais. A corrente do resistor não muda. A do capacitor fica dez vezes maior (267 mA), e a da bobina, dez vezes menor (18,7 mA).
+3. **Procure o ponto em que o capacitor e a bobina puxam a mesma corrente.** Perto de 160 Hz, os três multímetros marcam quase o mesmo valor, uns 70 mA: as duas reatâncias valem 100 Ω, como o resistor.
+4. **Vá até 1.000 Hz.** O capacitor puxa cerca de 445 mA, e a bobina só 11 mA. Nas frequências altas, o capacitor parece um fio, e a bobina parece um circuito aberto.
+5. **Volte para 50 Hz.** A tendência se inverte: o capacitor puxa só 22 mA, e a bobina, 225 mA. Imagine continuar descendo até a CC: o capacitor pararia de conduzir, e a bobina ficaria só com os 2 Ω do fio.
+
+Repare também na aba do osciloscópio: a corrente do capacitor continua adiantada um quarto de ciclo em qualquer frequência. O que muda com a frequência é o tamanho da corrente, não a defasagem.
+
+## Impedância: resistência e reatância juntas
+
+Componentes de verdade misturam as duas coisas. Uma bobina tem a reatância e a resistência do fio. Um motor tem os enrolamentos e o trabalho mecânico. A oposição total à corrente alternada se chama <Term id="impedancia">impedância</Term>, com o símbolo $Z$, também em ohms.
+
+Num circuito em série, a resistência e a reatância não se somam direto, porque a tensão no resistor está em fase com a corrente e a tensão na reatância está a 90° dela. Elas se somam como os fasores da aula anterior, num triângulo retângulo:
+
+$$
+Z = \sqrt{R^2 + X^2} \qquad\qquad \varphi = \arctan\frac{X}{R} \qquad\qquad I = \frac{V}{Z}
+$$
+
+- $R$ é a resistência, $X$ a reatância e $Z$ a impedância, todas em ohms;
+- $\varphi$ é a defasagem entre a tensão e a corrente;
+- $V$ e $I$ são a tensão e a corrente eficazes.
+
+Com bobina e capacitor no mesmo ramo em série, as reatâncias se descontam: $X = X_L - X_C$. Se o resultado é positivo, o ramo se comporta como bobina e a corrente atrasa; se é negativo, como capacitor, e a corrente adianta.
+
+<Figure caption="Figura 1. O triângulo da impedância de um enrolamento de motor (30 Ω de resistência e 24,9 Ω de reatância em 60 Hz). A impedância é a hipotenusa, 39 Ω, e não a soma 54,9 Ω. O ângulo entre a resistência e a impedância é a defasagem da corrente: 39,7°.">
+  <ImpedanceTriangle />
+</Figure>
+
+A lei de Ohm de CA é $V = Z \cdot I$. É a mesma conta da aula <LinkAula id="m01-eletricidade-do-zero/04-lei-de-ohm" />, só que com a impedância no lugar da resistência. A impedância muda com a frequência, porque a reatância muda.
+
+<DeepDive title="De onde vêm as fórmulas da reatância">
+
+No capacitor, a corrente é proporcional à rapidez com que a tensão muda: $i = C \, \dfrac{dv}{dt}$. Para uma tensão $v = V_p \sin(\omega t)$, com $\omega = 2\pi f$ (a frequência angular, em radianos por segundo), a derivada dá:
+
+$$
+i = \omega C V_p \cos(\omega t)
+$$
+
+O cosseno é o seno adiantado 90°: a corrente está adiantada. E a razão entre os picos é $V_p / I_p = 1/(\omega C) = X_C$.
+
+Na bobina, a tensão é proporcional à rapidez com que a corrente muda: $v = L \, \dfrac{di}{dt}$. Para uma corrente $i = I_p \sin(\omega t)$, a tensão é $v = \omega L I_p \cos(\omega t)$: a tensão adianta 90° em relação à corrente, ou seja, a corrente atrasa. A razão entre os picos é $\omega L = X_L$.
+
+Com números complexos, a impedância de cada componente é um número só: $Z_R = R$, $Z_L = j\omega L$ e $Z_C = 1/(j\omega C) = -j/(\omega C)$. Em série, as impedâncias se somam; em paralelo, se somam os inversos, exatamente como as resistências do módulo 2. O módulo do resultado é a impedância em ohms, e o ângulo, a defasagem. É assim que os simuladores, inclusive o deste curso, calculam circuitos de CA.
+
+</DeepDive>
+
+## Exemplo resolvido 1: a bobina da simulação
+
+A bobina de 100 mH tem 2 Ω de fio. Quanto ela puxa do gerador de 7,07 V em 60 Hz?
+
+1. **Reatância:** $X_L = 2\pi \times 60 \times 0{,}1 \approx 37{,}7\,\Omega$.
+2. **Impedância:** $Z = \sqrt{2^2 + 37{,}7^2} \approx 37{,}75\,\Omega$. Os 2 Ω do fio quase não pesam: num triângulo com um cateto muito maior, a hipotenusa fica quase igual a ele.
+3. **Corrente:** $I = 7{,}07 / 37{,}75 \approx 0{,}187\,\text{A} = 187\,\text{mA}$.
+4. **Defasagem:** $\varphi = \arctan(37{,}7 / 2) \approx 87^\circ$, atrasada.
+
+A simulação marca 187 mA em 60 Hz. Em CC, a mesma bobina puxaria $7{,}07 / 2 \approx 3{,}5\,\text{A}$, quase 19 vezes mais. É o que queima a bobina de um contator de 220 V CA ligada em CC, como mostrou a aula <LinkAula id="m05-magnetismo/06-reles-e-contatores" />.
+
+## Exemplo resolvido 2: o enrolamento do motor do portão
+
+O modelo de ensino da aula <LinkAula id="m16-portao/02-o-motor-do-portao" /> tem enrolamentos de 30 Ω e 66 mH e um capacitor de 40 µF, em 127 V e 60 Hz.
+
+**Enrolamento ligado direto:**
+
+1. $X_L = 2\pi \times 60 \times 0{,}066 \approx 24{,}9\,\Omega$.
+2. $Z = \sqrt{30^2 + 24{,}9^2} \approx 39{,}0\,\Omega$ (o triângulo da Figura 1).
+3. $I = 127 / 39{,}0 \approx 3{,}26\,\text{A}$, atrasada $\arctan(24{,}9 / 30) \approx 39{,}7^\circ$.
+
+**Enrolamento em série com o capacitor:**
+
+1. $X_C = 1 / (2\pi \times 60 \times 40 \times 10^{-6}) \approx 66{,}3\,\Omega$.
+2. $X = X_L - X_C = 24{,}9 - 66{,}3 = -41{,}4\,\Omega$. Negativo: o capacitor domina.
+3. $Z = \sqrt{30^2 + 41{,}4^2} \approx 51{,}2\,\Omega$, e $I = 127 / 51{,}2 \approx 2{,}48\,\text{A}$, adiantada $54{,}1^\circ$.
+
+As duas correntes ficam uns 94° uma da outra, o que faz o campo do motor girar. Repare que o capacitor não só adianta a corrente: ele também muda o quanto ela vale. Por isso o valor em µF do capacitor de motor não pode ser trocado por qualquer outro.
+
+<RealCase title="A fonte capacitiva da lâmpada LED barata">
+
+Muitas lâmpadas LED baratas, luzes noturnas, algumas fitas de LED de 127 V e alguns timers de tomada usam uma **fonte capacitiva**: um capacitor em série com a rede limita a corrente, uma ponte de diodos retifica e os LEDs (ou o circuito) recebem o que sobra.
+
+<Figure caption="Figura 2. Fonte capacitiva típica. O capacitor em série limita a corrente pela reatância; o resistor em paralelo com ele o descarrega quando a lâmpada é desligada; a ponte retifica e o capacitor eletrolítico alisa. Nenhuma peça isola os LEDs da rede: toda a placa fica ligada à fase e ao neutro.">
+  <CapacitiveDropper />
+</Figure>
+
+A conta da reatância explica o truque. Um capacitor de 0,33 µF (valor típico) em 60 Hz tem $X_C = 1 / (2\pi \times 60 \times 0{,}33 \times 10^{-6}) \approx 8{,}04\,\text{k}\Omega$. Em 127 V, ele deixa passar no máximo $127 / 8.040 \approx 15{,}8\,\text{mA}$, sem contar a tensão dos LEDs, que deixa a corrente ainda menor. Um resistor de 8 kΩ no mesmo lugar dissiparia $127^2 / 8.040 \approx 2\,\text{W}$; o capacitor, quase nada.
+
+O que isso significa para você:
+
+- **Nada ali é isolado da rede.** Diferente da fonte com transformador da aula <LinkAula id="m05-magnetismo/04-transformadores" />, cada LED, cada trilha e cada solda da placa está ligado à fase. Tocar na placa com a lâmpada ligada dá choque. Não abra nem conserte lâmpadas e luminárias ligadas.
+- **O capacitor pode continuar carregado depois de desligado.** É para isso que existe o <Term id="resistor-de-descarga">resistor de descarga</Term> em paralelo. Se ele estiver aberto, o capacitor guarda a tensão de pico da rede (cerca de 180 V em 127 V).
+- **A tensão da rede importa.** A mesma lâmpada feita para 127 V, ligada em 220 V, deixa passar 1,73 vez a corrente: cerca de 27 mA em vez de 16 mA. Os LEDs esquentam demais e queimam em pouco tempo. Respeite a tensão da embalagem, a não ser que ela diga bivolt.
+- **Peça de reposição tem de ser própria para a rede.** Esses capacitores são de um tipo de segurança, marcado **X2**, feito para ficar ligado direto na rede. Um capacitor comum de mesma capacitância pode entrar em curto.
+
+O mesmo raciocínio aparece em outros lugares: a bobina de um contator só funciona porque a reatância segura a corrente, e o "8 Ω" de um alto-falante é uma impedância nominal, que muda com a frequência, porque a bobina do alto-falante tem indutância (aula <LinkAula id="m02-circuitos-cc/09-maxima-transferencia-de-potencia" />).
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Medir um capacitor ou uma bobina com o ohmímetro para saber a reatância.** O ohmímetro mede com CC: no capacitor bom ele vai a "OL", e na bobina mostra só a resistência do fio. A reatância depende da frequência e só aparece em CA.
+- **Somar resistência e reatância direto.** Em série, elas se somam como catetos de um triângulo: $\sqrt{R^2 + X^2}$. Um enrolamento de 30 Ω com 24,9 Ω de reatância tem 39 Ω de impedância, não 54,9 Ω.
+- **Esquecer a frequência.** A impedância de um motor, de um transformador ou de uma bobina de contator depende da frequência. Feitos para 60 Hz e ligados em 50 Hz, eles têm reatância menor, puxam mais corrente e podem esquentar; um motor feito para 50 Hz, em 60 Hz, gira mais depressa. Confira a frequência na etiqueta, em especial em equipamentos importados.
+- **Trocar a bobina de CA por uma de CC, ou o contrário.** Em CC a reatância some e a bobina de CA queima; em CA, a bobina de CC puxa pouca corrente e não fecha direito.
+- **Mexer em fonte capacitiva ligada ou recém-desligada.** Tudo está na tensão da rede, e o capacitor pode estar carregado. Desligue, espere, meça a tensão no capacitor e só então encoste.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Qual a reatância de um capacitor de 2,2 µF em 60 Hz, em ohms?',
+      answer: 1206,
+      tolerance: 0.02,
+      unit: 'Ω',
+      explanation:
+        'X_C = 1 ÷ (2π × 60 × 2,2 × 10⁻⁶) = 1 ÷ 0,000829 ≈ 1.206 Ω, ou cerca de 1,2 kΩ.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma bobina tem 40 Ω de reatância e 30 Ω de resistência de fio. Ligada em 127 V, qual a corrente, em ampères?',
+      answer: 2.54,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation:
+        'Z = √(30² + 40²) = √2.500 = 50 Ω. Pela lei de Ohm de CA: I = 127 ÷ 50 = 2,54 A.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'A frequência de um gerador ligado a um capacitor dobra. O que acontece com a corrente?',
+      options: [
+        {
+          text: 'Dobra, porque a reatância do capacitor cai à metade',
+          correct: true,
+          feedback:
+            'X_C = 1/(2πfC): com o dobro da frequência, o capacitor carrega e descarrega o dobro de vezes por segundo, e a corrente dobra.',
+        },
+        {
+          text: 'Cai à metade, porque a reatância dobra',
+          feedback: 'Isso acontece na bobina, cuja reatância cresce com a frequência. No capacitor, cai.',
+        },
+        {
+          text: 'Não muda, porque a tensão é a mesma',
+          feedback:
+            'Isso valeria para um resistor. A oposição do capacitor depende da frequência.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'O capacitor da fonte capacitiva limita a corrente sem esquentar porque a reatância guarda e devolve energia em vez de transformá-la em calor.',
+      answer: true,
+      explanation:
+        'A reatância guarda energia num quarto de ciclo e devolve no seguinte. O resistor, ao contrário, transforma em calor tudo o que recebe.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você mede uma bobina de contator com o ohmímetro e lê 100 Ω. Ligada em 220 V CA, ela puxa só 44 mA. Por quê?',
+      options: [
+        {
+          text: 'Em CA, a reatância da bobina soma-se à resistência e a impedância fica bem maior que 100 Ω',
+          correct: true,
+          feedback:
+            'O ohmímetro mede com CC e só vê a resistência do fio. Em 60 Hz, a reatância da bobina é de milhares de ohms, e é ela que segura a corrente.',
+        },
+        {
+          text: 'O ohmímetro está errado',
+          feedback:
+            'Os 100 Ω estão certos: é a resistência do fio. O que o ohmímetro não mede é a reatância, que só existe em CA.',
+        },
+        {
+          text: 'A bobina só funciona com 127 V',
+          feedback:
+            'A tensão da bobina vem escrita nela. A corrente baixa é normal numa bobina de CA, por causa da reatância.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada componente ao que a oposição dele à corrente faz quando a frequência sobe.',
+      pairs: [
+        ['Resistor', 'Não muda'],
+        ['Capacitor', 'Diminui'],
+        ['Bobina', 'Aumenta'],
+      ],
+      explanation:
+        'R não depende da frequência. X_C = 1/(2πfC) cai com a frequência, e X_L = 2πfL cresce.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma lâmpada LED com fonte capacitiva, feita para 127 V, foi ligada numa tomada de 220 V. O que esperar?',
+      options: [
+        {
+          text: 'A corrente sobe cerca de 1,7 vez, os LEDs esquentam demais e queimam cedo',
+          correct: true,
+          feedback:
+            'A reatância do capacitor não muda com a tensão: a corrente cresce na mesma proporção que a tensão, 220/127 ≈ 1,73.',
+        },
+        {
+          text: 'Nada: o capacitor se ajusta à tensão da rede',
+          feedback:
+            'O capacitor tem reatância fixa em 60 Hz. Mais tensão, mais corrente, na mesma proporção.',
+        },
+        {
+          text: 'A lâmpada fica mais fraca',
+          feedback: 'É o contrário: com mais tensão, passa mais corrente, e os LEDs são sobrecarregados.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- **Reatância** é a oposição do capacitor e da bobina à corrente alternada, em ohms. Ela guarda e devolve energia, sem esquentar.
+- $X_C = 1/(2\pi f C)$ **cai** com a frequência; $X_L = 2\pi f L$ **cresce**. Em CC, o capacitor bloqueia e a bobina vira só o fio.
+- **Impedância** é a oposição total: $Z = \sqrt{R^2 + X^2}$ em série, com $X = X_L - X_C$. A lei de Ohm de CA é $V = Z \cdot I$.
+- O ângulo do triângulo, $\varphi = \arctan(X/R)$, é a defasagem entre tensão e corrente.
+- A fonte capacitiva limita a corrente dos LEDs com a reatância de um capacitor, mas deixa a placa inteira ligada à rede.
+
+Na próxima aula você vai ver o que essa energia que vai e volta faz com a potência e com a conta de luz: <LinkAula id="m06-corrente-alternada/05-potencia-e-fator-de-potencia" />.
