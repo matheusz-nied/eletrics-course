@@ -1,8 +1,8 @@
 /**
  * Power semiconductor in a TO-220 package (TIP120, IRF540, 7805 style):
  * epoxy body with printed front, metal tab with the 3,6 mm mounting hole and
- * three leads, optionally screwed to an extruded aluminium heatsink with a
- * mica insulator, insulating bushing, M3 screw and nut. Dimensions from
+ * three leads, optionally screwed to an extruded aluminium heatsink with an
+ * M3 screw and nut, with or without a mica insulator and insulating bushing. Dimensions from
  * JEDEC TO-220AB: body 10 × 9 mm, 4,5 mm thick with the 1,27 mm tab, 15,5 mm
  * tall with the tab, leads 0,8 × 0,5 mm (1,3 mm shoulders) at 2,54 mm.
  * Heatsink: typical 25 × 23 × 16 mm finned extrusion.
@@ -29,6 +29,11 @@ export interface TransistorTo220Props {
   code?: string;
   dateCode?: string;
   heatsink?: boolean;
+  /**
+   * Mica insulator and shoulder bushing between the tab and the heatsink. Off:
+   * the tab is screwed straight on, so the heatsink is at the middle lead's voltage.
+   */
+  insulator?: boolean;
   /** Case temperature in °C: hot tabs and screws darken (oxide), nothing glows. */
   temperature?: number;
   burned?: boolean;
@@ -58,11 +63,12 @@ export const meta: PartMeta = {
   label: 'Transistor de potência TO-220',
   category: 'semicondutores',
   summary:
-    'Componente de potência no encapsulamento TO-220 (transistor, MOSFET ou regulador), com a aba metálica e, se quiser, parafusado num dissipador de alumínio com isolante de mica.',
+    'Componente de potência no encapsulamento TO-220 (transistor, MOSFET ou regulador), com a aba metálica e, se quiser, parafusado num dissipador de alumínio, com ou sem isolante de mica.',
   defaults: {
     code: 'TIP120',
     dateCode: '2328',
     heatsink: false,
+    insulator: true,
     temperature: 25,
     burned: false,
     leadLength: 13.5,
@@ -71,6 +77,7 @@ export const meta: PartMeta = {
     code: { kind: 'text', label: 'Código impresso', maxLength: 10 },
     dateCode: { kind: 'text', label: 'Código de data', maxLength: 6 },
     heatsink: { kind: 'toggle', label: 'Com dissipador' },
+    insulator: { kind: 'toggle', label: 'Isolante de mica e bucha (com dissipador)' },
     temperature: { kind: 'number', label: 'Temperatura', min: 25, max: 300, step: 5, unit: '°C' },
     burned: { kind: 'toggle', label: 'Queimado' },
     leadLength: { kind: 'number', label: 'Terminais', min: 5, max: 20, step: 0.5, unit: 'mm' },
@@ -97,7 +104,13 @@ export const meta: PartMeta = {
       { at: [0, 0, 0] as Vec3, text: 'Chip de potência soldado na aba', anchor: 'die' },
       { at: [0, 0, 0] as Vec3, text: 'Fios grossos de alumínio', anchor: 'wires', exploded: true },
     ];
-    if (p.heatsink) {
+    if (p.heatsink && p.insulator === false) {
+      list.push({
+        at: [0, 0, 0] as Vec3,
+        text: 'Dissipador sem isolante: encosta na aba e fica na tensão do terminal do meio',
+        anchor: 'heatsink',
+      });
+    } else if (p.heatsink) {
       list.push(
         {
           at: [0, 0, 0] as Vec3,
@@ -126,7 +139,12 @@ export const meta: PartMeta = {
   describe: (p) => {
     const t = Number(p.temperature);
     const hot = t >= 60 ? `, a ${Math.round(t)} °C (quente demais para tocar)` : '';
-    return `Componente de potência ${String(p.code)} em TO-220${p.heatsink ? ', parafusado num dissipador de alumínio com isolante de mica' : ''}${hot}${p.burned ? ', queimado' : ''}. A aba metálica é ligada ao terminal do meio.`;
+    const mount = !p.heatsink
+      ? ''
+      : p.insulator === false
+        ? ', parafusado direto num dissipador de alumínio, sem isolante: o dissipador fica na tensão da aba'
+        : ', parafusado num dissipador de alumínio com isolante de mica';
+    return `Componente de potência ${String(p.code)} em TO-220${mount}${hot}${p.burned ? ', queimado' : ''}. A aba metálica é ligada ao terminal do meio.`;
   },
   view: [0.75, 0.55, 1.5],
 };
@@ -365,13 +383,21 @@ export default function TransistorTo220(props: TransistorTo220Props) {
   return (
     <group>
       {part}
-      <Mounting y0={y0} temperature={p.temperature} />
+      <Mounting y0={y0} temperature={p.temperature} insulator={p.insulator !== false} />
     </group>
   );
 }
 
-/** Heatsink, mica insulator, shoulder bushing, M3 screw, washer and nut. */
-function Mounting({ y0, temperature }: { y0: number; temperature: number }) {
+/** Heatsink, mica insulator and shoulder bushing (or a plain washer), M3 screw, washer and nut. */
+function Mounting({
+  y0,
+  temperature,
+  insulator,
+}: {
+  y0: number;
+  temperature: number;
+  insulator: boolean;
+}) {
   const holeY = y0 + HOLE_Y;
   const hsFront = TAB_BACK - MICA_T - 0.05;
 
@@ -478,35 +504,47 @@ function Mounting({ y0, temperature }: { y0: number; temperature: number }) {
       </Explode>
 
       {/* Mica insulator (with thermal grease haze). */}
-      <Explode offset={[0, 0, -6]}>
-        <mesh position={[0, y0 + 7.8, TAB_BACK - MICA_T / 2 - 0.02]}>
-          <boxGeometry args={[13, 18.5, MICA_T]} />
-          <Material
-            color="#d9b26a"
-            roughness={0.3}
-            metalness={0}
-            transparent
-            opacity={0.55}
-            depthWrite={false}
-          />
-        </mesh>
-        <Anchor name="mica" position={[6.5, y0 + 15, TAB_BACK - 0.1]} />
-      </Explode>
+      {insulator && (
+        <Explode offset={[0, 0, -6]}>
+          <mesh position={[0, y0 + 7.8, TAB_BACK - MICA_T / 2 - 0.02]}>
+            <boxGeometry args={[13, 18.5, MICA_T]} />
+            <Material
+              color="#d9b26a"
+              roughness={0.3}
+              metalness={0}
+              transparent
+              opacity={0.55}
+              depthWrite={false}
+            />
+          </mesh>
+          <Anchor name="mica" position={[6.5, y0 + 15, TAB_BACK - 0.1]} />
+        </Explode>
+      )}
 
       {/* Screw with the shoulder bushing on the front of the tab. */}
       <Explode offset={[0, 0, 10]}>
         <group position={[0, holeY, TAB_FRONT]} rotation={[Math.PI / 2, 0, 0]}>
-          {/* Shoulder bushing (nylon): flange and sleeve through the hole. */}
-          <mesh position={[0, 0.4, 0]}>
-            <cylinderGeometry args={[3.1, 3.1, 0.8, 32]} />
-            <Material preset="nylonNatural" />
-          </mesh>
-          <mesh position={[0, -0.7, 0]}>
-            <cylinderGeometry args={[1.75, 1.75, 1.4, 24]} />
-            <Material preset="nylonNatural" />
-          </mesh>
+          {insulator ? (
+            <>
+              {/* Shoulder bushing (nylon): flange and sleeve through the hole. */}
+              <mesh position={[0, 0.4, 0]}>
+                <cylinderGeometry args={[3.1, 3.1, 0.8, 32]} />
+                <Material preset="nylonNatural" />
+              </mesh>
+              <mesh position={[0, -0.7, 0]}>
+                <cylinderGeometry args={[1.75, 1.75, 1.4, 24]} />
+                <Material preset="nylonNatural" />
+              </mesh>
+            </>
+          ) : (
+            // Plain steel washer: the screw touches the tab.
+            <mesh position={[0, 0.4, 0]}>
+              <cylinderGeometry args={[3.3, 3.3, 0.8, 32]} />
+              <Material preset="zinc" color={screwTint} />
+            </mesh>
+          )}
         </group>
-        <Anchor name="bushing" position={[3.1, holeY, TAB_FRONT + 0.8]} />
+        {insulator && <Anchor name="bushing" position={[3.1, holeY, TAB_FRONT + 0.8]} />}
         <group position={[0, holeY, TAB_FRONT + 0.8]} rotation={[Math.PI / 2, 0, 0]}>
           <mesh geometry={screwHead}>
             <Material preset="zinc" color={screwTint} roughness={0.32} />
