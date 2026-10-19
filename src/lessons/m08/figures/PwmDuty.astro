@@ -1,0 +1,108 @@
+---
+/*
+ * 08.2: PWM at 25 %, 50 % and 75 % on 12 V: the same period, a different
+ * share of it switched on, and the average (dashed) that the motor follows.
+ */
+const X0 = 96;
+const X1 = 560;
+const PERIODS = 4;
+const H = 46; // height of 12 V
+const rows = [0.25, 0.5, 0.75].map((d, i) => {
+  const base = 70 + i * 82;
+  const p = (X1 - X0) / PERIODS;
+  let d0 = `M${X0} ${base}`;
+  for (let k = 0; k < PERIODS; k++) {
+    const x = X0 + k * p;
+    d0 += ` V${base - H} H${x + d * p} V${base} H${x + p}`;
+  }
+  return {
+    base,
+    path: d0,
+    avg: base - d * H,
+    label: `${Math.round(d * 100)} %`,
+    volts: `média ${(12 * d).toLocaleString('pt-BR')} V`,
+  };
+});
+---
+
+<svg viewBox="0 0 660 290" width="660" height="290" class="fig" aria-hidden="true">
+  {rows.map((r) => (
+    <g>
+      <text x="16" y={r.base - H / 2 + 5} class="duty start">
+        {r.label}
+      </text>
+      <path d={`M${X0 - 6} ${r.base} H${X1 + 8}`} class="axis" />
+      <text x={X0 - 10} y={r.base + 4} class="v end">
+        0
+      </text>
+      <text x={X0 - 10} y={r.base - H + 4} class="v end">
+        12 V
+      </text>
+      <path d={r.path} class="wave" />
+      <path d={`M${X0} ${r.avg} H${X1}`} class="avg" />
+      <text x={X1 + 12} y={r.avg + 4} class="avg-t start">
+        {r.volts}
+      </text>
+    </g>
+  ))}
+  <path d={`M${X0} 272 H${X0 + (X1 - X0) / PERIODS}`} class="dim" />
+  <path d={`M${X0} 266 V278 M${X0 + (X1 - X0) / PERIODS} 266 V278`} class="dim" />
+  <text x={X0 + (X1 - X0) / (2 * PERIODS)} y="264" class="note">
+    um período
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+  }
+  .wave {
+    stroke: var(--accent);
+    stroke-width: 2.5;
+  }
+  .avg {
+    stroke: var(--copper);
+    stroke-width: 2;
+    stroke-dasharray: 6 5;
+  }
+  .dim {
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .duty {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .v {
+    fill: var(--fg-muted);
+    font-size: 11.5px;
+  }
+  .avg-t {
+    fill: var(--copper);
+    font-weight: 600;
+    font-size: 12.5px;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

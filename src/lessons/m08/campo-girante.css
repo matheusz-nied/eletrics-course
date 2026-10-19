@@ -1,0 +1,168 @@
+/* CampoGirante.tsx: the rotating field of three coils, lesson 8.3. */
+
+.campo__body {
+  align-items: start;
+}
+
+@media (min-width: 52rem) {
+  .campo__body {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+}
+
+.campo__views,
+.campo__side {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.campo__stator,
+.campo__waves {
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.campo__stator {
+  max-width: 22rem;
+  justify-self: center;
+}
+
+.campo__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+}
+
+.campo__ring {
+  fill: none;
+  stroke: var(--surface);
+  stroke-width: 26;
+}
+
+.campo__rotor {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-dasharray: 3 5;
+  stroke-width: 1.5;
+}
+
+.campo__coil {
+  stroke-width: 2;
+}
+
+.campo__coil--1,
+.campo__arrow--1,
+.campo__wave--1,
+.campo__dot--1 {
+  --phase: var(--copper);
+}
+
+.campo__coil--2,
+.campo__arrow--2,
+.campo__wave--2,
+.campo__dot--2 {
+  --phase: var(--info);
+}
+
+.campo__coil--3,
+.campo__arrow--3,
+.campo__wave--3,
+.campo__dot--3 {
+  --phase: var(--success);
+}
+
+.campo__coil {
+  fill: var(--phase);
+  stroke: var(--phase);
+}
+
+.campo__phase {
+  font-size: 15px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.campo__phase--1 {
+  fill: var(--copper);
+}
+
+.campo__phase--2 {
+  fill: var(--info);
+}
+
+.campo__phase--3 {
+  fill: var(--success);
+}
+
+.campo__locus {
+  fill: none;
+  stroke: var(--fg-subtle);
+  stroke-dasharray: 4 5;
+  stroke-width: 1.25;
+}
+
+.campo__arrow {
+  fill: var(--phase);
+  stroke: var(--phase);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+  opacity: 0.85;
+}
+
+.campo__field {
+  fill: var(--accent);
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 6;
+}
+
+.campo__pivot {
+  fill: var(--fg);
+}
+
+.campo__caption,
+.campo__tick {
+  fill: var(--fg-muted);
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.campo__tick--start {
+  text-anchor: start;
+}
+
+.campo__tick--end {
+  text-anchor: end;
+}
+
+.campo__axis {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.campo__wave {
+  fill: none;
+  stroke: var(--phase);
+  stroke-width: 2.25;
+}
+
+.campo__cursor {
+  stroke: var(--fg);
+  stroke-dasharray: 3 3;
+  stroke-width: 1.25;
+}
+
+.campo__dot {
+  fill: var(--phase);
+  stroke: var(--bg);
+  stroke-width: 1.5;
+}
+
+.campo__sense {
+  font-size: 1.5rem;
+}

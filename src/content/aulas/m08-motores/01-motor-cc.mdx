@@ -1,0 +1,284 @@
+---
+titulo: Motor de corrente contínua
+modulo: m08-motores
+ordem: 1
+nivel: B
+duracaoMin: 35
+objetivos:
+  - Explicar como a força num fio com corrente, dentro de um campo magnético, faz o rotor girar
+  - Dizer para que servem o comutador e as escovas
+  - Explicar a força contraeletromotriz e por que o motor travado puxa muita corrente
+  - Calcular a corrente de partida, a rotação e a corrente com carga de um motor CC
+  - Inverter o sentido de um motor de ímã permanente e reconhecer o motor universal
+prerequisitos:
+  - m01-eletricidade-do-zero/04-lei-de-ohm
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+  - m05-magnetismo/02-eletroimas-e-solenoides
+tags: [motor, motor CC, comutador, escovas, força contraeletromotriz, torque, vidro elétrico, carro]
+seguranca: baixa-tensao
+rascunho: false
+---
+
+import DcMotorPrinciple from '../../../lessons/m08/figures/DcMotorPrinciple.astro';
+
+Você aperta o botão do vidro elétrico do carro e ouve o motorzinho dentro da porta. O vidro sobe rápido, chega ao alto e para. Se você continuar segurando o botão, o motor fica forçando, parado, e a corrente sobe muito. Segure por tempo demais e o motor esquenta, até queimar. Por que um motor parado puxa mais corrente do que um motor girando? A resposta explica quase tudo sobre o motor de corrente contínua.
+
+## A força num fio dentro de um ímã
+
+Na aula <LinkAula id="m05-magnetismo/02-eletroimas-e-solenoides" /> você viu que toda corrente cria um campo magnético em volta do fio. Agora ponha esse fio entre os polos de um ímã. Os dois campos se somam de um lado do fio e se cancelam do outro, e o fio é **empurrado** para o lado onde o campo ficou mais fraco. É uma força de verdade, que você sente na mão se segurar o fio com uma corrente forte.
+
+O tamanho da força depende de três coisas:
+
+$$
+F = B \cdot I \cdot L
+$$
+
+em que $F$ é a força em newtons (N), $B$ é a intensidade do campo do ímã em teslas (T), $I$ é a corrente no fio em ampères (A) e $L$ é o comprimento do fio que fica dentro do campo, em metros (m). A fórmula vale quando o fio cruza o campo em ângulo reto, que é como os motores são construídos.
+
+O sentido sai da **regra do tapa**, com a mão direita aberta: o polegar aponta no sentido da corrente (o convencional, do + para o −), os outros dedos apontam no sentido do campo (de N para S), e a palma empurra para onde vai a força. Inverta a corrente, ou inverta o ímã, e a força troca de sentido.
+
+Um número para ter ideia: num motor pequeno, $B = 0{,}3\,\text{T}$, um lado da bobina com 3 cm dentro do campo e 2 A dão $F = 0{,}3 \times 2 \times 0{,}03 = 0{,}018\,\text{N}$, quase nada. Por isso a bobina do motor tem dezenas ou centenas de voltas: cada volta soma a sua força.
+
+## De uma força a um giro
+
+Dobre o fio numa espira, uma volta retangular, presa a um eixo. Os dois lados compridos ficam dentro do campo, com a corrente em sentidos opostos: num lado ela vai, no outro ela volta. Então as forças também são opostas, uma para cima e outra para baixo, e as duas juntas fazem a espira girar. Esse esforço de giro é o <Term id="torque">torque</Term>, medido em newton-metro (N·m): força vezes a distância até o eixo.
+
+<Figure
+  caption="Figura 1. À esquerda, a espira vista de ponta, entre os polos do ímã: a corrente sai do papel no lado esquerdo (ponto) e entra no lado direito (×). A força empurra o lado esquerdo para cima e o direito para baixo, e a espira gira no sentido horário. À direita, o comutador: dois meios anéis presos no eixo, cada um ligado a uma ponta da bobina, e duas escovas fixas que levam a corrente da bateria até eles."
+  alt="Desenho de uma espira entre um polo norte vermelho e um polo sul azul, com setas de força para cima no lado esquerdo e para baixo no direito, e ao lado um comutador de dois segmentos de cobre com uma escova positiva à esquerda e uma negativa à direita, ligadas a uma bateria."
+  wide
+>
+  <DcMotorPrinciple />
+</Figure>
+
+Agora repare no problema. Depois de meia volta, o lado que estava à esquerda passou para a direita, mas a corrente nele continua no mesmo sentido. A força, que empurrava para cima, agora empurra para cima do lado errado, e freia a espira. Ela só balançaria e pararia de lado.
+
+## O comutador e as escovas
+
+A solução é trocar o sentido da corrente na espira a cada meia volta, bem na hora certa. Quem faz isso é o <Term id="comutador">comutador</Term>: um anel de cobre cortado em segmentos, preso no eixo, com cada segmento ligado a uma ponta da bobina. Duas <Term id="escova">escovas</Term>, blocos de carvão (grafite) apertados por molas, ficam paradas e encostam no anel, levando a corrente da bateria.
+
+Quando a espira passa da posição em pé, os segmentos trocam de escova, e a corrente na bobina se inverte. O lado que está à esquerda, seja ele qual for, sempre tem a corrente no mesmo sentido, e a força sempre empurra no sentido do giro. É uma chave inversora mecânica que gira junto com o motor.
+
+Os motores reais têm mais de uma bobina e mais segmentos (o motorzinho de brinquedo tem três), para o torque não ter pontos mortos. A parte que gira, com as bobinas e o comutador, é o <Term id="rotor">rotor</Term> (nos motores CC também chamado de induzido ou armadura). A parte fixa, com os ímãs e a carcaça, é o <Term id="estator">estator</Term>.
+
+<Model3D part="dc-motor" props={{ size: '385', rpm: 600 }} explode annotations />
+
+No modelo acima, gire a vista e veja, de trás para a frente: a tampa de plástico com os dois terminais e as escovas; o comutador de três segmentos; o rotor com as três bobinas enroladas no núcleo de chapas de ferro; e os dois ímãs em arco colados por dentro da carcaça. Ligue e desligue a vista explodida para ver cada peça no lugar.
+
+## O motor também é um gerador
+
+Um motor girando tem fios se movendo dentro de um campo magnético. Pela lei de Faraday (aula <LinkAula id="m05-magnetismo/03-inducao-eletromagnetica" />), isso induz uma tensão nas bobinas. É a mesma coisa que acontece num dínamo de bicicleta. Essa tensão aparece **contra** a tensão da bateria e cresce com a rotação. O nome dela é <Term id="forca-contraeletromotriz">força contraeletromotriz</Term>:
+
+$$
+E = K_e \cdot \omega
+$$
+
+em que $E$ é a força contraeletromotriz em volts (V), $\omega$ (ômega) é a velocidade de giro em radianos por segundo (rad/s) e $K_e$ é a constante do motor, em V·s/rad, que depende dos ímãs e do número de voltas da bobina.
+
+Para passar de rpm (rotações por minuto, como vem na etiqueta) para rad/s, multiplique por $2\pi$ e divida por 60:
+
+$$
+\omega = \frac{2\pi \cdot n}{60}
+$$
+
+com $n$ em rpm. Então 3.000 rpm são $2\pi \times 3.000 / 60 \approx 314\,\text{rad/s}$.
+
+A corrente na bobina é limitada pela diferença entre a tensão da bateria e a força contraeletromotriz, e pela resistência do enrolamento:
+
+$$
+I = \frac{V - E}{R} \qquad\qquad T = K_t \cdot I
+$$
+
+com $V$ a tensão aplicada, $R$ a resistência do enrolamento em ohms (Ω) e $T$ o torque do motor em N·m. A constante de torque $K_t$, em N·m/A, tem o mesmo valor de $K_e$ quando as duas são medidas em unidades do SI.
+
+Isso explica o gancho da aula:
+
+- **Parado** (na partida ou travado), $\omega = 0$, então $E = 0$, e a corrente só é limitada pela resistência do fio, que é pequena: $I = V/R$. É a <Term id="corrente-de-partida">corrente de partida</Term>, ou corrente de rotor travado.
+- **Girando sem carga**, o motor acelera até $E$ quase igualar $V$. Sobra uma corrente pequena, só para vencer o atrito.
+- **Com carga**, o motor desacelera um pouco, $E$ diminui, a corrente sobe e o torque sobe junto, até equilibrar a carga.
+
+O motor se ajusta sozinho à carga: puxa a corrente que o trabalho pede. E a rotação depende principalmente da tensão: sem carga, $\omega \approx V / K_e$. Metade da tensão, metade da rotação.
+
+## Explore: o motor do vidro elétrico
+
+A simulação tem o motor de um vidro elétrico, sem o redutor que fica entre ele e o vidro, ligado a uma bateria de 12 V por um botão. O controle **Carga no eixo** faz o papel da força que o vidro faz contra o motor.
+
+<Simulation circuit="m08/motor-cc" instruments={['multimetro']} />
+
+1. Aperte o play (▶) e ligue **Botão do vidro apertado**, com a carga em zero. Quanto o motor gira? Quanto ele puxa? Clique no motor no esquema para ver a rotação.
+2. Baixe a tensão da bateria para 6 V. O que acontece com a rotação?
+3. Volte para 12 V e suba a carga para 0,15 N·m, a força do vidro subindo. Leia a rotação e a corrente.
+4. Agora suba a carga até o fim, 0,6 N·m: o vidro chegou ao alto e travou. Quanto o motor puxa? Espere uns segundos com ele travado e leia as mensagens do simulador.
+
+Sem carga, o motor gira a uns 5.100 rpm e puxa só 2,7 A. Com 6 V, a rotação cai para uns 2.550 rpm, metade. Com a carga do vidro, a rotação cai para uns 3.500 rpm e a corrente sobe para uns 9,3 A. Travado, a rotação vai a zero e a corrente vai a 24 A: sem força contraeletromotriz, só os 0,5 Ω do enrolamento seguram a corrente. Em pouco mais de dez segundos o simulador avisa que o motor está esquentando demais; mantido assim, ele queima.
+
+<Plot
+  circuit="m08/partida-motor-cc"
+  until={1}
+  series={['IM', 'M1.rpm']}
+  title="corrente e rotação do motor do vidro, ligado direto em 12 V com a carga do vidro"
+/>
+
+O gráfico mostra a partida do mesmo motor, com a carga do vidro. No instante em que ele é ligado, ainda parado, a corrente vai para perto de 24 A. Conforme o rotor acelera, a força contraeletromotriz cresce e a corrente cai, até se firmar perto de 9,3 A, em cerca de um segundo.
+
+## Exemplo resolvido: os números do motor do vidro
+
+O motor da simulação tem enrolamento de $R = 0{,}5\,\Omega$ e $K_e = K_t = 0{,}02$ (em V·s/rad e N·m/A), e funciona em 12 V.
+
+**Corrente e torque com o motor travado.** Sem giro, não há força contraeletromotriz:
+
+$$
+I = \frac{V}{R} = \frac{12\,\text{V}}{0{,}5\,\Omega} = 24\,\text{A} \qquad T = K_t \cdot I = 0{,}02 \times 24 = 0{,}48\,\text{N·m}
+$$
+
+Esse é o maior torque que o motor consegue fazer em 12 V. Uma carga maior que 0,48 N·m trava o motor, como o vidro que chegou ao alto.
+
+**Corrente subindo o vidro, a 3.500 rpm.** Primeiro a velocidade em rad/s, depois a força contraeletromotriz:
+
+$$
+\omega = \frac{2\pi \times 3.500}{60} \approx 366{,}5\,\text{rad/s} \qquad E = 0{,}02 \times 366{,}5 \approx 7{,}33\,\text{V}
+$$
+
+$$
+I = \frac{V - E}{R} = \frac{12 - 7{,}33}{0{,}5} \approx 9{,}3\,\text{A}
+$$
+
+É o valor da simulação. O torque do motor é $0{,}02 \times 9{,}3 \approx 0{,}19\,\text{N·m}$: 0,15 N·m vão para o vidro e o resto vence o atrito do próprio motor.
+
+**Para onde vai a energia.** A bateria entrega $P = V \cdot I = 12 \times 9{,}3 \approx 112\,\text{W}$. O enrolamento transforma em calor $I^2 R = 9{,}3^2 \times 0{,}5 \approx 43\,\text{W}$ (efeito Joule, aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />). O vidro recebe a potência mecânica, torque vezes velocidade: $0{,}15 \times 366{,}5 \approx 55\,\text{W}$. O resto se perde no atrito. Com o motor travado, a bateria entrega $12 \times 24 = 288\,\text{W}$, e **tudo** vira calor no enrolamento, porque não há movimento. É por isso que o motor travado queima.
+
+<RealCase title="O vidro elétrico">
+
+Dentro da porta, o motor do vidro é um motor CC de ímã permanente, como o da simulação, com um redutor de rosca sem-fim que transforma muitas voltas rápidas e fracas em poucas voltas lentas e fortes (aula <LinkAula id="m08-motores/06-redutores-torque-e-potencia" />). O redutor sem-fim também segura o vidro parado: empurrar o vidro para baixo com a mão não faz o motor girar.
+
+Para subir e descer, o carro só precisa inverter a polaridade do motor. Isso é feito por dois relés ou por um circuito chamado ponte H, que é o assunto da próxima aula, <LinkAula id="m08-motores/02-ponte-h-e-pwm" />.
+
+E o vidro que sobe sozinho com um toque? O módulo eletrônico do vidro acompanha a corrente do motor, ou conta os pulsos de um sensor magnético no eixo. Quando o vidro chega ao alto, a corrente sobe e o motor para de girar, e o módulo desliga o motor. Em muitos carros, o mesmo princípio faz a função **antiesmagamento**: se o vidro encontra um braço no caminho, a rotação cai, a corrente sobe e o módulo inverte o vidro. Os detalhes variam de carro para carro.
+
+Um defeito clássico: o vidro sobe devagar, e cada vez mais devagar. Muitas vezes o motor está bom e o problema é mecânico: a canaleta de borracha ressecada ou suja faz o vidro pedir mais força. O motor, com mais carga, gira mais devagar e puxa mais corrente, exatamente como na simulação.
+
+</RealCase>
+
+## Invertendo o sentido
+
+No motor de ímã permanente, como o do vidro e o de brinquedos, o campo vem dos ímãs, que não mudam. Inverter a polaridade da bateria inverte a corrente na bobina, e pela regra do tapa a força inverte: o motor gira para o outro lado. A bolinha vermelha (ou o +) perto de um dos terminais marca o terminal que, no positivo, faz o motor girar no sentido indicado pelo fabricante.
+
+### E o liquidificador?
+
+Liquidificador, furadeira, aspirador de pó, batedeira e serra tico-tico usam um parente do motor CC: o <Term id="motor-universal">motor universal</Term>. No lugar dos ímãs, o campo vem de bobinas no estator, ligadas **em série** com o rotor, e ele também tem comutador e escovas. Na tomada, a corrente alternada inverte o sentido 120 vezes por segundo, mas inverte no campo e no rotor ao mesmo tempo, e a força continua no mesmo sentido. Por isso ele funciona em CA e em CC, daí o nome.
+
+É um motor que gira muito rápido (dezenas de milhares de rpm sem carga) e tem bastante torque para o tamanho. Em compensação, as escovas se gastam e faíscam, e o barulho é alto. Inverter os fios da tomada não muda o sentido desse motor, porque campo e rotor invertem juntos: para inverter, como nas furadeiras que têm a chave de reversão, é preciso trocar a ligação do rotor em relação à do campo.
+
+## Erros comuns e segurança
+
+- **Deixar o motor travado.** Parado, ele puxa a corrente máxima e transforma tudo em calor. Motor que não gira e esquenta tem que ser desligado.
+- **Achar que a corrente do motor é fixa.** Ela depende da carga: o mesmo motor puxa 2,7 A solto e 24 A travado. Fusível e fiação são escolhidos pela corrente de trabalho, e o fusível precisa aguentar o pico curto da partida (aula <LinkAula id="m04-passivos/06-fusiveis-e-protecao" />).
+- **Ignorar as escovas.** Faísca forte no comutador, cheiro de queimado e pó preto dentro do motor são sinais de escovas gastas ou de comutador sujo. Em ferramentas, as escovas são peça de reposição.
+- **Medir o motor na rede ligada.** O motor universal das ferramentas e eletrodomésticos fica ligado direto na tomada. Antes de abrir uma furadeira ou um liquidificador, tire o plugue da tomada, e não só desligue o interruptor.
+- **Encostar a mão no eixo ou no redutor de um motor energizado.** Mesmo um motor de 12 V tem torque para prender um dedo depois de passar por um redutor, como no vidro elétrico.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Por que um motor CC puxa muito mais corrente na partida do que girando?',
+      options: [
+        {
+          text: 'Parado, ele ainda não gera força contraeletromotriz, e só a resistência do enrolamento limita a corrente',
+          correct: true,
+          feedback:
+            'A força contraeletromotriz cresce com a rotação. Com o motor parado, ela é zero, e a corrente é V/R.',
+        },
+        {
+          text: 'Porque as escovas ainda estão frias e conduzem melhor',
+          feedback:
+            'A temperatura das escovas quase não muda a corrente. O que muda tudo é a força contraeletromotriz, que é zero com o motor parado.',
+        },
+        {
+          text: 'Porque o comutador fica em curto até o motor pegar velocidade',
+          feedback:
+            'O comutador não entra em curto. A corrente é alta porque, parado, o motor não gera a tensão que se opõe à bateria.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um motor CC de 12 V tem enrolamento de 0,4 Ω. Qual é a corrente com o rotor travado, em ampères?',
+      answer: 30,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation: 'Travado, não há força contraeletromotriz: I = V/R = 12 V ÷ 0,4 Ω = 30 A.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Quanto valem 3.000 rpm em radianos por segundo?',
+      answer: 314.16,
+      tolerance: 0.01,
+      unit: 'rad/s',
+      explanation: 'ω = 2π × n ÷ 60 = 2π × 3.000 ÷ 60 ≈ 314 rad/s.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'O motor do exemplo (12 V, 0,5 Ω, Ke = 0,02 V·s/rad) gira a 4.000 rpm. Qual é a corrente, em ampères?',
+      answer: 7.24,
+      tolerance: 0.03,
+      unit: 'A',
+      explanation:
+        'ω = 2π × 4.000 ÷ 60 ≈ 418,9 rad/s; E = 0,02 × 418,9 ≈ 8,38 V; I = (12 − 8,38) ÷ 0,5 ≈ 7,2 A.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Para que serve o comutador de um motor CC?',
+      options: [
+        {
+          text: 'Para inverter a corrente na bobina a cada meia volta, mantendo o torque sempre no mesmo sentido',
+          correct: true,
+          feedback:
+            'Sem o comutador, a força frearia a espira depois de meia volta. Ele troca as ligações da bobina na hora certa.',
+        },
+        {
+          text: 'Para regular a velocidade do motor',
+          feedback:
+            'A velocidade depende da tensão e da carga. O comutador só inverte a corrente na bobina a cada meia volta.',
+        },
+        {
+          text: 'Para transformar a corrente contínua da bateria em alternada para os ímãs',
+          feedback:
+            'Os ímãs não recebem corrente. O comutador inverte a corrente na bobina do rotor, e ela de fato fica alternada lá dentro, mas o objetivo é manter o torque num sentido só.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Trocar os dois fios da bateria inverte o sentido de giro de um motor CC de ímã permanente.',
+      answer: true,
+      explanation:
+        'O campo dos ímãs não muda; a corrente na bobina inverte, e a força também. No motor universal isso não funciona, porque campo e rotor invertem juntos.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada parte do motor CC ao que ela faz.',
+      pairs: [
+        ['Ímãs do estator', 'Criam o campo magnético fixo'],
+        ['Bobinas do rotor', 'Recebem a corrente e sofrem a força'],
+        ['Comutador', 'Inverte a corrente na bobina a cada meia volta'],
+        ['Escovas', 'Levam a corrente da parte fixa à parte que gira'],
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Um fio com corrente dentro de um campo magnético sofre uma força $F = B \cdot I \cdot L$; numa espira, as forças opostas dos dois lados fazem o **torque**.
+- O **comutador** e as **escovas** invertem a corrente na bobina a cada meia volta, para o torque continuar no mesmo sentido.
+- Girando, o motor gera uma **força contraeletromotriz** $E = K_e \cdot \omega$ contra a bateria; a corrente é $I = (V - E)/R$ e o torque é $T = K_t \cdot I$.
+- **Parado ou travado**, o motor puxa a corrente máxima, $V/R$, e transforma tudo em calor. Com carga, desacelera e puxa mais corrente; sem carga, gira quase em $V/K_e$.
+- A rotação acompanha a **tensão**, e o sentido acompanha a **polaridade** (no motor de ímã permanente). O **motor universal**, de ferramentas e eletrodomésticos, tem campo em série e funciona em CA.
+
+Na próxima aula, você vai controlar este motor com eletrônica: inverter o sentido sem trocar fios e mudar a velocidade sem desperdiçar energia, com a <LinkAula id="m08-motores/02-ponte-h-e-pwm" />.
