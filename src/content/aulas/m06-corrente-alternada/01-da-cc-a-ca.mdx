@@ -1,0 +1,326 @@
+---
+titulo: Da corrente contínua à alternada
+modulo: m06-corrente-alternada
+ordem: 1
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Diferenciar corrente contínua (CC) de corrente alternada (CA) e reconhecer cada uma nas etiquetas
+  - Explicar como um gerador produz uma senoide
+  - Relacionar frequência e período e calcular um a partir do outro
+  - Explicar por que a rede elétrica usa CA de 60 Hz e por que os eletrônicos precisam de CC
+prerequisitos:
+  - m05-magnetismo/03-inducao-eletromagnetica
+  - m03-medicoes/05-osciloscopio
+tags: [corrente alternada, corrente contínua, senoide, frequência, período, 60 Hz, gerador]
+seguranca: baixa-tensao
+rascunho: false
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import CcCaGraphs from '../../../lessons/m06/figures/CcCaGraphs.astro';
+import AcGeneratorSketch from '../../../lessons/m06/figures/AcGeneratorSketch.astro';
+import SineCycleAnatomy from '../../../lessons/m06/figures/SineCycleAnatomy.astro';
+import GeradorOsciloscopio from '../../../lessons/m06/GeradorOsciloscopio.tsx';
+
+Pegue o carregador do seu celular e leia as letrinhas gravadas nele. Uma etiqueta típica diz algo como **Entrada: 100–240 V~ 50/60 Hz** e **Saída: 5 V ⎓ 2 A**. Numa caixinha do tamanho de um dedo, entram e saem dois tipos de corrente diferentes: o "~" e o "⎓". A central de um portão eletrônico faz a mesma coisa, com a rede de um lado e os 12 V da placa do outro.
+
+Nesta aula você vai ver o que separa a corrente contínua da alternada, de onde vem a senoide da tomada e o que querem dizer os 60 Hz.
+
+## Duas maneiras de a corrente andar
+
+Na <Term id="corrente-continua">corrente contínua</Term> (CC), a tensão tem sempre o mesmo sinal e a corrente anda sempre no mesmo sentido, do positivo para o negativo pelo circuito. É o que sai de uma pilha, de uma bateria de carro e da saída de um carregador. Num gráfico da tensão ao longo do tempo, a CC de uma bateria é uma linha reta.
+
+Na <Term id="corrente-alternada">corrente alternada</Term> (CA), a tensão sobe até um máximo, desce, passa por zero, fica negativa, chega a um mínimo e volta. A corrente acompanha: anda num sentido, para, e anda no sentido contrário. É o que chega à tomada.
+
+<Figure caption="Figura 1. A mesma janela de 50 ms em dois casos. Em cima, a bateria de 12 V: uma linha reta. Embaixo, a tomada de 127 V: a tensão vai a +180 V, volta a zero, vai a −180 V e retorna, três vezes nesses 50 ms.">
+  <CcCaGraphs />
+</Figure>
+
+Repare na escala da Figura 1: a tomada de 127 V chega a cerca de 180 V nos picos. Por que ela se chama "127 V", então, é o assunto da próxima aula.
+
+Uma imagem ajuda: a CC é como a água num cano que corre sempre para o mesmo lado. A CA é como um serrote, que vai e volta sem sair do lugar e corta nas duas direções. Os elétrons de um fio ligado na tomada fazem isso: balançam cerca de um milésimo de milímetro para cada lado, e mesmo assim a lâmpada acende, porque a energia é levada pelo empurrão que se espalha pelo fio, e não pelos elétrons, como você viu na aula <LinkAula id="m01-eletricidade-do-zero/02-corrente-eletrica" />. A analogia do serrote vale para o vaivém, mas não explica tudo: ela não diz, por exemplo, quanto uma corrente que vai e volta aquece um fio. Isso fica para a próxima aula.
+
+Nos equipamentos, a CA aparece como **AC** (do inglês *alternating current*), **Vca**, **Vac** ou com o símbolo **~**. A CC aparece como **DC** (*direct current*), **Vcc**, **Vdc** ou com o símbolo **⎓**, uma linha cheia sobre uma tracejada.
+
+## De onde vem a senoide
+
+Na aula <LinkAula id="m05-magnetismo/03-inducao-eletromagnetica" /> você viu que uma espira girando entre os polos de um ímã produz tensão, porque o fluxo magnético que passa por ela muda o tempo todo. Esse é o gerador de corrente alternada, também chamado de **alternador**.
+
+<Part3D
+  part="ac-generator"
+  props={{ phases: 1 }}
+  annotations
+  alt="Gerador simples de corrente alternada: os polos norte, em vermelho, e sul, em azul, de um ímã, com linhas tracejadas de campo entre eles. No meio, uma espira de cobre retangular gira num eixo vertical. As duas pontas da espira descem pelo eixo até dois anéis coletores, um acima do outro, e duas escovas encostadas nos anéis levam a tensão por fios até um osciloscópio, que mostra dois ciclos de uma senoide."
+  caption="Figura 2. O gerador mais simples: uma espira girando entre os polos de um ímã. Os anéis coletores giram com a espira, e as escovas, paradas, encostam neles e levam a tensão para fora."
+>
+  <AcGeneratorSketch />
+</Part3D>
+
+As peças, de dentro para fora:
+
+- A **espira** é uma volta de fio de cobre presa ao eixo. Num gerador real são centenas de voltas, enroladas em bobinas.
+- O **ímã** (ou um eletroímã) cria o campo magnético.
+- Os **anéis coletores** são dois anéis de metal presos ao eixo, um para cada ponta da espira. Eles giram junto.
+- As **escovas** são blocos de grafite parados que encostam nos anéis e levam a tensão para os fios de saída, sem torcer os fios.
+
+A cada volta, a espira passa por duas posições especiais. De frente para o campo, o fluxo que passa por ela é o máximo, mas nesse instante ele não está mudando, e a tensão é zero. Deitada ao longo do campo, o fluxo é zero, mas está mudando o mais rápido possível, e a tensão chega ao pico. Meia volta depois, a espira está ao contrário, e o pico é negativo. Uma volta inteira dá um ciclo completo da onda. Essa curva suave, que sobe e desce sempre no mesmo ritmo, é a <Term id="senoide">senoide</Term>.
+
+### Explore: o gerador e o osciloscópio
+
+O osciloscópio, que você conheceu na aula <LinkAula id="m03-medicoes/05-osciloscopio" />, desenha a tensão ao longo do tempo. No gerador abaixo, ele mostra 50 ms na tela, 5 ms por divisão.
+
+<GeradorOsciloscopio client:visible />
+
+1. **Aperte Girar**, com 60 voltas por segundo. Acompanhe o ponto no osciloscópio e a espira juntos. Quando a espira passa na vertical, de frente para o campo, a tensão está em zero. Na horizontal, está no pico. Conte quantos ciclos cabem na tela: 3.
+2. **Mude para 50 voltas por segundo.** Agora cabem 2,5 ciclos, e o período sobe para 20 ms. Repare também que o pico cai de 12 V para 10 V: com ímãs fixos, girar mais devagar muda o fluxo mais devagar e induz menos tensão.
+3. **Pare o gerador e gire a espira à mão** com a barra de posição. Em 90° a tensão é +12 V; em 270°, −12 V; em 0° e 180°, zero.
+
+Nas usinas, a velocidade dos geradores é mantida constante, e a tensão de saída é ajustada mudando a corrente nos eletroímãs que fazem o campo. Por isso a tomada tem sempre a mesma frequência e quase a mesma tensão.
+
+## Frequência e período
+
+Duas grandezas dizem o ritmo de uma senoide:
+
+- A <Term id="frequencia">frequência</Term> $f$ é quantos ciclos acontecem por segundo, em hertz (Hz). Um hertz é um ciclo por segundo.
+- O <Term id="periodo">período</Term> $T$ é quanto tempo dura um ciclo, em segundos (s).
+
+Uma é o inverso da outra:
+
+$$
+T = \frac{1}{f} \qquad\qquad f = \frac{1}{T}
+$$
+
+A rede elétrica brasileira tem 60 Hz. O período é $T = 1/60\,\text{s} \approx 0{,}0167\,\text{s} = 16{,}7\,\text{ms}$.
+
+<Figure caption="Figura 3. Um ciclo e meio da tomada de 127 V e 60 Hz. Um ciclo dura 16,7 ms e tem um semiciclo positivo (sombreado) e um negativo. A tensão passa por zero duas vezes por ciclo.">
+  <SineCycleAnatomy />
+</Figure>
+
+A Figura 3 dá nome às partes de um ciclo. Ele tem um **semiciclo positivo** e um **semiciclo negativo**, cada um com 8,3 ms, e a tensão passa por zero duas vezes. Em 60 Hz, isso dá $2 \times 60 = 120$ passagens por zero a cada segundo. O ponto mais alto é o **pico**.
+
+A senoide tem uma equação:
+
+$$
+v(t) = V_p \cdot \sin(2\pi \cdot f \cdot t)
+$$
+
+em que $v(t)$ é a tensão no instante $t$, em volts; $V_p$ é o pico, em volts; $f$ é a frequência, em hertz; e $t$ é o tempo, em segundos. A função seno vai de −1 a +1, então $v$ vai de $-V_p$ a $+V_p$.
+
+<DeepDive title="De onde vem o 2π">
+
+O seno trabalha com ângulos. Uma volta completa da espira são 360°, ou $2\pi$ radianos (o radiano é a unidade de ângulo que os físicos preferem; $2\pi\,\text{rad} = 360°$). Se a espira dá $f$ voltas por segundo, ela gira $2\pi f$ radianos por segundo. Essa é a **velocidade angular**, com o símbolo $\omega$ (ômega):
+
+$$
+\omega = 2\pi f
+$$
+
+Para 60 Hz, $\omega = 2\pi \times 60 \approx 377\,\text{rad/s}$. Muitos livros escrevem a senoide como $v(t) = V_p \sin(\omega t)$, que é a mesma coisa. O ângulo $\omega t$ é exatamente o ângulo da espira do gerador: em $t = T/4$, ele vale $\pi/2$ (90°), e a tensão está no pico.
+
+</DeepDive>
+
+## Por que 60 Hz
+
+Brasil, Estados Unidos e Canadá usam 60 Hz. A Europa, a Argentina, o Paraguai e o Uruguai usam 50 Hz. Não há uma frequência certa: cada país escolheu uma no começo da eletrificação e ficou com ela, porque trocar depois exigiria mudar geradores, motores e transformadores. Em Itaipu, que é do Brasil e do Paraguai, metade das máquinas gera em 60 Hz e metade em 50 Hz, como você viu no módulo 5.
+
+O gerador do Explore tem um ímã com dois polos, e cada volta dá um ciclo: para 60 Hz, ele precisa de 60 voltas por segundo, ou 3.600 rotações por minuto (rpm). Geradores com mais polos dão vários ciclos por volta e podem girar mais devagar. A conta é:
+
+$$
+n = \frac{120 \cdot f}{p}
+$$
+
+em que $n$ é a rotação em rpm, $f$ é a frequência em hertz e $p$ é o número de polos. Um gerador de 4 polos dá 60 Hz a 1.800 rpm. Os de usinas hidrelétricas têm dezenas de polos e giram devagar, acompanhando a turbina: com 40 polos, bastam 180 rpm.
+
+A frequência importa para o que você liga na tomada. Motores de CA giram numa velocidade presa à frequência (o módulo <LinkAula id="m08-motores" /> explica por quê), então um motor feito para 50 Hz gira cerca de 20% mais rápido em 60 Hz. Transformadores feitos para 60 Hz esquentam além da conta em 50 Hz. Por isso a etiqueta diz a frequência, ou "50/60 Hz" quando o aparelho aceita as duas.
+
+## Por que a rede é alternada
+
+Se os eletrônicos funcionam com CC, por que a usina não manda CC de uma vez? Porque a CA tem uma vantagem enorme: o <Term id="transformador">transformador</Term>, da aula <LinkAula id="m05-magnetismo/04-transformadores" />, muda o valor dela com facilidade, e ele só funciona com CA.
+
+Mudar a tensão importa por causa das perdas nos fios. A potência que esquenta um fio de resistência $R$ é $P = R \cdot I^2$ (a aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" /> mostra de onde vem). Para levar a mesma potência com uma tensão mais alta, a corrente é menor, e a perda cai com o quadrado da corrente. Por isso a energia viaja da usina em centenas de milhares de volts, chega aos bairros em alguns milhares (13,8 kV é um valor típico) e só no poste um último transformador baixa para 127 V e 220 V.
+
+### Exemplo resolvido: a mesma potência em duas tensões
+
+Uma rua inteira consome 10 kW. Compare a corrente nos fios em 127 V e em 13,8 kV.
+
+1. **Em 127 V:** $I = P / V = 10.000\,\text{W} / 127\,\text{V} \approx 79\,\text{A}$.
+2. **Em 13,8 kV:** $I = 10.000\,\text{W} / 13.800\,\text{V} \approx 0{,}72\,\text{A}$.
+3. **A perda no mesmo fio:** como $P = R \cdot I^2$, ela cai na proporção do quadrado das correntes: $(79 / 0{,}72)^2 \approx 12.000$ vezes menos.
+
+Com tensão alta, um fio fino leva a energia longe; com 127 V, seria preciso um cabo grosso como um braço. A conta usa a corrente eficaz, que é a da próxima aula, mas a ideia não muda.
+
+A CA tem outra vantagem prática: como a corrente passa por zero 120 vezes por segundo, o arco elétrico que se forma quando um disjuntor ou um interruptor abre se apaga mais fácil. E a CC não sumiu da transmissão: parte da energia de Itaipu, a gerada em 50 Hz, viaja até São Paulo em corrente contínua de altíssima tensão, convertida em estações especiais nas duas pontas.
+
+Dentro de casa, quem converte CA em CC é a **fonte** de cada aparelho: o carregador do celular, a fonte do computador, a fonte dentro da central do portão. Ela tem um <Term id="retificador">retificador</Term>, que você vê na aula <LinkAula id="m09-semicondutores/03-retificadores" />, e as fontes completas estão no módulo <LinkAula id="m10-fontes" />.
+
+## Explore: a mesma lâmpada em CC e em CA
+
+Na simulação, uma chave liga uma lâmpada de 12 V e 5 W a uma bateria de 12 V ou a um gerador de 12 V eficazes. A frequência do gerador pode ir de 0,5 Hz a 120 Hz. A simulação roda em câmera lenta.
+
+<Simulation
+  circuit="m06/cc-ca-lampada"
+  instruments={['osciloscopio', 'multimetro']}
+  height={340}
+/>
+
+1. **Aperte o play (▶)**, com a lâmpada no gerador de 60 Hz. No osciloscópio, a tensão é uma senoide de 17 V de pico e 60 Hz (a legenda dá a frequência medida). A corrente sobe e desce junto com a tensão.
+2. **Passe a chave para a bateria.** A tensão vira uma linha reta em 12 V. A lâmpada brilha igual, e o multímetro mostra a mesma corrente nos dois casos, 0,42 A (em A~ no gerador, em A⎓ na bateria). Guarde esse resultado: ele é a chave da próxima aula.
+3. **Volte para o gerador e baixe a frequência para 1 Hz.** A lâmpada pisca: acende forte, apaga quase toda, acende de novo. São duas piscadas por ciclo, uma em cada semiciclo, porque o filamento tem tempo de esfriar sempre que a tensão passa por zero.
+4. **Suba devagar até 60 Hz.** Em 10 Hz ela ainda tremula, cerca de 20% para cima e para baixo. Em 60 Hz, o brilho varia menos de 5% e o olho vê a lâmpada acesa sem parar.
+
+O filamento de uma lâmpada incandescente demora uma fração de segundo para esquentar e esfriar, e é essa inércia que esconde os 120 zeros por segundo. Lâmpadas fluorescentes e LEDs baratos, que não têm essa inércia, às vezes tremulam a 120 Hz: o olho quase não percebe, mas uma câmera de celular pode mostrar faixas na imagem.
+
+### Exemplo resolvido: lendo a frequência no osciloscópio
+
+Um técnico mede a saída de um gerador portátil a gasolina, com o osciloscópio em 5 ms por divisão. Um ciclo completo ocupa 3,4 divisões na tela.
+
+1. **Período:** $T = 3{,}4 \times 5\,\text{ms} = 17\,\text{ms}$.
+2. **Frequência:** $f = 1 / 0{,}017\,\text{s} \approx 58{,}8\,\text{Hz}$.
+3. **Rotação do motor:** num gerador de 2 polos, $n = 120 \times 58{,}8 / 2 \approx 3.530\,\text{rpm}$, um pouco abaixo dos 3.600 rpm de 60 Hz.
+
+Geradores portáteis costumam perder um pouco de rotação quando a carga aumenta, e a frequência cai junto. Uma frequência um pouco baixa não atrapalha uma lâmpada incandescente, mas motores giram mais devagar e alguns aparelhos eletrônicos reclamam.
+
+<RealCase title="Lendo a etiqueta: CA, CC e 50/60 Hz">
+
+Antes de ligar qualquer aparelho, a etiqueta diz três coisas: se ele usa CA ou CC, que tensão aceita e, para CA, que frequência. Alguns exemplos típicos:
+
+| Onde | O que diz | O que quer dizer |
+|------|-----------|------------------|
+| Carregador de celular | Entrada 100–240 V~ 50/60 Hz | Liga em qualquer tomada, 127 V ou 220 V, de 50 ou 60 Hz |
+| Carregador de celular | Saída 5 V ⎓ 2 A | Entrega CC de 5 V ao celular |
+| Central de portão | Alimentação 127/220 Vca | CA da rede; em muitos modelos é preciso escolher a tensão (como a chave do trafo da aula 5.4) |
+| Central de portão | Saída 12 Vcc para acessórios | CC para a fotocélula e o receptor |
+| Fita de LED | 12 Vcc | Só funciona com uma fonte; ligada direto na tomada, queima na hora |
+| Ventilador | 127 V~ 60 Hz | Feito para a rede brasileira de 127 V |
+
+Na prática:
+
+- **Aparelho de CC** (fita de LED, câmera, roteador) precisa de uma fonte com a tensão e a polaridade certas. Nunca ligue o fio dele direto na rede.
+- **Aparelho de CA** precisa da tensão certa (127 V ou 220 V, ou uma faixa como 100–240 V) e da frequência certa. "50/60 Hz" aceita as duas. Um aparelho importado só de 50 Hz pode funcionar, mas motores e transformadores dentro dele podem girar mais rápido ou esquentar.
+- **No multímetro**, CA se mede em V~ e CC em V⎓. Medir a tomada em V⎓ dá perto de zero, como você viu na aula <LinkAula id="m03-medicoes/02-medindo-tensao" />.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Achar que a CA dá menos choque porque passa por zero.** Ela passa por zero e volta ao pico 120 vezes por segundo, e o corpo não tem tempo de se recuperar. Para a mesma corrente, a CA de 60 Hz é até mais perigosa para o coração que a CC. Reveja a aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />.
+- **Confundir hertz com volts.** "60 Hz" é o ritmo da onda, não a tensão. Uma tomada de 60 Hz pode ser de 127 V ou de 220 V.
+- **Ligar um aparelho de CC na tomada.** Fitas de LED, motores de 12 V e placas de 5 V queimam, e alguns pegam fogo.
+- **Ligar um transformador em CC.** Ele não funciona e esquenta até queimar (aula <LinkAula id="m05-magnetismo/04-transformadores" />).
+- **Prender a garra do osciloscópio na rede.** A garra de terra das pontas de um osciloscópio de bancada está ligada ao terra da tomada. Presa num fio da rede, ela cria um curto. Sinais da rede se medem com pontas diferenciais ou isoladas, assunto para técnicos.
+- **Comprar um aparelho importado sem olhar a frequência.** Um motor de 50 Hz numa rede de 60 Hz gira cerca de 20% mais rápido; alguns aguentam, outros não.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Na Argentina a rede é de 50 Hz. Quanto dura um ciclo, em milissegundos?',
+      answer: 20,
+      tolerance: 0.02,
+      unit: 'ms',
+      explanation: 'T = 1/f = 1/50 s = 0,02 s = 20 ms. Em 60 Hz, o ciclo dura 16,7 ms.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'No osciloscópio, com 2 ms por divisão, um ciclo de um sinal ocupa 4 divisões. Qual a frequência, em hertz?',
+      answer: 125,
+      tolerance: 0.02,
+      unit: 'Hz',
+      explanation: 'O período é 4 × 2 ms = 8 ms. A frequência é 1 ÷ 0,008 s = 125 Hz.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'A etiqueta de um aparelho diz "Entrada: 127 V~". O que significa o "~"?',
+      options: [
+        {
+          text: 'Que a entrada é de corrente alternada',
+          correct: true,
+          feedback: 'O til é o símbolo de CA, como a senoide. Para CC, o símbolo é ⎓.',
+        },
+        {
+          text: 'Que a tensão é aproximada',
+          feedback:
+            'Na etiqueta, o "~" não quer dizer "cerca de". Ele é o símbolo de corrente alternada.',
+        },
+        {
+          text: 'Que o aparelho aceita CA e CC',
+          feedback:
+            'Isso seria indicado com os dois símbolos ou com "AC/DC". O "~" sozinho quer dizer só CA.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'A tensão de uma tomada de 60 Hz passa por zero 120 vezes por segundo.',
+      answer: true,
+      explanation:
+        'Cada ciclo tem duas passagens por zero, uma no fim de cada semiciclo. São 60 ciclos por segundo, então 120 passagens.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Qual o principal motivo de a rede elétrica usar corrente alternada?',
+      options: [
+        {
+          text: 'O transformador muda o valor da CA com facilidade, e a energia pode viajar em tensão alta, com perdas pequenas',
+          correct: true,
+          feedback:
+            'Com tensão alta, a corrente é baixa e a perda nos fios, que cresce com o quadrado da corrente, despenca. E o transformador só funciona com CA.',
+        },
+        {
+          text: 'A CA é mais segura que a CC',
+          feedback: 'As duas dão choque e podem matar. A CA de 60 Hz é até mais perigosa para o coração.',
+        },
+        {
+          text: 'Os aparelhos eletrônicos funcionam com CA',
+          feedback:
+            'É o contrário: os circuitos eletrônicos precisam de CC, e cada aparelho tem uma fonte que converte a CA da tomada.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma lâmpada incandescente ligada em CA de 60 Hz não pisca, embora a tensão passe por zero 120 vezes por segundo. Por quê?',
+      options: [
+        {
+          text: 'O filamento demora para esfriar, e não dá tempo de apagar entre um semiciclo e outro',
+          correct: true,
+          feedback:
+            'É a inércia térmica do filamento. Na simulação, em 1 Hz há tempo de esfriar e a lâmpada pisca; em 60 Hz, o brilho varia menos de 5%.',
+        },
+        {
+          text: 'Na lâmpada, a CA vira CC',
+          feedback: 'A lâmpada não retifica nada: a corrente nela vai e volta junto com a tensão.',
+        },
+        {
+          text: 'A tensão nunca chega a zero de verdade',
+          feedback:
+            'Chega, duas vezes por ciclo. O osciloscópio mostra a senoide cruzando o zero.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada marcação de etiqueta ao que ela quer dizer.',
+      pairs: [
+        ['100–240 V~', 'Aceita CA de 100 V a 240 V'],
+        ['12 V ⎓', 'Usa CC de 12 V'],
+        ['50/60 Hz', 'Funciona nas duas frequências'],
+        ['127 V~ 60 Hz', 'Só CA de 127 V, frequência brasileira'],
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Na **CC** a tensão tem sempre o mesmo sinal e a corrente anda num sentido só. Na **CA** a tensão sobe, desce e inverte, e a corrente vai e volta. Nas etiquetas: ⎓, DC, Vcc para CC; ~, AC, Vca para CA.
+- Uma espira girando num campo magnético produz uma **senoide**: uma volta, um ciclo. Anéis coletores e escovas levam a tensão para fora do gerador.
+- **Frequência** é o número de ciclos por segundo, em Hz; **período** é a duração de um ciclo. $T = 1/f$. Em 60 Hz, $T \approx 16{,}7\,\text{ms}$ e a tensão passa por zero 120 vezes por segundo.
+- O Brasil usa 60 Hz; boa parte do mundo usa 50 Hz. Motores e transformadores dependem da frequência, por isso ela aparece na etiqueta.
+- A rede é CA porque o **transformador** muda a tensão com facilidade, e a energia viaja em tensão alta com perdas pequenas. Os eletrônicos convertem a CA em CC numa fonte.
+
+Na próxima aula, você vai descobrir por que a tomada de 127 V chega a quase 180 V no pico, e o que o multímetro mede de verdade: <LinkAula id="m06-corrente-alternada/02-pico-eficaz-e-medio" />.

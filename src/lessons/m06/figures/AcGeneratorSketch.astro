@@ -1,0 +1,182 @@
+---
+/*
+ * 06.1: the simplest AC generator. A loop turns on a vertical shaft between
+ * the poles of a magnet; its two ends go to two slip rings, and brushes
+ * pressing on the rings take the voltage to an oscilloscope, which draws a
+ * sine. Illustration used until the 3D part "ac-generator" exists.
+ */
+const N = 120;
+const wave = Array.from({ length: N + 1 }, (_, i) => {
+  const x = 404 + (128 * i) / N;
+  const y = 262 - 26 * Math.sin((2 * Math.PI * 2 * i) / N);
+  return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
+}).join(' ');
+---
+
+<svg viewBox="0 0 580 330" width="580" height="330" class="fig" aria-hidden="true">
+  <!-- magnet poles -->
+  <path d="M30 50h70a24 24 0 0 1 0 140h-70z" class="pole n" />
+  <path d="M550 50h-70a24 24 0 0 0 0 140h70z" class="pole s" />
+  <text x="56" y="126" class="pole-t">
+    N
+  </text>
+  <text x="524" y="126" class="pole-t">
+    S
+  </text>
+  {[-48, -24, 0, 24, 48].map((dy) => (
+    <path d={`M132 ${120 + dy}H448`} class="field" />
+  ))}
+  <text x="290" y="34" class="lbl">
+    campo magnético do ímã
+  </text>
+
+  <!-- rotation arrow -->
+  <path d="M250 52 A48 10 0 1 0 330 52" class="spin" marker-end="url(#gen-arrow)" />
+  <defs>
+    <marker
+      id="gen-arrow"
+      viewBox="0 0 10 10"
+      refX="5"
+      refY="5"
+      markerWidth="6"
+      markerHeight="6"
+      orient="auto-start-reverse"
+    >
+      <path d="M0 0L10 5L0 10z" class="arrowhead"></path>
+    </marker>
+  </defs>
+
+  <!-- loop -->
+  <path d="M284 172 H220 L196 66 L362 78 L382 184 H296" class="loop" />
+  <path d="M284 172 V222 M296 184 V252" class="lead" />
+  <text x="212" y="194" class="lbl end">
+    espira
+  </text>
+
+  <!-- shaft, slip rings and brushes -->
+  <path d="M290 186 V300" class="shaft" />
+  <ellipse cx="290" cy="226" rx="26" ry="7" class="ring" />
+  <ellipse cx="290" cy="256" rx="26" ry="7" class="ring" />
+  <rect x="316" y="219" width="22" height="14" rx="2" class="brush" />
+  <rect x="316" y="249" width="22" height="14" rx="2" class="brush" />
+  <path d="M338 226 H372 V246 H390 M338 256 H366 V278 H390" class="wire" />
+  <text x="250" y="230" class="lbl end">
+    anéis coletores
+  </text>
+  <text x="250" y="260" class="note end">
+    (giram com a espira)
+  </text>
+  <text x="327" y="210" class="lbl">
+    escovas
+  </text>
+  <text x="282" y="318" class="note end">
+    eixo, girado pela turbina
+  </text>
+
+  <!-- oscilloscope -->
+  <rect x="390" y="214" width="156" height="96" rx="8" class="scope" />
+  <rect x="400" y="226" width="136" height="72" rx="3" class="screen" />
+  <path d="M404 262 H532" class="grid" />
+  <path d={wave} class="wave" />
+  <text x="468" y="326" class="lbl">
+    osciloscópio
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .pole {
+    stroke: var(--fg);
+    stroke-width: 1;
+  }
+  .pole.n {
+    fill: var(--danger);
+  }
+  .pole.s {
+    fill: var(--info);
+  }
+  .field {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 4 5;
+  }
+  .spin {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .arrowhead {
+    fill: var(--fg-muted);
+  }
+  .loop {
+    stroke: var(--copper);
+    stroke-width: 5;
+  }
+  .lead {
+    stroke: var(--copper);
+    stroke-width: 3;
+  }
+  .shaft {
+    stroke: var(--fg-muted);
+    stroke-width: 5;
+  }
+  .ring {
+    fill: var(--surface);
+    stroke: var(--copper);
+    stroke-width: 4;
+  }
+  .brush {
+    fill: var(--fg-muted);
+    stroke: var(--fg);
+    stroke-width: 1;
+  }
+  .wire {
+    stroke: var(--fg);
+    stroke-width: 1.75;
+  }
+  .scope {
+    fill: var(--surface);
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+  }
+  .screen {
+    fill: var(--bg);
+    stroke: var(--border);
+  }
+  .grid {
+    stroke: var(--border-strong);
+    stroke-width: 1;
+  }
+  .wave {
+    stroke: var(--accent);
+    stroke-width: 2.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .pole-t {
+    fill: var(--bg);
+    font-size: 20px;
+    font-weight: 800;
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>
