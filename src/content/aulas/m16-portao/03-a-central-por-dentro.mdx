@@ -22,7 +22,6 @@ seguranca: rede
 ---
 
 import CentralVirtual from '../../../lessons/m16/ui/CentralVirtual';
-import EmBreve from '../../../lessons/m16/ui/EmBreve.astro';
 import PlacaCD1 from '../../../lessons/m16/figuras/PlacaCD1.astro';
 import ControleDeFase from '../../../lessons/m16/figuras/ControleDeFase.astro';
 import { lessonUrl } from '../../../lib/url';
@@ -37,7 +36,11 @@ A placa tem dois lados. À esquerda e embaixo fica o **lado da rede**: <Term id=
 
 Antes de mexer em qualquer coisa, saiba onde fica cada lado: relés, TRIAC, fusível e até o dissipador do TRIAC podem estar ligados à rede.
 
-<EmBreve component="Model3D" id="central-generica" />
+<Model3D
+  part="gate-control-board"
+  props={{ highlight: 'lado-rede' }}
+  caption="A CD-1 em 3D, com o lado da rede em colorido: bornes de força, fusível, fonte, TRIAC e relés. O resto da placa fica acinzentado. Gire a placa e ligue as anotações para ver o que faz cada parte."
+/>
 
 ## Rede, fusível e fonte
 

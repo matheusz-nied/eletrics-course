@@ -292,10 +292,18 @@ test.describe('instruments', () => {
     const sim = await openSimulation(page, demo('motor-capacitor'));
     await sim.getByRole('button', { name: 'Iniciar simulação', exact: true }).click();
     await sim.getByRole('tab', { name: 'Multímetro' }).click();
-    // About 0,94 A at full speed; the common carries the same current as the fuse.
-    await expect.poll(() => meter(page, 'IF', 'A'), { timeout: 10_000 }).toBeGreaterThan(0.8);
-    const motor = await meter(page, 'IM', 'A');
-    expect(motor).toBeCloseTo(await meter(page, 'IF', 'A'), 1);
+    // About 0,94 A at full speed (several amperes while it starts); the common
+    // carries the same current as the fuse. Both meters are read together, at
+    // every poll, until the motor is up to speed.
+    await expect
+      .poll(
+        async () => {
+          const [fuse, motor] = await Promise.all([meter(page, 'IF', 'A'), meter(page, 'IM', 'A')]);
+          return fuse > 0.8 && fuse < 1.1 && Math.abs(motor - fuse) < 0.05;
+        },
+        { timeout: 20_000 },
+      )
+      .toBe(true);
     errors.expectClean();
   });
 
