@@ -1,0 +1,291 @@
+---
+titulo: Potência em CA e fator de potência
+modulo: m06-corrente-alternada
+ordem: 5
+nivel: I
+duracaoMin: 30
+objetivos:
+  - Explicar por que um motor puxa mais corrente do que a potência dele sugere
+  - Diferenciar potência ativa (W), reativa (var) e aparente (VA) e relacioná-las no triângulo das potências
+  - Calcular o fator de potência e a corrente de uma carga
+  - Dimensionar o capacitor que corrige o fator de potência de um motor
+  - Entender quem paga pelo fator de potência baixo e por que um capacitor não reduz a conta de luz de casa
+prerequisitos:
+  - m06-corrente-alternada/03-fase-e-fasores
+  - m06-corrente-alternada/04-reatancia-e-impedancia
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+tags: [potência ativa, potência reativa, potência aparente, fator de potência, VA, var, banco de capacitores, motor]
+seguranca: rede
+rascunho: false
+---
+
+import TrianguloPotencias from '../../../lessons/m06/TrianguloPotencias.tsx';
+import PowerInstant from '../../../lessons/m06/figures/PowerInstant.astro';
+import BeerGlass from '../../../lessons/m06/figures/BeerGlass.astro';
+
+A bomba d'água do poço tem uns 500 W de consumo. Na tomada de 127 V, a conta da aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" /> dá $500 / 127 \approx 3{,}9\,\text{A}$. Mas o eletricista prende o alicate amperímetro no fio da bomba e lê 5,6 A. O alicate não está com defeito, e a bomba não está gastando mais do que deveria. Do outro lado da cidade, uma padaria cheia de motores recebe a conta de luz com uma cobrança a mais, chamada de "energia reativa excedente".
+
+As duas histórias têm a mesma causa: em corrente alternada, nem toda a corrente que passa pelos fios vira trabalho. Nesta aula você vai ver para onde vai essa corrente, como medi-la e como um capacitor resolve o problema.
+
+## A potência que vai e volta
+
+Num aparelho que só esquenta, como o chuveiro, a corrente sobe e desce junto com a tensão. A potência de cada instante, $p = v \cdot i$, nunca fica negativa: a energia só vai da rede para a resistência, que a transforma em calor. Ela pulsa 120 vezes por segundo, mas sempre no mesmo sentido.
+
+Um motor é diferente. Para girar, ele precisa criar um campo magnético nos enrolamentos, e esse campo se desmonta e se remonta a cada meio ciclo. Como você viu na aula <LinkAula id="m06-corrente-alternada/03-fase-e-fasores" />, isso deixa a corrente **atrasada** em relação à tensão. Em parte de cada ciclo, a tensão é positiva e a corrente ainda é negativa: a potência fica negativa, e a energia guardada no campo **volta para a rede**.
+
+<Figure caption="Figura 1. Tensão, corrente e potência instantânea em dois ciclos. Em cima, uma resistência: a potência é sempre positiva. Embaixo, um motor com a corrente 45° atrasada: duas vezes por ciclo a potência fica negativa (área vermelha) e a energia do campo magnético volta para a rede. A linha tracejada é a média, a potência que de fato vira trabalho.">
+  <PowerInstant />
+</Figure>
+
+Essa energia que vai e volta não é gasta. Mas, para ir e voltar, ela precisa passar pelos fios, pelo disjuntor, pelo medidor e pelo transformador da rua. E corrente em fio sempre esquenta o fio.
+
+## Três potências
+
+Com isso aparecem três jeitos de falar da potência de uma carga em CA.
+
+- A <Term id="potencia-ativa">potência ativa</Term> ($P$) é a média da potência instantânea: a parte que vira trabalho, calor ou luz. Medida em **watts** (W). É ela que o medidor de energia da sua casa conta, em kWh.
+- A <Term id="potencia-reativa">potência reativa</Term> ($Q$) mede a energia que vai e volta entre a rede e os campos magnéticos (ou elétricos, num capacitor). Medida em **volt-ampère reativo** (var).
+- A potência aparente ($S$) é simplesmente a tensão vezes a corrente, os números que o voltímetro e o alicate mostram. Medida em <Term id="volt-ampere">volt-ampères</Term> (VA). É o que esquenta os fios e os transformadores.
+
+<Figure caption="Figura 2. A analogia do copo de chope. O chope é a potência ativa, o que mata a sede. A espuma é a potência reativa: ocupa espaço no copo e não mata a sede de ninguém. O copo cheio é a potência aparente, o que o garçom precisa servir. À direita, o triângulo das potências, que é a conta certa.">
+  <BeerGlass />
+</Figure>
+
+A analogia ajuda a lembrar quem é quem, mas para aí. No copo, chope e espuma se somam em altura; as potências se somam como os lados de um triângulo retângulo, porque a parte ativa e a parte reativa da corrente estão defasadas de 90°. E a espuma não volta para o barril, enquanto a energia reativa volta para a rede a cada ciclo.
+
+### O triângulo das potências
+
+Com tensão e corrente senoidais, defasadas de um ângulo $\varphi$ (a letra grega "fi"), as três potências são:
+
+$$
+S = V \cdot I \qquad P = V \cdot I \cdot \cos\varphi \qquad Q = V \cdot I \cdot \operatorname{sen}\varphi
+$$
+
+$$
+S^2 = P^2 + Q^2
+$$
+
+- $V$ e $I$ são os valores eficazes da tensão (V) e da corrente (A), os que o multímetro mostra em V~ e A~;
+- $\varphi$ é o ângulo entre a tensão e a corrente, em graus: zero numa resistência, perto de 90° num indutor puro;
+- $S$ sai em VA, $P$ em W e $Q$ em var.
+
+A relação entre a potência ativa e a aparente tem nome: <Term id="fator-de-potencia">fator de potência</Term> (FP).
+
+$$
+\text{FP} = \frac{P}{S} = \cos\varphi
+$$
+
+O fator de potência vai de 0 a 1. Chuveiro, ferro de passar e lâmpada incandescente têm FP igual a 1: toda a corrente vira calor. Motores, reatores de lâmpadas fluorescentes antigas e transformadores têm FP menor que 1. Fontes eletrônicas simples também, mas por outro motivo: a corrente delas não é senoidal, chega em pulsos curtos perto do pico da tensão (você vai ver por que em <LinkAula id="m10-fontes/01-fonte-linear" />). Nesse caso o FP continua sendo $P/S$, mas deixa de ser igual a $\cos\varphi$.
+
+Voltando à bomba do começo: $S = 127\,\text{V} \times 5{,}55\,\text{A} \approx 704\,\text{VA}$ para $P = 500\,\text{W}$. O fator de potência é $500 / 704 \approx 0{,}71$.
+
+## Por que o fator de potência importa
+
+Duas cargas de 500 W, uma com FP 1 e outra com FP 0,71, gastam a mesma energia por hora. Mas a segunda puxa 40% mais corrente. Isso tem três consequências.
+
+1. **Os fios esquentam mais.** A perda nos fios é $R \cdot I^2$: com 40% mais corrente, a perda dobra. Toda a fiação, da tomada até a usina, precisa ser mais grossa para levar a mesma potência útil.
+2. **Transformadores, geradores e nobreaks se dimensionam em VA.** O limite deles é a corrente que aguentam sem esquentar demais, e não a potência que a carga aproveita. É por isso que a etiqueta de um transformador diz VA (a promessa da aula <LinkAula id="m05-magnetismo/04-transformadores" />) e que um nobreak traz dois limites, um em VA e outro em W. A carga precisa respeitar os dois.
+3. **Alguém paga por essa corrente.** A distribuidora precisa de cabos e transformadores maiores para entregar a corrente reativa. Por isso cobra das instalações grandes que deixam o fator de potência baixo, como você vai ver no caso real desta aula.
+
+## Explore: a bomba com o capacitor de correção
+
+A simulação abaixo usa um **modelo simplificado** da bomba: um resistor de 16 Ω, que representa a potência que vira trabalho e calor, em série com um indutor de 42 mH, que representa o campo magnético. Um motor de verdade é mais complicado, mas visto da tomada se comporta parecido. Em paralelo com ele há um capacitor, ligado por uma chave, com quatro valores possíveis. A rede tem uma pequena resistência, a da fiação da casa (0,3 Ω no total).
+
+<Simulation circuit="m06/fator-de-potencia-motor" instruments={['multimetro']} height={300} />
+
+1. **Aperte o play (▶).** Com a chave do capacitor desligada, a corrente da rede é de 5,59 A, a mesma do motor. A potência ativa é de cerca de 500 W (o visor mostra 0,500 kW). Passe o mouse sobre a rede (ou toque nela) para ver o fator de potência: 0,71. Repare que o motor recebe 125,8 V, e não 127 V: a corrente provoca uma pequena queda na fiação.
+2. **Ligue o capacitor de 40 µF.** A corrente da rede cai para 4,46 A, e o fator de potência sobe para 0,89. Olhe a corrente do motor: continua 5,59 A. E a potência ativa?
+3. **Troque para 60 µF e depois 80 µF.** Com 60 µF, 4,12 A e FP 0,96. Com 80 µF, a corrente da rede cai para 3,97 A e o fator de potência chega a 1,00. É praticamente a corrente de uma resistência de 500 W: $500 / 125{,}8 \approx 3{,}97\,\text{A}$.
+4. **Exagere: 120 µF.** A corrente volta a subir, para 4,35 A, e o FP cai para 0,91. Agora quem sobra é a potência reativa do capacitor.
+
+O que aconteceu? A potência ativa ficou a mesma em todos os passos: o motor faz o mesmo trabalho. A corrente do motor também não mudou. O que mudou foi o caminho da corrente reativa. O capacitor guarda energia no campo elétrico nos instantes em que o motor devolve a do campo magnético, e devolve quando o motor pede. Com 80 µF, a troca acontece toda ali, entre o motor e o capacitor: passam 3,79 A pelo capacitor, e a rede só entrega a parte que vira trabalho. A fiação, que antes dissipava 9,4 W, passa a dissipar 4,7 W.
+
+## A correção do fator de potência
+
+A potência reativa de um capacitor tem sinal contrário à de um motor: ela **desconta** a do motor no triângulo. Um capacitor de capacitância $C$ ligado numa tensão $V$ de frequência $f$ fornece:
+
+$$
+Q_C = 2\pi f \cdot C \cdot V^2
+$$
+
+com $Q_C$ em var, $f$ em Hz, $C$ em farads e $V$ em volts eficazes. Na simulação, 80 µF em 127 V dão $2\pi \cdot 60 \cdot 80 \times 10^{-6} \cdot 127^2 \approx 486\,\text{var}$, quase toda a potência reativa da bomba.
+
+Para levar uma carga de potência $P$ de um fator de potência $\text{FP}_1$ para $\text{FP}_2$, o capacitor precisa fornecer a diferença entre as duas potências reativas:
+
+$$
+C = \frac{P \cdot (\tan\varphi_1 - \tan\varphi_2)}{2\pi f \cdot V^2}
+$$
+
+em que $\varphi_1$ e $\varphi_2$ são os ângulos cujos cossenos são $\text{FP}_1$ e $\text{FP}_2$.
+
+<DeepDive title="De onde vem essa fórmula">
+
+No triângulo, a potência reativa é o cateto oposto ao ângulo: $Q = P \cdot \tan\varphi$. Antes da correção, a carga pede $Q_1 = P \cdot \tan\varphi_1$. Depois, queremos que a rede entregue só $Q_2 = P \cdot \tan\varphi_2$. A potência ativa não muda, porque o capacitor ideal não gasta energia. A diferença, $Q_1 - Q_2$, é o que o capacitor precisa fornecer. Igualando a $2\pi f \cdot C \cdot V^2$ e isolando $C$, sai a fórmula acima.
+
+A corrente nova é $I_2 = P / (V \cdot \text{FP}_2)$. Repare que a corrente cai muito quando o FP sai de 0,7 para 0,9, e pouco quando sai de 0,92 para 1. Por isso ninguém corrige até 1 exato: o capacitor fica caro e a carga varia, então o risco de passar do ponto aumenta.
+
+</DeepDive>
+
+<TrianguloPotencias client:visible />
+
+No triângulo acima, a bomba começa com 500 W e FP 0,71. Arraste o capacitor até o fator de potência passar de 0,92: em 47 µF a corrente cai de 5,55 A para 4,27 A. Continue até 82 µF, e o triângulo vira quase uma linha reta. Depois escolha o chuveiro: não há nada para corrigir. Os valores do triângulo usam 127 V exatos, sem a fiação, por isso diferem um pouco da simulação.
+
+### Exemplo resolvido: o compressor da oficina
+
+Um compressor de ar tem motor de 1.500 W, fator de potência 0,75 (típico de motor pequeno) e é ligado em 220 V. Qual a corrente? Qual capacitor leva o FP a 0,92, e qual a corrente depois?
+
+1. **Potência aparente e corrente:** $S = P / \text{FP} = 1.500 / 0{,}75 = 2.000\,\text{VA}$. A corrente é $I = S / V = 2.000 / 220 \approx 9{,}09\,\text{A}$.
+2. **Potência reativa:** $Q = \sqrt{S^2 - P^2} = \sqrt{2.000^2 - 1.500^2} \approx 1.323\,\text{var}$.
+3. **Potência reativa permitida com FP 0,92:** $\tan\varphi_2 = \tan(\arccos 0{,}92) \approx 0{,}426$, então $Q_2 = 1.500 \times 0{,}426 \approx 639\,\text{var}$.
+4. **O capacitor fornece a diferença:** $Q_C = 1.323 - 639 = 684\,\text{var}$, e $C = 684 / (2\pi \cdot 60 \cdot 220^2) \approx 37{,}5\,\text{µF}$.
+5. **A corrente depois:** $I_2 = 1.500 / (220 \times 0{,}92) \approx 7{,}41\,\text{A}$.
+
+Confira no triângulo interativo: ponha 1.500 W, FP 0,75 e 220 V. A nota embaixo dos resultados pede 37,5 µF para chegar a 0,92, e, com 38 µF, a corrente cai para cerca de 7,4 A.
+
+<RealCase title="Quem paga pelo fator de potência baixo">
+
+**Na padaria e na indústria.** No Brasil, as instalações atendidas em média e alta tensão (o chamado grupo A, como indústrias, supermercados e prédios comerciais grandes) têm um medidor que registra também a energia reativa. A regulação da ANEEL fixa um fator de potência de referência de 0,92. Quando a instalação fica abaixo disso, a conta traz o **excedente de reativo**, uma cobrança a mais. A solução é um <Term id="banco-de-capacitores">banco de capacitores</Term> no quadro, muitas vezes com um controlador que liga e desliga estágios conforme as máquinas entram e saem. Esse banco é dimensionado por um engenheiro eletricista a partir das medições da instalação, porque capacitor demais também é problema.
+
+**Na sua casa.** Residências são atendidas em baixa tensão (grupo B) e o medidor conta só a energia ativa, em kWh. Por isso, corrigir o fator de potência em casa **não reduz a conta de luz**. Desconfie dos "economizadores de energia" vendidos para ligar na tomada: no máximo, um capacitor ali dentro corrige um pouco o fator de potência de algum motor, o que não muda os kWh que você paga.
+
+**O capacitor do portão não é de correção.** O motor monofásico de portão, de ventilador ou de bomba tem um capacitor, parecido com o de correção. Mas a função dele é outra: ele fica em série com um dos enrolamentos e atrasa a corrente dele, para criar o campo que faz o motor partir e escolher o sentido. Sem ele, o motor só zumbe (veja <LinkAula id="m16-portao/02-o-motor-do-portao" /> e <LinkAula id="m08-motores/04-motor-monofasico-capacitor" />). Os dois são capacitores de filme, para CA, com a tensão em VCA na etiqueta. Um não substitui o outro.
+
+<Model3D
+  part="motor-capacitor"
+  props={{ microfarads: 16, voltage: 250 }}
+  caption="Capacitor permanente de motor, de 16 µF e 250 VCA. Capacitores de correção para cargas pequenas têm aparência parecida; o que muda é onde e para que são ligados."
+/>
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Dimensionar em watts o que se dimensiona em VA.** Transformador, nobreak, gerador e estabilizador têm limite em VA. Um motor de 500 W com FP 0,71 pede 704 VA. Some os VA das cargas e respeite também o limite em W, quando houver.
+- **Achar que a corrente "a mais" é defeito.** Num motor, $P / V$ dá menos que o alicate mede. É o fator de potência, e não um motor gastando energia à toa.
+- **Capacitor demais.** Passar do ponto deixa a potência reativa capacitiva e a corrente volta a subir. Num banco grande, ainda pode elevar a tensão da instalação quando as máquinas desligam.
+- **Usar capacitor errado.** Capacitor de correção e de motor trabalham em CA: são de filme, sem polaridade, com tensão em VCA igual ou maior que a da rede. Eletrolítico comum é polarizado e estoura em CA.
+- **Mexer em capacitor recém-desligado.** Um capacitor ligado na rede pode ficar carregado com até o valor de pico, cerca de 180 V numa rede de 127 V e 311 V numa de 220 V, mesmo depois de desligado. Antes de tocar, desligue o disjuntor, espere, meça a tensão nos terminais e, se houver tensão, descarregue com um resistor (como na aula <LinkAula id="m04-passivos/03-capacitores" />), nunca com uma chave de fenda em curto.
+- **Instalar banco de capacitores por conta própria.** Correção de fator de potência em instalação comercial ou industrial pede projeto e medição. Chame um profissional habilitado.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Um motor ligado em 220 V puxa 4 A e tem fator de potência 0,8. Qual a potência ativa dele, em watts?',
+      answer: 704,
+      tolerance: 0.02,
+      unit: 'W',
+      explanation: 'P = V × I × FP = 220 × 4 × 0,8 = 704 W. A potência aparente é 220 × 4 = 880 VA.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma carga tem potência ativa de 300 W e potência reativa de 400 var. Qual o fator de potência?',
+      answer: 0.6,
+      tolerance: 0.02,
+      explanation:
+        'S = √(300² + 400²) = 500 VA. FP = P ÷ S = 300 ÷ 500 = 0,6. É o triângulo 3-4-5.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Ao ligar um capacitor de correção em paralelo com um motor, o que acontece com a corrente do próprio motor?',
+      options: [
+        {
+          text: 'Continua a mesma; quem diminui é a corrente que vem da rede',
+          correct: true,
+          feedback:
+            'O motor continua precisando do mesmo campo magnético. O capacitor só passa a trocar a energia reativa com ele, ali do lado, e a rede deixa de carregar essa parte.',
+        },
+        {
+          text: 'Diminui, porque o motor passa a gastar menos energia',
+          feedback:
+            'O motor faz o mesmo trabalho e puxa a mesma corrente. Na simulação, a corrente do motor ficou em 5,59 A em todos os passos.',
+        },
+        {
+          text: 'Aumenta, porque o capacitor puxa corrente da rede',
+          feedback:
+            'O capacitor tem a sua própria corrente, mas ela está defasada da do motor e as duas se descontam na rede. A do motor não muda.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Ligar um capacitor de correção do fator de potência na tomada reduz a conta de luz de uma casa comum.',
+      answer: false,
+      explanation:
+        'O medidor residencial conta só a energia ativa, em kWh, e o capacitor não muda a potência ativa das cargas. Corrigir o fator de potência reduz a corrente, não os kWh.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você vai comprar um nobreak para um equipamento de 400 W com fator de potência 0,6. Qual a potência aparente que ele pede?',
+      options: [
+        {
+          text: 'Cerca de 667 VA',
+          correct: true,
+          feedback: 'S = P ÷ FP = 400 ÷ 0,6 ≈ 667 VA. O nobreak precisa aguentar esse valor em VA e os 400 W.',
+        },
+        {
+          text: '400 VA',
+          feedback: 'Isso só vale com fator de potência 1. Com 0,6, a corrente é maior e a potência aparente também.',
+        },
+        {
+          text: '240 VA',
+          feedback:
+            'Multiplicar pelo fator de potência dá o contrário. A potência aparente é sempre maior ou igual à ativa.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Para que serve o capacitor ligado ao motor de um portão eletrônico?',
+      options: [
+        {
+          text: 'Para atrasar a corrente de um dos enrolamentos e fazer o motor partir no sentido certo',
+          correct: true,
+          feedback:
+            'É o capacitor de partida e funcionamento do motor monofásico. Ele fica em série com um enrolamento; sem ele o motor só zumbe.',
+        },
+        {
+          text: 'Para corrigir o fator de potência e economizar energia',
+          feedback:
+            'Parece com um capacitor de correção, mas está ligado de outro jeito e para outra coisa: criar a defasagem que faz o motor girar.',
+        },
+        {
+          text: 'Para filtrar ruídos da rede',
+          feedback:
+            'Capacitores de filtro de ruído são bem menores. O do motor é o que dá a partida e define o sentido.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem segura a troca de um capacitor de correção de uma máquina.',
+      items: [
+        'Desligar o disjuntor e testar a ausência de tensão na alimentação',
+        'Esperar e medir a tensão nos terminais do capacitor',
+        'Descarregar o capacitor com um resistor, se ainda houver tensão',
+        'Trocar por um capacitor de mesma capacitância e tensão em VCA igual ou maior',
+        'Religar e medir a corrente da rede com o alicate',
+      ],
+      explanation:
+        'O capacitor pode guardar carga depois de desligado: primeiro garantir a ausência de tensão na alimentação, depois no próprio capacitor, e só então mexer.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Em CA, a energia que monta o campo magnético de um motor vai e volta da rede a cada ciclo. Ela não é gasta, mas faz passar corrente pelos fios.
+- **Potência ativa** ($P$, em W) vira trabalho e é o que o medidor de casa conta. **Reativa** ($Q$, em var) vai e volta. **Aparente** ($S = V \cdot I$, em VA) é o que esquenta fios e transformadores. $S^2 = P^2 + Q^2$.
+- **Fator de potência** é $P / S$, e vale $\cos\varphi$ para tensão e corrente senoidais. Resistências têm 1; motores, menos.
+- Um **capacitor em paralelo** fornece a potência reativa do motor: a corrente da rede cai, e a potência ativa e a corrente do motor não mudam. $C = P(\tan\varphi_1 - \tan\varphi_2) / (2\pi f V^2)$.
+- Instalações em média e alta tensão pagam a mais com FP abaixo de 0,92. Em casa, corrigir o FP não reduz a conta.
+- Capacitores guardam carga: meça e descarregue antes de tocar.
+
+A próxima aula usa capacitores e bobinas para outra coisa: escolher frequências. Lá estão os filtros do som e a ressonância, em <LinkAula id="m06-corrente-alternada/06-ressonancia-e-filtros" />.
