@@ -1,0 +1,170 @@
+---
+/*
+ * 07.8: the shower circuit from the panel, in a 127/220 V house where the
+ * shower gets 220 V between two phases. A two-pole 40 A breaker and a 30 mA
+ * RCD (DR) feed the two wires of the shower; its green-and-yellow earth
+ * wire goes to the earth bar (PE) of the panel, never to the neutral.
+ */
+---
+
+<svg viewBox="0 0 360 300" width="360" height="300" class="fig" aria-hidden="true">
+  <rect x="8" y="10" width="150" height="250" rx="8" class="panel" />
+  <text x="83" y="30" class="title">
+    Quadro
+  </text>
+
+  <!-- Two phases in. -->
+  <text x="40" y="54" class="lbl fase-t">
+    F1
+  </text>
+  <text x="76" y="54" class="lbl fase-t">
+    F2
+  </text>
+  <path d="M40 60 V76 M76 60 V76" class="wire fase" />
+
+  <!-- Two-pole breaker. -->
+  <rect x="26" y="76" width="64" height="40" rx="4" class="device" />
+  <text x="58" y="101" class="lbl strong">
+    40 A
+  </text>
+  <text x="96" y="92" class="lbl start small">
+    disjuntor
+  </text>
+  <text x="96" y="106" class="lbl start small">
+    bipolar
+  </text>
+  <path d="M40 116 V132 M76 116 V132" class="wire fase" />
+
+  <!-- RCD. -->
+  <rect x="26" y="132" width="64" height="40" rx="4" class="device" />
+  <text x="58" y="157" class="lbl strong">
+    DR
+  </text>
+  <text x="96" y="148" class="lbl start small">
+    DR de
+  </text>
+  <text x="96" y="162" class="lbl start small">
+    30 mA
+  </text>
+  <rect x="78" y="160" width="8" height="8" rx="1" class="test" />
+
+  <!-- To the shower. -->
+  <path d="M40 172 V196 H246 V172 H268" class="wire fase" />
+  <path d="M76 172 V186 H232 V160 H268" class="wire fase" />
+
+  <!-- Earth bar. -->
+  <rect x="22" y="226" width="96" height="12" rx="2" class="bar" />
+  {[34, 50, 66, 82, 98].map((x) => (
+    <circle cx={x} cy="232" r="2.5" class="screw" />
+  ))}
+  <text x="70" y="254" class="lbl small">
+    barra de terra (PE)
+  </text>
+  <path d="M106 226 V214 H282 V188" class="wire earth" />
+  <path d="M106 226 V214 H282 V188" class="wire earth-stripe" />
+
+  <!-- The shower. -->
+  <rect x="266" y="140" width="40" height="48" rx="8" class="shower" />
+  <ellipse cx="286" cy="196" rx="34" ry="7" class="shower" />
+  <path d="M286 140 V112 H340" class="pipe" />
+  <text x="322" y="104" class="lbl small">
+    cano
+  </text>
+  <text x="300" y="232" class="lbl">
+    chuveiro
+  </text>
+  <text x="300" y="248" class="lbl small">
+    220 V
+  </text>
+
+  <text x="206" y="210" class="lbl small earth-t">
+    verde-amarelo
+  </text>
+  <text x="180" y="290" class="note">
+    O terra vai à barra de terra, nunca ao neutro.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .panel {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .device {
+    fill: var(--bg);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .test {
+    fill: var(--warning);
+  }
+  .wire {
+    stroke-width: 3;
+  }
+  .fase {
+    stroke: var(--fg);
+  }
+  .earth {
+    stroke: var(--success);
+  }
+  .earth-stripe {
+    stroke: var(--warning);
+    stroke-dasharray: 6 8;
+  }
+  .bar {
+    fill: color-mix(in oklab, var(--success) 35%, var(--surface));
+    stroke: var(--success);
+  }
+  .screw {
+    fill: var(--fg-muted);
+  }
+  .shower {
+    fill: var(--bg);
+    stroke: var(--fg-muted);
+    stroke-width: 1.8;
+  }
+  .pipe {
+    stroke: var(--fg-muted);
+    stroke-width: 5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-weight: 700;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+  }
+  .strong {
+    fill: var(--fg);
+    font-weight: 700;
+  }
+  .small {
+    font-size: 12px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .fase-t {
+    fill: var(--fg);
+    font-weight: 700;
+  }
+  .earth-t {
+    fill: var(--success);
+  }
+  .note {
+    fill: var(--fg);
+    font-weight: 700;
+  }
+</style>

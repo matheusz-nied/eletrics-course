@@ -1,0 +1,179 @@
+---
+/*
+ * 07.7: three reasons why a switched-off LED bulb glows faintly or blinks.
+ * (1) The switch cuts the neutral: the lamp stays at the phase and a tiny
+ * leakage gets through. (2) A switch with a locator light: its small LED
+ * and resistor sit across the contact and feed the lamp a trickle of
+ * current. (3) A long switch leg running next to the phase: the two wires
+ * form a small capacitor that lets microamperes through.
+ */
+const panels = [
+  { y: 0, title: '1. Interruptor cortando o neutro', kind: 'neutro' },
+  { y: 136, title: '2. Interruptor com luz de localização', kind: 'piloto' },
+  { y: 272, title: '3. Retorno longo ao lado da fase', kind: 'capacitivo' },
+];
+const TOP = 46;
+const BOT = 96;
+const LAMP_X = 284;
+---
+
+<svg viewBox="0 0 360 400" width="360" height="400" class="fig" aria-hidden="true">
+  {panels.map((p) => (
+    <g transform={`translate(0 ${p.y})`}>
+      <text x="8" y="20" class="title">
+        {p.title}
+      </text>
+      <text x="8" y={TOP + 4} class="lbl strong fase-t">
+        F
+      </text>
+      <text x="8" y={BOT + 4} class="lbl strong neutro-t">
+        N
+      </text>
+
+      {p.kind === 'neutro' ? (
+        <>
+          <path d={`M22 ${TOP} H${LAMP_X} V${TOP + 10}`} class="wire fase" />
+          <path d={`M22 ${BOT} H110`} class="wire neutro" />
+          <circle cx="114" cy={BOT} r="3.5" class="pin" />
+          <path d={`M114 ${BOT} L140 ${BOT - 14}`} class="blade" />
+          <circle cx="146" cy={BOT} r="3.5" class="pin" />
+          <path d={`M150 ${BOT} H${LAMP_X} V${BOT - 10}`} class="wire on-lamp" />
+          <text x="22" y={BOT + 24} class="lbl small start">
+            Desligado, mas a lâmpada continua ligada à fase.
+          </text>
+        </>
+      ) : p.kind === 'piloto' ? (
+        <>
+          <path d={`M22 ${TOP} H110`} class="wire fase" />
+          <circle cx="114" cy={TOP} r="3.5" class="pin" />
+          <path d={`M114 ${TOP} L140 ${TOP - 14}`} class="blade" />
+          <circle cx="146" cy={TOP} r="3.5" class="pin" />
+          <path d={`M150 ${TOP} H${LAMP_X} V${TOP + 10}`} class="wire on-lamp" />
+          <path d={`M100 ${TOP} V${TOP + 22} H112 M150 ${TOP + 22} H160 V${TOP}`} class="thin" />
+          <rect x="112" y={TOP + 17} width="18" height="10" rx="2" class="res" />
+          <path
+            d={`M134 ${TOP + 16} V${TOP + 28} M134 ${TOP + 22} L146 ${TOP + 16} V${TOP + 28} Z`}
+            class="led-sym"
+          />
+          <path d={`M146 ${TOP + 22} H150`} class="thin" />
+          <circle cx="100" cy={TOP} r="2.5" class="pin" />
+          <circle cx="160" cy={TOP} r="2.5" class="pin" />
+          <path d={`M22 ${BOT} H${LAMP_X} V${BOT - 10}`} class="wire neutro" />
+          <text x="22" y={BOT + 24} class="lbl small start">
+            LED e resistor em paralelo com o contato aberto.
+          </text>
+        </>
+      ) : (
+        <>
+          <path d={`M22 ${TOP} H60`} class="wire fase" />
+          <circle cx="64" cy={TOP} r="3.5" class="pin" />
+          <path d={`M64 ${TOP} L90 ${TOP - 14}`} class="blade" />
+          <circle cx="96" cy={TOP} r="3.5" class="pin" />
+          <path d={`M100 ${TOP} H${LAMP_X} V${TOP + 10}`} class="wire on-lamp" />
+          <path d={`M40 ${TOP} V${TOP + 16} H${LAMP_X - 40}`} class="wire fase" />
+          {[130, 170, 210, 250].map((x) => (
+            <path
+              d={`M${x} ${TOP + 1} V${TOP + 5} M${x - 6} ${TOP + 5} H${x + 6} M${x - 6} ${TOP + 10} H${x + 6} M${x} ${TOP + 10} V${TOP + 15}`}
+              class="cap"
+            />
+          ))}
+          <path d={`M22 ${BOT} H${LAMP_X} V${BOT - 10}`} class="wire neutro" />
+          <text x="22" y={BOT + 24} class="lbl small start">
+            Fios lado a lado no eletroduto: um capacitor pequeno.
+          </text>
+        </>
+      )}
+
+      <circle cx={LAMP_X} cy={(TOP + BOT) / 2} r="15" class="lamp" />
+      <path
+        d={`M${LAMP_X - 6} ${(TOP + BOT) / 2 - 6} L${LAMP_X + 6} ${(TOP + BOT) / 2} L${LAMP_X - 6} ${(TOP + BOT) / 2 + 6} Z M${LAMP_X + 6} ${(TOP + BOT) / 2 - 6} V${(TOP + BOT) / 2 + 6}`}
+        class="led-sym"
+      />
+      <text x={LAMP_X + 20} y={(TOP + BOT) / 2 + 4} class="lbl start">
+        LED
+      </text>
+    </g>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    stroke-width: 2.5;
+  }
+  .fase {
+    stroke: var(--danger);
+  }
+  .neutro {
+    stroke: var(--info);
+  }
+  .on-lamp {
+    stroke: color-mix(in oklab, var(--danger) 55%, var(--fg-muted));
+    stroke-dasharray: 6 4;
+  }
+  .thin {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .pin {
+    fill: var(--fg);
+    stroke: none;
+  }
+  .blade {
+    stroke: var(--fg);
+    stroke-width: 2.5;
+  }
+  .res {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .led-sym {
+    stroke: var(--fg);
+    stroke-width: 1.5;
+    fill: none;
+  }
+  .cap {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+  .lamp {
+    fill: color-mix(in oklab, var(--warning) 22%, var(--bg));
+    stroke: var(--warning);
+    stroke-width: 2;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-weight: 700;
+    text-anchor: start;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+  }
+  .small {
+    font-size: 12px;
+  }
+  .strong {
+    font-weight: 700;
+    text-anchor: start;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .fase-t {
+    fill: var(--danger);
+  }
+  .neutro-t {
+    fill: var(--info);
+  }
+</style>

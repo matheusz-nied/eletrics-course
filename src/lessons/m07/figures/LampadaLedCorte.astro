@@ -1,0 +1,180 @@
+---
+/*
+ * 07.7: an A60 LED bulb cut in half (the SVG version of the lamp-led 3D
+ * part). From top to bottom: the milky diffuser, the aluminium board with
+ * the SMD LEDs, the neck that spreads the heat, the driver board inside the
+ * neck and the E27 base with the central contact.
+ */
+const leds = [150, 164, 178, 192, 206];
+const threads = [232, 242, 252, 262];
+---
+
+<svg viewBox="0 0 360 318" width="360" height="318" class="fig" aria-hidden="true">
+  <!-- Diffuser. -->
+  <path d="M128 128 A 56 56 0 1 1 228 128 Z" class="dome" />
+  <!-- LED board. -->
+  <rect x="134" y="124" width="88" height="8" rx="2" class="board" />
+  {leds.map((x) => (
+    <rect x={x - 4} y="118" width="8" height="6" rx="1" class="led" />
+  ))}
+  <!-- Neck with the heat spreader. -->
+  <path d="M130 132 H226 L208 222 H148 Z" class="neck" />
+  <path d="M138 136 H218 L202 216 H154 Z" class="spreader" />
+  <!-- Driver board with its parts. -->
+  <rect x="172" y="142" width="12" height="74" rx="2" class="pcb" />
+  <rect x="160" y="150" width="12" height="22" rx="5" class="cap" />
+  <rect x="184" y="158" width="10" height="10" rx="1" class="chip" />
+  <rect x="184" y="178" width="9" height="16" rx="3" class="part" />
+  <rect x="162" y="182" width="10" height="8" rx="1" class="part" />
+  <!-- E27 base. -->
+  <rect x="152" y="222" width="52" height="48" rx="4" class="shell" />
+  {threads.map((y) => (
+    <path d={`M152 ${y} L204 ${y + 6}`} class="thread" />
+  ))}
+  <path d="M158 270 H198 L190 284 H166 Z" class="insulator" />
+  <rect x="172" y="284" width="12" height="8" rx="2" class="tip" />
+  <path d="M176 216 L170 284 M180 216 L200 262" class="lead" />
+
+  <!-- Labels: left. -->
+  <text x="8" y="58" class="lbl start strong">
+    Difusor leitoso
+  </text>
+  <text x="8" y="73" class="lbl start">
+    espalha a luz
+  </text>
+  <path d="M96 66 H132" class="leader" />
+  <text x="8" y="112" class="lbl start strong">
+    LEDs SMD
+  </text>
+  <text x="8" y="127" class="lbl start">
+    na placa de alumínio
+  </text>
+  <path d="M84 116 H144" class="leader" />
+  <text x="8" y="196" class="lbl start strong">
+    Pescoço
+  </text>
+  <text x="8" y="211" class="lbl start">
+    tira o calor
+  </text>
+  <path d="M66 200 H146" class="leader" />
+  <text x="8" y="248" class="lbl start strong">
+    Rosca E27
+  </text>
+  <text x="8" y="263" class="lbl start">
+    neutro
+  </text>
+  <path d="M80 252 H150" class="leader" />
+
+  <!-- Labels: right. -->
+  <text x="352" y="150" class="lbl end strong">
+    Driver
+  </text>
+  <text x="352" y="165" class="lbl end">
+    CA da rede →
+  </text>
+  <text x="352" y="180" class="lbl end">
+    CC para os LEDs
+  </text>
+  <path d="M262 160 H196" class="leader" />
+  <text x="352" y="212" class="lbl end strong">
+    Capacitor
+  </text>
+  <text x="352" y="227" class="lbl end">
+    de filtro
+  </text>
+  <path d="M290 216 L170 168" class="leader" />
+  <text x="352" y="290" class="lbl end strong">
+    Contato central
+  </text>
+  <text x="352" y="305" class="lbl end">
+    fase, pelo interruptor
+  </text>
+  <path d="M244 292 H188" class="leader" />
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .dome {
+    fill: color-mix(in oklab, var(--warning) 10%, var(--bg));
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .board {
+    fill: color-mix(in oklab, var(--fg-muted) 45%, var(--surface));
+    stroke: var(--fg-muted);
+  }
+  .led {
+    fill: var(--warning);
+    stroke: var(--fg-muted);
+    stroke-width: 0.8;
+  }
+  .neck {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .spreader {
+    stroke: color-mix(in oklab, var(--fg-muted) 60%, transparent);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+  }
+  .pcb {
+    fill: color-mix(in oklab, var(--success) 45%, var(--surface));
+    stroke: var(--success);
+  }
+  .cap {
+    fill: color-mix(in oklab, var(--info) 55%, var(--surface));
+    stroke: var(--fg-muted);
+  }
+  .chip {
+    fill: var(--fg);
+  }
+  .part {
+    fill: color-mix(in oklab, var(--fg-muted) 50%, var(--surface));
+    stroke: var(--fg-muted);
+    stroke-width: 0.8;
+  }
+  .shell {
+    fill: color-mix(in oklab, var(--fg-muted) 30%, var(--surface));
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .thread {
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+  }
+  .insulator {
+    fill: var(--fg);
+  }
+  .tip {
+    fill: var(--copper);
+  }
+  .lead {
+    stroke: var(--copper);
+    stroke-width: 1.5;
+  }
+  .leader {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .strong {
+    fill: var(--fg);
+    font-weight: 700;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

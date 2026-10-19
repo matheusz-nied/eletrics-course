@@ -1,0 +1,146 @@
+---
+/*
+ * 07.7: the two ways a presence sensor is wired. Three wires: phase and
+ * neutral feed the sensor's own circuit, and its output (carga) switches
+ * the phase to the lamp. Two wires: the sensor takes the place of the
+ * switch, in series with the lamp, and feeds itself with a small current
+ * through the lamp, even with the lamp "off".
+ */
+const LAMP_X = 278;
+---
+
+<svg viewBox="0 0 360 316" width="360" height="316" class="fig" aria-hidden="true">
+  <g>
+    <text x="8" y="18" class="title">
+      Sensor de 3 fios
+    </text>
+    <text x="8" y="50" class="tag fase-t">
+      F
+    </text>
+    <text x="8" y="118" class="tag neutro-t">
+      N
+    </text>
+    <rect x="88" y="34" width="112" height="58" rx="8" class="box" />
+    <text x="144" y="56" class="lbl strong">
+      sensor
+    </text>
+    <text x="106" y="84" class="lbl small">
+      L
+    </text>
+    <text x="144" y="84" class="lbl small">
+      N
+    </text>
+    <text x="180" y="84" class="lbl small">
+      carga
+    </text>
+    <path d="M22 46 H70 V100 H106 V92" class="wire fase" />
+    <path d="M22 114 H144 V92" class="wire neutro" />
+    <path d={`M144 114 H${LAMP_X} V88`} class="wire neutro" />
+    <path d={`M180 92 V100 H220 V46 H${LAMP_X} V58`} class="wire fase" />
+    <circle cx={LAMP_X} cy="73" r="15" class="lamp" />
+    <text x={LAMP_X + 22} y="77" class="lbl start">
+      lâmpada
+    </text>
+    <circle cx="144" cy="114" r="3" class="pin" />
+    <text x="8" y="140" class="lbl small start">
+      O sensor tem a própria alimentação, entre F e N.
+    </text>
+  </g>
+
+  <g transform="translate(0 156)">
+    <text x="8" y="18" class="title">
+      Sensor de 2 fios (no lugar do interruptor)
+    </text>
+    <text x="8" y="50" class="tag fase-t">
+      F
+    </text>
+    <text x="8" y="112" class="tag neutro-t">
+      N
+    </text>
+    <rect x="96" y="30" width="84" height="34" rx="8" class="box" />
+    <text x="138" y="52" class="lbl strong">
+      sensor
+    </text>
+    <path d="M22 46 H96" class="wire fase" />
+    <path d={`M180 46 H${LAMP_X} V58`} class="wire fase" />
+    <text x="220" y="38" class="lbl small">
+      retorno
+    </text>
+    <path d={`M22 108 H${LAMP_X} V88`} class="wire neutro" />
+    <circle cx={LAMP_X} cy="73" r="15" class="lamp" />
+    <text x={LAMP_X + 22} y="77" class="lbl start">
+      lâmpada
+    </text>
+    <text x="8" y="134" class="lbl small start">
+      Para se alimentar, ele deixa passar uma corrente
+    </text>
+    <text x="8" y="150" class="lbl small start">
+      pequena pela lâmpada, mesmo com ela "apagada".
+    </text>
+  </g>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    stroke-width: 2.5;
+  }
+  .fase {
+    stroke: var(--danger);
+  }
+  .neutro {
+    stroke: var(--info);
+  }
+  .box {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .pin {
+    fill: var(--info);
+    stroke: none;
+  }
+  .lamp {
+    fill: color-mix(in oklab, var(--warning) 22%, var(--bg));
+    stroke: var(--warning);
+    stroke-width: 2;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-weight: 700;
+    text-anchor: start;
+  }
+  .tag {
+    font-weight: 700;
+    text-anchor: start;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+  }
+  .strong {
+    fill: var(--fg);
+    font-weight: 700;
+  }
+  .small {
+    font-size: 12px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .fase-t {
+    fill: var(--danger);
+  }
+  .neutro-t {
+    fill: var(--info);
+  }
+</style>
