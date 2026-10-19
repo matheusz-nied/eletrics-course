@@ -40,6 +40,8 @@ for (const path of LESSONS) {
 
 test.describe('accessibility', () => {
   test.skip(({ isMobile }) => isMobile, 'Runs once, on desktop.');
+  // Axe over a page with several 3D views is slow on CI's software WebGL.
+  test.describe.configure({ timeout: 60_000 });
 
   for (const theme of ['light', 'dark'] as const) {
     for (const path of LESSONS) {
