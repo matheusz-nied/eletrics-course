@@ -3,13 +3,14 @@ import type { CircuitDoc } from '../../engine/contract';
 import { Simulator } from '../../engine/analysis/simulator';
 import { checkGoal } from '../../engine/analysis/goals';
 import estrelaTriangulo from './estrela-triangulo.circuit';
+import motorCapacitor from './motor-capacitor.circuit';
 
 /**
  * The shared lesson test only runs the goals of DC and transient circuits;
  * the AC motor circuits of module 8 are quasi-static, so their goals (the
  * numbers the lessons quote) are checked here the same way.
  */
-const circuits: CircuitDoc[] = [estrelaTriangulo];
+const circuits: CircuitDoc[] = [estrelaTriangulo, motorCapacitor];
 
 for (const doc of circuits) {
   describe(doc.id, () => {
