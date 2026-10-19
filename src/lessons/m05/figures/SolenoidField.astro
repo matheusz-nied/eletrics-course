@@ -1,0 +1,145 @@
+---
+/*
+ * 05.2: a coil cut lengthwise, with the wire coming out of the page on top
+ * (dots) and going in at the bottom (crosses). The field runs through the
+ * middle from left to right and closes outside: S on the left, N on the
+ * right. With an iron core the lines crowd together (stronger field).
+ */
+const MID = 140;
+const X0 = 76;
+const X1 = 204;
+const TOP = 104;
+const BOTTOM = 176;
+const AXIS = (TOP + BOTTOM) / 2;
+const turns = Array.from({ length: 7 }, (_, i) => X0 + 4 + (i * (X1 - X0 - 8)) / 6);
+
+/** A closed field line: straight through the coil at height y, back around outside at height out. */
+function loop(y: number, out: number) {
+  const reach = 34 + Math.abs(out - AXIS) * 0.35;
+  return `M${X0 - 14} ${y}H${X1 + 14}C${X1 + 14 + reach} ${y} ${X1 + 14 + reach} ${out} ${MID} ${out}C${X0 - 14 - reach} ${out} ${X0 - 14 - reach} ${y} ${X0 - 14} ${y}`;
+}
+
+const panels = [
+  {
+    dx: 0,
+    title: 'Bobina no ar',
+    core: false,
+    lines: [
+      { y: AXIS - 10, out: 64 },
+      { y: AXIS + 10, out: 216 },
+    ],
+  },
+  {
+    dx: 280,
+    title: 'Com núcleo de ferro',
+    core: true,
+    lines: [
+      { y: AXIS - 15, out: 50 },
+      { y: AXIS - 9, out: 66 },
+      { y: AXIS - 3, out: 82 },
+      { y: AXIS + 3, out: 198 },
+      { y: AXIS + 9, out: 214 },
+      { y: AXIS + 15, out: 230 },
+    ],
+  },
+];
+---
+
+<svg viewBox="0 0 560 280" width="560" height="280" class="fig" aria-hidden="true">
+  {panels.map((p) => (
+    <g transform={`translate(${p.dx} 0)`}>
+      <text x={MID} y="22" class="title">
+        {p.title}
+      </text>
+      {p.core && (
+        <rect x={X0 - 12} y={AXIS - 20} width={X1 - X0 + 24} height="40" rx="3" class="core" />
+      )}
+      {p.lines.map((l) => (
+        <g>
+          <path d={loop(l.y, l.out)} class="line" />
+          <path d="M-6 -4L4 0L-6 4Z" transform={`translate(${MID} ${l.y})`} class="arrow" />
+          <path d="M6 -4L-4 0L6 4Z" transform={`translate(${MID} ${l.out})`} class="arrow" />
+        </g>
+      ))}
+      {turns.map((x) => (
+        <g>
+          <circle cx={x} cy={TOP} r="8" class="turn" />
+          <circle cx={x} cy={TOP} r="2.4" class="mark" />
+          <circle cx={x} cy={BOTTOM} r="8" class="turn" />
+          <path
+            d={`M${x - 4} ${BOTTOM - 4}L${x + 4} ${BOTTOM + 4}M${x + 4} ${BOTTOM - 4}L${x - 4} ${BOTTOM + 4}`}
+            class="cross"
+          />
+        </g>
+      ))}
+      <text x={X0 - 34} y={AXIS + 6} class="pole halo">
+        S
+      </text>
+      <text x={X1 + 34} y={AXIS + 6} class="pole halo">
+        N
+      </text>
+    </g>
+  ))}
+  <text x="280" y="268" class="small">
+    • corrente saindo da folha × corrente entrando na folha
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .core {
+    fill: color-mix(in oklab, var(--fg-subtle) 30%, var(--surface));
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .line {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+  .arrow {
+    fill: var(--accent);
+  }
+  .turn {
+    fill: color-mix(in oklab, var(--copper) 30%, var(--surface));
+    stroke: var(--copper);
+    stroke-width: 2;
+  }
+  .mark {
+    fill: var(--copper);
+  }
+  .cross {
+    stroke: var(--copper);
+    stroke-width: 1.8;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .pole {
+    font-size: 16px;
+    font-weight: 700;
+    fill: var(--fg-muted);
+  }
+  /* Keeps the pole letters readable over the field lines. */
+  .halo {
+    stroke: var(--surface);
+    stroke-width: 6px;
+    paint-order: stroke;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+    white-space: pre;
+  }
+</style>

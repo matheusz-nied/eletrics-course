@@ -1,0 +1,316 @@
+---
+titulo: Indução eletromagnética
+modulo: m05-magnetismo
+ordem: 3
+nivel: I
+duracaoMin: 25
+objetivos:
+  - Explicar o que é fluxo magnético e por que só a variação dele gera tensão
+  - Estimar a tensão induzida numa bobina com a lei de Faraday
+  - Prever o sentido da corrente induzida com a lei de Lenz
+  - Descrever como funcionam o gerador de CA, o dínamo de bicicleta e o alternador do carro
+  - Reconhecer a indução em aparelhos do dia a dia
+prerequisitos:
+  - m05-magnetismo/02-eletroimas-e-solenoides
+  - m04-passivos/05-indutores-e-circuito-rl
+tags: [indução, Faraday, Lenz, fluxo magnético, gerador, dínamo, alternador, carro]
+seguranca: nenhum
+rascunho: false
+---
+
+import InducaoIma from '../../../lessons/m05/InducaoIma.tsx';
+import LenzTube from '../../../lessons/m05/figures/LenzTube.astro';
+import RotatingLoop from '../../../lessons/m05/figures/RotatingLoop.astro';
+import CarAlternator from '../../../lessons/m05/figures/CarAlternator.astro';
+
+O farol de uma bicicleta antiga acende sem pilha nenhuma. Encostado no pneu, há um cilindrinho que gira junto com a roda: o dínamo. Quanto mais rápido você pedala, mais forte fica a luz; parou no sinal, a luz apaga. No carro, o alternador faz o mesmo serviço com muito mais força, e é ele que mantém a bateria carregada.
+
+Nos dois casos, um ímã gira perto de uma bobina de fio, e aparece tensão nas pontas da bobina. Nesta aula você vai ver de onde vem essa tensão, do que ela depende e por que ela sempre aparece "do contra".
+
+## Da corrente ao ímã, e de volta
+
+Na aula anterior, <LinkAula id="m05-magnetismo/02-eletroimas-e-solenoides" />, você viu que corrente elétrica cria campo magnético: é assim que funcionam o eletroímã, o solenoide e o relé. Em 1831, o inglês Michael Faraday fez a pergunta ao contrário: se corrente gera campo, será que campo gera corrente?
+
+Ele enrolou duas bobinas num anel de ferro. Numa delas ligou uma bateria com uma chave; na outra, um galvanômetro, um medidor de corrente com o zero no meio da escala. Com a chave ligada e a corrente estável, o ponteiro ficava no zero. A surpresa veio nos instantes de ligar e de desligar: o ponteiro dava um tranco para um lado ao ligar e para o outro ao desligar.
+
+A conclusão de Faraday é a ideia central desta aula: **campo magnético parado não gera corrente. O que gera é o campo mudando.** Esse fenômeno se chama <Term id="inducao-eletromagnetica">indução eletromagnética</Term>.
+
+## Fluxo magnético: quanto campo atravessa a bobina
+
+Para medir "quanto campo passa por dentro" de uma espira (uma volta de fio), usa-se o <Term id="fluxo-magnetico">fluxo magnético</Term>. Com o campo atravessando a espira de frente, ele é o campo vezes a área:
+
+$$
+\Phi = B \cdot A
+$$
+
+- $\Phi$ (a letra grega fi) é o fluxo, em **weber** (Wb);
+- $B$ é a intensidade do campo magnético, em tesla (T);
+- $A$ é a área da espira, em metros quadrados (m²).
+
+Uma imagem que ajuda: pense na chuva passando por uma janela aberta. Passa mais água com chuva mais forte (campo maior), com janela maior (área maior) e com a janela de frente para a chuva. Se você inclina a janela até ficar de lado, quase nada passa. A analogia para aí: no campo magnético não há nada escorrendo de verdade. O fluxo é só uma conta que diz quanto campo atravessa a área.
+
+Os números costumam ser pequenos. Um ímã de neodímio pequeno, no meio de uma espira de 2 cm de diâmetro, dá um fluxo de uns 47 µWb (microwebers) por espira.
+
+## A lei de Faraday
+
+A tensão que aparece nas pontas de uma bobina é proporcional à **rapidez** com que o fluxo muda dentro dela. É a <Term id="lei-de-faraday">lei de Faraday</Term>:
+
+$$
+v = -N \cdot \frac{\Delta \Phi}{\Delta t}
+$$
+
+- $v$ é a tensão induzida, em volts (V);
+- $N$ é o número de espiras da bobina. Cada espira gera a sua parte, e elas se somam em série;
+- $\Delta \Phi$ é quanto o fluxo mudou, em webers, e $\Delta t$ é em quanto tempo, em segundos. A razão $\Delta \Phi / \Delta t$ é a velocidade da mudança, em webers por segundo (1 Wb/s = 1 V);
+- o sinal de menos diz o sentido da tensão. Ele é a lei de Lenz, que vem logo abaixo.
+
+Daqui sai tudo o que importa na prática. A tensão é maior quando:
+
+- **a mudança é mais rápida**: o mesmo ímã passando duas vezes mais depressa gera o dobro da tensão;
+- **a bobina tem mais espiras**: o dobro de espiras, o dobro da tensão;
+- **o ímã é mais forte**: mais fluxo para mudar.
+
+E a tensão é **zero** se nada muda, mesmo com um ímã fortíssimo parado dentro da bobina.
+
+O fluxo pode mudar de três jeitos: mexendo o ímã (ou a bobina), girando a bobina dentro do campo (o gerador) ou variando a corrente de um eletroímã ao lado (o transformador, da próxima aula).
+
+### Exemplo resolvido
+
+Uma bobina de 200 espiras, com 4 cm² de área (0,0004 m²), é encostada num ímã. O campo dentro dela vai de 0 a 0,5 T em 0,1 s. Qual a tensão induzida?
+
+O fluxo em cada espira vai de zero a
+
+$$
+\Phi = B \cdot A = 0{,}5\,\text{T} \times 0{,}0004\,\text{m}^2 = 0{,}0002\,\text{Wb}
+$$
+
+e a mudança acontece em 0,1 s. A tensão (sem o sinal) é
+
+$$
+v = N \cdot \frac{\Delta \Phi}{\Delta t} = 200 \times \frac{0{,}0002\,\text{Wb}}{0{,}1\,\text{s}} = 0{,}4\,\text{V}
+$$
+
+Se a mesma aproximação durar só 0,01 s, a tensão vai a 4 V: dez vezes mais rápido, dez vezes mais tensão. E com o ímã parado encostado na bobina, a tensão é zero, por maior que seja o campo.
+
+## A lei de Lenz: a corrente induzida reage
+
+Em que sentido a corrente induzida circula? A resposta é a <Term id="lei-de-lenz">lei de Lenz</Term>: **a corrente induzida cria um campo que se opõe à mudança que a criou.**
+
+Aproxime o polo norte de um ímã de uma bobina fechada. O fluxo dentro dela aumenta, e a corrente induzida transforma a bobina num eletroímã com um polo **norte** virado para o ímã: a bobina empurra o ímã de volta. Afaste o ímã, e a corrente inverte: a face da bobina vira um polo **sul**, que puxa o ímã de volta. Nos dois casos, a bobina "reclama" da mudança.
+
+Não podia ser de outro jeito. Se a corrente induzida ajudasse o movimento, o ímã aceleraria sozinho, geraria mais corrente, aceleraria mais, e você teria energia de graça. O que acontece é o contrário: para tirar energia elétrica da bobina, alguém precisa empurrar o ímã contra essa reação. Por isso pedalar fica um pouco mais pesado com o farol do dínamo aceso.
+
+<Figure caption="Figura 1. Um ímã de neodímio solto num tubo de plástico cai como uma pedra. No tubo de cobre, ele desce devagar: o ímã em movimento induz correntes que circulam no próprio tubo, em volta dele, e essas correntes criam campos que o freiam, por cima e por baixo.">
+  <LenzTube />
+</Figure>
+
+A Figura 1 mostra uma demonstração clássica. O tubo de cobre não é atraído por ímã nenhum (cobre não é ferromagnético), mas o ímã cai devagar dentro dele. As correntes induzidas no metal, chamadas <Term id="correntes-parasitas">correntes parasitas</Term> (ou correntes de Foucault), freiam o ímã. O mesmo efeito freia trens e carrinhos de montanha-russa sem nenhum atrito, e é o que esquenta a panela no fogão de indução. No transformador, ele é um problema, e a próxima aula mostra como o núcleo é feito para diminuí-lo.
+
+## Explore: um ímã atravessando a bobina
+
+No experimento abaixo, um ímã passa por dentro de uma bobina de 2 cm de diâmetro ligada a um osciloscópio e a um galvanômetro. A passagem acontece em câmera lenta, e a passagem anterior fica apagadinha na tela para você comparar.
+
+<InducaoIma client:visible />
+
+1. Com os valores iniciais (500 espiras, ímã de neodímio, polo norte na frente, 1 m/s), aperte **Passar o ímã pela bobina**. Quantos pulsos aparecem? O primeiro é positivo ou negativo? Qual é o pico?
+2. Mude a velocidade para 2 m/s e passe de novo. O que aconteceu com a altura e com a largura dos pulsos?
+3. Volte para 1 m/s e troque para 1.000 espiras. Depois troque o ímã para ferrite.
+4. Vire o ímã: polo sul na frente. O que muda no desenho?
+5. Arraste o ímã com a barra de posição, devagar e depois depressa. Pare com o ímã bem no meio da bobina. Quanto marca a tensão?
+
+Com os valores iniciais aparecem **dois pulsos de sinais opostos**, com pico de cerca de 2 V. Enquanto o polo norte chega, o fluxo aumenta e a tensão é negativa; quando o ímã sai pelo outro lado, o fluxo diminui e a tensão fica positiva. Bem no meio, por um instante, o fluxo para de mudar e a tensão passa por zero.
+
+A 2 m/s, o pico dobra (cerca de 4 V) e os pulsos ficam com a metade da largura: a mesma mudança de fluxo acontece na metade do tempo. Com 1.000 espiras, o pico também dobra. O ímã de ferrite, três vezes mais fraco que o de neodímio do mesmo tamanho, dá um terço da tensão: cerca de 0,67 V. Com o polo sul na frente, tudo se inverte: o primeiro pulso fica positivo.
+
+Movendo à mão, a tensão acompanha a sua velocidade. E com o ímã parado no meio da bobina, onde o fluxo é o maior de todos, a tensão é **zero**. É a lei de Faraday na prática: o que conta é a mudança.
+
+Os números saem de um modelo simplificado: o ímã é tratado como um pequeno dipolo, a bobina é curta e o galvanômetro quase não deixa passar corrente. Num experimento de bancada os números mudam, mas o formato dos dois pulsos e as proporções são os mesmos.
+
+## Geradores: girar em vez de empurrar
+
+Passar um ímã de um lado para o outro dá só um pulso de cada vez. Para gerar energia sem parar, o jeito é **girar**: uma bobina girando entre os polos de um ímã (ou um ímã girando dentro de bobinas) vê o fluxo subir e descer o tempo todo.
+
+<Figure caption="Figura 2. Uma espira girando entre os polos de um ímã, vista de lado. Quando ela está de frente para o campo, passa o fluxo máximo, mas ele quase não muda naquele instante, e a tensão é zero. Quando ela está deitada, alinhada com o campo, o fluxo é zero mas está mudando mais depressa, e a tensão é máxima. Uma volta completa dá um ciclo da senoide.">
+  <RotatingLoop />
+</Figure>
+
+A tensão de uma espira girando com velocidade constante é uma **senoide**: sobe, desce, troca de sinal e repete a cada volta. É a corrente alternada (CA) da tomada. Nas usinas, turbinas movidas por água, vapor ou vento giram geradores enormes, sincronizados para dar exatamente 60 ciclos por segundo, a frequência da rede no Brasil. Uma curiosidade: em Itaipu, metade das unidades geradoras trabalha em 60 Hz para o Brasil e metade em 50 Hz, a frequência usada no Paraguai. A senoide, o valor eficaz e a frequência são o assunto do módulo <LinkAula id="m06-corrente-alternada/01-da-cc-a-ca" />.
+
+### Dínamo de bicicleta
+
+No <Term id="dinamo">dínamo</Term> de garrafa, aquele que encosta no pneu, um ímã permanente gira dentro de uma bobina fixa. Ele dá corrente alternada, e quanto mais rápido a roda gira, maiores ficam a tensão e a frequência. Os dínamos comuns são de 6 V e 3 W (típico), e um pequeno regulador ou a própria lâmpada limita a tensão em velocidade alta. Parado, não há mudança de fluxo e o farol apaga; modelos com farol que fica aceso alguns minutos usam um capacitor ou uma bateria pequena.
+
+### Alternador do carro
+
+O <Term id="alternador">alternador</Term> é o gerador do carro. Ele gira puxado por uma correia do motor e tem quatro partes:
+
+<Figure caption="Figura 3. O caminho da energia no alternador. O rotor é um eletroímã alimentado pelas escovas; girando, ele induz CA trifásica nas bobinas do estator. Os diodos retificam para CC, e o regulador mede a tensão da saída e ajusta a corrente do rotor para manter cerca de 14 V.">
+  <CarAlternator />
+</Figure>
+
+- **Rotor:** um eletroímã que gira. A corrente chega a ele por **escovas** de carvão que deslizam sobre anéis.
+- **Estator:** as bobinas fixas em volta do rotor, em três grupos (trifásico), onde a tensão é induzida.
+- **Retificador:** um conjunto de diodos que transforma a CA do estator em corrente contínua para a bateria. Retificadores são assunto da aula <LinkAula id="m09-semicondutores/03-retificadores" />.
+- **Regulador:** mede a tensão de saída e ajusta a corrente do rotor.
+
+Por que um eletroímã no rotor, e não um ímã permanente? Porque o motor do carro gira devagar na marcha lenta e muito rápido na estrada. Com ímã permanente, a tensão subiria junto com a rotação. Com o eletroímã, o regulador controla a força do campo: quando o motor acelera, ele diminui a corrente do rotor, e a saída fica perto de 14 V (típico: 13,8 a 14,4 V) em qualquer rotação. Essa tensão é um pouco maior que os 12,6 V da bateria carregada justamente para empurrar corrente para dentro dela, como você viu na aula <LinkAula id="m02-circuitos-cc/07-fontes-reais-e-baterias" />.
+
+## Indução mútua e autoindução
+
+No anel de Faraday, a corrente que muda numa bobina induz tensão na outra. Isso é a **indução mútua**, e é exatamente o que faz um transformador, o assunto da próxima aula: <LinkAula id="m05-magnetismo/04-transformadores" />. Repare que ela só funciona enquanto a corrente **muda**. Com corrente contínua estável, a segunda bobina não recebe nada. Por isso transformador é coisa de corrente alternada.
+
+Uma bobina também induz tensão **nela mesma** quando a sua corrente muda: é a **autoindução**, a propriedade que dá ao <Term id="indutor">indutor</Term> a sua indutância. Quando a corrente de uma bobina é cortada de repente, o fluxo cai a zero quase instantaneamente, e a lei de Faraday dá um pico de centenas de volts. Você viu esse pico, e o diodo que o segura, na aula <LinkAula id="m04-passivos/05-indutores-e-circuito-rl" />. A bobina de ignição do carro usa esse pico de propósito para fazer a faísca da vela.
+
+<RealCase title="Indução por todo lado">
+
+Depois que você conhece a lei de Faraday, começa a ver indução em todo canto:
+
+- **Carregador sem fio do celular:** uma bobina na base, alimentada com corrente alternada de alta frequência, induz tensão numa bobina dentro do celular. É um transformador com o primário e o secundário separados por alguns milímetros de plástico.
+- **Fogão de indução:** uma bobina debaixo do vidro cria um campo que muda dezenas de milhares de vezes por segundo. No fundo da panela de ferro, as correntes parasitas esquentam o metal. O vidro em si quase não esquenta, e panela de alumínio ou de vidro não funciona, a menos que tenha um fundo próprio para indução.
+- **Captador de guitarra:** um ímã com uma bobina embaixo de cada corda. A corda de aço vibrando muda o fluxo, e a bobina gera uma pequena tensão com o formato do som.
+- **Alicate amperímetro de CA:** o fio que passa pela garra é o "primário", e a bobina dentro da garra recebe uma tensão proporcional à corrente, como na aula <LinkAula id="m03-medicoes/03-medindo-corrente" />. Com corrente contínua não há variação, e esse tipo de alicate não mede nada. Alicates que medem CC usam um sensor de efeito Hall, da aula <LinkAula id="m05-magnetismo/05-sensores-magneticos" />.
+- **Cartão de ônibus e crachá por aproximação:** o leitor cria um campo alternado, e a bobina embutida no cartão capta energia suficiente para o chip responder.
+- **Detector de metais:** uma bobina cria um campo que muda; um objeto de metal enterrado ganha correntes parasitas, que perturbam o campo, e o aparelho apita.
+
+### Conferindo o alternador com o multímetro
+
+Um teste simples, que dispensa ferramenta especial: com o multímetro em V⎓ nos bornes da bateria (aula <LinkAula id="m03-medicoes/02-medindo-tensao" />), meça com o motor desligado e depois com o motor ligado em marcha lenta, faróis apagados. Desligado, uma bateria boa marca uns 12,6 V. Ligado, deve subir para perto de 14 V (típico: 13,8 a 14,4 V). Se continuar em 12,6 V ou menos, o alternador não está carregando; se passar bastante de 14,5 V, o regulador pode estar com defeito e a bateria vai ferver. A luz da bateria acesa no painel com o motor ligado é o mesmo aviso.
+
+Durante o teste, fique longe da correia, do ventilador e das partes quentes do motor, e prenda as pontas de prova antes de dar a partida.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Esperar tensão de um ímã parado.** Dentro da bobina ou não, sem mudança de fluxo não há tensão. O dínamo parado não acende o farol.
+- **Achar que a indução dá energia de graça.** Pela lei de Lenz, a corrente induzida sempre freia o movimento que a criou. A energia elétrica que sai do gerador entra como trabalho mecânico de quem gira.
+- **Esquecer o pico de autoindução.** Ao desligar bobinas de relés, motores e solenoides aparece um pico de tensão alto. Ele faísca nos contatos, queima transistores e pode dar um choque doloroso mesmo num circuito de 12 V.
+- **Mexer nos cabos de vela com o motor ligado.** A bobina de ignição gera dezenas de milhares de volts (típico). Nunca segure um cabo de vela com o motor funcionando.
+- **Desligar a bateria com o motor do carro ligado** para "testar o alternador". É um teste antigo e perigoso: sem a bateria para segurar a tensão, o alternador pode dar um pico que queima a eletrônica do carro. Use o multímetro, como no quadro acima.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'Um ímã forte está parado bem no meio de uma bobina de 1.000 espiras ligada a um voltímetro. O que o voltímetro mostra?',
+      options: [
+        {
+          text: 'Zero',
+          correct: true,
+          feedback:
+            'Sem mudança de fluxo não há tensão induzida, por maior que seja o campo. A tensão aparece só enquanto o ímã entra ou sai.',
+        },
+        {
+          text: 'A tensão máxima, porque o fluxo ali é o maior',
+          feedback:
+            'O fluxo é máximo, mas não está mudando. Pela lei de Faraday, o que conta é a rapidez da mudança, não o tamanho do fluxo.',
+        },
+        {
+          text: 'Uma tensão pequena e constante',
+          feedback:
+            'Tensão constante exigiria um fluxo mudando sempre no mesmo ritmo. Com o ímã parado, o fluxo não muda e a tensão é zero.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Numa bobina de 100 espiras, o fluxo em cada espira vai de 0 a 3 mWb em 0,05 s. Qual a tensão induzida, em volts (sem o sinal)?',
+      answer: 6,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        'v = N·ΔΦ/Δt = 100 × 0,003 Wb ÷ 0,05 s = 6 V.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você aproxima o polo norte de um ímã de uma bobina com as pontas ligadas uma na outra. Que polo aparece na face da bobina voltada para o ímã?',
+      options: [
+        {
+          text: 'Um polo norte, que empurra o ímã',
+          correct: true,
+          feedback:
+            'Pela lei de Lenz, a corrente induzida se opõe ao aumento do fluxo. Norte com norte se repelem: a bobina empurra o ímã que chega.',
+        },
+        {
+          text: 'Um polo sul, que puxa o ímã',
+          feedback:
+            'Se a bobina puxasse o ímã, ele aceleraria e geraria mais corrente sozinho: seria energia de graça. A reação é sempre contra a mudança.',
+        },
+        {
+          text: 'Nenhum: a bobina não vira ímã',
+          feedback:
+            'Com as pontas ligadas, a tensão induzida faz circular corrente, e toda bobina com corrente é um eletroímã.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Na simulação, com 500 espiras e o ímã de neodímio a 1 m/s, o pico é de cerca de 2 V. Qual seria o pico com 1.000 espiras e o mesmo ímã a 1,5 m/s, em volts?',
+      answer: 6.07,
+      tolerance: 0.05,
+      unit: 'V',
+      explanation:
+        'A tensão é proporcional ao número de espiras e à velocidade: 2,02 V × 2 × 1,5 ≈ 6,1 V.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'No alternador do carro, o rotor é um eletroímã para que o regulador possa manter a tensão perto de 14 V em qualquer rotação do motor.',
+      answer: true,
+      explanation:
+        'Controlando a corrente do rotor, o regulador ajusta a força do campo: menos campo quando o motor acelera, mais campo na marcha lenta.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem o caminho da energia no alternador, do motor até a bateria.',
+      items: [
+        'A correia do motor gira o rotor',
+        'O rotor, um eletroímã, gira dentro do estator',
+        'As bobinas do estator recebem tensão alternada trifásica',
+        'Os diodos retificam a CA para CC',
+        'A bateria recebe cerca de 14 V e se carrega',
+      ],
+      explanation:
+        'Movimento vira campo girando, campo girando vira CA nas bobinas (Faraday), e os diodos entregam CC para a bateria. O regulador acompanha tudo ajustando a corrente do rotor.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que uma panela de alumínio comum não esquenta num fogão de indução?',
+      options: [
+        {
+          text: 'Porque o fogão precisa de um fundo de ferro, onde o campo se concentra e as correntes parasitas esquentam o metal',
+          correct: true,
+          feedback:
+            'O fogão é feito para panelas ferromagnéticas. Panelas de alumínio, cobre ou vidro só funcionam com um fundo próprio para indução.',
+        },
+        {
+          text: 'Porque o alumínio é isolante',
+          feedback:
+            'O alumínio conduz muito bem. O problema é que ele não concentra o campo como o ferro, e o fogão não consegue aquecê-lo direito.',
+        },
+        {
+          text: 'Porque o fogão de indução esquenta o vidro, e o alumínio reflete o calor',
+          feedback:
+            'O vidro quase não esquenta sozinho: o calor nasce no fundo da panela, pelas correntes induzidas. Ele só esquenta depois, pelo contato com a panela.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- **Campo parado não gera tensão.** A tensão induzida aparece quando o fluxo magnético dentro de uma bobina muda.
+- O **fluxo** ($\Phi = B \cdot A$, em webers) mede quanto campo atravessa a espira.
+- **Lei de Faraday:** $v = -N \cdot \Delta\Phi / \Delta t$. Mais rápido, mais espiras ou ímã mais forte dão mais tensão.
+- **Lei de Lenz:** a corrente induzida se opõe à mudança. Por isso o tubo de cobre freia o ímã e o gerador "pesa" quando entrega energia.
+- Girando, o gerador produz uma **senoide**. O dínamo da bicicleta usa ímã permanente; o alternador do carro usa um eletroímã, diodos e um regulador para dar cerca de 14 V.
+- A indução está no transformador, no carregador sem fio, no fogão de indução, no captador da guitarra e no alicate amperímetro de CA.
+
+A indução mútua entre duas bobinas é a base do transformador, que baixa os 220 V da tomada para os 12 V de uma central de portão: <LinkAula id="m05-magnetismo/04-transformadores" />.

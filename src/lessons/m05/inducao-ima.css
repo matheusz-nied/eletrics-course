@@ -1,0 +1,174 @@
+/* InducaoIma.tsx: a magnet through a coil, lesson 5.3. */
+
+.inducao__body {
+  align-items: start;
+}
+
+@media (min-width: 52rem) {
+  .inducao__body {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  }
+}
+
+.inducao__views,
+.inducao__side {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.inducao__scene,
+.inducao__scope {
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.inducao__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.inducao__track {
+  stroke: var(--border-strong);
+  stroke-dasharray: 4 5;
+  stroke-width: 1;
+}
+
+.inducao__ring {
+  fill: none;
+  stroke: var(--copper);
+  stroke-width: 3;
+}
+
+.inducao__ring--back {
+  opacity: 0.45;
+}
+
+.inducao__pole {
+  stroke: var(--fg);
+  stroke-width: 1;
+}
+
+.inducao__pole--n {
+  fill: var(--danger);
+}
+
+.inducao__pole--s {
+  fill: var(--info);
+}
+
+.inducao__pole-text {
+  fill: var(--bg);
+  font-size: 11px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.inducao__face {
+  font-size: 15px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.inducao__face--n {
+  fill: var(--danger);
+}
+
+.inducao__face--s {
+  fill: var(--info);
+}
+
+.inducao__caption {
+  fill: var(--fg-muted);
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.inducao__caption--start {
+  text-anchor: start;
+}
+
+.inducao__lead {
+  fill: none;
+  stroke: var(--copper);
+  stroke-width: 1.5;
+}
+
+.inducao__dial {
+  fill: var(--surface);
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+
+.inducao__tick {
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+
+.inducao__dial-sign {
+  fill: var(--fg-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.inducao__dial-sign--end {
+  text-anchor: end;
+}
+
+.inducao__needle {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-width: 2.5;
+}
+
+.inducao__pivot {
+  fill: var(--fg);
+}
+
+.inducao__screen {
+  fill: var(--surface);
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.inducao__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.inducao__grid--axis {
+  stroke: var(--border-strong);
+}
+
+.inducao__trace {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linejoin: round;
+  stroke-width: 2.25;
+}
+
+.inducao__trace--prev {
+  stroke: var(--fg-subtle);
+  stroke-dasharray: 4 3;
+  stroke-width: 1.75;
+}
+
+.inducao__scope-text {
+  fill: var(--fg-muted);
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.inducao__scope-text--start {
+  text-anchor: start;
+}
+
+.inducao__scope-text--end {
+  text-anchor: end;
+}
+
+.inducao__peak {
+  white-space: nowrap;
+}

@@ -1,0 +1,170 @@
+---
+/*
+ * 05.3: a loop turning between two poles, seen edge-on, every quarter turn,
+ * above one cycle of the voltage it gives. Upright (facing the field): the
+ * most flux, but it is not changing, so v = 0. Lying flat (along the field):
+ * no flux, but it changes fastest, so v is at a peak.
+ */
+const X0 = 70;
+const X1 = 590;
+const CY = 66; // centre of the loop drawings
+const Y0 = 222; // zero of the voltage axis
+const AMP = 52;
+const LOOP = 26; // half the loop seen edge-on
+
+const steps = [0, 90, 180, 270, 360].map((deg, i) => {
+  const x = X0 + ((X1 - X0) * i) / 4;
+  const rad = (deg * Math.PI) / 180;
+  const dx = LOOP * Math.sin(rad);
+  const dy = -LOOP * Math.cos(rad);
+  const v = Math.sin(rad);
+  return {
+    x,
+    deg,
+    dx,
+    dy,
+    y: Y0 - AMP * v,
+    flux: deg % 180 === 0 ? 'fluxo máximo' : 'fluxo zero',
+  };
+});
+
+const N = 200;
+const wave = Array.from({ length: N + 1 }, (_, i) => {
+  const x = X0 + ((X1 - X0) * i) / N;
+  const y = Y0 - AMP * Math.sin((2 * Math.PI * i) / N);
+  return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
+}).join(' ');
+---
+
+<svg viewBox="0 0 660 320" width="660" height="320" class="fig" aria-hidden="true">
+  {steps.map((s) => (
+    <g>
+      <text x={s.x} y="18" class="angle">
+        {s.deg}°
+      </text>
+      <rect x={s.x - 56} y={CY - 22} width="15" height="44" class="pole n" />
+      <rect x={s.x + 41} y={CY - 22} width="15" height="44" class="pole s" />
+      <text x={s.x - 48.5} y={CY + 4} class="pole-t">
+        N
+      </text>
+      <text x={s.x + 48.5} y={CY + 4} class="pole-t">
+        S
+      </text>
+      {[-14, 0, 14].map((dy) => (
+        <path d={`M${s.x - 38} ${CY + dy} H${s.x + 38}`} class="field" />
+      ))}
+      <path d={`M${s.x - s.dx} ${CY - s.dy} L${s.x + s.dx} ${CY + s.dy}`} class="loop" />
+      <circle cx={s.x + s.dx} cy={CY + s.dy} r="4" class="mark" />
+      <text x={s.x} y={CY + 46} class="flux">
+        {s.flux}
+      </text>
+      <path d={`M${s.x} ${CY + 54} V${s.y}`} class="guide" />
+      <circle cx={s.x} cy={s.y} r="4" class="dot" />
+    </g>
+  ))}
+
+  <path d={`M${X0} ${Y0} H${X1 + 14}`} class="axis" />
+  <path d={`M${X0} ${Y0 - AMP - 12} V${Y0 + AMP + 12}`} class="axis" />
+  <path d={wave} class="wave" />
+
+  <text x={X0 - 8} y={Y0 + 4} class="lbl end">
+    0 V
+  </text>
+  <text x={X0 - 8} y={Y0 - AMP + 4} class="lbl end">
+    +
+  </text>
+  <text x={X0 - 8} y={Y0 + AMP + 4} class="lbl end">
+    −
+  </text>
+  <text x={steps[1]!.x + 10} y={steps[1]!.y - 8} class="lbl start">
+    tensão máxima
+  </text>
+  <text x={steps[3]!.x + 10} y={steps[3]!.y + 16} class="lbl start">
+    máxima, invertida
+  </text>
+  <text x={(X0 + X1) / 2} y={Y0 + AMP + 40} class="axis-t">
+    uma volta = um ciclo
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .pole {
+    stroke: var(--fg);
+    stroke-width: 1;
+  }
+  .pole.n {
+    fill: var(--danger);
+  }
+  .pole.s {
+    fill: var(--info);
+  }
+  .field {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+  }
+  .loop {
+    stroke: var(--copper);
+    stroke-width: 5;
+  }
+  .mark {
+    fill: var(--bg);
+    stroke: var(--copper);
+    stroke-width: 2;
+  }
+  .guide {
+    stroke: var(--border-strong);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+  }
+  .dot {
+    fill: var(--accent);
+    stroke: none;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .wave {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .angle {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .pole-t {
+    fill: var(--bg);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .flux {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .axis-t {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

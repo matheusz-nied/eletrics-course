@@ -1,0 +1,286 @@
+---
+/*
+ * 05.6: reversing starter. Power: K1 feeds the motor straight, K2 swaps L1
+ * and L3. Control: each start button has its own 13-14 seal and goes through
+ * the 21-22 contact of the other contactor (electrical interlock).
+ */
+import { contactNf, contactNo, heater, pushHead, pushRod, thermalHead, thermalRod } from './ladder';
+
+const k1 = [60, 85, 110];
+const k2 = [160, 185, 210];
+const inBus = [44, 56, 68];
+// Output buses T1, T2 and T3 at y 150, 162 and 174.
+// K1 straight (L1→T1, L2→T2, L3→T3); K2 crossed (L1→T3, L2→T2, L3→T1).
+const k1Out = [150, 162, 174];
+const k2Out = [174, 162, 150];
+const drops = [
+  { x: 120, y: 150 },
+  { x: 135, y: 162 },
+  { x: 150, y: 174 },
+];
+const C = 330;
+const D = 460;
+---
+
+<svg viewBox="0 0 560 370" width="560" height="370" class="fig" aria-hidden="true">
+  <!-- Power -->
+  <text x="130" y="18" class="title">
+    Força
+  </text>
+  {inBus.map((y, i) => (
+    <g>
+      <text x="28" y={y + 4} class="pin end">
+        L{i + 1}
+      </text>
+      <path d={`M34 ${y} H226`} class="wire" />
+    </g>
+  ))}
+  <path d="M60 150 H210 M85 162 H185 M110 174 H160" class="wire" />
+  {k1.map((x, i) => (
+    <g>
+      <path d={`M${x} ${inBus[i]} V92`} class="wire" />
+      <circle cx={x} cy={inBus[i]} r="3" class="dot" />
+      <path d={contactNo(x, 92, 126)} class="wire main" />
+      <path d={`M${x} 126 V${k1Out[i]}`} class="wire" />
+      <circle cx={x} cy={k1Out[i]} r="3" class="dot" />
+    </g>
+  ))}
+  {k2.map((x, i) => (
+    <g>
+      <path d={`M${x} ${inBus[i]} V92`} class="wire" />
+      <circle cx={x} cy={inBus[i]} r="3" class="dot" />
+      <path d={contactNo(x, 92, 126)} class="wire main" />
+      <path d={`M${x} 126 V${k2Out[i]}`} class="wire" />
+      <circle cx={x} cy={k2Out[i]} r="3" class="dot" />
+    </g>
+  ))}
+  <path d="M54 111 H104 M154 111 H204" class="link" />
+  <text x="120" y="114" class="name start">
+    K1
+  </text>
+  <text x="220" y="114" class="name start">
+    K2
+  </text>
+  {drops.map((d) => (
+    <g>
+      <circle cx={d.x} cy={d.y} r="3" class="dot" />
+      <path d={`M${d.x} ${d.y} V196`} class="wire" />
+      <path d={heater(d.x, 196, 228, 4)} class="wire" />
+    </g>
+  ))}
+  <rect x="108" y="192" width="54" height="40" rx="3" class="box" />
+  <text x="100" y="216" class="name end">
+    FT1
+  </text>
+  <path d="M120 228 V254 M135 228 V250 M150 228 V254" class="wire" />
+  <circle cx="135" cy="280" r="30" class="motor" />
+  <text x="135" y="278" class="m">
+    M
+  </text>
+  <text x="135" y="298" class="pin">
+    3~
+  </text>
+  <text x="130" y="334" class="note">
+    K2 troca L1 com L3: o motor inverte.
+  </text>
+  <text x="130" y="354" class="note danger">
+    K1 e K2 juntos: curto entre L1 e L3.
+  </text>
+
+  <!-- Control -->
+  <text x="415" y="18" class="title">
+    Comando
+  </text>
+  <circle cx={C} cy="36" r="3.5" class="term" />
+  <text x={C - 12} y="40" class="name end">
+    F
+  </text>
+  <path d={`M${C} 36 V46 M${C} 68 V80`} class="wire" />
+  <rect x={C - 6} y="46" width="12" height="22" class="fuse" />
+  <path d={`M${C} 46 V68`} class="wire thin" />
+  <text x={C - 14} y="62" class="name end">
+    F4
+  </text>
+  <path d={contactNf(C, 80, 108)} class="wire" />
+  <path d={thermalRod(C, 80, 108)} class="link" />
+  <path d={thermalHead(C, 80, 108)} class="wire thin" />
+  <text x={C - 36} y="98" class="name end">
+    FT1
+  </text>
+  <path d={`M${C} 108 V118`} class="wire" />
+  <path d={contactNf(C, 118, 146)} class="wire" />
+  <path d={pushRod(C, 118, 146, true)} class="link" />
+  <path d={pushHead(C, 118, 146)} class="wire" />
+  <text x={C - 30} y="136" class="name end">
+    B0
+  </text>
+  <path d={`M${C} 146 V160 H${D + 50}`} class="wire" />
+  <circle cx={C} cy="160" r="3" class="dot" />
+  <circle cx={C + 50} cy="160" r="3" class="dot" />
+  <circle cx={D} cy="160" r="3" class="dot" />
+
+  <!-- Branch 1: B1 with the K1 seal, K2 interlock, K1 coil -->
+  <path d={contactNo(C, 160, 194)} class="wire" />
+  <path d={pushRod(C, 160, 194, false)} class="link" />
+  <path d={pushHead(C, 160, 194)} class="wire" />
+  <text x={C - 30} y="182" class="name end">
+    B1
+  </text>
+  <path d={contactNo(C + 50, 160, 194)} class="wire seal" />
+  <text x={C + 60} y="182" class="name start seal-text">
+    K1
+  </text>
+  <path d={`M${C + 50} 194 H${C} V206`} class="wire" />
+  <circle cx={C} cy="194" r="3" class="dot" />
+  <path d={contactNf(C, 206, 236)} class="wire lock" />
+  <text x={C + 15} y="214" class="pin start lock-text">
+    21
+  </text>
+  <text x={C + 15} y="240" class="pin start lock-text">
+    22
+  </text>
+  <text x={C - 12} y="226" class="name end lock-text">
+    K2
+  </text>
+  <path d={`M${C} 236 V250`} class="wire" />
+  <rect x={C - 13} y="250" width="26" height="22" class="coil" />
+  <text x={C - 20} y="265" class="name end">
+    K1
+  </text>
+  <path d={`M${C} 272 V294`} class="wire" />
+
+  <!-- Branch 2: B2 with the K2 seal, K1 interlock, K2 coil -->
+  <path d={contactNo(D, 160, 194)} class="wire" />
+  <path d={pushRod(D, 160, 194, false)} class="link" />
+  <path d={pushHead(D, 160, 194)} class="wire" />
+  <text x={D - 30} y="182" class="name end">
+    B2
+  </text>
+  <path d={contactNo(D + 50, 160, 194)} class="wire seal" />
+  <text x={D + 60} y="182" class="name start seal-text">
+    K2
+  </text>
+  <path d={`M${D + 50} 194 H${D} V206`} class="wire" />
+  <circle cx={D} cy="194" r="3" class="dot" />
+  <path d={contactNf(D, 206, 236)} class="wire lock" />
+  <text x={D + 15} y="214" class="pin start lock-text">
+    21
+  </text>
+  <text x={D + 15} y="240" class="pin start lock-text">
+    22
+  </text>
+  <text x={D - 12} y="226" class="name end lock-text">
+    K1
+  </text>
+  <path d={`M${D} 236 V250`} class="wire" />
+  <rect x={D - 13} y="250" width="26" height="22" class="coil" />
+  <text x={D - 20} y="265" class="name end">
+    K2
+  </text>
+  <path d={`M${D} 272 V294 H${C}`} class="wire" />
+  <circle cx={C} cy="294" r="3.5" class="term" />
+  <text x={C - 12} y="298" class="name end">
+    N
+  </text>
+
+  <text x="290" y="334" class="note start seal-text">
+    Selo: 13-14 em paralelo com o botão
+  </text>
+  <text x="290" y="354" class="note start lock-text">
+    Intertravamento: 21-22 do outro contator
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .wire.thin {
+    stroke-width: 1.2;
+  }
+  .wire.main {
+    stroke-width: 2.6;
+  }
+  .wire.seal {
+    stroke: var(--copper);
+    stroke-width: 2.6;
+  }
+  .wire.lock {
+    stroke: var(--accent);
+    stroke-width: 2.6;
+  }
+  .fuse,
+  .coil {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.8;
+  }
+  .box,
+  .link {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+    stroke-dasharray: 4 3;
+  }
+  .motor {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .term {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .dot {
+    fill: var(--fg);
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .pin {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .name {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .m {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .note {
+    font-size: 12.5px;
+  }
+  .danger {
+    fill: var(--danger);
+    font-weight: 600;
+  }
+  .seal-text {
+    fill: var(--copper);
+  }
+  .lock-text {
+    fill: var(--accent);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

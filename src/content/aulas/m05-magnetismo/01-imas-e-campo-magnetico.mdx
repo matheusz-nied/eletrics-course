@@ -1,0 +1,341 @@
+---
+titulo: Ímãs e campo magnético
+modulo: m05-magnetismo
+ordem: 1
+nivel: B
+duracaoMin: 20
+objetivos:
+  - Explicar os polos norte e sul de um ímã e quando eles se atraem ou se repelem
+  - Ler um desenho de linhas de campo e dizer onde o campo é mais forte
+  - Comparar intensidades de campo em tesla, do campo da Terra ao de um ímã de neodímio
+  - Separar os materiais que o ímã atrai dos que ele não atrai
+  - Manusear ímãs fortes sem se machucar nem estragar aparelhos
+prerequisitos:
+  - m01-eletricidade-do-zero/01-atomos-eletrons-e-carga
+tags: [ímã, campo magnético, bússola, tesla, neodímio, ferrite, portão]
+seguranca: nenhum
+rascunho: false
+---
+
+import CampoMagnetico from '../../../lessons/m05/CampoMagnetico.tsx';
+import MagnetBreak from '../../../lessons/m05/figures/MagnetBreak.astro';
+import MagneticDomains from '../../../lessons/m05/figures/MagneticDomains.astro';
+import EarthCompass from '../../../lessons/m05/figures/EarthCompass.astro';
+import Part3D from '../../../lessons/m02/Part3D.astro';
+
+A porta da geladeira encosta e, nos últimos centímetros, fecha sozinha. O portão eletrônico abre e para no lugar certo, sem ninguém olhar. A agulha da bússola gira até apontar para o norte. Nos três casos há um **ímã** trabalhando: na borracha da porta, na cremalheira do portão e na própria agulha.
+
+Este módulo vai do ímã ao eletroímã, ao gerador e ao transformador, e chega aos sensores e contatores que você encontra em portões e quadros elétricos. Tudo começa com uma pergunta simples: o que um ímã tem em volta dele?
+
+## Polo norte e polo sul
+
+Um <Term id="ima">ímã</Term> é uma peça que atrai ferro e que tem dois lados diferentes, os **polos**. Pendure um ímã em barra por um fio, longe de outros ímãs e de ferro: ele gira e para com um dos lados apontando mais ou menos para o norte da Terra. Esse lado foi chamado de **polo norte** (N), e o outro de **polo sul** (S). Nos ímãs escolares, o norte costuma ser pintado de vermelho e o sul de azul.
+
+Aproximando dois ímãs, a regra é sempre a mesma:
+
+- polos **diferentes** se atraem (N com S);
+- polos **iguais** se repelem (N com N, S com S).
+
+Os <Term id="polo-magnetico">polos</Term> sempre vêm em par. Se você quebra um ímã ao meio, não fica um pedaço só com o norte e outro só com o sul: cada pedaço vira um ímã completo, com o seu norte e o seu sul. Na quebra aparecem dois polos novos, um de cada lado da rachadura.
+
+<Part3D
+  part="magnet"
+  props={{ variant: 'barra', size: 'medio', showPoles: true, fieldLines: true }}
+  explode
+  annotations
+  alt="Um ímã em barra com o polo sul, em azul, à esquerda e o polo norte, em vermelho, à direita. Embaixo, o mesmo ímã quebrado em dois: cada pedaço tem um polo sul e um polo norte, e na quebra aparecem um norte e um sul novos. Setinhas dentro do ímã mostram os pedacinhos magnéticos todos alinhados do sul para o norte."
+  caption="Um ímã em barra inteiro e quebrado ao meio: cada pedaço continua sendo um ímã, com norte e sul."
+>
+  <MagnetBreak />
+</Part3D>
+
+## O campo magnético
+
+O ímã age à distância: o clipe pula para ele antes de encostar. A região em volta do ímã onde essa influência existe se chama <Term id="campo-magnetico">campo magnético</Term>. Você não o vê, mas pode revelá-lo de dois jeitos:
+
+- com uma **bússola**: a agulha é um ímã pequeno e leve, que gira até se alinhar com o campo do lugar onde está. Levando a bússola em volta do ímã, você mapeia a direção do campo ponto por ponto;
+- com **limalha de ferro** (pó de ferro) espalhada numa folha por cima do ímã: cada grãozinho vira uma agulha de bússola minúscula, e eles se enfileiram em curvas.
+
+Essas curvas são as <Term id="linhas-de-campo">linhas de campo</Term>, o desenho mais usado para mostrar um campo magnético. Elas seguem quatro regras:
+
+1. **Saem do polo norte e entram no polo sul**, por fora do ímã. Por dentro do ímã, elas continuam do sul para o norte: cada linha é um laço fechado.
+2. Em cada ponto, a linha mostra para onde apontaria o **norte da agulha** de uma bússola colocada ali.
+3. **Linhas juntas, campo forte; linhas espaçadas, campo fraco.** Por isso o campo é mais forte perto dos polos.
+4. **Linhas nunca se cruzam**: num mesmo ponto, a bússola só pode apontar para um lado.
+
+## Explore: o campo em volta dos ímãs
+
+A figura abaixo calcula as linhas de campo de ímãs em barra e mostra uma grade de bússolas. A sonda amarela lê a direção do campo e a intensidade, comparada com a que existe encostado no polo de um ímã sozinho.
+
+<CampoMagnetico client:visible />
+
+1. Com **um ímã**, leve a sonda bem perto do polo norte, depois para cima do meio do ímã, na mesma distância. Onde o campo é mais forte?
+2. Ainda com um ímã, ponha a sonda acima do meio do ímã. Para que lado a bússola aponta? Por que é para o lado contrário ao norte do ímã?
+3. Afaste a sonda do polo norte, em linha reta, de 5 em 5 unidades. O campo cai devagar ou depressa?
+4. Escolha **polos iguais**. Procure, entre os dois polos norte, um ponto onde o campo some.
+5. Agora escolha **polos opostos** e compare o espaço entre os ímãs com o que você viu com os polos iguais.
+
+O campo é mais forte nos polos, onde as linhas se apertam, e bem mais fraco ao lado do meio do ímã. Acima do meio, a bússola aponta do norte para o sul do ímã: por fora, as linhas voltam do N para o S. Afastando-se do polo, o campo cai depressa, como você vai ver logo abaixo.
+
+Com dois polos norte frente a frente, as linhas dos dois se empurram e se desviam para cima e para baixo, e bem no meio do caminho existe um **ponto neutro**: ali os dois campos têm a mesma força e direções opostas, e se anulam. Uma bússola nesse ponto fica sem direção definida. Com polos opostos, as linhas atravessam o espaço entre os ímãs quase retas e bem juntas, do norte de um para o sul do outro: é o desenho de dois ímãs se atraindo.
+
+## Quanto é forte: o tesla
+
+A intensidade de um campo magnético tem o símbolo $B$ e se mede em <Term id="tesla">tesla</Term> (T). Um tesla é um campo muito forte; no dia a dia aparecem mais o militesla (mT, um milésimo de tesla) e o microtesla (µT, um milionésimo). Em catálogos de ímãs e em aparelhos antigos aparece também o gauss (G):
+
+$$
+1\,\text{T} = 1.000\,\text{mT} = 1.000.000\,\mu\text{T} = 10.000\,\text{G}
+$$
+
+Para ter uma ideia das ordens de grandeza (valores típicos):
+
+| Onde | Campo típico |
+|------|--------------|
+| Campo da Terra no Sudeste do Brasil | cerca de 23 µT |
+| Campo da Terra perto dos polos | mais de 60 µT |
+| Ímã de geladeira, encostado | cerca de 5 mT |
+| Ímã de ferrite (o ímã preto do alto-falante), perto da face | cerca de 0,1 T |
+| Ímã de neodímio pequeno, perto da face | de 0,3 T a mais de 1 T, conforme o tamanho |
+| Aparelho de ressonância magnética | 1,5 T ou 3 T |
+
+Repare no salto: o ímã de geladeira, que nem é forte, tem um campo umas 200 vezes maior que o da Terra, mas só bem pertinho dele.
+
+### O campo cai depressa com a distância
+
+Longe de um ímã (a uma distância bem maior que o tamanho dele), o campo cai com o **cubo** da distância:
+
+$$
+B \propto \frac{1}{d^3}
+$$
+
+O símbolo $\propto$ quer dizer "é proporcional a", e $d$ é a distância até o ímã. Dobrar a distância divide o campo por $2^3 = 8$; triplicar divide por $3^3 = 27$. É por isso que um ímã que gruda com força na porta da geladeira não atrai nada a um palmo de distância. Perto do ímã, a conta exata depende do formato dele, mas a ideia continua: o campo despenca quando você se afasta.
+
+### Exemplo resolvido
+
+Um sensor de porta de alarme precisa de 2 mT para funcionar. O ímã dele produz 16 mT a 1 cm, já longe o bastante para a regra do cubo valer (é um ímã pequeno). A que distância o campo cai para 2 mT?
+
+O campo precisa ficar $16 / 2 = 8$ vezes menor. Pela regra do cubo, isso acontece quando a distância dobra, porque $2^3 = 8$:
+
+$$
+B(2\,\text{cm}) = \frac{16\,\text{mT}}{2^3} = \frac{16\,\text{mT}}{8} = 2\,\text{mT}
+$$
+
+A 2 cm o sensor ainda funciona por pouco; a 3 cm o campo cai para $16 / 27 \approx 0{,}6\,\text{mT}$ e o sensor já não percebe o ímã. É por isso que o manual de um sensor magnético sempre traz a **distância máxima** entre o sensor e o ímã. Você vai ver esses sensores na aula <LinkAula id="m05-magnetismo/05-sensores-magneticos" />.
+
+## O ímã gigante embaixo dos seus pés
+
+A Terra se comporta como um ímã enorme, e é por isso que a bússola funciona. Só que há uma troca de nomes que confunde todo mundo: como o norte da agulha é **atraído** pelo polo da Terra que fica lá no norte, aquele polo é, magneticamente, um **polo sul**. O polo norte magnético da Terra fica perto do polo sul geográfico.
+
+<Figure caption="Figura 1. A Terra como um ímã. O polo sul magnético fica perto do polo norte geográfico (e o eixo magnético é um pouco inclinado em relação ao eixo de rotação). Por fora, as linhas de campo saem do hemisfério sul e entram no hemisfério norte, e o norte da agulha da bússola segue as linhas.">
+  <EarthCompass />
+</Figure>
+
+Dois detalhes que aparecem quando você usa uma bússola de verdade no Brasil:
+
+- **A agulha não aponta exatamente para o norte geográfico.** Os polos magnéticos não coincidem com os geográficos, e a diferença muda de lugar para lugar. Em boa parte do Brasil ela fica perto de 20°, o que importa para quem navega ou faz topografia.
+- **O campo aqui é fraco.** Sobre o sul e o sudeste do Brasil e o oceano ao lado fica a **Anomalia Magnética do Atlântico Sul**, uma região onde o campo da Terra é dos mais fracos do planeta: perto de 23 µT no Sudeste, contra mais de 60 µT perto dos polos.
+
+Mesmo fraco, esse campo é muito maior que o de muitos fios e aparelhos a alguns metros de distância. Mas uma bússola apoiada em cima de uma bancada de aço, de um ímã de alto-falante ou ao lado de um fio com corrente aponta para o lado errado. Na próxima aula você vai ver que todo fio com corrente cria um campo em volta de si.
+
+## O que o ímã atrai
+
+Ímãs atraem com força só alguns materiais, chamados <Term id="ferromagnetico">ferromagnéticos</Term>: o **ferro** e quase todos os **aços**, o **níquel** e o **cobalto**, e ligas feitas com eles. Não são atraídos o alumínio, o cobre, o latão, o ouro, a prata, o plástico, a madeira e o vidro.
+
+O inox engana. O inox mais comum, de pias e talheres (tipo 304), quase não é atraído; já outros tipos, como o 430, que aparece em algumas panelas próprias para fogão de indução, grudam bem no ímã. Para saber, só testando.
+
+### Por que só alguns materiais
+
+Dentro de um material ferromagnético existem regiões microscópicas, os **domínios magnéticos**, que já são pequenos ímãs. Num prego comum, os domínios apontam cada um para um lado e os efeitos se cancelam: o prego não atrai nada. Perto de um ímã, os domínios se alinham com o campo e o prego vira um ímã também. É por isso que um ímã segura uma corrente de clipes: cada clipe imantado segura o próximo.
+
+<Figure caption="Figura 2. Domínios magnéticos. Num pedaço de ferro comum, cada domínio aponta para um lado e o conjunto não atrai nada. Perto de um ímã, os domínios se alinham com o campo e o ferro vira um ímã. Num ímã permanente, eles continuam alinhados mesmo longe de qualquer outro ímã.">
+  <MagneticDomains />
+</Figure>
+
+O que acontece quando o ímã vai embora depende do material:
+
+- **Ferro doce** (ferro quase puro, como o núcleo de um relé): os domínios se bagunçam de novo e o magnetismo quase todo some. É um **ímã temporário**, e é exatamente o que um eletroímã precisa.
+- **Aço temperado, ferrite e neodímio**: os domínios ficam presos na posição alinhada. São **ímãs permanentes**.
+
+Ímã permanente não "gasta" com o uso nem precisa de "carga". Mas ele pode perder força com **calor** e com **pancadas**, que desalinham os domínios. Acima de uma temperatura que depende do material, a **temperatura de Curie**, ele perde todo o magnetismo; o ferro, por exemplo, deixa de ser ferromagnético perto de 770 °C. Ímãs de neodímio comuns já começam a enfraquecer acima de uns 80 °C (típico), um cuidado importante em motores que esquentam.
+
+## Ferrite e neodímio
+
+Os ímãs que você vai encontrar em aparelhos são quase sempre de dois tipos:
+
+| | Ferrite (cerâmico) | Neodímio (NdFeB) |
+|--|--------------------|------------------|
+| Aparência | Cinza-escuro ou preto, fosco | Prateado, brilhante (banho de níquel) |
+| Força | Moderada | Muito forte para o tamanho |
+| Onde aparece | Alto-falantes, ímãs de geladeira e de brinquedo, motores pequenos baratos | Fones de ouvido, disco rígido (HD), motores de bicicleta elétrica e de drone, sensores |
+| Cuidados | Quebra se cair | Quebra fácil, solta lascas, belisca a pele |
+
+A borracha preta da porta da geladeira tem dentro uma tira de ímã flexível: pó de ferrite misturado em borracha. Ela gruda no aço do gabinete e mantém a porta vedada, sem trinco.
+
+<RealCase title="Os ímãs do portão">
+
+Num portão deslizante automático, dois ímãs presos na **cremalheira** (a régua dentada que o motor empurra) marcam onde o portão deve parar: um para o aberto e um para o fechado. Quando um deles passa na frente do sensor, na caixa do motor, a central desliga o motor. Esses ímãs não têm marca de polo e às vezes precisam ser trocados de lugar ou de posição.
+
+### Achando os polos de um ímã sem marca
+
+Com uma bússola comum:
+
+<Steps>
+  <Step title="Afaste a bússola de ferro e de aparelhos">
+    Deixe a bússola sobre uma mesa de madeira ou de plástico, longe de ferramentas, celulares e da carcaça de aço do motor. Espere a agulha parar apontando para o norte.
+  </Step>
+  <Step title="Aproxime uma ponta do ímã devagar">
+    Traga o ímã pela lateral da bússola, sem encostar. Se o **norte** da agulha (a ponta vermelha ou marcada) for **atraído**, essa ponta do ímã é um polo **sul**. Se o norte da agulha fugir, é um polo **norte**.
+  </Step>
+  <Step title="Confirme com a outra ponta">
+    A outra ponta do ímã tem que fazer o contrário. Marque o norte com caneta ou fita.
+  </Step>
+  <Step title="Não deixe o ímã encostar na bússola">
+    Um ímã forte encostado na agulha pode inverter a imantação dela, e a bússola passa a apontar para o sul. Se isso acontecer, ela não serve mais para medir.
+  </Step>
+</Steps>
+
+Os sensores de fim de curso do portão, que percebem esses ímãs, estão na aula <LinkAula id="m05-magnetismo/05-sensores-magneticos" />, e o ajuste dos ímãs no portão, em <LinkAula id="m16-portao/04-fim-de-curso-e-sensores" />.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Dedo entre dois ímãs de neodímio.** Dois ímãs fortes se juntam de uma vez, com força para beliscar e ferir a pele. Junte e separe deslizando um sobre o outro, nunca puxando de frente.
+- **Ímã de neodímio batendo.** Eles são duros e quebradiços: batem, trincam e soltam lascas cortantes. Proteja os olhos quando trabalhar com ímãs grandes.
+- **Crianças e ímãs pequenos.** Dois ímãs fortes engolidos podem se atrair através da parede do intestino e causar uma lesão grave. Guarde ímãs pequenos longe de crianças e de animais.
+- **Marca-passo e implantes.** Campos fortes podem interferir em marca-passos e outros aparelhos implantados. Mantenha ímãs fortes longe do peito de quem usa esses aparelhos e siga a orientação do médico.
+- **Cartões e aparelhos.** Ímãs fortes apagam a tarja magnética de cartões antigos e de bilhetes, e podem desmagnetizar a agulha de bússolas e atrapalhar sensores e aparelhos. Não guarde ímãs ao lado deles.
+- **Achar que todo metal gruda.** Alumínio, cobre e latão não são atraídos, e muitos inox também não. Antes de prender um ímã num suporte, confira com um ímã de teste.
+- **Esquentar ímã.** Soldar perto, deixar no sol num painel de carro ou num motor quente faz o ímã perder força, às vezes para sempre.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Você quebra um ímã em barra bem no meio. O que você fica tendo?',
+      options: [
+        {
+          text: 'Dois ímãs menores, cada um com um polo norte e um polo sul',
+          correct: true,
+          feedback:
+            'Os polos sempre vêm em par. Na quebra aparecem um norte e um sul novos, um de cada lado da rachadura.',
+        },
+        {
+          text: 'Um pedaço só com o polo norte e outro só com o polo sul',
+          feedback:
+            'Não existe polo isolado. Cada pedaço continua com os domínios alinhados e vira um ímã completo.',
+        },
+        {
+          text: 'Dois pedaços sem magnetismo nenhum',
+          feedback:
+            'A quebra não desalinha os domínios do resto do ímã. Os dois pedaços continuam atraindo ferro.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Onde o campo é muito forte, as linhas de campo podem se cruzar.',
+      answer: false,
+      explanation:
+        'As linhas nunca se cruzam: num ponto, a bússola só aponta para um lado. Campo forte aparece como linhas mais juntas, não como linhas se cruzando.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Ordene os campos do mais fraco para o mais forte.',
+      items: [
+        'Campo da Terra no Sudeste do Brasil',
+        'Ímã de geladeira, encostado',
+        'Ímã de neodímio, perto da face',
+        'Aparelho de ressonância magnética',
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Longe de um ímã, o campo cai com o cubo da distância. Um ímã produz 24 mT a 1 cm (já longe o bastante para a regra valer). Quanto ele produz a 2 cm, em mT?',
+      answer: 3,
+      tolerance: 0.02,
+      unit: 'mT',
+      explanation:
+        'Dobrar a distância divide o campo por 2³ = 8. Então 24 mT ÷ 8 = 3 mT.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que o norte da agulha da bússola aponta para o norte geográfico?',
+      options: [
+        {
+          text: 'Porque perto do polo norte geográfico fica um polo sul magnético, que atrai o norte da agulha',
+          correct: true,
+          feedback:
+            'Polos diferentes se atraem. O polo da Terra que fica no norte é, magneticamente, um polo sul.',
+        },
+        {
+          text: 'Porque perto do polo norte geográfico fica um polo norte magnético',
+          feedback:
+            'Polos iguais se repelem. Se lá fosse um polo norte magnético, o norte da agulha fugiria dele.',
+        },
+        {
+          text: 'Porque a agulha é atraída pelo ferro que existe no polo norte',
+          feedback:
+            'A agulha é um ímã e se alinha com o campo magnético da Terra, que vem do núcleo do planeta, não de um depósito de ferro no polo.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Qual destes objetos um ímã comum NÃO atrai?',
+      options: [
+        {
+          text: 'Uma lata de refrigerante de alumínio',
+          correct: true,
+          feedback:
+            'Alumínio não é ferromagnético. Já a lata de aço (de conservas, por exemplo) é atraída.',
+        },
+        {
+          text: 'Um prego',
+          feedback: 'Pregos são de aço, que é ferromagnético: o ímã atrai e até imanta o prego.',
+        },
+        {
+          text: 'Uma arruela de aço',
+          feedback: 'Aço comum é ferromagnético e é atraído pelo ímã.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Na figura interativa, com dois polos norte frente a frente, existe um ponto entre eles em que o campo some. Por quê?',
+      options: [
+        {
+          text: 'Ali os campos dos dois ímãs têm a mesma intensidade e sentidos opostos, e se anulam',
+          correct: true,
+          feedback:
+            'É o ponto neutro. Cada ímã empurra a agulha para longe do seu norte, e no meio os dois empurrões se equilibram.',
+        },
+        {
+          text: 'Porque o campo magnético não atravessa o ar entre dois ímãs',
+          feedback:
+            'O campo existe no ar normalmente; é ele que faz a bússola girar. No ponto neutro, os dois campos se cancelam.',
+        },
+        {
+          text: 'Porque os dois ímãs se desmagnetizam quando ficam frente a frente',
+          feedback:
+            'Os ímãs continuam imantados. Basta mover a sonda um pouco para o lado e o campo aparece de novo.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Todo ímã tem um **polo norte** e um **polo sul**; polos diferentes se atraem e polos iguais se repelem. Quebrar um ímã dá dois ímãs completos.
+- As **linhas de campo** saem do norte, entram no sul e fecham por dentro do ímã. Linhas juntas indicam campo forte; elas nunca se cruzam.
+- O campo se mede em **tesla** (T), com mT e µT no dia a dia. Longe do ímã, ele cai com o **cubo** da distância.
+- A Terra é um ímã: o polo que fica no norte geográfico é um **polo sul magnético**. No Sudeste do Brasil o campo é fraco, perto de 23 µT.
+- Ímãs atraem materiais **ferromagnéticos** (ferro, aço, níquel, cobalto). Ferro doce é ímã temporário; ferrite e neodímio são permanentes, mas perdem força com calor e pancadas.
+- Neodímio belisca, quebra e é perigoso para crianças e para quem usa marca-passo.
+
+Na próxima aula, você vai ver que uma corrente elétrica também cria campo magnético, e que uma bobina com núcleo de ferro vira um ímã que liga e desliga: <LinkAula id="m05-magnetismo/02-eletroimas-e-solenoides" />.

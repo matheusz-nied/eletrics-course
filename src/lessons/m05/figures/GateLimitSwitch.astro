@@ -1,0 +1,302 @@
+---
+/*
+ * 05.5: magnetic limit switch of a sliding gate, gate closed. Top: side view
+ * with the rack, the two magnet holders and the sensor on top of the
+ * operator. Bottom: the sensor's two reeds wired to the FCA/GND/FCF
+ * connector of the course's generic control board (docs/plano/05-portao.md).
+ */
+const bars = Array.from({ length: 19 }, (_, i) => 103 + i * 23);
+const teeth = Array.from({ length: 57 }, (_, i) => 80 + i * 8)
+  .map((x) => `L${x + 4} 184 L${x + 8} 178`)
+  .join(' ');
+const ground = Array.from({ length: 28 }, (_, i) => 6 + i * 20);
+---
+
+<svg viewBox="0 0 560 420" width="560" height="420" class="fig" aria-hidden="true">
+  <!-- Opening direction -->
+  <path d="M330 18 H250" class="dir" marker-end="url(#gate-arrow)" />
+  <text x="340" y="22" class="note start">
+    abre
+  </text>
+
+  <!-- Gate -->
+  <rect x="80" y="34" width="460" height="216" class="gate" />
+  {bars.map((x) => (
+    <path d={`M${x} 34 V250`} class="bar" />
+  ))}
+  <path d="M80 142 H540" class="bar" />
+  <circle cx="130" cy="262" r="12" class="wheel" />
+  <circle cx="490" cy="262" r="12" class="wheel" />
+  <path d="M30 274 H556" class="rail" />
+  <path d="M0 282 H560" class="ground" />
+  {ground.map((x) => (
+    <path d={`M${x} 282 l-8 10`} class="ground" />
+  ))}
+
+  <!-- Rack, with teeth underneath -->
+  <rect x="80" y="168" width="460" height="10" class="rack" />
+  <path d={`M80 178 ${teeth}`} class="teeth" />
+  <text x="360" y="160" class="label halo">
+    cremalheira
+  </text>
+
+  <!-- Magnet holders: FCF over the sensor (gate closed), FCA at the far end -->
+  <g>
+    <rect x="168" y="158" width="30" height="26" rx="2" class="holder" />
+    <rect x="170" y="184" width="13" height="6" class="pole-n" />
+    <rect x="183" y="184" width="13" height="6" class="pole-s" />
+    <text x="183" y="150" class="label halo strong">
+      ímã FCF
+    </text>
+  </g>
+  <g>
+    <rect x="500" y="158" width="30" height="26" rx="2" class="holder" />
+    <rect x="502" y="184" width="13" height="6" class="pole-n" />
+    <rect x="515" y="184" width="13" height="6" class="pole-s" />
+    <text x="515" y="150" class="label halo strong">
+      ímã FCA
+    </text>
+  </g>
+
+  <!-- Operator in front of the gate, pinion under the rack -->
+  <rect x="150" y="194" width="120" height="80" rx="8" class="housing" />
+  <circle cx="240" cy="192" r="9" class="pinion" />
+  <rect x="166" y="198" width="34" height="8" rx="1" class="sensor" />
+  <text x="183" y="220" class="tiny">
+    sensor
+  </text>
+  <text x="210" y="252" class="note">
+    automatizador
+  </text>
+
+  <!-- Wiring, at the bottom -->
+  <path d="M10 300 H550" class="sep" />
+  <text x="20" y="320" class="note start strong">
+    Ligação do sensor na central, com o portão fechado
+  </text>
+  <rect x="24" y="332" width="238" height="80" rx="6" class="board" />
+  <rect x="330" y="332" width="220" height="80" rx="6" class="board" />
+  <text x="540" y="406" class="tiny end">
+    central
+  </text>
+  <text x="250" y="406" class="tiny end">
+    sensor
+  </text>
+
+  <!-- FCA line and reed (open) -->
+  <path d="M60 342 H340" class="wire" />
+  <path d="M60 342 V349 M60 363 V370" class="wire" />
+  <ellipse cx="60" cy="356" rx="7" ry="12" class="glass" />
+  <path d="M57 348 V358 M63 364 V354" class="blade" />
+  <text x="74" y="360" class="tiny start">
+    reed FCA: aberto
+  </text>
+
+  <!-- GND line and FCF reed (closed: magnet on top) -->
+  <path d="M60 370 H340" class="wire on" />
+  <path d="M60 370 V377 M60 391 V398" class="wire on" />
+  <ellipse cx="60" cy="384" rx="7" ry="12" class="glass" />
+  <path d="M59.5 376 V387 M60.5 392 V381" class="blade on" />
+  <path d="M60 398 H340" class="wire on" />
+  <text x="74" y="388" class="tiny start on-text">
+    reed FCF: fechado (ímã em cima)
+  </text>
+
+  <!-- Connector -->
+  {[
+    { y: 342, t: 'FCA' },
+    { y: 370, t: 'GND' },
+    { y: 398, t: 'FCF' },
+  ].map((c) => (
+    <g>
+      <circle cx="344" cy={c.y} r="4" class="term" />
+      <text x="354" y={c.y + 4} class="pin start">
+        {c.t}
+      </text>
+    </g>
+  ))}
+  <circle cx="414" cy="352" r="7" class="led-off" />
+  <text x="428" y="356" class="tiny start">
+    LED FCA apagado
+  </text>
+  <circle cx="414" cy="384" r="7" class="led-on" />
+  <text x="428" y="388" class="tiny start strong">
+    LED FCF aceso
+  </text>
+
+  <defs>
+    <marker
+      id="gate-arrow"
+      viewBox="0 0 10 10"
+      refX="8"
+      refY="5"
+      markerWidth="7"
+      markerHeight="7"
+      orient="auto"
+    >
+      <path d="M0 1 L9 5 L0 9 Z" class="head" />
+    </marker>
+  </defs>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .gate {
+    stroke: var(--fg-muted);
+    stroke-width: 3;
+  }
+  .bar {
+    stroke: var(--border-strong);
+    stroke-width: 2;
+  }
+  .wheel {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .rail {
+    stroke: var(--fg-muted);
+    stroke-width: 3;
+  }
+  .ground {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+  }
+  .rack {
+    fill: var(--fg-subtle);
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .teeth {
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+  }
+  .holder {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .pole-n {
+    fill: var(--danger);
+  }
+  .pole-s {
+    fill: var(--info);
+  }
+  .housing {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .pinion {
+    fill: var(--fg-subtle);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .sensor {
+    fill: var(--fg);
+  }
+  .dir {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .head {
+    fill: var(--fg-muted);
+    stroke: none;
+  }
+  .sep {
+    stroke: var(--border);
+    stroke-width: 1;
+    stroke-dasharray: 5 5;
+  }
+  .board {
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+  }
+  .wire {
+    stroke: var(--fg-subtle);
+    stroke-width: 2;
+  }
+  .wire.on {
+    stroke: var(--copper);
+  }
+  .glass {
+    fill: color-mix(in oklab, var(--info) 10%, transparent);
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+  }
+  .blade {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .blade.on {
+    stroke: var(--copper);
+  }
+  .term {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .led-off {
+    fill: var(--surface-2);
+    stroke: var(--success);
+    stroke-width: 2;
+  }
+  .led-on {
+    fill: var(--danger);
+    stroke: var(--danger);
+    stroke-width: 2;
+    filter: drop-shadow(0 0 4px var(--danger));
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .label {
+    font-size: 13px;
+  }
+  .halo {
+    paint-order: stroke;
+    stroke: var(--bg);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+  }
+  .strong {
+    font-weight: 700;
+  }
+  .note {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .note.strong {
+    fill: var(--fg);
+  }
+  .tiny {
+    font-size: 11.5px;
+    fill: var(--fg-muted);
+  }
+  .tiny.strong {
+    fill: var(--fg);
+  }
+  .on-text {
+    fill: var(--copper);
+    font-weight: 600;
+  }
+  .pin {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

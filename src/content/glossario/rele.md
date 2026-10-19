@@ -2,7 +2,7 @@
 termo: Relé
 resumo: "Chave acionada por um eletroímã: a corrente na bobina move os contatos. Permite que um circuito pequeno comande outro, separado e de maior potência."
 sinonimos: [relê]
-relacionados: [contato-na-nf, indutor, transistor]
+relacionados: [contato-na-nf, indutor, transistor, eletroima, contator]
 aula: m04-passivos/07-chaves-botoes-e-reles
 ---
 Quando a bobina recebe corrente, o eletroímã puxa a armadura e os contatos mudam de posição, com o estalo característico. Os terminais dos contatos são o comum (COM), o normalmente aberto (NA) e o normalmente fechado (NF).
