@@ -1,0 +1,269 @@
+---
+titulo: Motor monofásico com capacitor
+modulo: m08-motores
+ordem: 4
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Explicar por que um motor de indução com uma fase só não parte sozinho
+  - Explicar como o enrolamento auxiliar e o capacitor criam o campo girante
+  - Reconhecer os tipos de motor monofásico e onde cada um aparece
+  - Inverter o sentido de um motor com capacitor
+  - Identificar o comum e os enrolamentos de um motor de três fios com o multímetro
+prerequisitos:
+  - m04-passivos/03-capacitores
+  - m06-corrente-alternada/03-fase-e-fasores
+  - m08-motores/03-motor-de-inducao-trifasico
+tags: [motor, motor monofásico, capacitor, enrolamento auxiliar, ventilador de teto, portão, bomba, multímetro]
+seguranca: rede
+rascunho: false
+---
+
+import SinglePhaseReversal from '../../../lessons/m08/figures/SinglePhaseReversal.astro';
+import WireIdentification from '../../../lessons/m08/figures/WireIdentification.astro';
+
+O ventilador de teto de casa começou a girar devagar. Na velocidade mínima, às vezes nem sai do lugar, e só pega se alguém der um empurrãozinho na pá. Na velocidade máxima, gira, mas fraco. O motor não queimou, os fios estão bons, e o conserto custa poucos reais: um capacitor novo. Para entender por que uma peça tão simples faz tanta diferença, você precisa ver o problema de um motor de indução que só tem uma fase.
+
+## Uma fase só não faz campo girante
+
+Na aula <LinkAula id="m08-motores/03-motor-de-inducao-trifasico" />, três enrolamentos ligados nas três fases criaram um campo girante. Na tomada de casa há uma fase só. Um enrolamento sozinho, ligado nela, cria um campo que só pulsa: cresce, diminui, inverte e volta, sempre na mesma direção. É o caso da falta de fase no campo girante da aula 8.3.
+
+Um campo que pulsa equivale a dois campos iguais, cada um com metade do tamanho, girando em sentidos opostos. Com o rotor parado, os dois puxam com a mesma força, um para cada lado, e o rotor não sai do lugar. O motor **zumbe**, puxa a corrente de rotor bloqueado e esquenta. Mas se alguma coisa der um empurrão, o rotor passa a girar mais perto de um dos campos, esse campo puxa mais que o outro, e o motor pega e acelera, **para o lado do empurrão**. Girando, um enrolamento só basta. O problema é só a partida.
+
+## O enrolamento auxiliar e o capacitor
+
+A solução é pôr um segundo enrolamento no estator, a um quarto de volta (90°) do primeiro, e alimentar esse <Term id="enrolamento-auxiliar">enrolamento auxiliar</Term> com uma corrente defasada em relação à do principal. Com duas correntes defasadas de quase um quarto de ciclo em dois enrolamentos cruzados, a soma dos dois campos gira, como no trifásico.
+
+Quem cria a defasagem é o <Term id="capacitor-de-motor">capacitor</Term>. O enrolamento ligado direto na rede se comporta como um indutor, e a corrente dele fica atrasada em relação à tensão. O enrolamento que recebe a corrente pelo capacitor tem a corrente adiantada. Uma atrasada e a outra adiantada: a diferença chega perto de 90° (a conta está na aula <LinkAula id="m16-portao/02-o-motor-do-portao" />, com fasores da aula <LinkAula id="m06-corrente-alternada/03-fase-e-fasores" />). Os dois enrolamentos se juntam numa ponta, o **comum**, e por isso o motor tem três fios.
+
+<Model3D
+  part="induction-motor"
+  props={{ phases: 'monofasico' }}
+  cutaway
+  annotations
+  caption="Motor monofásico de carcaça 80 com capacitor de partida, num alojamento sobre a carcaça, e chave centrífuga na tampa traseira. Por dentro, ele é quase igual ao trifásico da aula 8.3."
+/>
+
+## Os tipos de motor monofásico
+
+O capacitor não é a única forma de defasar a corrente do auxiliar, e nem sempre ele fica ligado o tempo todo. Os tipos mais comuns:
+
+| Tipo | Como parte | Torque de partida | Onde aparece |
+| --- | --- | --- | --- |
+| Fase dividida | Auxiliar de fio fino (resistência alta), desligado na partida por uma <Term id="chave-centrifuga">chave centrífuga</Term> | Baixo | Máquinas de lavar antigas, esmeril, compressores de geladeira (com um relé de partida no lugar da chave) |
+| Capacitor de partida | <Term id="capacitor-de-partida">Capacitor de partida</Term> eletrolítico em série com o auxiliar, desligado pela chave centrífuga | Alto | Compressores de ar, bombas, betoneiras, serras de bancada |
+| Capacitor permanente (PSC) | Capacitor de filme ligado o tempo todo | Baixo a médio | Ventiladores de teto e de pé, motores de portão, ventiladores de ar-condicionado |
+| Dois capacitores | Um de partida, que sai, e um permanente, que fica | Alto | Bombas e compressores maiores, motores de 1 CV para cima |
+| <Term id="polos-sombreados">Polos sombreados</Term> | Espira de cobre em curto em parte de cada polo, sem capacitor | Muito baixo | Exaustores de banheiro, ventoinhas de forno e de geladeira, bombas de dreno |
+
+O motor de portão e o ventilador de teto são do tipo **capacitor permanente**: o capacitor fica ligado entre as duas pontas dos enrolamentos o tempo todo, e o motor gira suave e silencioso. Ele parte com pouca força, e funciona bem porque o ventilador e o portão (com o redutor) não pedem muito torque para sair do lugar.
+
+O motor com **capacitor de partida** é o que você ouve dar um estalo logo depois de ligar: é a chave centrífuga abrindo, quando o rotor passa de uns 75 % da rotação. Quando ele desliga e desacelera, ouve-se outro estalo, da chave fechando de novo. O capacitor de partida é eletrolítico (para CA) e de valor alto, dezenas a centenas de µF, e só aguenta ficar ligado alguns segundos.
+
+## Explore: o motor com capacitor
+
+A simulação tem um motor de 1/3 CV e 127 V, do tipo usado em portões, com dois enrolamentos iguais e um capacitor permanente de 25 µF. A chave de sentido põe a fase direto num enrolamento ou no outro; quem fica com o capacitor é o que não recebe a fase direto. Clique no motor para ver a rotação, a corrente e a temperatura.
+
+<Simulation circuit="m08/motor-capacitor" instruments={['multimetro']} />
+
+1. Aperte o play (▶). Leia a corrente no comum durante a partida e com o motor girando.
+2. Ligue **Chave de sentido invertida** e reinicie (↺). Para que lado ele gira agora?
+3. Volte a chave e escolha **Estado do capacitor: Aberto**. Reinicie e espere. O que o motor faz? Fique de olho na temperatura e nas mensagens.
+4. Com o motor girando normalmente, mude o capacitor para **Aberto**. Ele para?
+5. Volte para **Bom** e experimente **10 µF** e **50 µF** no lugar dos 25 µF da placa, sempre reiniciando.
+
+Com o capacitor bom, a partida puxa 5,5 A e, em pouco mais de um segundo, o motor chega a 1.767 rpm e a corrente cai para 0,9 A. Com a chave invertida, ele gira igual, só que para o outro lado. Com o capacitor aberto, ele fica parado, zumbindo, com 6,2 A, e esquenta: em uns 45 segundos o <Term id="protetor-termico">protetor térmico</Term> abre, o motor esfria e, meio minuto depois, o protetor fecha e o zumbido recomeça. Se o capacitor abre com o motor já girando, ele continua girando, mas puxa 2,3 A, mais que o dobro do normal.
+
+O valor do capacitor importa para os dois lados. Com 10 µF, o motor não tem força para partir com a carga e só zumbe, como com um capacitor fraco. Com 50 µF, ele parte mais depressa, mas girando puxa 4,4 A, quase cinco vezes o normal, e em uns dois minutos o protetor térmico abre. Capacitor não é "quanto mais, melhor": o certo é o valor da placa ou da etiqueta do capacitor original.
+
+## Exemplo resolvido: a tensão no capacitor
+
+Na simulação, com o motor girando, a corrente no capacitor de 25 µF é de cerca de 2,0 A. Qual é a tensão nele? A oposição do capacitor à corrente alternada, a reatância, vale:
+
+$$
+X_C = \frac{1}{2\pi f C} = \frac{1}{2\pi \times 60 \times 25 \times 10^{-6}} \approx 106\,\Omega
+$$
+
+A tensão eficaz no capacitor é a corrente vezes a reatância:
+
+$$
+V_C = I \cdot X_C = 2{,}0\,\text{A} \times 106\,\Omega \approx 212\,\text{V}
+$$
+
+Mais que os 127 V da rede! As tensões no enrolamento auxiliar e no capacitor estão defasadas, e cada uma pode passar da tensão da rede. É por isso que os capacitores de motores de 127 V são de 250 VCA, e os de motores de 220 V, de 380 a 450 VCA. Na troca, use os mesmos µF e uma tensão em VCA igual ou maior que a do original.
+
+## Invertendo o sentido
+
+<Figure
+  caption="Figura 1. À esquerda, o motor de três fios com enrolamentos iguais: a chave põe a fase direto no enrolamento 1 ou no 2, e o capacitor fica sempre entre eles. À direita, o motor de quatro fios: o principal fica como está, e trocar as duas pontas do auxiliar (com o capacitor) inverte o sentido."
+  alt="Dois esquemas. No primeiro, a fase passa por uma chave de duas posições que vai a um ou outro de dois enrolamentos iguais; um capacitor liga as pontas de cima dos dois enrolamentos, e as outras pontas se juntam no neutro. No segundo, o enrolamento principal fica entre fase e neutro, e o auxiliar, em série com o capacitor, tem as duas pontas marcadas com setas tracejadas indicando a troca."
+  wide
+>
+  <SinglePhaseReversal />
+</Figure>
+
+O sentido depende de qual enrolamento tem a corrente adiantada. Nos motores de **portão** e em muitos **ventiladores de teto**, os dois enrolamentos são iguais. Basta pôr a fase direto no outro enrolamento, e o capacitor passa a alimentar o primeiro: é o que faz a chave de sentido da simulação, os relés ABRE e FECHA da central do portão e a chave "verão/inverno" de muitos ventiladores de teto.
+
+Nos motores de **bomba**, de **compressor** e de máquinas de bancada, o auxiliar é diferente do principal e o motor é feito para girar num sentido só. Quando ele tem quatro fios na caixa (duas pontas de cada enrolamento), o sentido se inverte trocando as duas pontas do auxiliar entre si, sem mexer no principal. Quando tem só três fios, com o comum feito por dentro, não dá para inverter sem abrir o motor. Trocar os dois fios da tomada nunca inverte um motor monofásico: fase e neutro trocam nos dois enrolamentos ao mesmo tempo.
+
+## Identificando os fios com o multímetro
+
+Um motor de três fios tirado do lugar, com as cores apagadas, pode ser identificado com o <Term id="multimetro">multímetro</Term> na escala de resistência, com o motor desligado da rede e o capacitor desligado e descarregado. Meça os três pares de fios.
+
+<Figure
+  caption="Figura 2. Os três pares de fios de um motor monofásico de três fios. A maior leitura é a dos dois enrolamentos em série, e o fio que ficou de fora é o comum. A partir do comum, a menor leitura é o enrolamento principal."
+  alt="Desenho de um motor com dois enrolamentos, o principal de 12 ohms e o auxiliar de 20 ohms, que se juntam no fio C. Os fios A e B são as outras pontas. Ao lado, três leituras: entre A e B, 32 ohms, a maior; entre A e C, 12 ohms, a menor, o enrolamento principal; entre B e C, 20 ohms, o enrolamento auxiliar."
+  wide
+>
+  <WireIdentification />
+</Figure>
+
+1. **A maior leitura** é entre as duas pontas livres, com os dois enrolamentos em série. O fio que não entrou nessa medida é o **comum**.
+2. **Do comum para os outros dois**, a menor leitura é o enrolamento **principal** (fio mais grosso, menos voltas) e a maior é o **auxiliar**.
+3. **Confira a soma:** as duas leituras a partir do comum somadas dão a maior. Se não derem, há mau contato, um fio rompido ou um protetor térmico aberto no caminho.
+
+Nos motores de portão, os enrolamentos são iguais e as duas leituras a partir do comum dão quase o mesmo valor. Aí qualquer um pode ser ABRE ou FECHA, e o sentido certo se acerta trocando os dois fios na central. A aula <LinkAula id="m16-portao/02-o-motor-do-portao" /> tem um exercício interativo de medir os fios.
+
+Leitura infinita entre o comum e um dos fios com o motor frio indica enrolamento aberto (queimado) ou protetor térmico aberto. Com o motor quente, espere esfriar e meça de novo: o protetor fecha sozinho.
+
+<RealCase title="O ventilador de teto fraco">
+
+Muitos ventiladores de teto vendidos no Brasil usam um capacitor com várias seções num corpo só, com quatro ou cinco fios, por exemplo 2 µF + 2,5 µF + 3,5 µF. A chave de velocidade escolhe qual seção (ou qual combinação) fica em série com o motor: menos µF, menos corrente e menos velocidade. A chave "verão/inverno" troca qual enrolamento recebe a fase direto e inverte o giro.
+
+Com o tempo, o capacitor seca e perde capacitância. O sintoma é exatamente o da história do começo: as velocidades baixas param de partir, e a alta fica fraca. O conserto é um capacitor com os mesmos valores, a mesma tensão em VCA e a mesma ligação dos fios. Fotografe a ligação antes de soltar qualquer fio, porque as cores mudam de fabricante para fabricante.
+
+O mesmo vale para o motor do portão (aula <LinkAula id="m16-portao/02-o-motor-do-portao" />) e para o ventilador da condensadora do ar-condicionado. Na condensadora há também um capacitor duplo, de três terminais (C, FAN e HERM), que serve ao mesmo tempo o compressor e o ventilador.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Mexer no capacitor sem descarregar.** O capacitor de motor guarda carga depois que o aparelho é desligado. Desligue o disjuntor, tire o plugue da tomada quando houver, e descarregue o capacitor com um resistor (por exemplo, 10 kΩ de 5 W) encostado nos dois terminais por alguns segundos, com ferramentas isoladas. Nunca descarregue em curto com uma chave de fenda: a faísca danifica os terminais e pode ferir. Confirme com o multímetro em V⎓ que sobrou menos de alguns volts.
+- **Trocar o capacitor por qualquer um.** Os µF certos são os da etiqueta do original. A tensão em VCA tem que ser igual ou maior. Capacitor eletrolítico comum, polarizado, estoura em CA; capacitor de partida não serve como permanente.
+- **Insistir num motor que zumbe.** Zumbido sem giro é corrente de rotor bloqueado. Desligue logo. Se o motor tem protetor térmico, ele vai desligar e religar sozinho, e o motor vai queimar aos poucos.
+- **Empurrar com a mão o que deveria partir sozinho.** Dar a partida na pá de um ventilador ou no eixo de uma bomba ligada é risco de corte e de ser puxado pela máquina. Desligue e conserte.
+- **Confiar nas cores dos fios.** Cada fabricante usa uma cor. Meça com o ohmímetro, motor desligado e capacitor descarregado.
+- **Esquecer o terra.** A carcaça metálica de um motor ligado na rede precisa do fio terra, como qualquer aparelho com carcaça de metal (aula <LinkAula id="m07-instalacoes/02-fase-neutro-e-terra" />).
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Por que um motor de indução com um enrolamento só, ligado na tomada, não parte sozinho?',
+      options: [
+        {
+          text: 'O campo de um enrolamento só pulsa sobre uma linha; parado, o rotor é puxado igualmente para os dois lados',
+          correct: true,
+          feedback:
+            'Um campo que pulsa equivale a dois campos girando em sentidos opostos. Parado, eles se equilibram; girando, um deles vence.',
+        },
+        {
+          text: 'A tensão da tomada é baixa demais para um motor',
+          feedback:
+            'A tensão está certa. O problema é que um enrolamento sozinho não cria campo girante, então não há torque de partida.',
+        },
+        {
+          text: 'Porque o rotor precisa de escovas para receber corrente',
+          feedback:
+            'O motor de indução não tem escovas: o rotor recebe corrente por indução. Falta só o campo girante na partida.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Um motor monofásico de capacitor permanente com o capacitor aberto pode continuar girando se já estava girando.',
+      answer: true,
+      explanation:
+        'Girando, um enrolamento só basta para manter o torque. Ele fica mais fraco e puxa mais corrente, mas não para. O problema é partir de novo.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Qual é a reatância de um capacitor de motor de 16 µF na rede de 60 Hz, em ohms?',
+      answer: 165.8,
+      tolerance: 0.02,
+      unit: 'Ω',
+      explanation: 'XC = 1 ÷ (2π × 60 × 16 × 10⁻⁶) ≈ 166 Ω.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Num motor de três fios, você mede: entre azul e preto, 9 Ω; entre azul e branco, 24 Ω; entre preto e branco, 15 Ω. Qual fio é o comum?',
+      options: [
+        {
+          text: 'O preto',
+          correct: true,
+          feedback:
+            'A maior leitura (24 Ω) é entre azul e branco, os dois enrolamentos em série. O fio de fora, o preto, é o comum. Do preto, 9 Ω vai ao principal (azul) e 15 Ω ao auxiliar (branco).',
+        },
+        {
+          text: 'O azul',
+          feedback:
+            'Procure a maior leitura: 24 Ω, entre azul e branco. Esses são as pontas livres; o comum é o fio que ficou de fora.',
+        },
+        {
+          text: 'O branco',
+          feedback:
+            'O branco faz parte do par de maior leitura (24 Ω), então é uma ponta livre, não o comum.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'O capacitor de um motor de portão de 127 V estufou. A etiqueta diz 25 µF ± 5 %, 250 VCA. Qual substituto serve?',
+      options: [
+        {
+          text: '25 µF, 250 VCA ou mais, de filme para motor',
+          correct: true,
+          feedback: 'Mesmos µF e tensão em VCA igual ou maior, do mesmo tipo (permanente, de filme).',
+        },
+        {
+          text: '40 µF, 250 VCA, para dar mais força',
+          feedback:
+            'Capacitor maior faz o motor puxar corrente demais girando e esquentar. Use o valor da etiqueta.',
+        },
+        {
+          text: '25 µF, 63 V, eletrolítico comum',
+          feedback:
+            'Eletrolítico comum é polarizado e não aguenta CA; e 63 V é muito menos do que o capacitor recebe, que passa de 200 V.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada tipo de motor monofásico a um lugar onde ele aparece.',
+      pairs: [
+        ['Capacitor permanente', 'Ventilador de teto e motor de portão'],
+        ['Capacitor de partida', 'Compressor de ar e betoneira'],
+        ['Polos sombreados', 'Exaustor de banheiro'],
+        ['Fase dividida com relé de partida', 'Compressor de geladeira'],
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem a troca do capacitor de um ventilador de teto.',
+      items: [
+        'Desligar o disjuntor do circuito e confirmar a ausência de tensão',
+        'Descarregar o capacitor velho com um resistor',
+        'Fotografar a ligação, soltar o capacitor velho e ligar o novo, com os mesmos valores',
+        'Isolar as emendas e fechar o ventilador',
+        'Religar o disjuntor e testar todas as velocidades',
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Um enrolamento sozinho na rede monofásica cria um campo que **pulsa**: o motor parado só zumbe, mas girando continua.
+- O **enrolamento auxiliar**, a 90° do principal, recebe uma corrente defasada, e os dois campos somados **giram**. Quem defasa é o **capacitor** (ou a resistência alta do auxiliar, ou as espiras de sombra).
+- **Capacitor permanente** em ventiladores e portões; **capacitor de partida** com chave centrífuga em compressores e bombas; **polos sombreados** em exaustores pequenos.
+- O valor do capacitor é o da etiqueta: menor, o motor não parte; maior, ele esquenta girando. A tensão em VCA passa da tensão da rede.
+- Com enrolamentos iguais, inverte-se pondo a fase no outro enrolamento; com principal e auxiliar, trocando as pontas do auxiliar.
+- No ohmímetro, a **maior leitura** é entre as duas pontas livres, e o fio de fora é o **comum**. Descarregue o capacitor antes de medir.
+
+Na próxima aula, você vai conhecer motores que não giram livres na rede, mas são comandados passo a passo por eletrônica: o <LinkAula id="m08-motores/05-passo-servo-e-brushless" />.
