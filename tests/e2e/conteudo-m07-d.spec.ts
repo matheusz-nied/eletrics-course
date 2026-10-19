@@ -1,6 +1,9 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { expectAccessible, expectNoHorizontalOverflow, watchErrors } from './helpers';
 
+/** With software WebGL (CI) each 3D canvas blocks the page while its shaders compile. */
+const HYDRATION = { timeout: 20_000 };
+
 const MODULE = 'm07-instalacoes/';
 
 const LESSONS = ['07-iluminacao', '08-chuveiro-eletrico'];
@@ -9,10 +12,10 @@ const LESSONS = ['07-iluminacao', '08-chuveiro-eletrico'];
 async function hydrateAll(page: Page) {
   for (const island of await page.locator('astro-island').all()) {
     await island.scrollIntoViewIfNeeded();
-    await expect(island).not.toHaveAttribute('ssr');
+    await expect(island).not.toHaveAttribute('ssr', HYDRATION);
   }
   for (const sim of await page.locator('[data-simulation]').all()) {
-    await expect(sim).toHaveAttribute('data-ready', '');
+    await expect(sim).toHaveAttribute('data-ready', '', HYDRATION);
   }
 }
 
@@ -20,7 +23,7 @@ async function hydrateAll(page: Page) {
 async function simulation(page: Page, id: string) {
   const sim = page.locator(`[data-simulation="${id}"]`);
   await sim.scrollIntoViewIfNeeded();
-  await expect(sim).toHaveAttribute('data-ready', '');
+  await expect(sim).toHaveAttribute('data-ready', '', HYDRATION);
   return sim;
 }
 
@@ -28,7 +31,7 @@ async function simulation(page: Page, id: string) {
 async function widget(page: Page, selector: string) {
   const island = page.locator(`astro-island:has(${selector})`).first();
   await island.scrollIntoViewIfNeeded();
-  await expect(island).not.toHaveAttribute('ssr');
+  await expect(island).not.toHaveAttribute('ssr', HYDRATION);
   return island.locator(selector);
 }
 
