@@ -3,9 +3,229 @@ titulo: Passo, servo e brushless
 modulo: m08-motores
 ordem: 5
 nivel: I
-duracaoMin: 30
+duracaoMin: 40
 objetivos:
-  - Rascunho
+  - Explicar como o motor de passo anda um ângulo fixo a cada pulso e o que faz o driver
+  - Calcular passos por milímetro de um eixo de impressora 3D
+  - Explicar como o servo vai até o ângulo pedido e como é o sinal de 1 a 2 ms
+  - Explicar como o motor brushless gira sem escovas e o que o ESC faz
+  - Usar a constante KV para estimar a rotação de um motor brushless
+prerequisitos:
+  - m08-motores/01-motor-cc
+  - m08-motores/02-ponte-h-e-pwm
+tags: [motor de passo, servo, brushless, BLDC, ESC, driver, impressora 3D, drone, Arduino]
+seguranca: baixa-tensao
+rascunho: false
 ---
 
-Rascunho.
+import MotorDePasso from '../../../lessons/m08/MotorDePasso.tsx';
+import ServoPulso from '../../../lessons/m08/ServoPulso.tsx';
+
+Uma impressora 3D desenha uma peça camada por camada, com o bico parando exatamente onde deve, centenas de vezes por segundo, e não tem nenhum sensor dizendo onde o bico está. Um drone de corrida acelera os quatro motores de zero a 30.000 rpm em uma fração de segundo, e esses motores não têm escovas. O braço de um robô de brinquedo vai ao ângulo pedido e fica lá, mesmo que você empurre. São três motores diferentes do motor CC da aula <LinkAula id="m08-motores/01-motor-cc" />, todos comandados por eletrônica: o motor de passo, o servo e o motor brushless.
+
+## Motor de passo: um ângulo por pulso
+
+O <Term id="motor-de-passo">motor de passo</Term> não gira sozinho quando recebe tensão. Ele tem duas bobinas no estator, chamadas A e B, e um rotor com ímã. O circuito que comanda o motor, o **driver**, liga uma bobina, depois a outra, depois a primeira com a corrente invertida, e assim por diante. A cada troca, o campo do estator muda de direção, o ímã do rotor se alinha com ele, e o eixo anda um passo.
+
+<MotorDePasso client:visible />
+
+1. Dê alguns passos à frente e acompanhe a tabela. Qual bobina liga em cada passo, e com que sinal?
+2. Volte dois passos. A sequência é a mesma, de trás para a frente?
+3. Mude para **Duas bobinas juntas**. Onde o rotor para agora, e o que acontece com o torque?
+4. Mude para **Meio passo** e dê oito passos.
+
+Com uma bobina por vez, a sequência é A+, B+, A−, B−: o rotor dá um quarto de volta a cada passo no desenho. Voltando, a sequência roda ao contrário, e é só isso que o driver muda para inverter o sentido. Com duas bobinas juntas, o rotor para entre dois polos, e o torque para segurar o eixo sobe para cerca de 1,4 vez, porque as duas bobinas puxam juntas. O meio passo alterna os dois modos e dobra o número de posições.
+
+### Por que 200 passos
+
+O desenho tem quatro passos por volta. O motor de passo de verdade, o **híbrido**, tem 8 polos no estator, cada um com vários dentes pequenos, e um rotor feito de dois copos de aço com 50 dentes cada, um copo norte e o outro sul, com um ímã entre eles. Os dentes do rotor e os do estator só se alinham de um jeito por vez, e cada troca de bobina desloca o rotor um quarto de dente. O resultado são 200 passos por volta, ou $360^\circ \div 200 = 1{,}8^\circ$ por passo, o número que vem na etiqueta.
+
+<Model3D part="stepper-motor" props={{ position: 3 }} cutaway annotations />
+
+O tamanho mais comum em impressoras 3D é o **NEMA 17**: a frente tem 42,3 mm de lado, e o comprimento muda o torque. NEMA é só o padrão da flange (o tamanho da frente e dos furos), e não diz nada sobre a parte elétrica.
+
+### O driver, a corrente e o micropasso
+
+As duas bobinas precisam de corrente nos dois sentidos, então cada uma tem a sua ponte H (aula <LinkAula id="m08-motores/02-ponte-h-e-pwm" />). Os drivers de impressora 3D e CNC, como o A4988, o DRV8825 e os TMC2208 e TMC2209, juntam as duas pontes num chip e recebem só dois sinais do microcontrolador: **STEP**, um pulso para cada passo, e **DIR**, o sentido. A velocidade é a frequência dos pulsos.
+
+O motor de passo é ligado numa tensão bem maior que a da bobina (12 V ou 24 V, para bobinas de 2 a 4 V), e o driver limita a corrente por PWM, ajustada num trimpot na placa ou por software. Isso faz a corrente subir rápido a cada passo, o que dá torque em velocidades mais altas.
+
+O driver também faz <Term id="micropasso">micropasso</Term>: em vez de ligar e desligar as bobinas, ele dosa a corrente nas duas, como um seno e um cosseno, e o rotor para em posições intermediárias. Com 1/16 de passo, são $200 \times 16 = 3.200$ micropassos por volta. O motor fica muito mais suave e silencioso.
+
+Um cuidado: o motor de passo não sabe onde está. O driver conta os pulsos e supõe que o eixo os seguiu. Se a carga pedir mais torque do que o motor tem, ou se a aceleração for alta demais, o rotor **perde passos**, e o controlador não fica sabendo. Na impressora 3D, é a camada que sai deslocada de repente. Por isso a impressora vai até a chave de fim de curso de cada eixo ao ligar, para saber onde é o zero.
+
+## Exemplo resolvido: passos por milímetro
+
+O eixo X de uma impressora 3D é puxado por uma correia GT2, com dentes a cada 2 mm, numa polia de 20 dentes no eixo de um motor de 1,8°. O driver usa 1/16 de passo. Quantos micropassos o firmware manda para andar 1 mm?
+
+Uma volta da polia puxa $20 \times 2\,\text{mm} = 40\,\text{mm}$ de correia. Uma volta do motor são $200 \times 16 = 3.200$ micropassos. Então:
+
+$$
+\frac{3.200\ \text{micropassos}}{40\,\text{mm}} = 80\ \text{micropassos por mm}
+$$
+
+É o número que aparece na configuração de quase todas as impressoras com correia GT2 e polia de 20 dentes. Um micropasso corresponde a $1 \div 80 = 0{,}0125\,\text{mm}$ de movimento do bico.
+
+## Servo: um motor CC que sabe onde está
+
+O <Term id="servomotor">servo</Term> de modelismo, como o micro servo de 9 g que aparece em projetos com Arduino, é por dentro um motor CC comum, um redutor de engrenagens de plástico, um <Term id="potenciometro">potenciômetro</Term> preso no eixo de saída e uma plaquinha de controle. A placa compara o ângulo pedido com o que o potenciômetro mede e gira o motor para um lado ou para o outro, por uma ponte H, até os dois concordarem. Se alguém força o braço para fora da posição, o potenciômetro acusa, e a placa força de volta. Isso é um controle em **malha fechada**: o motor é corrigido pela medida da própria saída.
+
+<Model3D part="servo-motor" props={{ angle: 45 }} explode annotations />
+
+O servo tem três fios: **marrom** (ou preto) é o GND, **vermelho** é o +5 V e **laranja** (ou amarelo ou branco) é o sinal. O sinal é um pulso de 5 V (ou 3,3 V) repetido a cada 20 ms, 50 vezes por segundo. A **largura** do pulso diz o ângulo: 1 ms é um extremo, 1,5 ms é o meio, 2 ms é o outro extremo.
+
+<ServoPulso client:visible />
+
+Os números de 1 a 2 ms são o padrão antigo do modelismo. Muitos servos de 180° pedem de 0,5 a 2,5 ms para usar todo o curso, e a biblioteca Servo do Arduino trabalha com essa faixa mais larga. Na dúvida, comece no meio, 1,5 ms, e vá abrindo aos poucos: forçar o servo contra o batente esquenta o motor e gasta as engrenagens.
+
+Existe também o servo de **rotação contínua**: sem o batente e com o potenciômetro travado no meio, ele gira sem parar, e a largura do pulso passa a dizer a velocidade e o sentido. Já os **servomotores industriais**, de máquinas e robôs de fábrica, são outra coisa: motores CA ou sem escovas com um encoder no eixo, comandados por um driver próprio. A ideia de malha fechada é a mesma.
+
+## Brushless: o comutador virou eletrônica
+
+O motor CC tem um problema que você viu na aula 8.1: as escovas. Elas se gastam, faíscam, fazem barulho e limitam a rotação. O <Term id="motor-brushless">motor brushless</Term>, ou BLDC, vira o motor CC do avesso: os ímãs vão para a parte que gira, e as bobinas ficam paradas no estator, ligadas direto nos fios. Sem nada girando que precise receber corrente, as escovas somem.
+
+<Model3D part="bldc-motor" props={{ rpm: 12000 }} cutaway annotations />
+
+Falta quem faça o trabalho do comutador: trocar a corrente de bobina na hora certa. Esse é o papel do <Term id="esc">ESC</Term> (controlador eletrônico de velocidade), ou do driver do motor. O estator tem três fases, A, B e C, e o ESC tem três meias pontes de <Term id="mosfet">MOSFETs</Term> (aula <LinkAula id="m09-semicondutores/08-mosfet" />). Em cada instante, ele liga uma fase no positivo, outra no negativo e deixa a terceira solta, e troca a combinação seis vezes a cada volta elétrica, acompanhando o rotor. A velocidade é regulada por PWM, como no motor CC.
+
+Para saber onde está o rotor, alguns motores têm três sensores Hall no estator (aula <LinkAula id="m05-magnetismo/05-sensores-magneticos" />). A maioria dos ESCs de drone dispensa sensores: eles medem a tensão que a fase solta gera (a força contraeletromotriz) e descobrem dali a posição. É por isso que esses motores dão uma tremidinha antes de partir: com o rotor parado, ainda não há tensão para medir.
+
+O motor do drone é um **outrunner**: o rotor é um sino com os ímãs colados por dentro, girando por fora do estator. Ele tem mais torque para o tamanho e move a hélice direto, sem redutor. O **inrunner**, com o rotor por dentro, como um motor comum, gira mais rápido e aparece em carrinhos de controle remoto e ferramentas.
+
+### A constante KV
+
+Os motores brushless de modelismo trazem um número na etiqueta, como **2207 2.300 KV**. O 2207 é o tamanho do estator (22 mm de diâmetro, 7 mm de altura). A <Term id="constante-kv">constante KV</Term> diz quantas rpm o motor gira sem carga para cada volt aplicado:
+
+$$
+n_{\text{vazio}} = K_V \cdot V
+$$
+
+Com uma bateria LiPo de 4 células (4S, 14,8 V nominais), esse motor giraria $2.300 \times 14{,}8 \approx 34.000\,\text{rpm}$ sem a hélice. Com a hélice, gira menos, porque a carga pede torque e o motor escorrega para baixo da rotação em vazio, como o motor CC da aula 8.1. KV é o inverso da constante da força contraeletromotriz: KV alto quer dizer muita rotação e pouco torque por ampère.
+
+## Quem é quem
+
+| Motor | Como é comandado | Ponto forte | Ponto fraco | Onde aparece |
+| --- | --- | --- | --- | --- |
+| Passo | Pulsos de STEP e DIR num driver | Posição exata sem sensor, torque parado | Perde passos sem avisar, esquenta parado, perde torque em alta rotação | Impressora 3D, CNC, impressora de papel, válvula de ar-condicionado |
+| Servo de modelismo | Pulso de 1 a 2 ms a cada 20 ms | Vai ao ângulo e segura, com três fios | Curso limitado, pouco torque, engrenagens de plástico | Robótica, aeromodelos, travas e tampas em projetos |
+| Brushless (BLDC) | ESC ou driver de três fases | Rendimento alto, rotação alta, sem desgaste | Precisa de eletrônica para girar | Drone, ventoinha de computador, patinete, lavadora e ar-condicionado inverter |
+
+<RealCase title="Impressora 3D">
+
+Uma impressora 3D cartesiana comum tem quatro ou cinco motores de passo NEMA 17: um para X, um para Y, um ou dois para o Z e um para empurrar o filamento. O X e o Y puxam correias GT2; o Z gira um fuso com rosca, que dá muitos passos por milímetro e segura a mesa parada mesmo com o motor desligado.
+
+Os defeitos mais comuns são de motor de passo. Camada deslocada é passo perdido: correia frouxa, aceleração alta demais ou corrente do driver baixa. Motor que vibra e não gira é uma bobina sem contato ou com os fios trocados no conector (as duas pontas de uma bobina precisam ficar juntas: meça com o multímetro, cada par dá poucos ohms). Driver muito quente é corrente ajustada alta demais.
+
+</RealCase>
+
+<RealCase title="Drone">
+
+Cada braço do drone tem um motor brushless outrunner com a hélice presa no sino, e cada motor tem o seu ESC, muitas vezes os quatro numa placa só. A controladora de voo, com giroscópio e acelerômetro, decide centenas de vezes por segundo quanto cada motor deve girar, e o drone se inclina e se mantém no ar só mudando a velocidade das hélices. Dois motores giram no sentido horário e dois no anti-horário, para os torques se cancelarem. Para inverter um motor brushless, basta trocar dois dos três fios, como no motor trifásico (aula <LinkAula id="m08-motores/03-motor-de-inducao-trifasico" />), ou mudar o sentido na configuração do ESC.
+
+</RealCase>
+
+<RealCase title="Portões com motor CC e com inversor">
+
+Nem todo portão usa o motor monofásico com capacitor da aula <LinkAula id="m08-motores/04-motor-monofasico-capacitor" />. Os automatizadores de **motor CC de 24 V** usam um motor de ímã permanente comandado por ponte H e PWM, como o do vidro elétrico da aula 8.1. Eles partem e param suave, controlam a velocidade, sentem o obstáculo pela corrente e funcionam com bateria quando falta energia.
+
+Os portões **rápidos** usam um motor trifásico, ou um brushless, alimentado por um **inversor de frequência** (aula 8.3) dentro da central. Mesmo ligada numa tomada monofásica, a central cria a sua própria rede trifásica, de frequência ajustável: o portão sai devagar, acelera, corre e desacelera antes do fim de curso, sem tranco.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Desligar o motor de passo com o driver energizado.** Soltar o conector com a fonte ligada gera picos de tensão que queimam o driver. Desligue a fonte antes de mexer nos fios.
+- **Alimentar servos pelo 5 V da placa.** Um servo pequeno puxa algumas centenas de miliampères ao se mover e mais ainda travado; vários servos derrubam a tensão e reiniciam o microcontrolador. Use uma fonte separada para os servos e ligue os GNDs juntos.
+- **Testar motor de drone com a hélice.** Na bancada, tire as hélices. Uma hélice a 20.000 rpm corta a mão.
+- **Tratar bateria LiPo como pilha.** Ela entrega dezenas de ampères num curto e pega fogo se for furada, sobrecarregada ou descarregada demais. Carregue com o carregador próprio, sem ninguém longe, e guarde num saco antichama.
+- **Ajustar a corrente do driver no máximo.** Mais corrente dá mais torque, mas esquenta o motor e o driver. Ajuste pela corrente da etiqueta do motor.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Quantos passos inteiros um motor de 1,8° por passo precisa dar para girar 90°?',
+      answer: 50,
+      tolerance: 0.01,
+      unit: 'passos',
+      explanation: '90° ÷ 1,8° = 50 passos, um quarto dos 200 passos de uma volta.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um eixo Z é movido por um fuso de 8 mm por volta, com motor de 200 passos e driver em 1/16. Quantos micropassos por milímetro?',
+      answer: 400,
+      tolerance: 0.01,
+      unit: 'micropassos/mm',
+      explanation:
+        'Uma volta são 200 × 16 = 3.200 micropassos e move 8 mm: 3.200 ÷ 8 = 400 micropassos por milímetro.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'A peça da impressora 3D saiu com as camadas de cima deslocadas para um lado. O que aconteceu?',
+      options: [
+        {
+          text: 'O motor de passo perdeu passos, e o controlador não ficou sabendo',
+          correct: true,
+          feedback:
+            'O motor de passo não tem sensor de posição. Se ele não acompanha os pulsos (correia frouxa, aceleração alta, corrente baixa), a posição real fica diferente da que o firmware supõe.',
+        },
+        {
+          text: 'O servo do eixo X foi para o ângulo errado',
+          feedback: 'Os eixos da impressora 3D usam motores de passo, não servos.',
+        },
+        {
+          text: 'O ESC do motor X trocou a sequência das fases',
+          feedback:
+            'ESC é para motor brushless. Os eixos usam motores de passo, que perdem passos quando não acompanham os pulsos.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um servo usa 1 ms para 0° e 2 ms para 180°. Qual largura de pulso, em milissegundos, leva o braço a 45°?',
+      answer: 1.25,
+      tolerance: 0.01,
+      unit: 'ms',
+      explanation: '45° é um quarto do curso: 1 ms + 0,25 × 1 ms = 1,25 ms.',
+    },
+    {
+      type: 'vf',
+      prompt: 'O motor brushless tem os ímãs no estator e as bobinas no rotor, como o motor CC.',
+      answer: false,
+      explanation:
+        'É o contrário: no brushless, os ímãs ficam no rotor e as bobinas no estator. Por isso ele dispensa escovas e precisa do ESC para comutar as fases.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um motor brushless de 1.700 KV é ligado numa bateria de 3 células (11,1 V). Quantas rpm ele gira sem carga, aproximadamente?',
+      answer: 18870,
+      tolerance: 0.02,
+      unit: 'rpm',
+      explanation: 'n = KV × V = 1.700 × 11,1 ≈ 18.900 rpm sem carga. Com hélice, menos.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada aparelho ao motor que ele usa.',
+      pairs: [
+        ['Eixo X da impressora 3D', 'Motor de passo'],
+        ['Braço de um robô de Arduino', 'Servo de modelismo'],
+        ['Hélice de drone', 'Brushless outrunner'],
+        ['Vidro elétrico do carro', 'Motor CC de ímã permanente'],
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **motor de passo** anda um ângulo fixo por pulso (1,8° no comum, 200 passos por volta). O **driver** liga as duas bobinas na sequência, recebe STEP e DIR e faz **micropasso**. Ele não sabe onde está: se a carga for demais, perde passos.
+- O **servo** é um motor CC com redutor, potenciômetro e placa de controle em malha fechada. O ângulo vem da **largura do pulso**, de 1 a 2 ms, repetido a cada 20 ms.
+- O **brushless** tem os ímãs no rotor e as bobinas no estator; o **ESC** troca a corrente entre as três fases, no lugar do comutador. A rotação sem carga é $K_V \cdot V$.
+- Os três são comandados por eletrônica: pontes H, MOSFETs e PWM, os mesmos blocos da aula <LinkAula id="m08-motores/02-ponte-h-e-pwm" />.
+
+Na última aula do módulo, você vai ver como transformar a rotação rápida desses motores em força, com engrenagens: <LinkAula id="m08-motores/06-redutores-torque-e-potencia" />.
