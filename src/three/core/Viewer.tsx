@@ -25,6 +25,7 @@ import { FrameRateMonitor, KeyboardOrbit, ReadySignal, ViewerErrorBoundary } fro
 import { useReducedMotion } from './motion';
 import { guessQuality, QUALITY, QUALITY_LABELS, useQuality, type QualityLevel } from './quality';
 import { Stage } from './Stage';
+import { useStartTurn } from './startQueue';
 import { useInView } from './useInView';
 import { useContinuousRender, ViewProvider } from './view';
 import { hasWebGL, isSoftwareRenderer } from './webgl';
@@ -141,10 +142,14 @@ export default function Viewer({
   const animated = autoRotate || (!!meta && isAnimated(meta, resolved));
   const text = description ?? (meta ? (meta.describe?.(resolved) ?? meta.summary) : label);
 
+  // One canvas starts at a time (see startQueue.ts).
+  const [turn, turnDone] = useStartTurn(!!(webgl && inView && module && status !== 'error'));
+
   const handleReady = useCallback(() => {
     setStatus('ready');
+    turnDone();
     onReady?.();
-  }, [onReady]);
+  }, [onReady, turnDone]);
   const reframe = useCallback(() => setFitKey((k) => k + 1), []);
 
   const toggleFullscreen = () => {
@@ -155,7 +160,7 @@ export default function Viewer({
   };
 
   const unsupported = !webgl || status === 'unsupported';
-  const showCanvas = webgl && inView && module && status !== 'error';
+  const showCanvas = webgl && inView && module && status !== 'error' && turn;
   const interactive = !coarse || touchActive;
 
   const fallback = (
