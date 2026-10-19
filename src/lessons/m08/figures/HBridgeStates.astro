@@ -1,0 +1,176 @@
+---
+/*
+ * 08.2: the four useful (and one forbidden) states of an H bridge, as four
+ * small bridges: forward (S1 + S4), reverse (S3 + S2), brake (S2 + S4, the
+ * motor shorted through the negative) and the short (S1 + S2, the battery
+ * shorted through one leg). Closed switches are drawn as a straight bar, the
+ * current path in the accent colour (danger for the short).
+ */
+interface State {
+  title: string;
+  note: string;
+  closed: [boolean, boolean, boolean, boolean]; // S1, S2, S3, S4
+  path: string;
+  danger?: boolean;
+  spin?: 1 | -1 | 0;
+}
+
+const W = 150; // width of one bridge cell
+const L = 22; // left leg x within the cell
+const R = 118; // right leg x
+const TOP = 40;
+const BOT = 160;
+const MID = 100;
+
+const states: State[] = [
+  {
+    title: 'Frente',
+    note: 'S1 e S4 fechadas',
+    closed: [true, false, false, true],
+    path: `M${L} ${TOP} V${MID} H${R} V${BOT}`,
+    spin: 1,
+  },
+  {
+    title: 'Ré',
+    note: 'S3 e S2 fechadas',
+    closed: [false, true, true, false],
+    path: `M${R} ${TOP} V${MID} H${L} V${BOT}`,
+    spin: -1,
+  },
+  {
+    title: 'Freio',
+    note: 'S2 e S4 fechadas',
+    closed: [false, true, false, true],
+    path: `M${L + 30} ${MID} H${L} V${BOT} H${R} V${MID} H${R - 30}`,
+    spin: 0,
+  },
+  {
+    title: 'Curto!',
+    note: 'S1 e S2 juntas',
+    closed: [true, true, false, false],
+    path: `M${L} ${TOP} V${BOT}`,
+    danger: true,
+  },
+];
+
+/** A switch on a leg from y0 to y1: closed is a straight bar, open is tilted. */
+function sw(x: number, y0: number, y1: number, closed: boolean) {
+  const a = y0 + 12;
+  const b = y1 - 12;
+  return closed
+    ? `M${x} ${y0} V${y1}`
+    : `M${x} ${y0} V${a} M${x} ${a} L${x + 12} ${b - 4} M${x} ${b} V${y1}`;
+}
+---
+
+<svg viewBox="0 0 620 210" width="620" height="210" class="fig" aria-hidden="true">
+  {states.map((s, i) => (
+    <g transform={`translate(${i * 155 + 4} 0)`}>
+      <text x={W / 2} y="18" class:list={['title', { danger: s.danger }]}>
+        {s.title}
+      </text>
+      <path d={`M${L - 8} ${TOP} H${R + 8}`} class="rail" />
+      <path d={`M${L - 8} ${BOT} H${R + 8}`} class="rail" />
+      <text x={L - 12} y={TOP + 4} class="pol end">+</text>
+      <text x={L - 12} y={BOT + 4} class="pol end">−</text>
+      <path d={s.path} class:list={['path', { danger: s.danger }]} />
+      <path d={sw(L, TOP, MID, s.closed[0])} class="leg" />
+      <path d={sw(L, MID, BOT, s.closed[1])} class="leg" />
+      <path d={sw(R, TOP, MID, s.closed[2])} class="leg" />
+      <path d={sw(R, MID, BOT, s.closed[3])} class="leg" />
+      <path d={`M${L} ${MID} H${W / 2 - 18} M${W / 2 + 18} ${MID} H${R}`} class="leg" />
+      <circle cx={W / 2} cy={MID} r="17" class="motor" />
+      <text x={W / 2} y={MID + 5} class="m">M</text>
+      {s.spin === 1 && (
+        <path d={`M${W / 2 - 10} ${MID - 26} A 26 26 0 0 1 ${W / 2 + 14} ${MID - 22}`} class="spin" marker-end="url(#m08-h-spin)" />
+      )}
+      {s.spin === -1 && (
+        <path d={`M${W / 2 + 10} ${MID - 26} A 26 26 0 0 0 ${W / 2 - 14} ${MID - 22}`} class="spin" marker-end="url(#m08-h-spin)" />
+      )}
+      <text x={L + 9} y={TOP + 32} class="sw start">S1</text>
+      <text x={L + 9} y={BOT - 22} class="sw start">S2</text>
+      <text x={R - 9} y={TOP + 32} class="sw end">S3</text>
+      <text x={R - 9} y={BOT - 22} class="sw end">S4</text>
+      <text x={W / 2} y={BOT + 26} class="note">
+        {s.note}
+      </text>
+    </g>
+  ))}
+  <defs>
+    <marker id="m08-h-spin" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" class="head" />
+    </marker>
+  </defs>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .rail {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .leg {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .path {
+    stroke: var(--accent);
+    stroke-width: 7;
+    opacity: 0.35;
+  }
+  .path.danger {
+    stroke: var(--danger);
+    opacity: 0.5;
+  }
+  .motor {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .spin {
+    stroke: var(--success);
+    stroke-width: 2.5;
+  }
+  .head {
+    fill: var(--success);
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .title.danger {
+    fill: var(--danger);
+  }
+  .pol {
+    font-weight: 700;
+  }
+  .m {
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .sw {
+    fill: var(--fg-muted);
+    font-size: 11.5px;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>
