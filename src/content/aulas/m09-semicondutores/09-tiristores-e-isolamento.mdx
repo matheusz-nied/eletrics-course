@@ -1,0 +1,337 @@
+---
+titulo: Tiristores e isolamento
+modulo: m09-semicondutores
+ordem: 9
+nivel: I
+duracaoMin: 35
+objetivos:
+  - Explicar como o SCR dispara e por que ele continua conduzindo depois que o pulso no gatilho acaba
+  - Explicar como o TRIAC e o DIAC controlam a potência de uma carga ligada à rede pelo ângulo de disparo
+  - Relacionar a posição do potenciômetro de um dimmer com o atraso do disparo e a tensão na lâmpada
+  - Usar um optoacoplador para ligar a rede a um microcontrolador sem nenhum fio em comum
+  - Reconhecer TRIAC, dissipador e optoacoplador numa placa e os cuidados de segurança com cada um
+prerequisitos:
+  - m09-semicondutores/02-diodo
+  - m09-semicondutores/06-transistor-como-chave
+  - m00-comece-aqui/02-seguranca-em-eletricidade
+tags: [SCR, TRIAC, DIAC, tiristor, dimmer, controle de fase, optoacoplador, isolação, MOC3021, PC817, central de portão]
+seguranca: rede
+---
+
+import MosfetTo220 from '../../../lessons/m09/figures/MosfetTo220.astro';
+import TiristorCamadas from '../../../lessons/m09/figures/TiristorCamadas.astro';
+import TiristorFase from '../../../lessons/m09/figures/TiristorFase.astro';
+import TiristorOpto from '../../../lessons/m09/figures/TiristorOpto.astro';
+import Part3D from '../../../lessons/m02/Part3D.astro';
+
+Você gira o botão do dimmer da sala e a lâmpada vai apagando devagar. Você aperta o controle do portão e o motor parte sem tranco. Por dentro, os dois aparelhos têm a mesma peça de três pernas presa num dissipador, o **TRIAC**, e, perto dela, um chip pequeno que conversa com a rede sem encostar nela: o **optoacoplador**.
+
+Nesta aula você vai conhecer a família dos tiristores, as chaves eletrônicas que controlam cargas ligadas à rede, e o componente que deixa um microcontrolador de 5 V comandar 127 V ou 220 V com segurança.
+
+## O SCR: um diodo que espera a ordem
+
+Na aula sobre o [diodo](../02-diodo/) você viu uma junção PN que conduz num sentido só. O <Term id="tiristor">tiristor</Term> empilha **quatro** camadas: P, N, P, N. O mais simples deles é o <Term id="scr">SCR</Term> (do inglês *silicon controlled rectifier*, retificador controlado de silício). Ele tem três terminais: **anodo** (A), **catodo** (K) e **gatilho** (G), ligado à camada P do meio.
+
+Com o anodo mais positivo que o catodo, o SCR ainda não conduz: uma das junções fica bloqueando. Basta um pulso de corrente no gatilho, de alguns miliampères, para ele ligar. E aqui está a diferença para o transistor: depois de ligado, o SCR **continua conduzindo sozinho**, mesmo sem o pulso. Ele trava ligado.
+
+<Figure caption="Figura 1. Primeiro, as quatro camadas do SCR e o símbolo, um diodo com o gatilho no lado do catodo. Em seguida, o jeito mais usado de entender a trava: as camadas formam um transistor PNP e um NPN, e cada um alimenta a base do outro. Depois que os dois ligam, o pulso no gatilho já não faz falta." alt="Primeiro, um bloco com quatro faixas empilhadas, P, N, P e N, com o anodo no topo, o catodo embaixo e o gatilho saindo da faixa P de baixo; ao lado, o símbolo do SCR, um triângulo com uma barra e um fio de gatilho. Em seguida, um transistor PNP em cima e um NPN embaixo: o coletor do PNP vai à base do NPN, que é o gatilho, e o coletor do NPN vai à base do PNP. Três marcas numeradas mostram a sequência: o pulso no gatilho liga o NPN, o NPN liga o PNP, e o PNP mantém o NPN ligado.">
+  <TiristorCamadas />
+</Figure>
+
+A figura mostra por que ele trava. Lembre do [transistor como chave](../06-transistor-como-chave/): corrente na base liga o transistor. Dentro do SCR, o PNP e o NPN estão ligados de um jeito que a corrente de coletor de um é a corrente de base do outro. O pulso no gatilho liga o NPN, o NPN liga o PNP, e o PNP passa a alimentar a base do NPN. Um segura o outro.
+
+Para desligar o SCR, não adianta tirar o pulso. É preciso fazer a corrente entre anodo e catodo cair abaixo de um valor mínimo, a **corrente de manutenção** ($I_H$). As folhas de dados trazem três números principais:
+
+- $I_{GT}$, a **corrente de disparo do gatilho**: o mínimo no gatilho para o SCR ligar.
+- $I_L$, a **corrente de travamento**: logo depois do pulso, a corrente principal precisa passar desse valor para a trava se firmar; se a carga puxar menos, o SCR desliga junto com o pulso. Costuma ser um pouco maior que $I_H$.
+- $I_H$, a **corrente de manutenção**: abaixo dela, a trava se desfaz e o SCR desliga.
+
+## Explore: o alarme que não para de tocar
+
+O circuito abaixo é um alarme simples, alimentado por uma bateria de 12 V. A sirene está em série com o SCR e com o botão de rearme, que é **normalmente fechado** (NF): apertado, ele abre o circuito. O sensor da porta leva corrente ao gatilho por um resistor de 1 kΩ. No simulador, o SCR dispara com 5 mA no gatilho e se mantém com 10 mA ou mais.
+
+<Simulation circuit="m09/scr-alarme" height={340} />
+
+1. Em repouso, quanto de tensão fica sobre o SCR? A sirene toca?
+2. Aperte e solte o **Sensor da porta**. Quanto passa no gatilho enquanto ele está apertado? E o que acontece com a sirene quando você solta?
+3. Aperte o **Rearme** e solte. Por que a sirene não volta?
+
+Em repouso, o SCR fica com quase os 12 V inteiros e a sirene fica muda: não passa corrente nenhuma. Com o sensor apertado, passam uns 11 mA no gatilho, bem acima dos 5 mA de disparo. O SCR liga, fica com só 0,9 V e a sirene puxa cerca de 27 mA. Quando você solta o sensor, a corrente no gatilho vai a zero, e a sirene continua tocando: os 27 mA estão acima da corrente de manutenção, e a trava se mantém. O rearme interrompe a corrente da sirene. Sem corrente, a trava se desfaz, e quando o botão fecha de novo o SCR continua bloqueando, à espera de outro pulso.
+
+É assim que funcionam alarmes simples e proteções de fontes de alimentação, em que um SCR dispara para curto-circuitar a saída e queimar o fusível quando a tensão passa do limite.
+
+## O TRIAC: o tiristor da corrente alternada
+
+Na <Term id="corrente-alternada">corrente alternada</Term>, a corrente passa por zero duas vezes a cada ciclo, 120 vezes por segundo na rede de 60 Hz. A cada passagem por zero, a corrente de qualquer tiristor cai abaixo da corrente de manutenção e ele desliga sozinho. Na rede, não é preciso botão de rearme: o tiristor desliga no fim de cada semiciclo e espera o próximo pulso.
+
+O SCR só conduz num sentido, então aproveita metade da senoide. O <Term id="triac">TRIAC</Term> é como dois SCRs montados ao contrário, um ao lado do outro, com um gatilho só: ele conduz nos dois sentidos e serve para cargas de corrente alternada. Os terminais de força se chamam **MT1** e **MT2** (em algumas folhas de dados, A1 e A2), e o gatilho é medido em relação ao MT1. O pulso pode ser positivo ou negativo, e o TRIAC dispara nos dois semiciclos.
+
+<Part3D
+  part="transistor-to220"
+  props={{ code: 'BT136', heatsink: true, insulator: false }}
+  annotations
+  alt="TRIAC no encapsulamento TO-220 preso a um dissipador de alumínio com aletas. O corpo preto tem o código impresso, a aba de metal com o furo do parafuso fica encostada no dissipador, e as três pernas são, da esquerda para a direita, MT1, MT2 e gatilho."
+  caption="TRIAC em TO-220, a mesma embalagem dos MOSFETs da aula anterior. Neste modelo, a aba de metal está ligada ao MT2, a perna do meio: com a placa na tomada, a aba e o dissipador ficam com a tensão da rede."
+>
+  <MosfetTo220
+    pins={['MT1', 'MT2', 'G']}
+    code="BT136"
+    heatsink
+    tab={['aba de metal: ligada', 'ao MT2, na rede']}
+  />
+</Part3D>
+
+Repare na aba. Em TRIACs como o BT136, ela é ligada ao MT2 e, portanto, à rede. Existem TRIACs de **aba isolada**, como os da série BTA, em que o dissipador fica sem tensão; os da série BTB e o BT136 não têm essa isolação. Só a folha de dados diz qual é o caso, e por isso a regra é tratar todo dissipador de TRIAC como parte da rede.
+
+## Controle de fase: o dimmer
+
+O TRIAC pode simplesmente ligar e desligar uma carga, no lugar de um relé, sem faísca e sem desgaste. Mas o uso mais esperto é o <Term id="controle-de-fase">controle de fase</Term>. Em cada semiciclo, o circuito espera um pouco depois da passagem por zero e só então dispara o TRIAC. Ele conduz do disparo até o fim do semiciclo, e a carga recebe só esse pedaço da senoide. Disparando cedo, a carga recebe quase tudo. Disparando tarde, recebe uma fatia pequena.
+
+O atraso é medido pelo **ângulo de disparo**, $\alpha$, em que 0° é o começo do semiciclo e 180° é o fim. Em 60 Hz, cada semiciclo dura $1/120\ \text{s} \approx 8{,}33\ \text{ms}$, então:
+
+$$
+\alpha = 180^\circ \times \frac{t_{\text{atraso}}}{8{,}33\ \text{ms}}
+$$
+
+em que $t_{\text{atraso}}$ é o tempo entre a passagem por zero e o disparo, em milissegundos. Disparar 4,17 ms depois do zero é disparar em 90°, no pico da senoide: a carga recebe a segunda metade de cada semiciclo.
+
+<Figure caption="Figura 2. Controle de fase com disparo em 64°. A tensão da tomada (tracejada) segue a senoide inteira; a lâmpada só recebe a parte sombreada, do disparo até o fim de cada semiciclo. Embaixo, os pulsos que disparam o TRIAC, um positivo e um negativo por ciclo." alt="Gráfico de um ciclo da rede. A senoide da tomada aparece tracejada. A tensão na lâmpada fica em zero do começo de cada semiciclo até 64 graus, cerca de 3 milissegundos, e então salta para a senoide e a acompanha até o zero, com a área sombreada. Embaixo, um pulso para cima no disparo do semiciclo positivo e um para baixo no negativo. Uma nota indica que o TRIAC desliga sozinho no zero.">
+  <TiristorFase alpha={64} />
+</Figure>
+
+O <Term id="dimmer">dimmer</Term> de parede faz isso com quatro peças. Um resistor e um potenciômetro carregam um capacitor a cada semiciclo. Quando a tensão no capacitor chega a uns 32 V, o <Term id="diac">DIAC</Term>, um componente de dois terminais que só conduz acima dessa tensão, conduz de repente e descarrega o capacitor no gatilho do TRIAC, num pulso curto. Com o potenciômetro em resistência baixa, o capacitor carrega depressa e o disparo vem cedo. Com resistência alta, carrega devagar, e o disparo vem tarde. O DIAC mais comum, o DB3, dispara por volta de 32 V (valor típico).
+
+<DeepDive title="Quanto de tensão chega à carga">
+
+Numa carga que se comporta como um resistor, como um aquecedor, dá para calcular a tensão eficaz que sobra para cada ângulo de disparo, com $\alpha$ em radianos:
+
+$$
+V_{\text{carga}} = V_{\text{rede}} \cdot \sqrt{1 - \frac{\alpha}{\pi} + \frac{\operatorname{sen}(2\alpha)}{2\pi}}
+$$
+
+em que $V_{\text{rede}}$ é a tensão eficaz da tomada. Com $\alpha = 90^\circ = \pi/2$, a raiz vale $\sqrt{0{,}5} \approx 0{,}71$, e a potência no resistor cai para a metade. Com $\alpha = 64^\circ$ (1,12 rad), a conta dá cerca de 111 V numa tomada de 127 V; o simulador, logo abaixo, mostra cerca de 110 V, porque o TRIAC fica com 1 V ou 2 V quando conduz.
+
+Numa lâmpada incandescente, a potência não segue a conta à risca: com menos tensão, o filamento esfria, a resistência dele cai e a lâmpada puxa um pouco mais de corrente do que um resistor puxaria.
+
+</DeepDive>
+
+## Explore: dimmer com TRIAC
+
+O circuito abaixo é um dimmer ligado a uma lâmpada incandescente de 60 W numa tomada de 127 V. A rede de atraso tem um resistor de 3,3 kΩ, um potenciômetro de 330 kΩ e um capacitor de 100 nF. O osciloscópio mostra a tensão na lâmpada (canal 1) e no capacitor (canal 2); o multímetro mostra as tensões eficazes. A simulação roda 50 vezes mais devagar que o tempo real.
+
+<Simulation circuit="m09/dimmer-triac" instruments={['osciloscopio', 'multimetro']} height={400} />
+
+1. Rode a simulação com o potenciômetro em 80 % e use o Autoajuste do osciloscópio. Quanto tempo depois do começo de cada semiciclo a lâmpada recebe tensão? Que ângulo de disparo é esse?
+2. No multímetro, em CA, leia a tensão na lâmpada. Depois leve o potenciômetro a 100 % e a 50 % e leia de novo.
+3. Olhe o capacitor no canal 2: até quanto a tensão dele sobe antes de cada disparo? Gire o potenciômetro para baixo até a lâmpada apagar.
+
+Em 80 %, a lâmpada fica sem tensão nos primeiros 3 ms de cada semiciclo: um ângulo de disparo de cerca de 64°, como na Figura 2. Ela recebe uns 110 V eficazes e consome perto de 50 W. Em 100 %, o disparo vem em menos de 1 ms (uns 18°), e a lâmpada recebe uns 126 V e 60 W, quase como ligada direto. Em 50 %, o disparo vem 5 ms depois do zero (uns 107°, já depois do pico), e a lâmpada fica com uns 70 V e 27 W, um brilho fraco e alaranjado.
+
+O capacitor sobe até uns 32 V, positivos num semiciclo e negativos no outro, e despenca no instante do disparo: é o DIAC descarregando o capacitor no gatilho. Abaixo de uns 40 %, o disparo vem tão tarde que o filamento mal esquenta, e a lâmpada parece apagada. Em 25 %, a resistência fica tão alta que o capacitor não chega aos 32 V antes de o semiciclo acabar: o DIAC nunca conduz, o TRIAC nunca dispara e não passa corrente nenhuma.
+
+## Optoacoplador: o sinal passa, a rede não
+
+Um <Term id="microcontrolador">microcontrolador</Term> que comanda um TRIAC, ou que precisa saber o que acontece na rede, tem um problema: a placa dele trabalha com 5 V ou 3,3 V e muitas vezes tem conectores, botões e displays que a pessoa toca. Ligar a rede direto nessa placa colocaria 127 V ou 220 V ao alcance da mão.
+
+O <Term id="optoacoplador">optoacoplador</Term> resolve isso com luz. Dentro de um encapsulamento pequeno, de 4 ou 6 pinos, há um LED infravermelho de um lado e um receptor de luz do outro, separados por um material transparente e isolante. A corrente no LED vira luz, a luz liga o receptor, e nenhum fio atravessa. Os dois circuitos ficam com <Term id="isolacao-galvanica">isolação galvânica</Term>: nenhum caminho de condução entre eles. No PC817, um optoacoplador de 4 pinos muito comum, a folha de dados garante a isolação para 5.000 V eficazes entre os lados.
+
+<Part3D
+  part="optocoupler"
+  props={{ package: 'dip4', code: 'PC817', active: true }}
+  annotations
+  alt="Optoacoplador de quatro pinos com o topo cortado. Do lado esquerdo, nos pinos 1 e 2, fica o LED infravermelho; do lado direito, nos pinos 4 e 3, o fototransistor. Entre os dois, uma faixa de material transparente e isolante, que só a luz atravessa."
+  caption="Optoacoplador de 4 pinos, como o PC817, com o topo cortado. O LED fica do lado da rede, o fototransistor do lado da placa, e só a luz atravessa a isolação. A bolinha marca o pino 1."
+>
+  <TiristorOpto code="PC817" />
+</Part3D>
+
+O receptor muda conforme o uso:
+
+- **Fototransistor**, como no PC817: a luz faz o papel da corrente de base. Serve para levar um sinal de um lado para o outro, por exemplo para o microcontrolador saber se a rede está presente ou em que semiciclo ela está.
+- **Fototriac**, como no MOC3021, de 6 pinos: a luz dispara um pequeno TRIAC, que por sua vez dispara o TRIAC de potência. É o jeito comum de um microcontrolador comandar um TRIAC na rede. O LED pede de 5 mA a 15 mA, conforme a versão (veja a folha de dados).
+
+Existe uma versão do fototriac com **detector de passagem por zero**, como o MOC3041: ele só dispara perto do zero da senoide, mesmo que o LED acenda no meio do semiciclo. Isso diminui o ruído elétrico ao ligar uma carga, mas impede o controle de fase. Para dimmer e partida suave, o fototriac precisa ser do tipo sem detector, como o MOC3021, e o microcontrolador precisa saber quando a rede passa por zero para calcular o atraso. É aí que entra o circuito da próxima simulação.
+
+## Explore: o optoacoplador lendo a rede
+
+Do lado da rede, a tomada acende o LED do optoacoplador através de dois resistores de 47 kΩ em série. Um diodo comum, ligado ao contrário em paralelo com o LED, conduz no semiciclo negativo e protege o LED da tensão reversa. Do lado da placa, o fototransistor puxa para 0 V a saída, que tem um resistor de 10 kΩ para os 5 V. O resistor "Isolação", de 10 GΩ, representa o único caminho entre os dois lados: a isolação do componente.
+
+<Simulation circuit="m09/optoacoplador-rede" instruments={['osciloscopio', 'multimetro']} height={380} />
+
+1. Rode a simulação e compare, no osciloscópio, a tensão da tomada (canal 1) com a saída para a placa (canal 2); o Autoajuste acerta as escalas. Em qual semiciclo a saída fica em 0 V?
+2. Qual é a corrente de pico nos resistores, que é a corrente no LED no semiciclo positivo?
+3. Passe a tomada para 220 V. O que muda na corrente? E na saída?
+
+A saída fica em 0 V durante quase todo o semiciclo positivo e em 5 V durante todo o negativo: uma onda quadrada de 60 Hz, que o microcontrolador lê como um sinal digital comum. Ela cai logo que a rede passa de uns 25 V, menos de meio milissegundo depois do zero. O microcontrolador usa essa borda para saber onde está a passagem por zero e calcular quando disparar o TRIAC. No pico, o LED recebe cerca de 1,9 mA, o suficiente para o fototransistor puxar a saída para 0 V com folga. Em 220 V, o pico sobe para uns 3,3 mA, e a saída faz o mesmo desenho: quem muda é o calor nos resistores, como mostra o exemplo a seguir.
+
+## Exemplo resolvido: os resistores do LED na rede
+
+Você vai usar o circuito da simulação numa placa que pode ser ligada em 127 V ou em 220 V. Os resistores são de 47 kΩ e 1/4 W, ou seja, aguentam 0,25 W cada um. Eles servem para as duas tensões?
+
+**Passo 1: a corrente de pico em 127 V.** O pico da tomada de 127 V é de cerca de 180 V. Os dois resistores somam 94 kΩ, e a queda no LED, de 1 V a 2 V, é pequena perto disso:
+
+$$
+I_{\text{pico}} \approx \frac{180\ \text{V}}{94.000\ \Omega} \approx 1{,}9\ \text{mA}
+$$
+
+**Passo 2: a potência em 127 V.** Com o diodo em paralelo, passa corrente nos resistores nos dois semiciclos, então vale a tensão eficaz da tomada sobre os 94 kΩ:
+
+$$
+P = \frac{V^2}{R} = \frac{127^2}{94.000} \approx 0{,}17\ \text{W}
+$$
+
+São cerca de 0,09 W em cada resistor, bem abaixo dos 0,25 W.
+
+**Passo 3: em 220 V.** O pico vai a uns 311 V, e a corrente de pico a 3,3 mA. A potência:
+
+$$
+P = \frac{220^2}{94.000} \approx 0{,}51\ \text{W}
+$$
+
+Agora são cerca de 0,26 W em cada resistor, acima do que um resistor de 1/4 W aguenta. Para 220 V, use resistores de 1/2 W ou de resistência maior.
+
+**Por que dois resistores, e não um de 94 kΩ?** Além da potência, todo resistor tem uma tensão máxima de trabalho. Num resistor comum de 1/4 W, ela costuma ficar entre 200 V e 250 V (valor típico; confira a folha de dados), e os 311 V de pico da rede de 220 V passam disso. Divididos por dois, ficam uns 155 V em cada um. E, se um deles entrar em curto, o outro ainda limita a corrente do LED.
+
+<RealCase title="O TRIAC e o optoacoplador na central do portão">
+
+A central de um portão eletrônico é um bom exemplo de tudo o que você viu nesta aula. Na central genérica do curso, a CD-1, dois relés escolhem o sentido do motor e um TRIAC liga, desliga e dosa a força. Para a **partida suave**, o microcontrolador dispara o TRIAC tarde no começo do movimento e vai adiantando o disparo, até o nível de força ajustado no trimpot. É o controle de fase do dimmer, só que comandado por programa e não por um capacitor e um DIAC. A aula <LinkAula id="m16-portao/03-a-central-por-dentro" /> mostra a placa inteira e a sequência de relés e TRIAC.
+
+Em muitas centrais, o caminho do comando passa por dois optoacopladores. Um, ligado à rede como o da simulação, avisa o microcontrolador de cada passagem por zero. O outro, um fototriac como o MOC3021, leva o pulso do microcontrolador ao gatilho do TRIAC de potência. A placa é dividida em dois lados, e é comum o rasgo entre eles passar por baixo dos optoacopladores.
+
+O TRIAC fica preso num dissipador de alumínio, porque conduz a corrente do motor e esquenta. Se a aba dele não for isolada, o dissipador está ligado à rede, mesmo com o portão parado. E quando o TRIAC queima, como o MOSFET, ele costuma ficar em curto: a carga fica ligada sem controle. Na CD-1, os relés evitam o pior, porque o motor só anda se algum relé fechar.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+Tudo nesta aula envolve a rede elétrica. Monte e teste esses circuitos só no simulador ou, numa bancada, com a supervisão de alguém experiente e os cuidados do aviso no começo da aula.
+
+- **Encostar no dissipador do TRIAC com a placa ligada.** Em muitos TRIACs a aba está ligada ao MT2. Trate dissipador, aba e parafuso como parte da rede.
+- **Achar que o TRIAC desligado isola a carga.** Ele não abre o circuito como um interruptor: deixa passar uma pequena corrente de fuga, e a carga continua ligada à fase. Para mexer na lâmpada ou no motor, desligue o disjuntor.
+- **Prender a garra do terra do osciloscópio no circuito da rede.** A garra está ligada ao terra da tomada, e prendê-la num ponto da rede faz um curto-circuito pela ponta de prova. Veja a aula <LinkAula id="m03-medicoes/05-osciloscopio" />. Sinais ligados à rede se medem com ponta diferencial ou osciloscópio de canais isolados.
+- **Usar dimmer de TRIAC com a carga errada.** Ele foi feito para lâmpadas incandescentes e halógenas. Lâmpada LED só funciona com ele se a embalagem disser que é dimerizável; as outras piscam, zumbem ou queimam. Motores e transformadores pedem um controle próprio.
+- **Passar trilhas da rede perto do lado de baixa tensão.** A isolação do optoacoplador só vale se a placa respeitar a distância entre os dois lados. Nunca passe uma trilha da rede por baixo do optoacoplador.
+- **Usar o optoacoplador com detecção de zero num dimmer.** O MOC3041 e seus parentes só disparam perto do zero e não fazem controle de fase.
+- **Trocar o TRIAC queimado e ligar de novo.** Como ele costuma queimar em curto, descubra antes o motivo: motor travado, falta de dissipador ou um pico de tensão na rede.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'Um SCR alimentado por uma bateria disparou com um pulso no gatilho. O que faz ele desligar?',
+      options: [
+        {
+          text: 'Interromper a corrente entre anodo e catodo, ou fazê-la cair abaixo da corrente de manutenção',
+          correct: true,
+          feedback:
+            'Isso. Depois de disparado, o SCR trava ligado. Só desliga quando a corrente principal cai abaixo da corrente de manutenção, como no botão de rearme do alarme.',
+        },
+        {
+          text: 'Tirar a corrente do gatilho',
+          feedback:
+            'Essa é a diferença para o transistor. Depois do disparo, o gatilho não comanda mais nada: o SCR continua conduzindo sozinho.',
+        },
+        {
+          text: 'Aplicar uma tensão maior no anodo',
+          feedback: 'Mais tensão no anodo só aumenta a corrente. Para desligar, a corrente precisa cair.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Ligado à rede, o TRIAC desliga sozinho a cada passagem da corrente por zero e precisa de um novo pulso no gatilho para conduzir no semiciclo seguinte.',
+      answer: true,
+      explanation:
+        'Na passagem por zero, a corrente cai abaixo da corrente de manutenção e a trava se desfaz. É por isso que o dimmer dispara o TRIAC de novo a cada semiciclo.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Na rede de 60 Hz, um dimmer dispara o TRIAC 4,17 ms depois de cada passagem por zero. Qual é o ângulo de disparo, em graus?',
+      answer: 90,
+      tolerance: 0.02,
+      unit: '°',
+      explanation:
+        'Cada semiciclo dura 8,33 ms e corresponde a 180°. α = 180° × 4,17 / 8,33 ≈ 90°: o disparo acontece no pico da senoide.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'O LED de um optoacoplador é ligado a uma tomada de 127 V por resistores que somam 100 kΩ, com um diodo em paralelo com o LED. Quantos watts os resistores dissipam juntos? (Responda em W.)',
+      answer: 0.16,
+      tolerance: 0.05,
+      unit: 'W',
+      explanation:
+        'Com o diodo, passa corrente nos dois semiciclos, então vale a tensão eficaz: P = V² / R = 127² / 100.000 ≈ 0,16 W.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'No dimmer, o que acontece quando você aumenta a resistência do potenciômetro?',
+      options: [
+        {
+          text: 'O capacitor demora mais para chegar à tensão do DIAC, o disparo atrasa e a lâmpada recebe menos tensão',
+          correct: true,
+          feedback:
+            'Isso. Com mais resistência, o capacitor carrega mais devagar. O DIAC dispara mais tarde em cada semiciclo e a lâmpada recebe uma fatia menor da senoide.',
+        },
+        {
+          text: 'O TRIAC passa a conduzir menos corrente durante todo o semiciclo',
+          feedback:
+            'O TRIAC não limita a corrente: ou ele está desligado, ou conduz totalmente. O que muda é o momento do disparo.',
+        },
+        {
+          text: 'A tensão de disparo do DIAC sobe',
+          feedback:
+            'A tensão de disparo é do próprio DIAC, uns 32 V. O potenciômetro muda o tempo que o capacitor leva para chegar lá.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você quer que um microcontrolador faça a partida suave de um motor ligado à rede, com controle de fase. Qual optoacoplador vai entre ele e o TRIAC?',
+      options: [
+        {
+          text: 'Um fototriac sem detector de passagem por zero, como o MOC3021',
+          correct: true,
+          feedback:
+            'Isso. Ele dispara na hora em que o LED acende, em qualquer ponto do semiciclo, e o microcontrolador escolhe o atraso.',
+        },
+        {
+          text: 'Um fototriac com detector de passagem por zero, como o MOC3041',
+          feedback:
+            'Esse só dispara perto do zero da senoide. Serve para ligar e desligar a carga com pouco ruído, mas não faz controle de fase.',
+        },
+        {
+          text: 'Nenhum: o pino do microcontrolador pode ir direto ao gatilho do TRIAC',
+          feedback:
+            'O gatilho é medido em relação ao MT1, que está ligado à rede. Ligar o pino direto colocaria a placa inteira no potencial da rede.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada componente ao que ele faz.',
+      pairs: [
+        ['SCR', 'Conduz num sentido e trava ligado depois de um pulso no gatilho'],
+        ['TRIAC', 'Conduz nos dois sentidos e desliga a cada passagem por zero'],
+        ['DIAC', 'Conduz de repente quando a tensão passa de uns 32 V'],
+        ['Optoacoplador', 'Leva um sinal por luz entre dois circuitos isolados'],
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **SCR** tem quatro camadas e trava ligado depois de um pulso no gatilho. Só desliga quando a corrente cai abaixo da corrente de manutenção.
+- O **TRIAC** conduz nos dois sentidos e, na rede, desliga sozinho a cada passagem por zero. A aba de muitos TRIACs está ligada à rede.
+- No **controle de fase**, o disparo atrasa um ângulo $\alpha$ em cada semiciclo: quanto mais tarde, menos tensão na carga. Em 60 Hz, 180° são 8,33 ms.
+- No **dimmer**, um potenciômetro e um capacitor definem o atraso, e o **DIAC** dispara o TRIAC quando o capacitor chega a uns 32 V.
+- O **optoacoplador** leva sinais por luz entre a rede e o microcontrolador, com isolação galvânica. O fototransistor lê a rede; o fototriac dispara o TRIAC.
+
+Este é o fim do módulo de semicondutores. No próximo módulo, as peças que você conheceu, como diodos, capacitores, transistores e reguladores, se juntam para transformar a tensão da tomada na tensão estável que alimenta os circuitos, começando pela <LinkAula id="m10-fontes/01-fonte-linear" />.

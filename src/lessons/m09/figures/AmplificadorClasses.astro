@@ -1,0 +1,150 @@
+---
+/* 9.7: the current in the output transistors over two cycles of a sine, for
+   classes A, B, AB and D. Above the line, the NPN (or the only transistor);
+   below it, the PNP. Shapes only, not to scale. */
+const W = 140;
+const H = 90;
+const N = 161;
+/** Plots f over two cycles; where f is null the pen lifts (the transistor is off). */
+const path = (f: (s: number) => number | null, x0: number, y0: number) => {
+  let d = '';
+  let down = false;
+  for (let k = 0; k < N; k++) {
+    const y = f(Math.sin((4 * Math.PI * k) / (N - 1)));
+    if (y === null) {
+      down = false;
+      continue;
+    }
+    d += `${down ? 'L' : 'M'}${(x0 + (W * k) / (N - 1)).toFixed(1)} ${(y0 - y).toFixed(1)}`;
+    down = true;
+  }
+  return d;
+};
+
+const GAP = 0.35;
+const Q = 0.12;
+const SCALE = 38;
+const PANELS = [
+  { x: 24, y: 44, title: 'Classe A', note: 'conduz o ciclo todo' },
+  { x: 204, y: 44, title: 'Classe B', note: 'metade cada, com um vão' },
+  { x: 24, y: 186, title: 'Classe AB', note: 'pouco mais da metade' },
+  { x: 204, y: 186, title: 'Classe D', note: 'liga e desliga (PWM)' },
+];
+const [a, b, ab, d] = PANELS.map((p) => ({ ...p, mid: p.y + H / 2 }));
+
+// Class A: one transistor, always on, around its rest current.
+const classA = path((s) => SCALE * (0.5 + 0.42 * s), a!.x, a!.mid);
+// Class B: each transistor only past the 0,6 V of its junction.
+const bN = path((s) => (s > GAP ? SCALE * (s - GAP) : null), b!.x, b!.mid);
+const bP = path((s) => (s < -GAP ? SCALE * (s + GAP) : null), b!.x, b!.mid);
+// The gap: neither conducts, and the output stays at zero.
+const bGap = path((s) => (Math.abs(s) <= GAP ? 0 : null), b!.x, b!.mid);
+// Class AB: both carry a little rest current, the halves overlap at zero.
+const share = (s: number) => (s + Math.sqrt(s * s + 4 * Q * Q)) / 2;
+const abN = path((s) => SCALE * share(s), ab!.x, ab!.mid);
+const abP = path((s) => -SCALE * share(-s), ab!.x, ab!.mid);
+// Class D: on or off, the width of each pulse follows the signal.
+const PULSES = 20;
+const dPulses = Array.from({ length: PULSES }, (_, k) => {
+  const t = (k + 0.5) / PULSES;
+  const duty = 0.5 + 0.42 * Math.sin(4 * Math.PI * t);
+  const x0 = d!.x + (W * k) / PULSES;
+  const x1 = x0 + (W / PULSES) * duty;
+  const x2 = x0 + W / PULSES;
+  const hi = d!.mid - SCALE;
+  const lo = d!.mid + SCALE;
+  return `${k ? 'L' : 'M'}${x0.toFixed(1)} ${hi}L${x1.toFixed(1)} ${hi}L${x1.toFixed(1)} ${lo}L${x2.toFixed(1)} ${lo}`;
+}).join('');
+const dSine = path((s) => SCALE * 0.84 * s, d!.x, d!.mid);
+---
+
+<svg viewBox="0 0 360 318" width="360" height="318" class="fig" aria-hidden="true">
+  {PANELS.map((p) => (
+    <g>
+      <rect x={p.x - 6} y={p.y - 4} width={W + 12} height={H + 8} rx="6" class="panel" />
+      <text x={p.x - 6} y={p.y - 24} class="title">
+        {p.title}
+      </text>
+      <text x={p.x - 6} y={p.y - 10} class="note">
+        {p.note}
+      </text>
+      <path d={`M${p.x} ${p.y + H / 2}H${p.x + W}`} class="zero" />
+    </g>
+  ))}
+  <path d={classA} class="npn" />
+  <path d={bN} class="npn" />
+  <path d={bP} class="pnp" />
+  <path d={bGap} class="gap" />
+  <path d={abN} class="npn" />
+  <path d={abP} class="pnp" />
+  <path d={dPulses} class="npn thin" />
+  <path d={dSine} class="filtered" />
+
+  <g transform="translate(18 306)">
+    <path d="M0 -4H20" class="npn" />
+    <text x="25" y="0" class="legend">
+      de cima (NPN)
+    </text>
+    <path d="M112 -4H132" class="pnp" />
+    <text x="137" y="0" class="legend">
+      de baixo (PNP)
+    </text>
+    <path d="M226 -4H246" class="filtered" />
+    <text x="251" y="0" class="legend">
+      filtrado
+    </text>
+  </g>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .panel {
+    fill: var(--surface);
+    stroke: var(--border);
+  }
+  .zero {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  .npn,
+  .pnp,
+  .filtered {
+    fill: none;
+    stroke-width: 2.4;
+    stroke-linejoin: round;
+  }
+  .npn {
+    stroke: var(--accent);
+  }
+  .pnp {
+    stroke: var(--copper);
+  }
+  .gap {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 3.5;
+  }
+  .thin {
+    stroke-width: 1.2;
+    opacity: 0.7;
+  }
+  .filtered {
+    stroke: var(--fg);
+    stroke-dasharray: 5 3;
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .note,
+  .legend {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+</style>

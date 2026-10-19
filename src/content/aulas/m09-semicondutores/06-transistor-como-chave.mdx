@@ -1,0 +1,344 @@
+---
+titulo: Transistor bipolar como chave
+modulo: m09-semicondutores
+ordem: 6
+nivel: I
+duracaoMin: 35
+objetivos:
+  - Identificar emissor, base e coletor de um transistor bipolar NPN e PNP, no símbolo e na peça
+  - Explicar como uma corrente pequena na base controla uma corrente grande no coletor
+  - Distinguir corte, saturação e região ativa, e dizer por que uma chave deve ficar só nas duas primeiras
+  - Calcular o resistor de base para saturar um transistor que aciona um relé ou uma lâmpada
+  - Explicar o pico de tensão de uma bobina desligada e como o diodo de roda livre protege o transistor
+prerequisitos:
+  - m09-semicondutores/02-diodo
+  - m01-eletricidade-do-zero/04-lei-de-ohm
+  - m04-passivos/07-chaves-botoes-e-reles
+tags: [transistor, BJT, NPN, PNP, corte, saturação, relé, diodo de roda livre, Arduino, ESP32]
+seguranca: baixa-tensao
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import TransistorNPN from '../../../lessons/m09/figures/TransistorNPN.astro';
+import TransistorTO92 from '../../../lessons/m09/figures/TransistorTO92.astro';
+
+Um pino de Arduino ou de ESP32 fornece poucos miliampères, a 5 V ou a 3,3 V. A bobina de um relé de 12 V pede uns 30 mA, a 12 V; uma lâmpada ou uma fita de LED, bem mais. Ligar a carga direto no pino não funciona e ainda pode queimar a placa. Entre o pino e a carga quase sempre existe uma peça de três pernas que obedece ao pino e aguenta a corrente: o **transistor**.
+
+Nesta aula você vai ver como o transistor bipolar funciona por dentro, como usá-lo como chave liga e desliga, como calcular o resistor da base e por que toda bobina comandada por ele precisa de um diodo do lado.
+
+## Duas junções num cristal só
+
+Na aula sobre a [junção PN](../01-juncao-pn/) você viu o que acontece quando silício tipo P encosta em silício tipo N. O <Term id="transistor">transistor</Term> bipolar tem **duas** junções: é um sanduíche de três regiões. No tipo **NPN**, o mais usado, uma camada fina de silício tipo P fica entre duas regiões tipo N. Cada região tem um terminal:
+
+- **Emissor (E):** região N muito dopada, cheia de elétrons livres. É ela que "emite" os portadores.
+- **Base (B):** a camada P do meio, fininha (bem menos de um milésimo de milímetro) e pouco dopada.
+- **Coletor (C):** a outra região N, maior, que "coleta" os portadores.
+
+Ligue o emissor ao negativo, o coletor a uma carga que vai ao positivo e aplique na base uma tensão um pouco acima de 0,6 V. A junção base-emissor fica em polarização direta e conduz como um diodo: o emissor injeta uma enxurrada de elétrons na base. Se a base fosse grossa, esses elétrons encontrariam lacunas e voltariam todos pelo terminal da base. Só que ela é tão fina que quase todos a atravessam antes de se recombinar, chegam à junção base-coletor e são puxados pelo campo elétrico dela para o coletor, que está mais positivo. Só uns poucos, cerca de um em cada duzentos num transistor típico, ficam na base e saem pelo terminal dela.
+
+<Figure caption="Figura 1. No primeiro desenho, o NPN por dentro: os elétrons saem do emissor, quase todos atravessam a base fininha e chegam ao coletor; poucos ficam na base. As setas verdes são as correntes no sentido convencional, contrário ao dos elétrons: a do coletor é grande, a da base é pequena, e a do emissor é a soma das duas. No segundo, os símbolos do NPN e do PNP." alt="Desenho de três regiões lado a lado: emissor tipo N, base tipo P estreita e coletor tipo N. Elétrons saem do emissor e atravessam a base até o coletor; um deles desce pelo terminal da base. Abaixo, os terminais E, B e C com as correntes IE, IB e IC. Ao lado, os símbolos do transistor NPN, com a seta do emissor para fora, e do PNP, com a seta para dentro.">
+  <TransistorNPN />
+</Figure>
+
+O resultado é que a corrente de coletor fica proporcional à corrente de base, e muito maior que ela. A razão entre as duas é o <Term id="ganho-de-corrente">ganho de corrente</Term>, chamado de β (beta) ou, nas folhas de dados, de hFE:
+
+$$
+I_\text{C} = \beta \cdot I_\text{B} \qquad\qquad I_\text{E} = I_\text{C} + I_\text{B}
+$$
+
+em que $I_\text{C}$ é a corrente de coletor, $I_\text{B}$ a de base e $I_\text{E}$ a de emissor, que leva as duas. Com β = 200, 1 mA na base controla 200 mA no coletor.
+
+Pense numa comporta de represa com uma manivela pequena. Um esforço pequeno na manivela controla uma vazão enorme, mas a água vem da represa, não da sua mão. No transistor é igual: a energia que chega à carga vem da fonte do coletor, e a base só controla quanto passa. A analogia deixa de valer num ponto: a comporta aberta deixa passar o que a represa der, e o transistor só deixa passar até β vezes a corrente de base.
+
+### O símbolo e o PNP
+
+No símbolo, a base é o traço grosso, e o emissor é o terminal com a seta. A seta mostra o sentido convencional da corrente na junção base-emissor: no NPN ela aponta para fora (um jeito de lembrar: **N**ão **P**e**N**etra). No **PNP**, as regiões são invertidas, todas as tensões e correntes também, e a seta aponta para dentro. O PNP conduz quando a base fica uns 0,7 V **abaixo** do emissor, e por isso costuma ficar do lado do positivo da carga. Nesta aula você vai usar o NPN, que fica do lado do negativo.
+
+### A peça
+
+<Part3D
+  part="transistor-to92"
+  props={{ code: 'BC548', pinout: 'CBE', type: 'npn' }}
+  annotations
+  alt="Transistor BC548 no encapsulamento TO-92: corpo preto de plástico com uma face plana impressa e a outra arredondada, e três terminais embaixo. Olhando a face plana com os terminais para baixo, a ordem é coletor, base e emissor."
+  caption="O BC548 no encapsulamento TO-92, o mais comum para transistores pequenos."
+>
+  <TransistorTO92 />
+</Part3D>
+
+Os transistores pequenos vêm no **TO-92**, o corpinho preto com uma face plana, onde vai impresso o código. **A ordem dos terminais muda de um modelo para outro.** No BC548 e no BC337, olhando a face plana com as pernas para baixo, a ordem é coletor, base e emissor (C B E); no 2N2222 e no 2N3904 nesse encapsulamento, é emissor, base e coletor (E B C). Confira sempre na folha de dados. Na dúvida, o multímetro na escala de <Term id="teste-de-diodo">teste de diodo</Term> ajuda: a base é o terminal que conduz para os outros dois, e as duas junções aparecem como diodos (veja a aula <LinkAula id="m03-medicoes/04-resistencia-continuidade-e-diodo" />).
+
+## Corte, saturação e região ativa
+
+Um transistor trabalha em três situações, as **regiões de operação**:
+
+| Região | Base | Coletor | Como se comporta |
+|--------|------|---------|------------------|
+| Corte | Sem corrente (VBE abaixo de uns 0,5 V) | Quase nada passa; VCE fica com a tensão da fonte | Chave aberta |
+| Ativa | Corrente moderada | IC = β × IB; VCE fica no meio do caminho | Amplificador |
+| Saturação | Corrente de sobra | A carga limita a corrente; VCE cai para 0,05 a 0,3 V | Chave fechada |
+
+O <Term id="corte-e-saturacao">corte e a saturação</Term> são os dois estados de uma chave. A região ativa é a do amplificador, assunto da próxima aula. Para uma chave, ela é um problema por causa do calor. A potência dissipada no transistor é:
+
+$$
+P = V_\text{CE} \cdot I_\text{C}
+$$
+
+em que $V_\text{CE}$ é a tensão entre coletor e emissor. No corte, $I_\text{C}$ é quase zero; na saturação, $V_\text{CE}$ é quase zero. Nos dois casos, quase nada esquenta. Na região ativa, há tensão **e** corrente ao mesmo tempo, e o transistor vira um aquecedor. Uma chave deve estar sempre cortada ou saturada, e passar de um estado para o outro depressa.
+
+## Quanto de corrente na base
+
+Saturar quer dizer dar à base mais corrente do que a carga precisa dividida por β. O roteiro:
+
+1. **Corrente da carga**, com o transistor saturado (VCE de uns 0,2 V):
+
+$$
+I_\text{C} = \frac{V_\text{CC} - V_\text{CE(sat)}}{R_\text{carga}}
+$$
+
+2. **Corrente mínima de base**, com o menor β da folha de dados (o β varia muito de peça para peça):
+
+$$
+I_\text{B(min)} = \frac{I_\text{C}}{\beta_\text{min}}
+$$
+
+3. **Folga.** Use pelo menos duas a três vezes esse mínimo. Uma regra prática muito usada, quando não se quer depender do β, é $I_\text{B} \approx I_\text{C} / 10$.
+
+4. **Resistor de base**, descontando os cerca de 0,7 V da junção base-emissor:
+
+$$
+R_\text{B} = \frac{V_\text{pino} - V_\text{BE}}{I_\text{B}}
+$$
+
+5. **Conferir o pino.** A corrente $I_\text{B}$ sai do pino do microcontrolador e precisa ficar bem abaixo do limite dele.
+
+## Explore: o transistor como chave
+
+No circuito abaixo, o pino de um <Term id="microcontrolador">microcontrolador</Term> (5 V) comanda, por um resistor RB, a base de um transistor NPN pequeno, do tipo do BC337. O transistor liga uma lâmpada de 12 V e 1,2 W, que pede 0,1 A acesa. O β do transistor simulado é 250, um valor típico.
+
+<Simulation circuit="m09/transistor-chave" />
+
+1. Com o pino em 5 V e RB = 1 kΩ, anote a corrente de base, a corrente na lâmpada, a tensão VCE e a potência no transistor.
+2. Coloque o pino em 0 V. O que acontece?
+3. Volte o pino para 5 V e aumente RB devagar até uns 22 kΩ. Acompanhe a lâmpada, VCE e a potência no transistor. Clique no transistor para ver a temperatura dele.
+
+Com RB = 1 kΩ, a base recebe cerca de 4,2 mA, a lâmpada recebe os 0,10 A dela e acende com brilho total. O transistor fica com só 0,07 V e dissipa uns 10 mW: está saturado. Com o pino em 0 V, a corrente some, a lâmpada apaga e VCE sobe para os 12 V da fonte: corte.
+
+Aumentando RB, nada muda até uns 10 kΩ: com β = 250, até 0,4 mA na base ainda dá para os 100 mA. Depois disso, a corrente de base não basta, o transistor sai da saturação e entra na região ativa. Com RB = 22 kΩ, a base recebe 0,19 mA, e o transistor deixa passar só cerca de 52 mA. A lâmpada, com metade da corrente, quase não brilha (o filamento de uma lâmpada só brilha bem perto da corrente nominal). E o transistor fica com cerca de 9 V e dissipa quase meio watt, perto do limite de 0,625 W de um BC337. Em poucos segundos, a temperatura da junção passa de 100 °C. É o erro clássico de quem calcula RB "no limite".
+
+Repare também por que a folga importa. O simulado tem β = 250, mas a folha de dados do BC337 admite peças com β de apenas 100. Com essa peça, RB de 10 kΩ daria uns 46 mA, e a lâmpada nem acenderia.
+
+## Bobinas e o diodo de roda livre
+
+Agora troque a lâmpada pela bobina de um relé. Uma bobina é um <Term id="indutor">indutor</Term>: a corrente nela não pode parar de repente. Na aula sobre <LinkAula id="m04-passivos/05-indutores-e-circuito-rl">indutores</LinkAula>, você vê que a tensão numa bobina é
+
+$$
+V = L \cdot \frac{\Delta I}{\Delta t}
+$$
+
+em que $L$ é a indutância e $\Delta I / \Delta t$ a rapidez com que a corrente muda. Quando o transistor corta, ele tenta zerar a corrente da bobina em microssegundos. A bobina reage com uma tensão enorme, no sentido de manter a corrente andando, que se soma à da fonte no coletor. Essa tensão sobe até alguma coisa conduzir. Sem proteção, essa coisa é o próprio transistor.
+
+A proteção é um diodo em paralelo com a bobina, com o catodo no positivo da fonte: o **diodo de roda livre**. Com o transistor ligado, ele fica em polarização reversa e não faz nada. Quando o transistor corta, a corrente da bobina passa a circular pelo diodo e pela própria bobina, e vai morrendo aos poucos, gastando a energia na resistência da bobina. O coletor sobe só até a tensão da fonte mais a queda do diodo, cerca de 0,7 V.
+
+A energia guardada na bobina é
+
+$$
+E = \frac{1}{2} \cdot L \cdot I^2
+$$
+
+No relé da simulação abaixo, com 0,15 H e 30 mA, são cerca de 68 µJ a cada desligamento. Parece pouco, mas, sem o diodo, essa energia vai toda para um ponto minúsculo do chip do transistor.
+
+## Explore: o pico da bobina
+
+No circuito abaixo, um pino de 3,3 V comanda um relé de 12 V por um transistor do tipo do BC548, que aguenta no máximo 30 V entre coletor e emissor. O contato do relé acende um LED. A chave S2 permite tirar o diodo de roda livre do circuito. O osciloscópio mostra a tensão no coletor, e o multímetro mostra também a corrente na bobina. A simulação roda em câmera lenta, cem vezes mais devagar que o real.
+
+<Simulation
+  circuit="m09/rele-roda-livre"
+  instruments={[{ kind: 'osciloscopio', series: ['VC'] }, 'multimetro']}
+/>
+
+Aperte o play (▶) e espere uns segundos, com o pino desligado: o osciloscópio faz o autoajuste sozinho. Depois prepare-o para capturar um evento único: coloque o canal 1 em 10 V/div, baixe o nível de disparo para uns 6 V e marque "Só com disparo (normal)". Assim, a tela só desenha quando o coletor sobe e passa de 6 V, e guarda a imagem.
+
+1. Ligue o pino. Veja o relé atracar: o LED acende um instante depois. No multímetro, quanto marcam a tensão no coletor e a corrente na bobina?
+2. Desligue o pino. Quanto o coletor sobe?
+3. Desligue o diodo de roda livre e repita: ligue e desligue o pino. Compare o pico do coletor.
+
+Ligado, o transistor satura: o coletor fica em cerca de 0,05 V e a bobina recebe cerca de 30 mA. Com o diodo, ao desligar, o coletor sobe só até cerca de 12,7 V, os 12 V da fonte mais o diodo. A corrente da bobina continua circulando pelo diodo e morre aos poucos, em pouco mais de 1 ms.
+
+Sem o diodo, o coletor dispara para cerca de 29 V num pico estreito, de uns 0,2 ms. O simulador avisa que o transistor entrou em **avalanche**: a tensão chegou ao limite dele, a junção base-coletor rompeu e passou a conduzir, e foi isso que segurou o pico.
+
+No simulador, o transistor sobrevive, porque a energia de um único pico é pequena. Na vida real, ele não foi feito para trabalhar em avalanche. Cada desligamento castiga um ponto do chip, e o transistor pode durar mil ou um milhão de acionamentos, mas um dia falha, quase sempre em curto, e o relé fica atracado para sempre. Com bobinas maiores, como a de uma fechadura elétrica, de um solenoide ou de um contator, a energia é muito maior, e o transistor pode morrer no primeiro desligamento. O pico também espalha ruído pela placa e pode reiniciar o microcontrolador. O diodo custa centavos.
+
+O preço do diodo é um relé que solta um pouco mais devagar: a corrente leva mais tempo para morrer. Quase sempre isso não importa. Quando importa, usa-se um diodo zener em série com o diodo de roda livre, para deixar o coletor subir até um valor seguro e gastar a energia mais depressa.
+
+## Exemplo resolvido: um ESP32 acionando um relé de 12 V
+
+Um ESP32, com saídas de 3,3 V, vai acionar um relé de 12 V com bobina de 400 Ω, por um transistor BC548. Na folha de dados, o BC548 sem letra de grupo tem β mínimo de 110. Calcule RB.
+
+**Passo 1: a corrente da bobina**, com o transistor saturado:
+
+$$
+I_\text{C} = \frac{12\,\text{V} - 0{,}2\,\text{V}}{400\,\Omega} \approx 30\,\text{mA}
+$$
+
+**Passo 2: a corrente mínima de base:**
+
+$$
+I_\text{B(min)} = \frac{30\,\text{mA}}{110} \approx 0{,}27\,\text{mA}
+$$
+
+**Passo 3: a folga.** Com a regra $I_\text{B} \approx I_\text{C} / 10$, a base recebe 3 mA, mais de dez vezes o mínimo.
+
+**Passo 4: o resistor de base:**
+
+$$
+R_\text{B} = \frac{3{,}3\,\text{V} - 0{,}7\,\text{V}}{3\,\text{mA}} \approx 867\,\Omega
+$$
+
+O valor comercial mais próximo, para baixo, é **820 Ω**, que dá $I_\text{B} = 2{,}6\,\text{V} / 820\,\Omega \approx 3{,}2\,\text{mA}$.
+
+**Passo 5: conferir o pino e o transistor.** O pino fornece 3,2 mA, bem abaixo do que os pinos de um ESP32 ou de um Arduino aguentam (algumas dezenas de miliampères no máximo; o valor exato está na folha de dados). O BC548 aguenta 100 mA no coletor e 30 V entre coletor e emissor; a bobina pede 30 mA e a fonte é de 12 V. Saturado, ele dissipa uns $0{,}05\,\text{V} \times 30\,\text{mA} = 1{,}5\,\text{mW}$.
+
+Completam o circuito o diodo de roda livre (um 1N4148 ou um 1N4007) e um resistor de 10 kΩ entre a base e o emissor. Esse resistor, um **pull-down**, garante o corte enquanto o pino ainda está "flutuando", nos primeiros instantes depois de ligar a placa, antes de o programa configurar o pino (veja o <Term id="pull-up">resistor de pull-up</Term> e a aula <LinkAula id="m11-digital/03-pull-up-pull-down-e-debounce" />). Ele rouba só 0,07 mA da base. É o circuito da segunda simulação.
+
+<RealCase title="O módulo de relé e a central do portão">
+
+Os módulos de relé vendidos para Arduino, aquelas plaquinhas azuis com um ou mais relés, são o circuito desta aula montado: um transistor (às vezes com um optoacoplador antes dele), um resistor de base, o diodo de roda livre ao lado da bobina e um LED que indica o relé ligado. Repare no "IN": é a entrada da base, que você liga ao pino. E repare no "GND": o negativo da placa do relé e o do microcontrolador precisam estar ligados, senão a corrente de base não tem por onde voltar.
+
+Na central de um portão eletrônico, os relés que escolhem o sentido do motor são acionados do mesmo jeito: o microcontrolador comanda um transistor para cada relé, cada bobina com seu diodo (veja <LinkAula id="m16-portao/03-a-central-por-dentro" />). Muitas placas usam um chip com vários transistores e os diodos já embutidos, como o ULN2003, que tem sete canais. Um defeito típico dessas placas é um transistor em curto: o relé fica sempre atracado, e o motor não para quando deveria. O inverso, transistor aberto, deixa o relé sempre solto. Saber disso ajuda a achar o defeito: se o relé não muda de estado com o comando, meça a tensão entre coletor e emissor do transistor dele com o pino ligado e desligado.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Ligar o relé ou o motor direto no pino.** O pino não fornece a corrente, e pode queimar. Entre o pino e qualquer carga maior que um LED vai um transistor.
+- **Esquecer o resistor de base.** A junção base-emissor é um diodo: ligada direto ao pino, ela puxa toda a corrente que o pino conseguir dar, e o pino ou o transistor queima.
+- **Esquecer o diodo de roda livre, ou ligá-lo invertido.** Sem ele, o transistor morre aos poucos. Invertido, com o anodo no positivo, ele vira um curto-circuito na fonte quando o transistor liga, e o diodo ou o transistor queima na hora. A faixa do diodo (catodo) vai para o lado do positivo da fonte.
+- **Esquecer o negativo comum.** O emissor, o negativo da fonte da carga e o GND do microcontrolador precisam estar ligados.
+- **Calcular RB no limite.** Use o β mínimo da folha de dados e dê folga. Um transistor de chave que esquenta não está saturado.
+- **Trocar os terminais.** C B E num modelo, E B C no outro. Um transistor ligado ao contrário até conduz um pouco, com β muito baixo, e engana quem testa.
+- **Ultrapassar os limites da peça.** O BC548 aguenta 100 mA e 30 V; para cargas maiores, use um transistor maior (como o BC337, de 800 mA) ou um MOSFET, assunto da aula 9.8.
+- **Comandar a rede elétrica.** O contato do relé pode ligar uma carga de 127 V ou 220 V, e aí todo o lado do contato segue as regras de segurança da rede: desligue o disjuntor antes de mexer, isole os bornes e mantenha a fiação da rede longe da parte de baixa tensão da placa.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'Num transistor NPN em funcionamento, o que faz a maior parte dos elétrons que o emissor injeta na base?',
+      options: [
+        {
+          text: 'Atravessa a base, que é muito fina, e é puxada para o coletor',
+          correct: true,
+          feedback:
+            'Isso. Só uma pequena parte se recombina na base e sai pelo terminal dela: é a corrente de base, β vezes menor que a de coletor.',
+        },
+        {
+          text: 'Sai pelo terminal da base',
+          feedback:
+            'Isso aconteceria se a base fosse grossa. Como ela é fininha, só uma pequena parte dos elétrons fica nela.',
+        },
+        {
+          text: 'Volta para o emissor',
+          feedback:
+            'Não: a junção base-emissor está em polarização direta, e os elétrons seguem para o coletor.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada região de operação ao que acontece nela.',
+      pairs: [
+        ['Corte', 'Sem corrente de base; VCE igual à tensão da fonte; chave aberta'],
+        ['Saturação', 'Base com corrente de sobra; VCE de poucos décimos de volt; chave fechada'],
+        ['Região ativa', 'IC = β × IB; tensão e corrente ao mesmo tempo; o transistor esquenta'],
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um Arduino (5 V) vai acionar, por um transistor, um relé de 12 V com bobina de 240 Ω. Usando IB = IC ÷ 10, VBE = 0,7 V e VCE de saturação de 0,2 V, qual deve ser o resistor de base, em ohms?',
+      answer: 875,
+      tolerance: 0.07,
+      unit: 'Ω',
+      explanation:
+        'IC = (12 − 0,2) ÷ 240 ≈ 49 mA. IB = 4,9 mA. RB = (5 − 0,7) ÷ 0,0049 ≈ 875 Ω. Na prática, 820 Ω, o valor comercial logo abaixo.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um transistor que liga uma lâmpada esquenta muito, e a lâmpada acende fraca. Qual é a causa mais provável?',
+      options: [
+        {
+          text: 'A corrente de base é pequena demais, e o transistor está na região ativa, sem saturar',
+          correct: true,
+          feedback:
+            'Isso. Com tensão e corrente ao mesmo tempo, ele dissipa P = VCE × IC. Diminua RB (sem passar do limite do pino) ou use um transistor de β maior.',
+        },
+        {
+          text: 'O transistor está saturado demais',
+          feedback:
+            'Saturado, o transistor fica com poucos décimos de volt e quase não esquenta. Mais corrente de base não faz mal à chave, até o limite do pino.',
+        },
+        {
+          text: 'Falta o diodo de roda livre',
+          feedback:
+            'A lâmpada incandescente quase não tem indutância. O diodo é para bobinas: relés, solenoides, motores.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'No diodo de roda livre de um relé acionado por um NPN, o catodo (a faixa) fica ligado ao positivo da fonte.',
+      answer: true,
+      explanation:
+        'Isso. Com o transistor ligado, o diodo fica em polarização reversa e não conduz. Quando o transistor corta, a corrente da bobina passa a circular pelo diodo. Ligado ao contrário, ele faria um curto na fonte.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que o coletor dispara para dezenas de volts quando o transistor desliga uma bobina sem diodo?',
+      options: [
+        {
+          text: 'Porque a corrente da bobina não pode parar de repente, e ela gera a tensão que for preciso para manter a corrente andando',
+          correct: true,
+          feedback:
+            'Isso. V = L × ΔI/Δt: com a corrente tentando zerar em microssegundos, a tensão sobe até alguma coisa conduzir. Sem o diodo, é o transistor.',
+        },
+        {
+          text: 'Porque o transistor amplifica a tensão da fonte',
+          feedback: 'O transistor cortado não amplifica nada. Quem gera o pico é a bobina.',
+        },
+        {
+          text: 'Porque a fonte de 12 V sobe quando a carga é desligada',
+          feedback: 'A fonte continua em 12 V. O pico vem da energia guardada no campo magnético da bobina.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem os passos para calcular o resistor de base de uma chave com transistor.',
+      items: [
+        'Calcular a corrente da carga com o transistor saturado',
+        'Dividir pelo β mínimo da folha de dados',
+        'Multiplicar por uma folga de duas a três vezes (ou usar IC ÷ 10)',
+        'Calcular RB com a tensão do pino menos 0,7 V',
+        'Conferir se a corrente de base cabe no limite do pino',
+      ],
+      explanation:
+        'Primeiro o que a carga precisa, depois quanto a base precisa para isso, com folga, e só então o resistor. Por último, confira se o pino aguenta.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **transistor bipolar** tem três regiões, emissor, base e coletor. No NPN, uma corrente pequena entrando na base controla uma corrente β vezes maior no coletor: $I_\text{C} = \beta \cdot I_\text{B}$.
+- Ele trabalha em **corte** (chave aberta), **saturação** (chave fechada, com VCE de poucos décimos de volt) ou na **região ativa** (amplificador). Uma chave não deve ficar na região ativa, onde dissipa $V_\text{CE} \cdot I_\text{C}$ e esquenta.
+- Para saturar: calcule a corrente da carga, divida pelo **β mínimo**, dê folga (ou use $I_\text{C}/10$) e calcule $R_\text{B} = (V_\text{pino} - 0{,}7\,\text{V})/I_\text{B}$. Confira o limite do pino.
+- A ordem dos terminais muda de modelo para modelo: confira na folha de dados.
+- Bobinas (relés, solenoides, motores) geram um pico de tensão ao serem desligadas. O **diodo de roda livre**, com o catodo no positivo, dá caminho à corrente e protege o transistor.
+
+Na próxima aula, o transistor sai do liga e desliga e passa a trabalhar no meio da região ativa, como [amplificador](../07-transistor-como-amplificador/).

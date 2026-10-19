@@ -1,0 +1,120 @@
+---
+/* 9.8 and 9.9: a part in the TO-220 package seen from the front, with or
+   without a finned heatsink: the metal tab with its screw hole, the epoxy
+   body with the printed code and the three legs, named below. Stands in for
+   the 3D model until the kit's transistor-to220 part reaches main. */
+export interface Props {
+  /** Leg names, left to right, as printed under each leg. */
+  pins: [string, string, string];
+  /** Code printed on the body. */
+  code: string;
+  heatsink?: boolean;
+  /** Note about the tab, at its right (two lines). */
+  tab?: [string, string];
+}
+
+const { pins, code, heatsink = false, tab } = Astro.props;
+const CX = 150;
+const BODY_W = 100;
+const left = CX - BODY_W / 2;
+const legs = [CX - 25, CX, CX + 25];
+const fins = Array.from({ length: 9 }, (_, k) => CX - 80 + k * 20);
+/* Names longer than the leg spacing ("MT1", "MT2"): the middle one goes a row lower. */
+const stagger = pins.some((p) => p.length > 2);
+const height = stagger ? 316 : 300;
+---
+
+<svg viewBox={`0 0 420 ${height}`} width="420" height={height} class="fig" aria-hidden="true">
+  {heatsink && (
+    <g class="sink">
+      <rect x={CX - 90} y="18" width="180" height="122" rx="4" />
+      {fins.map((x) => (
+        <path d={`M${x} 24V134`} class="fin" />
+      ))}
+    </g>
+  )}
+  <path
+    d={`M${left} 126V64Q${left} 56 ${left + 8} 56H${left + BODY_W - 8}Q${left + BODY_W} 56 ${left + BODY_W} 64V126Z`}
+    class="tab"
+  />
+  <circle cx={CX} cy="86" r="10" class="hole" />
+  <rect x={left} y="120" width={BODY_W} height="82" rx="3" class="body" />
+  <text x={CX} y="158" class="code">
+    {code}
+  </text>
+  {legs.map((x) => (
+    <rect x={x - 3.5} y="202" width="7" height="66" rx="1.5" class="leg" />
+  ))}
+  {legs.map((x, k) => (
+    <text x={x} y={stagger && k === 1 ? 308 : 290} class="pin">
+      {pins[k]}
+    </text>
+  ))}
+  {tab && (
+    <>
+      <path d={`M${left + BODY_W + 2} 74L${heatsink ? 262 : 232} 74`} class="leader" />
+      <text x={heatsink ? 268 : 238} y="70" class="note">
+        {tab[0]}
+      </text>
+      <text x={heatsink ? 268 : 238} y="88" class="note">
+        {tab[1]}
+      </text>
+    </>
+  )}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .sink rect {
+    fill: var(--surface-2);
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+  }
+  .fin {
+    stroke: var(--border-strong);
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+  .tab {
+    fill: var(--border-strong);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .hole {
+    fill: var(--bg);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .body {
+    fill: var(--fg);
+    stroke: var(--fg);
+  }
+  .code {
+    fill: var(--bg);
+    font-size: 13px;
+    font-weight: 600;
+    text-anchor: middle;
+    letter-spacing: 0.04em;
+  }
+  .leg {
+    fill: var(--fg-subtle);
+  }
+  .pin {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .leader {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+</style>

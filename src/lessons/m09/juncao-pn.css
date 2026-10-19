@@ -1,0 +1,148 @@
+/* JuncaoPN.tsx: the PN junction of lesson 9.1. */
+
+.jpn .lw__body {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.jpn__svg {
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.jpn__side {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+  min-width: 0;
+}
+
+@media (min-width: 44rem) {
+  .jpn__side {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.jpn__p {
+  fill: var(--danger-soft);
+  stroke: var(--danger-border);
+}
+
+.jpn__n {
+  fill: var(--info-soft);
+  stroke: var(--info-border);
+}
+
+.jpn__dep {
+  fill: var(--surface);
+  stroke: var(--fg-subtle);
+  stroke-dasharray: 4 3;
+  transition:
+    x 200ms,
+    width 200ms;
+}
+
+.jpn__hole {
+  fill: var(--bg);
+  stroke: var(--danger);
+  stroke-width: 2;
+}
+
+.jpn__electron {
+  fill: var(--info);
+}
+
+.jpn__ion rect {
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.jpn__ion path {
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.jpn__ion--neg rect,
+.jpn__ion--neg path {
+  stroke: var(--danger);
+}
+
+.jpn__ion--pos rect,
+.jpn__ion--pos path {
+  stroke: var(--info);
+}
+
+.jpn__region-label {
+  fill: var(--fg);
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.jpn__small {
+  fill: var(--fg-muted);
+  font-size: 15px;
+}
+
+.jpn__sign {
+  fill: var(--fg);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* On a phone the drawing shrinks to half its size: larger type keeps it legible. */
+@media (max-width: 36rem) {
+  .jpn__region-label {
+    font-size: 30px;
+  }
+
+  .jpn__small {
+    font-size: 24px;
+  }
+
+  .jpn__sign {
+    font-size: 26px;
+  }
+}
+
+.jpn__bracket,
+.jpn__wire,
+.jpn__battery path {
+  fill: none;
+  stroke: var(--fg-muted);
+  stroke-width: 2;
+}
+
+.jpn__wire {
+  stroke: var(--copper);
+  stroke-width: 2.5;
+}
+
+.jpn__battery .jpn__plates {
+  stroke: var(--fg);
+  stroke-width: 3;
+}
+
+.jpn__arrow path {
+  fill: none;
+  stroke: var(--success);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.jpn__values {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+}
+
+.jpn .jpn__value {
+  font-size: 1.6rem;
+}
+
+.jpn .lw__btn[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}

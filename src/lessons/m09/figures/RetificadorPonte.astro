@@ -1,0 +1,229 @@
+---
+/*
+ * 9.3: the paths of the current in a bridge rectifier. Left, the positive
+ * half-cycle (D1 and D4 conduct); right, the negative one (D2 and D3). In
+ * both, the current crosses the load from + to −. Drawn as two legs of two
+ * diodes with the source between them, so no wire crosses another. One SVG
+ * per half-cycle, so the two stack on a narrow screen.
+ */
+const TOP = 66;
+const BOT = 266;
+const MID = (TOP + BOT) / 2;
+
+interface Panel {
+  title: string;
+  sub: string;
+  on: [string, string];
+  positive: boolean;
+}
+
+const panels: Panel[] = [
+  { title: 'Semiciclo positivo', sub: 'conduzem D1 e D4', on: ['D1', 'D4'], positive: true },
+  {
+    title: 'Semiciclo negativo',
+    sub: 'conduzem D2 e D3',
+    on: ['D2', 'D3'],
+    positive: false,
+  },
+];
+
+/* A diode on a vertical leg, pointing up (anode below), centred at (x, y). */
+const diode = (x: number, y: number) => ({
+  body: `M${x - 11} ${y + 9}L${x + 11} ${y + 9}L${x} ${y - 9}Z`,
+  bar: `M${x - 11} ${y - 9}H${x + 11}`,
+});
+
+function geometry(p: Panel) {
+  const l1 = 70;
+  const l2 = 170;
+  const load = 280;
+  const src = 120;
+  const diodes = [
+    { id: 'D1', x: l1, y: (TOP + MID) / 2 },
+    { id: 'D3', x: l1, y: (MID + BOT) / 2 },
+    { id: 'D2', x: l2, y: (TOP + MID) / 2 },
+    { id: 'D4', x: l2, y: (MID + BOT) / 2 },
+  ];
+  // The conducting path, as one polyline from the + terminal of the source back to its − terminal.
+  const path = p.positive
+    ? `M${src - 20} ${MID}H${l1}V${TOP}H${load}V${BOT}H${l2}V${MID}H${src + 20}`
+    : `M${src + 20} ${MID}H${l2}V${TOP}H${load}V${BOT}H${l1}V${MID}H${src - 20}`;
+  return { l1, l2, load, src, diodes, path };
+}
+
+const ZIG = Array.from({ length: 6 }, (_, k) => (k % 2 === 0 ? 9 : -9));
+const resistor = (x: number) =>
+  `M${x} ${MID - 36}` +
+  ZIG.map((dx, k) => `L${x + dx} ${MID - 30 + k * 12}`).join('') +
+  `L${x} ${MID + 36}`;
+---
+
+<div class="pair">
+  {panels.map((p) => {
+    const g = geometry(p);
+    return (
+      <svg viewBox="0 0 340 280" width="340" height="280" class="fig" aria-hidden="true">
+        <text x="170" y="22" class="title">
+          {p.title}
+        </text>
+        <text x="170" y="42" class="sub">
+          {p.sub}
+        </text>
+
+        {/* The conducting path, under the wires */}
+        <path d={g.path} class="path" />
+
+        {/* Legs, rails, source wires and the load */}
+        <path
+          d={`M${g.l1} ${TOP}V${BOT}M${g.l2} ${TOP}V${BOT}M${g.l1} ${TOP}H${g.load}V${MID - 36}M${g.load} ${MID + 36}V${BOT}H${g.l1}M${g.l1} ${MID}H${g.src - 20}M${g.src + 20} ${MID}H${g.l2}`}
+          class="wire"
+        />
+        <path d={resistor(g.load)} class="wire" />
+        <circle cx={g.l1} cy={MID} r="3.5" class="dot" />
+        <circle cx={g.l2} cy={MID} r="3.5" class="dot" />
+        <circle cx={g.l1} cy={TOP} r="3.5" class="dot" />
+        <circle cx={g.l2} cy={TOP} r="3.5" class="dot" />
+        <circle cx={g.l1} cy={BOT} r="3.5" class="dot" />
+        <circle cx={g.l2} cy={BOT} r="3.5" class="dot" />
+
+        {g.diodes.map((d) => {
+          const s = diode(d.x, d.y);
+          const on = p.on.includes(d.id);
+          return (
+            <g class={on ? 'diode on' : 'diode off'}>
+              <path d={s.body} />
+              <path d={s.bar} class="bar" />
+              <text x={d.x - 16} y={d.y + 5} class="dlabel">
+                {d.id}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* The source (the transformer's secondary) and its polarity in this half-cycle */}
+        <circle cx={g.src} cy={MID} r="20" class="source" />
+        <path d={`M${g.src - 11} ${MID}c 4 -9 7 -9 11 0 s 7 9 11 0`} class="tilde" />
+        <text x={g.src - 25} y={MID - 12} class="pol">
+          {p.positive ? '+' : '−'}
+        </text>
+        <text x={g.src + 25} y={MID - 12} class="pol">
+          {p.positive ? '−' : '+'}
+        </text>
+        <text x={g.src} y={MID + 40} class="small">
+          secundário
+        </text>
+
+        {/* Load: always + on top, current downwards */}
+        <text x={g.load + 16} y={MID - 6} class="small start">
+          carga
+        </text>
+        <text x={g.load - 10} y={TOP + 22} class="pol">
+          +
+        </text>
+        <text x={g.load - 10} y={BOT - 10} class="pol">
+          −
+        </text>
+        <path d={`M${g.load + 20} ${MID + 8}v26m-6 -9l6 9l6 -9`} class="arrow" />
+      </svg>
+    );
+  })}
+</div>
+
+<style>
+  .pair {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+  }
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 16px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .sub {
+    fill: var(--fg-muted);
+    font-size: 13.5px;
+    text-anchor: middle;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .wire {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .path {
+    fill: none;
+    stroke: var(--success);
+    stroke-width: 9;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    opacity: 0.3;
+  }
+  .dot {
+    fill: var(--fg);
+  }
+  .diode path {
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .diode.on path {
+    fill: var(--fg);
+    stroke: var(--fg);
+  }
+  .diode.off path {
+    fill: var(--surface);
+    stroke: var(--fg-subtle);
+  }
+  .diode .bar {
+    fill: none;
+    stroke-width: 3;
+  }
+  .dlabel {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 650;
+    text-anchor: end;
+  }
+  .diode.off .dlabel {
+    fill: var(--fg-subtle);
+  }
+  .source {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .tilde {
+    fill: none;
+    stroke: var(--copper);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  }
+  .pol {
+    fill: var(--fg);
+    font-size: 16px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .arrow {
+    fill: none;
+    stroke: var(--success);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>
