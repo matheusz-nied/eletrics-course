@@ -1,0 +1,128 @@
+---
+/*
+ * 07.6: the back of a generic three-way switch module: three terminals, the
+ * common (C) and the two contacts (1 and 2). The marking varies from maker
+ * to maker. Fallback of the 3D part "wall-switch".
+ */
+---
+
+<svg viewBox="0 0 360 250" width="360" height="250" class="fig" aria-hidden="true">
+  <text x="150" y="16" class="small">
+    interruptor paralelo visto por trás
+  </text>
+  <rect x="96" y="26" width="108" height="170" rx="10" class="module" />
+  <rect x="112" y="40" width="76" height="20" rx="4" class="clip" />
+
+  <!-- Common terminal on top, contacts 1 and 2 below -->
+  <rect x="128" y="76" width="44" height="34" rx="5" class="terminal" />
+  <circle cx="150" cy="93" r="9" class="screw" />
+  <path d="M144 93 H156" class="slot" />
+  <rect x="108" y="140" width="40" height="34" rx="5" class="terminal" />
+  <circle cx="128" cy="157" r="9" class="screw" />
+  <path d="M122 157 H134" class="slot" />
+  <rect x="152" y="140" width="40" height="34" rx="5" class="terminal" />
+  <circle cx="172" cy="157" r="9" class="screw" />
+  <path d="M166 157 H178" class="slot" />
+
+  <!-- Inside: the common moves between 1 and 2 -->
+  <path d="M150 112 V122 L134 136" class="inside" />
+  <path d="M150 122 L166 136" class="inside dashed" />
+
+  <text x="150" y="72" class="mark">
+    C
+  </text>
+  <text x="128" y="190" class="mark">
+    1
+  </text>
+  <text x="172" y="190" class="mark">
+    2
+  </text>
+
+  <text x="216" y="88" class="label">
+    C: comum
+  </text>
+  <text x="216" y="104" class="small start">
+    recebe a fase ou
+  </text>
+  <text x="216" y="118" class="small start">
+    entrega o retorno
+  </text>
+  <text x="216" y="152" class="label">
+    1 e 2
+  </text>
+  <text x="216" y="168" class="small start">
+    os dois viajantes
+  </text>
+
+  <text x="180" y="220" class="legend">
+    Algumas marcas imprimem L, 1 e 2, outras usam setas
+  </text>
+  <text x="180" y="237" class="legend">
+    ou letras diferentes. Na dúvida, teste a continuidade.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .module {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .clip {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .terminal {
+    fill: color-mix(in oklab, var(--copper) 18%, var(--surface-2));
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+  }
+  .screw {
+    fill: var(--surface-2);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .slot {
+    stroke: var(--fg);
+    stroke-width: 1.8;
+  }
+  .inside {
+    stroke: var(--copper);
+    stroke-width: 2.5;
+  }
+  .dashed {
+    stroke-dasharray: 3 3;
+  }
+  text {
+    fill: var(--fg);
+    stroke: none;
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .mark {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .label {
+    font-size: 13px;
+    font-weight: 700;
+    text-anchor: start;
+  }
+  .small {
+    fill: var(--fg-muted);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .legend {
+    font-size: 12px;
+  }
+</style>

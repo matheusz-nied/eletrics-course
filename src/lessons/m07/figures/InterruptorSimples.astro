@@ -1,0 +1,151 @@
+---
+/*
+ * 07.6: a simple switch, open (lamp off), placed on the phase (right) and on
+ * the neutral (wrong). Cut on the phase, the lamp and its socket are dead
+ * while off; cut on the neutral, the phase still reaches the socket.
+ */
+const rows = [
+  {
+    y: 0,
+    title: 'Certo: o interruptor corta a fase',
+    onPhase: true,
+    note: 'apagada: soquete sem fase',
+  },
+  {
+    y: 150,
+    title: 'Errado: o interruptor corta o neutro',
+    onPhase: false,
+    note: 'apagada, mas com fase no soquete',
+  },
+];
+---
+
+<svg viewBox="0 0 360 300" width="360" height="300" class="fig" aria-hidden="true">
+  {rows.map((r) => {
+    const yf = r.y + 46;
+    const yn = r.y + 112;
+    return (
+      <g>
+        <text x="12" y={r.y + 18} class={r.onPhase ? 'title ok' : 'title bad'}>
+          {r.title}
+        </text>
+        <text x="14" y={yf + 4} class="pin">
+          F
+        </text>
+        <text x="14" y={yn + 4} class="pin">
+          N
+        </text>
+        {r.onPhase ? (
+          <>
+            <path d={`M28 ${yf} H130`} class="w fase" />
+            <path d={`M170 ${yf} H296 V${yf + 18}`} class="w retorno" />
+            <path d={`M296 ${yn - 18} V${yn} H28`} class="w neutro" />
+            <circle cx="130" cy={yf} r="3.5" class="term" />
+            <circle cx="170" cy={yf} r="3.5" class="term" />
+            <path d={`M130 ${yf} L164 ${yf - 18}`} class="blade" />
+            <text x="150" y={yf + 22} class="small">
+              interruptor
+            </text>
+            <text x="232" y={yf - 8} class="small">
+              retorno
+            </text>
+          </>
+        ) : (
+          <>
+            <path d={`M28 ${yf} H296 V${yf + 18}`} class="w fase" />
+            <path d={`M296 ${yn - 18} V${yn} H170`} class="w neutro" />
+            <path d={`M130 ${yn} H28`} class="w neutro" />
+            <circle cx="130" cy={yn} r="3.5" class="term" />
+            <circle cx="170" cy={yn} r="3.5" class="term" />
+            <path d={`M130 ${yn} L164 ${yn - 18}`} class="blade" />
+            <text x="150" y={yn + 22} class="small">
+              interruptor
+            </text>
+            <circle cx="296" cy={yf + 18} r="5" class="live" />
+            <circle cx="296" cy={yn - 18} r="5" class="live" />
+          </>
+        )}
+        <circle cx="296" cy={(yf + yn) / 2} r="15" class="lamp" />
+        <path
+          d={`M286 ${(yf + yn) / 2 + 5} L291 ${(yf + yn) / 2 - 6} L296 ${(yf + yn) / 2 + 5} L301 ${(yf + yn) / 2 - 6} L306 ${(yf + yn) / 2 + 5}`}
+          class="filament"
+        />
+        <text x="270" y={(yf + yn) / 2 + 16} class={r.onPhase ? 'small end' : 'small end bad'}>
+          {r.note}
+        </text>
+      </g>
+    );
+  })}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .w {
+    stroke-width: 3;
+  }
+  .fase {
+    stroke: var(--danger);
+  }
+  .neutro {
+    stroke: var(--info);
+  }
+  .retorno {
+    stroke: var(--warning);
+  }
+  .term {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .blade {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .lamp {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .filament {
+    stroke: var(--fg);
+    stroke-width: 1.4;
+  }
+  .live {
+    fill: var(--danger);
+    stroke: var(--bg);
+    stroke-width: 1.5;
+  }
+  text {
+    fill: var(--fg);
+    stroke: none;
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 13.5px;
+    font-weight: 700;
+    text-anchor: start;
+  }
+  .pin {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .small {
+    fill: var(--fg-muted);
+  }
+  .end {
+    text-anchor: end;
+  }
+  .ok {
+    fill: var(--success);
+  }
+  .bad {
+    fill: var(--danger);
+  }
+</style>
