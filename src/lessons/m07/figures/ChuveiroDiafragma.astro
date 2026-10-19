@@ -1,0 +1,143 @@
+---
+/*
+ * 07.8: the diaphragm (pressure switch) of a shower in section. Without
+ * water the rubber membrane rests and the moving contact stays away from the
+ * fixed ones: no current. With the water flowing, its pressure bows the
+ * membrane, the rod lifts the moving contact and the circuit closes.
+ */
+const panels = [
+  { x: 0, title: 'Registro fechado', water: false, lines: ['Sem pressão:', 'contatos abertos'] },
+  {
+    x: 182,
+    title: 'Registro aberto',
+    water: true,
+    lines: ['A pressão empurra:', 'contatos fechados'],
+  },
+];
+---
+
+<svg viewBox="0 0 360 250" width="360" height="250" class="fig" aria-hidden="true">
+  {panels.map((p) => {
+    const c = p.x + 88;
+    const membrane = p.water
+      ? `M${p.x + 22} 132 Q${c} 96 ${p.x + 154} 132`
+      : `M${p.x + 22} 132 Q${c} 128 ${p.x + 154} 132`;
+    const rodTop = p.water ? 45 : 64;
+    const rodBottom = p.water ? 114 : 130;
+    return (
+      <g>
+        <text x={c} y="18" class="title">
+          {p.title}
+        </text>
+        {/* Fixed contacts, wired to the supply and to the heating element. */}
+        <path d={`M${p.x + 30} 40 H${p.x + 70} M${p.x + 106} 40 H${p.x + 146}`} class="fixed" />
+        <circle cx={p.x + 30} cy="40" r="3" class="dot" />
+        <circle cx={p.x + 146} cy="40" r="3" class="dot" />
+        {/* Moving contact on the rod. */}
+        <path d={`M${p.x + 58} ${rodTop} H${p.x + 118}`} class={p.water ? 'moving on' : 'moving'} />
+        <path d={`M${c} ${rodTop} V${rodBottom}`} class="rod" />
+        {/* Chamber and membrane. */}
+        <path d={`M${p.x + 22} 132 V176 H${p.x + 154} V132`} class="chamber" />
+        {p.water && (
+          <path
+            d={`M${p.x + 24} 133 Q${c} 98 ${p.x + 152} 133 V174 H${p.x + 24} Z`}
+            class="water"
+          />
+        )}
+        <path d={membrane} class="membrane" />
+        <path d={`M${c - 10} 196 V178`} class={p.water ? 'pipe water-in' : 'pipe'} />
+        <path d={`M${c + 10} 196 V178`} class={p.water ? 'pipe water-in' : 'pipe'} />
+        {p.water && (
+          <>
+            <path
+              d={`M${c - 34} 166 V146 M${c - 39} 151 L${c - 34} 145 L${c - 29} 151`}
+              class="arrow"
+            />
+            <path
+              d={`M${c + 34} 166 V146 M${c + 29} 151 L${c + 34} 145 L${c + 39} 151`}
+              class="arrow"
+            />
+          </>
+        )}
+        {p.lines.map((line, i) => (
+          <text
+            x={c}
+            y={218 + i * 16}
+            class={i === 1 ? (p.water ? 'note ok' : 'note off') : 'note'}
+          >
+            {line}
+          </text>
+        ))}
+      </g>
+    );
+  })}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .fixed {
+    stroke: var(--copper);
+    stroke-width: 5;
+  }
+  .dot {
+    fill: var(--fg);
+  }
+  .moving {
+    stroke: var(--fg-muted);
+    stroke-width: 5;
+  }
+  .moving.on {
+    stroke: var(--copper);
+  }
+  .rod {
+    stroke: var(--fg-muted);
+    stroke-width: 3;
+  }
+  .chamber {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .water {
+    fill: color-mix(in oklab, var(--info) 30%, transparent);
+  }
+  .membrane {
+    stroke: var(--fg);
+    stroke-width: 4;
+  }
+  .pipe {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .water-in {
+    stroke: var(--info);
+  }
+  .arrow {
+    stroke: var(--info);
+    stroke-width: 2.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-weight: 700;
+  }
+  .note {
+    fill: var(--fg-muted);
+  }
+  .note.ok {
+    fill: var(--success);
+    font-weight: 700;
+  }
+  .note.off {
+    fill: var(--danger);
+    font-weight: 700;
+  }
+</style>

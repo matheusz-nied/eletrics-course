@@ -1,0 +1,139 @@
+/* SensorPresenca.tsx: a presence sensor in a hallway (lesson 7.7). */
+
+.sensor-presenca__scene,
+.sensor-presenca__timeline svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.sensor-presenca__scene {
+  max-width: 34rem;
+  margin-inline: auto;
+  border-radius: 0.5rem;
+}
+
+.sensor-presenca__room {
+  fill: color-mix(in oklab, var(--warning) 6%, var(--surface));
+}
+
+.sensor-presenca__room.is-dusk {
+  fill: color-mix(in oklab, var(--fg) 8%, var(--surface));
+}
+
+.sensor-presenca__room.is-night {
+  fill: color-mix(in oklab, var(--fg) 16%, var(--surface));
+}
+
+.sensor-presenca__beam {
+  fill: color-mix(in oklab, var(--warning) 28%, transparent);
+}
+
+.sensor-presenca__fov {
+  fill: none;
+  stroke: var(--accent);
+  stroke-dasharray: 3 5;
+  stroke-width: 1.2;
+}
+
+.sensor-presenca__window {
+  fill: color-mix(in oklab, var(--info) 14%, var(--bg));
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+
+.sensor-presenca__sun {
+  fill: var(--warning);
+}
+
+.sensor-presenca__moon {
+  fill: var(--fg-muted);
+}
+
+.sensor-presenca__line {
+  stroke: var(--fg-muted);
+  stroke-width: 2;
+}
+
+.sensor-presenca__bulb {
+  fill: var(--surface-2);
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+
+.sensor-presenca__bulb.is-on {
+  fill: var(--warning);
+  stroke: var(--warning);
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--warning) 80%, transparent));
+}
+
+.sensor-presenca__sensor {
+  fill: var(--bg);
+  stroke: var(--fg);
+  stroke-width: 1.5;
+}
+
+.sensor-presenca__label {
+  fill: var(--fg-muted);
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.sensor-presenca__person {
+  fill: none;
+  stroke: var(--fg);
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.sensor-presenca__person circle {
+  fill: var(--fg);
+  stroke: none;
+}
+
+.sensor-presenca__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sensor-presenca__readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2.5rem;
+}
+
+.sensor-presenca__timeline {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+.sensor-presenca__axis {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.sensor-presenca__on {
+  fill: var(--warning);
+}
+
+.sensor-presenca__motion {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.sensor-presenca__tick {
+  fill: var(--fg-muted);
+  font-size: 12px;
+}
+
+.sensor-presenca__tick--start {
+  text-anchor: start;
+}
+
+.sensor-presenca__tick--end {
+  text-anchor: end;
+}

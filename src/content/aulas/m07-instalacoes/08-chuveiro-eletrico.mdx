@@ -1,0 +1,325 @@
+---
+titulo: Chuveiro elétrico por dentro
+modulo: m07-instalacoes
+ordem: 8
+nivel: B
+duracaoMin: 35
+objetivos:
+  - Explicar o papel da resistência, do diafragma e da chave de temperatura e calcular a potência de cada posição com P = V²/R
+  - Explicar por que o chuveiro queima quando é ligado sem água e por que um chuveiro mais potente desarma o disjuntor de um circuito antigo
+  - Reconhecer a ligação correta do chuveiro, com circuito próprio, DR e fio terra na barra de terra
+  - Trocar a resistência do chuveiro na ordem segura
+prerequisitos:
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+  - m07-instalacoes/03-disjuntores-dr-e-dps
+tags: [chuveiro, resistência, diafragma, verão, inverno, disjuntor, DR, fio terra, troca de resistência]
+seguranca: rede
+rascunho: false
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import ChuveiroExplodido from '../../../lessons/m07/figures/ChuveiroExplodido.astro';
+import ChuveiroDiafragma from '../../../lessons/m07/figures/ChuveiroDiafragma.astro';
+import ChuveiroLigacao from '../../../lessons/m07/figures/ChuveiroLigacao.astro';
+
+Duas reclamações chegam todo inverno a qualquer eletricista. A primeira: "o chuveiro só esquenta no inverno; no verão sai água fria". A segunda: "troquei a resistência, liguei, e ela queimou na hora". As duas têm explicação simples quando você conhece as quatro peças que fazem um chuveiro funcionar: a resistência, o diafragma, a chave de temperatura e o fio terra.
+
+Na aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" /> você viu por que a posição inverno tem menos resistência e mais potência. Agora vamos abrir o chuveiro, ver cada peça, ligar o circuito do jeito certo e trocar a resistência na ordem segura.
+
+## O chuveiro por dentro
+
+<Part3D
+  part="electric-shower"
+  explode
+  annotations
+  alt="Chuveiro elétrico desmontado, de cima para baixo: a tampa com a entrada da água; o diafragma, uma membrana de borracha; o bloco dos contatos com a alavanca da chave de temperatura e os fios de alimentação; a resistência, um fio em espiral preso numa base com três terminais; a câmara de aquecimento, com o borne do fio terra em contato com a água; e o espalhador com os furos."
+  caption="Um chuveiro elétrico típico desmontado. A água entra por cima, empurra o diafragma, passa pela resistência na câmara e sai pelo espalhador."
+>
+  <ChuveiroExplodido />
+</Part3D>
+
+Siga o caminho da água, de cima para baixo:
+
+- **Entrada e tampa:** a água vem do cano da parede.
+- **Diafragma:** uma membrana de borracha que a pressão da água empurra. É ela que liga o chuveiro.
+- **Contatos e chave de temperatura:** o diafragma aperta os contatos uns contra os outros, e a chave escolhe quais deles a corrente usa (desligado, verão ou inverno).
+- **Resistência:** o fio que esquenta, enrolado em espiral.
+- **Câmara de aquecimento:** onde a água envolve a resistência. Nela fica também o **borne do fio terra**, uma peça de metal em contato com a água.
+- **Espalhador (crivo):** a placa com furos por onde a água sai.
+
+## A resistência: um fio nu dentro da água
+
+A <Term id="resistencia-do-chuveiro">resistência do chuveiro</Term> é um fio de uma liga de níquel e cromo, que aguenta calor sem oxidar, enrolado em espiral para caber muito fio num espaço pequeno. Ela esquenta pelo <Term id="efeito-joule">efeito Joule</Term> e passa o calor para a água que corre em volta.
+
+Repare num detalhe estranho: o fio é **nu**, sem isolação nenhuma, e fica mergulhado na água. Funciona por dois motivos. A água tira o calor tão depressa que o fio não chega a ficar em brasa; e a água limpa da casa conduz pouco, então só uma corrente pequena "foge" do fio pela água. Pequena, mas não zero: é por isso que o chuveiro tem fio terra, como você vai ver adiante.
+
+Sem a água em volta, a história muda. Um fio que dissipa 7.500 W no ar fica vermelho e rompe em segundos. Guarde isso: é a explicação da resistência que queima "na hora".
+
+## O diafragma: sem água, não liga
+
+O <Term id="diafragma">diafragma</Term> é a chave de pressão do chuveiro. Ele separa a entrada da água da parte elétrica e só fecha os contatos quando a água empurra.
+
+<Figure
+  caption="Figura 1. O diafragma em corte. Com o registro fechado, a membrana fica parada e o contato móvel fica longe dos fixos. Com o registro aberto, a pressão da água curva a membrana, a haste sobe e o contato móvel encosta nos dois fixos: a corrente passa para a resistência."
+  alt="Dois cortes lado a lado. À esquerda, registro fechado: membrana reta, haste baixa e contato móvel afastado dos dois contatos fixos. À direita, registro aberto: a água empurra a membrana para cima, a haste sobe e o contato móvel encosta nos contatos fixos."
+>
+  <ChuveiroDiafragma />
+</Figure>
+
+Ele é o motivo de o chuveiro não esquentar com o registro fechado e explica três defeitos comuns:
+
+- **Água fraca:** a pressão não basta para fechar os contatos direito. O chuveiro esquenta pouco, liga e desliga sozinho, ou faz um chiado de faísca nos contatos. Acontece com caixa d'água baixa, no último andar e com o registro pouco aberto.
+- **Diafragma furado ou ressecado:** vaza água para a parte elétrica, ou não fecha mais. Troca-se a peça.
+- **Ligar logo depois da troca da resistência:** a câmara está cheia de ar. A pressão da água já fecha o diafragma, mas a água ainda não chegou à resistência. O trecho que fica no ar queima. Por isso, depois de qualquer manutenção, a água corre **antes** de o disjuntor ser religado.
+
+## A chave de temperatura: menos fio, mais calor
+
+A resistência tem três terminais: um em cada ponta e um no meio. A chave de temperatura escolhe por quanto fio a corrente passa. Com a tensão da rede fixa, a forma útil da potência é a da aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />:
+
+$$
+P = \frac{V^2}{R}
+\qquad\qquad
+I = \frac{V}{R}
+$$
+
+com $P$ em watts (W), $V$ a tensão da rede em volts (V), $R$ a resistência do trecho usado em ohms (Ω) e $I$ a corrente em ampères (A).
+
+Para um chuveiro de 220 V e 7.500 W no inverno (valores típicos; os do seu estão na etiqueta), a resistência de cada posição é:
+
+$$
+R_\text{inverno} = \frac{V^2}{P} = \frac{220^2}{7.500} = \frac{48.400}{7.500} \approx 6{,}45\,\Omega
+\qquad
+I = \frac{220}{6{,}45} \approx 34{,}1\,\text{A}
+$$
+
+Na posição **verão**, a corrente passa pelo fio inteiro. Se o terminal do meio estiver na metade, a resistência dobra, 12,9 Ω, e a potência cai pela metade: 3.750 W e uns 17 A. Na posição **desligado**, a chave não fecha nenhum caminho.
+
+Compare com o chuveiro de 5.500 W da aula 1.5: 8,8 Ω e 25 A no inverno. Mais potência quer dizer menos resistência e mais corrente, e é a corrente que decide o fio e o disjuntor do circuito.
+
+**Mude a chave com o registro fechado.** Com a água correndo, os contatos abrem e fecham 34 A, fazem faísca e se desgastam. Muitos fabricantes pedem isso no manual.
+
+Os **chuveiros eletrônicos**, com um botão giratório no lugar das posições, dosam a potência sem degraus. Dentro deles há um <Term id="triac">TRIAC</Term> fazendo <Term id="controle-de-fase">controle de fase</Term>, o mesmo princípio do dimmer (aula <LinkAula id="m09-semicondutores/09-tiristores-e-isolamento" />). O botão no mínimo não é desligamento: para mexer no chuveiro, desligue o disjuntor.
+
+### Por que o chuveiro costuma ser de 220 V
+
+O mesmo chuveiro de 7.500 W em 127 V puxaria $7.500 / 127 \approx 59\,\text{A}$, quase o dobro. Fio mais grosso, disjuntor maior e mais perda nas conexões, porque o calor num mau contato cresce com o quadrado da corrente. Em 220 V, a mesma potência sai com 34 A. A escolha do fio e do disjuntor para essa corrente está na aula <LinkAula id="m07-instalacoes/04-fios-e-cabos" />.
+
+Nas cidades com rede de 127/220 V, os 220 V do chuveiro vêm de **duas fases**; nas de 220/380 V, de uma fase e o neutro (aula <LinkAula id="m06-corrente-alternada/07-monofasico-bifasico-e-trifasico" />). Nos dois casos, o chuveiro tem dois fios de alimentação e o fio terra.
+
+## Explore: o chuveiro no circuito dele
+
+A simulação liga o chuveiro de 7.500 W na rede de 220 V por um disjuntor de 40 A. A chave "Água aberta" faz o papel do diafragma, e "Posição inverno", da chave de temperatura. Os multímetros mostram a tensão no chuveiro, a corrente no disjuntor e a potência.
+
+<Simulation circuit="m07/chuveiro" instruments={['multimetro']} />
+
+1. Aperte o play (▶). Com a água fechada, quanto marcam a corrente e a potência?
+2. Abra a água na posição verão: confira **uns 17 A e 3.750 W**. Agora passe para o inverno: **uns 34 A e 7.500 W**.
+3. Escolha o disjuntor de **25 A**, de um circuito antigo, e deixe o chuveiro no inverno. Ponha a velocidade em 10× no seletor de velocidade da simulação. Em quanto tempo simulado o disjuntor desarma? E no verão, ele desarma?
+4. Rearme: volte ao disjuntor de 40 A e ligue-o de novo. Agora ponha "Trecho 2 da resistência" em **Rompido**. Em que posição o chuveiro ainda esquenta?
+5. Volte o trecho 2 para inteiro e escolha **Ar na câmara**. Abra a água no inverno. O que acontece com o trecho 1? (Reinicie a simulação para consertar a resistência.)
+
+No inverno, os 34 A são 1,36 vez os 25 A do disjuntor antigo: é uma sobrecarga, e a lâmina bimetálica do disjuntor esquenta até desarmar. Na simulação, isso leva uns 2 minutos e 25 segundos de banho. Num disjuntor real, o tempo para essa sobrecarga depende do modelo e da temperatura do quadro e pode ser bem maior, de vários minutos a mais de uma hora (aula <LinkAula id="m07-instalacoes/03-disjuntores-dr-e-dps" />). No verão, 17 A, ele não desarma nunca. Com o trecho 2 rompido, só o inverno funciona. E com ar na câmara, o trecho 1 rompe em cerca de 1 segundo e o chuveiro para de esquentar nas duas posições.
+
+## Exemplo resolvido: o chuveiro novo no circuito antigo
+
+Uma família troca o chuveiro velho, de 4.400 W, por um de 7.500 W, os dois de 220 V. O circuito antigo tem fio de 4 mm² e disjuntor de 25 A. Na primeira semana de frio, o disjuntor começa a desarmar no meio do banho. O que está errado, e qual é a solução?
+
+**A corrente de antes e a de agora:**
+
+$$
+I_\text{antigo} = \frac{4.400}{220} = 20\,\text{A}
+\qquad
+I_\text{novo} = \frac{7.500}{220} \approx 34{,}1\,\text{A}
+$$
+
+**Para o disjuntor:** $34{,}1 / 25 \approx 1{,}36$ vez a corrente nominal. É a sobrecarga que você viu na simulação, e o disjuntor está certo em desarmar: ele protege o **fio**.
+
+**Para o fio:** na tabela de capacidade de condução de corrente da NBR 5410, para fio de cobre com isolação de PVC em eletroduto embutido na parede, com dois condutores carregados, o fio de 4 mm² conduz 32 A, e o de 6 mm², 41 A. O fio de 4 mm² não aguenta os 34 A do chuveiro novo.
+
+**A solução errada**, e muito comum, é trocar só o disjuntor por um de 40 A. O disjuntor para de desarmar, e o fio de 4 mm² passa a trabalhar acima da capacidade dele em todo banho de inverno, esquentando dentro da parede. **A solução certa** é refazer o circuito com fio de 6 mm² e disjuntor de 40 A (com 34,1 A, ele fica a 85 % da nominal), ou voltar a um chuveiro que o circuito aguente. O cálculo completo, com a queda de tensão no comprimento do fio, está na aula <LinkAula id="m07-instalacoes/04-fios-e-cabos" />.
+
+## Terra e DR: o chuveiro e a água
+
+<Figure
+  caption="Figura 2. O circuito do chuveiro numa casa com rede de 127/220 V: duas fases passam por um disjuntor bipolar de 40 A e por um DR de 30 mA e vão aos dois fios do chuveiro. O fio verde-amarelo do chuveiro vai à barra de terra do quadro, nunca ao neutro."
+  alt="Quadro com as fases F1 e F2 entrando num disjuntor bipolar de 40 A e depois num DR de 30 mA. Dois fios saem do DR e vão ao chuveiro. Da barra de terra do quadro sai um fio verde-amarelo que também vai ao chuveiro."
+>
+  <ChuveiroLigacao />
+</Figure>
+
+Como a resistência nua fica dentro da água, sempre existe uma corrente de fuga pequena pela água. Com a resistência velha, rachada ou com depósito de calcário, essa fuga cresce, e o cano de metal e o registro podem ficar com tensão. É o choque no registro da aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />.
+
+Por isso o chuveiro tem três cuidados que não se negociam:
+
+- **Fio terra ligado.** O fio verde-amarelo do chuveiro vai ao <Term id="aterramento">condutor de proteção</Term> (PE), que chega à barra de terra do quadro. Ele dá à fuga um caminho de resistência baixa, em vez de esperar alguém encostar no registro. Nunca ligue o terra no neutro: a aula <LinkAula id="m07-instalacoes/02-fase-neutro-e-terra" /> mostra o que acontece quando o neutro se rompe.
+- **DR no circuito do banheiro.** A NBR 5410 exige <Term id="dr">DR</Term> de alta sensibilidade (30 mA) nos circuitos de banheiro. Ele desliga o chuveiro quando a fuga passa do limite, antes que ela vire choque perigoso (aula <LinkAula id="m07-instalacoes/03-disjuntores-dr-e-dps" />).
+- **Circuito próprio.** Um disjuntor só para o chuveiro, com o fio escolhido para a corrente dele, sem dividir com tomadas.
+
+Se o DR desarma toda vez que o chuveiro liga, ele está fazendo o trabalho dele: a fuga está alta, quase sempre na resistência. Troque a resistência; se continuar, chame um eletricista. **Nunca tire nem "pule" o DR.**
+
+## Na prática: trocar a resistência com segurança
+
+O resumo da ordem segura está abaixo. No celular, abra o modo oficina e siga passo a passo ao lado do chuveiro.
+
+<Steps>
+  <Step title="Compre a resistência certa">
+    A do modelo do seu chuveiro, indicada pelo fabricante, com a mesma tensão e a mesma potência da etiqueta. Nunca uma "mais forte".
+  </Step>
+  <Step title="Desligue o disjuntor do chuveiro e sinalize o quadro">
+    A chave do chuveiro em "desligado" não basta. Cole um aviso: "Não ligue: manutenção no chuveiro".
+  </Step>
+  <Step title="Teste a ausência de tensão">
+    Teste o multímetro numa tomada energizada, meça 0 V entre os fios do chuveiro e entre cada um e o terra, e teste o multímetro de novo na tomada.
+  </Step>
+  <Step title="Feche o registro, abra o chuveiro e troque a resistência">
+    Encaixe a nova como estava a antiga, sem esticar a espiral, sem dobrar o fio e sem deixar voltas encostadas. Se os contatos ou os fios estiverem derretidos, pare e chame um eletricista.
+  </Step>
+  <Step title="Feche o chuveiro e abra a água antes de religar">
+    Com o disjuntor ainda desligado, deixe a água correr até sair sem ar. Só então religue o disjuntor e teste as posições.
+  </Step>
+</Steps>
+
+<Workshop id="trocar-resistencia-chuveiro" />
+
+<RealCase title="O chuveiro que só esquenta no inverno">
+
+Na posição verão, a corrente atravessa a resistência inteira; no inverno, só o primeiro trecho. Se o chuveiro esquenta no inverno e sai frio no verão, o fio rompeu no **segundo trecho**, o que só a posição verão usa. Foi o que você viu na simulação com o trecho 2 rompido. Não esquenta em nenhuma posição? O rompimento pode estar no primeiro trecho, ou o problema está no diafragma, num contato ou no disjuntor.
+
+A solução é trocar a resistência inteira, na ordem segura. Emendar o fio rompido, uma gambiarra antiga, deixa um ponto de mau contato que esquenta e encurta o fio: a resistência fica menor, a potência maior, e ela volta a romper logo, às vezes levando os contatos junto.
+
+E a resistência nova que queimou "na hora"? Quase sempre ela foi ligada com a câmara cheia de ar: o disjuntor foi religado antes de a água encher o chuveiro. Outras causas: uma resistência de 127 V num chuveiro de 220 V, ou a espiral esticada até as voltas se encostarem.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Mexer no chuveiro só com a chave em "desligado".** Desligue o disjuntor, sinalize o quadro e teste a ausência de tensão com um instrumento que você acabou de testar numa tomada energizada. Não trabalhe sozinho em instalação energizada e, se não tiver segurança, chame um eletricista habilitado.
+- **Religar o disjuntor antes da água.** Abra a água primeiro e deixe o ar sair.
+- **Trocar o disjuntor por um maior porque "está desarmando".** O disjuntor protege o fio. Troque fio e disjuntor juntos, calculados para a corrente do chuveiro.
+- **Ligar o terra no neutro, ou deixar o chuveiro sem terra.** Fuga na água vira tensão no registro.
+- **Tirar o DR porque ele desarma.** Ele está avisando que há fuga.
+- **Resistência de tensão ou potência diferente.** Use a indicada pelo fabricante para o modelo.
+- **Emendar fios do chuveiro com fita ou com conectores pequenos.** Com 34 A, cada mau contato é um aquecedor. As conexões do chuveiro usam conectores para a bitola e a corrente do circuito.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Um chuveiro de 220 V tem, na posição inverno, um trecho de resistência de 8,8 Ω. Qual a potência dele nessa posição, em watts?',
+      answer: 5500,
+      tolerance: 0.01,
+      unit: 'W',
+      explanation: 'P = V²/R = 220² ÷ 8,8 = 48.400 ÷ 8,8 = 5.500 W.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que o chuveiro não esquenta com o registro fechado?',
+      options: [
+        {
+          text: 'Porque o diafragma só fecha os contatos quando a pressão da água o empurra',
+          correct: true,
+          feedback:
+            'Isso. Sem água passando, a membrana fica parada e os contatos ficam abertos: não há corrente na resistência.',
+        },
+        {
+          text: 'Porque a resistência só conduz corrente quando está molhada',
+          feedback:
+            'A resistência é um fio de metal: conduz com ou sem água. Quem abre o circuito sem água é o diafragma.',
+        },
+        {
+          text: 'Porque o disjuntor desliga quando a água para',
+          feedback: 'O disjuntor não sente a água. Quem liga e desliga com a água é o diafragma.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um chuveiro esquenta bem no inverno, mas no verão a água sai fria. Qual o defeito mais provável?',
+      options: [
+        {
+          text: 'O trecho da resistência que só a posição verão usa rompeu',
+          correct: true,
+          feedback:
+            'Isso. No verão a corrente atravessa o fio inteiro; com o segundo trecho rompido, esse caminho está aberto. O inverno usa só o primeiro trecho.',
+        },
+        {
+          text: 'O diafragma está furado',
+          feedback:
+            'Com o diafragma sem fechar, nenhuma posição esquentaria. O defeito está no trecho que só o verão usa.',
+        },
+        {
+          text: 'O disjuntor é pequeno demais',
+          feedback:
+            'Um disjuntor pequeno desarmaria no inverno, a posição de mais corrente, e não no verão.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Quanto um chuveiro de 7.500 W puxa de corrente, em ampères, numa rede de 220 V?',
+      answer: 34.1,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation: 'I = P/V = 7.500 ÷ 220 ≈ 34,1 A.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'O disjuntor de 25 A desarma desde que a família instalou um chuveiro de 7.500 W no circuito antigo, de fio de 4 mm². O que fazer?',
+      options: [
+        {
+          text: 'Refazer o circuito com fio e disjuntor calculados para os 34 A do chuveiro novo, ou voltar a um chuveiro que o circuito aguente',
+          correct: true,
+          feedback:
+            'Isso. O disjuntor protege o fio. Com 34 A, o fio de 4 mm² trabalha acima da capacidade dele.',
+        },
+        {
+          text: 'Trocar só o disjuntor por um de 40 A',
+          feedback:
+            'Assim o disjuntor para de desarmar, mas o fio de 4 mm² esquenta acima do limite dentro da parede. É o erro mais perigoso.',
+        },
+        {
+          text: 'Usar o chuveiro só no verão',
+          feedback:
+            'No verão ele não desarmaria, mas basta alguém passar para o inverno. O circuito precisa ser adequado ao aparelho.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem a troca da resistência do chuveiro.',
+      items: [
+        'Desligar o disjuntor do chuveiro e sinalizar o quadro',
+        'Testar a ausência de tensão com o multímetro testado numa tomada',
+        'Fechar o registro, abrir o chuveiro e trocar a resistência',
+        'Fechar o chuveiro e abrir a água até sair sem ar',
+        'Religar o disjuntor e testar as posições',
+      ],
+      explanation:
+        'Primeiro sem energia e com a ausência de tensão confirmada. No fim, a água vem antes da energia: com ar na câmara, a resistência queima.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Ligar o fio terra do chuveiro no neutro é uma alternativa segura quando a casa não tem fio terra.',
+      answer: false,
+      explanation:
+        'Se o neutro se romper, a carcaça e a água passam a receber a tensão da fase por dentro do próprio chuveiro. O terra vai ao condutor de proteção, e uma casa sem terra precisa de um eletricista.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- A **resistência** é um fio nu de níquel-cromo em espiral, resfriado pela água. Fora da água, rompe em segundos.
+- O **diafragma** só fecha os contatos com a pressão da água. Água fraca dá chuveiro fraco ou que liga e desliga; ar na câmara queima a resistência.
+- A **chave de temperatura** escolhe o trecho de fio: no inverno, menos resistência, mais corrente e mais potência ($P = V^2/R$). Um chuveiro de 7.500 W em 220 V tem uns 6,45 Ω e puxa uns 34 A.
+- O chuveiro precisa de **circuito próprio**, com fio e disjuntor para a corrente dele, **DR** de 30 mA e **fio terra** no condutor de proteção, nunca no neutro.
+- Na troca da resistência: disjuntor desligado e sinalizado, ausência de tensão testada, resistência igual à original e **água antes da energia**.
+
+Este é o fim do módulo de instalações. O próximo módulo mostra como a eletricidade vira movimento, do motor de brinquedo ao motor do portão: <LinkAula id="m08-motores" />.

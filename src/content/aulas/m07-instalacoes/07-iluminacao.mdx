@@ -1,0 +1,359 @@
+---
+titulo: Iluminação
+modulo: m07-instalacoes
+ordem: 7
+nivel: B
+duracaoMin: 35
+objetivos:
+  - Comparar lâmpadas pela luz que dão (lúmens) e não pelos watts, e calcular a economia da troca por LED
+  - Explicar o que o driver faz dentro da lâmpada LED e por que a fase vai ao contato central da rosca E27
+  - Descobrir por que uma lâmpada LED pisca ou brilha fraco com o interruptor desligado, e o que fazer
+  - Ajustar o tempo (TIME) e a luz (LUX) de um sensor de presença e entender o relé fotoelétrico
+prerequisitos:
+  - m07-instalacoes/06-interruptores
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+tags: [lâmpada, LED, driver, lúmen, temperatura de cor, E27, dimmer, sensor de presença, relé fotoelétrico, tensão fantasma]
+seguranca: rede
+rascunho: false
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import LampadaLedCorte from '../../../lessons/m07/figures/LampadaLedCorte.astro';
+import LampadaE27Ligacao from '../../../lessons/m07/figures/LampadaE27Ligacao.astro';
+import LedFantasma from '../../../lessons/m07/figures/LedFantasma.astro';
+import SensorPresencaLigacao from '../../../lessons/m07/figures/SensorPresencaLigacao.astro';
+import SensorPresenca from '../../../lessons/m07/SensorPresenca';
+
+Você trocou a lâmpada do quarto por uma LED novinha. À noite, apaga a luz no interruptor para dormir e, no escuro, a lâmpada dá uma piscadinha. Alguns segundos depois, outra. Lâmpada com defeito? Quase nunca. Ela está mostrando que, mesmo desligada, ainda chega um fio de corrente até ela.
+
+Para entender isso, e para escolher, ligar e automatizar a iluminação da casa, você precisa saber o que tem dentro de uma lâmpada LED, onde vai cada fio do bocal e como funcionam o dimmer, o sensor de presença e o relé fotoelétrico. É o assunto desta aula.
+
+## Da incandescente ao LED
+
+A lâmpada **incandescente** é a mais simples que existe: um filamento de tungstênio enrolado, dentro de um bulbo de vidro com gás inerte. A corrente aquece o filamento a mais de 2.500 °C pelo <Term id="efeito-joule">efeito Joule</Term>, e ele brilha, como você viu na aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />. O problema é que quase toda a energia sai como calor: só uns 5 % viram luz visível. Uma lâmpada de 60 W dá perto de 800 lm (típico), uns 13 lúmens por watt. Por isso o Brasil, como muitos países, tirou do mercado as incandescentes comuns em etapas, ao longo da década de 2010, por uma regra de eficiência energética.
+
+Duas outras tecnologias aparecem nas casas mais antigas:
+
+- **Halógena:** uma incandescente com um gás que deixa o filamento trabalhar mais quente. Luz mais branca e um pouco mais de luz por watt, mas continua esquentando muito.
+- **Fluorescente compacta:** um tubo com gás que brilha com uma descarga elétrica e um pó branco por dentro que transforma a luz ultravioleta em luz visível. Gasta perto de um quarto da incandescente, mas tem mercúrio dentro: quebrada ou queimada, vai para o ponto de coleta, não para o lixo comum.
+
+A **lâmpada LED** venceu as duas. O <Term id="led">LED</Term> é um diodo que emite luz quando a corrente passa por ele (aula <LinkAula id="m09-semicondutores/04-leds" />). Ele quase não esquenta para a luz que dá, liga na hora e dura muito mais.
+
+| Lâmpada (típico) | Potência para uns 800 lm | Luz por watt | Vida útil |
+|---|---|---|---|
+| Incandescente comum | 60 W | perto de 13 lm/W | perto de 1.000 h |
+| Halógena | 43 W | perto de 18 lm/W | 2.000 h a 3.000 h |
+| Fluorescente compacta | 14 W | perto de 60 lm/W | 6.000 h a 10.000 h |
+| LED | 9 W | 80 a 110 lm/W | 15.000 h a 25.000 h |
+
+## Lúmens, watts e a cor da luz
+
+A embalagem de uma lâmpada traz três números que confundem muita gente. O **watt** diz quanta energia a lâmpada gasta. O <Term id="lumen">lúmen</Term> (lm) diz quanta luz ela dá. E a <Term id="eficiencia-luminosa">eficiência luminosa</Term> diz quanta luz sai de cada watt:
+
+$$
+\eta = \frac{\Phi}{P}
+$$
+
+- $\eta$ (eta) é a eficiência luminosa, em lúmens por watt (lm/W);
+- $\Phi$ (fi) é o fluxo luminoso, a luz que a lâmpada emite, em lúmens (lm);
+- $P$ é a potência elétrica da lâmpada, em watts (W).
+
+Uma lâmpada LED de 9 W com 810 lm tem $\eta = 810 / 9 = 90\,\text{lm/W}$. A incandescente de 60 W com 800 lm tem $\eta = 800 / 60 \approx 13\,\text{lm/W}$. A mesma luz, com quase sete vezes menos energia. Na loja, compare **lúmens**, não watts: "equivale a 60 W" é só um jeito de dizer "uns 800 lm".
+
+O terceiro número é a <Term id="temperatura-de-cor">temperatura de cor</Term>, em kelvin (K). Ela diz o tom do branco, não o calor nem a quantidade de luz:
+
+- **2.700 K a 3.000 K, branco quente:** amarelado, parecido com a incandescente. Comum em quartos e salas.
+- **4.000 K, branco neutro:** nem amarelo nem azul. Bom para cozinhas e banheiros.
+- **5.000 K a 6.500 K, branco frio:** azulado, a "luz de escritório".
+
+A embalagem também diz a **tensão**. A maioria das lâmpadas LED de rosca é **bivolt**: funciona em 127 V e em 220 V, porque o circuito dentro dela se ajusta. Confira antes de comprar; uma lâmpada só de 127 V ligada em 220 V queima.
+
+## A lâmpada LED por dentro
+
+Os LEDs são pequenos e trabalham com poucos volts de **corrente contínua**, cada um com uns 3 V. A tomada dá 127 V ou 220 V de **corrente alternada**. Quem faz a ponte entre os dois é o <Term id="driver-de-led">driver</Term>, uma plaquinha escondida no pescoço da lâmpada. Gire o modelo abaixo e veja as peças separadas.
+
+<Part3D
+  part="lamp-led"
+  props={{ watts: 9, colorTemperature: 2700 }}
+  explode
+  annotations
+  alt="Lâmpada LED A60 com rosca E27, cortada ao meio. Em cima, o difusor leitoso; embaixo dele, a placa de alumínio com os LEDs SMD; no pescoço, que espalha o calor, a placa do driver com um capacitor de filtro; embaixo, a rosca E27, ligada ao neutro, e o contato central, que recebe a fase pelo interruptor."
+  caption="Lâmpada LED de 9 W, 2.700 K: o difusor, a placa de LEDs, o driver no pescoço e a rosca E27."
+>
+  <LampadaLedCorte />
+</Part3D>
+
+O driver faz três trabalhos:
+
+1. **Retifica:** uma ponte de diodos transforma a corrente alternada em corrente que só vai num sentido, como na aula <LinkAula id="m09-semicondutores/03-retificadores" />.
+2. **Filtra:** um capacitor eletrolítico alisa essa tensão.
+3. **Limita a corrente:** um pequeno circuito controla a corrente dos LEDs, porque LED sem limite de corrente queima. É o mesmo princípio do resistor em série com um LED, feito de um jeito que desperdiça menos energia. Nas lâmpadas melhores, é uma fonte chaveada em miniatura (aula <LinkAula id="m10-fontes/02-fontes-chaveadas" />).
+
+O ponto fraco da lâmpada LED quase nunca são os LEDs: é o driver, e o inimigo dele é o calor. Por isso o pescoço é de alumínio por dentro, e por isso a lâmpada LED dura menos numa luminária fechada e abafada. Se a embalagem disser que ela não serve para luminária fechada, respeite.
+
+## O bocal E27: onde vai cada fio
+
+A <Term id="rosca-e27">rosca E27</Term>, a rosca comum das lâmpadas de casa, tem dois contatos: a **lateral metálica da rosca** e o **contato central**, no fundo. O jeito certo de ligar está na figura.
+
+<Figure
+  caption="Figura 1. A fase sai do quadro, passa pelo interruptor e chega, como retorno, ao contato central do bocal. O neutro vai direto à rosca. Com o interruptor desligado, nada na lâmpada fica ligado à fase."
+  alt="Esquema com o quadro à esquerda, com os terminais F e N. A fase vai ao interruptor; do outro lado do interruptor, o fio de retorno desce até o contato central, no fundo da base de uma lâmpada. O neutro vai direto à lateral da rosca da lâmpada."
+>
+  <LampadaE27Ligacao />
+</Figure>
+
+São duas regras, e as duas protegem quem troca a lâmpada:
+
+- **O interruptor corta a fase**, nunca o neutro (aula <LinkAula id="m07-instalacoes/06-interruptores" />). Assim, com o interruptor desligado, a lâmpada inteira fica sem fase.
+- **A fase vai ao contato central, e o neutro à rosca.** A rosca é a parte que o dedo pode encostar ao rosquear a lâmpada; o contato central fica escondido no fundo.
+
+Mesmo assim, para trocar o bocal ou mexer na fiação, desligue o disjuntor. Você não sabe se quem fez a instalação seguiu essas regras.
+
+## A lâmpada LED que pisca apagada
+
+A lâmpada incandescente precisava de dezenas de watts para brilhar, e uma corrente pequena passava despercebida. A lâmpada LED é diferente: o capacitor do driver vai juntando carga com qualquer corrente minúscula que chegue e, quando junta o bastante, o driver acende os LEDs por um instante e o capacitor se esvazia. Começa tudo de novo: a lâmpada pisca a cada poucos segundos, ou fica com um brilho fraquinho. Três causas explicam quase todos os casos.
+
+<Figure
+  caption="Figura 2. Três jeitos de uma corrente pequena chegar à lâmpada desligada. 1: o interruptor corta o neutro, e a lâmpada continua ligada à fase. 2: o interruptor tem uma luz de localização, um LED com um resistor em paralelo com o contato. 3: o retorno corre metros ao lado de uma fase, e os dois fios formam um capacitor pequeno."
+  alt="Três esquemas empilhados, cada um com uma lâmpada LED entre a fase F e o neutro N. No primeiro, o interruptor está no fio do neutro. No segundo, o interruptor está na fase e tem um LED com resistor ligado por fora do contato. No terceiro, o fio do retorno corre ao lado de um fio de fase, com capacitores desenhados entre os dois."
+>
+  <LedFantasma />
+</Figure>
+
+1. **Interruptor cortando o neutro.** É um erro de ligação: a lâmpada fica com a fase o tempo todo, e a umidade e a poeira do bocal deixam passar uma fuga pequena. Além da piscada, é perigoso: quem troca a lâmpada "desligada" encosta na fase.
+2. **Interruptor com luz de localização** (o LEDzinho que ajuda a achar o interruptor no escuro). Para acender, esse LED precisa de corrente, e ele a pega passando pela lâmpada. Para a incandescente era nada; para o driver da LED, basta para piscar.
+3. **Acoplamento capacitivo.** É a mesma <Term id="tensao-fantasma">tensão fantasma</Term> que engana o multímetro (aula <LinkAula id="m03-medicoes/02-medindo-tensao" />). Dois fios lado a lado no mesmo eletroduto, por muitos metros, formam um capacitor. Com uns 100 pF por metro (típico), dez metros de fio dão 1 nF.
+
+Faça a conta do caso 3. Na rede de 127 V e 60 Hz, a reatância de 1 nF e a corrente que ela deixa passar são:
+
+$$
+X_C = \frac{1}{2\pi f C} = \frac{1}{2\pi \times 60 \times 10^{-9}} \approx 2{,}65\,\text{M}\Omega
+\qquad
+I = \frac{127}{2{,}65 \times 10^{6}} \approx 48\,\mu\text{A}
+$$
+
+A lâmpada acesa puxa uns 71 mA. Os 48 µA são menos de um milésimo disso: não acendem a lâmpada, mas enchem o capacitor do driver aos poucos, e ele pisca.
+
+O que fazer depende da causa. Ligação com o neutro no interruptor se corrige: o interruptor vai para a fase (com o disjuntor desligado). Interruptor com luz de localização se troca por um sem luz. No acoplamento capacitivo, um eletricista pode pôr uma carga pequena em paralelo com a lâmpada (existem acessórios vendidos para isso) para escoar a corrente fantasma. Trocar a lâmpada por um modelo de outra marca às vezes resolve, porque cada driver acorda com uma carga diferente.
+
+## Dimmer: só com lâmpada dimerizável
+
+O <Term id="dimmer">dimmer</Term> de parede controla o brilho cortando um pedaço de cada semiciclo da senoide com um TRIAC, o <Term id="controle-de-fase">controle de fase</Term> da aula <LinkAula id="m09-semicondutores/09-tiristores-e-isolamento" />. Ele foi feito para a incandescente, que é só um fio quente. O driver de uma lâmpada LED comum foi feito para receber a senoide inteira: com o dimmer, ele pisca, zumbe ou queima.
+
+Para usar dimmer, a lâmpada precisa dizer **dimerizável** na embalagem, e o dimmer precisa servir para LED. Mesmo assim, alguns pares de lâmpada e dimmer não se entendem e piscam no brilho baixo. O dimmer também tem uma pequena fuga, e uma LED comum ligada nele pode brilhar fraco mesmo "desligada", como na seção anterior.
+
+## O sensor de presença
+
+No corredor, na escada do prédio e na garagem, a luz acende sozinha quando alguém passa. Quem faz isso é o <Term id="sensor-de-presenca">sensor de presença</Term>. O mais comum é o **PIR** (infravermelho passivo): ele não emite nada, só sente o calor do corpo. A lente de plástico em gomos divide o campo de visão em faixas, e o sensor percebe quando uma fonte de calor passa de uma faixa para outra.
+
+Repare na consequência: o PIR vê **movimento**, não presença. Uma pessoa parada, lendo ou no banho, deixa de ser vista.
+
+Atrás do sensor ficam dois ou três botões de ajuste (os nomes variam, mas estes são os mais comuns):
+
+- **TIME:** quanto tempo a luz fica acesa **depois do último movimento**. Cada movimento que o sensor vê recomeça a contagem.
+- **LUX:** a partir de que luz ambiente o sensor acende. No símbolo do sol, ele acende sempre; no da lua, só no escuro. Assim a luz não acende de dia, à toa.
+- **SENS**, em alguns modelos: o alcance.
+
+<SensorPresenca client:visible />
+
+Use o simulador acima. O relógio pode andar mais rápido, para você não esperar tanto.
+
+1. Com a noite, LUX no meio e TIME em 30 s, clique em **Atravessar o corredor**. A pessoa leva 6 s para passar. Quanto tempo a luz fica acesa no total? (A linha do tempo ajuda.)
+2. Ponha TIME em 1 min. Atravesse uma vez e, quando o relógio mostrar uns 40 s depois, atravesse de novo. Quando a luz apaga?
+3. Escolha **Entrar e ficar parado**. O que acontece depois do TIME? E quando a pessoa acena?
+4. Mude a luz do ambiente para **Dia claro (300 lx)** com LUX no meio (50 lx) e atravesse o corredor. Agora o **Fim de tarde (30 lx)**. E com LUX na lua (5 lx)?
+
+Na tarefa 1, a luz fica acesa 36 s: os 6 s em que a pessoa anda, mais os 30 s contados do último movimento. Na 2, a segunda passagem recomeça a contagem, e a luz só apaga 1 min depois dela. Na 3, a luz apaga com a pessoa embaixo do sensor, e um aceno a acende de novo: é o motivo de tanta gente acenar no banheiro. Na 4, de dia o sensor vê a pessoa, mas o LUX não deixa acender; no fim de tarde, com 30 lx, ele acende com LUX em 50 lx e não acende com LUX em 5 lx.
+
+### Sensor de 3 fios e de 2 fios
+
+<Figure
+  caption="Figura 3. Em cima, o sensor de 3 fios: fase e neutro alimentam o sensor, e a saída (carga) leva a fase à lâmpada. Embaixo, o sensor de 2 fios entra no lugar do interruptor, em série com a lâmpada, e se alimenta com uma corrente pequena que passa por ela."
+  alt="Dois esquemas. No de cima, o sensor tem três bornes: L ligado à fase, N ligado ao neutro e carga ligado à lâmpada, cujo outro lado vai ao neutro. No de baixo, o sensor fica no fio da fase, entre a fase e o retorno da lâmpada, e a lâmpada vai ao neutro."
+>
+  <SensorPresencaLigacao />
+</Figure>
+
+O sensor de **3 fios** (fase, neutro e carga) precisa do neutro na caixa onde ele vai ficar. O de **2 fios** substitui um interruptor comum, sem neutro, mas para se alimentar deixa passar uma corrente pequena pela lâmpada o tempo todo. Com lâmpada LED, isso pode dar a piscada da seção anterior; os manuais desses sensores costumam pedir uma potência mínima de lâmpada. Na dúvida, prefira o de 3 fios.
+
+## O relé fotoelétrico
+
+A luz do poste, do muro e do jardim acende sozinha ao anoitecer. Quem decide é o <Term id="rele-fotoeletrico">relé fotoelétrico</Term>, que muita gente chama de fotocélula. Dentro dele há um sensor de luz, em geral um <Term id="ldr">LDR</Term> (aula <LinkAula id="m04-passivos/02-resistores-variaveis" />), e um relé que liga a lâmpada.
+
+A simulação mostra uma versão simplificada do circuito: o LDR em série com um resistor de 20 kΩ, um comparador que compara a tensão desse divisor com 6 V, um transistor e um relé que leva a fase de 127 V à lâmpada do jardim.
+
+<Simulation circuit="m07/rele-fotoeletrico" instruments={['multimetro']} />
+
+Aperte o play (▶) e ponha os dois multímetros em **V⎓ CC**: o lado do comando trabalha com corrente contínua. Depois vá escurecendo o dia no seletor **Luz sobre o sensor**, do dia nublado até a noite. Em que momento a lâmpada acende? Quanto marca a tensão do sensor antes e depois?
+
+O LDR desta simulação tem 20 kΩ com 10 lx, uma luz de fim de crepúsculo. Com mais luz que isso, ele tem menos de 20 kΩ, e o divisor dá mais de 6 V; com menos luz, mais de 20 kΩ, e menos de 6 V. Então a lâmpada acende abaixo de 10 lx. Confira com os números:
+
+- **Pôr do sol, 20 lx:** o LDR tem cerca de 12,3 kΩ, e o sensor marca $12 \times 20 / (20 + 12{,}3) \approx 7{,}4\,\text{V}$, acima dos 6 V. A lâmpada continua apagada.
+- **Anoitecer, 3 lx:** o LDR sobe para cerca de 46,5 kΩ, e o sensor cai para $12 \times 20 / (20 + 46{,}5) \approx 3{,}6\,\text{V}$. O comparador liga o transistor, a bobina do relé puxa uns 30 mA e o contato acende a lâmpada.
+
+Os relés fotoelétricos de verdade têm mais dois cuidados que esta simulação não mostra: uma **diferença** entre a luz de acender e a de apagar, para não ficarem ligando e desligando no crepúsculo, e um **atraso** de alguns segundos, para o farol de um carro passando não apagar a luz da rua.
+
+## Exemplo resolvido: quanto economiza trocar as lâmpadas por LED
+
+Uma casa tem 10 lâmpadas incandescentes de 60 W, acesas em média 4 horas por dia. Quanto ela economiza por mês trocando todas por lâmpadas LED de 9 W, com a mesma luz? Use a tarifa de exemplo da aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />, R\$ 0,90 por kWh.
+
+**Energia das incandescentes no mês.** Potência total, vezes horas por dia, vezes 30 dias:
+
+$$
+E = 10 \times 0{,}060\,\text{kW} \times 4\,\text{h} \times 30 = 72\,\text{kWh}
+\qquad
+72 \times 0{,}90 = \text{R\$}\ 64{,}80
+$$
+
+**Energia das lâmpadas LED no mês:**
+
+$$
+E = 10 \times 0{,}009\,\text{kW} \times 4\,\text{h} \times 30 = 10{,}8\,\text{kWh}
+\qquad
+10{,}8 \times 0{,}90 = \text{R\$}\ 9{,}72
+$$
+
+**Economia:** 61,2 kWh por mês, ou R\$ 55,08 por mês, perto de R\$ 661 por ano. Cada lâmpada trocada economiza R\$ 5,51 por mês: em poucos meses ela se paga (confira o preço na loja). E como a LED dura umas quinze vezes mais, você também compra menos lâmpadas.
+
+Repare que a conta só funciona porque as duas dão a mesma luz, uns 800 lm. Trocar uma incandescente de 60 W por uma LED de 4 W gasta menos ainda, mas deixa o cômodo escuro.
+
+<RealCase title="A lâmpada LED que pisca com o interruptor desligado">
+
+Volte ao quarto do começo da aula. Para descobrir a causa, siga esta ordem:
+
+1. **Olhe o interruptor.** Tem um LED de localização? Se tiver, é o suspeito número um. Um interruptor comum no lugar dele costuma resolver.
+2. **Confira se o interruptor corta a fase.** Com o interruptor desligado, use um detector de tensão ou o multímetro (aula <LinkAula id="m03-medicoes/02-medindo-tensao" />) nos dois contatos do bocal, com a lâmpada fora. Se algum deles mostrar a tensão da rede em relação ao terra, a fase está chegando à lâmpada desligada: o interruptor está no neutro. Isso precisa ser corrigido, com o disjuntor desligado e o teste de ausência de tensão antes de mexer.
+3. **Se nada disso aparecer, é acoplamento.** O retorno corre ao lado de uma fase por muitos metros. Teste outra lâmpada LED, de outro fabricante; se não resolver, um eletricista pode instalar uma carga de escoamento em paralelo com a lâmpada.
+
+Num prédio com sensor de presença de 2 fios na escada, o mesmo vale: a piscada vem da corrente que o sensor deixa passar para se alimentar.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Comprar pela potência.** Watts dizem o gasto; lúmens dizem a luz. Para a mesma luz, a LED tem muito menos watts.
+- **Usar lâmpada só de 127 V em 220 V.** Confira se é bivolt. Uma lâmpada errada queima o driver na hora.
+- **Pôr lâmpada LED comum num dimmer.** Só a dimerizável, com um dimmer que sirva para LED.
+- **Ligar o interruptor no neutro.** A lâmpada "desligada" continua com a fase, e quem a troca pode levar um choque. O interruptor corta sempre a fase.
+- **Instalar o relé fotoelétrico onde a própria lâmpada ilumina o sensor.** Ele "acha" que amanheceu, apaga, escurece, acende de novo e fica piscando. E não tampe o sensor com fita para deixar a luz acesa de dia.
+- **Trocar o bocal ou mexer no sensor só com o interruptor desligado.** O interruptor não é proteção, e você não sabe se ele corta a fase. Desligue o disjuntor do circuito de iluminação, sinalize o quadro e teste a ausência de tensão com um instrumento que você acabou de testar numa tomada energizada. Se não tiver segurança, chame um eletricista habilitado.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Uma lâmpada LED de 12 W emite 1.080 lm. Qual a eficiência luminosa dela, em lúmens por watt?',
+      answer: 90,
+      tolerance: 0.02,
+      unit: 'lm/W',
+      explanation: 'η = Φ/P = 1.080 lm ÷ 12 W = 90 lm/W.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Na loja, qual número da embalagem diz se uma lâmpada vai iluminar o cômodo tanto quanto a antiga?',
+      options: [
+        {
+          text: 'Os lúmens (lm)',
+          correct: true,
+          feedback: 'Isso. O lúmen mede a luz; com os mesmos lúmens, o cômodo fica igualmente claro.',
+        },
+        {
+          text: 'Os watts (W)',
+          feedback:
+            'Os watts dizem o gasto de energia. Uma LED de 9 W dá a luz de uma incandescente de 60 W.',
+        },
+        {
+          text: 'A temperatura de cor (K)',
+          feedback:
+            'A temperatura de cor diz o tom do branco, quente ou frio, não a quantidade de luz.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Num bocal E27 bem ligado, o que chega ao contato central, no fundo da rosca?',
+      options: [
+        {
+          text: 'A fase, depois de passar pelo interruptor',
+          correct: true,
+          feedback:
+            'Isso. A fase passa pelo interruptor e chega ao contato central; o neutro vai à rosca, a parte que o dedo pode tocar.',
+        },
+        {
+          text: 'O neutro',
+          feedback: 'O neutro vai à rosca. O contato central recebe a fase pelo interruptor.',
+        },
+        {
+          text: 'O fio terra',
+          feedback:
+            'O bocal comum não tem terra. O contato central recebe a fase, e a rosca, o neutro.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma lâmpada LED dá uma piscada a cada poucos segundos com o interruptor desligado. O interruptor tem um LEDzinho de localização. Qual a explicação mais provável?',
+      options: [
+        {
+          text: 'O LED do interruptor deixa passar uma corrente pequena pela lâmpada, que carrega o capacitor do driver até ele piscar',
+          correct: true,
+          feedback:
+            'Isso. A corrente que acende o LED de localização passa pela lâmpada. Um interruptor sem luz costuma resolver.',
+        },
+        {
+          text: 'A lâmpada está queimando',
+          feedback:
+            'Uma lâmpada boa faz o mesmo. A piscada vem da corrente que o LED do interruptor deixa passar.',
+        },
+        {
+          text: 'O disjuntor está com defeito',
+          feedback:
+            'O disjuntor não tem nada com isso: a corrente pequena passa pelo LED de localização do interruptor.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um sensor de presença está com TIME em 60 s. Uma pessoa passa e o sensor vê o último movimento dela no instante 0. Outra pessoa passa e é vista no instante 40 s. Em que instante, em segundos, a luz apaga?',
+      answer: 100,
+      tolerance: 0.01,
+      unit: 's',
+      explanation:
+        'Cada movimento recomeça a contagem. A luz apaga 60 s depois do último movimento: 40 + 60 = 100 s.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Um sensor de presença PIR mantém a luz acesa enquanto houver uma pessoa no cômodo, mesmo que ela fique parada.',
+      answer: false,
+      explanation:
+        'O PIR vê movimento de calor, não presença. Uma pessoa parada deixa de ser vista, e a luz apaga depois do tempo ajustado no TIME.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Você troca 5 lâmpadas incandescentes de 60 W por LED de 9 W, acesas 4 horas por dia. Quantos kWh a casa economiza em 30 dias?',
+      answer: 30.6,
+      tolerance: 0.02,
+      unit: 'kWh',
+      explanation:
+        'Cada lâmpada economiza 51 W. 5 × 0,051 kW × 4 h × 30 dias = 30,6 kWh, metade dos 61,2 kWh do exemplo com 10 lâmpadas.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- **Lúmens medem a luz; watts, o gasto.** A LED dá 80 a 110 lm/W (típico), contra uns 13 lm/W da incandescente: a mesma luz com perto de um sétimo da energia.
+- A lâmpada LED tem um **driver** que retifica, filtra e limita a corrente dos LEDs. Ele é sensível ao calor e, nas lâmpadas comuns, não aceita dimmer.
+- No bocal **E27**, a fase passa pelo interruptor e vai ao **contato central**; o neutro vai à **rosca**.
+- A LED que **pisca apagada** recebe uma corrente minúscula: interruptor no neutro, interruptor com luz de localização ou acoplamento entre fios longos.
+- O **sensor de presença** PIR vê movimento de calor; o **TIME** conta do último movimento e o **LUX** impede que ele acenda de dia. O **relé fotoelétrico** acende quando o LDR percebe que escureceu.
+
+Na próxima aula, o aparelho mais potente da casa: <LinkAula id="m07-instalacoes/08-chuveiro-eletrico" />.
