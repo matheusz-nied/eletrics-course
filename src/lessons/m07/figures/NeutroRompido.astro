@@ -1,0 +1,165 @@
+---
+/*
+ * 07.2: what an open neutral does. Top: with the neutral broken between the
+ * load and the panel, no current flows, and the whole neutral beyond the
+ * break sits at the phase voltage through the load. Bottom: the "terra no
+ * neutro" shortcut (the outlet's earth pin jumped to its neutral): when the
+ * neutral breaks upstream, the machine's case gets the phase through its own
+ * motor.
+ */
+---
+
+<svg viewBox="0 0 400 352" width="400" height="352" class="fig" aria-hidden="true">
+  <!-- Panel A: the open neutral -->
+  <text x="8" y="18" class="title">
+    Neutro rompido
+  </text>
+  <text x="8" y="44" class="tag fase-t">
+    F
+  </text>
+  <path d="M24 40 H300 V60" class="fase"></path>
+  <circle cx="300" cy="76" r="16" class="load"></circle>
+  <path d="M289 65 L311 87 M311 65 L289 87" class="load"></path>
+  <text x="324" y="80" class="small">
+    lâmpada
+  </text>
+  <text x="8" y="134" class="tag neutro-t">
+    N
+  </text>
+  <path d="M24 130 H120" class="neutro"></path>
+  <path d="M136 130 H300 V92" class="vivo"></path>
+  <path d="M120 122 l8 16 M128 122 l8 16" class="break"></path>
+  <text x="128" y="114" class="small mid bad">
+    rompido
+  </text>
+  <text x="218" y="150" class="note bad mid">
+    deste lado, o neutro tem 127 V
+  </text>
+  <text x="218" y="166" class="small mid">
+    (a lâmpada apaga, mas o fio dá choque)
+  </text>
+  <text x="70" y="150" class="small mid">
+    quadro
+  </text>
+
+  <!-- Panel B: earth jumped to neutral in the outlet -->
+  <g transform="translate(0 186)">
+    <text x="8" y="18" class="title">
+      Terra ligado no neutro
+    </text>
+    <text x="8" y="44" class="tag fase-t">
+      F
+    </text>
+    <path d="M24 40 H212" class="fase"></path>
+    <text x="8" y="94" class="tag neutro-t">
+      N
+    </text>
+    <path d="M24 90 H70" class="neutro"></path>
+    <path d="M86 90 H212" class="vivo"></path>
+    <path d="M70 82 l8 16 M78 82 l8 16" class="break"></path>
+    <text x="78" y="74" class="small mid bad">
+      rompido
+    </text>
+    <!-- The outlet with the jumper -->
+    <rect x="150" y="26" width="62" height="114" rx="8" class="outlet"></rect>
+    <text x="181" y="156" class="small mid">
+      tomada
+    </text>
+    <circle cx="181" cy="116" r="4" class="dot"></circle>
+    <path d="M181 112 V90" class="vivo"></path>
+    <text x="196" y="122" class="small">
+      ⏚
+    </text>
+    <!-- The machine: motor between F and N, case on the earth pin -->
+    <rect x="262" y="20" width="126" height="120" rx="6" class="case"></rect>
+    <path d="M212 40 H318 V56" class="fase-in"></path>
+    <path d="M212 90 H318 V84" class="vivo"></path>
+    <rect x="308" y="56" width="20" height="28" rx="3" class="load"></rect>
+    <text x="336" y="76" class="small">
+      motor
+    </text>
+    <path d="M181 116 H262" class="vivo"></path>
+    <circle cx="262" cy="116" r="3" class="dot"></circle>
+    <text x="392" y="160" class="note bad end">
+      a carcaça fica com a fase
+    </text>
+  </g>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .fase,
+  .neutro,
+  .vivo,
+  .fase-in {
+    stroke-width: 2.6;
+  }
+  .fase,
+  .fase-in {
+    stroke: var(--danger);
+  }
+  .neutro {
+    stroke: var(--accent);
+  }
+  .vivo {
+    stroke: var(--danger);
+    stroke-dasharray: 7 4;
+  }
+  .break {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .load {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .outlet {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .case {
+    stroke: var(--fg-muted);
+    stroke-width: 2.4;
+  }
+  .dot {
+    fill: var(--fg);
+    stroke: none;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .note {
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .bad {
+    fill: var(--danger);
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .tag {
+    font-weight: 700;
+  }
+  .fase-t {
+    fill: var(--danger);
+  }
+  .neutro-t {
+    fill: var(--accent);
+  }
+</style>
