@@ -1,0 +1,233 @@
+---
+/*
+ * 07.1: front view of a house distribution board with the cover open. On the
+ * DIN rail: main breaker, RCD (DR), surge protector (DPS) and four circuit
+ * breakers fed by a comb busbar; below, the neutral and earth busbars. Fallback
+ * of <Part3D part="distribution-board">.
+ */
+const circuits = [
+  { n: 1, x: 200 },
+  { n: 2, x: 224 },
+  { n: 3, x: 248 },
+  { n: 4, x: 272 },
+];
+const screws = (x0: number, n: number) => Array.from({ length: n }, (_, i) => x0 + 14 + i * 18);
+---
+
+<svg viewBox="0 0 420 340" width="420" height="340" class="fig" aria-hidden="true">
+  <rect x="8" y="8" width="404" height="324" rx="10" class="panel" />
+
+  <!-- Labels above the modules -->
+  <text x="62" y="52" class="lbl mid strong">
+    Geral
+  </text>
+  <text x="112" y="52" class="lbl mid strong">
+    DR
+  </text>
+  <text x="162" y="52" class="lbl mid strong">
+    DPS
+  </text>
+  {circuits.map((c) => (
+    <text x={c.x + 11} y="52" class="lbl mid strong">
+      {c.n}
+    </text>
+  ))}
+
+  <!-- DIN rail -->
+  <rect x="28" y="96" width="300" height="12" class="rail" />
+
+  <!-- Main breaker (2 poles) -->
+  <rect x="40" y="62" width="44" height="80" rx="3" class="module" />
+  <rect x="52" y="78" width="20" height="20" rx="2" class="lever" />
+  <text x="62" y="126" class="tiny">
+    63 A
+  </text>
+
+  <!-- RCD -->
+  <rect x="90" y="62" width="44" height="80" rx="3" class="module" />
+  <rect x="96" y="78" width="16" height="20" rx="2" class="lever" />
+  <circle cx="124" cy="88" r="5" class="test" />
+  <text x="124" y="91" class="tiny">
+    T
+  </text>
+  <text x="112" y="126" class="tiny">
+    30 mA
+  </text>
+
+  <!-- Surge protector -->
+  <rect x="140" y="62" width="44" height="80" rx="3" class="module dps" />
+  <rect x="148" y="80" width="12" height="10" rx="1" class="window" />
+  <rect x="164" y="80" width="12" height="10" rx="1" class="window" />
+  <text x="162" y="126" class="tiny">
+    DPS
+  </text>
+
+  <!-- Circuit breakers and the comb busbar -->
+  {circuits.map((c) => (
+    <g>
+      <rect x={c.x} y="62" width="22" height="80" rx="3" class="module" />
+      <rect x={c.x + 5} y="78" width="12" height="20" rx="2" class="lever" />
+    </g>
+  ))}
+  <path d="M200 66 H294" class="comb" />
+  <path d="M134 70 H140 M184 70 H200" class="phase" />
+  <text x="300" y="62" class="small">
+    barramento
+  </text>
+  <text x="300" y="76" class="small">
+    de fase (pente)
+  </text>
+  <text x="211" y="126" class="tiny">
+    10
+  </text>
+  <text x="235" y="126" class="tiny">
+    20
+  </text>
+  <text x="259" y="126" class="tiny">
+    20
+  </text>
+  <text x="283" y="126" class="tiny">
+    32
+  </text>
+
+  <!-- Feeder in, from the meter -->
+  <path d="M54 20 V62 M70 20 V62" class="feed" />
+  <text x="80" y="28" class="small">
+    chega do medidor
+  </text>
+
+  <!-- Neutral and earth busbars -->
+  <path d="M120 142 V178 M112 142 V164 H60 V196" class="neutral-wire" />
+  <path d="M172 142 V228" class="earth-wire" />
+  <rect x="40" y="196" width="140" height="14" rx="3" class="bar neutral" />
+  {screws(40, 7).map((x) => (
+    <circle cx={x} cy="203" r="3" class="screw" />
+  ))}
+  <text x="40" y="190" class="small">
+    barramento de neutro
+  </text>
+  <rect x="160" y="228" width="140" height="14" rx="3" class="bar earth" />
+  {screws(160, 7).map((x) => (
+    <circle cx={x} cy="235" r="3" class="screw" />
+  ))}
+  <text x="306" y="240" class="small">
+    barramento
+  </text>
+  <text x="306" y="254" class="small">
+    de terra
+  </text>
+
+  <!-- Legend of the circuits (the panel's identification) -->
+  <path d="M24 266 H396" class="sep" />
+  <text x="28" y="288" class="lbl">
+    1 Iluminação · 10 A
+  </text>
+  <text x="214" y="288" class="lbl">
+    2 Tomadas da sala · 20 A
+  </text>
+  <text x="28" y="312" class="lbl">
+    3 Tomadas da cozinha · 20 A
+  </text>
+  <text x="214" y="312" class="lbl">
+    4 Chuveiro · 32 A
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .panel {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .rail {
+    fill: var(--fg-subtle);
+    stroke: none;
+    opacity: 0.6;
+  }
+  .module {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .module.dps {
+    fill: var(--surface-2);
+  }
+  .lever {
+    fill: var(--fg);
+    stroke: none;
+  }
+  .test {
+    fill: var(--warning-soft);
+    stroke: var(--warning);
+    stroke-width: 1.5;
+  }
+  .window {
+    fill: var(--success-soft);
+    stroke: var(--success);
+    stroke-width: 1.2;
+  }
+  .comb {
+    stroke: var(--copper);
+    stroke-width: 5;
+  }
+  .phase,
+  .feed {
+    stroke: var(--copper);
+    stroke-width: 3;
+  }
+  .neutral-wire {
+    stroke: light-dark(#1f6fb8, #63adf0);
+    stroke-width: 3;
+  }
+  .earth-wire {
+    stroke: light-dark(#13763a, #5ccf8a);
+    stroke-width: 3;
+  }
+  .bar {
+    stroke: none;
+  }
+  .bar.neutral {
+    fill: light-dark(#1f6fb8, #63adf0);
+  }
+  .bar.earth {
+    fill: light-dark(#13763a, #5ccf8a);
+  }
+  .screw {
+    fill: var(--bg);
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .sep {
+    stroke: var(--border-strong);
+    stroke-width: 1;
+  }
+  /* A halo in the panel's colour keeps the labels readable over the wires. */
+  text {
+    paint-order: stroke;
+    stroke: var(--surface);
+    stroke-width: 4px;
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .strong {
+    font-weight: 700;
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .tiny {
+    fill: var(--fg-muted);
+    font-size: 10px;
+    text-anchor: middle;
+  }
+</style>

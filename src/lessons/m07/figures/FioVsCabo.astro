@@ -1,0 +1,108 @@
+---
+/*
+ * 07.4: cross-sections of the same copper section made three ways: a solid
+ * wire (one conductor), a stranded rigid cable (7 wires) and a flexible cable
+ * (many thin wires). Fallback of <Part3D part="wire">.
+ */
+const R_COPPER = 26;
+const R_INSUL = 38;
+
+/** Seven wires: one in the centre and six around it. */
+const seven = [
+  [0, 0],
+  ...Array.from({ length: 6 }, (_, i) => {
+    const a = (i * Math.PI) / 3;
+    return [Math.cos(a) * 17.4, Math.sin(a) * 17.4];
+  }),
+];
+
+/** Flexible: rings of thin wires filling the copper circle. */
+const thin: [number, number][] = [[0, 0]];
+for (const [radius, n] of [
+  [5.2, 6],
+  [10.4, 12],
+  [15.6, 18],
+  [20.8, 24],
+] as const) {
+  for (let i = 0; i < n; i++) {
+    const a = (i * 2 * Math.PI) / n + (n % 12 === 0 ? 0 : Math.PI / n);
+    thin.push([Math.cos(a) * radius, Math.sin(a) * radius]);
+  }
+}
+const cols = [70, 210, 350];
+---
+
+<svg viewBox="0 0 420 210" width="420" height="210" class="fig" aria-hidden="true">
+  <!-- Solid wire -->
+  <circle cx={cols[0]} cy="80" r={R_INSUL} class="insul" />
+  <circle cx={cols[0]} cy="80" r={R_COPPER} class="copper" />
+
+  <!-- Stranded rigid cable -->
+  <circle cx={cols[1]} cy="80" r={R_INSUL} class="insul" />
+  {seven.map(([x, y]) => (
+    <circle cx={cols[1]! + x!} cy={80 + y!} r="8.6" class="copper" />
+  ))}
+
+  <!-- Flexible cable -->
+  <circle cx={cols[2]} cy="80" r={R_INSUL} class="insul" />
+  {thin.map(([x, y]) => (
+    <circle cx={cols[2]! + x} cy={80 + y} r="2.5" class="copper thin" />
+  ))}
+
+  <text x={cols[0]} y="142" class="lbl mid strong">
+    Fio rígido
+  </text>
+  <text x={cols[0]} y="160" class="small mid">
+    um condutor sólido
+  </text>
+  <text x={cols[1]} y="142" class="lbl mid strong">
+    Cabo rígido
+  </text>
+  <text x={cols[1]} y="160" class="small mid">
+    poucos fios (7)
+  </text>
+  <text x={cols[2]} y="142" class="lbl mid strong">
+    Cabo flexível
+  </text>
+  <text x={cols[2]} y="160" class="small mid">
+    dezenas de fios finos
+  </text>
+
+  <text x="210" y="192" class="small mid">
+    Mesma seção de cobre (em mm²), mesma isolação de PVC
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+  }
+  .insul {
+    fill: light-dark(#2a86d4, #3a8fd8);
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+  }
+  .copper {
+    fill: light-dark(#c8783f, #e59a63);
+    stroke: light-dark(#8a4a1c, #9c5a2c);
+    stroke-width: 1.2;
+  }
+  .copper.thin {
+    stroke-width: 0.6;
+  }
+  text {
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .strong {
+    font-weight: 700;
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+</style>

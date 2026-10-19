@@ -1,0 +1,127 @@
+---
+/*
+ * 07.4: the coordination I_B ≤ I_n ≤ I_Z on a current axis, for the
+ * 7.500 W shower at 220 V (34 A) with a 40 A breaker: right with a 6 mm²
+ * wire (41 A), wrong with the old 4 mm² wire (32 A).
+ */
+const x = (amps: number) => 24 + amps * 7.2;
+const ticks = [0, 10, 20, 30, 40, 50];
+const rows = [
+  { y: 70, title: 'Certo: fio de 6 mm²', iz: 41, ok: true },
+  { y: 190, title: 'Errado: o fio velho de 4 mm²', iz: 32, ok: false },
+];
+const IB = 34.1;
+const IN = 40;
+---
+
+<svg viewBox="0 0 420 290" width="420" height="290" class="fig" aria-hidden="true">
+  {rows.map((r) => (
+    <g>
+      <text x="14" y={r.y - 42} class={r.ok ? 'title ok' : 'title bad'}>
+        {r.title}
+      </text>
+      {!r.ok && (
+        <rect x={x(r.iz)} y={r.y - 9} width={x(IN) - x(r.iz)} height="18" class="danger-zone" />
+      )}
+      <path d={`M${x(0)} ${r.y} H${x(52)}`} class="axis" />
+      {ticks.map((t) => (
+        <g>
+          <path d={`M${x(t)} ${r.y - 4} V${r.y + 4}`} class="axis" />
+          <text x={x(t)} y={r.y + 20} class="tick">
+            {t === 50 ? '50 A' : t}
+          </text>
+        </g>
+      ))}
+      <circle cx={x(IB)} cy={r.y} r="6" class="mark load" />
+      <text x={x(IB) - 8} y={r.y - 14} class="mlbl end">
+        carga 34 A
+      </text>
+      <path d={`M${x(IN)} ${r.y - 12} V${r.y + 12}`} class="mark-line breaker" />
+      <text x={x(IN)} y={r.y + 38} class="mlbl mid">
+        disjuntor 40 A
+      </text>
+      <rect
+        x={x(r.iz) - 4}
+        y={r.y - 4}
+        width="8"
+        height="8"
+        class={r.ok ? 'mark wire-ok' : 'mark wire-bad'}
+      />
+      <text
+        x={x(r.iz) + (r.ok ? 10 : -6)}
+        y={r.ok ? r.y - 14 : r.y + 38}
+        class={r.ok ? 'mlbl' : 'mlbl end'}
+      >
+        {`fio ${r.iz} A`}
+      </text>
+    </g>
+  ))}
+  <text x="14" y="262" class="note">
+    Na faixa vermelha, o fio passa do que aguenta
+  </text>
+  <text x="14" y="279" class="note">
+    e o disjuntor não desarma.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+  }
+  .axis {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .danger-zone {
+    fill: var(--danger-soft);
+    stroke: var(--danger);
+    stroke-width: 1;
+  }
+  .mark.load {
+    fill: var(--accent);
+  }
+  .mark-line.breaker {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .mark.wire-ok {
+    fill: var(--success);
+  }
+  .mark.wire-bad {
+    fill: var(--danger);
+  }
+  text {
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .title.ok {
+    fill: var(--success);
+  }
+  .title.bad {
+    fill: var(--danger);
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 11px;
+    text-anchor: middle;
+  }
+  .mlbl {
+    font-size: 12px;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+</style>

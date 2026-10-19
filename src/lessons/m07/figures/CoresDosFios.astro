@@ -1,0 +1,120 @@
+---
+/*
+ * 07.4: the colours of building wires. NBR 5410: neutral light blue,
+ * protective conductor green-yellow (or green), phase any other colour; the
+ * switched return has no colour in the norm.
+ */
+const rows = [
+  {
+    y: 22,
+    title: 'Neutro',
+    note: 'azul-claro (NBR 5410)',
+    wires: ['neutro'],
+  },
+  {
+    y: 86,
+    title: 'Proteção (terra, PE)',
+    note: 'verde-amarelo ou verde (NBR 5410)',
+    wires: ['terra'],
+  },
+  {
+    y: 150,
+    title: 'Fase',
+    note: 'outras cores: preto, vermelho e marrom são comuns',
+    wires: ['preto', 'vermelho', 'marrom'],
+  },
+  {
+    y: 214,
+    title: 'Retorno (do interruptor à lâmpada)',
+    note: 'sem cor na norma: costuma ser outra cor, combinada na obra',
+    wires: ['branco'],
+  },
+];
+---
+
+<svg viewBox="0 0 420 274" width="420" height="274" class="fig" aria-hidden="true">
+  <defs>
+    <pattern id="cores-verde-amarelo" width="18" height="16" patternUnits="userSpaceOnUse">
+      <rect width="18" height="16" class="c-verde" />
+      <path d="M0 16 L8 0 H14 L6 16 Z" class="c-amarelo" />
+    </pattern>
+  </defs>
+  {rows.map((row) => (
+    <g>
+      <text x="14" y={row.y + 12} class="lbl strong">
+        {row.title}
+      </text>
+      <text x="14" y={row.y + 30} class="small">
+        {row.note}
+      </text>
+      {row.wires.map((w, i) => {
+        const y = row.y + 38;
+        const x = 14 + i * 136;
+        const len = row.wires.length > 1 ? 120 : 390;
+        return (
+          <g>
+            <rect
+              x={x}
+              y={y}
+              width={len - 18}
+              height="12"
+              rx="6"
+              class={`wire c-${w}`}
+              fill={w === 'terra' ? 'url(#cores-verde-amarelo)' : undefined}
+            />
+            <rect x={x + len - 22} y={y + 3} width="22" height="6" rx="3" class="cu" />
+          </g>
+        );
+      })}
+    </g>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+  }
+  .wire {
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .c-neutro {
+    fill: light-dark(#3d93dc, #4a9be0);
+  }
+  .c-verde {
+    fill: light-dark(#13763a, #1f8a4a);
+  }
+  .c-amarelo {
+    fill: light-dark(#f2c81a, #e8c22a);
+  }
+  .c-terra {
+    fill: url(#cores-verde-amarelo);
+  }
+  .c-preto {
+    fill: #1c1c1e;
+  }
+  .c-vermelho {
+    fill: #c21f1b;
+  }
+  .c-marrom {
+    fill: #6b3d24;
+  }
+  .c-branco {
+    fill: #efede6;
+  }
+  .cu {
+    fill: light-dark(#c8783f, #e59a63);
+    stroke: none;
+  }
+  text {
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .strong {
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+</style>
