@@ -1,0 +1,6 @@
+id: m12-microcontroladores
+numero: 12
+parte: 3
+titulo: Microcontroladores, sensores e automação
+resumo: Como um equipamento "pensa". Pinos de entrada e saída, conversor analógico-digital, PWM, máquinas de estado, sensores, atuadores, um microcontrolador simulado para programar e a automação da casa com ESP32, da luz de escada à central do portão.
+icone: chip

@@ -1,0 +1,115 @@
+---
+/* 12.1: logic levels of a digital input. Two bars, 5 V (ATmega328P of the
+   Arduino Uno: low up to 0,3 × VCC, high from 0,6 × VCC) and 3,3 V (ESP32:
+   low up to 0,25 × VDD, high from 0,75 × VDD), each with the undefined band
+   in the middle. Thresholds from the chips' datasheets. */
+const H = 200;
+const TOP = 34;
+const BARS = [
+  { x: 110, vcc: 5, low: 1.5, high: 3, name: 'placa de 5 V', chip: 'tipo Arduino Uno' },
+  { x: 330, vcc: 3.3, low: 0.825, high: 2.475, name: 'placa de 3,3 V', chip: 'tipo ESP32' },
+];
+const fmt = (v: number) => v.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+---
+
+<svg viewBox="0 0 520 290" width="520" height="290" class="fig" aria-hidden="true">
+  {
+    BARS.map((b) => {
+      const y = (v: number) => TOP + H - (v / b.vcc) * H;
+      return (
+        <g>
+          <rect x={b.x} y={y(b.vcc)} width="56" height={y(b.high) - y(b.vcc)} class="hi" />
+          <rect x={b.x} y={y(b.high)} width="56" height={y(b.low) - y(b.high)} class="mid" />
+          <rect x={b.x} y={y(b.low)} width="56" height={y(0) - y(b.low)} class="lo" />
+          <text x={b.x + 28} y={(y(b.vcc) + y(b.high)) / 2 + 4} class="band">
+            alto (1)
+          </text>
+          <text x={b.x + 28} y={(y(b.high) + y(b.low)) / 2 - 3} class="band muted">
+            indefinido
+          </text>
+          <text x={b.x + 28} y={(y(b.high) + y(b.low)) / 2 + 12} class="band muted small">
+            evite
+          </text>
+          <text x={b.x + 28} y={(y(b.low) + y(0)) / 2 + 4} class="band">
+            baixo (0)
+          </text>
+          {[b.vcc, b.high, b.low, 0].map((v) => (
+            <>
+              <path d={`M${b.x - 6} ${y(v)}H${b.x}`} class="tick" />
+              <text x={b.x - 10} y={y(v) + 4} class="val">
+                {fmt(v)} V
+              </text>
+            </>
+          ))}
+          <text x={b.x + 28} y={TOP + H + 26} class="name">
+            {b.name}
+          </text>
+          <text x={b.x + 28} y={TOP + H + 44} class="chip">
+            {b.chip}
+          </text>
+        </g>
+      );
+    })
+  }
+  <text x="260" y="18" class="title">o que uma entrada digital entende como 0 e como 1</text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .hi {
+    fill: var(--danger-soft);
+    stroke: var(--danger-border);
+  }
+  .mid {
+    fill: var(--surface-2);
+    stroke: var(--border-strong);
+    stroke-dasharray: 4 3;
+  }
+  .lo {
+    fill: var(--info-soft);
+    stroke: var(--info-border);
+  }
+  .band {
+    fill: var(--fg);
+    font-size: 12px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .muted {
+    fill: var(--fg-muted);
+    font-weight: 500;
+  }
+  .small {
+    font-size: 10.5px;
+  }
+  .tick {
+    stroke: var(--fg-muted);
+  }
+  .val {
+    fill: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    text-anchor: end;
+  }
+  .name {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .chip {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 13.5px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+</style>

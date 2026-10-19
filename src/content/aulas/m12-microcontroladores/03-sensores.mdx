@@ -1,0 +1,308 @@
+---
+titulo: Sensores
+modulo: m12-microcontroladores
+ordem: 3
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Classificar um sensor pelo tipo de sinal que ele entrega ao microcontrolador
+  - Ler um sensor resistivo (NTC, LDR) com um divisor de tensão e converter a leitura na grandeza física
+  - Explicar como funcionam os sensores de presença (PIR), de distância por ultrassom e de obstáculo por infravermelho
+  - Medir corrente com sensor Hall ou alicate não invasivo, respeitando a segurança da rede
+  - Usar histerese e tempo de confirmação para evitar acionamentos falsos
+prerequisitos:
+  - m12-microcontroladores/02-maquinas-de-estado
+  - m04-passivos/02-resistores-variaveis
+tags: [sensores, NTC, LDR, PIR, ultrassom, infravermelho, sensor de corrente, Hall, histerese, ADC]
+seguranca: baixa-tensao
+---
+
+import LaboratorioSensores from '../../../lessons/m12/LaboratorioSensores';
+
+A luz da garagem acende quando você chega com o carro. O poste da rua acende quando escurece. O ar-condicionado desliga quando a sala esfria. Em todos esses casos, um microcontrolador precisou **saber** alguma coisa do mundo: se há alguém ali, quanto de luz existe, qual é a temperatura. Quem conta isso a ele é um **sensor**.
+
+Nesta aula você vai ver os sensores mais usados em automação e eletrônica de hobby: o que cada um mede, como funciona por dentro e, principalmente, que tipo de sinal entrega ao pino, porque é isso que define como o programa vai lê-lo.
+
+## O que o pino recebe
+
+Um sensor transforma uma grandeza física (temperatura, luz, movimento, distância, corrente) num sinal elétrico. Do ponto de vista do microcontrolador, só existem alguns tipos de sinal:
+
+| O sensor entrega | Exemplos | Como o programa lê |
+|---|---|---|
+| Uma resistência que varia | NTC, LDR, potenciômetro | Divisor de tensão numa entrada analógica (ADC) |
+| Uma tensão que varia | LM35 (10 mV por grau), sensor de corrente Hall | Entrada analógica |
+| Liga ou desliga | Sensor de presença (PIR), reed, sensor de obstáculo | Entrada digital |
+| Um pulso cuja duração é a medida | Sensor de distância por ultrassom | Entrada digital, medindo o tempo |
+| Uma mensagem digital | DS18B20, sensores de umidade, acelerômetros | Protocolo de comunicação (1-Wire, I²C, SPI) |
+
+Os três primeiros tipos você já sabe ler com o que viu na aula anterior. Os sensores com mensagem digital entregam o valor pronto, já em graus ou em porcentagem, e o programa usa uma biblioteca para conversar com eles.
+
+## Sensores resistivos e o divisor de tensão
+
+O <Term id="ntc">termistor NTC</Term> e o <Term id="ldr">LDR</Term> são resistores que mudam com a temperatura e com a luz. O microcontrolador não mede resistência, só tensão. A solução é o <Term id="divisor-de-tensao">divisor de tensão</Term>: o sensor em série com um resistor fixo, e o ponto do meio numa entrada analógica. Com o sensor embaixo (entre o pino e o negativo) e o resistor fixo $R_\text{F}$ em cima:
+
+$$
+V_\text{pino} = V_\text{CC} \cdot \frac{R_\text{sensor}}{R_\text{F} + R_\text{sensor}}
+$$
+
+Para tirar o máximo do conversor, escolha $R_\text{F}$ perto da resistência do sensor no meio da faixa que interessa. Com um NTC de 10 kΩ a 25 °C, um resistor de 10 kΩ deixa o pino em 2,5 V na temperatura ambiente, no meio da escala, e a tensão varia bastante para cima e para baixo.
+
+O programa faz a conta ao contrário. A partir da leitura $L$ do ADC de 10 bits, a resistência do sensor é:
+
+$$
+R_\text{sensor} = R_\text{F} \cdot \frac{L}{1024 - L}
+$$
+
+### Temperatura com NTC
+
+A resistência de um NTC cai com a temperatura de um jeito bem descrito pela **equação Beta**:
+
+$$
+\frac{1}{T} = \frac{1}{T_{25}} + \frac{1}{B} \ln\!\left(\frac{R}{R_{25}}\right)
+$$
+
+em que $T$ é a temperatura em kelvin (°C + 273,15), $T_{25}$ = 298,15 K, $R_{25}$ é a resistência a 25 °C e $B$ é a constante do termistor, que vem na folha de dados (3950 K é um valor típico). É a conta que o programa da simulação abaixo faz.
+
+<Simulation circuit="m12/termometro" />
+
+O circuito tem o divisor com um NTC de 10 kΩ e o programa liga a saída do ventilador (um LED azul) a partir de 30 °C. Aperte o play e clique no microcontrolador para ver a leitura do ADC, a resistência calculada e a temperatura.
+
+1. A 25 °C, quanto o programa calcula? E qual é a leitura do ADC?
+2. Suba a temperatura até 32 °C. O ventilador liga?
+3. Agora desça devagar: 30, 29, 28 °C. Em que temperatura o ventilador desliga?
+
+A 25 °C, o ADC lê cerca de 508 e o programa calcula uns 25,4 °C. A pequena diferença vem do degrau do conversor (cada degrau aqui vale uns 0,1 °C) e de um leve aquecimento do próprio NTC pela corrente do divisor. Em 32 °C, o ventilador liga. Na descida, ele continua ligado em 30 e 29 °C e só desliga quando a temperatura chega a 28 °C.
+
+Esse intervalo entre ligar e desligar é a <Term id="histerese">histerese</Term>. Sem ela, com a temperatura parada perto de 30 °C, o ruído da leitura faria o ventilador ligar e desligar várias vezes por segundo, o que gasta o relé e irrita qualquer um. É o mesmo princípio do termostato da geladeira.
+
+Outros sensores de temperatura comuns: o **LM35**, que entrega 10 mV por grau Celsius direto (250 mV a 25 °C), o **DS18B20**, digital, que manda a temperatura pronta por um fio só e vem em versões à prova d'água, e o **termopar**, que aguenta centenas de graus (fornos, motores) e precisa de um amplificador próprio.
+
+### Luz com LDR
+
+No LDR, a resistência cai quando a luz aumenta: dezenas ou centenas de quilo-ohms no escuro, poucas centenas de ohms no sol. Com o LDR em cima e o resistor fixo embaixo, a tensão no pino **sobe** com a luz. A simulação abaixo é uma luz automática: ela acende quando escurece e apaga quando o dia clareia.
+
+<Simulation circuit="m12/luz-automatica" />
+
+O programa usa dois limiares e um tempo de confirmação. Acende quando a leitura fica abaixo de 250 durante 3 s seguidos e apaga quando fica acima de 350 durante 3 s seguidos. Clique no microcontrolador para ver a leitura e o estado (DIA, ESCURECENDO, NOITE, CLAREANDO).
+
+1. Com 100 lx (uma sala acesa), qual é a leitura?
+2. Baixe a luz para 2 lx e espere. Depois de quanto tempo a luz acende?
+3. Com a luz acesa, suba rapidamente para 1.000 lx (como o farol de um carro passando) e, antes de 3 s, volte para 2 lx. A luz apaga?
+4. Ponha a luz em cerca de 8 lx, entre os dois limiares. O que acontece?
+
+Com 100 lx, o ADC lê cerca de 729. Com 2 lx, a leitura cai para uns 141, o estado vai para ESCURECENDO e, 3 s depois, para NOITE, acendendo a luz. O farol que passa leva a máquina para CLAREANDO, mas ela volta a NOITE antes de completar os 3 s, e a luz não pisca. Em 8 lx, a leitura fica entre 250 e 350, e a máquina simplesmente mantém o estado em que estava: é a histerese de novo, agora junto com uma máquina de estados como as da [aula anterior](../02-maquinas-de-estado/).
+
+## Presença: o sensor PIR
+
+O sensor de presença das luzes de garagem e dos alarmes é o **PIR** (infravermelho passivo). "Passivo" porque ele não emite nada: só recebe a radiação infravermelha que todo corpo quente emite. O coração dele é um **sensor piroelétrico**, um cristal que gera uma pequena tensão quando a quantidade de infravermelho que chega nele **muda**. Ele tem dois elementos lado a lado, ligados em oposição: uma parede quente parada aquece os dois igualmente, e nada acontece. Uma pessoa andando aquece um elemento antes do outro, e aparece um sinal.
+
+A cúpula branca na frente é uma **lente de Fresnel**, dividida em vários gomos. Cada gomo projeta uma "faixa" do ambiente sobre o sensor. Quando alguém atravessa essas faixas, o sinal sobe e desce, e o circuito do módulo transforma isso numa saída digital: nível alto por um tempo ajustável.
+
+<Model3D
+  part="pir-sensor"
+  annotations
+  caption="Módulo sensor de presença PIR, do tipo HC-SR501. Abra a vista explodida para ver o sensor piroelétrico sob a lente de Fresnel; ao lado, os trimpots de sensibilidade e de tempo e o jumper do modo de repetição."
+/>
+
+No módulo mais comum (tipo HC-SR501), um trimpot ajusta a **sensibilidade** (o alcance, até uns 7 m) e outro o **tempo** em que a saída fica alta depois de detectar, de uns 3 s a uns 5 min. Um jumper escolhe se um movimento novo durante esse tempo **renova** a contagem (modo de repetição) ou não. Depois que a saída volta a zero, o módulo fica uns 2,5 s sem detectar nada. A saída é de 3,3 V, o que serve tanto para placas de 5 V quanto para o ESP32.
+
+Uma consequência importante: o PIR detecta **movimento**, não presença. Uma pessoa sentada lendo, parada, deixa de ser vista depois de um tempo, e a luz apaga. Por isso o tempo da luz de um banheiro precisa ser mais longo que o de um corredor.
+
+## Distância: o sensor de ultrassom
+
+O sensor de ultrassom (tipo HC-SR04) mede a distância como um morcego. O programa manda um pulso de 10 µs no pino TRIG; o módulo emite pelo transmissor uma rajada de oito ciclos de som a 40 kHz, alto demais para o ouvido humano. O som bate no objeto e volta ao receptor. O módulo então põe o pino ECHO em nível alto por um tempo igual ao da ida e volta do som. O programa mede esse tempo e calcula:
+
+$$
+d = \frac{v \cdot t}{2}
+$$
+
+em que $d$ é a distância, $t$ é a duração do pulso de ECHO e $v$ é a velocidade do som, cerca de 343 m/s no ar a 20 °C. A divisão por 2 é porque o som vai e volta. Em centímetros e microssegundos, $d \approx t \times 0{,}0343 / 2$.
+
+<Model3D
+  part="ultrasonic-sensor"
+  props={{ pulse: true }}
+  annotations
+  caption="Módulo de distância por ultrassom, do tipo HC-SR04: o transmissor emite a rajada de 40 kHz e o receptor ouve o eco."
+/>
+
+A velocidade do som muda com a temperatura do ar, cerca de $v \approx 331{,}3 + 0{,}606 \cdot T$ m/s, com $T$ em °C. Um programa que assume 343 m/s num dia de 35 °C (som a uns 352,5 m/s) erra quase 3 % para menos. Para medir nível de caixa d'água, tudo bem; para uma medida precisa, o programa corrige pela temperatura. O alcance típico vai de 2 cm a 4 m. Superfícies macias (tecido, espuma) ou muito inclinadas desviam o som, e o eco não volta; nesse caso, o módulo devolve um pulso longo, de cerca de 38 ms, e o programa deve tratá-lo como "nada à frente".
+
+## Infravermelho ativo: obstáculo e controle remoto
+
+Os sensores de obstáculo por infravermelho (dos robôs seguidores de linha e de algumas torneiras) têm um LED infravermelho e um fototransistor lado a lado. O LED ilumina; se houver um objeto perto, a luz reflete e chega ao fototransistor. Um comparador no módulo compara o sinal com um limiar ajustado num trimpot e entrega uma saída digital, quase sempre **ativa em nível baixo**: 0 quando há obstáculo. Superfícies brancas refletem muito e são vistas de mais longe; pretas, quase nada. O sol forte, cheio de infravermelho, pode enganar o sensor.
+
+O receptor do controle remoto da TV é outro sensor infravermelho, mais esperto: ele só responde a luz piscando a 38 kHz (a frequência mais comum), o que o torna quase imune ao sol e às lâmpadas. O assunto volta no <LinkAula id="m13-sem-fio" />.
+
+## Corrente
+
+Saber a corrente de uma carga permite descobrir se uma bomba está funcionando, quanto um aparelho consome ou, como faz a central do portão, se o motor está forçando contra um obstáculo. Há dois tipos de sensor muito usados:
+
+- **Sensor Hall em série** (tipo ACS712): a corrente passa por uma trilha de cobre dentro do chip, e um sensor de <Term id="efeito-hall">efeito Hall</Term> mede o campo magnético que ela cria. A saída é uma tensão centrada em metade da alimentação: na versão de 5 A, 2,5 V sem corrente e 185 mV a mais (ou a menos) por ampère. Com corrente alternada, a saída é uma senoide em torno de 2,5 V, e o programa calcula o valor eficaz a partir de muitas amostras.
+- **Alicate não invasivo** (tipo SCT-013): um <Term id="transformador">transformador</Term> de corrente que abre e abraça o fio, sem cortar nada. No modelo de 100 A, o secundário entrega 50 mA quando passam 100 A (uma relação de 2.000 para 1); um resistor de carga transforma essa corrente numa tensão que o ADC lê. É o mesmo princípio do <LinkAula id="m03-medicoes/03-medindo-corrente">alicate amperímetro</LinkAula>.
+
+O sensor Hall precisa estar **em série** com o condutor, e o fio da carga passa pelos bornes dele. Se a carga é ligada à rede, esses bornes estão na tensão da rede, e a instalação segue todas as regras de segurança: disjuntor desligado, ausência de tensão testada, bornes isolados. O chip isola eletricamente o lado da medida, mas a placa e os fios em volta precisam respeitar essa isolação. O alicate não invasivo evita isso: o fio continua inteiro, e só o alicate o abraça.
+
+## Explore: o laboratório de sensores
+
+A figura interativa abaixo tem um sensor em cada aba. Em todas, você mexe na grandeza física e vê o que chega ao pino do microcontrolador e o que o programa calcula.
+
+<LaboratorioSensores client:visible />
+
+1. **Presença:** passe na frente do sensor uma vez e conte quanto tempo a saída fica alta. Passe de novo durante esse tempo, com o jumper em cada posição. Qual é a diferença?
+2. **Distância:** ponha o objeto a 1 m. Qual é a duração do pulso de ECHO? Agora mude a temperatura do ar para 35 °C sem mudar a distância. Quanto o programa que assume 343 m/s passa a medir?
+3. **Infravermelho:** aproxime um objeto branco e depois um preto. A partir de que distância cada um é detectado? Ligue o sol forte.
+4. **Corrente:** escolha uma carga e compare a saída do sensor Hall com a do alicate não invasivo.
+
+A 1 m, o som leva cerca de 5.831 µs para ir e voltar (2 m divididos por 343 m/s). A 35 °C, o eco volta mais cedo, e o programa que não corrige a temperatura mede uns 97 cm. No infravermelho, o objeto branco é detectado de bem mais longe que o preto, e o sol forte pode acionar o sensor sem objeto algum. Na corrente, repare no tamanho do sinal: o degrau do ADC, 4,9 mV, corresponde a uns 26 mA no sensor Hall de 5 A. Para cargas pequenas, isso é pouca resolução.
+
+## Exemplo resolvido: o NTC a 40 °C
+
+Um NTC de 10 kΩ (B = 3950 K) está embaixo de um divisor com 10 kΩ em cima, alimentado por 5 V. Que leitura o ADC de 10 bits dá a 40 °C? E qual temperatura o programa calcula a partir dela?
+
+**Passo 1: a resistência do NTC a 40 °C.** Isolando $R$ na equação Beta, com $T$ = 313,15 K:
+
+$$
+R = R_{25} \cdot e^{B\left(\frac{1}{T} - \frac{1}{T_{25}}\right)} = 10\,\text{k}\Omega \cdot e^{3950\,(0{,}0031934 - 0{,}0033540)} \approx 10\,\text{k}\Omega \cdot e^{-0{,}634} \approx 5{,}30\,\text{k}\Omega
+$$
+
+**Passo 2: a tensão no pino.**
+
+$$
+V = 5\,\text{V} \cdot \frac{5{,}30}{10 + 5{,}30} \approx 1{,}73\,\text{V}
+$$
+
+**Passo 3: a leitura.** $1{,}73 / 5 \times 1024 \approx 354{,}8$, que arredonda para baixo: **354**.
+
+**Passo 4: o caminho de volta.** O programa calcula $R = 10\,\text{k}\Omega \cdot 354 / (1024 - 354) \approx 5{,}28\,\text{k}\Omega$ e, pela equação Beta, cerca de **40,1 °C**. O simulador mostra 352 e 40,3 °C, dois degraus abaixo: a entrada analógica também puxa um pouquinho de corrente do divisor. Na prática, a tolerância do próprio NTC (1 % a 5 %) pesa mais que isso.
+
+<RealCase title="A luz da garagem e o motor que força">
+
+A luz automática de uma garagem costuma juntar dois sensores desta aula: um **LDR**, para só funcionar à noite, e um **PIR**, para acender com movimento. A máquina de estados é simples: se estiver escuro e houver movimento, acende e conta o tempo; movimento novo renova a contagem; o tempo esgotado apaga. Quando a luz "não apaga nunca", o suspeito é algo se mexendo no campo do PIR (uma planta ao vento, uma cortina, o ar quente de um aquecedor); quando "acende de dia", é o LDR sujo, mal posicionado ou com o trimpot de luminosidade mal ajustado.
+
+A central do portão usa um **sensor de corrente** no comum do motor. No começo de cada percurso, ela aprende a corrente normal; se a corrente passar muito desse valor por um tempo, entende que o portão bateu em alguma coisa e reverte. O trimpot de força ajusta esse limite. Veja em <LinkAula id="m16-portao/05-seguranca-e-acessorios" /> e <LinkAula id="m16-portao/08-ajustes-e-testes" />.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Ligar o sensor resistivo sem divisor.** O pino não mede resistência. Sem o resistor fixo, a tensão no pino fica parada num extremo.
+- **Escolher o resistor fixo longe da faixa útil.** Com um resistor muito maior ou muito menor que o sensor, a tensão quase não varia, e a resolução vai embora.
+- **Comparar com um limiar só.** Sem histerese (ou tempo de confirmação), a saída fica ligando e desligando quando a grandeza está perto do limiar.
+- **Ligar o ECHO de 5 V num ESP32.** O HC-SR04 trabalha com 5 V, e o pulso de ECHO também. Use um divisor de tensão (por exemplo, 1 kΩ e 2 kΩ) para trazê-lo a 3,3 V.
+- **Pôr o PIR atrás de um vidro.** O vidro comum bloqueia o infravermelho que o PIR enxerga. Sol direto e saídas de ar quente também causam disparos falsos.
+- **Fios longos de sensor junto da fiação da rede.** Sinais analógicos pequenos captam ruído. Use cabo blindado ou par trançado e mantenha distância dos fios de 127/220 V.
+- **Instalar sensor de corrente na rede sem desligar o circuito.** Sensor Hall em série é parte da instalação: desligue o disjuntor, teste a ausência de tensão e isole os bornes. Prefira o alicate não invasivo, que não exige cortar o fio. Quem não tem segurança deve chamar um eletricista habilitado.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'associar',
+      prompt: 'Associe cada sensor ao tipo de sinal que ele entrega ao microcontrolador.',
+      pairs: [
+        ['NTC num divisor de tensão', 'Tensão que varia (entrada analógica)'],
+        ['Sensor de presença PIR', 'Liga ou desliga (entrada digital)'],
+        ['Ultrassom tipo HC-SR04', 'Pulso cuja duração é a medida'],
+        ['DS18B20', 'Mensagem digital com a temperatura pronta'],
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Num divisor com 10 kΩ em cima e um LDR embaixo, alimentado por 5 V, o ADC de 10 bits lê 256. Qual é a resistência do LDR, em ohms?',
+      answer: 3333,
+      tolerance: 0.02,
+      unit: 'Ω',
+      explanation: 'R = 10 kΩ × 256 ÷ (1024 − 256) = 10 kΩ × 256 ÷ 768 ≈ 3,33 kΩ.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'O pulso de ECHO de um sensor de ultrassom durou 2.915 µs. Com o som a 343 m/s, a que distância está o objeto, em centímetros?',
+      answer: 50,
+      tolerance: 0.02,
+      unit: 'cm',
+      explanation: 'd = v × t ÷ 2 = 343 m/s × 0,002915 s ÷ 2 ≈ 0,50 m = 50 cm.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que uma luz controlada por PIR apaga quando a pessoa fica parada lendo?',
+      options: [
+        {
+          text: 'O PIR detecta mudanças de infravermelho, ou seja, movimento; um corpo parado deixa de gerar sinal',
+          correct: true,
+          feedback:
+            'Isso. O sensor piroelétrico responde à variação. Por isso o tempo da luz deve ser longo onde as pessoas ficam paradas.',
+        },
+        {
+          text: 'O corpo esfria quando a pessoa fica parada',
+          feedback: 'A temperatura do corpo não muda. O que some é a variação que o movimento provoca.',
+        },
+        {
+          text: 'O LDR do sensor manda apagar',
+          feedback: 'O LDR só decide se é dia ou noite. Quem deixa de ver a pessoa parada é o PIR.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um termostato liga o ventilador em 30 °C e desliga em 28 °C. Qual é a vantagem de não desligar também em 30 °C?',
+      options: [
+        {
+          text: 'Evitar que o ventilador fique ligando e desligando quando a temperatura está perto de 30 °C',
+          correct: true,
+          feedback:
+            'Isso. É a histerese: o ruído da leitura e pequenas variações não bastam para mudar o estado.',
+        },
+        {
+          text: 'Economizar memória do microcontrolador',
+          feedback: 'A memória não muda nada. A histerese existe para a saída não oscilar.',
+        },
+        {
+          text: 'Deixar a leitura do NTC mais precisa',
+          feedback: 'A precisão da leitura é a mesma. A histerese só muda quando a saída troca de estado.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'O alicate não invasivo (tipo SCT-013) mede a corrente de um fio sem que seja preciso cortá-lo ou soltá-lo dos bornes.',
+      answer: true,
+      explanation:
+        'Isso. Ele é um transformador de corrente que abraça o fio. Já o sensor Hall tipo ACS712 fica em série, e o fio da carga passa pelos bornes dele.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'O que pode acontecer se o pino ECHO de um HC-SR04 alimentado com 5 V for ligado direto num ESP32?',
+      options: [
+        {
+          text: 'O pino do ESP32, que trabalha com 3,3 V, recebe 5 V e pode ser danificado',
+          correct: true,
+          feedback:
+            'Isso. Um divisor de tensão (1 kΩ e 2 kΩ, por exemplo) baixa o pulso para cerca de 3,3 V.',
+        },
+        {
+          text: 'Nada: o ESP32 aceita 5 V em qualquer pino',
+          feedback: 'Os pinos do ESP32 não toleram 5 V.',
+        },
+        {
+          text: 'A distância medida dobra',
+          feedback: 'A conta não muda; o problema é a tensão alta demais no pino.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Para o microcontrolador, um sensor entrega **resistência**, **tensão**, **liga/desliga**, um **pulso** ou uma **mensagem digital**; cada tipo tem seu jeito de ler.
+- Sensores resistivos (NTC, LDR) vão num **divisor de tensão** com um resistor fixo perto da resistência do sensor no meio da faixa; o programa calcula $R = R_\text{F} \cdot L / (1024 - L)$ e, no NTC, a temperatura pela equação Beta.
+- O **PIR** vê movimento (variação de infravermelho) através da lente de Fresnel; o **ultrassom** mede o tempo do eco, $d = v \cdot t / 2$, com $v$ dependendo da temperatura; o **infravermelho ativo** detecta reflexo.
+- Corrente: **sensor Hall em série** (saída em torno de metade da alimentação) ou **alicate não invasivo**, que não exige mexer no fio. Na rede, siga as regras de segurança.
+- **Histerese** e **tempo de confirmação** evitam acionamentos falsos.
+
+Na próxima aula, o caminho inverso: os [atuadores](../04-atuadores/), que transformam as decisões do programa em luz, movimento e som.
