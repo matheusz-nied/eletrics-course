@@ -24,7 +24,9 @@ async function hydrateAll(page: Page) {
   for (let i = 0; i < count; i++) {
     const island = islands.nth(i);
     await island.scrollIntoViewIfNeeded();
-    await expect(island).not.toHaveAttribute('ssr');
+    // On software WebGL (CI), the first frames of the 3D board in lesson 3
+    // hold the main thread for a few seconds, delaying the next island.
+    await expect(island).not.toHaveAttribute('ssr', { timeout: 15_000 });
   }
 }
 
