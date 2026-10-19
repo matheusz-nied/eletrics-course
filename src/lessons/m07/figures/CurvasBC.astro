@@ -1,0 +1,228 @@
+---
+/*
+ * 07.3: time–current curves of the simulator's breaker (log–log), for curves
+ * B, C and D: the slow thermal part, then the drop to "instant" at the
+ * magnetic threshold. The shaded strips are the bands of IEC 60898 where a
+ * real breaker of each curve must trip magnetically. Computed from
+ * ../disjuntor-curva.ts, which ../tres-falhas.test.ts checks against the engine.
+ */
+import { BANDS, MAGNETIC, thermalTripTime, type Curve } from '../disjuntor-curva';
+
+const W = 400;
+const H = 330;
+const PLOT = { left: 62, right: 388, top: 30, bottom: 262 };
+const X = { min: 1, max: 50 };
+const Y = { min: 0.005, max: 1000 };
+/** "Instant" in the chart: the magnetic release opens within a hundredth of a second. */
+const INSTANT = 0.01;
+
+const lx = (k: number) =>
+  PLOT.left +
+  ((Math.log10(k) - Math.log10(X.min)) / (Math.log10(X.max) - Math.log10(X.min))) *
+    (PLOT.right - PLOT.left);
+const ly = (t: number) =>
+  PLOT.bottom -
+  ((Math.log10(t) - Math.log10(Y.min)) / (Math.log10(Y.max) - Math.log10(Y.min))) *
+    (PLOT.bottom - PLOT.top);
+const f = (v: number) => v.toFixed(1);
+
+function curvePath(curve: Curve): string {
+  const m = MAGNETIC[curve];
+  const pts: string[] = [];
+  // Thermal part, from where it leaves the top of the chart to the magnetic threshold.
+  const k0 = 1.3 / Math.sqrt(1 - Math.exp(-Y.max / 60));
+  const n = 90;
+  for (let i = 0; i <= n; i++) {
+    const k = k0 * Math.pow(m / k0, i / n);
+    pts.push(`${f(lx(k))} ${f(ly(Math.min(thermalTripTime(k), Y.max)))}`);
+  }
+  pts.push(`${f(lx(m))} ${f(ly(INSTANT))}`, `${f(lx(X.max))} ${f(ly(INSTANT))}`);
+  return `M${pts.join(' L')}`;
+}
+
+/** Each name sits beside the vertical drop of its curve, where the curves part. */
+const curves: { curve: Curve; cls: string; label: string; labelAt: number }[] = [
+  { curve: 'B', cls: 'b', label: 'B', labelAt: 0.25 },
+  { curve: 'C', cls: 'c', label: 'C', labelAt: 0.25 },
+  { curve: 'D', cls: 'd', label: 'D', labelAt: 0.12 },
+];
+const xTicks = [1, 2, 3, 5, 10, 20, 50];
+const yTicks: [number, string][] = [
+  [0.01, '0,01 s'],
+  [0.1, '0,1 s'],
+  [1, '1 s'],
+  [10, '10 s'],
+  [100, '100 s'],
+  [1000, '1.000 s'],
+];
+const overload = { k: 2.44, t: thermalTripTime(2.44) };
+const motorC = { k: 6.1, t: thermalTripTime(6.1) };
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} class="fig" aria-hidden="true">
+  <!-- Magnetic bands of the standard -->
+  {curves.map(({ curve, cls }) => (
+    <rect
+      x={f(lx(BANDS[curve][0]))}
+      y={f(ly(0.03))}
+      width={f(lx(BANDS[curve][1]) - lx(BANDS[curve][0]))}
+      height={f(ly(Y.min) - ly(0.03))}
+      class={`band ${cls}`}
+    />
+  ))}
+  <!-- Grid and axes -->
+  {xTicks.map((k) => (
+    <>
+      <path d={`M${f(lx(k))} ${PLOT.top} V${PLOT.bottom}`} class="grid" />
+      <text x={f(lx(k))} y={PLOT.bottom + 16} class="tick mid">
+        {k}
+      </text>
+    </>
+  ))}
+  {yTicks.map(([t, label]) => (
+    <>
+      <path d={`M${PLOT.left} ${f(ly(t))} H${PLOT.right}`} class="grid" />
+      <text x={PLOT.left - 6} y={f(ly(t) + 4)} class="tick end">
+        {label}
+      </text>
+    </>
+  ))}
+  <path d={`M${PLOT.left} ${PLOT.top} V${PLOT.bottom} H${PLOT.right}`} class="axis"></path>
+  <text x={(PLOT.left + PLOT.right) / 2} y={PLOT.bottom + 34} class="lbl mid">
+    corrente, em múltiplos da nominal (× In)
+  </text>
+  <text x="8" y="12" class="lbl">
+    tempo para desarmar
+  </text>
+
+  <!-- Curves -->
+  {curves.map(({ curve, cls }) => (
+    <path d={curvePath(curve)} class={`curve ${cls}`} />
+  ))}
+  {curves.map(({ curve, cls, label, labelAt }) => (
+    <text x={f(lx(MAGNETIC[curve]) + 5)} y={f(ly(labelAt))} class={`name ${cls}`}>
+      {label}
+    </text>
+  ))}
+
+  <!-- Points the lesson discusses -->
+  <circle cx={f(lx(overload.k))} cy={f(ly(overload.t))} r="4" class="pt"></circle>
+  <path
+    d={`M${f(lx(overload.k) - 3)} ${f(ly(overload.t) + 5)} L112 ${f(ly(0.5) - 14)}`}
+    class="leader"
+  ></path>
+  <text x={PLOT.left + 6} y={f(ly(0.5))} class="note">
+    aquecedor +
+  </text>
+  <text x={PLOT.left + 6} y={f(ly(0.5) + 15)} class="note">
+    forno: 20 s
+  </text>
+  <path d={`M${f(lx(motorC.k))} ${PLOT.top + 40} V${PLOT.bottom}`} class="marker"></path>
+  <circle cx={f(lx(motorC.k))} cy={f(ly(motorC.t))} r="4" class="pt"></circle>
+  <text x={f(lx(motorC.k) + 6)} y={PLOT.top + 52} class="note">
+    partida do motor
+  </text>
+  <text x={f(lx(motorC.k) + 6)} y={f(ly(motorC.t) + 4)} class="note">
+    C: 2,8 s
+  </text>
+
+  <!-- Legend for the bands -->
+  <rect x={PLOT.left} y={H - 20} width="14" height="10" class="band c"></rect>
+  <text x={PLOT.left + 20} y={H - 11} class="tick">
+    faixa de disparo magnético da norma, por curva
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .grid {
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+  .axis {
+    stroke: var(--fg-muted);
+    stroke-width: 1.4;
+  }
+  .curve {
+    stroke-width: 2.6;
+  }
+  .curve.b {
+    stroke: var(--accent);
+  }
+  .curve.c {
+    stroke: var(--warning);
+    stroke-dasharray: 9 5;
+  }
+  .curve.d {
+    stroke: var(--success);
+    stroke-dasharray: 2 5;
+  }
+  .band {
+    stroke: none;
+    opacity: 0.22;
+  }
+  .band.b {
+    fill: var(--accent);
+  }
+  .band.c {
+    fill: var(--warning);
+  }
+  .band.d {
+    fill: var(--success);
+  }
+  .marker {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.2;
+    stroke-dasharray: 3 3;
+  }
+  .leader {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+  }
+  .pt {
+    fill: var(--fg);
+    stroke: var(--surface);
+    stroke-width: 1.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 12px;
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 11.5px;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .note {
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .name {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .name.b {
+    fill: var(--accent);
+  }
+  .name.c {
+    fill: var(--warning);
+  }
+  .name.d {
+    fill: var(--success);
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

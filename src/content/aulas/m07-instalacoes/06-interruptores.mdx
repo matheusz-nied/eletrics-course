@@ -1,0 +1,311 @@
+---
+titulo: Interruptores
+modulo: m07-instalacoes
+ordem: 6
+nivel: B
+duracaoMin: 35
+objetivos:
+  - Explicar por que o interruptor corta a fase e o que é o retorno
+  - Ligar um interruptor simples, um par de interruptores paralelos (three-way) e um intermediário (four-way)
+  - Montar e testar a ligação de uma escada com dois interruptores
+  - Reconhecer o interruptor bipolar, o duplo, o pulsador com relé de impulso, a minuteria e a tecla luminosa
+prerequisitos:
+  - m04-passivos/07-chaves-botoes-e-reles
+  - m07-instalacoes/05-tomadas-e-plugues
+tags: [interruptor, paralelo, three-way, intermediário, four-way, retorno, viajante, escada, caixa 4×2]
+seguranca: rede
+rascunho: false
+---
+
+import InterruptorSimples from '../../../lessons/m07/figures/InterruptorSimples.astro';
+import ParaleloLigacao from '../../../lessons/m07/figures/ParaleloLigacao.astro';
+import IntermediarioLigacao from '../../../lessons/m07/figures/IntermediarioLigacao.astro';
+import InterruptorParaleloVerso from '../../../lessons/m07/figures/InterruptorParaleloVerso.astro';
+import MontarParalelo from '../../../lessons/m07/MontarParalelo';
+import Part3D from '../../../lessons/m02/Part3D.astro';
+
+A luz da escada tem um interruptor lá embaixo. Você sobe, chega ao andar de cima e a luz fica acesa atrás de você, ou você apaga lá embaixo e sobe no escuro. A solução que toda casa conhece é um interruptor em cada ponta: qualquer um dos dois acende e qualquer um apaga. Parece mágica, mas são duas chaves reversíveis e dois fios bem escolhidos.
+
+Nesta aula você começa pelo interruptor simples e pela regra que vale para todos (o interruptor corta a fase), passa ao par de interruptores paralelos da escada e chega ao intermediário, que leva o comando para três ou mais lugares. No caminho, você monta a ligação com as próprias mãos, num simulador que avisa quando o erro é perigoso.
+
+## O interruptor simples corta a fase
+
+O interruptor é uma chave de um polo e uma posição: fecha ou abre um caminho (aula <LinkAula id="m04-passivos/07-chaves-botoes-e-reles" />). Na instalação, ele fica num dos dois fios da lâmpada. A pergunta é: em qual?
+
+<Figure
+  caption="Figura 1. Interruptor aberto e lâmpada apagada nas duas ligações. Em cima, o interruptor corta a fase: do interruptor até a lâmpada vai o retorno, e a lâmpada apagada fica sem fase. Embaixo, o interruptor corta o neutro: a lâmpada apaga do mesmo jeito, mas a fase continua chegando ao soquete (os pontos vermelhos)."
+  alt="Dois diagramas com fase, neutro, um interruptor aberto e uma lâmpada. No primeiro, o interruptor está no fio da fase e o trecho até a lâmpada se chama retorno. No segundo, o interruptor está no neutro e a fase chega direto à lâmpada, marcada com pontos vermelhos nos dois terminais."
+>
+  <InterruptorSimples />
+</Figure>
+
+Nas duas ligações a lâmpada acende e apaga. A diferença aparece com ela **apagada**:
+
+- **Interruptor na fase (certo).** Com a chave aberta, a <Term id="fase">fase</Term> para no interruptor. O fio que sai dele até a lâmpada, o <Term id="retorno">retorno</Term>, fica sem tensão, e o soquete também. Trocar a lâmpada com a luz apagada fica seguro (mesmo assim, o certo é desligar o disjuntor).
+- **Interruptor no neutro (errado).** A fase vai direto à lâmpada. Com a chave aberta, nenhuma corrente passa, mas os dois terminais do soquete continuam no potencial da fase: um ligado direto a ela e o outro pelo próprio filamento. Quem encosta no soquete "com a luz apagada" leva choque.
+
+É a mesma ideia da aula <LinkAula id="m02-circuitos-cc/01-o-circuito-eletrico" />: chave aberta não é circuito sem tensão. Por isso a regra é fixa: **a fase vai ao interruptor e o <Term id="neutro">neutro</Term> vai direto à lâmpada**.
+
+O caminho completo de uma lâmpada com interruptor simples fica assim: do quadro saem fase e neutro; o neutro vai ao soquete; a fase vai ao interruptor; do interruptor, o retorno vai ao outro borne do soquete. O retorno não tem cor obrigatória, e muitos eletricistas usam uma cor diferente da fase e do neutro (o neutro é azul-claro) para reconhecê-lo na caixa.
+
+### Bipolar, duplo e triplo
+
+- **Interruptor bipolar.** Corta os dois fios ao mesmo tempo, com uma tecla só. Ele aparece onde não basta cortar um fio: numa lâmpada ou num aparelho de 220 V ligado entre **duas fases**, um interruptor simples corta só uma delas, e apagado o aparelho continua com a outra fase. O bipolar corta as duas.
+- **Interruptor duplo ou triplo.** Dois ou três interruptores simples na mesma placa, cada um com o seu retorno para a sua lâmpada. A fase entra num deles e passa para os outros por um pedaço de fio (a "ponte") entre os bornes de entrada. Todos ficam numa <Term id="caixa-4x2">caixa 4×2</Term>, com um suporte que segura até três módulos.
+
+## Dois pontos: o interruptor paralelo
+
+Para a escada, cada ponta recebe um <Term id="interruptor-paralelo">interruptor paralelo</Term> (o *three-way*). Ele é uma chave reversível (SPDT): tem três bornes, o **comum** (C) e os contatos **1** e **2**, e a tecla liga o comum ora ao 1, ora ao 2. Ele nunca fica "aberto": sempre há um caminho do comum para um dos lados.
+
+<Part3D
+  part="wall-switch"
+  props={{ kind: 'paralelo' }}
+  annotations
+  alt="Parte de trás de um interruptor paralelo genérico, com três bornes de parafuso: o comum, marcado C, em cima, e os contatos 1 e 2 embaixo. Uma linha indica que, por dentro, o comum se liga ao 1 ou ao 2 conforme a posição da tecla."
+  caption="Figura 2. Um interruptor paralelo visto por trás: o comum (C) e os bornes 1 e 2. A marcação muda de fabricante para fabricante."
+>
+  <InterruptorParaleloVerso />
+</Part3D>
+
+A marcação dos bornes não é igual em todos os modelos. Alguns fabricantes imprimem C, 1 e 2; outros, L, 1 e 2; outros usam setas ou só um borne de cor diferente para o comum. Na dúvida, descubra com o multímetro em continuidade, com o interruptor **fora da instalação** (aula <LinkAula id="m03-medicoes/04-resistencia-continuidade-e-diodo" />): o comum é o borne que apita com um dos outros dois numa posição da tecla e com o outro na posição contrária.
+
+### A ligação clássica
+
+<Figure
+  caption="Figura 3. A ligação clássica de dois interruptores paralelos. A fase vai ao comum do interruptor 1; dois viajantes ligam o borne 1 ao borne 1 e o 2 ao 2; o retorno sai do comum do interruptor 2 até a lâmpada; o neutro vai direto à lâmpada. Com os dois comuns no borne 1, o caminho fecha pelo viajante 1 e a lâmpada acende."
+  alt="Diagrama com o fio da fase chegando ao comum do interruptor 1, dois fios viajantes entre os bornes 1 e 2 dos dois interruptores, o retorno saindo do comum do interruptor 2 até a lâmpada acesa e o neutro indo do quadro direto à lâmpada."
+>
+  <ParaleloLigacao />
+</Figure>
+
+Os dois fios entre as caixas dos interruptores são os **viajantes**, também chamados de "paralelos" ou "fios de manobra". Siga a corrente:
+
+- A fase chega ao comum do interruptor 1, que a manda para o viajante 1 ou para o viajante 2.
+- O comum do interruptor 2 "escuta" um dos viajantes e passa o que encontrar para o retorno.
+- Se os dois comuns apontam para o **mesmo viajante**, a fase chega ao retorno e a lâmpada acende. Se apontam para viajantes **diferentes**, o caminho fica aberto e ela apaga.
+
+Por isso qualquer um dos dois muda a lâmpada: virar um interruptor troca o viajante dele, e o "mesmo" vira "diferente" (ou o contrário). As quatro posições possíveis:
+
+| Interruptor 1 | Interruptor 2 | Lâmpada |
+|---|---|---|
+| C no 1 | C no 1 | Acesa |
+| C no 1 | C no 2 | Apagada |
+| C no 2 | C no 1 | Apagada |
+| C no 2 | C no 2 | Acesa |
+
+Repare que a regra da fase continua valendo. A lâmpada recebe o neutro direto e a fase só pelo retorno; apagada, ela fica sem fase. Os viajantes, sim, levam fase: em qualquer posição, um deles está ligado à fase pelo interruptor 1. Ao mexer numa caixa de paralelo, todos os fios são suspeitos.
+
+## Explore: a luz da escada
+
+A simulação monta a escada: a rede de 127 V, um disjuntor de 10 A, os dois interruptores paralelos ligados pelos viajantes e uma lâmpada de 60 W. No esquema, os bornes 1 e 2 de cada interruptor aparecem com as marcas NF e NA do símbolo de chave reversível.
+
+<Simulation circuit="m07/escada-paralelo" instruments={['multimetro']} autoplay />
+
+**Tarefas:**
+
+1. A lâmpada começa acesa. Quanto marca a corrente nela?
+2. Mude só o **interruptor de baixo**. A lâmpada apaga? Agora mude o **de cima**. O que acontece?
+3. Volte ao começo e faça o caminho de quem sobe: acenda embaixo, suba e apague em cima. Depois desça: acenda em cima e apague embaixo.
+4. Com a lâmpada apagada, olhe a tensão nela. Quanto sobrou?
+
+A corrente da lâmpada acesa é de cerca de 0,47 A, como dá a conta $I = P / V = 60\,\text{W} \div 127\,\text{V} \approx 0{,}47\,\text{A}$. Cada mudança, em qualquer dos dois interruptores, troca o estado da lâmpada; e apagada ela fica sem tensão, porque os interruptores estão no caminho da fase.
+
+## Monte você mesmo
+
+Ver a ligação pronta é uma coisa; montar é outra. No simulador abaixo, você escolhe o fio de cada borne dos dois interruptores e da lâmpada. A fase e o neutro chegam do quadro; o retorno e os dois viajantes são os fios que você passa entre as caixas.
+
+<MontarParalelo client:visible />
+
+**Tarefas:**
+
+1. Monte a ligação clássica da Figura 3, vire os dois interruptores e aperte **Testar as quatro posições**.
+2. Troque os viajantes de um dos interruptores (o 1 com o 2). Continua funcionando? O que muda?
+3. Agora troque a fase e o neutro de lugar: o neutro no comum do interruptor 1 e a fase direto na lâmpada. A lâmpada funciona? O que o teste diz?
+4. Por fim, ligue a fase no comum de um interruptor e o neutro no comum do outro, com a lâmpada entre o retorno e o neutro. Vire os interruptores. O que acontece?
+
+Na tarefa 2, a lâmpada continua comandada pelos dois pontos, só que acende com os comuns em lados "diferentes": as duas ligações estão certas. Na tarefa 3, a lâmpada acende e apaga direitinho, e é por isso que esse erro passa despercebido: os interruptores cortam o neutro, e a lâmpada apagada fica com fase no soquete. Na tarefa 4, em algumas posições a fase encontra o neutro pelos viajantes sem passar pela lâmpada: é um <Term id="curto-circuito">curto-circuito</Term>, e na casa de verdade o disjuntor desarmaria com um estalo. O neutro nunca vai a um interruptor paralelo.
+
+## Três ou mais pontos: o intermediário
+
+Um corredor com três portas, uma escada com três andares: para comandar a mesma lâmpada de três ou mais lugares, entra o <Term id="interruptor-intermediario">interruptor intermediário</Term> (o *four-way*). Ele tem quatro bornes, dois de cada lado, e fica **no meio dos viajantes**, entre os dois paralelos.
+
+<Figure
+  caption="Figura 4. Em cima, as duas posições do intermediário: em repouso, os viajantes passam direto; acionado, eles se cruzam. Embaixo, onde ele fica: entre os dois paralelos (P1 e P2), cortando os viajantes. Para cada ponto a mais, mais um intermediário na fila."
+  alt="Dois desenhos de um interruptor de quatro bornes, um com as ligações retas e outro com as ligações cruzadas, e um diagrama com a fase entrando num interruptor paralelo, os viajantes passando por um intermediário até o segundo paralelo, e o retorno indo à lâmpada."
+>
+  <IntermediarioLigacao />
+</Figure>
+
+Por dentro, o intermediário é uma chave de dois polos e duas posições (DPDT) ligada em cruz. Numa posição, ele passa o viajante 1 para o 1 e o 2 para o 2. Na outra, cruza: o 1 vai para o 2 e o 2 para o 1. Cruzar os viajantes tem o mesmo efeito de virar um dos paralelos: o "mesmo viajante" vira "viajante diferente", e a lâmpada muda de estado.
+
+<Simulation circuit="m07/tres-pontos" instruments={['multimetro']} autoplay />
+
+**Tarefa:** a lâmpada começa acesa. Mude só o **intermediário**: ela apaga? Agora mude o **paralelo 1**, e depois o **paralelo 2**. Cada toque, em qualquer um dos três, troca o estado da lâmpada?
+
+Com o intermediário cruzado, a lâmpada apaga; mudando o paralelo 1, os comuns voltam a "se encontrar" pelos viajantes cruzados e ela acende; mudando o paralelo 2, apaga outra vez. Qualquer um dos três comanda a lâmpada, em qualquer combinação.
+
+### Exemplo resolvido: o corredor de quatro portas
+
+Um corredor tem uma lâmpada e quatro portas, e o dono quer acender e apagar de qualquer uma. Quantos interruptores de cada tipo, e quantos fios entre as caixas?
+
+1. **As pontas são dois paralelos.** A primeira porta e a última recebem um interruptor paralelo cada.
+2. **O meio são intermediários.** Sobram duas portas no meio: dois intermediários. Regra geral: para $n$ pontos de comando, 2 paralelos e $n - 2$ intermediários. Aqui, $4 - 2 = 2$.
+3. **Os fios.** Entre uma caixa de interruptor e a seguinte, passam os dois viajantes. A fase chega ao comum do primeiro paralelo, e o retorno sai do comum do último até a lâmpada, que recebe também o neutro.
+4. **A corrente.** Com uma lâmpada de 60 W em 127 V, a corrente é de cerca de 0,47 A, a mesma da escada. Ela passa por todos os contatos da fila, em série.
+
+Para corredores com muitos pontos, a fila de intermediários fica longa e cheia de fios. É aí que entra outra solução, a seguir.
+
+## Pulsadores, relé de impulso e minuteria
+
+Em vez de chaves que guardam a posição, dá para usar <Term id="pulsador">pulsadores</Term> (como o botão da campainha), todos ligados em paralelo, comandando um **relé de impulso**: a cada pulso, o relé troca de estado e fica assim, acendendo ou apagando a lâmpada. Os pulsadores podem ser quantos você quiser, com apenas dois fios até cada um, e quem leva a corrente da lâmpada é o contato do relé (aula <LinkAula id="m05-magnetismo/06-reles-e-contatores" />).
+
+Nas escadas de prédio, o comum é a **minuteria**: um pulsador em cada andar liga a luz, e um temporizador a apaga sozinho depois de um tempo ajustável. A ideia do temporizador, um capacitor que se descarrega devagar, está na aula <LinkAula id="m04-passivos/04-circuito-rc" />.
+
+## A tecla luminosa e a lâmpada LED que pisca
+
+Muitos interruptores têm uma **tecla luminosa**: uma luzinha (um LED ou uma pequena lâmpada neon, com um resistor) que acende com a luz apagada, para achar o interruptor no escuro. Para acender, ela precisa de corrente, e essa corrente só tem um caminho: ela fica **em paralelo com os contatos** e passa pela própria lâmpada do teto até o neutro.
+
+Com uma lâmpada incandescente, essa corrente minúscula não faz nada: o filamento nem esquenta. Com uma lâmpada LED, o circuito de entrada dela (o driver) vai acumulando essa corrente num capacitor até ter carga para ligar, acende por um instante e apaga de novo. O resultado é a lâmpada LED que **pisca ou brilha fraco** com o interruptor desligado. O mesmo sintoma aparece com o interruptor cortando o neutro e com retornos longos correndo ao lado de fios energizados. Os drivers, o dimmer e como resolver estão na aula <LinkAula id="m07-instalacoes/07-iluminacao" />.
+
+<RealCase title="A escada com dois interruptores">
+
+Numa casa, o interruptor de cima da escada quebrou e foi trocado. Desde então, a luz só funciona "às vezes": de baixo, acende e apaga; de cima, só se o de baixo estiver numa certa posição.
+
+Duas causas aparecem quase sempre:
+
+- **Trocaram um paralelo por um simples.** O interruptor simples tem dois bornes, e o fio que sobrou (um viajante) ficou isolado na caixa. Com isso, só um dos viajantes funciona, e o interruptor de baixo precisa "escolher" esse viajante para o de cima ter efeito.
+- **Inverteram o comum.** O paralelo novo é o certo, mas o fio do comum (o retorno, no interruptor de cima) foi parar num borne 1 ou 2, e um viajante foi para o comum. A lâmpada passa a depender de uma combinação estranha das teclas.
+
+O diagnóstico começa, como sempre, pelo disjuntor desligado, sinalizado e pela ausência de tensão confirmada (aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />). Com o interruptor velho, ou com uma foto da ligação antiga, identifique os três fios: o que estava no comum é o retorno (no interruptor de cima) ou a fase (no de baixo); os outros dois são os viajantes. No interruptor novo, ache o comum com o multímetro em continuidade, ligue o fio certo nele e os viajantes no 1 e no 2. Religue e teste as quatro posições, como no simulador: de baixo e de cima, com a lâmpada acesa e apagada.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Interruptor no neutro.** A lâmpada funciona, mas o soquete apagado fica com fase. Quem troca a lâmpada leva choque, e lâmpadas LED podem piscar.
+- **Neutro no comum de um paralelo, ou fase e neutro nos dois comuns.** No primeiro caso o interruptor corta o neutro; no segundo, os viajantes fecham um curto-circuito em algumas posições.
+- **Confundir o comum com os bornes 1 e 2.** A marcação varia de modelo para modelo. Na dúvida, continuidade com o interruptor fora da instalação.
+- **Achar que a caixa do interruptor está sem tensão porque a luz está apagada.** Os viajantes e a fase de entrada continuam energizados. Desligue o disjuntor, confirme a ausência de tensão em todos os fios da caixa e sinalize o quadro.
+- **Trocar um paralelo por um simples** "porque era o que tinha". A luz deixa de funcionar de um dos lados, e sobra um fio solto na caixa.
+- **Deixar emenda sem isolar ou cobre exposto na caixa 4×2.** Os fios precisam caber sem esmagar, com as emendas bem feitas e isoladas. Com dúvida sobre a ligação, chame um eletricista habilitado.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Por que o interruptor deve ficar no fio da fase, e não no neutro?',
+      options: [
+        {
+          text: 'Para que a lâmpada apagada fique sem fase no soquete',
+          correct: true,
+          feedback:
+            'Com o interruptor na fase, o retorno e o soquete ficam sem tensão quando a luz está apagada.',
+        },
+        {
+          text: 'Porque no neutro o interruptor não consegue apagar a lâmpada',
+          feedback:
+            'No neutro ele apaga, sim: o circuito abre do mesmo jeito. O problema é que o soquete continua com fase.',
+        },
+        {
+          text: 'Para gastar menos energia',
+          feedback:
+            'Com a lâmpada apagada não passa corrente nas duas ligações. A diferença é de segurança, não de consumo.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Numa ligação correta de dois interruptores paralelos, com a lâmpada apagada, nenhum fio da caixa do interruptor tem tensão.',
+      answer: false,
+      explanation:
+        'A fase chega ao comum do primeiro interruptor, e um dos viajantes sempre está ligado a ela. Só a lâmpada fica sem fase. Antes de mexer, desligue o disjuntor.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada fio da ligação da escada ao lugar dele.',
+      pairs: [
+        ['Fase', 'Comum do interruptor 1'],
+        ['Retorno', 'Do comum do interruptor 2 até a lâmpada'],
+        ['Viajantes', 'Entre os bornes 1 e 2 dos dois interruptores'],
+        ['Neutro', 'Direto à lâmpada'],
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um corredor tem 5 pontos de comando para a mesma lâmpada. Quantos interruptores intermediários são necessários?',
+      answer: 3,
+      tolerance: 0,
+      explanation:
+        'As pontas são dois paralelos; os pontos do meio são intermediários: 5 − 2 = 3.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Com os dois interruptores paralelos da escada, a lâmpada está acesa. Alguém muda o de cima e, em seguida, o de baixo. Como fica a lâmpada?',
+      options: [
+        {
+          text: 'Acesa de novo',
+          correct: true,
+          feedback:
+            'Cada mudança troca o estado: a primeira apaga, a segunda acende. Os comuns voltam a apontar para o mesmo viajante.',
+        },
+        {
+          text: 'Apagada',
+          feedback:
+            'A primeira mudança apaga, mas a segunda acende de novo: cada toque, em qualquer um dos dois, troca o estado.',
+        },
+        {
+          text: 'Depende de qual foi mudado primeiro',
+          feedback:
+            'Não importa a ordem: duas mudanças, em qualquer interruptor, deixam a lâmpada como estava.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Qual é a corrente de uma lâmpada de 60 W ligada em 127 V, em ampères?',
+      answer: 0.47,
+      tolerance: 0.03,
+      unit: 'A',
+      explanation: 'I = P/V = 60 W ÷ 127 V ≈ 0,47 A, o valor que o simulador mostra na escada.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Depois de trocar um interruptor comum por um com tecla luminosa, a lâmpada LED do teto passou a piscar fraco com o interruptor desligado. Por quê?',
+      options: [
+        {
+          text: 'A luzinha da tecla fica em paralelo com os contatos e deixa passar uma corrente pequena pela lâmpada LED',
+          correct: true,
+          feedback:
+            'Essa corrente carrega aos poucos o driver da lâmpada, que acende por um instante e apaga.',
+        },
+        {
+          text: 'O interruptor novo está em curto',
+          feedback:
+            'Com o interruptor em curto, a lâmpada ficaria acesa com brilho normal. Piscar fraco é sinal de uma corrente pequena.',
+        },
+        {
+          text: 'A lâmpada LED está queimada',
+          feedback:
+            'Uma lâmpada boa faz o mesmo. A causa é a corrente da luzinha da tecla passando por ela.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O interruptor **corta a fase**; o neutro vai direto à lâmpada. O fio do interruptor até a lâmpada é o **retorno**, e com a luz apagada ele e o soquete ficam sem tensão.
+- O **interruptor paralelo** (three-way) é uma chave reversível com comum (C) e bornes 1 e 2. Na ligação clássica: fase no comum de um, retorno no comum do outro e dois **viajantes** entre os bornes 1 e 2.
+- A lâmpada acende quando os dois comuns apontam para o mesmo viajante; qualquer interruptor muda o estado.
+- O **intermediário** (four-way) fica no meio dos viajantes e os passa direto ou cruzados. Para $n$ pontos: 2 paralelos e $n - 2$ intermediários.
+- Com muitos pontos, **pulsadores** com relé de impulso ou **minuteria**; a **tecla luminosa** pode fazer lâmpadas LED piscarem.
+- Na caixa de um paralelo, a fase e os viajantes continuam energizados com a luz apagada: desligue o disjuntor antes de mexer.
+
+Na próxima aula, as lâmpadas: incandescente, LED e o driver por dentro, dimmer, sensor de presença e relé fotoelétrico: <LinkAula id="m07-instalacoes/07-iluminacao" />.

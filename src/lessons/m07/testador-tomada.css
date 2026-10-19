@@ -1,0 +1,125 @@
+/* Lesson 7.5: outlet tester widget (TestadorTomada.tsx). */
+
+.tt__choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.tt__scene {
+  width: 100%;
+  max-width: 34rem;
+  height: auto;
+  justify-self: center;
+  font-family: var(--font-sans);
+}
+
+.tt__plate {
+  fill: var(--surface);
+  stroke: var(--border-strong);
+  stroke-width: 2;
+}
+
+.tt__recess {
+  fill: var(--bg);
+  stroke: var(--border-strong);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.tt__feed {
+  stroke: var(--fg);
+  stroke-width: 1.5;
+}
+
+.tt__feed--fase,
+.tt__feed--fase2 {
+  fill: var(--danger);
+}
+
+.tt__feed--neutro {
+  fill: var(--info);
+}
+
+.tt__feed--terra {
+  fill: var(--success);
+}
+
+.tt__feed--solto {
+  fill: var(--bg);
+  stroke-dasharray: 3 2;
+}
+
+.tt__tester {
+  fill: var(--surface-2);
+  stroke: var(--fg-muted);
+  stroke-width: 2;
+}
+
+.tt__lamp {
+  fill: var(--bg);
+  stroke: var(--fg-muted);
+  stroke-width: 2;
+  transition: fill 200ms;
+}
+
+.tt__lamp.is-on {
+  fill: var(--warning);
+  stroke: var(--warning);
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--warning) 70%, transparent));
+}
+
+.tt__scene text {
+  fill: var(--fg);
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.tt__scene .tt__hole-name,
+.tt__scene .tt__lamp-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tt__scene .tt__caption {
+  fill: var(--fg-muted);
+  font-size: 11px;
+}
+
+.tt__table-wrap {
+  overflow-x: auto;
+}
+
+.tt__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.tt__table caption {
+  margin-bottom: 0.4rem;
+  text-align: left;
+}
+
+.tt__table :where(th, td) {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tt__table thead th {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.tt__table tbody th {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.tt__verdict {
+  display: grid;
+  gap: 0.5rem;
+}

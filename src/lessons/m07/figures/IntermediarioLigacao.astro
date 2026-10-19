@@ -1,0 +1,154 @@
+---
+/*
+ * 07.6: the intermediate (four-way) switch. Top: its two positions, straight
+ * and crossed. Bottom: where it goes, in the middle of the travelers of a
+ * pair of three-way switches; one more intermediate for each extra point.
+ */
+const panels = [
+  { x: 20, title: 'em repouso: direto', crossed: false },
+  { x: 196, title: 'acionado: cruzado', crossed: true },
+];
+---
+
+<svg viewBox="0 0 360 290" width="360" height="290" class="fig" aria-hidden="true">
+  {panels.map((p) => (
+    <g>
+      <text x={p.x + 72} y="18" class="title">
+        {p.title}
+      </text>
+      <rect x={p.x + 30} y="30" width="84" height="84" rx="8" class="box" />
+      <path d={`M${p.x} 50 H${p.x + 40} M${p.x} 94 H${p.x + 40}`} class="w v1in" />
+      <path d={`M${p.x + 104} 50 H${p.x + 144} M${p.x + 104} 94 H${p.x + 144}`} class="w v2in" />
+      <circle cx={p.x + 40} cy="50" r="3.5" class="pivot" />
+      <circle cx={p.x + 40} cy="94" r="3.5" class="pivot" />
+      <circle cx={p.x + 104} cy="50" r="3.5" class="term" />
+      <circle cx={p.x + 104} cy="94" r="3.5" class="term" />
+      <path
+        d={
+          p.crossed
+            ? `M${p.x + 40} 50 L${p.x + 101} 92 M${p.x + 40} 94 L${p.x + 101} 52`
+            : `M${p.x + 40} 50 H${p.x + 101} M${p.x + 40} 94 H${p.x + 101}`
+        }
+        class="blade"
+      />
+      <text x={p.x + 72} y="132" class="small">
+        {p.crossed ? 'viajantes trocados' : 'viajantes seguem reto'}
+      </text>
+    </g>
+  ))}
+
+  <path d="M8 148 H352" class="sep" />
+
+  <!-- Three points of control -->
+  <text x="180" y="170" class="title">
+    três pontos: paralelo, intermediário, paralelo
+  </text>
+  <path d="M20 214 H36" class="w fase" />
+  <text x="4" y="218" class="pin">
+    F
+  </text>
+  <rect x="36" y="190" width="52" height="48" rx="6" class="box" />
+  <rect x="140" y="190" width="56" height="48" rx="6" class="box" />
+  <rect x="248" y="190" width="52" height="48" rx="6" class="box" />
+  <path d="M88 200 H140 M196 200 H248" class="w v1in" />
+  <path d="M88 228 H140 M196 228 H248" class="w v2in" />
+  <path d="M300 214 H330 V236" class="w retorno" />
+  <circle cx="330" cy="250" r="13" class="lamp" />
+  <path d="M330 263 V276 H20" class="w neutro" />
+  <text x="4" y="280" class="pin">
+    N
+  </text>
+  <text x="62" y="219" class="tag">
+    P1
+  </text>
+  <text x="168" y="219" class="tag">
+    I
+  </text>
+  <text x="274" y="219" class="tag">
+    P2
+  </text>
+  <text x="114" y="186" class="small">
+    viajantes
+  </text>
+  <text x="222" y="186" class="small">
+    viajantes
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .w {
+    stroke-width: 3;
+  }
+  .fase {
+    stroke: var(--danger);
+  }
+  .neutro {
+    stroke: var(--info);
+  }
+  .retorno {
+    stroke: var(--warning);
+  }
+  .v1in {
+    stroke: var(--copper);
+  }
+  .v2in {
+    stroke: light-dark(#6d3fb0, #c6a4f2);
+  }
+  .box {
+    fill: var(--bg);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .pivot {
+    fill: var(--fg);
+  }
+  .term {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .blade {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .lamp {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .sep {
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+  text {
+    fill: var(--fg);
+    stroke: none;
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 11px;
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .pin {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 12px;
+    text-anchor: start;
+  }
+</style>

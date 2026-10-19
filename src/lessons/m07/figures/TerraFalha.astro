@@ -1,0 +1,188 @@
+---
+/*
+ * 07.2: an insulation fault puts the phase on the metal case of a washing
+ * machine. Without PE (top) the only way back is through the person who
+ * touches it, to the floor. With PE (bottom) the fault current takes the
+ * green wire, which is far easier, and the protection can see it.
+ */
+const panels = [
+  { y: 0, title: 'Sem fio terra', pe: false },
+  { y: 186, title: 'Com fio terra', pe: true },
+];
+---
+
+<svg viewBox="0 0 400 366" width="400" height="366" class="fig" aria-hidden="true">
+  <defs>
+    <marker
+      id="falha-arrow"
+      viewBox="0 0 10 10"
+      refX="7"
+      refY="5"
+      markerWidth="7"
+      markerHeight="7"
+      orient="auto-start-reverse"
+    >
+      <path d="M0 0 L10 5 L0 10 z" class="arrow"></path>
+    </marker>
+  </defs>
+  {panels.map(({ y, title, pe }) => (
+    <g transform={`translate(0 ${y})`}>
+      <text x="8" y="18" class="title">
+        {title}
+      </text>
+      {/* Phase and neutral from the outlet */}
+      <path d="M8 54 H176" class="fase" />
+      <text x="12" y="46" class="tag fase-t">
+        F
+      </text>
+      <path d="M8 118 H176" class="neutro" />
+      <text x="12" y="110" class="tag neutro-t">
+        N
+      </text>
+      {/* Machine: metal case, motor, the fault */}
+      <rect x="120" y="32" width="120" height="112" rx="6" class="case" />
+      <text x="180" y="160" class="small mid">
+        carcaça de metal
+      </text>
+      <path d="M176 54 V72 M176 100 V118" class="load" />
+      <rect x="166" y="72" width="20" height="28" rx="3" class="load" />
+      <text x="160" y="90" class="small end">
+        motor
+      </text>
+      <path d="M176 54 H226 L240 62" class="fase" />
+      <path d="M232 52 l8 -6 M236 60 l10 -2 M232 70 l8 6" class="spark" />
+      <text x="236" y="28" class="small bad">
+        falha de isolação
+      </text>
+      {/* The person touching the case, feet on the floor */}
+      <circle cx="318" cy="52" r="10" class="person" />
+      <path d="M318 62 V108 M318 108 L304 140 M318 108 L332 140 M318 76 L242 84" class="person" />
+      <path d="M262 142 H392" class="floor" />
+      <text x="392" y="158" class="small end">
+        chão
+      </text>
+      {pe ? (
+        <>
+          <path d="M120 132 H64 V168" class="pe" />
+          <path d="M52 168 H76 M56 173 H72 M60 178 H68" class="pe" />
+          <text x="82" y="152" class="tag pe-t">
+            PE
+          </text>
+          <path
+            d="M214 60 C196 132 150 140 126 132 M118 132 H70 V160"
+            class="falta"
+            marker-end="url(#falha-arrow)"
+          />
+          <text x="12" y="76" class="note">
+            a corrente vai
+          </text>
+          <text x="12" y="91" class="note">
+            pelo fio verde
+          </text>
+        </>
+      ) : (
+        <>
+          <path
+            d="M244 72 C272 74 300 80 314 90 M318 112 V138"
+            class="falta"
+            marker-end="url(#falha-arrow)"
+          />
+          <text x="8" y="174" class="note bad">
+            o caminho de volta é a pessoa
+          </text>
+        </>
+      )}
+    </g>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .fase,
+  .neutro,
+  .pe {
+    stroke-width: 2.6;
+  }
+  .fase {
+    stroke: var(--danger);
+  }
+  .neutro {
+    stroke: var(--accent);
+  }
+  .pe {
+    stroke: var(--success);
+  }
+  .case {
+    stroke: var(--fg-muted);
+    stroke-width: 2.4;
+  }
+  .load {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .spark {
+    stroke: var(--warning);
+    stroke-width: 2;
+  }
+  .person {
+    stroke: var(--fg);
+    stroke-width: 2.4;
+  }
+  .floor {
+    stroke: var(--fg-subtle);
+    stroke-width: 2;
+  }
+  .falta {
+    stroke: var(--warning);
+    stroke-width: 2.2;
+    stroke-dasharray: 6 4;
+  }
+  .arrow {
+    fill: var(--warning);
+    stroke: none;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .bad {
+    fill: var(--danger);
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .tag {
+    font-weight: 700;
+  }
+  .fase-t {
+    fill: var(--danger);
+  }
+  .neutro-t {
+    fill: var(--accent);
+  }
+  .pe-t {
+    fill: var(--success);
+  }
+</style>

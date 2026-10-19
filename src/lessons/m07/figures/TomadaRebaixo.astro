@@ -1,0 +1,136 @@
+---
+/*
+ * 07.5: why the NBR 14136 outlet has a recess. Cross-section of the outlet in
+ * the wall with a plug going in: by the time the pins reach the contacts,
+ * the plug body is already inside the recess and covers them. Schematic.
+ */
+---
+
+<svg viewBox="0 0 360 250" width="360" height="250" class="fig" aria-hidden="true">
+  <!-- Wall and box -->
+  <rect x="6" y="20" width="164" height="190" class="wall" />
+  <path d="M170 20 V80 M170 140 V210" class="face" />
+  <text x="60" y="38" class="small start">
+    parede
+  </text>
+
+  <!-- Outlet module: body with the recess cut into its face -->
+  <path d="M60 60 H170 V80 H140 V140 H170 V160 H60 Z" class="body" />
+  <path d="M140 80 H170 M140 140 H170" class="face" />
+  <!-- Contacts behind the recess floor -->
+  <path d="M92 92 H130 M92 128 H130" class="contact" />
+  <path d="M92 86 H130 M92 134 H130" class="contact thin" />
+  <circle cx="74" cy="89" r="5" class="screw" />
+  <circle cx="74" cy="131" r="5" class="screw" />
+
+  <!-- Plug going in: body inside the recess, pins reaching the contacts -->
+  <path d="M152 86 H262 Q282 86 282 98 V122 Q282 134 262 134 H152 Z" class="plug" />
+  <path d="M152 92 H112 M152 128 H112" class="pin" />
+  <path d="M282 110 H352" class="cord" />
+
+  <!-- A finger that cannot reach the pins -->
+  <path d="M232 26 Q220 26 214 38 L196 74 Q192 82 200 84 Q206 86 210 80 L232 50" class="finger" />
+
+  <!-- Labels -->
+  <text x="250" y="114" class="tag">
+    plugue
+  </text>
+  <text x="112" y="182" class="label">
+    rebaixo
+  </text>
+  <path d="M155 176 H140 M155 176 V142" class="pointer" />
+  <text x="111" y="78" class="small">
+    contatos
+  </text>
+  <path d="M112 81 V86" class="pointer" />
+  <text x="34" y="114" class="small">
+    bornes
+  </text>
+
+  <text x="180" y="226" class="legend">
+    Quando os pinos tocam os contatos, o corpo do plugue
+  </text>
+  <text x="180" y="243" class="legend">
+    já está dentro do rebaixo: o dedo não alcança o metal.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wall {
+    fill: color-mix(in oklab, var(--fg-subtle) 18%, transparent);
+    stroke: none;
+  }
+  .face {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .body {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .contact {
+    stroke: var(--copper);
+    stroke-width: 3;
+  }
+  .thin {
+    stroke-width: 1.5;
+  }
+  .screw {
+    fill: var(--surface-2);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .plug {
+    fill: var(--surface-2);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .pin {
+    stroke: var(--copper);
+    stroke-width: 5;
+  }
+  .cord {
+    stroke: var(--fg-muted);
+    stroke-width: 7;
+  }
+  .finger {
+    fill: color-mix(in oklab, var(--warning) 25%, var(--bg));
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .pointer {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  text {
+    fill: var(--fg);
+    stroke: none;
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .tag {
+    font-weight: 700;
+  }
+  .label {
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .legend {
+    font-size: 12.5px;
+  }
+</style>

@@ -1,0 +1,49 @@
+/* CalculadoraCircuito.tsx: sizing a branch circuit, lesson 7.4. */
+
+.calc-circuito__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.calc-circuito__presets .lw__btn {
+  min-height: 2.25rem;
+  font-size: 0.875rem;
+  font-weight: 550;
+}
+
+.calc-circuito .lw__field input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.calc-circuito .lw__choice:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.calc-circuito__facts {
+  display: grid;
+  gap: 0.6rem 1.25rem;
+  margin: 0;
+}
+
+@media (min-width: 36rem) {
+  .calc-circuito__facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.calc-circuito__facts dt {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+
+.calc-circuito__facts dd {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.calc-circuito .lw__status p {
+  margin: 0;
+}

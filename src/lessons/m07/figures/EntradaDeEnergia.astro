@@ -1,0 +1,221 @@
+---
+/*
+ * 07.1: from the street to the outlet. The utility pole with the medium
+ * voltage network, the distribution transformer and the low voltage network;
+ * the service drop to the service entrance (meter and breaker in a sealed box,
+ * earth rod); the feeder to the house's distribution board and the circuits.
+ */
+---
+
+<svg viewBox="0 0 420 362" width="420" height="362" class="fig" aria-hidden="true">
+  <!-- Ground -->
+  <path d="M8 290 H412" class="ground" />
+
+  <!-- Utility pole and medium voltage -->
+  <path d="M36 24 V290" class="pole" />
+  <path d="M12 34 H62" class="arm" />
+  <path d="M6 30 H84" class="mt" />
+  <circle cx="16" cy="30" r="3" class="mt-dot" />
+  <circle cx="36" cy="30" r="3" class="mt-dot" />
+  <circle cx="56" cy="30" r="3" class="mt-dot" />
+  <text x="92" y="30" class="lbl strong">
+    1. Média tensão
+  </text>
+  <text x="92" y="45" class="small">
+    13,8 kV (típico)
+  </text>
+
+  <!-- Transformer -->
+  <rect x="44" y="60" width="32" height="44" rx="6" class="trafo" />
+  <path d="M52 60 V34 M68 60 V34" class="link" />
+  <text x="92" y="80" class="lbl strong">
+    2. Transformador
+  </text>
+  <text x="92" y="95" class="small">
+    de distribuição
+  </text>
+
+  <!-- Low voltage network -->
+  <path d="M18 124 H62" class="arm" />
+  <path d="M6 120 H84 M6 130 H84" class="bt" />
+  <path d="M60 104 V120" class="link" />
+  <text x="92" y="124" class="lbl strong">
+    3. Baixa tensão
+  </text>
+  <text x="92" y="139" class="small">
+    127/220 V ou 220/380 V
+  </text>
+
+  <!-- Service drop -->
+  <path d="M62 130 Q130 196 200 176 V216" class="drop" />
+  <text x="56" y="206" class="lbl strong">
+    4. Ramal de ligação
+  </text>
+
+  <!-- Service entrance -->
+  <path d="M206 170 V290" class="pole thin" />
+  <rect x="186" y="216" width="40" height="56" rx="3" class="box" />
+  <rect x="192" y="222" width="28" height="16" rx="2" class="meter" />
+  <text x="206" y="234" class="tiny">
+    kWh
+  </text>
+  <rect x="199" y="246" width="14" height="18" rx="2" class="breaker" />
+  <text x="178" y="230" class="lbl strong end">
+    5. Padrão de entrada
+  </text>
+  <text x="178" y="245" class="small end">
+    medidor e disjuntor
+  </text>
+  <text x="178" y="259" class="small end">
+    numa caixa lacrada
+  </text>
+  <path d="M206 290 V330" class="rod" />
+  <text x="214" y="328" class="small">
+    haste de aterramento
+  </text>
+
+  <!-- Feeder to the house -->
+  <path d="M226 262 H246 V282 H346 V254" class="feeder" />
+  <text x="236" y="306" class="small">
+    6. ramal até o quadro
+  </text>
+
+  <!-- House with the distribution board and an outlet -->
+  <path d="M324 290 V186 L367 150 L410 186 V290" class="house" />
+  <rect x="334" y="214" width="26" height="40" rx="3" class="qdc" />
+  <path d="M339 224 H355 M339 234 H355 M339 244 H355" class="link" />
+  <text x="347" y="206" class="lbl strong mid">
+    7. Quadro
+  </text>
+  <path d="M360 230 H392 V252" class="circuit" />
+  <rect x="382" y="252" width="20" height="16" rx="3" class="outlet" />
+  <circle cx="389" cy="260" r="1.6" class="dot" />
+  <circle cx="395" cy="260" r="1.6" class="dot" />
+  <text x="406" y="284" class="small end">
+    8. tomada
+  </text>
+
+  <!-- Who answers for what -->
+  <path d="M206 340 V358" class="split" />
+  <text x="198" y="354" class="small end">
+    ← distribuidora
+  </text>
+  <text x="214" y="354" class="small">
+    consumidor →
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ground {
+    stroke: var(--fg-subtle);
+    stroke-width: 2;
+  }
+  .pole {
+    stroke: var(--fg-muted);
+    stroke-width: 7;
+  }
+  .pole.thin {
+    stroke-width: 5;
+  }
+  .arm {
+    stroke: var(--fg-muted);
+    stroke-width: 4;
+  }
+  .mt {
+    stroke: var(--danger);
+    stroke-width: 2;
+  }
+  .mt-dot {
+    fill: var(--danger);
+    stroke: none;
+  }
+  .bt,
+  .drop {
+    stroke: var(--copper);
+    stroke-width: 2;
+  }
+  .trafo {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .link {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .box,
+  .qdc {
+    fill: var(--surface-2);
+    stroke: var(--fg);
+    stroke-width: 1.8;
+  }
+  .meter {
+    fill: var(--bg);
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+  }
+  .breaker {
+    fill: var(--fg-muted);
+    stroke: none;
+  }
+  .rod {
+    stroke: var(--success);
+    stroke-width: 3;
+  }
+  .feeder {
+    stroke: var(--copper);
+    stroke-width: 3;
+  }
+  .circuit {
+    stroke: var(--copper);
+    stroke-width: 2;
+    stroke-dasharray: 5 3;
+  }
+  .house {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .outlet {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .dot {
+    fill: var(--fg);
+    stroke: none;
+  }
+  .split {
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 4;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .strong {
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .tiny {
+    fill: var(--fg-muted);
+    font-size: 9px;
+    text-anchor: middle;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .mid {
+    text-anchor: middle;
+  }
+</style>

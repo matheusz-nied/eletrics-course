@@ -1,0 +1,154 @@
+---
+/*
+ * 07.3: a DR in the distribution board. Phase and neutral both go through it;
+ * after it, the phase feeds the circuit breakers and the neutral goes to its
+ * own neutral bar. The earth bar is apart and does not go through the DR.
+ * Dots are connections; lines that cross without a dot do not touch.
+ */
+const circuits = [
+  { x: 214, label: 'circuito 1' },
+  { x: 310, label: 'circuito 2' },
+];
+---
+
+<svg viewBox="0 0 400 300" width="400" height="300" class="fig" aria-hidden="true">
+  <!-- Incoming phase and neutral -->
+  <text x="8" y="54" class="tag fase-t">
+    F
+  </text>
+  <path d="M22 60 H70" class="fase"></path>
+  <text x="8" y="96" class="tag neutro-t">
+    N
+  </text>
+  <path d="M22 92 H70" class="neutro"></path>
+
+  <!-- The DR -->
+  <rect x="70" y="40" width="64" height="74" rx="6" class="device"></rect>
+  <text x="102" y="78" class="dev mid">
+    DR
+  </text>
+  <text x="102" y="96" class="small mid">
+    30 mA
+  </text>
+  <text x="102" y="130" class="small mid">
+    fase e neutro
+  </text>
+  <text x="102" y="144" class="small mid">
+    passam pelo DR
+  </text>
+
+  <!-- Phase after the DR to the breakers -->
+  <path d="M134 60 H160 V24 H330" class="fase"></path>
+  <!-- Neutral after the DR to its bar -->
+  <path d="M134 92 H176 V170" class="neutro"></path>
+  <path d="M176 170 H356" class="bar neutro"></path>
+  <circle cx="176" cy="170" r="3.5" class="dot n"></circle>
+  <text x="166" y="174" class="small end">
+    barra de neutro
+  </text>
+  <text x="166" y="188" class="small end">
+    (depois do DR)
+  </text>
+
+  <!-- Earth bar, apart from everything -->
+  <text x="8" y="214" class="tag pe-t">
+    PE
+  </text>
+  <path d="M30 210 H356" class="bar pe"></path>
+  <text x="30" y="230" class="small">
+    barra de terra
+  </text>
+
+  {circuits.map(({ x, label }) => (
+    <>
+      <circle cx={x} cy="24" r="3.5" class="dot f" />
+      <path d={`M${x} 24 V34`} class="fase" />
+      <rect x={x - 10} y="34" width="20" height="30" rx="3" class="device" />
+      <text x={x + 14} y="54" class="small">
+        DJ
+      </text>
+      <path d={`M${x} 64 V262`} class="fase" />
+      <circle cx={x + 16} cy="170" r="3.5" class="dot n" />
+      <path d={`M${x + 16} 170 V262`} class="neutro" />
+      <circle cx={x + 32} cy="210" r="3.5" class="dot p" />
+      <path d={`M${x + 32} 210 V262`} class="pe" />
+      <text x={x + 16} y="282" class="small mid">
+        {label}
+      </text>
+    </>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .fase,
+  .neutro,
+  .pe {
+    stroke-width: 2.4;
+  }
+  .fase {
+    stroke: var(--danger);
+  }
+  .neutro {
+    stroke: var(--accent);
+  }
+  .pe {
+    stroke: var(--success);
+  }
+  .bar {
+    stroke-width: 6;
+  }
+  .device {
+    stroke: var(--fg);
+    stroke-width: 1.8;
+    fill: var(--surface);
+  }
+  .dot {
+    stroke: none;
+  }
+  .dot.f {
+    fill: var(--danger);
+  }
+  .dot.n {
+    fill: var(--accent);
+  }
+  .dot.p {
+    fill: var(--success);
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .dev {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .tag {
+    font-weight: 700;
+  }
+  .fase-t {
+    fill: var(--danger);
+  }
+  .neutro-t {
+    fill: var(--accent);
+  }
+  .pe-t {
+    fill: var(--success);
+  }
+</style>

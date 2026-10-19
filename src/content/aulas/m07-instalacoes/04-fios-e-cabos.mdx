@@ -1,0 +1,375 @@
+---
+titulo: Fios e cabos
+modulo: m07-instalacoes
+ordem: 4
+nivel: I
+duracaoMin: 35
+objetivos:
+  - Diferenciar fio rígido, cabo rígido e cabo flexível e ler a seção nominal em mm²
+  - Explicar por que a capacidade de condução de corrente depende da forma de instalação
+  - Escolher o disjuntor que protege o fio, com a regra I_B ≤ I_n ≤ I_Z
+  - Calcular a queda de tensão de um circuito e conferir o limite de 4 % da NBR 5410
+  - Reconhecer as cores do neutro, do terra e da fase
+  - Dimensionar o circuito de um chuveiro e entender por que ele fica em 220 V
+prerequisitos:
+  - m01-eletricidade-do-zero/04-lei-de-ohm
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+  - m07-instalacoes/01-da-rua-ate-a-tomada
+tags: [fio, cabo, bitola, seção, mm², capacidade de condução, NBR 5410, queda de tensão, cores, chuveiro, disjuntor]
+seguranca: rede
+rascunho: false
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import CalculadoraCircuito from '../../../lessons/m07/CalculadoraCircuito';
+import FioVsCabo from '../../../lessons/m07/figures/FioVsCabo.astro';
+import FioCoordenacao from '../../../lessons/m07/figures/FioCoordenacao.astro';
+import CoresDosFios from '../../../lessons/m07/figures/CoresDosFios.astro';
+
+O chuveiro de 5.500 W funcionou anos sem problema. No inverno, a família troca por um de 7.500 W, bem mais quente. Duas semanas depois, cheiro de plástico queimado no banheiro: o fio que chega ao chuveiro está derretido, e o disjuntor nunca desarmou. Como pode, se "o disjuntor está ali para isso"?
+
+A resposta está na escolha do fio. Nesta aula você vai ver como um fio é feito, quanta corrente ele aguenta e por quê, como o disjuntor é escolhido para protegê-lo e como a queda de tensão entra na conta. No fim, você dimensiona o circuito de um chuveiro com uma calculadora e entende o que deu errado nessa casa.
+
+## Fio ou cabo?
+
+No balcão da loja, "fio" e "cabo" parecem a mesma coisa, mas não são:
+
+- **Fio rígido (sólido):** um único condutor de cobre, maciço. Firme, mantém a forma, bom para ligar em bornes de parafuso.
+- **Cabo:** o mesmo cobre dividido em vários fios torcidos juntos. O **cabo rígido** tem poucos fios (sete, por exemplo); o **cabo flexível** tem dezenas de fios finos e dobra com facilidade, o que ajuda a puxar dentro dos eletrodutos. É o mais usado nas instalações de casa hoje.
+
+<Part3D
+  part="wire"
+  props={{ kind: 'flexivel', section: 2.5, color: 'preto', strip: 12 }}
+  cutaway
+  alt="Três cortes de condutor com a mesma seção de cobre e a mesma isolação azul: o fio rígido, com um condutor maciço; o cabo rígido, com sete fios; e o cabo flexível, com dezenas de fios finos."
+  caption="Figura 1. Um cabo flexível de 2,5 mm² em corte: dezenas de fios finos de cobre dentro da isolação de PVC."
+>
+  <FioVsCabo />
+</Part3D>
+
+Para a corrente, o que importa é a quantidade de cobre, e não se ele está num fio só ou em muitos. Mas a ponta do cabo flexível espalha os fiozinhos: num borne de parafuso, use um terminal tubular (ponteira) prensado na ponta, como você vê em <LinkAula id="m14-placas/06-bornes-conectores-e-emendas" />.
+
+### Seção nominal: a "bitola"
+
+O tamanho do condutor é a <Term id="bitola">bitola</Term>, ou seção nominal: a área do corte do cobre, em milímetros quadrados (mm²). As seções mais comuns em casa são 1,5, 2,5, 4, 6 e 10 mm². Equipamentos importados e fios de eletrônica usam a escala americana AWG, em que o número maior é o fio mais fino (o 12 AWG tem cerca de 3,3 mm²); ela não coincide com as seções brasileiras.
+
+A seção decide a resistência do fio, como você viu em <LinkAula id="m01-eletricidade-do-zero/04-lei-de-ohm" />:
+
+$$
+R = \rho \cdot \frac{L}{S}
+$$
+
+com $R$ em ohms (Ω), $\rho$ a resistividade do cobre ($1{,}72 \times 10^{-8}\,\Omega\cdot\text{m}$ a 20 °C), $L$ o comprimento em metros e $S$ a seção em metros quadrados ($1\,\text{mm}^2 = 10^{-6}\,\text{m}^2$). O dobro da seção é metade da resistência.
+
+### Isolação
+
+O cobre vem coberto por uma isolação, quase sempre de PVC. Nos fios e cabos de instalação de casa, a isolação típica é de **PVC para 70 °C** e **450/750 V**: ela aguenta o fio trabalhando continuamente a até 70 °C e é feita para as tensões da rede. Essas informações vêm impressas ao longo do fio, junto com a seção e a norma do produto. Compre fio com a marcação legível e com a certificação do Inmetro.
+
+Os cordões flexíveis, como o cabo PP redondo e o cordão paralelo das extensões, são feitos para ligar aparelhos à tomada, não para a fiação fixa dentro da parede.
+
+## Quanta corrente o fio aguenta
+
+Toda corrente esquenta o fio por <Term id="efeito-joule">efeito Joule</Term>, $P = R \cdot I^2$ (aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />). O fio esquenta até que o calor que ele produz seja igual ao calor que ele consegue entregar ao ar e à parede em volta. A <Term id="capacidade-de-conducao">capacidade de condução de corrente</Term>, chamada de $I_Z$, é a maior corrente com que esse equilíbrio fica dentro do limite da isolação, os 70 °C do PVC.
+
+Por isso a capacidade não depende só da seção. Depende também de:
+
+- **Como o fio está instalado.** Dentro de um eletroduto embutido na parede, o calor sai com dificuldade; um cabo preso numa parede, ao ar, se resfria melhor.
+- **Quantos condutores carregados estão juntos.** Um circuito de fase e neutro tem dois condutores carregados (o terra só conduz em caso de defeito). Vários circuitos no mesmo eletroduto se aquecem uns aos outros, e cada um aguenta menos.
+- **A temperatura do ambiente.** Num forro quente sobra menos folga até os 70 °C.
+
+A <Term id="nbr-5410">NBR 5410</Term> traz tabelas da capacidade para cada forma de instalação. A tabela abaixo mostra um caso, o mais comum nas casas:
+
+| Seção (mm²) | 2 condutores carregados | 3 condutores carregados |
+| --- | --- | --- |
+| 1,5 | 17,5 A | 15,5 A |
+| 2,5 | 24 A | 21 A |
+| 4 | 32 A | 28 A |
+| 6 | 41 A | 36 A |
+| 10 | 57 A | 50 A |
+| 16 | 76 A | 68 A |
+
+Valores da tabela de capacidade de condução de corrente da NBR 5410 para fios de cobre com isolação de PVC (70 °C), método de referência B1 (condutores isolados em eletroduto, por exemplo embutido na alvenaria), temperatura ambiente de 30 °C. Um projeto real ainda aplica os fatores de correção da norma para agrupamento de circuitos e para temperatura, que reduzem esses valores.
+
+### As seções mínimas
+
+Além da corrente, a NBR 5410 fixa uma seção mínima de cobre para cada tipo de circuito, mesmo que a carga seja pequena: **1,5 mm² para circuitos de iluminação** e **2,5 mm² para circuitos de tomadas e de força** (o chuveiro, o forno). Um circuito de tomadas nunca tem fio de 1,5 mm², porque ninguém sabe o que vai ser ligado nele amanhã.
+
+## O disjuntor protege o fio
+
+O <Term id="disjuntor">disjuntor</Term> de cada circuito é escolhido pelo fio, não pelo aparelho. Três correntes entram na conta:
+
+- $I_B$, a **corrente de projeto**: a que a carga puxa ($I_B = P/V$ para uma carga resistiva);
+- $I_n$, a **corrente nominal do disjuntor**: 10, 16, 20, 25, 32, 40, 50 ou 63 A, os valores comerciais mais comuns;
+- $I_Z$, a **capacidade de condução** do fio.
+
+A regra é
+
+$$
+I_B \le I_n \le I_Z
+$$
+
+Em palavras: o disjuntor tem que aguentar a carga sem desarmar à toa ($I_B \le I_n$), e o fio tem que aguentar tudo o que o disjuntor deixa passar ($I_n \le I_Z$). Se o disjuntor for maior que o fio, existe uma faixa de corrente em que o fio esquenta além do limite e o disjuntor fica parado.
+
+<Figure
+  caption="Figura 2. A regra num eixo de corrente, para um chuveiro de 7.500 W em 220 V (34 A) com disjuntor de 40 A. Com fio de 6 mm² (41 A), o fio aguenta tudo o que o disjuntor deixa passar. Com fio de 4 mm² (32 A), entre 32 e 40 A o fio passa do limite e o disjuntor não desarma, e o chuveiro puxa 34 A, bem dentro dessa faixa."
+  alt="Dois eixos de corrente de 0 a 50 ampères. No de cima, marcado certo, a carga de 34 A, o disjuntor de 40 A e o fio de 6 mm², que aguenta 41 A, aparecem nessa ordem. No de baixo, marcado errado, o fio de 4 mm² aguenta 32 A, antes da carga de 34 A e do disjuntor de 40 A; a faixa de 32 a 40 A está em vermelho."
+>
+  <FioCoordenacao />
+</Figure>
+
+<DeepDive title="Por que a regra não pede uma folga maior">
+Um disjuntor não desarma exatamente em $I_n$: pelas normas dos disjuntores residenciais, ele aguenta 1,13 vez a nominal por pelo menos uma hora e desarma em menos de uma hora com 1,45 vez a nominal. Então o fio pode passar um tempo com até 45 % a mais que $I_n$ antes do desarme. A NBR 5410 também pede que essa corrente de disparo garantido não passe de 1,45 vez a capacidade do fio. Com os disjuntores comuns, cuja corrente de disparo garantido é justamente 1,45 vez $I_n$, essa segunda condição já fica atendida quando $I_n \le I_Z$. Por isso, na prática, a regra das três correntes resolve.
+</DeepDive>
+
+## Queda de tensão
+
+O fio tem resistência, e a corrente que passa por ele deixa uma parte da tensão pelo caminho: é a <Term id="queda-de-tensao">queda de tensão</Term>. O aparelho no fim do circuito recebe um pouco menos que a tensão do quadro. A corrente vai por um fio e volta pelo outro, então entram os dois na conta:
+
+$$
+\Delta V = \frac{2 \cdot \rho \cdot L \cdot I}{S}
+$$
+
+com $\Delta V$ em volts, $L$ o comprimento do circuito (só a ida, do quadro até a carga) em metros, $I$ em ampères e $S$ em m². A queda em porcentagem é $\Delta V / V$.
+
+Para os <Term id="circuito-terminal">circuitos terminais</Term>, os que saem do quadro e vão até as cargas, a NBR 5410 limita a queda de tensão a **4 %**. Num circuito comprido, o fio que aguenta a corrente pode não bastar: aumenta-se a seção até a queda ficar dentro do limite.
+
+No cálculo, usamos o cobre a 20 °C, como em <LinkAula id="m01-eletricidade-do-zero/04-lei-de-ohm" />. Quente, perto dos 70 °C, o cobre tem uns 20 % mais resistência, e a queda real fica um pouco maior. Um projeto usa a resistência na temperatura de trabalho.
+
+## Explore: dimensione um circuito
+
+A calculadora segue os passos de um projetista: corrente, seção pela capacidade, seção mínima, disjuntor e queda de tensão.
+
+<CalculadoraCircuito client:visible />
+
+1. Comece pelo exemplo pronto: chuveiro de 7.500 W, 220 V, 15 m, uso específico. Confira a corrente, a seção, o disjuntor e a queda.
+2. Mude a tensão para 127 V. O que acontece com a corrente, o fio e o disjuntor?
+3. Escolha **Tomadas da cozinha 2.200 W**, em 127 V, e arraste o comprimento até 40 m. Qual seção a capacidade pediria, e qual a calculadora indica no fim? Por quê?
+4. Escolha **Luzes da casa 600 W**. Por que a seção não desce abaixo de 1,5 mm²?
+
+Em 220 V, o chuveiro puxa 34,1 A e pede fio de 6 mm² com disjuntor de 40 A, com queda de 1,33 %. Em 127 V, a corrente vai a 59,1 A, e o circuito passa a pedir fio de 16 mm² e disjuntor de 63 A. Nas tomadas da cozinha a 40 m, os 17,3 A cabem no fio de 2,5 mm² com disjuntor de 20 A, mas a queda seria de uns 7,5 %; a calculadora sobe para 6 mm², com 3,13 %.
+
+## Exemplo resolvido: o circuito do chuveiro
+
+Um chuveiro de 7.500 W, em 220 V, a 15 m do quadro, com o fio em eletroduto embutido na parede (método B1, dois condutores carregados). Qual fio e qual disjuntor?
+
+**Passo 1: corrente de projeto.**
+
+$$
+I_B = \frac{P}{V} = \frac{7.500\,\text{W}}{220\,\text{V}} \approx 34{,}1\,\text{A}
+$$
+
+**Passo 2: seção pela capacidade.** Na tabela, 4 mm² aguenta 32 A, menos que 34,1 A. O próximo, 6 mm², aguenta 41 A. A seção mínima de um circuito de força é 2,5 mm², então vale o 6 mm².
+
+**Passo 3: disjuntor.** O menor valor comercial acima de 34,1 A é 40 A. Conferindo a regra: $34{,}1 \le 40 \le 41$. O disjuntor de 40 A protege o fio de 6 mm².
+
+**Passo 4: queda de tensão.**
+
+$$
+\Delta V = \frac{2 \times 1{,}72 \times 10^{-8} \times 15 \times 34{,}1}{6 \times 10^{-6}} \approx 2{,}93\,\text{V}
+$$
+
+$$
+\frac{2{,}93\,\text{V}}{220\,\text{V}} \approx 1{,}33\,\%
+$$
+
+Bem abaixo dos 4 %. Resultado: **fio de 6 mm² e disjuntor de 40 A**. O fio terra do chuveiro acompanha o circuito (a ligação dele é assunto de <LinkAula id="m07-instalacoes/08-chuveiro-eletrico" />).
+
+### E se fosse em 127 V?
+
+O mesmo chuveiro de 7.500 W em 127 V puxaria
+
+$$
+I_B = \frac{7.500\,\text{W}}{127\,\text{V}} \approx 59{,}1\,\text{A}
+$$
+
+O fio de 10 mm² aguenta 57 A, pouco. Seria preciso fio de 16 mm² e disjuntor de 63 A: quase três vezes mais cobre, mais caro, mais difícil de passar no eletroduto e de ligar no chuveiro. Com a mesma potência, a tensão maior pede corrente menor, e o calor no fio, que cresce com $I^2$, cai a cerca de um terço. É por isso que chuveiros de potência alta são feitos para 220 V. Nas casas de 127/220 V, eles são ligados entre duas fases, com um disjuntor de dois polos.
+
+## As cores dos fios
+
+<Figure
+  caption="Figura 3. As cores dos condutores. A NBR 5410 define o azul-claro para o neutro e o verde-amarelo (ou verde) para o condutor de proteção; a fase pode ter qualquer outra cor. O retorno não tem cor definida na norma."
+  alt="Quatro faixas de fio com a ponta de cobre exposta. Neutro: azul-claro. Proteção (terra, PE): verde com listras amarelas. Fase: três fios, preto, vermelho e marrom. Retorno, do interruptor à lâmpada: um fio branco, com a nota de que não há cor na norma."
+>
+  <CoresDosFios />
+</Figure>
+
+Quando os condutores são identificados por cor, a NBR 5410 pede:
+
+- **Neutro:** azul-claro.
+- **Condutor de proteção (terra, PE):** verde-amarelo, ou verde.
+- **Fase:** qualquer cor que não seja essas. Preto, vermelho e marrom são as mais comuns; numa casa com duas fases, usar uma cor para cada fase ajuda muito.
+
+O **retorno**, o fio que vai do interruptor até a lâmpada, não tem cor definida na norma. É costume usar uma cor diferente das usadas para as fases (branco ou amarelo, por exemplo), combinada na obra e anotada no projeto. Seja qual for a escolha, ela nunca pode ser azul-claro, verde ou verde-amarelo.
+
+As cores ajudam, mas não garantem nada: numa casa antiga ou mexida por outra pessoa, o azul pode ser fase. **Cor não substitui teste.** Antes de mexer, desligue o disjuntor, sinalize o quadro e teste a ausência de tensão com um instrumento que você acabou de conferir numa tomada energizada (aula <LinkAula id="m03-medicoes/02-medindo-tensao" />).
+
+## Emendas e conexões
+
+Uma emenda ou um borne frouxo é uma resistência pequena concentrada num ponto, e por ela passa a corrente inteira do circuito. É ali que a maioria dos fios derrete. Por isso:
+
+- Faça emendas só dentro de caixas (de passagem, de tomada, de interruptor), nunca dentro do eletroduto nem enterradas na parede.
+- Prefira conectores próprios, como o <Term id="conector-de-alavanca">conector de alavanca</Term>, escolhidos para a seção e a corrente do circuito. Uma emenda torcida precisa ficar firme e bem isolada.
+- Aperte os bornes com a ferramenta certa (veja <LinkAula id="m00-comece-aqui/03-ferramentas-essenciais" />) e use ponteira na ponta do cabo flexível.
+- Não faça a fiação "por fora": fio solto sobre o forro, emenda com fita no meio do caminho, extensão fazendo papel de circuito. A instalação segue a NBR 5410 inteira, não só a conta do fio.
+
+<RealCase title="O chuveiro novo derreteu o fio">
+
+Volte à casa do começo da aula. O chuveiro antigo, de 5.500 W em 220 V, puxava 25 A. O circuito tinha fio de 4 mm² (32 A no método B1), e alguém tinha instalado um disjuntor de 40 A.
+
+Com o chuveiro antigo, a corrente ficava abaixo do que o fio aguenta, e nada acontecia. Mas o disjuntor de 40 A já estava errado: $I_n = 40\,\text{A}$ é maior que $I_Z = 32\,\text{A}$. Ele nunca protegeu aquele fio, só ninguém tinha pedido mais corrente.
+
+Com o chuveiro novo, de 7.500 W, a corrente passou a 34,1 A, acima dos 32 A que o fio aguenta. O disjuntor de 40 A não tem motivo para desarmar com 34 A, e o fio passou a trabalhar acima do limite em todo banho. Se o eletroduto ainda é dividido com outros circuitos, o fio aguenta menos que os 32 A da tabela, e as conexões, que já esquentam mais que o resto, ficam ainda mais quentes. Banho após banho, a isolação passa dos 70 °C, amolece e derrete, quase sempre começando por um borne ou uma emenda.
+
+O conserto certo, com o disjuntor desligado e por um eletricista:
+
+1. **Trocar o fio** por um de 6 mm² até o quadro (a emenda no meio do caminho não resolve).
+2. **Manter o disjuntor de 40 A**, que agora protege o fio: $34{,}1 \le 40 \le 41$.
+3. **Conferir os bornes do chuveiro e do disjuntor** e trocar o que estiver escurecido.
+4. **Conferir o terra e o DR** do circuito (aulas <LinkAula id="m07-instalacoes/02-fase-neutro-e-terra" /> e <LinkAula id="m07-instalacoes/03-disjuntores-dr-e-dps" />).
+
+O atalho "o disjuntor de 32 A caía, então coloquei um de 40 A" é exatamente o que derrete fios. Antes de trocar um chuveiro por um mais potente, confira a seção do fio e o disjuntor com a calculadora desta aula. Se o fio não comporta, ou troca o fio, ou fica com o chuveiro de potência menor.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Trocar o disjuntor que desarma por um maior.** O disjuntor protege o fio. Se ele desarma com a carga normal, o circuito precisa de outro fio ou de outra divisão, não de um disjuntor maior.
+- **Usar fio de 1,5 mm² em tomadas "porque é só um carregador".** Hoje é um carregador; amanhã é um aquecedor. O mínimo para tomadas é 2,5 mm².
+- **Escolher a seção só pela corrente, num circuito comprido.** Confira a queda de tensão; acima de 4 %, aumente a seção.
+- **Comprar fio sem marcação** ou com seção menor que a anunciada. Um "2,5 mm²" com menos cobre tem menos capacidade. Exija a marcação impressa e a certificação.
+- **Confiar na cor.** Teste sempre a ausência de tensão antes de mexer, com o disjuntor desligado e o quadro sinalizado.
+- **Passar fio novo num eletroduto cheio** sem considerar o agrupamento: com mais circuitos juntos, cada um aguenta menos. Em reformas, chame um eletricista para refazer a conta.
+- **Mexer no circuito com o disjuntor ligado.** Desligue, sinalize, teste. E se tiver dúvida em qualquer etapa, chame um eletricista habilitado.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'Um circuito de tomadas puxa até 18 A e tem fio de 2,5 mm² (24 A no método B1). Qual disjuntor usar?',
+      options: [
+        {
+          text: '20 A',
+          correct: true,
+          feedback: '18 ≤ 20 ≤ 24: o disjuntor aguenta a carga e o fio aguenta tudo o que o disjuntor deixa passar.',
+        },
+        {
+          text: '16 A',
+          feedback: 'O fio fica protegido, mas 16 A é menor que os 18 A da carga: o disjuntor desarma à toa.',
+        },
+        {
+          text: '25 A',
+          feedback: '25 A passa dos 24 A que o fio aguenta: entre 24 e 25 A, o fio esquentaria além do limite sem o disjuntor desarmar.',
+        },
+        {
+          text: '32 A',
+          feedback: 'Muito acima da capacidade do fio. É o erro que derrete fios.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um circuito de tomadas em 127 V alimenta 2.200 W a 20 m do quadro, com fio de 2,5 mm². Qual é a queda de tensão, em volts? (Use ρ = 1,72 × 10⁻⁸ Ω·m.)',
+      answer: 4.77,
+      tolerance: 0.1,
+      unit: 'V',
+      explanation:
+        'I = 2.200 ÷ 127 ≈ 17,3 A. ΔV = 2 × 1,72 × 10⁻⁸ × 20 × 17,3 ÷ 2,5 × 10⁻⁶ ≈ 4,77 V, ou cerca de 3,75 % de 127 V: dentro dos 4 %, mas por pouco.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Um chuveiro de 6.800 W em 220 V (30,9 A) fica a 10 m do quadro. Qual combinação está certa?',
+      options: [
+        {
+          text: 'Fio de 4 mm² com disjuntor de 32 A',
+          correct: true,
+          feedback: '30,9 ≤ 32 ≤ 32, e a queda fica em torno de 1,2 %. O fio de 4 mm² aguenta 32 A no método B1.',
+        },
+        {
+          text: 'Fio de 2,5 mm² com disjuntor de 32 A',
+          feedback: 'O fio de 2,5 mm² aguenta 24 A: menos que a carga e menos que o disjuntor.',
+        },
+        {
+          text: 'Fio de 4 mm² com disjuntor de 40 A',
+          feedback: '40 A é mais do que os 32 A do fio: o disjuntor não protege o fio.',
+        },
+        {
+          text: 'Fio de 6 mm² com disjuntor de 25 A',
+          feedback: 'O fio está folgado, mas 25 A é menos que os 30,9 A do chuveiro: o disjuntor desarma em todo banho.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Pela NBR 5410, o neutro pode ter qualquer cor, desde que não seja verde.',
+      answer: false,
+      explanation:
+        'Quando identificado por cor, o neutro é azul-claro. Verde-amarelo (ou verde) é do condutor de proteção. A fase usa qualquer outra cor.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que chuveiros de potência alta são instalados em 220 V e não em 127 V?',
+      options: [
+        {
+          text: 'Com a mesma potência, a corrente é menor, e o fio e o disjuntor podem ser menores',
+          correct: true,
+          feedback: '7.500 W pedem 34 A em 220 V e 59 A em 127 V. Com menos corrente, o calor no fio (que cresce com I²) cai muito.',
+        },
+        {
+          text: 'Porque em 220 V o chuveiro gasta menos energia para esquentar a mesma água',
+          feedback: 'A energia para esquentar a água é a mesma. O que muda é a corrente que os fios precisam carregar.',
+        },
+        {
+          text: 'Porque em 220 V não é preciso fio terra',
+          feedback: 'O fio terra é necessário em qualquer tensão. O chuveiro tem partes metálicas e água: o terra e o DR são indispensáveis.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada condutor à sua cor.',
+      pairs: [
+        ['Neutro', 'Azul-claro'],
+        ['Condutor de proteção (terra)', 'Verde-amarelo ou verde'],
+        ['Fase', 'Qualquer outra cor, como preto, vermelho ou marrom'],
+        ['Retorno', 'Sem cor na norma; uma cor combinada, diferente das fases'],
+      ],
+      explanation:
+        'A NBR 5410 define o azul-claro do neutro e o verde-amarelo (ou verde) do condutor de proteção; a fase fica com as outras cores. O retorno não tem cor normativa.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que o mesmo fio de 2,5 mm² aguenta menos corrente quando divide o eletroduto com outros circuitos carregados?',
+      options: [
+        {
+          text: 'Os fios se aquecem uns aos outros e o calor sai com mais dificuldade',
+          correct: true,
+          feedback:
+            'A capacidade é a corrente em que o fio fica no limite de temperatura da isolação. Com vizinhos quentes, esse limite chega antes. A NBR 5410 tem fatores de correção para isso.',
+        },
+        {
+          text: 'Porque a resistência do cobre aumenta quando há outros fios por perto',
+          feedback: 'A resistência só muda com a temperatura. O problema é o calor: com vizinhos quentes, ele sai pior.',
+        },
+        {
+          text: 'Não muda: a capacidade depende só da seção',
+          feedback: 'A capacidade depende da seção, da forma de instalação, do agrupamento e da temperatura ambiente.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Fio é um condutor maciço; cabo é o cobre em vários fios torcidos. A seção nominal (bitola), em mm², é o que decide a resistência e quanta corrente ele aguenta.
+- A capacidade de condução $I_Z$ é a corrente em que a isolação fica no limite (70 °C no PVC). Ela depende da forma de instalação, do agrupamento e da temperatura. No método B1, com dois condutores carregados: 1,5 mm² 17,5 A, 2,5 mm² 24 A, 4 mm² 32 A, 6 mm² 41 A.
+- Seções mínimas da NBR 5410 em cobre: 1,5 mm² na iluminação, 2,5 mm² em tomadas e força.
+- O disjuntor protege o fio: $I_B \le I_n \le I_Z$. Disjuntor maior que o fio aguenta deixa o fio derreter.
+- A queda de tensão é $\Delta V = 2\rho L I / S$, limitada a 4 % nos circuitos terminais. O chuveiro de 7.500 W em 220 V a 15 m pede 6 mm² e 40 A, com 1,33 % de queda.
+- Neutro azul-claro, terra verde-amarelo ou verde, fase em outra cor. Cor não substitui teste.
+
+Na próxima aula, a tomada e o plugue, do padrão NBR 14136 à ligação correta: <LinkAula id="m07-instalacoes/05-tomadas-e-plugues" />.

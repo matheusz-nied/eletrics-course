@@ -1,0 +1,182 @@
+---
+/*
+ * 07.3: a surge (a lightning strike nearby, or switching in the grid) comes
+ * in on the phase and the neutral. The DPS, between each conductor and the
+ * earth bar, conducts only while the voltage is far above normal and sends
+ * the surge to the earth rod; the appliances get only what is left of it.
+ */
+---
+
+<svg viewBox="0 0 400 300" width="400" height="300" class="fig" aria-hidden="true">
+  <defs>
+    <marker
+      id="dps-arrow"
+      viewBox="0 0 10 10"
+      refX="7"
+      refY="5"
+      markerWidth="7"
+      markerHeight="7"
+      orient="auto-start-reverse"
+    >
+      <path d="M0 0 L10 5 L0 10 z" class="arrow"></path>
+    </marker>
+  </defs>
+
+  <!-- Lightning and the surge on the incoming line -->
+  <path d="M40 8 L28 32 H40 L30 54" class="bolt"></path>
+  <path d="M60 30 H70 L76 6 L82 42 L88 30 H98" class="spike"></path>
+  <text x="104" y="34" class="note">
+    surto: milhares de volts
+  </text>
+  <text x="104" y="50" class="small">
+    por uma fração de milissegundo
+  </text>
+
+  <text x="8" y="86" class="tag fase-t">
+    F
+  </text>
+  <path d="M22 82 H392" class="fase"></path>
+  <text x="8" y="126" class="tag neutro-t">
+    N
+  </text>
+  <path d="M22 122 H392" class="neutro"></path>
+
+  <!-- The DPS modules from F and N to the earth bar -->
+  <path d="M140 82 V150 M196 122 V150" class="wire"></path>
+  <circle cx="140" cy="82" r="3.5" class="dot f"></circle>
+  <circle cx="196" cy="122" r="3.5" class="dot n"></circle>
+  <rect x="128" y="150" width="24" height="36" rx="3" class="device"></rect>
+  <rect x="184" y="150" width="24" height="36" rx="3" class="device"></rect>
+  <text x="168" y="176" class="dev mid">
+    DPS
+  </text>
+  <path d="M140 186 V214 M196 186 V214" class="pe"></path>
+  <path d="M60 214 H260" class="bar"></path>
+  <text x="260" y="232" class="small end">
+    barra de terra
+  </text>
+  <path d="M80 214 V256" class="pe"></path>
+  <path d="M66 256 H94 M70 262 H90 M75 268 H85" class="pe"></path>
+  <text x="102" y="266" class="small">
+    haste
+  </text>
+
+  <!-- The surge path -->
+  <path
+    d="M110 76 H132 Q148 80 148 96 V204 Q148 222 120 222 H88 V250"
+    class="surto"
+    marker-end="url(#dps-arrow)"
+  ></path>
+
+  <!-- Protected appliances -->
+  <rect x="300" y="150" width="84" height="56" rx="6" class="device"></rect>
+  <path d="M324 82 V150 M360 122 V150" class="wire"></path>
+  <circle cx="324" cy="82" r="3.5" class="dot f"></circle>
+  <circle cx="360" cy="122" r="3.5" class="dot n"></circle>
+  <text x="342" y="182" class="small mid">
+    aparelhos
+  </text>
+  <text x="342" y="230" class="small mid">
+    recebem só
+  </text>
+  <text x="342" y="244" class="small mid">
+    uma sobra pequena
+  </text>
+  <text x="8" y="292" class="small">
+    sem um bom terra, o DPS não tem para onde desviar
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .fase,
+  .neutro,
+  .pe,
+  .wire {
+    stroke-width: 2.4;
+  }
+  .fase {
+    stroke: var(--danger);
+  }
+  .neutro {
+    stroke: var(--accent);
+  }
+  .pe {
+    stroke: var(--success);
+  }
+  .wire {
+    stroke: var(--fg-muted);
+  }
+  .bar {
+    stroke: var(--success);
+    stroke-width: 6;
+  }
+  .bolt {
+    stroke: var(--warning);
+    stroke-width: 3;
+  }
+  .spike {
+    stroke: var(--warning);
+    stroke-width: 2;
+  }
+  .surto {
+    stroke: var(--warning);
+    stroke-width: 2.4;
+    stroke-dasharray: 6 4;
+  }
+  .arrow {
+    fill: var(--warning);
+    stroke: none;
+  }
+  .device {
+    stroke: var(--fg);
+    stroke-width: 1.8;
+    fill: var(--surface);
+  }
+  .dot {
+    stroke: none;
+  }
+  .dot.f {
+    fill: var(--danger);
+  }
+  .dot.n {
+    fill: var(--accent);
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .dev {
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .note {
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .tag {
+    font-weight: 700;
+  }
+  .fase-t {
+    fill: var(--danger);
+  }
+  .neutro-t {
+    fill: var(--accent);
+  }
+</style>

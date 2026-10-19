@@ -1,0 +1,233 @@
+/* Lesson 7.6: three-way switch wiring widget (MontarParalelo.tsx). */
+
+.mp {
+  --mp-fase: var(--danger);
+  --mp-neutro: var(--info);
+  --mp-retorno: var(--warning);
+  --mp-viajante1: var(--copper);
+  --mp-viajante2: light-dark(#6d3fb0, #c6a4f2);
+}
+
+.mp__scene {
+  width: 100%;
+  max-width: 36rem;
+  height: auto;
+  justify-self: center;
+  font-family: var(--font-sans);
+}
+
+.mp__box {
+  fill: color-mix(in oklab, var(--surface-2) 70%, transparent);
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+
+.mp__lead {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 2;
+}
+
+.mp__pivot {
+  fill: var(--fg);
+}
+
+.mp__contact {
+  fill: var(--bg);
+  stroke: var(--fg);
+  stroke-width: 1.5;
+}
+
+.mp__blade {
+  stroke: var(--fg);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.mp__lamp {
+  fill: var(--bg);
+  stroke: var(--fg);
+  stroke-width: 2;
+  transition: fill 200ms;
+}
+
+.mp__lamp.is-on {
+  fill: var(--warning);
+  filter: drop-shadow(0 0 8px color-mix(in oklab, var(--warning) 70%, transparent));
+}
+
+.mp__filament {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 1.5;
+}
+
+.mp__wire {
+  fill: none;
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+.mp__wire--fase {
+  stroke: var(--mp-fase);
+}
+.mp__wire--neutro {
+  stroke: var(--mp-neutro);
+}
+.mp__wire--retorno {
+  stroke: var(--mp-retorno);
+}
+.mp__wire--viajante1 {
+  stroke: var(--mp-viajante1);
+  stroke-dasharray: 8 4;
+}
+.mp__wire--viajante2 {
+  stroke: var(--mp-viajante2);
+  stroke-dasharray: 2 4;
+}
+
+.mp__term,
+.mp__src {
+  stroke: var(--fg);
+  stroke-width: 1.5;
+}
+
+.mp__dot--nenhum {
+  fill: var(--bg);
+}
+.mp__dot--fase {
+  fill: var(--mp-fase);
+}
+.mp__dot--neutro {
+  fill: var(--mp-neutro);
+}
+.mp__dot--retorno {
+  fill: var(--mp-retorno);
+}
+.mp__dot--viajante1 {
+  fill: var(--mp-viajante1);
+}
+.mp__dot--viajante2 {
+  fill: var(--mp-viajante2);
+}
+
+.mp__scene text {
+  fill: var(--fg);
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.mp__scene .mp__term-name,
+.mp__scene .mp__src-text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mp__scene .mp__src-text,
+.mp__scene .mp__caption--start {
+  text-anchor: start;
+}
+
+.mp__scene .mp__caption {
+  fill: var(--fg-muted);
+  font-size: 11px;
+}
+
+.mp__short rect {
+  fill: var(--danger-soft);
+  stroke: var(--danger);
+  stroke-width: 1.5;
+}
+
+.mp__scene .mp__short text {
+  fill: var(--danger);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mp__switches,
+.mp__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mp__pos {
+  padding: 0.05rem 0.4rem;
+  border-radius: 0.4rem;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.mp__groups {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 40rem) {
+  .mp__groups {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.mp__group {
+  gap: 0.6rem;
+}
+
+.mp__field {
+  grid-template-columns: 4.75rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mp .mp__select {
+  border-left-width: 6px;
+}
+
+.mp .mp__select--fase {
+  border-left-color: var(--mp-fase);
+}
+.mp .mp__select--neutro {
+  border-left-color: var(--mp-neutro);
+}
+.mp .mp__select--retorno {
+  border-left-color: var(--mp-retorno);
+}
+.mp .mp__select--viajante1 {
+  border-left-color: var(--mp-viajante1);
+}
+.mp .mp__select--viajante2 {
+  border-left-color: var(--mp-viajante2);
+}
+
+.mp__verdict {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.mp__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.mp__table caption {
+  margin-bottom: 0.4rem;
+  text-align: left;
+}
+
+.mp__table :where(th, td) {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.mp__table thead th {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}

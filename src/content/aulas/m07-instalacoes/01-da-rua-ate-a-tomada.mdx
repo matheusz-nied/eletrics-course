@@ -1,0 +1,343 @@
+---
+titulo: Da rua até a tomada
+modulo: m07-instalacoes
+ordem: 1
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Seguir o caminho da energia do poste até a tomada, passando pelo padrão de entrada, pelo medidor e pelo quadro
+  - Ler o medidor e calcular o consumo do mês em kWh
+  - Reconhecer as peças do quadro de distribuição e dizer para que serve cada uma
+  - Explicar por que a casa é dividida em circuitos e calcular a corrente no disjuntor geral
+  - Saber o que você pode fazer no quadro e o que é serviço de eletricista ou da distribuidora
+prerequisitos:
+  - m00-comece-aqui/02-seguranca-em-eletricidade
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+tags: [padrão de entrada, medidor, kWh, quadro de distribuição, quadro de luz, disjuntor, barramento, circuitos, distribuidora]
+seguranca: rede
+rascunho: false
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import EntradaDeEnergia from '../../../lessons/m07/figures/EntradaDeEnergia.astro';
+import MedidorDigital from '../../../lessons/m07/figures/MedidorDigital.astro';
+import QuadroFrente from '../../../lessons/m07/figures/QuadroFrente.astro';
+
+Você liga o chuveiro numa noite fria e as luzes da casa dão uma piscadinha. Na conta de luz, o chuveiro aparece como o maior gasto do mês. E no quadro de luz, atrás da porta da cozinha, ele tem um disjuntor só dele, maior que os outros. Por quê?
+
+Para responder, siga a energia desde o poste da rua até a tomada. Nesta aula você vai conhecer cada etapa do caminho, ler o medidor, abrir (só a tampa!) o quadro de distribuição e entender por que a casa é dividida em circuitos. É o mapa do resto do módulo.
+
+## O caminho da energia
+
+<Figure
+  caption="Figura 1. Da rede da rua até a tomada. A média tensão (1) passa pelo transformador de distribuição (2), que entrega a baixa tensão (3). O ramal de ligação (4) leva a energia ao padrão de entrada (5), com o medidor, o disjuntor e a haste de aterramento. O ramal (6) segue para o quadro (7), de onde saem os circuitos até as tomadas (8). Embaixo, a marca no padrão separa, de forma aproximada, o que é responsabilidade da distribuidora e o que é do consumidor."
+  alt="Desenho de um poste com três fios de média tensão no alto, um transformador pendurado e dois fios de baixa tensão abaixo dele. Do poste, o ramal de ligação desce até um poste menor na frente do terreno, o padrão de entrada, com uma caixa onde ficam o medidor e um disjuntor, e uma haste de aterramento cravada no chão. Do padrão, um cabo vai até a casa, chega ao quadro de distribuição e segue por um circuito até uma tomada."
+  wide
+>
+  <EntradaDeEnergia />
+</Figure>
+
+### Do poste à rua: média e baixa tensão
+
+A energia chega ao bairro pela rede de **média tensão**, os fios mais altos do poste, com milhares de volts (13,8 kV é um valor comum, típico). Tensão alta permite levar muita potência com pouca corrente, e corrente baixa esquenta pouco os cabos: é o efeito Joule que você viu em <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />.
+
+Ninguém usa milhares de volts dentro de casa. Por isso, de tantos em tantos postes há um **transformador de distribuição**, aquele tambor pendurado no alto. Ele baixa a tensão para a **baixa tensão** da rua, que segue nos fios de baixo do poste e atende as casas daquele trecho. O princípio é o do transformador da aula <LinkAula id="m05-magnetismo/04-transformadores" />, só que bem maior.
+
+A baixa tensão da rua não é igual no país todo:
+
+- **127/220 V**, em boa parte do Brasil: 127 V entre uma fase e o neutro, 220 V entre duas fases. É o "110" do dia a dia: o nome é antigo, a tensão real é 127 V.
+- **220/380 V**, em outras regiões, como Brasília e muitas cidades do Nordeste: 220 V entre fase e neutro, 380 V entre fases.
+
+Por que dois números, e de onde vem o 220 entre duas fases de 127? Isso é assunto de <LinkAula id="m06-corrente-alternada/07-monofasico-bifasico-e-trifasico" />. Por enquanto, guarde que uma casa pode receber uma fase e o neutro (**monofásica**), duas fases e o neutro (**bifásica**) ou três fases e o neutro (**trifásica**). Quem decide é a distribuidora, conforme a carga da casa.
+
+### O ramal de ligação
+
+Do poste, os cabos descem até a casa: é o <Term id="ramal-de-ligacao">ramal de ligação</Term>. Ele pode ser aéreo ou subterrâneo, e pertence à distribuidora. Repare num detalhe importante: **antes do medidor não existe disjuntor do lado da casa**. Esses cabos estão sempre energizados, e só a distribuidora pode desligá-los.
+
+### O padrão de entrada
+
+O ramal termina no <Term id="padrao-de-entrada">padrão de entrada</Term>, na frente do terreno: um poste pequeno ou uma mureta com uma caixa onde ficam o medidor e o **disjuntor do padrão**, mais a **haste de aterramento**, uma barra de metal cravada no chão (o papel dela aparece em <LinkAula id="m07-instalacoes/02-fase-neutro-e-terra" />).
+
+Quem constrói o padrão é o dono da casa, mas seguindo as regras da distribuidora. **Cada distribuidora tem o seu próprio padrão**: altura do poste, tipo de caixa, bitola dos cabos, valor do disjuntor conforme a carga, tipo de haste. Essas regras estão no manual de fornecimento da sua distribuidora, que costuma estar no site dela. Antes de construir ou reformar um padrão, consulte esse manual e contrate um eletricista; a distribuidora inspeciona, liga e lacra a caixa do medidor.
+
+### O medidor de energia
+
+O <Term id="medidor-de-energia">medidor de energia</Term> soma a energia que a casa consome, em quilowatt-hora (kWh), a mesma unidade da conta de luz. Ele não mede a potência de um instante, e sim o total acumulado desde que foi instalado, como o hodômetro de um carro.
+
+<Figure
+  caption="Figura 2. Um medidor eletrônico (genérico). O visor mostra os kWh acumulados; a luz pisca mais depressa quanto mais potência a casa puxa. O consumo do mês é a leitura atual menos a anterior."
+  alt="Medidor eletrônico com visor mostrando 12480 kWh, uma luz vermelha que pisca com o consumo, a indicação da constante em impulsos por kWh e um lacre na tampa dos bornes. Ao lado, a conta: leitura atual 12.480 kWh menos leitura anterior 12.270 kWh dá consumo de 210 kWh."
+>
+  <MedidorDigital />
+</Figure>
+
+Para ler o medidor eletrônico, anote o número do visor junto com a unidade kWh (alguns modelos alternam várias telas; a de kWh total é a que interessa). Os medidores antigos, com disco giratório, mostram o total em rolinhos numerados ou em mostradores de ponteiro.
+
+Leia o medidor hoje e de novo daqui a uma semana: a diferença é o consumo da semana. É assim que a distribuidora faz a conta do mês. Multiplicado pela tarifa, em reais por kWh, esse consumo vira dinheiro, como você calculou em <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia#explore-quanto-custa-cada-aparelho" />.
+
+O medidor é da distribuidora e a caixa dele tem lacre. **Nunca rompa o lacre**: além de perigoso (os bornes do medidor estão antes de qualquer proteção da casa), é proibido. Casas com energia solar usam um medidor que conta a energia nos dois sentidos, assunto de <LinkAula id="m10-fontes/04-energia-solar" />.
+
+## O quadro de distribuição
+
+Depois do disjuntor do padrão, um cabo (o ramal alimentador) entra na casa e chega ao <Term id="quadro-de-distribuicao">quadro de distribuição</Term>, que muita gente chama de quadro de luz ou QDC. É dele que saem todos os circuitos.
+
+<Part3D
+  part="distribution-board"
+  annotations
+  alt="Quadro de distribuição aberto, visto de frente. No trilho, da esquerda para a direita: o disjuntor geral de 63 ampères, o DR de 30 miliampères com o botão de teste T, o DPS e quatro disjuntores numerados de 1 a 4, ligados por cima por um pente de cobre, o barramento de fase. Embaixo, o barramento de neutro, azul, e o barramento de terra, verde, cada um com uma fileira de parafusos. Uma legenda identifica os circuitos: 1 iluminação 10 A, 2 tomadas da sala 20 A, 3 tomadas da cozinha 20 A, 4 chuveiro 32 A."
+  caption="Figura 3. Um quadro de distribuição com a tampa aberta. Os valores são típicos de uma casa pequena; os do seu quadro dependem do projeto."
+>
+  <QuadroFrente />
+</Part3D>
+
+As peças que você vai encontrar, na ordem em que a energia passa por elas:
+
+- **Disjuntor geral.** Liga e desliga a casa toda e protege o ramal que vem do padrão. Em alguns quadros, quem faz o papel de chave geral é um DR.
+- **DR** (<Term id="dr">dispositivo diferencial residual</Term>). Desarma quando parte da corrente escapa para a terra, por exemplo pelo corpo de uma pessoa. É a proteção contra choque que você conheceu em <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />. Pode ser um para a casa toda ou um para cada grupo de circuitos. Tem um botão de teste, marcado com T.
+- **DPS** (dispositivo de proteção contra surtos). Desvia para o terra os picos de tensão que chegam pela rede, causados por raios e manobras. Não protege contra sobrecarga nem contra choque.
+- **Barramentos.** Um <Term id="barramento">barramento</Term> é uma barra de cobre onde vários fios se ligam no mesmo ponto. O de fase, muitas vezes um "pente" encaixado no alto dos disjuntores, leva a fase a todos eles. Os neutros de todos os circuitos se juntam no barramento de neutro, e os fios terra no de terra.
+- **Disjuntores dos circuitos.** Um para cada circuito, cada um com o valor escolhido para proteger os fios daquele circuito.
+
+Como cada uma dessas proteções decide a hora de desarmar é o assunto de <LinkAula id="m07-instalacoes/03-disjuntores-dr-e-dps" />.
+
+## Por que a casa é dividida em circuitos
+
+Um <Term id="circuito-terminal">circuito terminal</Term> é o caminho que sai de um disjuntor do quadro e vai até as cargas: as lâmpadas de alguns cômodos, um conjunto de tomadas, o chuveiro. Uma casa típica tem pelo menos estes:
+
+- **Iluminação**: as lâmpadas, com corrente pequena.
+- **Tomadas de uso geral**: onde se ligam TV, geladeira, ferro de passar, carregadores. Costumam ser divididas por área (sala e quartos, cozinha, área de serviço).
+- **Uso específico**: um circuito só para um aparelho de potência alta, como o chuveiro, o forno elétrico, o ar-condicionado ou a torneira elétrica.
+
+A <Term id="nbr-5410">NBR 5410</Term>, a norma brasileira das instalações elétricas de baixa tensão, pede iluminação e tomadas em circuitos separados e um circuito próprio para cada aparelho de corrente alta. Os motivos são práticos:
+
+1. **Um defeito não apaga a casa toda.** Se o disjuntor das tomadas da cozinha desarma, as luzes continuam acesas.
+2. **Cada circuito tem o fio do tamanho da sua corrente.** O chuveiro puxa 25 A ou mais; a iluminação, poucos ampères. Passar tudo por um fio só pediria um fio enorme até a última lâmpada. A escolha do fio é assunto de <LinkAula id="m07-instalacoes/04-fios-e-cabos" />.
+3. **Manutenção mais segura.** Para trocar uma tomada, você desliga só aquele circuito, e o resto da casa continua funcionando.
+
+### A corrente no disjuntor geral
+
+Os circuitos saem todos do mesmo barramento de fase, em paralelo, e voltam pelo barramento de neutro. Toda a corrente que vai para eles passa antes pelo disjuntor geral. Pela lei dos nós (<LinkAula id="m02-circuitos-cc/05-leis-de-kirchhoff" />), a corrente no geral é a soma das correntes dos circuitos:
+
+$$
+I_\text{geral} = I_1 + I_2 + I_3 + \dots
+$$
+
+E a corrente de cada carga resistiva vem da potência e da tensão, como em <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />:
+
+$$
+I = \frac{P}{V}
+$$
+
+com $I$ em ampères (A), $P$ em watts (W) e $V$ em volts (V). Num chuveiro, num ferro ou numa lâmpada incandescente, essa conta vale direto na rede; em motores e fontes eletrônicas ela dá uma estimativa (a conta completa está em <LinkAula id="m06-corrente-alternada/05-potencia-e-fator-de-potencia" />).
+
+## Explore: o quadro da casa
+
+A simulação mostra o quadro de uma casa pequena numa rede de 220 V entre fase e neutro (típico das regiões de 220/380 V). A fase passa pelo disjuntor geral de 63 A e chega ao barramento, que alimenta três disjuntores: iluminação (10 A, com duas lâmpadas de 100 W), tomadas (20 A) e chuveiro (32 A, 5.500 W). Os quatro multímetros abaixo do esquema mostram a corrente em cada disjuntor. O tempo da simulação corre 10 vezes mais rápido que o relógio.
+
+<Simulation circuit="m07/quadro-da-casa" instruments={['multimetro']} />
+
+1. Toque em **Iniciar simulação**. Acenda as luzes, ligue os aparelhos nas tomadas (TV e geladeira) e ligue o chuveiro. Anote a corrente de cada circuito e a do geral. A soma bate?
+2. Agora escolha **Tudo junto (6.600 W)** nas tomadas: aquecedor, ferro, micro-ondas e air fryer ao mesmo tempo. Quanto passa pelo disjuntor de 20 A? Espere e olhe o tempo no alto da simulação: o que acontece, e quando?
+3. Depois do desarme, o chuveiro e as luzes continuam ligados? Quanto marca o geral?
+4. Volte para TV e geladeira e religue o disjuntor das tomadas. Por fim, desligue o disjuntor geral.
+
+As luzes puxam uns 0,91 A, a TV e a geladeira 2 A, e o chuveiro 24,9 A. O geral marca cerca de 27,8 A, exatamente a soma. Com tudo junto nas tomadas, elas passam a puxar quase 30 A, uma vez e meia os 20 A do disjuntor, e o geral fica com cerca de 55,7 A, ainda abaixo dos 63 A dele. O disjuntor das tomadas desarma depois de pouco mais de um minuto (no relógio da simulação; num disjuntor real, o tempo varia de um modelo para outro). Só aquele circuito apaga: o geral cai para uns 25,8 A, com as luzes e o chuveiro funcionando. Com o geral desligado, todas as correntes vão a zero.
+
+Repare que o disjuntor não desarmou na hora: com uma sobrecarga moderada, ele espera esquentar. Isso é de propósito, e você vai ver o porquê em <LinkAula id="m07-instalacoes/03-disjuntores-dr-e-dps" />.
+
+## Exemplo resolvido: a corrente no geral
+
+Na casa da simulação, as luzes, a TV com a geladeira e o chuveiro estão ligados. Quanto passa pelo disjuntor geral?
+
+**Passo 1: a corrente de cada circuito**, com $I = P / V$ e $V = 220\,\text{V}$:
+
+$$
+I_1 = \frac{2 \times 100\,\text{W}}{220\,\text{V}} \approx 0{,}91\,\text{A}
+$$
+
+$$
+I_2 = \frac{440\,\text{W}}{220\,\text{V}} = 2\,\text{A}
+$$
+
+$$
+I_3 = \frac{5.500\,\text{W}}{220\,\text{V}} = 25\,\text{A}
+$$
+
+**Passo 2: a soma.**
+
+$$
+I_\text{geral} = 0{,}91 + 2 + 25 \approx 27{,}9\,\text{A}
+$$
+
+O simulador mostra um pouco menos, 27,8 A, porque uma pequena parte da tensão fica nos fios e nos contatos e cada carga recebe um pouco menos de 220 V. Essa queda de tensão volta em <LinkAula id="m07-instalacoes/04-fios-e-cabos" />.
+
+**Passo 3: a sobrecarga.** Com aquecedor, ferro, micro-ondas e air fryer juntos (6.600 W) nas tomadas:
+
+$$
+I_2 = \frac{6.600\,\text{W}}{220\,\text{V}} = 30\,\text{A} = 1{,}5 \times 20\,\text{A}
+$$
+
+O fio desse circuito foi escolhido para os 20 A do disjuntor. Com 30 A ele esquentaria demais, e quem impede isso é o disjuntor do circuito, que desarma. Ligar esses aparelhos em tomadas de circuitos diferentes (um na cozinha, outro na sala) divide a corrente entre dois disjuntores.
+
+## Lendo e etiquetando o quadro
+
+Um quadro bem feito tem cada disjuntor identificado: uma etiqueta ao lado da alavanca ou uma lista na parte de dentro da porta, como na legenda da Figura 3. Na hora de um desarme ou de uma troca de tomada, é essa etiqueta que diz qual disjuntor desligar.
+
+Se o seu quadro não tem identificação, dá para fazer o levantamento sem abrir nada além da porta:
+
+<Steps>
+  <Step title="Chame alguém para ajudar">
+    Uma pessoa fica no quadro e a outra percorre a casa com um abajur ou um carregador de celular ligado, testando tomadas e luzes. Avise todo mundo antes: computadores e aparelhos vão desligar.
+  </Step>
+  <Step title="Desligue um disjuntor de cada vez">
+    Com um disjuntor desligado, anote o que apagou: quais lâmpadas, quais tomadas, quais aparelhos fixos. Religue e passe para o próximo. Um disjuntor maior, de dois polos, costuma ser o do chuveiro.
+  </Step>
+  <Step title="Escreva e cole as etiquetas">
+    Use nomes claros ("Tomadas da cozinha", "Chuveiro do banheiro social") e guarde uma cópia da lista fora do quadro.
+  </Step>
+</Steps>
+
+Isso é apenas ligar e desligar disjuntores, com a tampa do quadro fechada sobre as ligações. Se algum disjuntor estiver quente, escurecido ou com cheiro de queimado, pare e chame um eletricista.
+
+### O que você pode fazer e o que não pode
+
+| Você pode | É serviço de eletricista ou da distribuidora |
+| --- | --- |
+| Abrir a porta do quadro e ligar ou desligar disjuntores | Tirar o espelho (a tampa interna que cobre bornes e barramentos) e mexer nas ligações |
+| Apertar o botão de teste do DR (ele deve desarmar) | Trocar um disjuntor, o DR ou o DPS, ou mudar o valor de um disjuntor |
+| Ler o medidor | Romper o lacre do medidor ou mexer na caixa do padrão |
+| Identificar e etiquetar os circuitos | Mexer no ramal de ligação ou em fios caídos da rede (só a distribuidora) |
+
+Dentro do quadro, mesmo com o disjuntor geral desligado, os cabos que chegam do medidor e os bornes de entrada do geral continuam energizados. Por isso o trabalho ali dentro é para quem tem formação, ferramentas e procedimento.
+
+<RealCase title="A luz de metade da casa apagou">
+
+As luzes da sala e da cozinha apagaram, as tomadas da cozinha também, mas o quarto continua normal. Antes de qualquer coisa, desligue da tomada o que estava sendo usado quando a luz apagou, e então vá ao quadro.
+
+1. **Procure o disjuntor desarmado.** Ele fica com a alavanca para baixo, diferente dos vizinhos. Leia a etiqueta: ela diz qual circuito caiu.
+2. **Se foi o DR,** a casa toda (ou todo um grupo de circuitos) apaga de uma vez. O DR desarma por fuga de corrente, e a investigação é outra: veja <LinkAula id="m07-instalacoes/03-disjuntores-dr-e-dps" />.
+3. **Antes de religar,** tire da tomada o aparelho que provocou o desarme. Um aquecedor e uma air fryer juntos no mesmo circuito são a causa mais comum.
+4. **Religue** empurrando a alavanca firme até o fim, para cima. Se o aparelho for o culpado, ligue-o depois num circuito menos carregado, ou não use os dois ao mesmo tempo.
+5. **Se desarmar de novo** na hora, mesmo com tudo desligado, há um curto-circuito ou um defeito na fiação. Se desarmar de novo depois de um tempo, com a carga de sempre, o circuito pode estar sobrecarregado ou ter uma conexão ruim esquentando. Nos dois casos, deixe o disjuntor desligado e chame um eletricista.
+
+E se nenhum disjuntor estiver desarmado? Numa casa bifásica ou trifásica, metade da casa apagada com todos os disjuntores ligados pode ser **falta de uma fase** na rede da rua: os circuitos ligados àquela fase ficam sem energia, e o chuveiro de 220 V, que usa duas fases, para de esquentar. Pergunte aos vizinhos e ligue para a distribuidora. Não mexa no padrão.
+
+Nunca segure a alavanca do disjuntor para cima, não prenda com fita e não troque por um disjuntor maior "porque vive caindo". O disjuntor que desarma está protegendo o fio.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **"Desliguei o disjuntor geral, posso mexer no quadro."** Não. A entrada do disjuntor geral e os cabos do medidor continuam com tensão. Dentro do quadro, só eletricista.
+- **"O medidor está girando muito, vou dar uma olhada."** O medidor e o padrão são da distribuidora e são lacrados. Para conferir o consumo, leia o visor; para reclamar da medição, fale com a distribuidora.
+- **Ligar tudo na mesma tomada.** Benjamins e filtros de linha não aumentam a capacidade do circuito: aquecedor, ferro e air fryer juntos podem passar do disjuntor e esquentar tomadas e plugues no caminho.
+- **Achar que "110" e "220" são só nomes.** Um aparelho de 127 V ligado em 220 V recebe quase o dobro da tensão e pode queimar na hora. Confira a tensão da sua região e a etiqueta do aparelho.
+- **Quadro sem identificação.** Na hora do problema, alguém desliga o geral à toa ou, pior, desliga o disjuntor errado e acha que o circuito está sem energia. Siga sempre a regra de ouro de <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />: desligar, sinalizar e testar a ausência de tensão com um instrumento que você acabou de conferir numa tomada energizada.
+- **Construir ou reformar o padrão sem o manual da distribuidora.** Cada distribuidora tem regras próprias, e um padrão fora delas não é ligado.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Os cabos que chegam ao medidor, vindos do poste, estão protegidos por qual disjuntor da casa?',
+      options: [
+        {
+          text: 'Por nenhum: eles estão antes de qualquer proteção da casa e ficam sempre energizados',
+          correct: true,
+          feedback: 'Isso mesmo. Só a distribuidora pode desligar o ramal de ligação. Por isso o padrão e o medidor não são lugar para mexer.',
+        },
+        {
+          text: 'Pelo disjuntor geral do quadro',
+          feedback: 'O disjuntor geral fica depois do medidor e do disjuntor do padrão. Desligá-lo não tira a tensão dos cabos que chegam ao medidor.',
+        },
+        {
+          text: 'Pelo DR',
+          feedback: 'O DR fica no quadro, bem depois do medidor. Ele não protege o ramal de ligação.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Numa casa de 220 V, estão ligados um ferro de passar de 1.100 W (circuito de tomadas) e o chuveiro de 5.500 W. Qual é a corrente no disjuntor geral?',
+      answer: 30,
+      tolerance: 0.5,
+      unit: 'A',
+      explanation: 'Ferro: 1.100 ÷ 220 = 5 A. Chuveiro: 5.500 ÷ 220 = 25 A. O geral conduz a soma: 5 + 25 = 30 A.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'A leitura do medidor era 8.150 kWh no mês passado e hoje é 8.390 kWh. Qual foi o consumo?',
+      answer: 240,
+      tolerance: 0.5,
+      unit: 'kWh',
+      explanation: 'O consumo é a diferença entre as leituras: 8.390 − 8.150 = 240 kWh.',
+    },
+    {
+      type: 'vf',
+      prompt: 'Se o disjuntor das tomadas da cozinha desarmar por sobrecarga, o chuveiro também desliga.',
+      answer: false,
+      explanation:
+        'Cada circuito tem o seu disjuntor. Só o circuito sobrecarregado desliga; o chuveiro, num circuito próprio, continua funcionando. Esse é um dos motivos para dividir a casa em circuitos.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada peça ao que ela faz.',
+      pairs: [
+        ['Medidor', 'Soma a energia consumida, em kWh'],
+        ['Disjuntor geral', 'Liga e desliga a casa toda'],
+        ['DR', 'Desarma quando parte da corrente escapa para a terra'],
+        ['DPS', 'Desvia para o terra os picos de tensão da rede'],
+        ['Barramento de neutro', 'Junta os neutros de todos os circuitos'],
+      ],
+      explanation:
+        'O medidor conta kWh; o disjuntor geral protege e comanda a casa toda; o DR protege contra choque; o DPS protege contra surtos; os barramentos distribuem e juntam os condutores.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem o que fazer quando o disjuntor de um circuito desarma.',
+      items: [
+        'Desligar da tomada o aparelho que estava em uso',
+        'Achar o disjuntor desarmado e ler a etiqueta',
+        'Religar o disjuntor empurrando a alavanca até o fim',
+        'Se desarmar de novo, deixar desligado e chamar um eletricista',
+      ],
+      explanation:
+        'Primeiro tire a causa provável, depois religue. Um disjuntor que desarma de novo está avisando que há um defeito: insistir ou trocar por um maior tira a proteção do fio.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Numa casa bifásica, metade dos cômodos ficou sem luz, todos os disjuntores estão ligados e o chuveiro não esquenta. O que é mais provável?',
+      options: [
+        {
+          text: 'Falta de uma fase na rede da rua: é caso de ligar para a distribuidora',
+          correct: true,
+          feedback:
+            'Os circuitos daquela fase apagam e o chuveiro de 220 V, que usa as duas fases, para. Pergunte aos vizinhos e chame a distribuidora.',
+        },
+        {
+          text: 'O DR desarmou',
+          feedback: 'Com o DR desarmado, a alavanca dele estaria para baixo e todos os circuitos ligados a ele apagariam.',
+        },
+        {
+          text: 'Uma lâmpada queimou',
+          feedback: 'Uma lâmpada queimada apaga só ela mesma, não metade da casa nem o chuveiro.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- A energia chega pela média tensão, passa pelo transformador de distribuição e segue em baixa tensão (127/220 V ou 220/380 V, conforme a região) até o ramal de ligação.
+- O padrão de entrada tem o medidor, o disjuntor do padrão e a haste de aterramento. Cada distribuidora tem as suas regras; o medidor é dela e tem lacre.
+- O medidor soma a energia em kWh: o consumo é a diferença entre duas leituras.
+- O quadro de distribuição tem o disjuntor geral, o DR, o DPS, os barramentos de fase, neutro e terra e um disjuntor para cada circuito; a corrente no geral é a soma dos circuitos.
+- Separar a casa em circuitos faz um defeito apagar só uma parte, permite um fio do tamanho certo para cada carga e torna a manutenção mais segura.
+- Você pode ligar e desligar disjuntores, testar o DR, ler o medidor e etiquetar o quadro; dentro do quadro e no padrão, é serviço de eletricista ou da distribuidora.
+
+Na próxima aula, os três fios que chegam a cada tomada e por que o terra existe: <LinkAula id="m07-instalacoes/02-fase-neutro-e-terra" />.

@@ -1,0 +1,357 @@
+---
+titulo: Tomadas e plugues
+modulo: m07-instalacoes
+ordem: 5
+nivel: B
+duracaoMin: 35
+objetivos:
+  - Reconhecer o padrão NBR 14136 de plugues e tomadas, com o pino terra e o rebaixo
+  - Explicar a diferença entre 10 A e 20 A e por que um plugue de 20 A não entra numa tomada de 10 A
+  - Entender o que há dentro de uma tomada e ligar fase, neutro e terra nos bornes certos
+  - Interpretar o testador de tomada e as três medidas do multímetro
+  - Reconhecer o mau contato e os riscos de adaptadores, benjamins e extensões
+prerequisitos:
+  - m03-medicoes/02-medindo-tensao
+  - m07-instalacoes/02-fase-neutro-e-terra
+tags: [tomada, plugue, NBR 14136, 10 A, 20 A, terra, adaptador, benjamim, testador de tomada, mau contato]
+seguranca: rede
+rascunho: false
+---
+
+import TomadaPadrao from '../../../lessons/m07/figures/TomadaPadrao.astro';
+import TomadaRebaixo from '../../../lessons/m07/figures/TomadaRebaixo.astro';
+import TomadaExplodida from '../../../lessons/m07/figures/TomadaExplodida.astro';
+import TomadaLigacao from '../../../lessons/m07/figures/TomadaLigacao.astro';
+import TestadorTomada from '../../../lessons/m07/TestadorTomada';
+import Part3D from '../../../lessons/m02/Part3D.astro';
+
+Você comprou uma fritadeira elétrica nova, chegou em casa e o plugue não entra na tomada da cozinha. Os pinos dele são mais grossos que os furos. Na loja de material elétrico, o vendedor oferece um adaptador "que resolve". Antes de comprar, vale entender por que a fritadeira veio com esse plugue: ele está avisando que o aparelho puxa mais corrente do que aquela tomada foi feita para aguentar.
+
+Nesta aula você vai conhecer o padrão brasileiro de plugues e tomadas, o que existe dentro de uma tomada, como ligar os três fios no lugar certo e como conferir a ligação com um testador e com o multímetro. No fim, um caso real: a tomada do micro-ondas que esquentou até derreter.
+
+## O padrão brasileiro: NBR 14136
+
+Desde o começo da década de 2010, os plugues e as tomadas vendidos no Brasil seguem um padrão só, definido pela <Term id="nbr-14136">NBR 14136</Term>, baseada na norma internacional IEC 60906-1. A troca foi obrigatória e feita por etapas; antes dela, conviviam pinos chatos, pinos redondos de vários tamanhos e as tomadas "universais", que aceitavam quase tudo e seguravam mal quase tudo.
+
+<Figure
+  caption="Figura 1. As tomadas de 10 A e de 20 A são iguais por fora, a não ser pelo tamanho dos furos. Embaixo, os plugues: de dois pinos (sem terra) e de três pinos, de 10 A (pinos de 4,0 mm) e de 20 A (pinos de 4,8 mm). O pino do meio é o terra."
+  alt="Duas tomadas vistas de frente, de 10 A com furos menores e de 20 A com furos maiores, cada uma com três furos dentro de um rebaixo; e três plugues vistos de frente: dois pinos de 10 A, três pinos de 10 A e três pinos de 20 A, com o pino terra no meio, um pouco fora da linha dos outros dois."
+>
+  <TomadaPadrao />
+</Figure>
+
+O que o padrão define:
+
+- **Pinos redondos.** Dois pinos para a fase e o neutro, e um terceiro, no meio, um pouco fora da linha dos outros dois: o <Term id="aterramento">terra</Term>. Por estar fora da linha, o plugue de três pinos só entra num sentido.
+- **Dois ou três pinos.** Aparelhos com carcaça metálica, como geladeira, micro-ondas e máquina de lavar, vêm com três pinos, porque a carcaça precisa do terra. Aparelhos de isolação dupla (marcados com um quadrado dentro de outro), como muitos carregadores e secadores de cabelo, vêm com dois.
+- **Duas correntes.** Plugues e tomadas de **10 A**, com pinos de 4,0 mm de diâmetro, e de **20 A**, com pinos de 4,8 mm.
+- **O rebaixo.** A tomada tem uma cavidade em volta dos furos, que você vai ver daqui a pouco.
+
+### 10 A ou 20 A?
+
+O plugue de 20 A não entra na tomada de 10 A: o pino é grosso demais para o furo. O contrário funciona: o plugue de 10 A entra na tomada de 20 A. A tabela resume:
+
+| | Tomada de 10 A | Tomada de 20 A |
+|---|---|---|
+| Plugue de 10 A | Entra | Entra |
+| Plugue de 20 A | **Não entra** | Entra |
+
+A ideia é simples. Um aparelho que puxa até 10 A pode ser ligado em qualquer tomada; um que puxa mais que isso só entra numa tomada feita para a corrente dele. Para saber quanto um aparelho puxa, use a potência da etiqueta e a relação que você viu na aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />:
+
+$$
+I = \frac{P}{V}
+$$
+
+com $I$ a corrente em ampères (A), $P$ a potência em watts (W) e $V$ a tensão da tomada em volts (V). No limite de 10 A:
+
+$$
+P = V \times I = 127\,\text{V} \times 10\,\text{A} = 1.270\,\text{W} \qquad\qquad 220\,\text{V} \times 10\,\text{A} = 2.200\,\text{W}
+$$
+
+A fritadeira do começo da aula tem 1.500 W e é de 127 V: puxa $1.500 \div 127 \approx 11{,}8\,\text{A}$, acima de 10 A. Por isso veio com plugue de 20 A. A versão de 220 V do mesmo aparelho puxaria $1.500 \div 220 \approx 6{,}8\,\text{A}$, e o fabricante pode usar o plugue de 10 A.
+
+<Callout type="atencao" title="A tomada de 20 A não basta sozinha">
+Trocar a tomada de 10 A por uma de 20 A faz o plugue entrar, mas não deixa o circuito pronto para 20 A. Quem aguenta a corrente são os fios e o disjuntor do circuito, e eles precisam ser escolhidos para essa carga (aula <LinkAula id="m07-instalacoes/04-fios-e-cabos" />). Uma tomada de 20 A num circuito de fios finos é um convite para o fio esquentar dentro da parede.
+</Callout>
+
+### O rebaixo: o dedo não alcança
+
+Nas tomadas antigas, dava para encostar os dedos nos pinos do plugue enquanto ele ainda estava entrando, já com os pinos tocando os contatos. A tomada do padrão tem um **rebaixo**: o espelho em volta dos furos é afundado, e o corpo do plugue entra nessa cavidade.
+
+<Figure
+  caption="Figura 2. Corte de uma tomada na parede com um plugue entrando. Quando os pinos começam a tocar os contatos, a frente do plugue já está dentro do rebaixo e cobre o metal: o dedo não alcança os pinos energizados."
+  alt="Corte lateral de uma tomada embutida na parede, com o rebaixo na frente, os contatos de metal atrás dos furos e os bornes no fundo. Um plugue entra com o corpo já dentro do rebaixo e os pinos tocando os contatos; um dedo, por cima, fica do lado de fora."
+>
+  <TomadaRebaixo />
+</Figure>
+
+## Adaptadores, benjamins e extensões
+
+O plugue que não entra é um aviso, e os adaptadores servem justamente para calar o aviso. Os três casos mais comuns:
+
+- **Adaptador de três pinos para dois.** Ele recebe o plugue de três pinos e entra numa tomada antiga de dois furos. O aparelho funciona, mas **o terra ficou para trás**: a carcaça metálica deixou de estar ligada ao fio de proteção. Cortar o pino terra do plugue é o mesmo erro, com a diferença de que o adaptador pelo menos sai depois. O lugar certo para resolver é a tomada: trocar por uma do padrão, com o terra ligado.
+- **Adaptador de 20 A para 10 A.** Deixa um plugue de 20 A entrar numa tomada de 10 A. É exatamente o que o padrão quis impedir: um aparelho de mais de 10 A numa tomada e, muitas vezes, num circuito que não foram feitos para ele.
+- **Benjamim (o "T") e régua de tomadas.** As correntes dos aparelhos ligados nele **se somam** e passam todas pelo mesmo plugue e pelos mesmos contatos da tomada da parede. Uma chaleira de 1.200 W e uma sanduicheira de 750 W, juntas em 127 V, puxam $1.950 \div 127 \approx 15{,}4\,\text{A}$ por um benjamim de 10 A.
+
+E as extensões finas esquentam pelo mesmo motivo que você viu na aula <LinkAula id="m01-eletricidade-do-zero/04-lei-de-ohm" />: corrente alta num fio com resistência demais. Extensão, régua e benjamim têm a corrente máxima escrita no corpo. Some as potências dos aparelhos antes de ligar, e nunca use extensão para aparelhos de aquecimento, como aquecedor, ferro de passar ou fritadeira, de forma permanente.
+
+## O que tem dentro de uma tomada
+
+Uma tomada de parede é um conjunto de peças encaixadas, e cada uma tem um papel na segurança.
+
+<Part3D
+  part="outlet-nbr14136"
+  props={{ rating: 10 }}
+  explode
+  annotations
+  alt="Conjunto de tomada desmontado, da frente para o fundo: a placa (espelho), o módulo da tomada com o rebaixo e os três furos na frente e os três bornes de parafuso atrás, o suporte que segura o módulo e a caixa 4×2 embutida na parede, de onde saem os fios da fase, do neutro e do terra."
+  caption="Figura 3. A tomada desmontada: placa, módulo, suporte e a caixa 4×2 na parede."
+>
+  <TomadaExplodida />
+</Part3D>
+
+- **Placa (espelho).** O acabamento da frente. Encaixa no suporte e cobre a caixa.
+- **Módulo.** A tomada propriamente dita: um corpo de plástico isolante e resistente ao calor, com o rebaixo na frente. Dentro dele ficam os **contatos**, lâminas de latão ou de bronze dobradas como molas, que abraçam os pinos do plugue. A pressão dessa mola é o que garante um bom contato elétrico.
+- **Bornes.** Atrás do módulo, um para cada fio. O <Term id="borne">borne</Term> pode ser de parafuso, que aperta o fio contra uma chapa, ou de engate rápido, em que o fio rígido entra num furo e uma mola o prende.
+- **Suporte.** A moldura que segura um, dois ou três módulos e é parafusada na caixa.
+- **<Term id="caixa-4x2">Caixa 4×2</Term>.** A caixinha embutida na parede, por onde chegam os fios dentro dos eletrodutos.
+
+## A ligação correta
+
+Três fios chegam à caixa de uma tomada de 127 V: a <Term id="fase">fase</Term>, o <Term id="neutro">neutro</Term> e o terra (o condutor de proteção). Pela NBR 5410, o neutro é azul-claro e o terra é verde-amarelo ou verde; a fase não tem uma cor obrigatória, e vermelho, preto e marrom são comuns. Em instalações antigas, as cores nem sempre foram respeitadas: confie no instrumento, não na cor.
+
+<Figure
+  caption="Figura 4. Em cima, a tomada vista por trás: o terra no borne do meio, ligado ao furo do terra; a fase e o neutro nos bornes laterais. Embaixo, três jeitos de um fio ficar no borne: todo o cobre dentro e a isolação encostando (certo), cobre sobrando para fora (errado) e isolação presa no lugar do cobre (errado)."
+  alt="Parte de trás de uma tomada com três bornes de parafuso: o fio terra verde e amarelo no borne do meio e os fios de fase e de neutro nos bornes laterais. Abaixo, três detalhes de um fio num borne: certo, com o cobre todo dentro; errado, com cobre exposto para fora; errado, com a isolação presa no borne."
+>
+  <TomadaLigacao />
+</Figure>
+
+O que importa, nesta ordem:
+
+1. **O terra no borne do terra.** É o borne ligado ao furo do meio, marcado com o símbolo ⏚ ou com a letra T. Nunca a fase, nunca o neutro.
+2. **Fase e neutro nos bornes laterais.** Como o plugue de dois pinos entra nos dois sentidos, nenhum aparelho pode depender de qual furo lateral recebe a fase. Mesmo assim, muitos instaladores mantêm uma convenção (a fase sempre do mesmo lado), e vale seguir a da casa: a próxima pessoa que abrir a tomada agradece.
+3. **Fios bem apertados e sem cobre exposto.** Desencape só o que o borne pede (muitas tomadas trazem a medida gravada atrás), coloque todo o cobre dentro do borne e aperte. Depois, puxe o fio com a mão: ele não pode sair.
+
+### Tomada de 127 V e de 220 V
+
+Numa instalação 127/220 V, a tomada comum recebe uma fase e o neutro, com 127 V entre eles. A tomada de 220 V recebe **duas fases** e o terra, sem neutro: 220 V entre as fases e cerca de 127 V de cada uma para o terra. Em cidades com rede 220/380 V, a tomada comum já tem 220 V entre fase e neutro. Os sistemas estão na aula <LinkAula id="m06-corrente-alternada/07-monofasico-bifasico-e-trifasico" />.
+
+Por fora, a tomada de 220 V é igual à de 127 V. Por isso ela precisa de uma etiqueta (ou de uma placa de outra cor): um aparelho só de 127 V ligado nela recebe quase o dobro da tensão e queima.
+
+### Quantas tomadas e onde
+
+A NBR 5410 pede um número mínimo de tomadas em cada cômodo, conforme o tamanho e o uso dele, e mais tomadas onde há mais aparelhos, como na cozinha e na área de serviço. Ela também separa as **tomadas de uso geral**, onde se liga qualquer coisa, das <Term id="tomada-de-uso-especifico">tomadas de uso específico</Term>, previstas para um aparelho de potência alta, como forno, lava-louças ou ar-condicionado, com circuito próprio no quadro. A altura de cada tomada segue o uso: baixas atrás dos móveis, mais altas em cima da bancada da cozinha. Os detalhes e as contas desses circuitos são assunto de projeto, e o projeto é de um eletricista ou engenheiro.
+
+## Explore: o testador de tomada e o multímetro
+
+O <Term id="testador-de-tomada">testador de tomada</Term> é um plugue com três luzes: cada uma fica entre dois furos e acende quando há tensão entre eles. O multímetro faz as mesmas três medidas com números, como na aula <LinkAula id="m03-medicoes/02-medindo-tensao" />.
+
+<TestadorTomada client:visible />
+
+**Tarefas:**
+
+1. Comece pela **ligação correta**. Anote quais luzes acendem e as três leituras do multímetro.
+2. Passe pelas outras ligações. Em quais delas o aparelho **funciona normalmente**, e mesmo assim a pessoa corre risco?
+3. Compare a **ponte do neutro para o terra** com a ligação correta. O testador consegue ver a diferença?
+4. Escolha a **fase no pino terra**. O que acontece com a carcaça metálica do aparelho?
+
+Na tarefa 2, o terra ausente e a ponte do neutro para o terra deixam o aparelho funcionando sem nenhum sinal de problema. Na tarefa 3, o testador acende as mesmas luzes da ligação correta: ele não enxerga a ponte. O multímetro também não ajuda muito, porque a diferença entre "perto de 0 V" e "0 V" é pequena demais para concluir algo. Essa gambiarra só aparece abrindo a tomada. E na tarefa 4 está a pior ligação de todas: o pino que deveria proteger leva a fase até a carcaça de qualquer aparelho ligado ali.
+
+Repare também que um furo **solto** não é um furo sem tensão. Com o neutro interrompido, a tomada parece morta, mas a fase continua chegando ao furo F. E o multímetro num fio solto mostra a <Term id="tensao-fantasma">tensão fantasma</Term>, um valor que não quer dizer nada.
+
+## O mau contato: calor onde ninguém vê
+
+Agora, a parte que derrete tomadas. Todo contato elétrico tem uma pequena resistência. Num contato bom, bem apertado, ela é de milésimos de ohm. Num contato **frouxo**, oxidado ou com a mola da tomada cansada, ela sobe para décimos de ohm. Parece pouco, mas a corrente inteira do aparelho passa por ali, e a potência que vira calor no contato é
+
+$$
+P = I^2 \times R
+$$
+
+com $P$ em watts, $I$ a corrente do aparelho em ampères e $R$ a resistência do contato em ohms. É o <Term id="efeito-joule">efeito Joule</Term>, concentrado num ponto do tamanho de um grão de arroz.
+
+### Exemplo resolvido: o contato frouxo do micro-ondas
+
+Um micro-ondas puxa cerca de 1.400 W da rede de 127 V (valor típico: confira na etiqueta do seu). O contato entre o pino e a tomada ficou frouxo, com 0,1 Ω (valor ilustrativo). Quanto calor sai do contato?
+
+1. A corrente do aparelho: $I = P / V = 1.400 \div 127 \approx 11\,\text{A}$.
+2. O calor no contato: $P = I^2 \times R = 11^2 \times 0{,}1 \approx 12\,\text{W}$.
+3. Com um contato bom, de 0,005 Ω: $11^2 \times 0{,}005 \approx 0{,}6\,\text{W}$, vinte vezes menos.
+
+Doze watts parecem pouco perto dos 1.400 W do aparelho, mas eles saem de um ponto minúsculo, cercado de plástico, que não tem como se livrar do calor. O metal oxida, a resistência sobe, o ponto esquenta mais, e o ciclo termina com plástico escurecido e derretido. E repare na corrente: com ou sem mau contato, ela é praticamente a mesma. **O disjuntor não tem como perceber o mau contato.**
+
+<Simulation circuit="m07/tomada-mau-contato" instruments={['multimetro']} autoplay />
+
+**Tarefa:** com o contato bom, veja a corrente do micro-ondas e o calor no contato. Depois troque o contato para **frouxo** e para **carbonizado**. O que acontece com a corrente? E com o calor? O disjuntor desarma?
+
+Na simulação, a corrente fica perto de 11 A nos três casos (11,2 A com o contato bom; ela cai um pouco quando o contato piora). O calor no contato vai de 0,6 W para 12,4 W com o contato frouxo, e para quase 58 W com o contato carbonizado, e o disjuntor de 20 A continua ligado o tempo todo.
+
+<RealCase title="A tomada do micro-ondas esquentou e derreteu">
+
+Numa cozinha, o micro-ondas começa a desligar sozinho no meio do uso. Dias depois, aparece um cheiro de plástico queimado, e o plugue sai da tomada com um dos pinos escurecido e a tomada com a borda derretida. O disjuntor nunca desarmou.
+
+O que costuma estar por trás, sozinho ou junto:
+
+- **Contatos frouxos.** Depois de anos de tira e põe, a mola dos contatos perde a pressão. Um plugue que entra "folgado" ou fica pendurado é um sinal.
+- **Borne mal apertado.** O fio atrás da tomada pode estar frouxo no parafuso, ou com fios quebrados na ponta. O calor aparece do mesmo jeito, só que escondido na caixa.
+- **Plugue de 10 A num aparelho de mais de 10 A.** Acontece quando alguém troca o plugue original de 20 A por um de 10 A "para caber" na tomada.
+- **Benjamim ou extensão.** Micro-ondas, cafeteira e torradeira no mesmo benjamim somam as correntes num contato só.
+
+O conserto é trocar a tomada **e** o plugue danificados (um pino oxidado estraga a tomada nova), conferir a ponta dos fios e o aperto dos bornes, e verificar se a tomada e o circuito são adequados à corrente do aparelho. Se o fio atrás da tomada também estiver escurecido ou com a isolação ressecada, o problema pode ir além da tomada, e é hora de chamar um eletricista.
+
+</RealCase>
+
+## Na prática: trocar uma tomada
+
+Trocar uma tomada é um serviço simples, mas só é seguro na ordem certa. O resumo:
+
+<Steps>
+  <Step title="Desligue e sinalize">
+    Desligue o disjuntor do circuito da tomada (use um abajur ligado nela para achar o disjuntor certo), prenda-o desligado com fita e deixe um aviso no quadro.
+  </Step>
+  <Step title="Teste a ausência de tensão">
+    Confira o instrumento numa tomada que está funcionando. Depois meça a tomada em que vai mexer, nos três pares de furos e, já aberta, em todos os fios da caixa. Volte a conferir o instrumento na tomada boa.
+  </Step>
+  <Step title="Identifique os fios">
+    Fotografe a ligação, etiquete cada fio e solte a tomada velha. Pontas escurecidas indicam mau contato: corte e desencape de novo.
+  </Step>
+  <Step title="Ligue a tomada nova">
+    Terra no borne do terra, fase e neutro nos bornes laterais (seguindo a convenção da casa). Desencape a medida certa, aperte e puxe cada fio para conferir.
+  </Step>
+  <Step title="Feche, religue e teste">
+    Acomode os fios na caixa sem esmagar, fixe o módulo e a placa, religue o disjuntor e teste a tomada com o testador ou com o multímetro antes de usar.
+  </Step>
+</Steps>
+
+O passo a passo completo, para seguir com a tomada na sua frente, está no modo oficina:
+
+<Workshop id="trocar-tomada" />
+
+## Erros comuns e segurança
+
+- **Mexer com o disjuntor ligado** "porque é só uma tomada". O procedimento seguro vale para qualquer serviço na rede (aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />), e a tomada pode ter fios de mais de um circuito.
+- **Cortar o pino terra, usar adaptador de três para dois pinos ou ligar o neutro no borne do terra.** Os três anulam a proteção do terra, e o último ainda engana o testador.
+- **Usar adaptador de 20 A para 10 A ou lixar o pino do plugue.** O aparelho passa a usar uma tomada, e às vezes um circuito, que não foi feita para a corrente dele.
+- **Pendurar vários aparelhos de aquecimento num benjamim ou numa extensão.** As correntes se somam no mesmo contato.
+- **Deixar cobre exposto fora do borne, ou prender a isolação no lugar do cobre.** O primeiro é risco de choque e de curto; o segundo, de mau contato.
+- **Ignorar tomada quente, plugue escurecido ou cheiro de queimado.** O disjuntor não percebe o mau contato: quem percebe é você.
+- **Confiar só no testador.** Ele não vê tudo, e não mede o valor da tensão. Na dúvida, multímetro; com qualquer leitura estranha, eletricista.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'O plugue de 20 A de uma fritadeira de 127 V não entra na tomada de 10 A da cozinha. Qual é a solução certa?',
+      options: [
+        {
+          text: 'Ligar a fritadeira numa tomada de 20 A, num circuito com fios e disjuntor escolhidos para essa corrente',
+          correct: true,
+          feedback:
+            'O plugue de 20 A avisa que o aparelho puxa mais de 10 A. A tomada e o circuito precisam ser feitos para isso.',
+        },
+        {
+          text: 'Usar um adaptador de 20 A para 10 A',
+          feedback:
+            'O adaptador faz o plugue entrar, mas o aparelho continua puxando mais de 10 A por uma tomada de 10 A. É o que o padrão quis impedir.',
+        },
+        {
+          text: 'Trocar o plugue da fritadeira por um de 10 A',
+          feedback:
+            'O plugue de 10 A não foi feito para a corrente da fritadeira. É um caminho comum para o mau contato e para a tomada derretida.',
+        },
+        {
+          text: 'Só trocar a tomada de 10 A por uma de 20 A, sem olhar o resto',
+          feedback:
+            'A tomada de 20 A faz o plugue entrar, mas quem aguenta a corrente são os fios e o disjuntor do circuito. Eles precisam ser conferidos.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Um aquecedor de 2.000 W é ligado em 127 V. Quanto ele puxa, em ampères?',
+      answer: 15.75,
+      tolerance: 0.03,
+      unit: 'A',
+      explanation:
+        'I = P/V = 2.000 W ÷ 127 V ≈ 15,7 A. Acima de 10 A: o aquecedor precisa de plugue e tomada de 20 A.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Se a casa não tem fio terra, pode-se cortar o pino terra do plugue, porque ele não faria nada mesmo.',
+      answer: false,
+      explanation:
+        'Cortar o pino tira a proteção de vez, mesmo depois que o terra for instalado. O certo é instalar o terra e trocar as tomadas antigas.',
+    },
+    {
+      type: 'associar',
+      prompt:
+        'Associe o que um testador de tomada mostra (as luzes acesas, entre os furos indicados) à ligação.',
+      pairs: [
+        ['F–N e F–T acesas', 'Ligação correta (ou ponte do neutro no terra)'],
+        ['Só F–N acesa', 'Terra ausente'],
+        ['F–N e N–T acesas', 'Fase e neutro trocados'],
+        ['F–T e N–T acesas', 'Fase no pino terra'],
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'A tomada do micro-ondas esquenta e escurece, mas o disjuntor nunca desarma. Por quê?',
+      options: [
+        {
+          text: 'Porque o mau contato aquece o ponto, mas a corrente continua praticamente a mesma',
+          correct: true,
+          feedback:
+            'O calor vem de P = I² × R no contato. A corrente do circuito quase não muda, e o disjuntor não tem o que perceber.',
+        },
+        {
+          text: 'Porque o disjuntor está com defeito',
+          feedback:
+            'Pode até estar, mas não é preciso: com um mau contato, a corrente é a normal do aparelho, e um disjuntor bom também não desarma.',
+        },
+        {
+          text: 'Porque o micro-ondas está em curto',
+          feedback:
+            'Um curto puxaria uma corrente enorme e o disjuntor desarmaria na hora. Aquecimento sem desarme é sinal de mau contato.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um aparelho puxa 10 A por um contato frouxo de 0,2 Ω. Quantos watts viram calor no contato?',
+      answer: 20,
+      tolerance: 0.02,
+      unit: 'W',
+      explanation: 'P = I² × R = 10² × 0,2 = 100 × 0,2 = 20 W, concentrados num ponto minúsculo.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem segura os passos para trocar uma tomada.',
+      items: [
+        'Desligar o disjuntor do circuito e sinalizar o quadro',
+        'Testar o instrumento numa tomada energizada',
+        'Confirmar a ausência de tensão em todos os fios da caixa',
+        'Ligar o terra, a fase e o neutro na tomada nova',
+        'Fechar, religar o disjuntor e testar a tomada',
+      ],
+      explanation:
+        'Primeiro desligar e impedir que alguém religue; depois provar que o instrumento funciona e que não há tensão; só então mexer nos fios; e testar a tomada antes de usar.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O padrão brasileiro (**NBR 14136**) tem pinos redondos, o **terra no meio**, fora da linha dos outros dois, e um **rebaixo** que impede o dedo de alcançar os pinos energizados.
+- Plugues de **10 A** têm pinos de 4,0 mm e os de **20 A**, de 4,8 mm. O de 20 A não entra na tomada de 10 A porque avisa que o aparelho puxa mais de 10 A (mais de 1.270 W em 127 V).
+- Adaptadores que derrubam o terra ou o limite de 10 A, benjamins e extensões sobrecarregadas desfazem a proteção que o padrão criou.
+- Na ligação, o que importa: **terra no borne do terra**, fase e neutro nos laterais seguindo a convenção da casa, fios bem apertados e sem cobre exposto.
+- O **testador de tomada** e o multímetro conferem a ligação, mas o testador não vê tudo (a ponte do neutro no terra passa como correta).
+- O **mau contato** vira calor ($P = I^2 R$) sem mudar a corrente: o disjuntor não percebe, e a tomada derrete.
+
+Na próxima aula, a luz: interruptor simples, paralelo e intermediário, e por que o interruptor corta a fase: <LinkAula id="m07-instalacoes/06-interruptores" />.

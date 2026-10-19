@@ -1,0 +1,160 @@
+---
+/*
+ * 07.7: how a lamp holder with an E27 screw is wired. The phase goes through
+ * the switch and arrives, as the "retorno", at the central contact at the
+ * bottom of the holder; the neutral goes to the screw shell. With the switch
+ * off, nothing on the lamp is at the phase.
+ */
+const threads = [139, 147, 155, 163];
+---
+
+<svg viewBox="0 0 360 262" width="360" height="262" class="fig" aria-hidden="true">
+  <rect x="8" y="22" width="62" height="96" rx="6" class="box" />
+  <text x="39" y="40" class="title">
+    Quadro
+  </text>
+  <circle cx="58" cy="62" r="4" class="pin" />
+  <text x="44" y="66" class="lbl end">
+    F
+  </text>
+  <circle cx="58" cy="98" r="4" class="pin" />
+  <text x="44" y="102" class="lbl end">
+    N
+  </text>
+
+  <!-- Phase to the switch, then the retorno to the central contact. -->
+  <path d="M62 62 H128" class="wire fase" />
+  <text x="95" y="54" class="lbl fase-t">
+    fase
+  </text>
+  <circle cx="132" cy="62" r="4" class="pin" />
+  <path d="M132 62 L160 46" class="blade" />
+  <circle cx="166" cy="62" r="4" class="pin" />
+  <text x="150" y="88" class="lbl">
+    interruptor
+  </text>
+  <path d="M170 62 H340 V236 H280 V214" class="wire fase" />
+  <text x="336" y="252" class="lbl end fase-t">
+    retorno: a fase depois do interruptor
+  </text>
+
+  <!-- Neutral to the screw shell. -->
+  <path d="M62 98 H112 V172 H262" class="wire neutro" />
+  <text x="118" y="190" class="lbl start neutro-t">
+    neutro
+  </text>
+
+  <!-- The lamp, base down. -->
+  <path
+    d="M266 134 C 266 122 238 112 238 86 A 42 42 0 1 1 322 86 C 322 112 294 122 294 134 Z"
+    class="bulb"
+  />
+  <rect x="262" y="134" width="36" height="40" rx="3" class="shell" />
+  {threads.map((y) => (
+    <path d={`M262 ${y} L298 ${y + 5}`} class="thread" />
+  ))}
+  <path d="M266 174 H294 L288 186 H272 Z" class="insulator" />
+  <rect x="274" y="186" width="12" height="8" rx="2" class="tip" />
+  <path d="M280 194 V214" class="wire fase" />
+
+  <text x="226" y="152" class="lbl end strong">
+    rosca
+  </text>
+  <text x="226" y="167" class="lbl end">
+    (neutro)
+  </text>
+  <path d="M230 158 H258" class="leader" />
+  <text x="226" y="212" class="lbl end strong">
+    contato central
+  </text>
+  <text x="226" y="227" class="lbl end">
+    (fase, pelo interruptor)
+  </text>
+  <path d="M230 214 L270 192" class="leader" />
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .box {
+    fill: var(--surface-2);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .pin {
+    fill: var(--fg);
+    stroke: none;
+  }
+  .wire {
+    stroke-width: 3;
+  }
+  .fase {
+    stroke: var(--danger);
+  }
+  .neutro {
+    stroke: var(--info);
+  }
+  .blade {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .bulb {
+    fill: color-mix(in oklab, var(--warning) 14%, var(--bg));
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .shell {
+    fill: color-mix(in oklab, var(--fg-muted) 30%, var(--surface));
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .thread {
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+  }
+  .insulator {
+    fill: var(--fg);
+    stroke: none;
+  }
+  .tip {
+    fill: var(--copper);
+    stroke: none;
+  }
+  .leader {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+  }
+  .strong {
+    fill: var(--fg);
+    font-weight: 700;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .fase-t {
+    fill: var(--danger);
+  }
+  .neutro-t {
+    fill: var(--info);
+  }
+</style>
