@@ -161,7 +161,8 @@ describe('9.3 ripple formula against the simulation', () => {
       expect(estimate).toBeCloseTo(k.expected, 1);
       expect(estimate).toBeGreaterThan(out.pp);
     }
-  });
+    // Three full simulations: about 4 s alone, more under CI load.
+  }, 30_000);
 
   it('worked example: 2.778 µF for 0,5 A and 1,5 V; 1,26 V with 3.300 µF; peak 15,4 V', () => {
     expect((0.5 / (120 * 1.5)) * 1e6).toBeCloseTo(2778, 0);
