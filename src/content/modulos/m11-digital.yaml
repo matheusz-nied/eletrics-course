@@ -1,0 +1,6 @@
+id: m11-digital
+numero: 11
+parte: 3
+titulo: Eletrônica digital
+resumo: Níveis lógicos, portas, pull-up e debounce, flip-flops e contadores, o 555 e a conversão entre o analógico e o digital. Como um circuito decide, lembra e conta, da entrada da central do portão ao pisca-pisca.
+icone: logica

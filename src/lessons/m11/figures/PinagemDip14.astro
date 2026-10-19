@@ -1,0 +1,103 @@
+---
+/* 11.2: pinout of a quad two-input gate in a DIP-14 package (74HC00, 74HC08,
+   74HC32, 74HC86), seen from the top with the notch on the left: pin 1 at
+   the bottom left, numbering counterclockwise. */
+const names: Record<number, string> = {
+  1: '1A', 2: '1B', 3: '1Y', 4: '2A', 5: '2B', 6: '2Y', 7: 'GND',
+  8: '3Y', 9: '3A', 10: '3B', 11: '4Y', 12: '4A', 13: '4B', 14: 'VCC',
+};
+const px = (p: number) => (p <= 7 ? 150 + (p - 1) * 50 : 150 + (14 - p) * 50);
+const kind = (p: number) => (p === 7 ? 'gnd' : p === 14 ? 'vcc' : /Y$/.test(names[p]!) ? 'out' : 'in');
+const pins = Array.from({ length: 14 }, (_, k) => k + 1);
+---
+
+<svg viewBox="0 0 640 290" width="640" height="290" class="fig" aria-hidden="true">
+  {pins.map((p) => {
+    const x = px(p);
+    const bottom = p <= 7;
+    return (
+      <g>
+        <rect x={x - 6} y={bottom ? 200 : 62} width="12" height="18" class="leg" />
+        <text x={x} y={bottom ? 238 : 54} class="num">
+          {p}
+        </text>
+        <text x={x} y={bottom ? 256 : 36} class={`pin ${kind(p)}`}>
+          {names[p]}
+        </text>
+      </g>
+    );
+  })}
+  <rect x="112" y="80" width="376" height="120" rx="6" class="body" />
+  <path d="M112 124A16 16 0 0 1 112 156" class="notch" />
+  <circle cx="136" cy="182" r="5" class="dimple" />
+  <text x="300" y="136" class="code">74HC08</text>
+  <text x="300" y="158" class="sub">quatro portas E de duas entradas</text>
+  <text x="300" y="282" class="legend">
+    Vista de cima, chanfro à esquerda: pino 1 embaixo à esquerda, contagem no sentido anti-horário.
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .body {
+    fill: #2b2b2e;
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .notch {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .dimple {
+    fill: #1c1c1f;
+    stroke: #55555a;
+  }
+  .leg {
+    fill: #c9cbd0;
+    stroke: var(--fg-muted);
+  }
+  .code {
+    fill: #e8e8ea;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .sub {
+    fill: #b5b5ba;
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .num {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .pin {
+    font-size: 13px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .in {
+    fill: var(--info);
+  }
+  .out {
+    fill: var(--success);
+  }
+  .vcc {
+    fill: var(--danger);
+  }
+  .gnd {
+    fill: var(--fg);
+  }
+  .legend {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+</style>

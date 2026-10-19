@@ -1,0 +1,89 @@
+---
+/* 11.2: logic with switches. Two switches in series light the lamp only if
+   A and B are closed (E); two in parallel light it if A or B is closed (OU). */
+const sw = (x: number, y: number, label: string) => `
+  <circle cx="${x}" cy="${y}" r="3" class="dot"/>
+  <circle cx="${x + 30}" cy="${y}" r="3" class="dot"/>
+  <path d="M${x} ${y}L${x + 26} ${y - 12}" class="blade"/>
+  <text x="${x + 15}" y="${y + 20}" class="lab">${label}</text>`;
+const lamp = (x: number, y: number) => `
+  <circle cx="${x}" cy="${y}" r="13" class="lampb"/>
+  <path d="M${x - 9} ${y - 9}L${x + 9} ${y + 9}M${x + 9} ${y - 9}L${x - 9} ${y + 9}" class="line"/>`;
+const battery = (x: number, y: number) => `
+  <path d="M${x - 12} ${y - 4}H${x + 12}M${x - 7} ${y + 4}H${x + 7}" class="bat"/>
+  <text x="${x - 18}" y="${y - 2}" class="lab end">+</text>`;
+---
+
+<svg viewBox="0 0 640 210" width="640" height="210" class="fig" aria-hidden="true">
+  <text x="150" y="20" class="title">E: chaves em série</text>
+  <text x="480" y="20" class="title">OU: chaves em paralelo</text>
+  <g>
+    <path d="M40 60H70M100 60H140M170 60H230V97M230 123V180H40V114M40 106V60" class="line" />
+    <Fragment set:html={sw(70, 60, 'A')} />
+    <Fragment set:html={sw(140, 60, 'B')} />
+    <Fragment set:html={lamp(230, 110)} />
+    <Fragment set:html={battery(40, 110)} />
+    <text x="150" y="202" class="note">acende só se A E B estiverem fechadas</text>
+  </g>
+  <g transform="translate(330 0)">
+    <path
+      d="M40 60H90M120 60H170V97M170 123V180H40V114M40 106V60M60 60V110H90M120 110H150V60"
+      class="line"
+    />
+    <Fragment set:html={sw(90, 60, 'A')} />
+    <Fragment set:html={sw(90, 110, 'B')} />
+    <Fragment set:html={lamp(170, 110)} />
+    <Fragment set:html={battery(40, 110)} />
+    <text x="150" y="202" class="note">acende se A OU B (ou as duas) estiverem fechadas</text>
+  </g>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .fig :global(.line) {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .fig :global(.blade) {
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+  .fig :global(.dot) {
+    fill: var(--fg);
+  }
+  .fig :global(.bat) {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .fig :global(.lampb) {
+    fill: color-mix(in oklab, var(--warning) 25%, var(--bg));
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .fig :global(.lab) {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .fig :global(.end) {
+    text-anchor: end;
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 15px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+</style>

@@ -1,0 +1,293 @@
+---
+titulo: Portas lógicas
+modulo: m11-digital
+ordem: 2
+nivel: B
+duracaoMin: 35
+objetivos:
+  - Reconhecer as portas E, OU, NÃO, NÃO-E, NÃO-OU e OU exclusivo pelo símbolo e pela tabela-verdade
+  - Montar a tabela-verdade de uma condição com várias entradas
+  - Usar a álgebra booleana e o teorema de De Morgan para escrever e simplificar uma condição
+  - Ler a pinagem de um chip de portas lógicas e ligá-lo corretamente
+  - Traduzir uma regra de segurança do portão ("só fecha se a fotocélula estiver livre") em portas lógicas
+prerequisitos:
+  - m11-digital/01-analogico-e-digital
+  - m04-passivos/07-chaves-botoes-e-reles
+tags: [porta lógica, E, OU, NÃO, NAND, NOR, XOR, tabela-verdade, álgebra booleana, De Morgan, 74HC08, 74HC00, fotocélula, portão]
+seguranca: baixa-tensao
+---
+
+import LogicaChaves from '../../../lessons/m11/figures/LogicaChaves.astro';
+import PinagemDip14 from '../../../lessons/m11/figures/PinagemDip14.astro';
+import PortasSimbolos from '../../../lessons/m11/figures/PortasSimbolos.astro';
+
+Você aperta o controle para fechar o portão, e ele começa a fechar. No meio do caminho, uma criança passa de bicicleta e corta o feixe da fotocélula: o portão para e volta a abrir. Ninguém precisou decidir nada. A central seguiu uma regra escrita em lógica: o motor só pode fechar se houver o comando **e** a fotocélula estiver livre **e** o portão ainda não tiver chegado ao fim.
+
+Regras assim, feitas de "e", "ou" e "não", estão em quase todo equipamento. Nesta aula você vai conhecer os circuitos que executam essas palavras, as **portas lógicas**, e aprender a escrever qualquer regra de sim e não com elas.
+
+## Decidir com chaves
+
+Antes de qualquer chip, dá para fazer lógica com chaves e uma lâmpada. Ligue duas chaves **em série**: a lâmpada só acende se a chave A **e** a chave B estiverem fechadas. Ligue as duas **em paralelo**: ela acende se A **ou** B estiver fechada (ou as duas). E um contato NF faz o **não**: a lâmpada acende quando o botão **não** está apertado.
+
+<Figure caption="Figura 1. Lógica com chaves. Em série, as duas precisam estar fechadas: é o E. Em paralelo, basta uma: é o OU." alt="Dois circuitos com bateria e lâmpada. No da esquerda, as chaves A e B estão em série, e a lâmpada só acende com as duas fechadas. No da direita, A e B estão em paralelo, e a lâmpada acende se qualquer uma estiver fechada.">
+  <LogicaChaves />
+</Figure>
+
+Os primeiros computadores eram feitos de relés ligados desse jeito, e os quadros de comando de máquinas ainda usam contatos em série e em paralelo (veja a partida com selo na aula <LinkAula id="m05-magnetismo/06-reles-e-contatores" />). Uma <Term id="porta-logica">porta lógica</Term> faz o mesmo papel com transistores, num chip, em bilionésimos de segundo e gastando quase nada. As entradas e a saída são tensões: 0 V para 0 e a alimentação para 1, como você viu na aula <LinkAula id="m11-digital/01-analogico-e-digital" />.
+
+## As seis portas
+
+O comportamento de uma porta cabe numa **<Term id="tabela-verdade">tabela-verdade</Term>**: uma linha para cada combinação das entradas, com a saída que a porta dá. Com duas entradas, são quatro combinações:
+
+| A | B | E (AND) | OU (OR) | OU exclusivo (XOR) | NÃO-E (NAND) | NÃO-OU (NOR) |
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| 0 | 0 | 0 | 0 | 0 | 1 | 1 |
+| 0 | 1 | 0 | 1 | 1 | 1 | 0 |
+| 1 | 0 | 0 | 1 | 1 | 1 | 0 |
+| 1 | 1 | 1 | 1 | 0 | 0 | 0 |
+
+Em palavras:
+
+- **E (AND):** saída 1 só quando **todas** as entradas são 1.
+- **OU (OR):** saída 1 quando **pelo menos uma** entrada é 1.
+- **NÃO (NOT)**, ou inversora: uma entrada só, e a saída é o contrário dela.
+- **NÃO-E (NAND):** um E seguido de um NÃO. Saída 0 só quando todas as entradas são 1.
+- **NÃO-OU (NOR):** um OU seguido de um NÃO. Saída 1 só quando todas as entradas são 0.
+- **OU exclusivo (XOR):** saída 1 quando as entradas são **diferentes**. É um "um ou outro, mas não os dois".
+
+<Figure caption="Figura 2. Os símbolos das seis portas. O formato curvo (ANSI) aparece em muitas folhas de dados e livros; o retangular (IEC), com o sinal da função dentro, é o do simulador do curso. A bolinha na saída indica a inversão." alt="Seis quadros, um por porta: E, OU, NÃO, NÃO-E, NÃO-OU e OU exclusivo. Em cada um, o símbolo ANSI à esquerda e o IEC à direita. ANSI: E em forma de D; OU com a frente pontuda e a traseira curva; NÃO como um triângulo com bolinha; NÃO-E e NÃO-OU iguais ao E e ao OU com uma bolinha na saída; OU exclusivo como o OU com uma curva a mais atrás. IEC: retângulos com &, ≥1, 1, & com bolinha, ≥1 com bolinha e =1.">
+  <PortasSimbolos />
+</Figure>
+
+No símbolo retangular, o sinal dentro da caixa diz a regra: **&** é o E; **≥1** quer dizer "pelo menos uma entrada em 1", o OU; **=1** quer dizer "exatamente uma em 1", o OU exclusivo; **1** é a porta que só repassa a entrada, e com a bolinha vira o NÃO.
+
+## Explore: cinco portas, as mesmas entradas
+
+No circuito abaixo, as entradas A e B alimentam ao mesmo tempo uma porta E, uma OU, uma OU exclusivo e uma NÃO-E. Uma porta NÃO recebe só a entrada A. Cada saída acende um LED. Os fios em nível 1 aparecem destacados nas portas.
+
+<Simulation circuit="m11/portas-basicas" height={460} />
+
+1. Com A e B em 0, quais LEDs acendem? Por que justo esses?
+2. Passe pelas quatro combinações de A e B e confira cada linha da tabela-verdade.
+3. Que combinação apaga a porta NÃO-E? E qual faz acender a OU exclusivo mas não a E?
+
+Com tudo em 0, acendem só a NÃO-E e a NÃO: as duas portas com bolinha dão 1 quando as entradas estão em 0. Com A = 1 e B = 0, acendem OU, OU exclusivo e NÃO-E, e a NÃO apaga. Com as duas em 1, a E acende e a OU exclusivo apaga, porque as entradas ficaram iguais. A NÃO-E só apaga nessa última combinação, quando a E acende: uma é sempre o contrário da outra.
+
+## Álgebra booleana: escrevendo as regras
+
+Para combinar portas sem desenhar tudo, usa-se a <Term id="algebra-booleana">álgebra booleana</Term>, criada pelo matemático inglês George Boole no século XIX. As variáveis só valem 0 ou 1, e as operações têm símbolos próprios:
+
+$$
+\text{E: } A \cdot B \qquad \text{OU: } A + B \qquad \text{NÃO: } \overline{A} \qquad \text{OU exclusivo: } A \oplus B
+$$
+
+O ponto é o E (muitas vezes omitido: $AB$), o "+" é o OU e a barra em cima é o NÃO. Cuidado: o "+" aqui não é soma. Em lógica, $1 + 1 = 1$, porque "verdadeiro ou verdadeiro" é verdadeiro.
+
+Algumas regras saem direto das tabelas:
+
+| Regra | Em palavras |
+|-------|-------------|
+| $A \cdot 0 = 0$ e $A \cdot 1 = A$ | Um E com 0 dá sempre 0; com 1, repassa a outra entrada |
+| $A + 1 = 1$ e $A + 0 = A$ | Um OU com 1 dá sempre 1; com 0, repassa a outra entrada |
+| $A \cdot \overline{A} = 0$ e $A + \overline{A} = 1$ | Algo não pode ser verdadeiro e falso ao mesmo tempo, e é sempre um dos dois |
+| $\overline{\overline{A}} = A$ | Dois NÃO se anulam |
+
+As duas primeiras explicam um truque muito usado: uma entrada de uma porta E funciona como **liberação**. Com ela em 1, o sinal da outra entrada passa; com ela em 0, a saída fica presa em 0. É exatamente o papel da fotocélula no portão.
+
+### O teorema de De Morgan
+
+O matemático Augustus De Morgan mostrou duas igualdades que aparecem o tempo todo em projetos:
+
+$$
+\overline{A \cdot B} = \overline{A} + \overline{B} \qquad\qquad \overline{A + B} = \overline{A} \cdot \overline{B}
+$$
+
+Em palavras: "não (A e B)" é o mesmo que "não A ou não B"; e "não (A ou B)" é o mesmo que "não A e não B". Pense no portão: "não é verdade que (a fotocélula está livre **e** o fim de curso está livre)" quer dizer "a fotocélula está bloqueada **ou** o portão chegou ao fim". Os dois jeitos dizem a mesma coisa, e quem projeta escolhe o que gasta menos portas.
+
+<DeepDive title="Com NÃO-E dá para fazer qualquer coisa">
+
+A porta NÃO-E é **universal**: qualquer circuito lógico pode ser montado só com ela.
+
+- **NÃO:** ligue as duas entradas juntas. $\overline{A \cdot A} = \overline{A}$.
+- **E:** uma NÃO-E seguida de uma NÃO (outra NÃO-E com as entradas juntas). $\overline{\overline{A \cdot B}} = A \cdot B$.
+- **OU:** inverta cada entrada e passe por uma NÃO-E. Por De Morgan, $\overline{\overline{A} \cdot \overline{B}} = A + B$.
+
+A NÃO-OU também é universal, pelo mesmo raciocínio. Isso tem uso prático: um único chip 74HC00, com quatro NÃO-E, resolve um circuito pequeno inteiro sem precisar comprar um chip de cada tipo. E o OU exclusivo cabe em quatro portas NÃO-E.
+
+</DeepDive>
+
+## Os chips de portas lógicas
+
+As portas vêm em chips com várias delas dentro. Os mais comuns são as famílias **74HC** (de 2 V a 6 V, ótima para 5 V e 3,3 V) e **CD4000** (de 3 V a 15 V, boa para circuitos de 12 V). Cada número é uma função: 74HC08 tem quatro portas E, 74HC32 quatro OU, 74HC86 quatro OU exclusivo, 74HC00 quatro NÃO-E, 74HC04 seis inversoras.
+
+<Model3D
+  part="ic-dip"
+  props={{ pins: 14, code: '74HC08' }}
+  annotations
+  caption="Um 74HC08 no encapsulamento DIP-14: quatro portas E num chip só. O chanfro e a marquinha redonda indicam o pino 1."
+/>
+
+<Figure caption="Figura 3. Pinagem dos chips com quatro portas de duas entradas, como o 74HC08. As entradas de cada porta são A e B, a saída é Y, e o número diz qual das quatro portas. A alimentação entra no pino 14 e o GND no 7." alt="Desenho de um chip DIP-14 visto de cima, com o chanfro à esquerda. Pinos de baixo, da esquerda para a direita: 1 1A, 2 1B, 3 1Y, 4 2A, 5 2B, 6 2Y, 7 GND. Pinos de cima, da direita para a esquerda: 8 3Y, 9 3A, 10 3B, 11 4Y, 12 4A, 13 4B, 14 VCC.">
+  <PinagemDip14 />
+</Figure>
+
+Os chips 74HC00, 74HC08, 74HC32 e 74HC86 têm essa mesma pinagem. O 74HC02 (NÃO-OU) é a exceção da família: as saídas ficam antes das entradas. Por isso, a regra de ouro é abrir a folha de dados antes de ligar. Os pinos de alimentação (VCC e GND) não aparecem nos símbolos das portas, mas precisam estar ligados: sem eles, o chip não funciona, ou funciona de um jeito estranho, alimentado pelas próprias entradas.
+
+## Exemplo resolvido: quando o portão pode fechar
+
+Vamos escrever a regra de fechamento da central em portas, com os sinais **como a central os recebe** (as aulas <LinkAula id="m16-portao/04-fim-de-curso-e-sensores" /> e <LinkAula id="m16-portao/05-seguranca-e-acessorios" /> mostram essas ligações):
+
+- **FECHAR** (C): 1 quando a central decidiu fechar.
+- **FOTO** (F): a fotocélula tem um contato NF que fica fechado para o GND com o feixe livre. A entrada tem um resistor que a puxa para 5 V. Feixe livre: 0. Pessoa no feixe: 1.
+- **FCF** (L), o fim de curso de fechamento: um contato que vai ao GND quando o ímã chega. Portão ainda aberto: 1. Portão encostado: 0.
+
+**Passo 1: a regra em palavras.** O motor fecha se houver o comando **e** **não** houver alguém no feixe **e** o portão **ainda não** tiver encostado.
+
+**Passo 2: a regra em álgebra.** "Não houver alguém no feixe" é $\overline{F}$. "Ainda não encostou" é $L = 1$, porque o sinal do fim de curso já é 1 com o portão aberto. Então:
+
+$$
+M = C \cdot \overline{F} \cdot L
+$$
+
+**Passo 3: a tabela-verdade.** Com três entradas há $2^3 = 8$ combinações. Só uma liga o motor:
+
+| C (fechar) | F (foto) | L (FCF) | M (motor fecha) |
+|:-:|:-:|:-:|:-:|
+| 0 | qualquer | qualquer | 0 |
+| 1 | 0 | 0 | 0 |
+| 1 | 0 | 1 | **1** |
+| 1 | 1 | 0 | 0 |
+| 1 | 1 | 1 | 0 |
+
+As quatro linhas com C = 0 foram juntadas na primeira: sem comando, o resto não importa.
+
+**Passo 4: as portas.** Uma porta NÃO faz $\overline{F}$. Uma porta E de duas entradas faz $C \cdot \overline{F}$, e uma segunda porta E junta o resultado com $L$. Portas E de três entradas também existem (74HC11), mas duas de duas entradas fazem o mesmo.
+
+**Passo 5: os chips.** Uma solução usa um 74HC04 (para a NÃO) e um 74HC08 (para as duas E), e sobram portas. Outra usa só um 74HC00: uma NÃO-E com as entradas juntas faz a NÃO, e cada E vira uma NÃO-E seguida de outra NÃO-E como inversora. São cinco portas, mais do que as quatro de um chip; por isso, na prática, o projetista fica com dois chips ou reescreve a regra.
+
+## Explore: a regra do portão
+
+O circuito abaixo é a regra do exemplo, com as entradas ligadas como na central: resistores de 10 kΩ e os contatos dos sensores. O LED verde é o motor fechando.
+
+<Simulation
+  circuit="m11/portao-fecha"
+  height={400}
+  instruments={[{ kind: 'multimetro', series: ['VFECHAR', 'VFOTO', 'VFCF'] }]}
+/>
+
+1. Dê o comando de fechar. O LED acende?
+2. Com o comando dado, ponha uma pessoa no feixe. O que acontece com a entrada FOTO e com o motor?
+3. Tire a pessoa do feixe e encoste o portão no fim de curso.
+4. Sem o comando, ponha e tire a pessoa do feixe. Alguma coisa muda no motor?
+
+Com o comando, o feixe livre e o portão aberto, o motor fecha. A pessoa no feixe abre o contato NF, a entrada FOTO vai a 5 V, a porta NÃO dá 0, e a porta E bloqueia o comando. Encostar o portão leva FCF a 0 V, e a segunda porta E bloqueia. Sem comando, o motor fica parado com qualquer combinação dos sensores: a primeira linha da tabela.
+
+Repare num detalhe de segurança do jeito como a fotocélula está ligada. Se o cabo dela se romper, o contato "abre" para sempre, a entrada vai a 5 V, e a central entende que tem alguém no feixe: o portão não fecha. Uma falha do sensor deixa o sistema no estado seguro. A aula <LinkAula id="m16-portao/05-seguranca-e-acessorios" /> explica por que nunca se deve anular essa entrada com um jumper.
+
+<RealCase title="Portas lógicas que você usa sem perceber">
+
+**O interruptor paralelo da escada é um OU exclusivo.** Com dois interruptores paralelos (os "three-way"), um embaixo e outro em cima, a lâmpada muda de estado quando você muda **qualquer um** dos dois. Chame de A e B a posição de cada interruptor: a lâmpada acende quando eles estão em posições diferentes (ou iguais, dependendo de como foram ligados). É a tabela do OU exclusivo, feita com dois contatos reversíveis e fios.
+
+**O alarme é um OU.** Sensor da porta OU sensor da janela OU sensor de presença: qualquer um dispara a sirene. Por isso, um sensor com defeito que fica sempre em 1 deixa o alarme tocando sem parar, e o técnico precisa olhar sensor por sensor.
+
+**A prensa de duas mãos é um E.** Prensas e guilhotinas industriais costumam exigir que o operador aperte dois botões, um com cada mão, para o golpe acontecer. É um E de segurança: as mãos ficam longe da ferramenta. Comandos bimanuais de verdade são mais rigorosos que uma porta E (exigem que os dois botões sejam apertados quase ao mesmo tempo), mas a ideia de partida é essa.
+
+**A central do portão faz tudo isso em programa.** Hoje, a regra de fechamento roda dentro do microcontrolador, como uma linha de código: `if (fechar && !foto && fcf)`. Os símbolos `&&` (e), `||` (ou) e `!` (não) das linguagens de programação são as mesmas portas desta aula. A aula <LinkAula id="m12-microcontroladores/02-maquinas-de-estado" /> mostra como a central organiza essas regras.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Deixar entradas soltas.** Uma entrada de porta CMOS sem nada ligado flutua e pode ler qualquer coisa (aula <LinkAula id="m11-digital/03-pull-up-pull-down-e-debounce" />). Nas portas que sobram num chip, ligue as entradas ao GND ou ao VCC.
+- **Esquecer a alimentação do chip.** O símbolo da porta não mostra VCC e GND, mas eles estão lá. E todo chip digital precisa de um capacitor de 100 nF entre VCC e GND, bem perto dos pinos, para segurar a tensão durante as trocas de nível.
+- **Pedir corrente demais da saída.** Uma saída 74HC aguenta acender um LED com uns 10 mA, mas não um relé, um motor ou uma lâmpada. Para isso use um transistor (aula <LinkAula id="m09-semicondutores/06-transistor-como-chave" />). Com muita corrente, a tensão da saída sai da faixa garantida e a porta seguinte pode ler errado.
+- **Confiar na pinagem de memória.** O 74HC02 tem as saídas em outro lugar. Confira sempre a folha de dados.
+- **Confundir o "+" lógico com soma.** Em álgebra booleana, $1 + 1 = 1$.
+- **Anular um sensor de segurança "para testar".** Um jumper que prende a entrada da fotocélula no nível de "feixe livre" transforma o E de segurança num fio. O portão passa a fechar em cima de quem estiver no caminho.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'associar',
+      prompt: 'Associe cada porta à condição em que a saída dela é 1.',
+      pairs: [
+        ['E (AND)', 'Todas as entradas em 1'],
+        ['OU (OR)', 'Pelo menos uma entrada em 1'],
+        ['OU exclusivo (XOR)', 'Entradas diferentes'],
+        ['NÃO-OU (NOR)', 'Todas as entradas em 0'],
+        ['NÃO-E (NAND)', 'Pelo menos uma entrada em 0'],
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Duas chaves ligadas em paralelo, alimentando uma lâmpada, fazem que operação lógica?',
+      options: [
+        {
+          text: 'OU',
+          correct: true,
+          feedback: 'Isso. Basta uma das chaves fechada para a corrente chegar à lâmpada.',
+        },
+        { text: 'E', feedback: 'O E é feito com as chaves em série: as duas precisam estar fechadas.' },
+        {
+          text: 'OU exclusivo',
+          feedback: 'Com as duas fechadas a lâmpada continua acesa, e o OU exclusivo daria 0.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Quantas linhas tem a tabela-verdade de uma condição com 4 entradas?',
+      answer: 16,
+      tolerance: 0,
+      explanation: 'Cada entrada dobra o número de combinações: 2⁴ = 16 linhas.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Pelo teorema de De Morgan, a que é igual "NÃO (A OU B)"?',
+      options: [
+        {
+          text: 'NÃO A E NÃO B',
+          correct: true,
+          feedback: 'Isso: o OU vira E, e cada entrada ganha o NÃO. Só dá 1 quando A e B são 0.',
+        },
+        {
+          text: 'NÃO A OU NÃO B',
+          feedback: 'Essa é a outra igualdade, a de "NÃO (A E B)".',
+        },
+        {
+          text: 'A E B',
+          feedback: 'Teste com A = B = 0: NÃO (0 OU 0) = 1, mas 0 E 0 = 0. As duas não são iguais.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Na regra M = C · F̄ · L do exemplo, se o cabo da fotocélula se romper, o portão não fecha.',
+      answer: true,
+      explanation:
+        'Com o cabo rompido, a entrada FOTO fica em 5 V (1), F̄ vira 0, e a porta E bloqueia o comando. A falha leva ao estado seguro.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Num 74HC08, você liga 5 V no pino 14, GND no pino 7 e as entradas nos pinos 1 e 2. Em que pino aparece a saída dessa porta?',
+      options: [
+        { text: 'Pino 3', correct: true, feedback: 'Isso: 1A e 1B nos pinos 1 e 2, saída 1Y no pino 3.' },
+        { text: 'Pino 8', feedback: 'O pino 8 é a saída 3Y, de outra porta.' },
+        { text: 'Pino 13', feedback: 'O pino 13 é a entrada 4B.' },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Portas lógicas fazem com transistores o que chaves em série (**E**) e em paralelo (**OU**) fazem com contatos. A **NÃO** inverte.
+- A **tabela-verdade** lista a saída para cada combinação das entradas; com $n$ entradas, são $2^n$ linhas.
+- **NÃO-E** e **NÃO-OU** são o E e o OU invertidos, e cada uma sozinha monta qualquer circuito. O **OU exclusivo** dá 1 quando as entradas são diferentes.
+- Na **álgebra booleana**, $A \cdot B$ é E, $A + B$ é OU, $\overline{A}$ é NÃO. **De Morgan**: $\overline{A \cdot B} = \overline{A} + \overline{B}$ e $\overline{A + B} = \overline{A} \cdot \overline{B}$.
+- Uma entrada de porta E serve como **liberação**: é assim que a fotocélula bloqueia o fechamento do portão. Ligue sempre VCC, GND, o capacitor de 100 nF e as entradas que sobram.
+
+Na próxima aula, você vai ver o que acontece com uma entrada que fica solta e com um botão que "quica": [pull-up, pull-down e debounce](../03-pull-up-pull-down-e-debounce/).
