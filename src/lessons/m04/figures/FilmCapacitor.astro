@@ -1,0 +1,76 @@
+---
+/* 04.3: polyester film capacitors: a green dipped one marked "2A104J" and a box one marked "104K 250 V". */
+---
+
+<svg viewBox="0 0 520 250" width="520" height="250" class="fig" aria-hidden="true">
+  <path d="M112 128 V200 M148 128 V200" class="lead" />
+  <path
+    d="M80 70 C80 50 96 44 130 44 C164 44 180 50 180 70 V112 C180 128 164 134 130 134 C96 134 80 128 80 112 Z"
+    class="green"
+  />
+  <text x="130" y="96" class="code">
+    2A104J
+  </text>
+  <text x="130" y="222" class="lbl">
+    poliéster encapsulado
+  </text>
+  <text x="130" y="240" class="small">
+    100 V, 100 nF, ±5 %
+  </text>
+
+  <path d="M350 132 V200 M410 132 V200" class="lead" />
+  <rect x="320" y="52" width="120" height="80" rx="5" class="box" />
+  <text x="380" y="86" class="code">
+    104K
+  </text>
+  <text x="380" y="112" class="code">
+    250 V
+  </text>
+  <text x="380" y="222" class="lbl">
+    filme em caixa
+  </text>
+  <text x="380" y="240" class="small">
+    250 V, 100 nF, ±10 %
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .lead {
+    stroke: var(--fg-subtle);
+    stroke-width: 3;
+  }
+  .green {
+    fill: color-mix(in oklab, var(--success) 45%, var(--surface));
+    stroke: var(--success);
+  }
+  .box {
+    fill: color-mix(in oklab, var(--danger) 35%, var(--surface));
+    stroke: var(--danger);
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 19px;
+    font-weight: 700;
+  }
+  .lbl {
+    font-weight: 700;
+    font-size: 14.5px;
+  }
+  .small {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+</style>

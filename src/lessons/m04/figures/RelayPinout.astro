@@ -1,0 +1,138 @@
+---
+/*
+ * 04.7: a common 5-pin PCB relay seen from above (what is printed on the
+ * case) and from below (where each pin is). Generic, no brand.
+ */
+---
+
+<svg viewBox="0 0 560 280" width="560" height="280" class="fig" aria-hidden="true">
+  <text x="140" y="24" class="title">
+    Visto de cima
+  </text>
+  <rect x="30" y="40" width="220" height="170" rx="10" class="case" />
+  <text x="140" y="78" class="print big">
+    RELÉ 12VDC
+  </text>
+  <text x="140" y="104" class="print">
+    10A 250VAC 10A 30VDC
+  </text>
+
+  <!-- printed diagram: coil and changeover contact -->
+  <g transform="translate(70 140)">
+    <rect x="0" y="12" width="26" height="34" class="sym" />
+    <path d="M0 46 L26 12" class="sym thin" />
+    <path d="M13 0 V12 M13 46 V58" class="sym" />
+    <path d="M30 29 H70" class="sym thin dash" />
+    <path d="M100 58 V44 L120 18" class="sym" />
+    <path d="M90 0 V14 M128 0 V14" class="sym" />
+    <circle cx="90" cy="16" r="2.4" class="dot" />
+    <circle cx="128" cy="16" r="2.4" class="dot" />
+  </g>
+
+  <text x="420" y="24" class="title">
+    Visto de baixo (pinos)
+  </text>
+  <rect x="320" y="40" width="200" height="170" rx="10" class="case under" />
+  <circle cx="356" cy="72" r="7" class="pin coil" />
+  <circle cx="356" cy="125" r="7" class="pin com" />
+  <circle cx="356" cy="178" r="7" class="pin coil" />
+  <circle cx="484" cy="72" r="7" class="pin" />
+  <circle cx="484" cy="178" r="7" class="pin" />
+
+  <text x="372" y="77" class="lbl start">
+    bobina
+  </text>
+  <text x="372" y="130" class="lbl start">
+    COM
+  </text>
+  <text x="372" y="183" class="lbl start">
+    bobina
+  </text>
+  <text x="468" y="77" class="lbl end">
+    NF
+  </text>
+  <text x="468" y="183" class="lbl end">
+    NA
+  </text>
+
+  <text x="280" y="244" class="note">
+    Um arranjo comum de pinos. Outros relés usam outro: confira sempre o desenho do
+  </text>
+  <text x="280" y="262" class="note">
+    próprio relé ou meça com o multímetro (veja o roteiro mais abaixo).
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .case {
+    fill: color-mix(in oklab, var(--info) 18%, var(--surface));
+    stroke: var(--info);
+    stroke-width: 2;
+  }
+  .case.under {
+    fill: color-mix(in oklab, var(--fg-subtle) 14%, var(--surface));
+    stroke: var(--fg-muted);
+  }
+  .sym {
+    stroke: var(--fg);
+    stroke-width: 1.8;
+  }
+  .sym.thin {
+    stroke-width: 1.2;
+  }
+  .sym.dash {
+    stroke-dasharray: 3 3;
+  }
+  .dot {
+    fill: var(--fg);
+  }
+  .pin {
+    fill: var(--bg);
+    stroke: var(--fg-muted);
+    stroke-width: 2.5;
+  }
+  .pin.coil {
+    stroke: var(--copper);
+  }
+  .pin.com {
+    stroke: var(--accent);
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .title {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .print {
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+  .print.big {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .lbl {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .note {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

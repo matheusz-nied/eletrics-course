@@ -1,0 +1,338 @@
+---
+titulo: Fusíveis e proteção
+modulo: m04-passivos
+ordem: 6
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Explicar como o fusível protege os fios e os aparelhos, e por que ele não protege contra choque
+  - Ler a marcação de um fusível de vidro e a cor de um fusível de lâmina
+  - Escolher entre fusível rápido e retardado conforme a carga
+  - Testar um fusível e decidir o que fazer quando ele queima de novo
+  - Reconhecer fusíveis térmicos e fusíveis rearmáveis
+prerequisitos:
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+  - m03-medicoes/04-resistencia-continuidade-e-diodo
+tags: [fusível, proteção, sobrecarga, curto-circuito, rápido, retardado, fusível de lâmina, fusível térmico, carro]
+seguranca: rede
+rascunho: false
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import GlassFuses from '../../../lessons/m04/figures/GlassFuses.astro';
+import BladeFuse from '../../../lessons/m04/figures/BladeFuse.astro';
+
+O som do carro apagou de repente. Na caixa de fusíveis, embaixo do painel, um fusível vermelho de 10 A está com a plaquinha de metal partida. Você coloca um novo, liga o som, e ele queima de novo na hora. Por que uma peça que custa centavos é feita para queimar? E o que ela está dizendo quando queima duas vezes?
+
+Nesta aula você vai ver como o fusível escolhe a hora de romper, por que existem fusíveis rápidos e retardados, como ler o que vem escrito neles e o que fazer (e o que nunca fazer) quando um fusível queima.
+
+## O ponto fraco de propósito
+
+Toda corrente aquece o fio por onde passa: é o <Term id="efeito-joule">efeito Joule</Term>, $P = R \cdot I^2$. Com a corrente normal, o fio esquenta pouco. Com o dobro da corrente, o calor é quatro vezes maior, e um fio que trabalha muito acima do que aguenta derrete o isolamento e pode começar um incêndio dentro da parede ou do painel do carro.
+
+O <Term id="fusivel">fusível</Term> é um ponto fraco colocado de propósito no circuito: um elo de metal (um fio fino ou uma lâmina estreita), calibrado para derreter antes que o resto se estrague. Ele fica em série com a carga, então toda a corrente passa por ele. Enquanto a corrente é normal, ele é só um pedaço de condutor. Se a corrente passa muito do previsto por tempo demais, o elo esquenta até derreter, o circuito abre e a corrente para.
+
+Ele protege contra dois tipos de problema:
+
+- **Sobrecarga**: corrente um pouco acima do normal, durante muito tempo. Aparelhos demais na mesma linha, um motor forçado, um eixo travado.
+- **<Term id="curto-circuito">Curto-circuito</Term>**: um caminho quase sem resistência, como um fio desencapado encostando na lataria. A corrente fica dezenas ou centenas de vezes maior que a normal.
+
+<Callout type="atencao" title="O fusível não protege você de choque">
+Um choque perigoso passa pelo corpo com algumas dezenas de miliampères, muito menos do que qualquer fusível ou disjuntor percebe. O fusível protege os fios e os aparelhos. Contra choque, a proteção é o DR, assunto da aula <LinkAula id="m07-instalacoes/03-disjuntores-dr-e-dps" />.
+</Callout>
+
+## Rápido ou retardado
+
+Derreter leva tempo, porque o elo precisa acumular calor. Quanto maior a corrente, mais depressa ele chega lá. Por isso o fusível não rompe em um valor exato: um fusível de 2 A não queima com 2,1 A. Ele aguenta a corrente nominal indefinidamente e até um pouco mais que isso por muito tempo; a partir daí, quanto maior o excesso, mais rápido ele rompe.
+
+O jeito de esquentar define dois tipos principais:
+
+- **Rápido (F, do inglês *fast*)**: elo fino e reto, com pouca massa. Esquenta e rompe depressa. Serve para eletrônica sensível, que não aguenta excesso de corrente nem por pouco tempo.
+- **Retardado (T, do alemão *träge*, "lento")**: o <Term id="fusivel-retardado">fusível retardado</Term> tem um elo com mais massa, muitas vezes enrolado em espiral ou com uma gotinha de solda no meio. Ele demora mais para esquentar e aguenta os picos curtos de <Term id="corrente-de-partida">corrente de partida</Term> de motores, transformadores e fontes com capacitores grandes, sem deixar de romper numa sobrecarga que continua.
+
+Para comparar fusíveis, os fabricantes informam o <Term id="i2t">I²t de fusão</Term>, em A²s (ampère ao quadrado vezes segundo): quanto "calor" o elo aguenta antes de derreter. Num curto-circuito, a corrente é tão alta que o elo não tem tempo de perder calor, e o tempo para derreter é, aproximadamente,
+
+$$
+t \approx \frac{(I^2t)_\text{fusão}}{I^2}
+$$
+
+com $t$ em segundos, $(I^2t)_\text{fusão}$ em A²s e a corrente de curto $I$ em ampères. No modelo da simulação abaixo, o fusível rápido de 2 A tem I²t de 3,2 A²s, e o retardado, de 60 A²s (valores típicos usados pelo modelo; o de cada fusível real está na folha de dados). Num curto de 170 A, o rápido derrete em cerca de $3{,}2 / 170^2 \approx 0{,}0001\,\text{s}$, um décimo de milésimo de segundo.
+
+## Explore: quanto tempo o fusível aguenta
+
+Na simulação, uma bateria de 12 V alimenta uma carga através de um fusível de vidro de 2 A. Você escolhe a carga, de normal até curto-circuito, e o tipo do fusível.
+
+<Simulation circuit="m04/fusivel-sobrecarga" instruments={['multimetro']} autoplay />
+
+Para cada teste, escolha a carga e o tipo e toque em **Reiniciar simulação** (a seta circular): o fusível volta novo e frio, e o relógio volta a zero. Quando o fusível rompe, aparece um aviso embaixo do circuito com o instante em que isso aconteceu. Passe o mouse ou toque no fusível para ver o **aquecimento do elo**: quando ele chega a 1, o fusível rompe.
+
+1. Com a carga normal (1,5 A), o fusível rompe? Onde o aquecimento do elo se estabiliza?
+2. Escolha a sobrecarga leve: 3 A, uma vez e meia a nominal. E agora?
+3. Com a sobrecarga de 4 A, compare quanto tempo o rápido e o retardado levam para romper.
+4. Repita com 8 A e com o curto-circuito.
+
+Com 1,5 A, nada acontece: o aquecimento fica em torno de 0,2. Com 3 A, o aquecimento sobe e para em uns 0,88, sem chegar a 1: no modelo, o fusível aguenta essa sobrecarga leve indefinidamente. Um fusível real só garante aguentar 1,5 vez a nominal por um tempo (pelo menos 1 hora, no padrão dos fusíveis de vidro) e pode romper depois de muito tempo. O excesso precisa ser maior para romper. Os tempos que você deve encontrar são estes (valores do modelo, típicos de fusíveis de vidro):
+
+| Corrente | Rápido (F) | Retardado (T) |
+| --- | --- | --- |
+| 1,5 A (normal) | não rompe | não rompe |
+| 3 A (1,5 × a nominal) | não rompe no modelo | não rompe no modelo |
+| 4 A (2 ×) | cerca de 0,3 s | cerca de 6 s |
+| 8 A (4 ×) | cerca de 0,06 s | cerca de 1 s |
+| Curto (cerca de 170 A) | menos de 1 ms | poucos milésimos de segundo |
+
+Repare na escala: com a mesma sobrecarga, o retardado demora quase 20 vezes mais que o rápido. E, no curto-circuito, os dois rompem quase na hora. A diferença entre eles está nos excessos moderados e curtos.
+
+## Explore: a partida de um motor
+
+Agora a carga é um pequeno motor CC de 12 V, que gira puxando cerca de 1 A. Parado, ele não gera a força contrária que limita a corrente, e na partida puxa bem mais. A simulação roda em câmera lenta.
+
+<Simulation circuit="m04/fusivel-motor" instruments={['grafico']} autoplay />
+
+1. Com o fusível rápido, ligue o motor. O que acontece?
+2. Toque em **Reiniciar simulação**, escolha o retardado e ligue de novo. Qual é o pico de corrente? E a corrente depois que o motor embala?
+3. Com o retardado, escolha **Travado** no eixo do motor, reinicie e ligue. O fusível aguenta?
+
+Com o rápido, o fusível rompe menos de 0,1 s depois de ligar: o motor nem chega a embalar. Com o retardado, a corrente passa de 7 A no começo (uns 7,5 A), cai à medida que o motor ganha velocidade, fica abaixo de 2 A em cerca de 0,6 s e se acomoda perto de 1 A. O aquecimento do elo não passa de 0,2: para o retardado, a partida foi um susto pequeno. Com o eixo travado, a corrente fica em uns 7,6 A sem parar, e o retardado rompe depois de pouco mais de 1 s.
+
+É por isso que o manual de um aparelho com motor ou transformador pede fusível retardado. Trocar por um rápido do mesmo valor parece seguro, mas ele queima em toda partida.
+
+Um fusível de 2 A não é a proteção ideal para o motor travado: até romper, o motor já esquentou. Motores costumam ter também um protetor térmico próprio, um interruptor que abre com a temperatura, embutido no enrolamento (muitos técnicos o chamam de klixon, pelo nome de uma marca).
+
+## Os fusíveis que você vai encontrar
+
+### Fusível de vidro
+
+<Part3D
+  part="fuse-glass"
+  props={{ amps: 2, type: 'retardo' }}
+  annotations
+  alt="Três fusíveis de vidro de 5 por 20 milímetros, com tampas de metal nas pontas. O rápido tem um fio fino e reto por dentro. O retardado tem o elo enrolado em espiral. O queimado tem o elo partido e o vidro escurecido."
+  caption="Fusíveis de vidro rápido, retardado e queimado."
+>
+  <GlassFuses />
+</Part3D>
+
+É o fusível das placas eletrônicas, de fontes, carregadores, aparelhos de som e centrais de portão. Os tamanhos mais comuns são 5 × 20 mm e 6,3 × 32 mm (que muitas lojas vendem como 6 × 30). Ele fica num porta-fusível de rosca ou preso em dois clipes na placa.
+
+A marcação gravada na tampa diz tudo. Um exemplo: **T2AL250V**.
+
+- **T**: retardado (F seria rápido).
+- **2A**: corrente nominal, 2 A. Valores abaixo de 1 A aparecem em mA, como 500mA.
+- **L**: baixa <Term id="capacidade-de-interrupcao">capacidade de interrupção</Term> (H seria alta). É a maior corrente de curto que o fusível consegue cortar com segurança. Acima dela, o arco pode continuar dentro do fusível depois que o elo derrete, e o vidro pode estourar.
+- **250V**: tensão nominal, a maior tensão que ele interrompe com segurança. Um fusível de tensão menor pode não apagar o arco.
+
+Fusíveis de vidro costumam ter capacidade de interrupção baixa, na casa das dezenas de ampères (típico). Onde a corrente de curto pode ser maior, como na entrada de rede de fontes e aparelhos, o fabricante usa fusíveis **cerâmicos**, cheios de areia, que apagam o arco e cortam correntes de curto bem maiores. Se o original é cerâmico, a troca também é por cerâmico.
+
+O fusível queimado também conta o que aconteceu. Elo partido num ponto, com o vidro limpo, costuma indicar sobrecarga moderada ou envelhecimento. Vidro escurecido ou espelhado por dentro, com o elo vaporizado, indica um curto forte: há um defeito sério no aparelho.
+
+### Fusível de lâmina (carro)
+
+<Part3D
+  part="fuse-blade"
+  props={{ amps: 10 }}
+  annotations
+  alt="Dois fusíveis de lâmina vermelhos de 10 ampères, vistos de frente: o corpo de plástico transparente mostra o elo de metal ligando as duas lâminas, e no alto há dois pontos de teste de metal. No fusível novo, o elo está inteiro; no queimado, o elo está partido no meio."
+  caption="Fusível de lâmina de 10 A, novo e queimado."
+>
+  <BladeFuse />
+</Part3D>
+
+No carro e na moto, os fusíveis são de lâmina, encaixados na caixa de fusíveis. O plástico é transparente, e dá para ver o elo por dentro. Em cima há dois pontos de metal expostos, para testar o fusível sem tirá-lo. A cor indica a corrente nominal, num código padronizado:
+
+| Cor | Corrente |
+| --- | --- |
+| Preto | 1 A |
+| Cinza | 2 A |
+| Violeta | 3 A |
+| Rosa | 4 A |
+| Bege | 5 A |
+| Marrom | 7,5 A |
+| Vermelho | 10 A |
+| Azul | 15 A |
+| Amarelo | 20 A |
+| Transparente ou branco | 25 A |
+| Verde | 30 A |
+| Laranja | 40 A |
+
+O número também vem gravado no topo. Existem tamanhos diferentes (mini, padrão e maxi), e a tampa da caixa de fusíveis ou o manual do carro diz qual fusível protege cada circuito. Fusíveis de lâmina são feitos para a baixa tensão do carro (32 V é um valor típico) e nunca devem ser usados na rede de 127 V ou 220 V.
+
+### Fusível térmico
+
+O <Term id="fusivel-termico">fusível térmico</Term> não reage à corrente, e sim à temperatura. Ele fica encostado na parte que esquenta de cafeteiras, sanduicheiras, secadores de cabelo, ferros de passar e motores de ventilador. Se o termostato falhar e o aparelho superaquecer, ele abre e não volta mais. O corpo traz a temperatura de abertura (marcada como Tf), a corrente e a tensão.
+
+Quando a cafeteira para de esquentar de vez, ele é um dos primeiros suspeitos. A troca é por um igual, com a mesma temperatura, e quase sempre com emenda prensada, não soldada: o calor do ferro de solda pode abrir o fusível novo (típico; siga o que o fabricante do componente recomenda). E fusível térmico aberto quase sempre tem um motivo, como um termostato colado: troque só ele, e o aparelho pode superaquecer de novo sem proteção.
+
+### Fusível rearmável
+
+Portas USB, carregadores e baterias de ferramentas costumam usar um **fusível rearmável** (PTC): uma pecinha cuja resistência dispara quando ela esquenta com corrente demais, cortando quase toda a corrente. Quando o defeito sai e ela esfria, volta a conduzir sozinha. Componentes que mudam a resistência com a temperatura são assunto da aula <LinkAula id="m04-passivos/02-resistores-variaveis" />.
+
+## Fusível ou disjuntor?
+
+Nas casas, os fusíveis de rosca e de cartucho deram lugar ao <Term id="disjuntor">disjuntor</Term>, que faz o mesmo trabalho e pode ser religado. Ele tem duas partes: uma térmica, que esquenta e desarma devagar numa sobrecarga, e uma magnética, que desarma quase na hora num curto. O disjuntor de cada circuito é escolhido para proteger o fio daquele circuito. Os detalhes estão em <LinkAula id="m07-instalacoes/03-disjuntores-dr-e-dps" />.
+
+O fusível continua firme em aparelhos e no carro: é pequeno, barato, rápido num curto e não tem peças móveis.
+
+## Exemplo resolvido: o fusível dos faróis auxiliares
+
+Você vai instalar dois faróis auxiliares de 55 W cada, em 12 V, num circuito novo do carro. Qual fusível usar?
+
+**Passo 1: corrente normal.**
+
+$$
+I = \frac{P}{V} = \frac{2 \times 55\,\text{W}}{12\,\text{V}} \approx 9{,}2\,\text{A}
+$$
+
+**Passo 2: folga.** O fusível precisa aguentar a corrente normal o tempo todo, mais o pico da lâmpada fria ao acender. A regra prática mais comum é escolher um fusível uns 25 % acima da corrente normal (típico):
+
+$$
+9{,}2\,\text{A} \times 1{,}25 = 11{,}5\,\text{A}
+$$
+
+**Passo 3: valor comercial.** O valor padronizado logo acima de 11,5 A é **15 A**, o fusível azul.
+
+**Passo 4: o fio.** O fio do circuito precisa aguentar com folga os 15 A do fusível; se não aguentar, use um fio mais grosso, nunca um fusível maior que o fio. A escolha do fio é assunto de <LinkAula id="m07-instalacoes/04-fios-e-cabos" />, e o circuito completo do carro, de <LinkAula id="m17-projetos/05-sistema-eletrico-do-carro" />. O fusível fica o mais perto possível da bateria (ou do ponto de onde sai a alimentação), para proteger o fio inteiro.
+
+<RealCase title="O fusível que queima de novo">
+
+De volta ao som do carro. Antes de trocar o fusível, confirme que é ele:
+
+1. **Olhe.** Pelo plástico transparente dá para ver se o elo está partido.
+2. **Meça sem tirar.** Com a ignição ligada e o som ligado, meça a tensão entre cada ponto de teste do topo do fusível e a lataria. Fusível bom: 12 V nos dois pontos. Fusível aberto: 12 V num ponto e zero no outro.
+3. **Ou meça fora do carro.** Com o fusível fora, use a escala de <Term id="continuidade">continuidade</Term>: fusível bom apita, fusível queimado não. Veja <LinkAula id="m03-medicoes/04-resistencia-continuidade-e-diodo" />.
+
+Desligue a ignição e o som, e troque por um fusível **igual**: mesma cor, mesma corrente. Se ele queimar de novo na hora, o problema não é o fusível. Procure um curto: um fio de alimentação desencapado encostando na lataria atrás do painel, um conector derretido, o próprio aparelho em curto. Se ele queimar depois de um tempo de uso, procure uma sobrecarga, como um motor (de vidro elétrico, de ventoinha) emperrado.
+
+A central de um portão eletrônico segue a mesma lógica, com um fusível de vidro protegendo a entrada de energia e, às vezes, o motor (o valor vem impresso na placa ou no manual). Um fusível que queima a cada abertura aponta para o motor forçado, o capacitor do motor ou um curto na placa, e não para um fusível "fraco". Veja <LinkAula id="m16-portao/09-diagnostico-do-portao" />.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Colocar um fusível maior porque o original vive queimando.** O fusível está avisando que há um defeito. Com um fusível maior, quem passa a ser o ponto fraco é o fio, que esquenta dentro da parede ou do painel.
+- **Trocar o fusível por um fio, um clipe, papel-alumínio ou uma moeda.** Isso tira toda a proteção contra incêndio. Nunca.
+- **Trocar retardado por rápido, ou vidro por cerâmico, "porque é do mesmo valor".** O tipo, a tensão nominal e a capacidade de interrupção fazem parte da especificação. Troque por um igual.
+- **Usar fusível de carro na rede.** Fusíveis de lâmina são para a baixa tensão do carro; na rede de 127 V ou 220 V, podem não apagar o arco.
+- **Trocar com o circuito energizado.** Num aparelho, tire o plugue da tomada antes de abrir. No quadro de energia, desligue o disjuntor geral. No carro, desligue a ignição e o consumidor.
+- **Encostar no circuito logo depois de desligar um aparelho da rede.** Fontes e placas têm capacitores que podem guardar carga por um tempo depois que o plugue sai da tomada. Veja como descarregar com segurança em <LinkAula id="m04-passivos/03-capacitores#descarregar-com-segurança" />.
+
+<Callout type="perigo" title="Fusível na entrada de rede">
+O fusível de entrada de uma fonte, de um carregador ou da central do portão fica do lado da rede de 127 V ou 220 V. Antes de tirá-lo do porta-fusível, desligue o aparelho da tomada (ou o disjuntor do circuito) e confira a ausência de tensão. Se o fusível novo queimar assim que você religa, não insista nem coloque um maior: há um curto do lado da rede, e o conserto é com um técnico.
+</Callout>
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'O que o fusível protege?',
+      options: [
+        {
+          text: 'Os fios e os aparelhos, contra sobrecarga e curto-circuito',
+          correct: true,
+          feedback: 'Ele rompe quando a corrente passa muito do previsto, antes que o fio esquente demais e pegue fogo.',
+        },
+        {
+          text: 'As pessoas, contra choque elétrico',
+          feedback:
+            'Uma corrente de choque perigosa é de dezenas de miliampères, pequena demais para o fusível perceber. Contra choque, a proteção é o DR.',
+        },
+        {
+          text: 'O aparelho, contra falta de energia',
+          feedback: 'O fusível não faz nada quando a energia falta. Ele só age quando a corrente é alta demais.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Um fusível de 2 A rompe assim que a corrente passa de 2 A.',
+      answer: false,
+      explanation:
+        'O elo precisa acumular calor. Um pouco acima da nominal, o fusível aguenta muito tempo; com o excesso maior, ele rompe cada vez mais depressa.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'O fusível original de uma bomba d’água pequena é T2A. Você só tem um F2A. O que acontece se usar o rápido?',
+      options: [
+        {
+          text: 'Ele tende a queimar na partida do motor, mesmo com a bomba boa',
+          correct: true,
+          feedback: 'A corrente de partida do motor passa várias vezes da nominal por uma fração de segundo. O retardado aguenta; o rápido, não.',
+        },
+        {
+          text: 'Nada muda, porque a corrente nominal é a mesma',
+          feedback: 'A corrente nominal é a mesma, mas o tempo de resposta não. O rápido rompe com picos curtos que o retardado aguenta.',
+        },
+        {
+          text: 'A bomba fica sem proteção contra curto',
+          feedback: 'No curto, o rápido rompe ainda mais depressa. O problema dele aqui é o contrário: romper sem defeito nenhum.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um fusível tem I²t de fusão de 3,2 A²s. Num curto-circuito de 80 A, em quanto tempo, aproximadamente, o elo derrete?',
+      answer: 0.5,
+      tolerance: 0.02,
+      unit: 'ms',
+      explanation: 't ≈ I²t ÷ I² = 3,2 ÷ 80² = 3,2 ÷ 6.400 = 0,0005 s = 0,5 ms.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada parte da marcação T2AL250V ao que ela significa.',
+      pairs: [
+        ['T', 'Retardado'],
+        ['2A', 'Corrente nominal'],
+        ['L', 'Baixa capacidade de interrupção'],
+        ['250V', 'Maior tensão que ele interrompe com segurança'],
+      ],
+      explanation:
+        'T é retardado (F seria rápido), 2A é a corrente nominal, L indica baixa capacidade de interrupção (H seria alta) e 250V é a tensão nominal.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'O fusível de vidro de um aparelho está com o vidro escurecido por dentro. O que isso sugere?',
+      options: [
+        {
+          text: 'Um curto forte: é preciso achar o defeito antes de trocar',
+          correct: true,
+          feedback: 'O elo vaporizou com uma corrente muito alta. Um fusível novo vai queimar de novo se o defeito continuar.',
+        },
+        {
+          text: 'O fusível envelheceu e é só trocar',
+          feedback: 'Fusível que envelhece costuma partir num ponto, com o vidro limpo. Vidro escuro indica corrente muito alta.',
+        },
+        {
+          text: 'O fusível era de valor alto demais',
+          feedback: 'O escurecimento indica a violência do curto, não o valor do fusível.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem a troca de um fusível queimado no carro.',
+      items: [
+        'Desligar a ignição e o aparelho do circuito',
+        'Achar o fusível certo pela tampa da caixa ou pelo manual',
+        'Tirar o fusível e conferir que está queimado',
+        'Colocar um fusível igual, da mesma cor e corrente',
+        'Ligar e testar; se queimar de novo, procurar o curto',
+      ],
+      explanation:
+        'Com tudo desligado, você evita faísca e curto na hora de mexer. E um fusível que queima de novo está apontando um defeito, não pedindo um fusível maior.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O fusível é um ponto fraco de propósito: um elo que derrete com o calor da corrente e abre o circuito antes que os fios e o aparelho se estraguem. Ele não protege contra choque.
+- Quanto maior o excesso de corrente, mais rápido ele rompe; um pouco acima da nominal, ele aguenta por muito tempo.
+- O rápido (F) protege eletrônica sensível; o retardado (T) aguenta a corrente de partida de motores e transformadores e ainda rompe numa sobrecarga que continua.
+- A marcação diz o tipo, a corrente, a capacidade de interrupção e a tensão (T2AL250V); no fusível de lâmina, a cor diz a corrente.
+- Troque sempre por um igual, com o circuito desligado. Fusível que queima de novo aponta um defeito: nunca coloque um maior, um fio ou papel-alumínio.
+
+Na próxima aula, as peças que ligam e desligam os circuitos de propósito: <LinkAula id="m04-passivos/07-chaves-botoes-e-reles" />.

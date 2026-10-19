@@ -1,0 +1,90 @@
+---
+/*
+ * 04.6: a standard automotive blade fuse of 10 A (red) seen from the front,
+ * new and blown, with the element visible through the body and the test
+ * points on top.
+ */
+---
+
+<svg viewBox="0 0 480 280" width="480" height="280" class="fig" aria-hidden="true">
+  <g transform="translate(130 20)">
+    <rect x="-64" y="0" width="128" height="58" rx="8" class="body" />
+    <circle cx="-38" cy="14" r="5" class="test" />
+    <circle cx="38" cy="14" r="5" class="test" />
+    <text x="0" y="22" class="amps">
+      10
+    </text>
+    <rect x="-56" y="58" width="112" height="70" rx="4" class="window" />
+    <path d="M-28 128 V96 H-10 V84 H10 V96 H28 V128" class="element" />
+    <rect x="-46" y="128" width="30" height="92" rx="3" class="blade" />
+    <rect x="16" y="128" width="30" height="92" rx="3" class="blade" />
+    <text x="0" y="252">
+      Novo
+    </text>
+  </g>
+
+  <g transform="translate(350 20)">
+    <rect x="-64" y="0" width="128" height="58" rx="8" class="body" />
+    <circle cx="-38" cy="14" r="5" class="test" />
+    <circle cx="38" cy="14" r="5" class="test" />
+    <text x="0" y="22" class="amps">
+      10
+    </text>
+    <rect x="-56" y="58" width="112" height="70" rx="4" class="window" />
+    <path d="M-28 128 V96 H-10 V88 M28 128 V96 H10 V88" class="element" />
+    <circle cx="-10" cy="86" r="3" class="blob" />
+    <circle cx="10" cy="86" r="3" class="blob" />
+    <rect x="-46" y="128" width="30" height="92" rx="3" class="blade" />
+    <rect x="16" y="128" width="30" height="92" rx="3" class="blade" />
+    <text x="0" y="252">
+      Queimado
+    </text>
+  </g>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .body {
+    fill: color-mix(in oklab, #d8241c 75%, var(--bg));
+    stroke: color-mix(in oklab, #d8241c 70%, var(--fg));
+    stroke-width: 1.5;
+  }
+  .window {
+    fill: color-mix(in oklab, #d8241c 28%, var(--bg));
+    stroke: color-mix(in oklab, #d8241c 60%, var(--fg));
+    stroke-width: 1.5;
+  }
+  .test {
+    fill: color-mix(in oklab, var(--fg-subtle) 50%, var(--bg));
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .element {
+    stroke: color-mix(in oklab, var(--fg-subtle) 70%, var(--fg));
+    stroke-width: 4;
+  }
+  .blob {
+    fill: color-mix(in oklab, var(--fg-subtle) 70%, var(--fg));
+  }
+  .blade {
+    fill: color-mix(in oklab, var(--fg-subtle) 40%, var(--bg));
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 15px;
+    text-anchor: middle;
+  }
+  .amps {
+    font-size: 16px;
+    font-weight: 700;
+    fill: #fff;
+  }
+</style>

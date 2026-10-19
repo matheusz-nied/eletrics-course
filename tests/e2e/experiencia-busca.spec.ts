@@ -45,10 +45,11 @@ test.describe('search', () => {
     await input.fill('capacitor');
     const hit = dialog.getByRole('link', { name: /Capacitor/ }).first();
     await expect(hit).toBeVisible();
+    const href = await hit.getAttribute('href');
     await page.keyboard.press('ArrowDown');
     await expect(hit).toBeFocused();
     await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(/glossario\/capacitor\/$/);
+    await expect(page).toHaveURL(new URL(href!, page.url()).href);
     errors.expectClean();
   });
 

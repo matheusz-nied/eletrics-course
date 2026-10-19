@@ -1,0 +1,380 @@
+---
+titulo: Resistores
+modulo: m04-passivos
+ordem: 1
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Reconhecer os tipos de resistor mais comuns, de filme, de fio, de cimento e SMD
+  - Ler o valor e a tolerância pelo código de cores de 4 e de 5 faixas
+  - Entender por que os resistores vêm em valores fixos, das séries E12 e E24
+  - Escolher a potência nominal de um resistor com folga
+  - Ler os códigos dos resistores SMD e a notação com letra, como 4R7 e 1K5
+  - Trocar um resistor queimado sabendo o que procurar antes
+prerequisitos:
+  - m01-eletricidade-do-zero/04-lei-de-ohm
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+  - m01-eletricidade-do-zero/06-unidades-e-ordens-de-grandeza
+tags: [resistor, código de cores, tolerância, potência, SMD, série E12]
+seguranca: baixa-tensao
+rascunho: false
+---
+
+import ColorCodeGame from '../../../lessons/m04/ColorCodeGame';
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import ResistorBands from '../../../lessons/m04/figures/ResistorBands.astro';
+import ResistorTypes from '../../../lessons/m04/figures/ResistorTypes.astro';
+
+Um aparelho parou de funcionar. Você abre e encontra, no meio da placa, um cilindrinho com a pintura escurecida e uma mancha marrom na placa embaixo dele. É um resistor que trabalhou acima do que aguentava. Para trocá-lo, você precisa de três informações que ele traz no corpo: o valor, a tolerância e, pelo tamanho, a potência. E precisa descobrir por que ele queimou, senão o novo vai pelo mesmo caminho.
+
+Nesta aula você vai conhecer os tipos de resistor, ler o código de cores e os códigos dos resistores SMD, entender por que a loja não vende resistor de 5 kΩ e escolher a potência certa para que ele não vire um aquecedor.
+
+## Um componente feito para resistir
+
+Nos módulos anteriores, o resistor foi um $R$ nas contas da <LinkAula id="m01-eletricidade-do-zero/04-lei-de-ohm" /> e um retângulo nos esquemas. A peça de verdade, o <Term id="resistor">resistor</Term>, é um componente fabricado para ter uma resistência conhecida. Ele aparece em quase toda placa e faz poucos trabalhos, sempre os mesmos: limita a corrente (de um LED, por exemplo), divide uma tensão, como nos divisores da aula <LinkAula id="m02-circuitos-cc/06-divisores-de-tensao-e-corrente" />, e fixa o nível de uma entrada digital. Em todos eles, a energia que passa pelo resistor vira calor, pelo <Term id="efeito-joule">efeito Joule</Term>.
+
+Todo resistor tem três números: a **resistência**, em ohms; a **tolerância**, quanto o valor real pode se afastar do valor marcado; e a **potência nominal**, quanto calor ele aguenta dissipar sem estragar.
+
+## Os tipos mais comuns
+
+<Figure caption="Figura 1. Os quatro tipos de resistor que você mais vai encontrar, fora de escala.">
+  <ResistorTypes />
+</Figure>
+
+- **Filme de carbono.** Um bastão de cerâmica coberto por uma película fina de carbono, com um terminal em cada ponta. Para chegar ao valor certo, a fábrica corta um sulco em espiral na película: quanto mais voltas, mais comprido e estreito fica o caminho da corrente, e maior a resistência. É o mais barato e o mais comum nos kits e nos consertos. Corpo geralmente bege, 4 faixas, tolerância típica de ±5 %.
+- **Filme metálico.** A mesma construção, com uma película de liga metálica no lugar do carbono. O valor muda menos com a temperatura e com o tempo, e o resistor gera menos ruído elétrico, por isso é o preferido em instrumentos e em áudio. Costuma ter corpo azul e 5 faixas, com tolerância de ±1 %. A cor do corpo é só um costume: o que vale são as faixas.
+- **Fio e cimento.** Para potências de alguns watts a dezenas de watts, um fio de liga resistiva é enrolado num suporte de cerâmica. Muitos vêm num bloco branco, o "resistor de cimento" (ou de porcelana), com o valor escrito por extenso.
+- **SMD.** Um chip retangular, sem fios, soldado direto na superfície da placa. É o tipo de quase toda placa moderna, do celular à central do portão.
+
+## O código de cores
+
+Um resistor de 1/4 W tem cerca de 6 mm de comprimento. Números impressos num corpo tão pequeno e redondo seriam difíceis de ler e se apagariam com o tempo. A solução, padronizada há décadas, são faixas coloridas que se veem de qualquer lado: o <Term id="codigo-de-cores">código de cores</Term>.
+
+| Cor      | Algarismo | Multiplicador     | Tolerância |
+| -------- | --------- | ----------------- | ---------- |
+| Preto    | 0         | ×1                |            |
+| Marrom   | 1         | ×10               | ±1 %       |
+| Vermelho | 2         | ×100              | ±2 %       |
+| Laranja  | 3         | ×1.000 (k)        |            |
+| Amarelo  | 4         | ×10.000           |            |
+| Verde    | 5         | ×100.000          | ±0,5 %     |
+| Azul     | 6         | ×1.000.000 (M)    | ±0,25 %    |
+| Violeta  | 7         | ×10.000.000       | ±0,1 %     |
+| Cinza    | 8         | ×100.000.000      | ±0,05 %    |
+| Branco   | 9         | ×1.000.000.000    |            |
+| Dourado  |           | ×0,1              | ±5 %       |
+| Prateado |           | ×0,01             | ±10 %      |
+
+Para decorar: preto é zero (nada), marrom é 1 e, de 2 a 7, as cores seguem a ordem do arco-íris: vermelho, laranja, amarelo, verde, azul, violeta. Depois vêm cinza (8) e branco (9). Dourado e prateado nunca são algarismo. No lugar do multiplicador, eles dividem o valor; no da tolerância, valem ±5 % e ±10 %.
+
+### Quatro faixas
+
+As duas primeiras faixas são algarismos, a terceira é o multiplicador e a quarta é a tolerância. Para valores de 10 Ω para cima, o multiplicador diz quantos zeros acrescentar.
+
+<Part3D
+  part="resistor"
+  props={{ ohms: 4700, tolerance: 5 }}
+  annotations
+  alt="Resistor de filme de carbono com as faixas amarelo (4), violeta (7), vermelho (multiplicador ×100) e dourado (±5 %): 4,7 kΩ ±5 %."
+  caption="Resistor de 4,7 kΩ ±5 %."
+>
+  <ResistorBands ohms={4700} />
+</Part3D>
+
+Amarelo (4), violeta (7), vermelho (×100): $47 \times 100 = 4.700\,\Omega$, ou 4,7 kΩ. A faixa dourada diz ±5 %.
+
+**De que lado começar.** A faixa da tolerância costuma ficar afastada das outras, perto de uma das pontas. Comece pelo outro lado. Duas pistas ajudam: dourado e prateado nunca são a primeira faixa, e o valor lido do lado certo quase sempre é um valor comercial, como você vai ver adiante.
+
+**Abaixo de 10 Ω**, o multiplicador é dourado (×0,1) ou prateado (×0,01). Amarelo, violeta, dourado, dourado: $47 \times 0{,}1 = 4{,}7\,\Omega$. Com prateado no lugar do primeiro dourado, 0,47 Ω.
+
+### Cinco faixas
+
+Nos resistores de precisão, de ±1 % ou melhor, há três algarismos antes do multiplicador. Marrom (1), preto (0), preto (0), vermelho (×100), marrom (±1 %): $100 \times 100 = 10.000\,\Omega$, ou 10 kΩ ±1 %. Repare que há uma faixa marrom em cada ponta. Aqui, é o afastamento da faixa de tolerância que diz o lado certo.
+
+Resistores muito antigos podem ter só 3 faixas: sem a faixa de tolerância, ela é de ±20 %. E alguns resistores de precisão têm uma sexta faixa, depois da tolerância, que diz quanto o valor muda com a temperatura. Ela não muda a leitura do valor.
+
+### Pratique
+
+<ColorCodeGame client:visible />
+
+1. No modo **Ler o valor**, acerte cinco resistores seguidos. Escreva o valor como preferir: 4700, 4,7k ou 4K7.
+2. No modo **Montar as faixas**, monte um resistor de 330 Ω ±5 %. Quais são as cores?
+3. Passe para 5 faixas e monte 10 kΩ ±1 %.
+
+O de 330 Ω é laranja, laranja, marrom e dourado: $33 \times 10$. O de 10 kΩ ±1 % é o do exemplo acima: marrom, preto, preto, vermelho e marrom.
+
+## Tolerância e valores comerciais
+
+Nenhum processo de fabricação acerta o valor exato, e a <Term id="tolerancia">tolerância</Term> diz até onde o valor real pode ir. Um resistor de 4,7 kΩ ±5 % pode ter qualquer valor entre:
+
+$$
+4.700\,\Omega \times 0{,}95 = 4.465\,\Omega \quad\text{e}\quad 4.700\,\Omega \times 1{,}05 = 4.935\,\Omega
+$$
+
+Na maioria dos circuitos, essa diferença não importa: o LED brilha um pouco mais ou um pouco menos. Onde a precisão importa, como num divisor que mede a tensão de uma bateria, usa-se resistor de ±1 %.
+
+### Por que não existe resistor de 5 kΩ na loja
+
+Procure um resistor de 5 kΩ numa loja: você vai achar 4,7 kΩ e 5,1 kΩ, mas dificilmente 5 kΩ. Os fabricantes não produzem todos os valores, e sim os das séries padronizadas pela norma IEC 60063. Na <Term id="serie-e12">série E12</Term>, cada década tem 12 valores, cada um cerca de 21 % maior que o anterior:
+
+**10, 12, 15, 18, 22, 27, 33, 39, 47, 56, 68, 82**, e de novo na década seguinte: 100, 120, 150… 1 k, 1,2 k, 1,5 k…
+
+O passo de 21 % combina com a tolerância de ±10 %: a faixa de valores de um resistor quase encosta na do vizinho, e qualquer resistência de que você precise fica perto de algum valor da série. A **série E24**, pensada para ±5 %, tem os 12 valores da E12 e mais 11, 13, 16, 20, 24, 30, 36, 43, 51, 62, 75 e 91. Para ±1 %, existe a E96, com 96 valores por década.
+
+Se precisar mesmo de 5 kΩ, use o valor comercial mais próximo, combine dois resistores em série (4,7 kΩ + 300 Ω) ou use um trimpot, assunto da próxima aula.
+
+## Potência: o resistor é um aquecedor
+
+Toda a potência que um resistor recebe vira calor. Ela sai das fórmulas da aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />:
+
+$$
+P = V \cdot I = R \cdot I^2 = \frac{V^2}{R}
+$$
+
+em que $P$ é a potência dissipada (W), $V$ é a tensão entre os terminais do resistor (V), $I$ é a corrente nele (A) e $R$ é a resistência (Ω).
+
+A <Term id="potencia-nominal">potência nominal</Term> é o máximo que o resistor aguenta dissipar continuamente sem estragar. Mesmo nela, o corpo já fica quente demais para encostar o dedo. Acima dela, o resistor esquenta mais, a pintura escurece, o valor muda e, um dia, a película queima e o circuito abre.
+
+Nos resistores pequenos, a potência quase nunca vem escrita: quem diz é o tamanho. Medidas típicas de resistores de filme de carbono:
+
+| Potência nominal | Comprimento do corpo | Diâmetro |
+| ---------------- | -------------------- | -------- |
+| 1/4 W            | 6,3 mm               | 2,4 mm   |
+| 1/2 W            | 9 mm                 | 3,2 mm   |
+| 1 W              | 11,5 mm              | 4,5 mm   |
+| 2 W              | 15,5 mm              | 5 mm     |
+
+O tamanho é uma pista, não uma garantia: existem resistores de filme metálico de 1/4 W bem menores que os de carbono. Na dúvida, procure a especificação da peça. Os de fio e de cimento trazem a potência escrita, como o "5W" da figura 1.
+
+<Callout type="dica" title="A regra do dobro">
+Escolha um resistor com potência nominal de pelo menos o dobro da que ele vai dissipar. A potência nominal vale para o resistor ao ar livre, num ambiente fresco; dentro de uma caixa fechada, perto de outras peças quentes, ele aguenta menos. E um resistor que trabalha frio dura mais e não queima a placa embaixo dele.
+</Callout>
+
+### Explore: quanto calor cabe em cada tamanho
+
+Uma fonte de 12 V alimenta um resistor de 100 Ω quando a chave S1 fecha. A temperatura do corpo aparece na "Tabela de valores".
+
+<Simulation circuit="m04/resistor-potencia" />
+
+1. Com 1/4 W, feche S1. Quanto o resistor dissipa? Acompanhe a temperatura por uns 20 segundos.
+2. Use **Reiniciar**, escolha 1/2 W e feche S1 de novo. Depois tente 1 W, 2 W e 3 W. Qual é a menor potência nominal que não faz o simulador avisar que o resistor está esquentando demais?
+3. Qual delas a regra do dobro escolheria?
+4. Volte para 1/4 W e troque a resistência para 1 kΩ. E agora?
+
+Com 100 Ω, a corrente é $12 / 100 = 0{,}12\,\text{A}$ e a potência é $12^2 / 100 = 1{,}44\,\text{W}$, quase seis vezes o que o resistor de 1/4 W aguenta. Em menos de 2 segundos o simulador avisa que ele está esquentando demais e, em cerca de 16 segundos, ele queima. Com 1/2 W, o corpo chega a cerca de 255 °C; com 1 W, a cerca de 140 °C, ainda acima do limite. O de 2 W é o primeiro que trabalha dentro da potência nominal, com o corpo em cerca de 83 °C. A regra do dobro pede $2 \times 1{,}44 = 2{,}88\,\text{W}$, ou seja, o de 3 W, que fica em cerca de 63 °C.
+
+Com 1 kΩ, a potência cai dez vezes, para 0,144 W (12 mA), e até o de 1/4 W aguenta, perto de 71 °C. Com a mesma tensão, a resistência dez vezes maior dividiu a potência por dez, porque $P = V^2 / R$.
+
+As temperaturas vêm do modelo do simulador, que é típico. Num resistor real, elas dependem do fabricante, da ventilação e da placa.
+
+## Exemplo resolvido: um resistor de carga para testar uma fonte
+
+Você quer conferir se uma fonte de 12 V aguenta uma carga de uns 50 mA e vai usar um resistor como carga. Qual valor e qual potência?
+
+**Passo 1: o valor.** Pela Lei de Ohm, $R = 12\,\text{V} / 0{,}05\,\text{A} = 240\,\Omega$. O valor da E12 mais perto é 220 Ω (240 Ω existe na E24, mas é mais difícil de achar).
+
+**Passo 2: a corrente e a potência com 220 Ω.**
+
+$$
+I = \frac{12\,\text{V}}{220\,\Omega} \approx 54{,}5\,\text{mA} \qquad P = \frac{(12\,\text{V})^2}{220\,\Omega} \approx 0{,}65\,\text{W}
+$$
+
+**Passo 3: a potência nominal.** 1/4 W e 1/2 W estão fora. O de 1 W aguenta, mas trabalha a 65 % do limite. Pela regra do dobro, $2 \times 0{,}65 = 1{,}3\,\text{W}$, e o próximo tamanho comum é **2 W**.
+
+**Passo 4: confira no simulador.** Escolha 220 Ω e feche S1. Com 1 W, o corpo fica em cerca de 77 °C; com 2 W, em cerca de 51 °C. Com 1/4 W, o aviso aparece em poucos segundos.
+
+## Resistores SMD e os códigos impressos
+
+Os resistores <Term id="smd">SMD</Term> (do inglês *surface-mount device*, componente de montagem em superfície) são pequenos demais para faixas. Quando têm marcação, é um código de números:
+
+| Código       | Como ler                                         | Valor             |
+| ------------ | ------------------------------------------------ | ----------------- |
+| `472`        | 47 seguido de 2 zeros                            | 4,7 kΩ            |
+| `103`        | 10 seguido de 3 zeros                            | 10 kΩ             |
+| `100`        | 10 seguido de nenhum zero                        | 10 Ω, e não 100 Ω |
+| `4702`       | 470 seguido de 2 zeros (código dos chips de 1 %) | 47 kΩ             |
+| `1002`       | 100 seguido de 2 zeros                           | 10 kΩ             |
+| `4R7`        | o R faz o papel da vírgula                       | 4,7 Ω             |
+| `R47`        | o R faz o papel da vírgula                       | 0,47 Ω            |
+| `0` ou `000` | resistor de zero ohm, usado como ponte           | 0 Ω               |
+
+Nos chips de ±1 % muito pequenos aparece outro código, de dois algarismos e uma letra, chamado EIA-96. Os algarismos dizem a posição do valor numa tabela da série E96 e a letra é o multiplicador: `01C`, por exemplo, é 10 kΩ. Para ler esse código, consulte a tabela do padrão, fácil de achar pelo nome. E muitos chips pequenos não trazem marcação nenhuma: só a lista de peças ou o multímetro dizem o valor.
+
+O tamanho do chip vem num código de quatro algarismos, em centésimos de polegada: o 1206 tem 0,12 por 0,06 polegada, ou 3,2 × 1,6 mm. Potências típicas: 1206, 1/4 W; 0805 (2,0 × 1,25 mm), 1/8 W; 0603 (1,6 × 0,8 mm), 1/10 W.
+
+### A letra no lugar da vírgula
+
+O truque do R vale também nos esquemas, nas listas de peças e no balcão da loja. A letra do prefixo fica no lugar da vírgula: R para ohms, K para quilo-ohms, M para megaohms. Assim, **4R7** é 4,7 Ω, **1K5** é 1,5 kΩ, **4K7** é 4,7 kΩ e **2M2** é 2,2 MΩ. Uma vírgula apagada no papel multiplicaria o valor por dez; uma letra, não.
+
+Nos resistores de cimento, o valor nesse código vem seguido de uma letra para a tolerância: F é ±1 %, J é ±5 % e K é ±10 %. O "5W 10RJ" da figura 1 é um resistor de 10 Ω, ±5 %, 5 W.
+
+## Medindo um resistor
+
+O multímetro na escala de resistência confirma o valor, como você viu na aula <LinkAula id="m03-medicoes/04-resistencia-continuidade-e-diodo" />. Três cuidados:
+
+- **Fora do circuito, ou com uma perna solta.** Soldado na placa, outros componentes ficam em paralelo com ele, e a leitura cai.
+- **Sem os dedos nos dois terminais.** Seu corpo também entra em paralelo, e o erro aparece nos valores altos.
+- **Compare com a tolerância.** Um resistor de 4,7 kΩ ±5 % bom mede entre 4.465 Ω e 4.935 Ω. Um resistor de carbono que esquentou demais costuma subir de valor; um queimado mostra `OL`, circuito aberto.
+
+Uma dica para medir na placa: os caminhos em paralelo só podem **baixar** a leitura. Se o multímetro mostra mais do que o valor das faixas somado à tolerância, o resistor está alterado ou aberto, mesmo sem tirá-lo da placa.
+
+<RealCase title="Trocar um resistor queimado">
+
+Voltando à placa do começo da aula, antes de pegar o ferro de solda:
+
+1. **Desligue e descarregue.** Se o aparelho vai na tomada, tire da tomada antes de abrir. Placas de fonte têm capacitores que guardam carga por um tempo; a aula <LinkAula id="m04-passivos/03-capacitores" /> mostra como descarregá-los com segurança.
+2. **Descubra por que ele queimou.** Resistor raramente queima sozinho. Quase sempre outra peça entrou em curto mais adiante (um transistor, um capacitor, um motor travado) e puxou corrente demais por ele. Trocar só o resistor e religar costuma queimar o novo. Meça as peças ligadas a ele antes de religar.
+3. **Descubra o valor.** O calor muda as cores: o vermelho escurece até parecer marrom, e o laranja pode parecer vermelho. Procure o esquema ou o manual de serviço, a referência impressa na placa (R12, por exemplo) com a lista de peças, ou um circuito igual na mesma placa, porque fontes e amplificadores costumam ter partes repetidas. Medir o resistor queimado quase nunca adianta.
+4. **Escolha a potência.** Igual ou maior, nunca menor. Se a placa está escurecida embaixo dele, o original já trabalhava quente: use um tamanho acima e monte-o alguns milímetros afastado da placa.
+5. **Cuidado com o resistor-fusível.** Em algumas fontes, um resistor é escolhido para abrir de propósito numa sobrecarga, como um fusível. O esquema ou a lista de peças avisa. Troque-o por outro do mesmo tipo, nunca por um resistor comum de potência maior e muito menos por um pedaço de fio: a proteção deixaria de existir.
+
+No balcão da loja de eletrônica, os valores são falados na notação com letra. "Me vê dez resistores de 1K5 de 1/4" (fala-se "um K cinco" ou "um K e meio") pede resistores de 1,5 kΩ e 1/4 W: marrom, verde, vermelho e dourado. Leve o valor escrito desse jeito e não há confusão.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Ler do lado errado.** Comece pela ponta oposta à faixa de tolerância. Dourado e prateado nunca vêm primeiro.
+- **Tomar o multiplicador por algarismo.** A terceira faixa de um resistor de 4 faixas é o multiplicador. E o `100` de um SMD é 10 Ω.
+- **Usar a potência no limite.** Um resistor dissipando exatamente a potência nominal funciona, mas quente. Use a regra do dobro.
+- **Deixar resistor quente encostado em fio ou plástico.** Resistores de potência chegam a temperaturas que derretem a isolação. Deixe espaço em volta.
+- **Encostar logo depois de desligar.** Um resistor de potência continua quente por um bom tempo e queima o dedo.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Um resistor de 4 faixas tem as cores amarelo, violeta, laranja e dourado. Qual é o valor?',
+      options: [
+        {
+          text: '47 kΩ ±5 %',
+          correct: true,
+          feedback: 'Amarelo (4), violeta (7), laranja (×1.000): 47 × 1.000 = 47.000 Ω. Dourado na quarta faixa é ±5 %.',
+        },
+        {
+          text: '4,7 kΩ ±5 %',
+          feedback: 'Seria assim com o multiplicador vermelho (×100). O laranja multiplica por 1.000.',
+        },
+        {
+          text: '473 Ω ±5 %',
+          feedback: 'Num resistor de 4 faixas, a terceira faixa é o multiplicador, não um algarismo.',
+        },
+        {
+          text: '47 kΩ ±10 %',
+          feedback: 'O valor está certo, mas a faixa dourada vale ±5 %. Prateado é que vale ±10 %.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um resistor de 5 faixas tem as cores vermelho, vermelho, preto, preto e marrom. Qual é o valor, em ohms?',
+      answer: 220,
+      tolerance: 0.01,
+      unit: 'Ω',
+      explanation:
+        'Três algarismos: vermelho (2), vermelho (2), preto (0), ou seja, 220. O multiplicador preto é ×1. São 220 Ω, com tolerância de ±1 % (marrom).',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um resistor de 2,2 kΩ tem tolerância de ±5 %. Qual é o maior valor, em ohms, que ele pode medir e ainda estar dentro da especificação?',
+      answer: 2310,
+      tolerance: 0.005,
+      unit: 'Ω',
+      explanation: '2.200 Ω × 1,05 = 2.310 Ω. O menor valor aceitável é 2.200 × 0,95 = 2.090 Ω.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Um resistor de 100 Ω está ligado numa tensão de 5 V. Quanto ele dissipa, em watts?',
+      answer: 0.25,
+      tolerance: 0.02,
+      unit: 'W',
+      explanation: 'P = V² / R = 25 / 100 = 0,25 W.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Para o resistor da questão anterior, que dissipa 0,25 W, qual potência nominal a regra do dobro indica?',
+      options: [
+        {
+          text: '1/2 W',
+          correct: true,
+          feedback: 'O dobro de 0,25 W é 0,5 W. O resistor de 1/2 W trabalha à metade do limite, com folga.',
+        },
+        {
+          text: '1/4 W',
+          feedback:
+            'Ele funcionaria exatamente no limite, quente, sem nenhuma folga para uma caixa fechada ou um dia de calor.',
+        },
+        {
+          text: '1/8 W',
+          feedback: 'Menor que a potência dissipada: ele esquentaria demais e acabaria queimando.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Um resistor SMD traz impresso o código 103. Qual é o valor dele?',
+      options: [
+        {
+          text: '10 kΩ',
+          correct: true,
+          feedback: 'Os dois primeiros algarismos são o valor (10) e o último é o número de zeros (3): 10.000 Ω.',
+        },
+        {
+          text: '103 Ω',
+          feedback: 'Nos códigos de 3 algarismos, o último não é algarismo do valor: é quantos zeros acrescentar.',
+        },
+        {
+          text: '1,03 kΩ',
+          feedback: 'Não há vírgula escondida. Quando o código tem vírgula, ela aparece como a letra R.',
+        },
+        {
+          text: '100 kΩ',
+          feedback: '100 kΩ seria 104: 10 seguido de 4 zeros.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Um resistor de cimento traz impresso "5W 0R22 J". O que isso quer dizer?',
+      options: [
+        {
+          text: '0,22 Ω, ±5 %, 5 W',
+          correct: true,
+          feedback: 'O R faz o papel da vírgula (0R22 = 0,22 Ω), J é a tolerância de ±5 % e 5W é a potência nominal.',
+        },
+        {
+          text: '22 Ω, ±5 %, 5 W',
+          feedback: 'O R fica no lugar da vírgula: 0R22 é zero vírgula vinte e dois ohms.',
+        },
+        {
+          text: '0,22 Ω, ±10 %, 5 W',
+          feedback: 'A letra J indica ±5 %. ±10 % seria a letra K.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Um resistor soldado na placa, com faixas de 4,7 kΩ, mede 3,3 kΩ no multímetro. Isso prova que ele está com defeito.',
+      answer: false,
+      explanation:
+        'Na placa, outros componentes ficam em paralelo com ele e baixam a leitura. Solte uma perna e meça de novo. Se medisse bem mais que 4,7 kΩ, aí sim estaria alterado, porque os caminhos em paralelo só podem baixar a leitura.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Os resistores mais comuns são de **filme de carbono** (4 faixas, ±5 %), **filme metálico** (5 faixas, ±1 %), **fio ou cimento** (potências altas, valor escrito) e **SMD** (código numérico).
+- No **código de cores**, as primeiras faixas são algarismos, a penúltima é o multiplicador e a última, afastada das outras, é a tolerância.
+- Os valores vêm em séries: a **E12** tem 10, 12, 15, 18, 22, 27, 33, 39, 47, 56, 68 e 82 em cada década; a E24 acrescenta mais 12.
+- A **potência dissipada** é $P = V^2 / R = R \cdot I^2$. Escolha uma **potência nominal** de pelo menos o dobro.
+- Nos códigos impressos, o último algarismo é o número de zeros, e a letra R, K ou M faz o papel da vírgula: 4R7, 1K5, 2M2.
+- Resistor queimado é sintoma: descubra a causa antes de trocar.
+
+Na próxima aula, o resistor ganha um cursor e passa a mudar de valor, girando um eixo ou sozinho, com o calor e a luz: <LinkAula id="m04-passivos/02-resistores-variaveis" />.

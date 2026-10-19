@@ -1,0 +1,425 @@
+---
+titulo: Indutores e circuito RL
+modulo: m04-passivos
+ordem: 5
+nivel: I
+duracaoMin: 30
+objetivos:
+  - Explicar o que é indutância e por que a corrente numa bobina não muda de uma vez
+  - Calcular a constante de tempo e a corrente final de um circuito RL
+  - Calcular a energia guardada no campo magnético de uma bobina
+  - Explicar de onde vem o pico de tensão quando uma bobina é desligada
+  - Ligar um diodo de roda livre na bobina de um relé, no sentido certo
+prerequisitos:
+  - m01-eletricidade-do-zero/04-lei-de-ohm
+  - m04-passivos/04-circuito-rc
+tags: [indutor, bobina, indutância, henry, circuito RL, constante de tempo, diodo de roda livre, relé, faísca]
+seguranca: baixa-tensao
+rascunho: false
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import InductorTypes from '../../../lessons/m04/figures/InductorTypes.astro';
+
+Na placa da central de um portão eletrônico, ao lado de cada relé (a caixinha que faz "tlec" quando o portão parte), há um diodo pequeno, preto, com uma faixa cinza. Ele está ligado de um jeito que parece errado: enquanto o relé está ligado, não conduz nada. Mas, sem ele, o transistor que comanda o relé corre o risco de queimar. Para que serve uma peça que não conduz? E por que sai uma faísca azulada do plugue quando você puxa da tomada um aspirador ligado?
+
+As duas perguntas têm a mesma resposta: a **bobina**. Nesta aula você vai ver por que a corrente numa bobina não para de uma vez e de onde vêm as centenas de volts que aparecem quando uma bobina de 12 V é desligada.
+
+## A bobina segura a corrente
+
+Passe corrente por um fio enrolado e aparece um campo magnético em volta das espiras, como no eletroímã (<LinkAula id="m05-magnetismo/02-eletroimas-e-solenoides" />). Montar esse campo exige energia, e energia não aparece de uma vez: enquanto o campo cresce, a bobina gera uma tensão contrária que freia a subida da corrente. Quando a corrente tenta diminuir, o campo que se desfaz gera uma tensão no sentido oposto, que tenta manter a corrente.
+
+Esse componente é o <Term id="indutor">indutor</Term>, que no dia a dia todo mundo chama de bobina. A propriedade de reagir às mudanças de corrente se chama <Term id="indutancia">indutância</Term>.
+
+Pense num carrinho de supermercado bem carregado: custa a começar a andar e, depois de andando, custa a parar. A corrente numa bobina tem esse tipo de inércia: a bobina não se opõe à corrente, e sim à **mudança** da corrente. A analogia para por aí: no carrinho, a inércia vem da massa de algo que se move; na bobina nada se move, e a "inércia" é a energia guardada no campo magnético.
+
+Na aula <LinkAula id="m04-passivos/03-capacitores" /> você viu o comportamento espelhado: o capacitor não deixa a **tensão** mudar de repente. A bobina não deixa a **corrente** mudar de repente.
+
+## Indutância em números
+
+A tensão que aparece numa bobina depende da rapidez com que a corrente muda:
+
+$$
+V_L = L \cdot \frac{\Delta I}{\Delta t}
+$$
+
+$V_L$ é a tensão na bobina, em volts (V). $\Delta I / \Delta t$ é quanto a corrente muda ($\Delta I$, em ampères) num intervalo de tempo ($\Delta t$, em segundos). $L$ é a indutância, medida em <Term id="henry">henry</Term> (H): uma bobina de 1 H gera 1 V quando a corrente nela muda 1 A a cada segundo.
+
+Com a corrente constante, seja 0 A ou 10 A, $\Delta I = 0$ e a indutância não gera tensão nenhuma: com corrente contínua estável, a bobina é só um pedaço de fio. Com a corrente mudando devagar, a tensão é pequena; mudando muito depressa ($\Delta t$ minúsculo), a tensão é enorme. É daí que vem a faísca.
+
+O henry é uma unidade grande. Bobinas de fontes chaveadas e de filtros ficam na casa dos microhenrys (µH) e dos milihenrys (mH); bobinas de relés e contatores, reatores de lâmpada fluorescente e enrolamentos de motores chegam a décimos de henry ou mais (valores típicos).
+
+A indutância cresce com o número de espiras (mantido o formato da bobina, dobrar as espiras multiplica a indutância por quatro), com a área de cada espira e, muito, com o núcleo: um núcleo de ferro ou de ferrite multiplica a indutância muitas vezes em relação à mesma bobina enrolada no ar.
+
+Enquanto a corrente passa, a bobina guarda energia no campo magnético:
+
+$$
+E = \frac{1}{2} \cdot L \cdot I^2
+$$
+
+com $E$ em joules (J), $L$ em henrys e $I$ em ampères. É a irmã da fórmula do capacitor, $E = \tfrac{1}{2} \cdot C \cdot V^2$. Quando a corrente é cortada, essa energia precisa ir para algum lugar. Essa frase explica a segunda metade da aula.
+
+## Como os indutores são
+
+<Part3D
+  part="inductor"
+  props={{ variant: 'tambor', microhenries: 100 }}
+  annotations
+  alt="Três indutores comuns. À esquerda, um indutor de tambor: um carretel de ferrite com fio de cobre enrolado e dois terminais embaixo. No meio, um indutor axial, parecido com um resistor gordinho, com faixas coloridas que indicam o valor em microhenry. À direita, um indutor toroidal: fio enrolado em volta de um anel de ferrite."
+  caption="Indutores de tambor, axial e toroidal."
+>
+  <InductorTypes />
+</Part3D>
+
+- **Tambor (radial)**: um carretel de ferrite com fio de cobre esmaltado, comum em fontes e placas. Às vezes vem num tubo termorretrátil com o valor em código de três algarismos, em microhenry: 101 é 10 seguido de um zero, 100 µH.
+- **Axial com faixas**: parece um resistor gordinho; as faixas seguem o código de cores dos resistores, com o valor em microhenry.
+- **Toroidal**: fio enrolado num anel de ferrite, que mantém o campo quase todo dentro do anel e interfere menos nas peças vizinhas.
+
+Também são bobinas a do <Term id="rele">relé</Term>, os enrolamentos de motores e transformadores, o reator da lâmpada fluorescente tubular, a bobina de ignição do carro e o cilindro de ferrite no cabo do notebook, que freia interferências de alta frequência.
+
+Na escala de resistência, o multímetro mede só a resistência do fio: algumas centenas de ohms na bobina de um relé de 12 V, uma fração de ohm numa bobina de ferrite de 100 µH (valores típicos). Isso mostra se o fio está inteiro (<LinkAula id="m03-medicoes/04-resistencia-continuidade-e-diodo" />), mas não mede a indutância; para isso existe o medidor LCR, e alguns multímetros têm escala de indutância.
+
+## O circuito RL
+
+Ligue uma bobina em série com um resistor e uma bateria. No instante em que a chave fecha, a corrente é zero e não pode pular; sem corrente, o resistor não tem queda de tensão, e toda a tensão da bateria fica na bobina. À medida que a corrente cresce, o resistor fica com uma parte cada vez maior da tensão, sobra menos para a bobina, e a corrente sobe cada vez mais devagar, até parar em $I = V / R$, como se a bobina nem estivesse lá.
+
+Esse é o <Term id="circuito-rl">circuito RL</Term>, e o ritmo da subida é dado pela **constante de tempo**:
+
+$$
+\tau = \frac{L}{R}
+$$
+
+Com $L$ em henrys e $R$ em ohms, $\tau$ (a letra grega tau) sai em segundos. A corrente segue a curva
+
+$$
+i(t) = \frac{V}{R} \cdot \left(1 - e^{-t/\tau}\right)
+$$
+
+em que $V$ é a tensão da bateria, $t$ é o tempo desde que a chave fechou e $e \approx 2{,}718$. Não precisa decorar a exponencial; basta lembrar dois pontos da curva, os mesmos do circuito RC:
+
+- depois de **uma** constante de tempo, a corrente chega a 63 % do valor final;
+- depois de **cinco**, passa de 99 %: na prática, a subida acabou.
+
+<Plot
+  title="corrente num circuito RL com bobina de 1 H e bateria de 12 V"
+  xUnit="s"
+  data={[
+    {
+      label: 'R = 100 Ω (τ = 10 ms)',
+      unit: 'mA',
+      points: [
+        [0, 0],
+        [0.0025, 26.5],
+        [0.005, 47.2],
+        [0.0075, 63.3],
+        [0.01, 75.9],
+        [0.0125, 85.6],
+        [0.015, 93.2],
+        [0.0175, 99.1],
+        [0.02, 103.8],
+        [0.0225, 107.4],
+        [0.025, 110.1],
+        [0.0275, 112.3],
+        [0.03, 114],
+        [0.0325, 115.3],
+        [0.035, 116.4],
+        [0.0375, 117.2],
+        [0.04, 117.8],
+        [0.0425, 118.3],
+        [0.045, 118.7],
+        [0.0475, 119],
+        [0.05, 119.2],
+      ],
+    },
+    {
+      label: 'R = 200 Ω (τ = 5 ms)',
+      unit: 'mA',
+      points: [
+        [0, 0],
+        [0.0025, 23.6],
+        [0.005, 37.9],
+        [0.0075, 46.6],
+        [0.01, 51.9],
+        [0.0125, 55.1],
+        [0.015, 57],
+        [0.0175, 58.2],
+        [0.02, 58.9],
+        [0.0225, 59.3],
+        [0.025, 59.6],
+        [0.0275, 59.8],
+        [0.03, 59.9],
+        [0.0325, 59.9],
+        [0.035, 59.9],
+        [0.0375, 60],
+        [0.04, 60],
+        [0.0425, 60],
+        [0.045, 60],
+        [0.0475, 60],
+        [0.05, 60],
+      ],
+    },
+  ]}
+/>
+
+Compare com o circuito RC da <LinkAula id="m04-passivos/04-circuito-rc">aula anterior</LinkAula>: lá, $\tau = R \cdot C$, e um resistor maior deixava a carga **mais lenta**. Aqui, $\tau = L / R$: no gráfico, o resistor de 200 Ω faz a subida acabar **mais cedo**, mas numa corrente menor. Faz sentido: com R maior, a corrente final é menor, e a bobina tem menos corrente para "construir".
+
+E quando a bateria sai e a bobina fica ligada só ao resistor? A corrente continua no mesmo sentido, empurrada pela energia do campo, e cai no mesmo ritmo: depois de uma constante de tempo, sobram 37 %.
+
+## Explore: a corrente que sobe devagar
+
+Na simulação, uma chave de duas posições liga a bateria de 12 V ao resistor de 100 Ω e à bobina de 1 H, ou tira a bateria e fecha o laço só entre o resistor e a bobina. O gráfico mostra a corrente e a tensão na bobina enquanto o tempo corre, em câmera lenta.
+
+<Simulation circuit="m04/rl-carga" instruments={['grafico', 'multimetro']} autoplay />
+
+1. Ponha a chave **Na bateria**. A corrente salta ou sobe aos poucos? Onde ela para?
+2. Quanto vale a tensão na bobina no primeiro instante? E quando a corrente para de subir?
+3. Calcule a constante de tempo. Quanto deveria valer a corrente depois de uma $\tau$?
+4. Volte a chave para **No negativo**. A corrente some de uma vez? Para que lado vai a tensão na bobina?
+5. Mude R1 para 200 Ω e repita. Depois volte R1 para 100 Ω e ponha a bobina em 2 H.
+
+A corrente sobe aos poucos e para em 120 mA (12 V ÷ 100 Ω): no fim, a bobina é só fio. No primeiro instante, a bobina fica com os 12 V inteiros, e essa tensão cai a zero conforme a corrente se estabiliza. A constante de tempo é 1 H ÷ 100 Ω = 0,01 s = 10 ms: depois de 10 ms, a corrente está em cerca de 76 mA (63 % de 120 mA), e em 50 ms está praticamente em 120 mA.
+
+De volta ao negativo, a corrente continua no mesmo sentido e cai no mesmo ritmo: depois de 10 ms sobram uns 44 mA (37 %). A tensão na bobina vira para cerca de −12 V: agora a bobina empurra a corrente pelo resistor, como uma fonte, até gastar a energia do campo.
+
+Com 200 Ω, a corrente final cai para 60 mA, e a constante de tempo para 5 ms. Com 2 H e 100 Ω, a corrente final volta a 120 mA, e a subida leva o dobro do tempo: 20 ms até os 76 mA.
+
+## Exemplo resolvido: a bobina de um relé
+
+A bobina de um relé de 12 V tem 400 Ω de resistência (medida com o multímetro) e uma indutância de 0,15 H, um valor plausível para um relé pequeno. Ligada em 12 V, qual é a corrente final, quanto tempo ela leva para se estabilizar e quanta energia fica guardada?
+
+**Passo 1: corrente final.** Com a corrente estável, só a resistência do fio conta:
+
+$$
+I = \frac{V}{R} = \frac{12\,\text{V}}{400\,\Omega} = 0{,}03\,\text{A} = 30\,\text{mA}
+$$
+
+**Passo 2: constante de tempo.**
+
+$$
+\tau = \frac{L}{R} = \frac{0{,}15\,\text{H}}{400\,\Omega} = 0{,}000375\,\text{s} = 0{,}375\,\text{ms}
+$$
+
+Em cinco constantes de tempo, $5 \times 0{,}375 \approx 1{,}9\,\text{ms}$, a corrente chegou aos 30 mA.
+
+**Passo 3: energia guardada.**
+
+$$
+\begin{aligned}
+E &= \frac{1}{2} \cdot L \cdot I^2 = \frac{1}{2} \times 0{,}15 \times 0{,}03^2 \\[4pt]
+&= 0{,}0000675\,\text{J} = 67{,}5\,\mu\text{J}
+\end{aligned}
+$$
+
+É muito pouco: uma pilha AA alcalina guarda uns 10.000 J (típico). O problema da bobina não é quanta energia ela guarda, e sim a pressa com que essa energia sai.
+
+<DeepDive title="Quanto tempo até a corrente chegar a 20 mA?">
+
+Isolando $t$ na curva $i(t) = I \cdot (1 - e^{-t/\tau})$, em que $I$ é a corrente final:
+
+$$
+t = \tau \cdot \ln\frac{I}{I - i}
+$$
+
+Para $i = 20\,\text{mA}$ e $I = 30\,\text{mA}$:
+
+$$
+t = 0{,}375\,\text{ms} \times \ln\frac{30}{30 - 20} = 0{,}375\,\text{ms} \times \ln 3 \approx 0{,}41\,\text{ms}
+$$
+
+Num relé real, os contatos demoram mais para fechar (alguns milissegundos, típico), porque a peça móvel, a armadura, precisa se mover. E a indutância muda um pouco quando ela se move, porque o caminho do campo magnético muda.
+
+</DeepDive>
+
+## Desligar uma bobina: o pico de tensão
+
+Agora, o diodo da central. A bobina do relé conduz 30 mA, e um botão (ou um transistor) abre o circuito. Pela fórmula $V_L = L \cdot \Delta I / \Delta t$, se a corrente cair de 30 mA a zero em 10 µs (dez milionésimos de segundo, um tempo plausível para um contato que se abre ou um transistor que corta):
+
+$$
+V_L = 0{,}15\,\text{H} \times \frac{0{,}03\,\text{A}}{0{,}00001\,\text{s}} = 450\,\text{V}
+$$
+
+São 450 V saindo de uma bobina alimentada com 12 V, e quanto mais rápido o corte, maior o pico. A bobina não cria energia: são os mesmos 67,5 µJ do exemplo, despejados em microssegundos. A tensão sobe o quanto for preciso para a corrente continuar por algum caminho.
+
+E que caminho? Com o circuito aberto, a tensão sobe até furar alguma coisa. Entre dois contatos que acabaram de se separar, o ar fura e conduz: é o <Term id="arco-eletrico">arco elétrico</Term>, a faísca azulada do plugue do aspirador ou do interruptor de parede. Cada faísca queima um pouquinho do metal dos contatos; por isso, contatos que desligam motores e bobinas se desgastam mais depressa. Se quem abre o circuito é um <Term id="transistor">transistor</Term>, o pico aparece entre os terminais dele, e um transistor pequeno, feito para algumas dezenas de volts (típico), pode ser danificado na hora ou aos poucos.
+
+## Explore: o pico no contato
+
+Na simulação abaixo, uma fonte de 12 V liga a bobina de um relé (0,15 H e 400 Ω, como no exemplo) através de um botão. O capacitor de 1 nF representa a capacitância do próprio <Term id="enrolamento">enrolamento</Term> e da fiação: espiras vizinhas funcionam como as placas de um capacitor minúsculo. A chave à direita liga um diodo em paralelo com a bobina.
+
+<Simulation circuit="m04/pico-bobina" instruments={['grafico']} autoplay />
+
+1. Segure o botão e acompanhe a corrente na bobina. Ela chega a 30 mA?
+2. Solte o botão. O que acontece com a tensão entre os contatos do botão?
+3. Ligue **Diodo de roda livre ligado** e repita: segure, espere a corrente estabilizar, solte. Quanto chega aos contatos agora?
+
+Com o botão apertado, a corrente sobe até 30 mA em menos de 2 ms, como no exemplo, e o contato fechado não tem tensão nenhuma. Ao soltar, sem o diodo, a tensão entre os contatos salta para cerca de 350 V e oscila até sumir. Com o diodo, ela não passa de cerca de 12,7 V.
+
+O gráfico abaixo mostra a mesma cena em detalhe, a partir do instante em que o contato abre, com e sem o diodo:
+
+<Plot
+  circuit="m04/pico-bobina-abertura"
+  until={0.0004}
+  series={['VA', 'VB']}
+  title="tensão entre os contatos nos primeiros 0,4 ms depois de abrir"
+/>
+
+Sem o diodo, a tensão chega a uns 370 V em 20 µs (um pouco mais que na simulação acima, porque o gráfico é calculado em passos de tempo menores). A energia vai e volta entre a bobina e a capacitância do enrolamento, por isso a tensão oscila e até fica negativa, e perde um pouco a cada ida e volta na resistência do fio. Com o diodo, a curva quase não sai dos 12 V.
+
+<Callout type="nota" title="O que o modelo simplifica">
+Neste modelo, quem limita o pico é a capacitância de 1 nF, que varia muito de uma bobina real para outra. Na prática, o pico muitas vezes nem chega ao valor calculado: o ar entre contatos que mal se separaram fura a algumas centenas de volts (típico), e um transistor conduz à força quando passa do que aguenta, esquentando. O número exato muda; a conclusão não: sem um caminho para a corrente, a tensão dispara.
+</Callout>
+
+## O diodo de roda livre
+
+A solução da central do portão é dar à corrente um caminho seguro: um <Term id="diodo">diodo</Term> em paralelo com a bobina, com a faixa (o catodo) do lado do positivo. Com a bobina ligada, o diodo fica polarizado ao contrário e não conduz. No instante em que o contato abre, a tensão na bobina se inverte, o diodo conduz, e a corrente fica girando no laço formado pela bobina e pelo diodo até morrer na resistência do fio.
+
+Por isso ele se chama <Term id="diodo-de-roda-livre">diodo de roda livre</Term> (em inglês, *flyback* ou *freewheeling diode*): a corrente gira solta, como a roda da bicicleta quando você para de pedalar. Na simulação, ele está desenhado com o catodo (a barra do símbolo) para cima, do lado do positivo.
+
+O que muda com ele:
+
+- **O contato só vê a fonte mais a queda do diodo**: cerca de 12 V + 0,7 V = 12,7 V.
+- **A corrente demora mais para sumir**: ela cai de 30 mA para uns 9 mA em 0,4 ms, em vez de sumir em microssegundos, e o relé solta um pouco mais devagar. Quando isso importa, usa-se um diodo em série com um diodo zener, que deixa a tensão subir um pouco mais em troca de uma descarga mais rápida.
+- **Só serve em corrente contínua.** Em CA, o diodo conduziria em metade de cada ciclo. Bobinas de CA, como as de contatores, usam um circuito RC ou um varistor em paralelo (<LinkAula id="m05-magnetismo/06-reles-e-contatores" />).
+
+Motores CC com escovas também são bobinas, e os circuitos com transistor que os ligam têm diodos fazendo esse mesmo papel.
+
+## Quando o pico é o objetivo
+
+O mesmo efeito é usado de propósito. Na **bobina de ignição** do carro, a central do motor (nos carros antigos, o platinado) corta de repente a corrente, e o pico, multiplicado por um segundo enrolamento com muito mais espiras, chega a dezenas de milhares de volts (típico) e faz saltar a faísca na vela. Na **lâmpada fluorescente tubular com reator convencional**, o starter (o cilindrinho encaixado na luminária) abre o circuito, e o pico do reator, que é uma bobina, acende o tubo.
+
+<RealCase title="O módulo de relé do Arduino e a central do portão">
+
+Quem monta automação com Arduino ou ESP32 costuma usar um **módulo de relé**: uma plaquinha com o relé, um transistor, um LED e, ao lado da bobina, um diodo pequeno, geralmente preto, com uma faixa numa das pontas.
+
+Num relé avulso na protoboard, o diodo é sua responsabilidade:
+
+1. Ache os dois terminais da bobina no desenho impresso no relé (ou meça: são os pinos com algumas dezenas a centenas de ohms entre si).
+2. Ligue um diodo comum, como o 1N4007 ou o 1N4148, direto nesses dois terminais.
+3. A faixa do diodo (catodo) vai no terminal ligado ao positivo; o outro lado, no terminal que o transistor liga ao negativo.
+
+A central do portão segue o mesmo esquema, com um diodo por relé. Quando um relé da central para de responder e o transistor que o aciona está em curto, um diodo de roda livre aberto ou ausente é um dos suspeitos. Veja <LinkAula id="m16-portao/03-a-central-por-dentro" /> e <LinkAula id="m16-portao/09-diagnostico-do-portao" />; o transistor como chave fica para <LinkAula id="m09-semicondutores/06-transistor-como-chave" />.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Ligar o diodo invertido.** Com a faixa do lado do negativo, ele conduz assim que a bobina é ligada: é um curto na fonte, que queima o diodo, o transistor ou o fusível.
+- **Tirar o diodo "porque ele não faz nada".** O trabalho dele acontece no microssegundo em que a bobina é desligada.
+- **Medir indutância com o ohmímetro.** Ele mede só a resistência do fio. Uma bobina com espiras em curto pode marcar resistência quase normal e ter a indutância bem menor.
+- **Usar chave ou relé no limite com carga indutiva.** Por causa do arco na abertura, interruptores e relés costumam aceitar menos corrente com cargas indutivas, como motores, do que com cargas resistivas. Confira a especificação.
+- **Achar que 12 V é sempre inofensivo.** Ao desligar uma bobina sem diodo, os terminais chegam a centenas de volts por um instante. Num relé pequeno, a energia é pouca e o máximo é um susto; em bobinas maiores, não.
+
+<Callout type="perigo" title="Bobina de ignição">
+Não segure os cabos de vela nem a bobina de ignição com o motor ligado ou dando partida, e não teste a faísca segurando o cabo. O pico chega a dezenas de milhares de volts (típico) e atravessa isolamento rachado, luva fina e pele úmida. Desligue a ignição antes de mexer no sistema de ignição.
+</Callout>
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Uma bobina de 0,5 H está em série com um resistor de 50 Ω. Qual é a constante de tempo do circuito?',
+      answer: 10,
+      tolerance: 0.01,
+      unit: 'ms',
+      explanation: 'τ = L ÷ R = 0,5 H ÷ 50 Ω = 0,01 s = 10 ms.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Quanta energia uma bobina de 0,2 H guarda quando passa por ela uma corrente de 0,5 A?',
+      answer: 25,
+      tolerance: 0.01,
+      unit: 'mJ',
+      explanation: 'E = ½ × L × I² = 0,5 × 0,2 × 0,5² = 0,025 J = 25 mJ.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'A corrente de 50 mA de uma bobina de 0,1 H é cortada em 20 µs. Qual é, aproximadamente, a tensão que aparece na bobina?',
+      answer: 250,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        'V = L × ΔI ÷ Δt = 0,1 × 0,05 ÷ 0,00002 = 250 V. Bem mais que a tensão que alimentava a bobina.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma bateria é ligada, de repente, a uma bobina em série com um resistor. Qual é a corrente no primeiro instante?',
+      options: [
+        {
+          text: 'Zero: a corrente começa em zero e sobe aos poucos',
+          correct: true,
+          feedback: 'A bobina não deixa a corrente mudar de repente. No primeiro instante, ela fica com toda a tensão da bateria.',
+        },
+        {
+          text: 'A tensão da bateria dividida pela resistência',
+          feedback: 'Esse é o valor final, depois de umas cinco constantes de tempo, quando a bobina já se comporta como um fio.',
+        },
+        {
+          text: 'Muito alta, porque a bobina é só um fio',
+          feedback:
+            'Com corrente estável, a bobina é só um fio. Mas no instante da ligação a corrente está mudando, e é aí que a indutância age.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Num circuito RL, você troca o resistor por outro de resistência maior. O que acontece?',
+      options: [
+        {
+          text: 'A corrente final fica menor e a subida termina mais cedo',
+          correct: true,
+          feedback: 'A corrente final é V ÷ R, e τ = L ÷ R também diminui quando R aumenta.',
+        },
+        {
+          text: 'A corrente final fica menor e a subida demora mais',
+          feedback: 'Isso valeria para o capacitor, onde τ = R × C. Na bobina, τ = L ÷ R: R maior deixa a subida mais rápida.',
+        },
+        {
+          text: 'A corrente final não muda, só o tempo',
+          feedback: 'No fim, a bobina é só um fio, e a corrente final é V ÷ R. Com R maior, ela diminui.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Como o diodo de roda livre deve ser ligado na bobina de um relé de 12 V?',
+      options: [
+        {
+          text: 'Em paralelo com a bobina, com a faixa (catodo) do lado do positivo',
+          correct: true,
+          feedback:
+            'Assim ele não conduz com a bobina ligada, e conduz no instante em que ela é desligada, dando caminho para a corrente.',
+        },
+        {
+          text: 'Em paralelo com a bobina, com a faixa do lado do negativo',
+          feedback: 'Assim ele conduz direto assim que a bobina é ligada: é um curto na fonte.',
+        },
+        {
+          text: 'Em série com a bobina',
+          feedback:
+            'Em série, ele não oferece caminho nenhum para a corrente quando o circuito abre, e o pico continua lá.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Com corrente contínua estável, uma bobina se comporta como um pedaço de fio, com a resistência do fio.',
+      answer: true,
+      explanation:
+        'A indutância só gera tensão quando a corrente muda. Corrente parada, bobina "invisível": sobra só a resistência do cobre.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Uma bobina (indutor) não deixa a **corrente** mudar de repente: $V_L = L \cdot \Delta I / \Delta t$, com $L$ em henrys.
+- Com corrente contínua estável, a bobina é só fio; o multímetro na escala de ohms mede a resistência do fio, não a indutância.
+- Num circuito RL, a corrente sobe até $V/R$ com constante de tempo $\tau = L/R$: 63 % em uma $\tau$, praticamente tudo em cinco.
+- A bobina guarda $E = \tfrac{1}{2} \cdot L \cdot I^2$. Cortar a corrente de uma vez faz essa energia sair em microssegundos, como um pico de centenas de volts que faísca contatos e danifica transistores.
+- O diodo de roda livre, em paralelo com a bobina e com a faixa no positivo, dá caminho para a corrente e limita o pico a pouco mais que a tensão da fonte.
+
+A próxima aula trata de outra peça que reage à corrente, mas de um jeito bem mais drástico: <LinkAula id="m04-passivos/06-fusiveis-e-protecao" />. A indução em detalhe, com ímãs e transformadores, está em <LinkAula id="m05-magnetismo/03-inducao-eletromagnetica" />, e o comportamento da bobina em corrente alternada, em <LinkAula id="m06-corrente-alternada/04-reatancia-e-impedancia" />.

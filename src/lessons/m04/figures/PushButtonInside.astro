@@ -1,0 +1,146 @@
+---
+/*
+ * 04.7: inside a normally open push-button (a doorbell button): the spring
+ * keeps the bridge away from the fixed contacts; pressing closes them, and
+ * letting go opens them again.
+ */
+const panels = [
+  { dx: 0, pressed: false, title: 'Solto', note: 'A mola afasta a ponte: aberto.' },
+  {
+    dx: 285,
+    pressed: true,
+    title: 'Apertado',
+    note: 'A ponte encosta nos dois contatos: fechado.',
+  },
+].map((p) => ({ ...p, d: p.pressed ? 18 : 0 }));
+
+function zigzag(y0: number, y1: number) {
+  const n = 8;
+  const step = (y1 - y0) / n;
+  let d = `M135 ${y0}`;
+  for (let i = 1; i <= n; i++) d += ` L${i % 2 ? 147 : 123} ${y0 + step * (i - 0.5)}`;
+  return `${d} L135 ${y1}`;
+}
+---
+
+<svg viewBox="0 0 560 300" width="560" height="300" class="fig" aria-hidden="true">
+  {panels.map((p) => (
+    <g transform={`translate(${p.dx} 0)`}>
+      <text x="135" y="22" class="title">
+        {p.title}
+      </text>
+      {p.pressed && <path d="M135 30 V44 M129 38 L135 45 L141 38" class="push" />}
+      <path d="M105 62 H60 V204 H210 V62 H165" class="body" />
+      <rect x="105" y={50 + p.d} width="60" height="34" rx="6" class="cap" />
+      <path d={`M135 ${84 + p.d} V${138 + p.d}`} class="plunger" />
+      <rect
+        x="84"
+        y={138 + p.d}
+        width="102"
+        height="8"
+        rx="2"
+        class={p.pressed ? 'bridge on' : 'bridge'}
+      />
+      <path d={zigzag(146 + p.d, 200)} class="spring" />
+      <rect x="84" y="166" width="16" height="8" class={p.pressed ? 'fixed on' : 'fixed'} />
+      <rect x="170" y="166" width="16" height="8" class={p.pressed ? 'fixed on' : 'fixed'} />
+      <path d="M84 170 H34 M186 170 H236" class={p.pressed ? 'lead on' : 'lead'} />
+      <circle cx="30" cy="170" r="6" class="screw" />
+      <circle cx="240" cy="170" r="6" class="screw" />
+      <text x="135" y="236" class="lbl">
+        bornes nas pontas
+      </text>
+      <text x="135" y="272" class={p.pressed ? 'note on' : 'note'}>
+        {p.note}
+      </text>
+    </g>
+  ))}
+  <text x="222" y="70" class="lbl start">
+    tecla
+  </text>
+  <text x="152" y="120" class="lbl start">
+    ponte
+  </text>
+  <text x="152" y="192" class="lbl start">
+    mola
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .body {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+    fill: color-mix(in oklab, var(--fg-subtle) 10%, transparent);
+  }
+  .cap {
+    fill: var(--surface-2);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .plunger {
+    stroke: var(--fg-muted);
+    stroke-width: 4;
+  }
+  .bridge,
+  .fixed {
+    fill: color-mix(in oklab, var(--fg-subtle) 40%, transparent);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .bridge.on,
+  .fixed.on {
+    fill: var(--copper);
+    stroke: var(--copper);
+  }
+  .lead {
+    stroke: var(--fg-subtle);
+    stroke-width: 2.5;
+  }
+  .lead.on {
+    stroke: var(--copper);
+  }
+  .spring {
+    stroke: var(--info);
+    stroke-width: 1.8;
+  }
+  .screw {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .push {
+    stroke: var(--warning);
+    stroke-width: 2.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .title {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .lbl {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .note {
+    font-size: 13px;
+    fill: var(--fg-muted);
+  }
+  .note.on {
+    fill: var(--success);
+    font-weight: 600;
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>

@@ -1,0 +1,144 @@
+---
+/*
+ * 04.1: the four kinds of resistor the lesson describes, side by side:
+ * carbon film (4 bands), metal film (5 bands), cement (value printed) and an
+ * SMD chip on its pads. Generic drawings, no brand.
+ */
+import ResistorBands from './ResistorBands.astro';
+---
+
+<div class="rt">
+  <div class="rt__item">
+    <ResistorBands ohms={4700} tolerance={5} count={4} legend={false} />
+    <p class="rt__cap">
+      <strong>Filme de carbono</strong>: corpo bege, 4 faixas, ±5 % (típico).
+    </p>
+  </div>
+
+  <div class="rt__item">
+    <ResistorBands ohms={10000} tolerance={1} count={5} legend={false} />
+    <p class="rt__cap">
+      <strong>Filme metálico</strong>: corpo azul, 5 faixas, ±1 % (típico).
+    </p>
+  </div>
+
+  <div class="rt__item">
+    <svg viewBox="0 0 360 110" width="360" height="110" aria-hidden="true">
+      <path d="M6 55H64M296 55H354" class="lead" />
+      <rect x="60" y="22" width="240" height="66" rx="5" class="cement" />
+      <path d="M68 30H292" class="cement-edge" />
+      <text x="180" y="62" class="print">
+        5W 10RJ
+      </text>
+    </svg>
+    <p class="rt__cap">
+      <strong>Fio ou cimento</strong>: de alguns watts a dezenas de watts, valor escrito por
+      extenso.
+    </p>
+  </div>
+
+  <div class="rt__item">
+    <svg viewBox="0 0 360 110" width="360" height="110" aria-hidden="true">
+      <rect x="20" y="10" width="320" height="90" rx="8" class="pcb" />
+      <path d="M40 55H110M250 55H320" class="trace" />
+      <rect x="108" y="34" width="44" height="42" rx="3" class="pad" />
+      <rect x="208" y="34" width="44" height="42" rx="3" class="pad" />
+      <rect x="122" y="38" width="116" height="34" rx="2" class="chip" />
+      <rect x="122" y="38" width="16" height="34" class="cap" />
+      <rect x="222" y="38" width="16" height="34" class="cap" />
+      <text x="180" y="62" class="code">
+        472
+      </text>
+    </svg>
+    <p class="rt__cap">
+      <strong>SMD</strong>: chip soldado na superfície da placa, valor em código (472 = 4,7 kΩ).
+    </p>
+  </div>
+</div>
+
+<style>
+  .rt {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1.25rem 1.5rem;
+    width: 100%;
+  }
+
+  .rt__item {
+    display: grid;
+    gap: 0.5rem;
+    justify-items: center;
+    margin: 0;
+  }
+
+  .rt__item svg {
+    width: 100%;
+    max-width: 26rem;
+    height: auto;
+  }
+
+  .rt__cap {
+    margin: 0;
+    color: var(--fg-muted);
+    font-size: 0.875rem;
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  .lead {
+    fill: none;
+    stroke: color-mix(in oklab, var(--fg-subtle) 70%, var(--bg));
+    stroke-width: 5;
+    stroke-linecap: round;
+  }
+
+  .cement {
+    fill: #ecebe4;
+    stroke: color-mix(in oklab, var(--fg) 35%, transparent);
+    stroke-width: 1.5;
+  }
+
+  .cement-edge {
+    stroke: #fff;
+    stroke-width: 4;
+    opacity: 0.7;
+  }
+
+  .print {
+    fill: #222;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+
+  .pcb {
+    fill: #1f5e3a;
+  }
+
+  .trace {
+    stroke: #c7a24a;
+    stroke-width: 8;
+    opacity: 0.6;
+  }
+
+  .pad {
+    fill: #d7d9dc;
+  }
+
+  .chip {
+    fill: #1b1b1b;
+  }
+
+  .cap {
+    fill: #b9bcc0;
+  }
+
+  .code {
+    fill: #f1f1ec;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+</style>

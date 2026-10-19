@@ -1,0 +1,95 @@
+---
+/* 04.3: ceramic capacitors: a disc marked "104", a dipped multilayer and an SMD chip with no marking. */
+---
+
+<svg viewBox="0 0 520 250" width="520" height="250" class="fig" aria-hidden="true">
+  <path d="M95 118 V140 L90 150 V200 M125 118 V140 L130 150 V200" class="lead" />
+  <circle cx="110" cy="80" r="42" class="disc" />
+  <text x="110" y="87" class="code">
+    104
+  </text>
+  <text x="110" y="222" class="lbl">
+    disco cerâmico
+  </text>
+  <text x="110" y="240" class="small">
+    104 = 100 nF
+  </text>
+
+  <path d="M262 98 V200 M278 98 V200" class="lead" />
+  <rect x="250" y="66" width="40" height="36" rx="14" class="mlcc" />
+  <text x="270" y="89" class="tiny-code">
+    104
+  </text>
+  <text x="270" y="222" class="lbl">
+    multicamada
+  </text>
+  <text x="270" y="240" class="small">
+    com pernas
+  </text>
+
+  <rect x="402" y="100" width="56" height="28" rx="2" class="chip" />
+  <rect x="402" y="100" width="11" height="28" rx="1" class="end" />
+  <rect x="447" y="100" width="11" height="28" rx="1" class="end" />
+  <text x="430" y="222" class="lbl">
+    multicamada SMD
+  </text>
+  <text x="430" y="240" class="small">
+    sem marcação
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .lead {
+    stroke: var(--fg-subtle);
+    stroke-width: 3;
+  }
+  .disc {
+    fill: color-mix(in oklab, var(--copper) 55%, var(--surface));
+    stroke: var(--copper);
+  }
+  .mlcc {
+    fill: color-mix(in oklab, var(--warning) 45%, var(--surface));
+    stroke: var(--warning);
+  }
+  .chip {
+    fill: color-mix(in oklab, var(--copper) 35%, var(--surface));
+    stroke: var(--copper);
+    stroke-width: 1.5;
+  }
+  .end {
+    fill: color-mix(in oklab, var(--fg-subtle) 50%, var(--surface));
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .tiny-code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .lbl {
+    font-weight: 700;
+    font-size: 14.5px;
+  }
+  .small {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+</style>
