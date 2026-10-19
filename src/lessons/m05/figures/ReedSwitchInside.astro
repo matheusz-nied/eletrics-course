@@ -1,0 +1,160 @@
+---
+/*
+ * 05.5: a reed switch without and with a magnet nearby. Two ferromagnetic
+ * blades overlap inside a glass capsule; the magnet turns their tips into
+ * opposite poles and they snap together.
+ */
+const panels = [
+  { dx: 0, near: false, title: 'Sem ímã: aberto' },
+  { dx: 285, near: true, title: 'Ímã perto: fechado' },
+];
+---
+
+<svg viewBox="0 0 560 250" width="560" height="250" class="fig" aria-hidden="true">
+  {panels.map((p) => (
+    <g transform={`translate(${p.dx} 0)`}>
+      <text x="135" y="24" class="title">
+        {p.title}
+      </text>
+      <path d="M8 104 H44 M226 104 H262" class={p.near ? 'lead on' : 'lead'} />
+      <rect x="40" y="82" width="190" height="44" rx="22" class="glass" />
+      <rect
+        x="44"
+        y={p.near ? 99 : 96}
+        width="102"
+        height="6"
+        rx="2"
+        class={p.near ? 'blade on' : 'blade'}
+      />
+      <rect
+        x="124"
+        y={p.near ? 105 : 108}
+        width="102"
+        height="6"
+        rx="2"
+        class={p.near ? 'blade on' : 'blade'}
+      />
+      {p.near && (
+        <g>
+          <text x="134" y="94" class="tiny">
+            N
+          </text>
+          <text x="136" y="124" class="tiny">
+            S
+          </text>
+          <rect x="60" y="168" width="75" height="26" class="pole-n" />
+          <rect x="135" y="168" width="75" height="26" class="pole-s" />
+          <text x="97" y="186" class="pole-text">
+            N
+          </text>
+          <text x="172" y="186" class="pole-text">
+            S
+          </text>
+          <text x="135" y="214" class="note">
+            ímã paralelo à ampola
+          </text>
+        </g>
+      )}
+      {!p.near && (
+        <g>
+          <path d="M135 104 V150" class="leader" />
+          <text x="135" y="166" class="note">
+            folga de décimos de milímetro
+          </text>
+          <text x="70" y="70" class="note start">
+            ampola de vidro
+          </text>
+          <text x="135" y="196" class="note">
+            lâminas de ferro-níquel,
+          </text>
+          <text x="135" y="212" class="note">
+            com gás inerte em volta
+          </text>
+        </g>
+      )}
+      <text x="135" y="240" class={p.near ? 'state on' : 'state'}>
+        {p.near ? 'As pontas viram polos opostos.' : 'A mola das lâminas as separa.'}
+      </text>
+    </g>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .glass {
+    fill: color-mix(in oklab, var(--info) 8%, transparent);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .blade {
+    fill: color-mix(in oklab, var(--fg-subtle) 55%, transparent);
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .blade.on {
+    fill: var(--copper);
+    stroke: var(--copper);
+  }
+  .lead {
+    stroke: var(--fg-subtle);
+    stroke-width: 2.5;
+  }
+  .lead.on {
+    stroke: var(--copper);
+  }
+  .leader {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  .pole-n {
+    fill: var(--danger);
+    stroke: var(--fg);
+    stroke-width: 1.2;
+  }
+  .pole-s {
+    fill: var(--info);
+    stroke: var(--fg);
+    stroke-width: 1.2;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .title {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .note {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .tiny {
+    font-size: 11px;
+    font-weight: 700;
+    fill: var(--fg-muted);
+  }
+  .pole-text {
+    font-size: 13px;
+    font-weight: 700;
+    fill: var(--on-accent);
+  }
+  .state {
+    font-size: 12.5px;
+    fill: var(--fg-muted);
+  }
+  .state.on {
+    fill: var(--success);
+    font-weight: 600;
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>

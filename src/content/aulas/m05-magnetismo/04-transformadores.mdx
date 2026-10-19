@@ -1,0 +1,323 @@
+---
+titulo: Transformadores
+modulo: m05-magnetismo
+ordem: 4
+nivel: I
+duracaoMin: 30
+objetivos:
+  - Explicar como o transformador usa a indução mútua e por que ele só funciona em CA
+  - Calcular tensões e correntes com a relação de espiras
+  - Ler a potência em VA e entender o núcleo laminado, as perdas e a regulação
+  - Diferenciar um transformador isolador de um autotransformador
+  - Conferir um transformador com chave 127/220 V na ordem segura
+prerequisitos:
+  - m05-magnetismo/03-inducao-eletromagnetica
+  - m03-medicoes/02-medindo-tensao
+tags: [transformador, trafo, relação de espiras, núcleo laminado, autotransformador, 127/220, central de portão]
+seguranca: rede
+rascunho: false
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import TransformerCore from '../../../lessons/m05/figures/TransformerCore.astro';
+import TapSelector from '../../../lessons/m05/figures/TapSelector.astro';
+import EiCore from '../../../lessons/m05/figures/EiCore.astro';
+import IsolationVsAuto from '../../../lessons/m05/figures/IsolationVsAuto.astro';
+
+Abra a caixa de uma central de portão antiga e você vai achar, num canto, uma peça pesada, feita de chapas de ferro e fio de cobre: o transformador, ou "trafo". A placa da central funciona com 12 V, e a tomada dá 127 V ou 220 V. Quem faz essa conversão é o trafo. Ao lado dele costuma haver uma chavinha marcada **127/220**. Na posição errada, a placa recebe quase o dobro da tensão e pode queimar em segundos.
+
+Nesta aula você vai ver como o transformador funciona, como calcular o que sai dele e como conferir um trafo desses com o multímetro, na ordem segura.
+
+## Duas bobinas e um núcleo
+
+Na aula anterior, <LinkAula id="m05-magnetismo/03-inducao-eletromagnetica" />, você viu a **indução mútua**: a corrente que muda numa bobina induz tensão numa bobina vizinha. O <Term id="transformador">transformador</Term> é isso, feito para funcionar bem: duas bobinas, chamadas de <Term id="enrolamento">enrolamentos</Term>, montadas no mesmo núcleo de ferro.
+
+<Figure caption="Figura 1. A ideia do transformador. A rede faz circular corrente alternada no primário; o fluxo magnético que ela cria dá a volta pelo núcleo de ferro e atravessa o secundário, onde induz a tensão de saída. Nenhum fio liga um lado ao outro.">
+  <TransformerCore />
+</Figure>
+
+- O <Term id="primario">primário</Term> é o enrolamento que recebe a energia, ligado na rede.
+- O <Term id="secundario">secundário</Term> é o enrolamento que entrega a energia, ligado na carga (a placa da central, por exemplo).
+
+A corrente alternada no primário cria um fluxo magnético que muda o tempo todo. O núcleo de ferro guia quase todo esse fluxo para dentro do secundário, e, pela lei de Faraday, aparece tensão nas pontas dele. Repare na Figura 1: entre o primário e o secundário não há fio nenhum. A energia passa só pelo campo magnético.
+
+### Por que só funciona em corrente alternada
+
+Lembre da regra da aula anterior: **só fluxo que muda induz tensão.** Com <Term id="corrente-alternada">corrente alternada</Term> (CA), a corrente do primário sobe, desce e troca de sentido 60 vezes por segundo, e o fluxo acompanha. Com <Term id="corrente-continua">corrente contínua</Term> (CC), o fluxo fica parado e o secundário não recebe nada.
+
+E o primário ainda sofre. Em CA, o que segura a corrente do primário é a própria indutância do enrolamento, que você viu na aula <LinkAula id="m04-passivos/05-indutores-e-circuito-rl" />: ela "reage" à corrente que muda. Em CC essa reação some, e sobra só a resistência do fio de cobre. No trafo da simulação desta aula, o primário tem 80 Ω: ligado em 220 V de CC, passariam $220 / 80 = 2{,}75\,\text{A}$, cerca de 600 W num trafo feito para 15 W. Ele queima. **Transformador comum não funciona com CC e queima com ela.**
+
+## A relação de espiras
+
+Todas as espiras no mesmo núcleo veem o mesmo fluxo mudando, então cada espira recebe a mesma tensão, tanto no primário quanto no secundário. É como dividir a tensão em "volts por espira". Daí sai a regra mais importante do transformador, a <Term id="relacao-de-espiras">relação de espiras</Term>:
+
+$$
+\frac{V_p}{V_s} = \frac{N_p}{N_s}
+$$
+
+- $V_p$ e $V_s$ são as tensões do primário e do secundário, em volts (valores eficazes, os que o multímetro mostra em V~);
+- $N_p$ e $N_s$ são os números de espiras do primário e do secundário.
+
+Um exemplo com números redondos: um primário de 1.700 espiras ligado em 220 V dá $220 / 1.700 \approx 0{,}129\,\text{V}$ por espira. Um secundário de 100 espiras, no mesmo núcleo, dá $100 \times 0{,}129 \approx 12{,}9\,\text{V}$. A relação é $1.700 / 100 = 17$: a tensão cai 17 vezes. Com menos espiras no secundário que no primário, o trafo é **abaixador**, como o da central. Com mais espiras no secundário, ele é **elevador**.
+
+### E a corrente?
+
+O transformador não cria energia. Desprezando as perdas, a potência que entra no primário é a que sai no secundário:
+
+$$
+V_p \cdot I_p \approx V_s \cdot I_s \quad\Rightarrow\quad \frac{I_s}{I_p} \approx \frac{N_p}{N_s}
+$$
+
+Se a tensão cai 17 vezes, a corrente **sobe** 17 vezes. Por isso o fio do secundário de um trafo abaixador é bem mais grosso que o do primário: ele carrega mais corrente.
+
+## Potência em VA
+
+A etiqueta de um trafo não diz a potência em watts, e sim em <Term id="volt-ampere">volt-ampères</Term> (VA): a tensão vezes a corrente que ele aguenta. O que esquenta o trafo é a corrente nos fios, e certas cargas (motores, fontes) puxam uma corrente maior do que a potência que de fato usam. A conta em VA cobre esses casos. A diferença entre VA e W é assunto da aula <LinkAula id="m06-corrente-alternada/05-potencia-e-fator-de-potencia" />.
+
+### Exemplo resolvido: o trafo de 15 VA da central
+
+O trafo da central é de 220 V para 12 V, 15 VA.
+
+1. **Corrente máxima no secundário:** $I_s = 15\,\text{VA} / 12\,\text{V} = 1{,}25\,\text{A}$. Se a placa, a trava e a fotocélula juntas puxarem mais que isso, o trafo esquenta além do previsto.
+2. **Corrente no primário com a carga máxima:** $I_p = 15\,\text{VA} / 220\,\text{V} \approx 68\,\text{mA}$. Por isso o fusível do lado da rede é bem menor que o do lado de 12 V.
+3. **Com a carga de teste da simulação:** o secundário entrega 0,92 A. Pela relação de espiras, o primário deveria puxar $0{,}92 / 17 \approx 54\,\text{mA}$. A simulação mostra 61 mA. A diferença é a **corrente de magnetização**, que o primário puxa mesmo sem carga para manter o fluxo no núcleo (29 mA neste trafo). As duas não se somam direto, porque estão fora de fase: a conta é $\sqrt{54^2 + 29^2} \approx 61\,\text{mA}$, como a hipotenusa de um triângulo. Fase é assunto da aula <LinkAula id="m06-corrente-alternada/03-fase-e-fasores" />.
+
+## Explore: o trafo da central na bancada
+
+A simulação abaixo tem a rede, a chave seletora do trafo e uma carga de teste no secundário: um resistor de 24 Ω, que puxa o que a placa da central puxaria, e uma lâmpada de 12 V e 5 W, que mostra de longe o que chega ao secundário. Cada multímetro mede um ponto: tensão e corrente no primário e no secundário.
+
+<Simulation
+  circuit="m05/trafo-central"
+  instruments={['multimetro', { kind: 'osciloscopio', series: ['VP', 'VS'] }]}
+  height={340}
+/>
+
+1. **Aperte o play (▶).** Com a rede em 220 V e a seletora na posição 220 V, deixe os multímetros em V~ e A~. O secundário marca 12,1 V e 0,92 A; o primário, 220 V e 61 mA. A lâmpada acende normal.
+2. **Desligue a carga** (a chave "Carga ligada ao secundário"). A tensão do secundário sobe para 12,9 V, que é $220 / 17$. A corrente do primário cai para 29 mA, mas não para zero: é a corrente de magnetização.
+3. **Olhe o osciloscópio.** As duas senoides sobem e descem juntas. Compare a escala dos dois canais: o pico do primário é 17 vezes o do secundário.
+4. **Repita o erro do caso real.** Ligue a carga de novo e, com a rede em 220 V, mude a seletora para a posição 127 V. O secundário vai para uns 21 V e a lâmpada de 12 V queima.
+5. **O erro ao contrário.** Use **Reiniciar** para trocar a lâmpada, ponha a rede em 127 V e a seletora em 220 V. O secundário dá só 6,9 V e a lâmpada fica fraca: nada queima, mas a central não funcionaria direito (os relés podem nem colar). Com a seletora em 127 V, o secundário volta para perto de 12 V (11,6 V na simulação).
+
+A simulação mostra a tensão que chega ao secundário, mas simplifica o núcleo. Num trafo real, a seletora em 127 V numa rede de 220 V também força o ferro além do que ele aguenta (ele **satura**): a corrente do primário dispara e o trafo esquenta, mesmo sem carga. A simulação não mostra esse aquecimento.
+
+<Figure caption="Figura 2. A chave seletora 127/220 V, com a tomada de 220 V nos dois casos. Na posição 220 V, a tensão da rede se espalha por todas as espiras do primário e o secundário dá 12 V. Na posição 127 V, os mesmos 220 V caem em só 58% das espiras: cada espira recebe mais volts, e o secundário também.">
+  <TapSelector />
+</Figure>
+
+A Figura 2 mostra o porquê. A posição 127 V liga a rede numa derivação (um fio que sai do meio do enrolamento) que pega só 127/220 das espiras do primário, 58% delas. Com 127 V na tomada, isso dá os mesmos volts por espira de antes. Com 220 V, os volts por espira sobem 220/127 = 1,73 vez, e o secundário também: $12{,}1 \times 1{,}73 \approx 21\,\text{V}$. Em alguns trafos, o primário tem duas metades iguais, que a chave liga em série (220 V) ou em paralelo (127 V). O resultado do erro é o mesmo.
+
+## O núcleo laminado
+
+O núcleo é de ferro porque o ferro concentra e guia o campo: quase todo o fluxo do primário passa pelo secundário. Mas o ferro também conduz eletricidade. Num bloco maciço, o fluxo alternado induziria <Term id="correntes-parasitas">correntes parasitas</Term> rodando dentro do próprio ferro, como no tubo de cobre da aula anterior, e o núcleo viraria um aquecedor.
+
+A solução é o <Term id="nucleo-laminado">núcleo laminado</Term>: em vez de um bloco, uma pilha de chapas finas de aço-silício, cada uma coberta por uma camada de verniz isolante. As correntes parasitas ficam presas dentro de cada chapa, onde quase não têm espaço para circular. No trafo mais comum, as chapas têm formato de **E** e de **I**, encaixadas alternadas.
+
+<Part3D
+  part="transformer-ei"
+  props={{ primaryVoltage: 'bivolt', secondaryVoltage: 12, secondaryCurrent: 1, size: 'EI-48' }}
+  explode
+  annotations
+  alt="Transformador EI desmontado, visto de frente: em cima, as chapas em E com três pernas; no meio, o carretel cortado ao meio, com o primário de fio fino por dentro, em volta da perna central, e o secundário de fio grosso por fora; embaixo, as chapas em I que fecham o núcleo. Do primário saem três fios, 0, 127 e 220; do secundário, dois fios de 12 V. Ao lado, o núcleo visto de lado, com as chapas finas separadas por verniz, e uma etiqueta de exemplo: Primário 0 – 127 – 220 V, Secundário 12 V – 1,25 A, Potência 15 VA."
+  caption="Transformador EI desmontado: chapas em E e em I, o carretel com os dois enrolamentos e uma etiqueta de exemplo."
+>
+  <EiCore />
+</Part3D>
+
+Esse empilhamento explica o **zumbido** dos transformadores: o campo faz as chapas vibrarem um pouquinho, duas vezes a cada ciclo, 120 vezes por segundo. Chapas mal presas zumbem mais alto.
+
+## Perdas e regulação
+
+Nenhum transformador é perfeito. Parte da energia vira calor em dois lugares:
+
+- **Perdas no cobre:** a corrente esquenta os fios dos enrolamentos (o <Term id="efeito-joule">efeito Joule</Term>). Elas crescem com a carga. Na simulação, com a carga de teste ligada, o cobre dissipa cerca de 0,8 W.
+- **Perdas no ferro:** correntes parasitas que sobram nas chapas e a energia gasta para magnetizar o ferro para um lado e para o outro a cada ciclo. Elas existem mesmo sem carga, e é por isso que um trafo ligado na tomada sem nada no secundário fica morno. A simulação não inclui essas perdas.
+
+A resistência dos fios também faz a tensão do secundário cair quando a carga aumenta. A medida dessa queda é a **regulação**: no trafo da simulação, 12,9 V sem carga e 12,1 V com carga, uma queda de $(12{,}9 - 12{,}1) / 12{,}1 \approx 7\%$. Os fabricantes enrolam umas espiras a mais no secundário para que a tensão da etiqueta seja a tensão **com carga**. Por isso é normal um trafo de 12 V marcar um pouco mais que 12 V sem carga.
+
+## Isolador ou autotransformador
+
+O transformador da Figura 1 tem uma propriedade valiosa: o secundário não tem nenhum caminho de metal até a rede. Esse isolamento entre os dois lados se chama **isolação galvânica**. Nos 12 V da central, ele é o que deixa a placa segura de tocar: o que sai do secundário não tem ligação nenhuma com a fase da tomada.
+
+Existe um parente mais barato e mais leve que não tem isso: o <Term id="autotransformador">autotransformador</Term>, um enrolamento só com uma derivação no meio. A saída sai da derivação e usa os próprios fios da rede.
+
+<Figure caption="Figura 3. À esquerda, o transformador isolador: dois enrolamentos e nenhum fio em comum entre a rede e a saída. À direita, o autotransformador: um enrolamento só, e a saída usa os mesmos fios da rede. Tocar num fio da saída do autotransformador é como tocar na tomada.">
+  <IsolationVsAuto />
+</Figure>
+
+O "transformador" de tomada que converte 220 V para 127 V (ou o contrário), vendido para ligar um aparelho de outra tensão, costuma ser um autotransformador; a etiqueta diz. Ele converte a tensão, mas **não isola**: a saída dá choque exatamente como a tomada.
+
+Mesmo um transformador isolador só protege contra um tipo de choque: o que passa pelo seu corpo até a terra. Tocar os **dois** fios da saída de um trafo de 220 V para 220 V dá choque do mesmo jeito. Isolação não é licença para trabalhar com o circuito energizado.
+
+## Tipos de transformador
+
+- **EI:** o das Figuras e da central antiga. Chapas em E e I, robusto e barato. Aparece em fontes antigas, nobreaks e aparelhos de som.
+- **Toroidal:** o núcleo é um anel de chapa enrolada, com os fios em volta. É mais compacto e espalha menos campo, mas puxa um pico de corrente alto no instante em que é ligado.
+- **De alta frequência:** nas fontes chaveadas, o trafo trabalha com dezenas de milhares de ciclos por segundo em vez de 60. Quanto mais rápido o fluxo muda, menos espiras e menos núcleo são precisos, e o trafo encolhe para o tamanho de uma tampinha. É o caso das centrais de portão mais novas, que aceitam de 90 V a 240 V sem chave nenhuma. Veja <LinkAula id="m10-fontes/02-fontes-chaveadas" />.
+- **Transformador de corrente:** o primário é o próprio cabo que passa por dentro de um anel. Ele mede corrente em medidores de energia e no alicate amperímetro de CA, da aula <LinkAula id="m03-medicoes/03-medindo-corrente" />.
+
+O trafo da central é a primeira peça de uma **fonte linear**: depois dele vêm os diodos que retificam a CA (<LinkAula id="m09-semicondutores/03-retificadores" />), o capacitor que filtra e o regulador que estabiliza. A fonte completa é a aula <LinkAula id="m10-fontes/01-fonte-linear" />.
+
+<RealCase title="Conferindo o trafo de uma central antiga">
+
+A central parou depois de uma mudança, ou alguém mexeu na caixa e você quer saber se o trafo e a chave seletora estão certos. O primário está ligado na rede, então siga as regras da aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />, nesta ordem:
+
+<Steps>
+  <Step title="Descubra a tensão da rede">
+    Pela etiqueta do disjuntor do portão ou medindo a tomada mais próxima com o multímetro em V~, como na aula <LinkAula id="m03-medicoes/02-medindo-tensao" />. Em muitas cidades a tomada comum é 127 V, mas o portão pode estar num circuito de 220 V.
+  </Step>
+  <Step title="Desligue o disjuntor e teste a ausência de tensão">
+    Com o multímetro que você acabou de testar numa tomada energizada, confirme que os bornes de entrada da central marcam zero.
+  </Step>
+  <Step title="Leia a etiqueta do trafo">
+    Ela diz as tensões, a potência em VA e a cor de cada fio, por exemplo "Secundário: fios amarelos". Não existe um padrão único de cores entre fabricantes: siga a etiqueta, não a memória.
+  </Step>
+  <Step title="Meça os enrolamentos com o ohmímetro, ainda desligado">
+    Primário (0 a 220): algumas dezenas a centenas de ohms (típico de trafos pequenos). Secundário: poucos ohms ou menos. Entre primário e secundário, e entre qualquer fio e as chapas: aberto (OL). Primário aberto costuma ser enrolamento rompido ou o fusível térmico interno queimado. Veja a aula <LinkAula id="m03-medicoes/04-resistencia-continuidade-e-diodo" />.
+  </Step>
+  <Step title="Ajuste a seletora para a tensão da rede">
+    Com tudo desligado. Feche a caixa ou proteja os bornes do primário.
+  </Step>
+  <Step title="Religue e meça o secundário em V~">
+    Prenda as pontas de prova nos fios do secundário antes de religar e mantenha as mãos longe do primário. O multímetro vai em **V~**, porque a saída do trafo é CA. Sem carga, um trafo de 12 V marca um pouco mais que 12 V.
+  </Step>
+</Steps>
+
+Se o secundário marcar perto de 21 V numa rede de 220 V, a seletora está em 127 V. Desligue o disjuntor antes de mexer na chave. E se o trafo zumbe alto, cheira a verniz queimado ou está quente demais para encostar a mão, troque-o por um de mesma tensão e mesma potência em VA (ou maior).
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Seletora na posição errada.** Na posição 127 V numa rede de 220 V, o secundário recebe 1,73 vez a tensão e o trafo satura e esquenta. Confira a chave antes de ligar qualquer aparelho com seletora.
+- **Medir o secundário em V⎓.** A saída do trafo é CA. Em V⎓ o multímetro marca perto de zero, e parece que o trafo está queimado.
+- **Ligar trafo em CC.** Numa bateria ou numa fonte CC, o secundário não dá nada e o enrolamento esquenta até queimar.
+- **Achar que o conversor de tomada isola.** O autotransformador não isola: a saída dá choque como a tomada.
+- **Trocar por um trafo de menos VA.** Ele até funciona, mas esquenta além do previsto e a tensão cai com a carga.
+- **Abrir micro-ondas e aparelhos com trafo elevador.** O trafo do micro-ondas eleva a tensão para milhares de volts (típico) e trabalha junto com um capacitor que guarda carga mesmo com o aparelho desligado. Não é aparelho para mexer sem formação.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Um transformador tem 1.100 espiras no primário e 60 no secundário. Ligado em 220 V, qual a tensão no secundário, em volts, sem carga?',
+      answer: 12,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        'Vs = Vp × Ns ÷ Np = 220 × 60 ÷ 1.100 = 12 V. São 0,2 V por espira, nos dois enrolamentos.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'O secundário de 12 V de um trafo entrega 1,5 A a uma carga. Desprezando as perdas e a corrente de magnetização, quanto o primário puxa da rede de 220 V, em mA?',
+      answer: 82,
+      tolerance: 0.03,
+      unit: 'mA',
+      explanation:
+        'A potência que sai é 12 V × 1,5 A = 18 VA. A mesma potência entra: 18 VA ÷ 220 V ≈ 0,082 A = 82 mA.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'A chave seletora do trafo de uma central está em 127 V, e a tomada é de 220 V. O que acontece ao ligar?',
+      options: [
+        {
+          text: 'O secundário dá quase o dobro do normal, e a placa e o trafo podem queimar',
+          correct: true,
+          feedback:
+            'Os 220 V caem em só 58% das espiras: os volts por espira sobem 1,73 vez, e o secundário também. Além disso, o núcleo satura e o trafo esquenta.',
+        },
+        {
+          text: 'O secundário dá a metade do normal, e a central fica fraca',
+          feedback:
+            'Isso acontece no erro contrário: seletora em 220 V numa tomada de 127 V. Na posição 127 V, menos espiras recebem a tensão toda, e a saída sobe.',
+        },
+        {
+          text: 'Nada: o trafo se ajusta sozinho à tensão da tomada',
+          feedback:
+            'Quem se ajusta sozinha é a fonte chaveada "full range" das centrais novas. O trafo comum só obedece à relação de espiras.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Ligando o secundário de 12 V de um trafo numa bateria de carro, aparecem 220 V no primário.',
+      answer: false,
+      explanation:
+        'A bateria dá CC, e fluxo parado não induz tensão. O primário fica em zero, e o secundário, de resistência baixa, puxa uma corrente alta da bateria e esquenta.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Por que o núcleo do transformador é feito de chapas finas envernizadas, e não de um bloco de ferro?',
+      options: [
+        {
+          text: 'Para cortar o caminho das correntes parasitas, que esquentariam o núcleo',
+          correct: true,
+          feedback:
+            'O fluxo alternado induz correntes no próprio ferro. O verniz entre as chapas as prende dentro de cada chapa fina, e a perda cai muito.',
+        },
+        {
+          text: 'Para o trafo ficar mais leve',
+          feedback:
+            'As chapas empilhadas pesam quase o mesmo que um bloco. O motivo é elétrico: impedir as correntes parasitas.',
+        },
+        {
+          text: 'Para isolar o primário do secundário',
+          feedback:
+            'Quem isola os enrolamentos é o verniz dos fios e o carretel. As chapas envernizadas servem para barrar as correntes parasitas no ferro.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um conversor de tomada 220 → 127 V é um autotransformador. Tocar num fio da saída dele, com a outra mão na parede, é:',
+      options: [
+        {
+          text: 'Tão perigoso quanto tocar na fase da tomada',
+          correct: true,
+          feedback:
+            'O autotransformador tem um enrolamento só, e a saída usa os próprios fios da rede. Não há isolação nenhuma.',
+        },
+        {
+          text: 'Seguro, porque todo transformador isola a saída da rede',
+          feedback:
+            'Só o transformador com dois enrolamentos separados isola. O autotransformador liga a saída direto na rede.',
+        },
+        {
+          text: 'Seguro, porque 127 V não dá choque',
+          feedback: '127 V dá choque, e pode matar. Reveja a aula de segurança do módulo 0.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem segura a conferência do trafo de uma central com chave 127/220 V.',
+      items: [
+        'Descobrir a tensão da rede',
+        'Desligar o disjuntor e testar a ausência de tensão',
+        'Medir os enrolamentos com o ohmímetro',
+        'Pôr a seletora na posição da tensão da rede',
+        'Religar e medir o secundário em V~',
+      ],
+      explanation:
+        'Primeiro saber a tensão que vai chegar; depois trabalhar só com tudo desligado e testado; a única medida com energia é a última, com as pontas presas antes de religar.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O transformador tem dois enrolamentos no mesmo núcleo. A CA no primário cria um fluxo que muda e induz tensão no secundário. **Com CC ele não funciona e queima.**
+- **Relação de espiras:** $V_p / V_s = N_p / N_s$. A corrente faz o contrário: o lado de menos tensão tem mais corrente.
+- A potência vem em **VA**. Um trafo de 12 V e 15 VA entrega até 1,25 A.
+- O núcleo é **laminado** para barrar as correntes parasitas. As perdas no cobre e no ferro viram calor, e a tensão cai um pouco com a carga.
+- A chave **127/220** muda quantas espiras do primário recebem a rede. Na posição 127 V numa tomada de 220 V, o secundário vai a 1,73 vez a tensão normal.
+- O transformador de dois enrolamentos isola a saída da rede. O **autotransformador** não isola.
+
+Na próxima aula, o magnetismo vira sensor: o reed switch e o sensor Hall que dizem à central onde o portão está, em <LinkAula id="m05-magnetismo/05-sensores-magneticos" />.

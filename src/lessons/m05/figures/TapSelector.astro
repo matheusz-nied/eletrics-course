@@ -1,0 +1,184 @@
+---
+/*
+ * 05.4: the 127/220 V selector of the gate central's transformer, both on a
+ * 220 V outlet. Right position: the 220 V spread over the whole primary, 12 V
+ * out. Wrong position: the same 220 V on the 127 V tap, 127/220 = 58 % of the
+ * turns, so each turn gets more volts and the secondary gives about 21 V
+ * (lesson 5.4 simulation, checked in trafo-central.test.ts).
+ */
+const PIVOT = { x: 62, y: 104 };
+const TOP = 70; // 220 V end of the primary
+const BOTTOM = 230; // 0 V end
+const TAP = BOTTOM - ((BOTTOM - TOP) * 127) / 220;
+const COIL_X = 120;
+const SEC = { x: 222, top: 110, bottom: 190 };
+
+const bumps = (x: number, y0: number, y1: number, n: number, side: 1 | -1) => {
+  const h = (y1 - y0) / n;
+  return `M${x} ${y0} ${Array.from({ length: n }, () => `a${h / 2} ${h / 2} 0 0 ${side > 0 ? 1 : 0} 0 ${h}`).join(' ')}`;
+};
+
+const panels = [
+  {
+    dx: 0,
+    title: 'Seletora em 220 V',
+    contact: TOP,
+    ok: true,
+    out: '12 V',
+    lines: ['Certo: os 220 V se espalham', 'pelo primário inteiro.'],
+  },
+  {
+    dx: 280,
+    title: 'Seletora em 127 V',
+    contact: TAP,
+    ok: false,
+    out: '~21 V',
+    lines: ['Errado: os 220 V caem em só', '58% das espiras.'],
+  },
+];
+---
+
+<svg viewBox="0 0 560 300" width="560" height="300" class="fig" aria-hidden="true">
+  {panels.map((p) => (
+    <g transform={`translate(${p.dx} 0)`}>
+      <text x="140" y="26" class="title">
+        {p.title}
+      </text>
+
+      <circle cx="30" cy="150" r="15" class="source" />
+      <path d="M21 150 q4.5 -8 9 0 t9 0" class="sine" />
+      <text x="50" y="174" class="lbl strong start">
+        220 V~
+      </text>
+      <path d={`M30 135 V${PIVOT.y} H${PIVOT.x}`} class={p.ok ? 'wire ok' : 'wire bad'} />
+      <path d={`M30 165 V${BOTTOM} H${COIL_X}`} class="wire" />
+
+      <path d={`M96 ${TOP} H${COIL_X} M96 ${TAP} H${COIL_X}`} class="wire" />
+      <path d={`M${PIVOT.x} ${PIVOT.y} L94 ${p.contact}`} class={p.ok ? 'blade ok' : 'blade bad'} />
+      <circle cx={PIVOT.x} cy={PIVOT.y} r="3.5" class="pivot" />
+      <circle cx="96" cy={TOP} r="3.5" class={p.contact === TOP ? 'contact on' : 'contact'} />
+      <circle cx="96" cy={TAP} r="3.5" class={p.contact === TAP ? 'contact on' : 'contact'} />
+
+      <path d={bumps(COIL_X, TOP, BOTTOM, 8, 1)} class="coil" />
+      <text x="138" y={TOP + 4} class="tap">
+        220
+      </text>
+      <text x="138" y={TAP + 4} class="tap">
+        127
+      </text>
+      <text x="138" y={BOTTOM + 4} class="tap">
+        0
+      </text>
+
+      <path d="M168 60 V240 M176 60 V240" class="core" />
+
+      <path d={bumps(SEC.x, SEC.top, SEC.bottom, 4, -1)} class="coil" />
+      <path d={`M${SEC.x} ${SEC.top} H252 M${SEC.x} ${SEC.bottom} H252`} class="wire" />
+      <circle cx="252" cy={SEC.top} r="3" class="pivot" />
+      <circle cx="252" cy={SEC.bottom} r="3" class="pivot" />
+      <text x="252" y="155" class={p.ok ? 'out ok' : 'out bad'}>
+        {p.out}
+      </text>
+
+      {p.lines.map((line, i) => (
+        <text x="140" y={268 + i * 17} class="note">
+          {line}
+        </text>
+      ))}
+    </g>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .source {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .sine {
+    stroke: var(--fg);
+    stroke-width: 1.8;
+  }
+  .wire {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .wire.ok,
+  .blade.ok {
+    stroke: var(--success);
+  }
+  .wire.bad,
+  .blade.bad {
+    stroke: var(--danger);
+  }
+  .blade {
+    stroke-width: 3;
+  }
+  .pivot {
+    fill: var(--fg);
+    stroke: none;
+  }
+  .contact {
+    fill: var(--surface);
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .contact.on {
+    fill: var(--fg);
+    stroke: var(--fg);
+  }
+  .coil {
+    stroke: var(--copper);
+    stroke-width: 2.5;
+  }
+  .core {
+    stroke: var(--fg-muted);
+    stroke-width: 3;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+  }
+  .strong {
+    font-weight: 700;
+    fill: var(--fg);
+    font-size: 12px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .tap {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: start;
+  }
+  .out {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .out.ok {
+    fill: var(--success);
+  }
+  .out.bad {
+    fill: var(--danger);
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+</style>

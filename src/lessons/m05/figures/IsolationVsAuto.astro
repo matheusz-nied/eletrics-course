@@ -1,0 +1,140 @@
+---
+/*
+ * 05.4: isolating transformer × autotransformer. Left: two windings, the
+ * output shares no wire with the mains. Right: one winding with a tap, the
+ * output uses the mains wires themselves (like the 127/220 V plug converter).
+ */
+const bumps = (x: number, y0: number, y1: number, n: number, side: 1 | -1) => {
+  const h = (y1 - y0) / n;
+  return `M${x} ${y0} ${Array.from({ length: n }, () => `a${h / 2} ${h / 2} 0 0 ${side > 0 ? 1 : 0} 0 ${h}`).join(' ')}`;
+};
+---
+
+<svg viewBox="0 0 560 318" width="560" height="318" class="fig" aria-hidden="true">
+  <g>
+    <text x="140" y="26" class="title">
+      Transformador isolador
+    </text>
+    <text x="24" y="84" class="pin">
+      F
+    </text>
+    <text x="24" y="204" class="pin">
+      N
+    </text>
+    <path d="M34 80 H100 M34 200 H100" class="wire mains" />
+    <path d={bumps(100, 80, 200, 6, 1)} class="coil" />
+    <path d="M128 70 V210 M136 70 V210" class="core" />
+    <path d={bumps(164, 100, 180, 4, -1)} class="coil" />
+    <path d="M164 100 H240 M164 180 H240" class="wire out" />
+    <circle cx="240" cy="100" r="3" class="dot" />
+    <circle cx="240" cy="180" r="3" class="dot" />
+    <text x="240" y="145" class="lbl">
+      saída
+    </text>
+    <text x="132" y="58" class="small">
+      só campo, sem fio
+    </text>
+    <text x="140" y="248" class="note">
+      A saída não tem fio em comum
+    </text>
+    <text x="140" y="265" class="note">
+      com a rede.
+    </text>
+  </g>
+
+  <g transform="translate(280 0)">
+    <text x="140" y="26" class="title">
+      Autotransformador
+    </text>
+    <text x="24" y="84" class="pin">
+      F
+    </text>
+    <text x="24" y="204" class="pin">
+      N
+    </text>
+    <path d="M34 80 H130" class="wire mains" />
+    <path d="M34 200 H240" class="wire shared" />
+    <path d="M114 90 V190 M120 90 V190" class="core" />
+    <path d={bumps(130, 80, 200, 6, 1)} class="coil" />
+    <path d="M130 140 H240" class="wire shared" />
+    <circle cx="130" cy="140" r="3" class="dot" />
+    <circle cx="240" cy="140" r="3" class="dot" />
+    <circle cx="240" cy="200" r="3" class="dot" />
+    <text x="240" y="176" class="lbl">
+      saída
+    </text>
+    <text x="196" y="216" class="small bad">
+      o mesmo fio da rede
+    </text>
+    <text x="140" y="248" class="note">
+      Uma bobina só: a saída usa os fios
+    </text>
+    <text x="140" y="265" class="note">
+      da rede e dá choque como a tomada.
+    </text>
+  </g>
+  <text x="280" y="300" class="small">
+    F: fase · N: neutro
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire {
+    stroke-width: 2.2;
+  }
+  .wire.mains {
+    stroke: var(--fg-muted);
+  }
+  .wire.out {
+    stroke: var(--success);
+  }
+  .wire.shared {
+    stroke: var(--danger);
+  }
+  .coil {
+    stroke: var(--copper);
+    stroke-width: 2.5;
+  }
+  .core {
+    stroke: var(--fg-muted);
+    stroke-width: 3;
+  }
+  .dot {
+    fill: var(--fg);
+    stroke: none;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .pin {
+    font-weight: 700;
+    text-anchor: end;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .small.bad {
+    fill: var(--danger);
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+</style>

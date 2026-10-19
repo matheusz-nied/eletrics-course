@@ -2,7 +2,7 @@
 termo: Indutor
 resumo: Bobina de fio que armazena energia num campo magnético e se opõe a variações de corrente. Medido em henrys (H).
 sinonimos: [bobina, indutância]
-relacionados: [capacitor, rele]
+relacionados: [capacitor, rele, eletroima, transformador]
 aula: m04-passivos/05-indutores-e-circuito-rl
 ---
 Quando a corrente num indutor tenta mudar, ele gera uma tensão contrária à mudança. Por isso o indutor deixa passar a corrente contínua estável, mas freia variações rápidas.
