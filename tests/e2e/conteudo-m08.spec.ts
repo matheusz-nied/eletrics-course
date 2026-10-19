@@ -16,10 +16,11 @@ const LESSONS = [
 async function hydrateAll(page: Page) {
   for (const island of await page.locator('astro-island').all()) {
     await island.scrollIntoViewIfNeeded();
-    await expect(island).not.toHaveAttribute('ssr');
+    // A 3D model above an island keeps the main thread busy while it loads.
+    await expect(island).not.toHaveAttribute('ssr', { timeout: 30_000 });
   }
   for (const sim of await page.locator('[data-simulation]').all()) {
-    await expect(sim).toHaveAttribute('data-ready', '');
+    await expect(sim).toHaveAttribute('data-ready', '', { timeout: 30_000 });
   }
 }
 
@@ -37,6 +38,12 @@ async function widget(page: Page, selector: string) {
   await island.scrollIntoViewIfNeeded();
   await expect(island).not.toHaveAttribute('ssr');
   return island.locator(selector);
+}
+
+/** Picks the radio choice labelled `name`; the styled label sits over the input. */
+async function choose(root: Locator, name: string | RegExp) {
+  await root.locator('label.lw__choice', { hasText: name }).click();
+  await expect(root.getByRole('radio', { name })).toBeChecked();
 }
 
 /** The reading of the multimeter on probe `id`. */
@@ -74,9 +81,9 @@ test.describe('módulo 8: motores elétricos', () => {
     const campo = await widget(page, 'section.campo');
     const sense = campo.locator('[data-sentido]');
     const before = await sense.getAttribute('data-sentido');
-    await campo.getByRole('radio', { name: 'L2 e L3 trocadas' }).check();
+    await choose(campo, 'L2 e L3 trocadas');
     await expect(sense).toHaveAttribute('data-sentido', String(-Number(before)));
-    await campo.getByRole('radio', { name: 'Faltando a fase L3' }).check();
+    await choose(campo, 'Faltando a fase L3');
     await expect(sense).toHaveAttribute('data-sentido', '0');
     errors.expectClean();
   });
@@ -121,7 +128,7 @@ test.describe('módulo 8: motores elétricos', () => {
     await forward.click();
     await forward.click();
     await expect(angle).toHaveText('3,6°');
-    await passo.getByRole('radio', { name: /Meio passo/i }).check();
+    await choose(passo, 'Meio passo');
     await expect(angle).toHaveText('0°');
     await forward.click();
     await expect(angle).toHaveText('0,9°');
