@@ -15,11 +15,17 @@ const LESSONS = [
   '09-tiristores-e-isolamento',
 ];
 
+/**
+ * How long an island may take to hydrate. Lessons with two 3D models and
+ * simulations take up to about 9 s on a loaded runner (software WebGL).
+ */
+const HYDRATION = { timeout: 20_000 };
+
 /** Scrolls through the page so every island hydrates, and waits for the simulations. */
 async function hydrateAll(page: Page) {
   for (const island of await page.locator('astro-island').all()) {
     await island.scrollIntoViewIfNeeded();
-    await expect(island).not.toHaveAttribute('ssr');
+    await expect(island).not.toHaveAttribute('ssr', HYDRATION);
   }
   for (const sim of await page.locator('[data-simulation]').all()) {
     await expect(sim).toHaveAttribute('data-ready', '');
@@ -30,7 +36,7 @@ async function hydrateAll(page: Page) {
 async function hydrated(page: Page, inner: string): Promise<Locator> {
   const island = page.locator(`astro-island:has(${inner})`).first();
   await island.scrollIntoViewIfNeeded();
-  await expect(island).not.toHaveAttribute('ssr');
+  await expect(island).not.toHaveAttribute('ssr', HYDRATION);
   return island.locator(inner).first();
 }
 
