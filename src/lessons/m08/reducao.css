@@ -1,0 +1,40 @@
+/* CalculadoraRedutor.tsx: motor, reducer and pinion, lesson 8.6. */
+
+.redutor__body {
+  align-items: start;
+}
+
+@media (min-width: 52rem) {
+  .redutor__body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.redutor__fields {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 30rem) {
+  .redutor__fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.redutor__grid {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+}
+
+.redutor__grid dd {
+  margin: 0;
+}
+
+.redutor__val {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  line-height: 1.25;
+}

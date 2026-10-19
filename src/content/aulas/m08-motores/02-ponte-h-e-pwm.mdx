@@ -1,0 +1,296 @@
+---
+titulo: Ponte H e PWM
+modulo: m08-motores
+ordem: 2
+nivel: I
+duracaoMin: 35
+objetivos:
+  - Montar uma ponte H e dizer quais chaves fazem o motor ir para a frente, para trás e frear
+  - Explicar por que duas chaves do mesmo lado da ponte nunca podem fechar juntas
+  - Calcular a tensão média de um sinal PWM pelo ciclo de trabalho
+  - Explicar por que o PWM controla a velocidade sem desperdiçar energia, e para que serve o diodo de roda livre
+  - Reconhecer a ponte H num vidro elétrico com relés e num módulo de motor para Arduino
+prerequisitos:
+  - m08-motores/01-motor-cc
+  - m09-semicondutores/08-mosfet
+tags: [ponte H, PWM, motor CC, MOSFET, ciclo de trabalho, roda livre, Arduino, robô, vidro elétrico]
+seguranca: baixa-tensao
+rascunho: false
+---
+
+import HBridgeStates from '../../../lessons/m08/figures/HBridgeStates.astro';
+import PwmDuty from '../../../lessons/m08/figures/PwmDuty.astro';
+
+Um carrinho de controle remoto anda para a frente, para trás, devagar ou rápido, e tudo isso com um motor de corrente contínua e um par de fios. Ninguém troca fio nenhum de lugar enquanto o carrinho anda, e o motor não ganha uma bateria nova para correr mais. Quem faz o serviço é um circuito de quatro chaves, a **ponte H**, comandado por um sinal que liga e desliga milhares de vezes por segundo, o **PWM**. São as duas ferramentas que controlam praticamente todo motor CC moderno.
+
+## Inverter sem trocar os fios
+
+Na aula <LinkAula id="m08-motores/01-motor-cc" />, você viu que o motor CC de ímã permanente inverte o sentido quando a polaridade se inverte. Com a mão, isso é trocar os dois fios da bateria. Com um circuito, é preciso um jeito de ligar cada terminal do motor ora no positivo, ora no negativo.
+
+A solução são quatro chaves. Cada terminal do motor ganha duas: uma que o liga ao positivo, em cima, e outra que o liga ao negativo, embaixo. Desenhado, o circuito parece a letra H: as duas pernas são os dois lados com as suas chaves, e o motor é o traço do meio. Daí o nome <Term id="ponte-h">ponte H</Term>.
+
+<Figure
+  caption="Figura 1. Os estados da ponte H. S1 e S2 formam o lado esquerdo; S3 e S4, o direito. Com S1 e S4, a corrente atravessa o motor da esquerda para a direita; com S3 e S2, ao contrário, e o motor inverte. Com S2 e S4, os dois terminais do motor ficam no negativo e ele freia. Com S1 e S2 juntas, a bateria fica em curto por um lado só da ponte."
+  alt="Quatro pontes H lado a lado. Na primeira, frente, S1 e S4 fechadas e a corrente passando pelo motor da esquerda para a direita. Na segunda, ré, S3 e S2 fechadas e a corrente ao contrário. Na terceira, freio, S2 e S4 fechadas e a corrente circulando entre o motor e o negativo. Na quarta, curto, S1 e S2 fechadas e a corrente indo direto do positivo ao negativo pelo lado esquerdo, marcada em vermelho."
+  wide
+>
+  <HBridgeStates />
+</Figure>
+
+| Chaves fechadas | O que acontece |
+|---|---|
+| S1 e S4 | Corrente da esquerda para a direita: o motor gira para a frente |
+| S3 e S2 | Corrente da direita para a esquerda: o motor gira para trás |
+| S2 e S4 (ou S1 e S3) | Os dois terminais do motor no mesmo potencial: freio |
+| Nenhuma | O motor fica solto e para devagar, só pelo atrito |
+| S1 e S2, ou S3 e S4 | **Curto-circuito na bateria. Proibido.** |
+
+### O freio que vem do próprio motor
+
+Por que ligar os dois terminais do motor juntos faz ele frear? Porque um motor girando é um gerador: ele produz a força contraeletromotriz. Com os terminais em curto, essa tensão faz circular uma corrente pela bobina, e a força nessa corrente é **contra** o giro. A energia do movimento vira calor no enrolamento, e o motor para em muito menos tempo do que solto. É o <Term id="freio-dinamico">freio dinâmico</Term>, o mesmo princípio que segura um carrinho de controle remoto parado numa ladeira.
+
+### O curto proibido
+
+Fechar as duas chaves do mesmo lado liga o positivo direto ao negativo, sem nada no meio. Com uma bateria de carro ou uma bateria de lítio, a corrente chega a centenas de ampères em milissegundos: fios derretem, a bateria esquenta e pode pegar fogo. Numa ponte com transistores, eles queimam antes de qualquer fusível agir. Esse defeito tem nome em inglês, *shoot-through*, e todo circuito de ponte H é desenhado para que ele nunca aconteça.
+
+## Explore: a ponte H com quatro chaves
+
+A simulação monta a ponte H com quatro chaves de verdade, um motor CC pequeno de 12 V e um fusível de 5 A junto da bateria.
+
+<Simulation circuit="m08/ponte-h" instruments={['multimetro']} />
+
+1. Aperte o play (▶). Feche **S1** e **S4**. Para que lado o motor gira (sinal da rotação, clicando no motor)? Quanto ele puxa sem carga?
+2. Abra S1 e S4 e veja quanto tempo o motor leva para parar sozinho.
+3. Ligue de novo com S1 e S4. Agora abra só S1 e feche S2: o motor fica com S2 e S4. Compare o tempo de parada.
+4. Com tudo aberto, feche S3 e S2. O que mudou?
+5. Por último, feche S1 e S2 ao mesmo tempo e leia a mensagem do simulador. Depois aperte **Reiniciar** para trocar o fusível.
+
+Com S1 e S4, o motor gira a uns 5.580 rpm e puxa só 0,08 A. Solto, em 0,3 s ele perde só uns 3 % da rotação, porque o atrito é pequeno. Com S2 e S4, ele cai para menos de um quarto da rotação em 0,3 s, com um pico de quase 3 A de corrente de freio. Com S3 e S2, a rotação fica negativa: o motor inverteu. E S1 com S2 rompe o fusível em menos de um milissegundo, com mais de 170 A.
+
+## As chaves de verdade
+
+Ninguém vira chaves à mão para guiar um robô. Numa ponte H real, as quatro chaves são **transistores**, em geral MOSFETs (aula <LinkAula id="m09-semicondutores/08-mosfet" />), ou então relés, quando o motor só precisa ligar, desligar e inverter. Isso traz três cuidados:
+
+- **Tempo morto.** Um transistor não desliga instantaneamente. Se o circuito desliga S1 e liga S2 no mesmo instante, por alguns microssegundos os dois conduzem juntos, e é o curto proibido em miniatura. O <Term id="tempo-morto">tempo morto</Term> é uma pequena espera, de fração de microssegundo a alguns microssegundos, entre desligar uma chave e ligar a outra do mesmo lado.
+- **Diodos.** Cada transistor tem um diodo em paralelo (no MOSFET, ele já vem de fábrica, dentro do componente). Quando uma chave abre, a indutância do motor quer manter a corrente; o diodo dá caminho a ela, em vez de deixar a tensão subir até queimar o transistor. É a mesma ideia do diodo de roda livre da bobina do relé (aula <LinkAula id="m09-semicondutores/06-transistor-como-chave" />).
+- **Comando.** As chaves de cima ficam do lado do positivo. Quando são MOSFETs de canal N, como costuma ser, o gate precisa de uma tensão acima da do próprio motor para o transistor conduzir bem. Por isso as pontes costumam vir prontas, num circuito integrado com toda essa lógica dentro.
+
+Nos módulos para Arduino, você encontra pontes H integradas como o L298N (mais antigo, com transistores bipolares, que perde perto de 2 V, típico, entre a fonte e o motor), o TB6612FNG e o DRV8833 (com MOSFETs, que perdem bem menos). Eles têm duas entradas por motor, em geral chamadas IN1 e IN2: uma em nível alto e a outra em nível baixo escolhe o sentido; as duas iguais freiam ou soltam o motor, conforme o chip. A tabela de cada um está na folha de dados do fabricante.
+
+## Velocidade sem desperdício: o PWM
+
+A rotação do motor CC acompanha a tensão. O jeito mais óbvio de baixar a tensão é pôr um resistor em série, mas a conta mostra o problema. Para um motor que, a 6 V, puxa 0,25 A, ligado em 12 V, o resistor teria que segurar os outros 6 V: $R = 6 / 0{,}25 = 24\,\Omega$, dissipando $P = 6 \times 0{,}25 = 1{,}5\,\text{W}$, tanto quanto o próprio motor recebe. Metade da energia vira calor no resistor.
+
+O <Term id="pwm">PWM</Term> (modulação por largura de pulso) faz diferente. Uma chave liga e desliga o motor muito depressa, sempre na tensão cheia ou em zero. A fração de cada período em que ela fica ligada é o <Term id="ciclo-de-trabalho">ciclo de trabalho</Term>, $D$, de 0 a 100 %. A tensão média que o motor recebe é:
+
+$$
+V_\text{média} = D \cdot V
+$$
+
+com $V$ a tensão da fonte. Com 12 V e $D = 50\,\%$, a média é 6 V; com 25 %, 3 V.
+
+<Figure
+  caption="Figura 2. PWM em 12 V com ciclos de trabalho de 25 %, 50 % e 75 %. O período é o mesmo nos três; muda só a fração dele em que a chave fica ligada. A linha tracejada é a média, que é o que o motor acompanha."
+  alt="Três ondas quadradas de 12 V com o mesmo período: na de 25 %, o pulso ocupa um quarto do período e a média tracejada fica em 3 V; na de 50 %, metade, com média de 6 V; na de 75 %, três quartos, com média de 9 V."
+  wide
+>
+  <PwmDuty />
+</Figure>
+
+Por que isso não desperdiça energia? Porque a chave passa o tempo todo totalmente ligada (tensão quase zero sobre ela) ou totalmente desligada (corrente zero). Nos dois casos, a potência nela, tensão vezes corrente, é quase zero. Um MOSFET bem escolhido controla dezenas de watts e fica morno.
+
+E por que o motor não liga e desliga junto com o pulso? Por dois motivos que se somam. O rotor tem inércia: ele não consegue frear e acelerar milhares de vezes por segundo, e gira na média. E o enrolamento tem indutância: a corrente sobe e desce um pouco a cada pulso, mas não acompanha o liga e desliga (aula <LinkAula id="m04-passivos/05-indutores-e-circuito-rl" />). Quando a chave abre, essa corrente continua pelo <Term id="diodo-de-roda-livre">diodo de roda livre</Term>, ligado em paralelo com o motor.
+
+A frequência do PWM tem efeitos que você escuta. Abaixo de uns 20 kHz, o enrolamento vibra na frequência do PWM, e o motor "canta": é o apito agudo de muito carrinho e muita bancada com Arduino, cuja saída PWM padrão fica perto de 490 Hz ou 980 Hz, conforme o pino. Acima de 20 kHz, fora da audição, o apito some, mas cada liga e desliga gasta um pouco de energia no transistor, e isso cresce com a frequência.
+
+## Explore: a velocidade pelo PWM
+
+A simulação usa uma placa parecida com a da aula <LinkAula id="m09-semicondutores/08-mosfet" />: um microcontrolador lê o potenciômetro e gera PWM de 4 kHz, que liga e desliga um MOSFET no negativo do motor. No eixo do motor há uma pequena ventoinha, uma carga que pesa mais quanto mais rápido ele gira. A simulação roda 20 vezes mais devagar que o tempo real.
+
+<Simulation
+  circuit="m08/pwm-motor"
+  instruments={[{ kind: 'osciloscopio', series: ['VM', 'IM'] }, 'multimetro']}
+/>
+
+1. Aperte o play (▶) e espere a rotação firmar. O potenciômetro começa no meio, com ciclo de trabalho de 50 % (clique no microcontrolador para ver). Quanto o motor gira?
+2. No osciloscópio, aperte **Autoajuste**. Veja a tensão no motor (VM) pulando entre 12 V e um pouco abaixo de zero, e a corrente (IM), que sobe e desce sem nunca zerar.
+3. No multímetro, meça a tensão no motor em CC, que é a média. Ela fica perto de 6 V?
+4. Gire o potenciômetro até o fim (100 %) e depois para 25 %. Como a rotação acompanha?
+
+Com 50 %, o motor gira a uns 2.200 rpm, e a tensão média fica perto de 5,6 V. É um pouco menos que os 6 V da conta, porque nos intervalos desligados a corrente passa pelo diodo, que deixa o terminal do motor uns 0,7 V abaixo do positivo: é por isso que VM vai um pouco abaixo de zero. Com 100 %, o motor vai a uns 4.770 rpm; com 25 %, a pouco menos de 1.000 rpm. A rotação acompanha a tensão média, quase em proporção.
+
+### Exemplo resolvido: o PWM do carrinho
+
+Um carrinho tem bateria de 12 V e gera PWM de 4 kHz com ciclo de trabalho de 40 %. Quanto dura cada período, quanto tempo a chave fica ligada e qual a tensão média?
+
+O período é o inverso da frequência:
+
+$$
+T = \frac{1}{f} = \frac{1}{4.000\,\text{Hz}} = 0{,}000\,25\,\text{s} = 0{,}25\,\text{ms}
+$$
+
+A chave fica ligada 40 % disso: $0{,}4 \times 0{,}25 = 0{,}1\,\text{ms}$, e desligada os outros 0,15 ms. A tensão média é:
+
+$$
+V_\text{média} = D \cdot V = 0{,}4 \times 12\,\text{V} = 4{,}8\,\text{V}
+$$
+
+Se esse motor, sem carga, gira a 4.770 rpm com 12 V, a 4,8 V ele vai girar perto de $4.770 \times 0{,}4 \approx 1.900\,\text{rpm}$, um pouco menos por causa da queda no diodo e na resistência do enrolamento.
+
+Para controlar sentido e velocidade juntos, junta-se as duas ideias: a ponte H escolhe o par de chaves do sentido, e o PWM liga e desliga uma delas. É exatamente o que um módulo de motor faz quando você manda IN1 em nível alto e um PWM na entrada de habilitação.
+
+<RealCase title="O vidro elétrico com dois relés">
+
+O vidro elétrico da aula anterior usa uma ponte H feita com dois relés de contato reversível. O comum de cada relé vai a um terminal do motor; o NF de cada um vai ao negativo, e o NA, ao positivo. Em repouso, os dois terminais do motor estão no negativo: é o estado de freio, que ajuda a segurar o motor parado. Apertando "sobe", um relé muda e põe um terminal no positivo; apertando "desce", muda o outro. Os dois relés juntos põem os dois terminais no positivo, e o motor de novo não gira: com relés ligados assim, não existe o curto proibido.
+
+Um defeito comum aparece daí: o vidro sobe, mas não desce (ou o contrário). O motor está bom, porque gira para um lado. O suspeito é o relé, o contato do interruptor ou o fio daquele sentido. Com o multímetro na escala de tensão CC, nos dois fios do motor, aperte cada sentido: deve aparecer uns 12 V, com a polaridade invertida de um sentido para o outro. Se num deles não aparece nada, o problema está antes do motor.
+
+</RealCase>
+
+<RealCase title="O robô com Arduino">
+
+Um robô de duas rodas com Arduino tem dois motores CC com redução e um módulo de ponte H dupla. Cada motor usa três fios de comando: IN1 e IN2 dão o sentido, e o pino de habilitação (EN) recebe o PWM, com `analogWrite`. Para fazer curva, um motor recebe menos PWM que o outro. Para girar no lugar, um vai para a frente e o outro para trás.
+
+Dois problemas típicos de quem monta o primeiro: o robô não sai do lugar com PWM baixo, porque o motor parado precisa de um mínimo de torque para vencer o atrito; e o Arduino reinicia quando os motores partem, porque os picos de corrente da partida derrubam a tensão da bateria. Para o segundo, alimente os motores por uma bateria separada (ou ponha um capacitor eletrolítico perto do módulo) e ligue o negativo das duas alimentações junto.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Fechar as duas chaves do mesmo lado.** Num programa que comanda os transistores um a um, um erro de lógica faz isso. Use pontes integradas, que já têm o tempo morto e a proteção, ou garanta no programa que isso nunca aconteça.
+- **Esquecer o fusível perto da bateria.** Uma bateria de carro ou de lítio fornece centenas de ampères num curto. O fusível precisa estar logo depois do positivo, antes de qualquer fio comprido.
+- **Tirar o diodo de roda livre** num circuito com um transistor só. Sem ele, o pico da indutância do motor queima o transistor (aula <LinkAula id="m09-semicondutores/06-transistor-como-chave" />).
+- **Achar que PWM baixo dá força baixa sempre.** Com PWM, cada pulso ainda leva a tensão cheia. Um motor travado com PWM puxa, nos pulsos, a corrente de rotor travado.
+- **Ligar o motor direto no pino do Arduino.** O pino dá uns 20 mA (típico); um motor pequeno puxa centenas de miliampères. Use sempre um transistor ou um módulo de ponte H, com a alimentação do motor separada.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt:
+        'Na ponte H da aula, com S1 e S2 no lado esquerdo e S3 e S4 no direito, quais chaves fazem o motor girar no sentido oposto ao de S1 com S4?',
+      options: [
+        {
+          text: 'S3 e S2',
+          correct: true,
+          feedback:
+            'S3 põe o terminal direito no positivo e S2 põe o esquerdo no negativo: a corrente atravessa o motor ao contrário.',
+        },
+        {
+          text: 'S2 e S4',
+          feedback: 'S2 e S4 põem os dois terminais no negativo: é o freio, não a ré.',
+        },
+        {
+          text: 'S1 e S2',
+          feedback:
+            'S1 e S2 ficam no mesmo lado: ligam o positivo direto ao negativo. É o curto proibido.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Numa ponte H de MOSFETs, para que serve o tempo morto entre desligar o transistor de cima e ligar o de baixo do mesmo lado?',
+      options: [
+        {
+          text: 'Para os dois nunca conduzirem juntos enquanto um deles ainda está desligando',
+          correct: true,
+          feedback:
+            'Um transistor leva um tempo para desligar. Sem a espera, os dois do mesmo lado conduziriam juntos por um instante: um curto na fonte.',
+        },
+        {
+          text: 'Para o motor esfriar entre os pulsos',
+          feedback:
+            'O tempo morto dura microssegundos, pouco demais para esfriar qualquer coisa. Ele evita que os dois transistores do mesmo lado conduzam juntos.',
+        },
+        {
+          text: 'Para reduzir a velocidade do motor',
+          feedback:
+            'Quem controla a velocidade é o ciclo de trabalho do PWM. O tempo morto protege a ponte contra o curto.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Um PWM de 12 V tem ciclo de trabalho de 30 %. Qual é a tensão média, em volts?',
+      answer: 3.6,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation: 'V média = D × V = 0,3 × 12 V = 3,6 V.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Quanto dura um período de um PWM de 20 kHz, em microssegundos?',
+      answer: 50,
+      tolerance: 0.02,
+      unit: 'µs',
+      explanation: 'T = 1/f = 1 ÷ 20.000 Hz = 0,000 05 s = 50 µs.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Controlar a velocidade de um motor CC com um resistor em série gasta a mesma energia que controlar com PWM.',
+      answer: false,
+      explanation:
+        'O resistor transforma em calor toda a tensão que ele segura. A chave do PWM fica totalmente ligada ou totalmente desligada e quase não dissipa.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Num circuito com um MOSFET ligando um motor no negativo, para que serve o diodo em paralelo com o motor?',
+      options: [
+        {
+          text: 'Para dar caminho à corrente do motor quando o MOSFET desliga, evitando o pico de tensão',
+          correct: true,
+          feedback:
+            'A indutância do motor mantém a corrente quando a chave abre. Com o diodo, ela circula pelo motor; sem ele, a tensão no dreno dispara.',
+        },
+        {
+          text: 'Para impedir que o motor gire ao contrário',
+          feedback:
+            'O diodo fica parado em reverso enquanto o MOSFET conduz. Ele só entra quando a chave abre, dando caminho à corrente do enrolamento.',
+        },
+        {
+          text: 'Para retificar a tensão da bateria',
+          feedback:
+            'A bateria já é contínua. O diodo de roda livre protege o MOSFET do pico da indutância do motor.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'No vidro elétrico com dois relés, com os dois em repouso, os dois terminais do motor ficam no negativo. O que isso faz?',
+      options: [
+        {
+          text: 'Freia o motor: girando, ele gera tensão, e o curto entre os terminais faz uma corrente contra o giro',
+          correct: true,
+          feedback:
+            'É o freio dinâmico. A energia do movimento vira calor no enrolamento, e o motor para logo.',
+        },
+        {
+          text: 'Põe a bateria em curto',
+          feedback:
+            'O curto da bateria seria ligar o positivo ao negativo. Aqui, os dois terminais do motor estão no negativo, e a bateria não entra.',
+        },
+        {
+          text: 'Nada: o motor fica solto',
+          feedback:
+            'Solto seria com os terminais desligados. Com os dois no negativo, o motor fica em curto e freia.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- A **ponte H** tem quatro chaves, duas por terminal do motor. Uma diagonal faz o motor ir para a frente, a outra para trás, e as duas de baixo (ou de cima) juntas fazem o **freio dinâmico**.
+- **Nunca** feche as duas chaves do mesmo lado: é um curto na fonte. Pontes de transistores usam **tempo morto** e diodos, e costumam vir prontas num circuito integrado.
+- O **PWM** liga e desliga o motor muito depressa; a tensão média é $D \cdot V$, e a rotação acompanha essa média.
+- A chave do PWM quase não esquenta, porque fica sempre toda ligada ou toda desligada. A inércia do rotor e a indutância do enrolamento alisam o resultado, e o **diodo de roda livre** dá caminho à corrente quando a chave abre.
+- Abaixo de 20 kHz, o motor apita na frequência do PWM.
+
+A partir da próxima aula, os motores passam a funcionar direto na rede de corrente alternada, sem escovas e sem eletrônica: <LinkAula id="m08-motores/03-motor-de-inducao-trifasico" />.

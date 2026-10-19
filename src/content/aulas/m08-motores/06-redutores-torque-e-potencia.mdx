@@ -1,0 +1,248 @@
+---
+titulo: Redutores, torque e potência mecânica
+modulo: m08-motores
+ordem: 6
+nivel: B
+duracaoMin: 35
+objetivos:
+  - Calcular o torque de uma força num braço e a potência mecânica de um eixo que gira
+  - Converter CV e HP em watts e entender o que a placa do motor informa
+  - Calcular a rotação e o torque na saída de um redutor de engrenagens ou de coroa e sem-fim
+  - Explicar por que o redutor de sem-fim segura o portão parado
+  - Calcular a velocidade e a força de um pinhão numa cremalheira
+prerequisitos:
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+  - m08-motores/01-motor-cc
+tags: [redutor, engrenagem, coroa, rosca sem-fim, torque, potência, CV, cremalheira, portão]
+seguranca: nenhum
+rascunho: false
+---
+
+import CalculadoraRedutor from '../../../lessons/m08/CalculadoraRedutor.tsx';
+import GearPair from '../../../lessons/m08/figures/GearPair.astro';
+
+O motor de um portão deslizante tem 1/3 de CV, menos que um liquidificador. Mesmo assim, ele empurra um portão de 300 kg de ferro, e ninguém consegue segurar o portão com a mão quando ele está andando. Sozinho, no eixo do motor, o torque mal passa de 1 N·m. Quem transforma esse motor rápido e fraco num empurrão lento e forte é o <Term id="redutor">redutor</Term>. Para entender a troca, você precisa de duas grandezas: o torque e a potência mecânica.
+
+## Torque: força com braço
+
+O <Term id="torque">torque</Term> é o esforço de giro. Ele depende da força e da distância entre o ponto onde ela é aplicada e o eixo, o **braço**:
+
+$$
+T = F \cdot r
+$$
+
+em que $T$ é o torque em newton-metro (N·m), $F$ é a força em newtons (N), aplicada perpendicular ao braço, e $r$ é o braço em metros (m).
+
+É por isso que a chave de roda é comprida. Com 200 N (a força de quem se apoia com uns 20 kg) na ponta de uma chave de 40 cm, o parafuso recebe $200 \times 0{,}4 = 80\,\text{N·m}$. Com uma chave de 20 cm, a mesma força dá só 40 N·m. Em manuais antigos aparece o kgf·m: 1 kgf·m vale 9,8 N·m.
+
+## Potência mecânica
+
+Torque sozinho não é trabalho: uma porca apertada tem torque e não gira. Trabalho aparece quando o eixo gira com torque. A **potência mecânica** de um eixo é:
+
+$$
+P = T \cdot \omega \qquad \omega = \frac{2\pi \cdot n}{60}
+$$
+
+em que $P$ é a potência em watts (W), $T$ é o torque em N·m, $\omega$ é a velocidade angular em radianos por segundo (rad/s) e $n$ é a rotação em rpm. É a mesma potência da aula <LinkAula id="m01-eletricidade-do-zero/05-potencia-e-energia" />, só que mecânica.
+
+A mesma potência pode sair rápida e fraca ou lenta e forte. 250 W a 1.730 rpm são $250 \div 181{,}2 \approx 1{,}4\,\text{N·m}$. Os mesmos 250 W a 78 rpm seriam uns 30 N·m. Trocar uma coisa pela outra é exatamente o trabalho do redutor.
+
+### CV, HP e watts
+
+As placas de motor no Brasil ainda usam o <Term id="cavalo-vapor">cavalo-vapor</Term>, o **CV**, e os catálogos importados usam o **HP**. Os dois são parecidos, mas não são iguais:
+
+| Unidade | Em watts | Onde aparece |
+| --- | --- | --- |
+| 1 CV (cavalo-vapor) | 735,5 W | Placas de motor no Brasil, carros |
+| 1 HP (horsepower) | 745,7 W | Catálogos e motores importados |
+| 1 kW | 1.000 W | Placas novas, ao lado do CV |
+
+Um motor de portão de 1/3 CV entrega $735{,}5 \div 3 \approx 245\,\text{W}$; de 1/2 CV, uns 368 W. Lembre que a placa mostra a potência **no eixo**. A potência que o motor puxa da rede é maior, porque o motor tem perdas: dividindo pela eficiência, o <Term id="rendimento">rendimento</Term>, $P_{\text{rede}} = P_{\text{eixo}} \div \eta$. O motor de 1 CV da aula <LinkAula id="m08-motores/03-motor-de-inducao-trifasico" />, com 82,5 % de rendimento, puxa uns 909 W para entregar 735,5 W.
+
+## Engrenagens: a relação de redução
+
+<Figure
+  caption="Figura 1. Um pinhão de 12 dentes no motor e uma engrenagem de 36 dentes na saída. Os dentes têm o mesmo tamanho, então a engrenagem grande tem o triplo de dentes e o triplo do raio: o pinhão dá 3 voltas para ela dar uma."
+  alt="Duas engrenagens retas engrenadas: uma pequena de 12 dentes à esquerda e uma grande de 36 dentes à direita, com setas de giro em sentidos opostos."
+  wide
+>
+  <GearPair />
+</Figure>
+
+Num par de engrenagens, os dentes passam um por um. Se o <Term id="pinhao">pinhão</Term> do motor tem 12 dentes e a engrenagem da saída tem 36, cada volta do pinhão empurra 12 dentes da grande, um terço de volta. A **relação de redução** é:
+
+$$
+i = \frac{z_{\text{saída}}}{z_{\text{entrada}}} \qquad n_{\text{saída}} = \frac{n_{\text{motor}}}{i} \qquad T_{\text{saída}} = T_{\text{motor}} \cdot i \cdot \eta
+$$
+
+em que $i$ é a relação (escrita 1:3, 1:30), $z$ é o número de dentes, $n$ é a rotação e $\eta$ é o rendimento do redutor. A rotação cai $i$ vezes e o torque sobe $i$ vezes, menos o que se perde em atrito. A potência não aumenta nunca: no máximo se conserva, e na prática diminui um pouco. As engrenagens também invertem o sentido: num par, a saída gira ao contrário da entrada.
+
+Redutores de engrenagens retas e helicoidais rendem perto de 95 % a 98 % por par. Para reduções grandes, põem-se vários pares em série, e as relações se multiplicam: três pares de 1:4 dão $4 \times 4 \times 4 = 1{:}64$. É assim no servo da aula <LinkAula id="m08-motores/05-passo-servo-e-brushless" />, na furadeira e na parafusadeira.
+
+## Coroa e rosca sem-fim
+
+O redutor do motor de portão (aula <LinkAula id="m16-portao/01-anatomia-do-automatizador" />), do vidro elétrico e de muitos redutores industriais pequenos é de **coroa e** <Term id="rosca-sem-fim">rosca sem-fim</Term>. No eixo do motor fica um parafuso, a rosca, que engrena numa roda dentada de bronze, a coroa, com o eixo de saída em ângulo reto.
+
+<Model3D part="worm-gear" props={{ ratio: 30, starts: 1, rpm: 600 }} cutaway annotations />
+
+Cada volta da rosca empurra a coroa em um dente, se a rosca tem uma **entrada** (um filete só, como um parafuso comum). Uma rosca de duas entradas, com dois filetes lado a lado, empurra dois dentes por volta. A redução é:
+
+$$
+i = \frac{\text{dentes da coroa}}{\text{entradas da rosca}}
+$$
+
+Uma coroa de 30 dentes com rosca de uma entrada dá 1:30; com rosca de duas entradas, 1:15. Num parafuso só, o sem-fim consegue reduções que pediriam vários pares de engrenagens retas.
+
+### O redutor que trava sozinho
+
+O sem-fim tem uma propriedade que faz dele o redutor do portão. A rosca gira a coroa com facilidade, mas a coroa não consegue girar a rosca: o filete é inclinado demais e o atrito entre o aço da rosca e o bronze da coroa trava o movimento ao contrário. O redutor é **irreversível**. Empurrar o portão com o motor parado não faz nada girar, e o portão fica parado no lugar sem nenhuma trava a mais, sem gastar energia. O mesmo vale para o vidro elétrico: empurrar o vidro com a mão não faz o motor descer.
+
+O preço é o rendimento. O atrito que trava a volta também atrapalha a ida, e um sem-fim irreversível rende pouco, em geral menos de 50 %. Como regra prática, um redutor de sem-fim com rendimento abaixo de uns 50 % é irreversível. Roscas de duas ou mais entradas, com o filete menos inclinado, rendem mais (70 % a 90 %) e deixam a carga voltar. Por isso o motor do portão não tem freio, mas tem o **desbloqueio**, que solta a transmissão para o portão correr à mão quando falta energia.
+
+O que não vira trabalho vira calor: num redutor de 45 %, mais da metade da potência do motor esquenta o óleo e a carcaça. Por isso os redutores de sem-fim trabalham em óleo ou graxa, e esquentam quando o portão é usado sem parar.
+
+### Pinhão e cremalheira
+
+Na saída do redutor do portão fica um pinhão que empurra a <Term id="cremalheira">cremalheira</Term> presa ao portão. O giro vira linha reta:
+
+$$
+v = \omega_{\text{pinhão}} \cdot r \qquad F = \frac{T_{\text{saída}}}{r}
+$$
+
+em que $v$ é a velocidade do portão (m/s), $\omega_{\text{pinhão}}$ é a velocidade angular do pinhão (rad/s), $r$ é o raio do pinhão (m) e $F$ é a força na cremalheira (N). Pinhão maior: portão mais rápido e menos força. Pinhão menor: mais força e menos velocidade.
+
+## Calcule: do motor ao portão
+
+<CalculadoraRedutor client:visible />
+
+O exemplo do portão usa os mesmos números da simulação do portão do módulo 16: motor de 1/3 CV a 1.730 rpm, redução 1:22, rendimento de 45 % e pinhão de 3 cm de raio. Experimente trocar a redução e o pinhão e veja o que acontece com a força e a velocidade. Com raio 0, a calculadora para na saída do redutor.
+
+## Exemplo resolvido: o portão de 15 m/min
+
+Com os números do motor de portão do exemplo, siga a potência do motor até a cremalheira.
+
+**Torque no motor.** 250 W a 1.730 rpm:
+
+$$
+\omega = \frac{2\pi \times 1.730}{60} \approx 181{,}2\,\text{rad/s} \qquad T = \frac{250}{181{,}2} \approx 1{,}38\,\text{N·m}
+$$
+
+**Saída do redutor.** Com 1:22 e 45 %:
+
+$$
+n = \frac{1.730}{22} \approx 78{,}6\,\text{rpm} \qquad T = 1{,}38 \times 22 \times 0{,}45 \approx 13{,}66\,\text{N·m}
+$$
+
+**Na cremalheira.** Com o pinhão de 3 cm ($r = 0{,}03\,\text{m}$):
+
+$$
+v = \frac{2\pi \times 78{,}6}{60} \times 0{,}03 \approx 0{,}247\,\text{m/s} \approx 14{,}8\,\text{m/min} \qquad F = \frac{13{,}66}{0{,}03} \approx 455\,\text{N}
+$$
+
+O portão anda perto de 15 m/min, o número dos catálogos e da aula <LinkAula id="m16-portao/01-anatomia-do-automatizador" />, empurrado com 455 N, a força de um peso de uns 46 kg. Confira a potência: $455 \times 0{,}247 \approx 112{,}5\,\text{W}$, que é 45 % dos 250 W do motor. Os outros 137,5 W esquentam o redutor.
+
+E os 300 kg do portão? Para manter o portão andando, a força só precisa vencer o atrito das roldanas no trilho, que num portão bem montado fica perto de 100 N. A força que sobra acelera o portão na partida e vence trechos duros do trilho. Um trilho torto ou roldanas gastas pedem mais força do que o motor tem, e o portão para no meio.
+
+<RealCase title="Por que o motor do portão tem redutor">
+
+Sem redutor, o pinhão de 3 cm giraria a 1.730 rpm, e o portão andaria a $181{,}2 \times 0{,}03 \approx 5{,}4\,\text{m/s}$, perto de 20 km/h, com uma força de só 46 N, que nem venceria o atrito das roldanas. Não haveria como parar o portão a tempo no fim de curso, nem segurá-lo parado.
+
+O redutor de sem-fim resolve três coisas de uma vez: baixa a velocidade para algo seguro, multiplica a força e trava o portão quando o motor para. Quem troca o motor do portão por outro modelo precisa conferir as três coisas juntas: a potência para o peso do portão, a velocidade (relação e pinhão) e o dente do pinhão, para combinar com a cremalheira (aula <LinkAula id="m16-portao/07-trocar-motor-e-central" />). Motores de mais força para o mesmo motor costumam ter redução maior, e são mais lentos.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Achar que o redutor aumenta a potência.** Ele aumenta o torque e baixa a rotação; a potência, no máximo, se conserva. Um motor fraco demais para a carga não fica forte com um redutor, fica lento.
+- **Confundir CV com HP ou com kW.** 1 CV = 735,5 W, 1 HP = 745,7 W. Num motor de 10 CV, a diferença é de mais de 100 W.
+- **Esquecer o rendimento.** A conta $T \cdot i$ sem o $\eta$ promete o dobro da força num sem-fim de 45 %.
+- **Pôr a mão perto do pinhão ou da cremalheira.** O redutor multiplica a força do motor dezenas de vezes: o pinhão do portão empurra com centenas de newtons e não para por causa de um dedo. Desligue o motor e acione o desbloqueio antes de mexer na cremalheira.
+- **Abrir o desbloqueio num portão em rampa.** Sem o redutor travando, o portão corre sozinho morro abaixo. Segure o portão antes de soltar.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Uma força de 50 N é aplicada na ponta de uma manivela de 30 cm. Qual é o torque, em N·m?',
+      answer: 15,
+      tolerance: 0.01,
+      unit: 'N·m',
+      explanation: 'T = F × r = 50 N × 0,3 m = 15 N·m.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Quantos watts tem um motor de 1/2 CV?',
+      answer: 367.75,
+      tolerance: 0.01,
+      unit: 'W',
+      explanation: '1 CV = 735,5 W, então 1/2 CV = 367,75 W, uns 368 W.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Um motor entrega 4 N·m a 1.800 rpm. Qual é a potência mecânica no eixo, em watts?',
+      answer: 754,
+      tolerance: 0.01,
+      unit: 'W',
+      explanation: 'ω = 2π × 1.800 ÷ 60 ≈ 188,5 rad/s; P = T × ω = 4 × 188,5 ≈ 754 W, cerca de 1 CV.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um redutor de coroa de 40 dentes e rosca de duas entradas recebe 1.700 rpm. Qual é a rotação na saída, em rpm?',
+      answer: 85,
+      tolerance: 0.01,
+      unit: 'rpm',
+      explanation: 'A redução é 40 ÷ 2 = 1:20. A saída gira 1.700 ÷ 20 = 85 rpm.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um motor de 2 N·m aciona um redutor 1:15 com rendimento de 80 %. Qual é o torque na saída, em N·m?',
+      answer: 24,
+      tolerance: 0.01,
+      unit: 'N·m',
+      explanation: 'T = 2 × 15 × 0,8 = 24 N·m. Sem perdas seriam 30 N·m.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que o portão com redutor de sem-fim não abre quando alguém empurra com o motor parado?',
+      options: [
+        {
+          text: 'A coroa não consegue girar a rosca de volta: o filete inclinado e o atrito travam o movimento ao contrário',
+          correct: true,
+          feedback:
+            'O sem-fim de rendimento baixo é irreversível. A rosca gira a coroa, mas a coroa não gira a rosca, e o portão fica travado sem freio.',
+        },
+        {
+          text: 'O capacitor do motor segura o rotor parado',
+          feedback:
+            'O capacitor só ajuda o motor a partir, e só com energia. Quem segura o portão parado é o redutor de sem-fim.',
+        },
+        {
+          text: 'O motor fica com um pouco de corrente para frear o portão',
+          feedback:
+            'Com o motor parado, a central não manda corrente para ele. O travamento é mecânico, do redutor.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Um redutor 1:10 transforma um motor de 250 W num motor de 2.500 W.',
+      answer: false,
+      explanation:
+        'O redutor multiplica o torque e divide a rotação na mesma proporção. A potência, no máximo, se conserva: 250 W na entrada dão menos de 250 W na saída.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- **Torque** é força vezes braço, $T = F \cdot r$, em N·m. **Potência mecânica** é torque vezes velocidade angular, $P = T \cdot \omega$, com $\omega = 2\pi n / 60$.
+- **1 CV = 735,5 W** e **1 HP = 745,7 W**. A placa do motor mostra a potência no eixo; a da rede é maior, dividida pelo rendimento.
+- Num redutor de relação $i$, a rotação cai $i$ vezes e o torque sobe $i \cdot \eta$ vezes. A potência nunca aumenta.
+- Na **coroa e sem-fim**, a relação é dentes da coroa ÷ entradas da rosca. Com rendimento baixo, ele é **irreversível** e trava a carga parada, como no portão e no vidro elétrico.
+- O **pinhão** na **cremalheira** vira o giro em linha reta: $v = \omega \cdot r$ e $F = T / r$.
+
+Você terminou o módulo de motores. Do motor CC do vidro elétrico ao trifásico da bomba, do capacitor do ventilador ao drone, todos são a mesma ideia: corrente dentro de campo magnético faz força, e alguém, as escovas, o capacitor, a rede trifásica ou a eletrônica, cuida de a força apontar sempre para o lado do giro. No módulo 16, essas ideias se juntam no motor, no redutor e na central do <LinkAula id="m16-portao/02-o-motor-do-portao">portão eletrônico</LinkAula>.
