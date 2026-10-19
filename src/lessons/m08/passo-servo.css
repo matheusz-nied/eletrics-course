@@ -1,0 +1,221 @@
+/* MotorDePasso.tsx and ServoPulso.tsx, lesson 8.5. */
+
+.passo__body,
+.servo__body {
+  align-items: start;
+}
+
+@media (min-width: 52rem) {
+  .passo__body,
+  .servo__body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.passo__side,
+.servo__side,
+.servo__views {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.passo__motor,
+.servo__top,
+.servo__signal {
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.passo__motor {
+  max-width: 20rem;
+  justify-self: center;
+}
+
+.passo__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.passo__ring {
+  fill: var(--surface);
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+
+.passo__pole {
+  fill: var(--fg-subtle);
+  stroke: var(--fg-muted);
+  stroke-width: 1;
+}
+
+.passo__pole--n {
+  fill: var(--danger);
+}
+
+.passo__pole--s {
+  fill: var(--info);
+}
+
+.passo__coil {
+  fill: none;
+  stroke: var(--copper);
+  stroke-width: 3;
+  opacity: 0.45;
+}
+
+.passo__coil--on {
+  opacity: 1;
+  stroke-width: 4;
+}
+
+.passo__coil-name {
+  fill: var(--fg);
+  font-size: 15px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.passo__face {
+  font-size: 13px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.passo__face--n {
+  fill: var(--danger);
+}
+
+.passo__face--s {
+  fill: var(--info);
+}
+
+.passo__rotor--anim {
+  transition: transform 250ms ease-out;
+}
+
+.passo__mag {
+  stroke: var(--fg);
+  stroke-width: 1;
+}
+
+.passo__mag--n {
+  fill: var(--danger);
+}
+
+.passo__mag--s {
+  fill: var(--info);
+}
+
+.passo__mag-t {
+  fill: var(--bg);
+  font-size: 12px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.passo__pivot {
+  fill: var(--fg);
+}
+
+.passo__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.passo__table caption {
+  text-align: left;
+}
+
+.passo__table :where(th, td) {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.passo__row--on {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.servo__scale {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-dasharray: 3 5;
+  stroke-width: 1.25;
+}
+
+.servo__tick,
+.servo__axis {
+  stroke: var(--fg-subtle);
+  stroke-width: 1.25;
+}
+
+.servo__tick-t {
+  fill: var(--fg-muted);
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.servo__tick-t--end {
+  text-anchor: end;
+}
+
+.servo__case {
+  fill: var(--info);
+  stroke: var(--fg);
+  stroke-width: 1;
+  opacity: 0.85;
+}
+
+.servo__ears {
+  opacity: 0.6;
+}
+
+.servo__case-t {
+  fill: var(--bg);
+  font-size: 11px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.servo__horn {
+  stroke: var(--fg);
+  stroke-linecap: round;
+  stroke-width: 14;
+}
+
+.servo__horn-end {
+  fill: var(--fg);
+}
+
+.servo__hub {
+  fill: var(--surface);
+  stroke: var(--fg);
+  stroke-width: 2;
+}
+
+.servo__wave {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linejoin: round;
+  stroke-width: 2.25;
+}
+
+.servo__dim {
+  fill: none;
+  stroke: var(--fg-muted);
+  stroke-width: 1.2;
+}
+
+.servo__pulse-t {
+  fill: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  text-anchor: middle;
+}
