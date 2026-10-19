@@ -1,0 +1,326 @@
+---
+titulo: Disjuntores, DR e DPS
+modulo: m07-instalacoes
+ordem: 3
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Explicar como o disjuntor termomagnético desarma numa sobrecarga e num curto-circuito
+  - Escolher a corrente nominal e a curva (B, C ou D) de um disjuntor e entender a capacidade de interrupção
+  - Explicar o que o DR protege, como ele é ligado no quadro, como testá-lo e o que quer dizer quando ele desarma sozinho
+  - Explicar o que é um surto e como o DPS protege a instalação
+  - Dizer qual proteção desarma em cada tipo de falha
+prerequisitos:
+  - m04-passivos/06-fusiveis-e-protecao
+  - m07-instalacoes/02-fase-neutro-e-terra
+tags: [disjuntor, curva B, curva C, curva D, DR, IDR, DDR, DPS, surto, sobrecarga, curto-circuito, fuga, quadro de distribuição, NBR 5410]
+seguranca: rede
+---
+
+import DisjuntorPorDentro from '../../../lessons/m07/figures/DisjuntorPorDentro.astro';
+import CurvasBC from '../../../lessons/m07/figures/CurvasBC.astro';
+import DrNoQuadro from '../../../lessons/m07/figures/DrNoQuadro.astro';
+import DpsSurto from '../../../lessons/m07/figures/DpsSurto.astro';
+
+Abra a porta do quadro de distribuição da sua casa. Lá dentro há uma fileira de disjuntores, talvez um aparelho mais largo com um botão marcado **T**, e talvez um módulo com uma janelinha colorida. Cada um vigia um tipo diferente de problema, e nenhum faz o trabalho do outro: o disjuntor da cozinha cai quando o forno e a air fryer ligam juntos, mas não percebe uma pessoa levando choque.
+
+Nesta aula você vai abrir o disjuntor, entender as curvas B, C e D, ver como o DR é ligado, conhecer o DPS e, no simulador, provocar as três falhas para ver quem desarma em cada uma.
+
+## Três falhas, três vigias
+
+Um circuito pode dar errado de três jeitos principais, e mais um que vem de fora:
+
+| Falha | O que acontece | Quem desliga |
+| --- | --- | --- |
+| **Sobrecarga** | Aparelhos demais no mesmo circuito: a corrente passa um pouco da que o fio aguenta, por muito tempo | A parte térmica do disjuntor, em segundos ou minutos |
+| **Curto-circuito** | Fase e neutro (ou fase e terra, no esquema TN) se encontram sem nada no meio: a corrente vai a centenas de ampères | A parte magnética do disjuntor, na hora |
+| **Fuga para a terra** | Parte da corrente escapa por outro caminho, como uma carcaça aterrada ou o corpo de uma pessoa | O DR |
+| **Surto** | Um pico de milhares de volts por uma fração de milissegundo, vindo de um raio ou de manobras na rede | O DPS |
+
+A sobrecarga e o curto são correntes **grandes**, que estragam o fio e podem começar um incêndio. A fuga por uma pessoa é **pequena**, de dezenas de miliampères, mas mata. O surto é uma tensão alta demais. Problemas tão diferentes precisam de sensores diferentes.
+
+## O disjuntor por dentro
+
+O <Term id="disjuntor">disjuntor</Term> termomagnético faz o mesmo trabalho do fusível da aula <LinkAula id="m04-passivos/06-fusiveis-e-protecao" />, com a vantagem de poder ser religado. Ele tem duas proteções dentro da mesma caixa, uma para cada tamanho de excesso.
+
+<Figure
+  alt="Corte de um disjuntor de trilho. A corrente entra pelo borne de cima, passa pela bobina do disparo magnético, que tem um êmbolo no meio, pelos contatos, por uma cordoalha até a lâmina bimetálica e sai pelo borne de baixo. À esquerda, a alavanca e a trava do mecanismo; ao lado dos contatos, a câmara de extinção do arco, uma pilha de placas de aço."
+  caption="Figura 1. O disjuntor termomagnético em corte. A corrente percorre a bobina, os contatos e o bimetal. Num curto, a bobina puxa o êmbolo na hora; numa sobrecarga, o bimetal esquenta e se curva. Os dois soltam a mesma trava, e a mola abre os contatos. O arco que se forma entre eles é puxado para a câmara de extinção."
+>
+  <DisjuntorPorDentro />
+</Figure>
+
+- **A parte térmica: o bimetal.** A corrente passa por uma <Term id="bimetal">lâmina bimetálica</Term>, dois metais colados que dilatam de jeitos diferentes. A lâmina esquenta pelo efeito Joule e, numa sobrecarga, se curva até soltar a trava. Como precisa esquentar, ela é lenta de propósito: aguenta picos curtos e reage ao excesso que continua.
+- **A parte magnética: a bobina.** A corrente também passa por uma bobina, um <Term id="eletroima">eletroímã</Term> como os da aula <LinkAula id="m05-magnetismo/02-eletroimas-e-solenoides" />. Com a corrente normal, a força dela é pequena. Num curto, a corrente vai a dezenas de vezes a nominal, a bobina puxa o êmbolo de uma vez e solta a trava em milésimos de segundo, sem esperar nada esquentar.
+- **A câmara de extinção.** Quando os contatos se separam com corrente alta, a corrente continua pelo ar entre eles: é o <Term id="arco-eletrico">arco elétrico</Term>. Uma pilha de placas de aço puxa o arco, o divide e o resfria até ele apagar.
+
+O número grande gravado no disjuntor (10, 16, 20, 25 A…) é a <Term id="corrente-nominal">corrente nominal</Term>, $I_n$: a corrente que ele conduz o tempo todo sem desarmar. Para falar de excessos, é prático usar o múltiplo da nominal:
+
+$$
+k = \frac{I}{I_n}
+$$
+
+Aqui, $I$ é a corrente do circuito e $I_n$, a nominal do disjuntor, as duas em ampères (A), e $k$ não tem unidade. Um disjuntor de 10 A com 25 A está em $k = 2{,}5$. Pela norma dos disjuntores residenciais, a IEC 60898 (no Brasil, NBR NM 60898), o disjuntor não pode desarmar com $1{,}13\,I_n$ dentro de uma hora e tem de desarmar com $1{,}45\,I_n$ dentro de uma hora. Até uns $2$ a $3\,I_n$, quem age é o bimetal, em segundos ou minutos; acima do limite magnético, a bobina, na hora.
+
+Outro número gravado no disjuntor é a <Term id="capacidade-de-interrupcao">capacidade de interrupção</Term>: a maior corrente de curto que ele consegue cortar sem se destruir. Ela vem em ampères, num retângulo, como **3000** ou **4500**: 3 kA ou 4,5 kA, valores comuns em disjuntores residenciais (típico). A corrente de curto no quadro depende do transformador e da distância até ele, e quem define a capacidade necessária é o projeto. Com capacidade menor que o curto possível, o disjuntor pode não conseguir apagar o arco.
+
+<Callout type="atencao" title="O disjuntor protege o fio, não a pessoa">
+A corrente nominal do disjuntor é escolhida pelo fio do circuito: ele existe para o fio não esquentar até pegar fogo. Uma pessoa levando um choque de 100 mA é, para um disjuntor de 20 A, 0,5 % da nominal: ele nem percebe. Contra choque, a proteção é o DR.
+</Callout>
+
+## Curvas B, C e D
+
+O bimetal é igual em todos os disjuntores residenciais de mesma corrente nominal. O que muda entre eles é **a partir de quantas vezes a nominal a bobina desarma na hora**. Isso é a <Term id="curva-de-disparo">curva de disparo</Term>, a letra antes do número no disjuntor (C20 é curva C, 20 A). Pela IEC 60898:
+
+- **Curva B**: o disparo magnético acontece entre 3 e 5 vezes a nominal. É a mais sensível. Serve para cargas resistivas, sem pico de partida (aquecedores, chuveiros), e para circuitos longos, em que o fio comprido limita a corrente de curto no fim do circuito e só um disparo sensível garante o desarme na hora.
+- **Curva C**: entre 5 e 10 vezes a nominal. É a de uso geral nas casas: tomadas, iluminação com reatores e drivers, e motores pequenos como o de uma bomba, de um ar-condicionado ou do <LinkAula id="m16-portao/07-trocar-motor-e-central">portão eletrônico</LinkAula>.
+- **Curva D**: entre 10 e 20 vezes a nominal. Para cargas com <Term id="corrente-de-partida">corrente de partida</Term> muito alta, como transformadores grandes, máquinas de solda e motores grandes. Quase não aparece em casas.
+
+<Figure
+  alt="Gráfico em escala logarítmica do tempo para desarmar em função da corrente, em múltiplos da corrente nominal. Três curvas, B, C e D, com a mesma parte térmica, que desce devagar da esquerda para a direita a partir de cerca de 1,3 vez a nominal. Cada uma cai na vertical até o disparo instantâneo, menos de 0,01 s, no seu limite magnético: em 4 vezes a nominal na curva B, em 7,5 vezes na C e em 15 vezes na D. Faixas sombreadas marcam as faixas da norma: de 3 a 5, de 5 a 10 e de 10 a 20 vezes a nominal. Um ponto marca 2,4 vezes a nominal em 20 segundos; uma linha tracejada em 6 vezes a nominal mostra a curva C desarmando em 2,8 segundos, enquanto a B já desarmou na hora."
+  caption="Figura 2. As curvas de disparo do disjuntor do simulador (valores do modelo). À esquerda, a parte térmica: quanto maior a sobrecarga, mais rápido. Na vertical, o limite magnético de cada curva, dentro da faixa da norma (sombreada). Um disjuntor real tem uma faixa de tempos em vez de uma linha, informada na folha de dados do fabricante."
+>
+  <CurvasBC />
+</Figure>
+
+Leia o gráfico na linha de 6 vezes a nominal, uma partida de motor comum num circuito pequeno. A curva B já passou do limite magnético: desarma na hora (pela norma, um B desarma na hora até 5 × In). A curva C do simulador, com limite em 7,5 × In, está na parte térmica: aguenta a partida, que dura uma fração de segundo, e só desarmaria se a corrente durasse uns 3 segundos, como num motor travado. Um C real pode ter o limite em qualquer ponto entre 5 e 10 × In, conforme o fabricante. Por isso um motor num disjuntor B "derruba a luz" quando parte, e a solução é um C de mesma corrente, nunca um B maior.
+
+<DeepDive title="O modelo do disjuntor no simulador">
+No simulador, o bimetal esquenta em direção a $(I/I_n)^2$ com uma constante de tempo de 60 s e desarma quando chega a $1{,}3^2$. Partindo do frio, o tempo para desarmar com $k = I / I_n$ é
+
+$$
+t = -60\,\text{s} \cdot \ln\left(1 - \frac{1{,}3^2}{k^2}\right)
+$$
+
+que vale cerca de 33 s com $k = 2$, 20 s com $k = 2{,}44$, 12,5 s com $k = 3$ e 2,8 s com $k = 6{,}1$. Abaixo de $k = 1{,}3$, a conta não tem solução: o modelo nunca desarma. O disparo magnético acontece em 4, 7,5 e 15 vezes a nominal nas curvas B, C e D, dentro das faixas da norma. Esses números são do modelo, escolhidos para caber nas faixas da IEC 60898; um disjuntor de verdade segue a curva do fabricante dele.
+</DeepDive>
+
+## Explore: os três tipos de falha
+
+A simulação tem uma rede de 127 V, um DR de 30 mA e um disjuntor de 10 A, de curva B ou C, num circuito de tomadas com a geladeira e as lâmpadas (300 W) ligadas. Chaves ligam um aquecedor de 1.000 W e um forno de 2.000 W, fecham um curto ou fazem uma pessoa encostar na fase com os pés no chão. Um botão simula a partida de um motor enquanto fica apertado.
+
+<Simulation circuit="m07/tres-falhas" height={360} />
+
+Aperte o play (▶). Quando algo desarma, um aviso embaixo do circuito mostra o instante e o motivo. Passe o mouse (ou toque) no disjuntor para ver o **aquecimento do bimetal**: em 1, ele desarma. Use **Reiniciar** entre os testes, e a velocidade 5× nas sobrecargas.
+
+1. **Normal.** Só com a geladeira e as lâmpadas, a corrente é de 2,35 A. Ligue o aquecedor: 10 A, exatamente a nominal. O aquecimento sobe e para em torno de 0,6. O disjuntor aguenta o dia inteiro.
+2. **Sobrecarga.** Ligue também o forno: cerca de 24 A, 2,4 vezes a nominal. O aquecimento sobe sem parar, e o disjuntor desarma por sobrecarga em cerca de 20 s. Reinicie e ligue só o forno com a geladeira: 17 A, e o disjuntor leva cerca de 50 s. O DR não faz nada: a corrente que vai pela fase volta inteira pelo neutro.
+3. **Curto-circuito.** Reinicie e feche o curto. A corrente vai a cerca de 380 A, e o disjuntor desarma pelo disparo magnético no primeiro instante, com a curva B ou com a C.
+4. **Fuga pela pessoa.** Reinicie e faça a pessoa encostar na fase. A corrente pelo corpo seria de cerca de 0,1 A, e a do disjuntor quase não muda (de 2,35 A para 2,45 A). Quem desarma é o DR, no primeiro passo da simulação: a pessoa sente o choque, mas ele para na zona AC-2.
+5. **Curva B ou C.** Reinicie com a curva C e segure **Partida do motor** por cerca de 1 s: a corrente vai a uns 61 A, seis vezes a nominal, e o disjuntor aguenta. Mude para a curva B e repita: desarma na hora. Com a curva C, segure o botão uns 3 s, como um motor travado: o bimetal desarma em cerca de 2,8 s.
+
+Repare como o DR não vê os testes 2, 3 e 5, e o disjuntor não vê o teste 4. Cada um tem o seu trabalho.
+
+## Exemplo resolvido: o disjuntor do forno
+
+Você vai ligar um forno elétrico de 2.000 W, em 127 V, num circuito só dele, na cozinha. Qual disjuntor usar?
+
+**Passo 1: a corrente do circuito.** É a corrente de projeto, $I_B$:
+
+$$
+I_B = \frac{P}{V} = \frac{2.000\,\text{W}}{127\,\text{V}} \approx 15{,}7\,\text{A}
+$$
+
+**Passo 2: a regra do meio.** A corrente nominal do disjuntor tem que ficar entre a corrente do circuito e a corrente que o fio aguenta, $I_Z$:
+
+$$
+I_B \le I_n \le I_Z
+$$
+
+Acima de 15,7 A, o valor comercial seguinte é **20 A**. Agora o fio precisa aguentar pelo menos 20 A nas condições em que vai instalado, conferido pela tabela da NBR 5410 na aula <LinkAula id="m07-instalacoes/04-fios-e-cabos" />. Se ele aguentar menos, a solução é um fio mais grosso, nunca um disjuntor menor que a carga ou maior que o fio.
+
+**Passo 3: a curva.** O forno é uma resistência, sem pico de partida: a curva B serviria. Na prática, a curva C também serve e é a mais fácil de achar; no circuito de um motor, ela é a escolha.
+
+**Passo 4: o resto da etiqueta.** Um polo (monopolar), porque o circuito de 127 V tem uma fase e o neutro; capacidade de interrupção igual ou maior que a pedida no projeto do quadro; e o selo do Inmetro. Um forno de 220 V ligado entre duas fases pediria um disjuntor bipolar, que desliga as duas fases juntas.
+
+## O DR
+
+A aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" /> mostrou a ideia do <Term id="dr">DR</Term>: fase e neutro passam por dentro de um anel magnético; se toda a corrente que vai volta, nada acontece; se uma parte escapa para a terra, sobra uma diferença, e o DR desarma. Agora, os detalhes de quem vai mexer no quadro.
+
+**Os tipos.** O **interruptor DR** (às vezes chamado de IDR) só faz a proteção diferencial: ele não desarma com sobrecarga nem com curto, e precisa de disjuntores junto. O **disjuntor DR** (às vezes DDR) junta as duas coisas num aparelho só. Os dois existem com dois polos (fase e neutro, ou duas fases) e com quatro polos, para circuitos trifásicos.
+
+**A sensibilidade.** O número do DR é a corrente diferencial que ele percebe, $I_{\Delta n}$. O de **30 mA**, chamado de alta sensibilidade, é o que protege pessoas. Os de 100 mA, 300 mA e mais protegem contra incêndio causado por fugas, não contra choque. A NBR 5410 exige DR de alta sensibilidade em vários circuitos da casa, como os de banheiros, cozinhas, áreas de serviço e tomadas de áreas externas; muitos eletricistas protegem a casa inteira.
+
+**A ligação.** A Figura 3 mostra o jeito certo. Fase e neutro entram no DR e saem dele; depois, a fase vai aos disjuntores dos circuitos, e o neutro vai a um barramento de neutro só dos circuitos daquele DR. O terra não passa pelo DR.
+
+<Figure
+  alt="Ligação de um DR no quadro. A fase e o neutro entram no DR. Depois dele, a fase alimenta dois disjuntores, de dois circuitos; o neutro vai a uma barra de neutro exclusiva, de onde sai o neutro de cada circuito. A barra de terra fica separada e não passa pelo DR; dela sai o terra de cada circuito."
+  caption="Figura 3. O DR no quadro. Fase e neutro passam pelo DR; depois dele, o neutro tem barra própria, e o terra fica de fora. Se o neutro de um circuito protegido encostar no terra depois do DR, ou se o neutro de um circuito sem DR for ligado na barra de neutro depois do DR, o DR vê uma diferença e desarma."
+>
+  <DrNoQuadro />
+</Figure>
+
+Dois erros de ligação fazem o DR desarmar sem defeito nos aparelhos. O **neutro encostando no terra depois do DR**, numa tomada ou caixa de passagem, desvia parte da volta pelo terra. E **misturar neutros** entre um circuito com DR e um sem faz a ida passar pelo DR e a volta, por fora. Os dois são comuns em casa antiga com DR novo. O conserto é separar os neutros, não tirar o DR.
+
+**O teste.** O botão **T** cria uma pequena fuga por dentro do DR, por um resistor. Aperte-o periodicamente, como o fabricante indica no aparelho ou no manual, com o circuito ligado: o DR tem que desarmar. Se não desarmar, ele está com defeito e tem que ser trocado. O botão testa o mecanismo do DR, não a instalação: um DR que desarma no teste ainda pode estar mal ligado.
+
+**Quando ele desarma sozinho.** É o aviso de uma fuga real: um chuveiro com a resistência gasta, uma tomada externa com água, um aparelho úmido, um erro de ligação, ou várias fugas pequenas que somadas passam do limite. A resposta é procurar o defeito.
+
+## O DPS
+
+Um raio que cai perto da rede induz nos fios milhares de volts durante uma fração de milissegundo; manobras da concessionária e cargas grandes criam picos menores e mais frequentes. São os <Term id="surto">surtos</Term>. O disjuntor e o DR não foram feitos para eles: um surto é uma tensão alta por microssegundos.
+
+<Figure
+  alt="Um surto chega pela fase e pelo neutro, vindo de um raio. No quadro, um DPS está ligado entre a fase e a barra de terra, e outro entre o neutro e a barra de terra. Uma linha tracejada mostra o surto entrando pela fase, atravessando o DPS e descendo pela barra de terra até a haste. À direita, os aparelhos, ligados à fase e ao neutro, recebem só uma sobra pequena do surto."
+  caption="Figura 4. O DPS desvia o surto para a terra. Na tensão normal, ele quase não conduz; quando a tensão dispara, ele conduz muito e manda a energia do surto para a haste, antes que ela chegue aos aparelhos."
+>
+  <DpsSurto />
+</Figure>
+
+O <Term id="dps">DPS</Term> (dispositivo de proteção contra surtos) fica no quadro, ligado entre cada condutor e o barramento de terra. Por dentro, o mais comum é um <Term id="varistor">varistor</Term>, um componente que quase não conduz na tensão normal e passa a conduzir muito quando a tensão sobe demais. O surto encontra no DPS um caminho mais fácil que os aparelhos e vai para a terra.
+
+O que você precisa saber sobre ele:
+
+- **Ele precisa de um bom terra.** O DPS desvia o surto para o aterramento. Sem terra, ou com um terra ruim, ele não tem para onde mandar a energia.
+- **Ele não protege contra choque nem contra sobrecarga.** Para isso continuam o DR e o disjuntor.
+- **Ele tem classe.** O de **classe I** aguenta parte da corrente de um raio direto e fica na entrada de prédios com para-raios ou rede aérea exposta. O de **classe II** é o comum no quadro de uma casa, para surtos induzidos e de manobra. Qual usar, e onde, é decisão do projeto, pelas regras da NBR 5410.
+- **Ele se gasta.** Cada surto forte desgasta o varistor. Muitos DPS têm uma janelinha que muda de cor (de verde para vermelho, por exemplo) no fim da vida. Olhe-a de vez em quando e depois de tempestades; o DPS que indica fim de vida tem que ser trocado.
+
+Os protetores de tomada e os filtros de linha com varistor fazem uma proteção parecida, mais fraca, no próprio aparelho. Eles também dependem do terra da tomada.
+
+<RealCase title="O DR desarma toda vez que liga o chuveiro">
+Você instalou um DR no quadro, e agora ele desarma sempre que alguém liga o chuveiro. A tentação é tirar o DR, ou ligar o chuveiro por fora dele. **Não faça nenhuma das duas coisas**: o DR está mostrando um defeito que já existia, e que antes passava despercebido, num lugar onde a pessoa está molhada e descalça.
+
+As causas mais comuns:
+
+- **Resistência gasta ou trincada.** Nos chuveiros de resistência nua, a resistência fica em contato com a água, e uma parte da corrente passa pela água até o cano ou até a carcaça aterrada. Com a resistência velha, essa fuga cresce e passa dos 30 mA. Muitos fabricantes têm modelos de resistência blindada, isolada da água, indicados para circuitos com DR.
+- **Um erro de ligação no circuito do chuveiro**, como o neutro encostando no terra depois do DR ou o fio terra do chuveiro ligado no neutro.
+- **Umidade numa caixa de passagem** ou numa emenda do circuito.
+
+O eletricista acha o defeito por eliminação: desliga os disjuntores dos circuitos daquele DR, arma o DR e religa um circuito de cada vez. Dentro do circuito suspeito, desconecta os aparelhos; se o DR ainda desarma, o problema está na fiação, e ele mede a isolação com um instrumento próprio. Um alicate de fuga abraçando fase e neutro juntos mostra a corrente que não está voltando.
+
+E se a pergunta for **"qual disjuntor eu compro para o circuito X?"**, o roteiro é o do exemplo resolvido: a corrente do circuito, o fio que aguenta mais que ela, um disjuntor entre os dois, a curva pela carga, os polos pelo circuito e a capacidade de interrupção pelo projeto. Trocar o disjuntor por um maior porque ele "cai" é o jeito mais comum de tirar a proteção de um fio.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Trocar o disjuntor por um maior porque ele desarma.** Ele está protegendo o fio. Com um disjuntor maior que o fio aguenta, quem vira o ponto fraco é o fio, dentro da parede.
+- **Tirar o DR, ou ligar um circuito por fora dele, porque ele desarma.** O DR está avisando de uma fuga. Procure o defeito.
+- **Usar um disjuntor B num motor e depois aumentar a corrente.** O certo é a curva C de mesma corrente nominal.
+- **Ligar o neutro no terra depois do DR, ou misturar neutros de circuitos diferentes.** O DR desarma sem defeito nos aparelhos, e a tentação de tirá-lo aparece.
+- **Instalar DPS sem terra.** Ele não tem para onde desviar o surto.
+- **Mexer no quadro energizado.** Os cabos que chegam ao disjuntor geral continuam energizados com ele desligado. Trabalho dentro do quadro é para eletricista habilitado: desligar o geral, sinalizar o quadro e testar a ausência de tensão nos bornes com um instrumento conferido.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'associar',
+      prompt: 'Associe cada falha a quem desliga o circuito.',
+      pairs: [
+        ['Aparelhos demais no mesmo circuito, por minutos', 'O bimetal do disjuntor'],
+        ['Fase e neutro encostando, com centenas de ampères', 'A bobina do disjuntor'],
+        ['Uma pessoa encostando na fase, com os pés no chão', 'O DR'],
+        ['Um raio que cai perto da rede', 'O DPS'],
+      ],
+      explanation:
+        'Sobrecarga é com o térmico, curto com o magnético, fuga para a terra com o DR, surto com o DPS. Nenhum faz o trabalho do outro.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um disjuntor de 10 A está num circuito com um aquecedor de 1.000 W e um forno de 2.000 W ligados juntos, em 127 V, além de 300 W de outros aparelhos. Desprezando a queda de tensão, qual é a corrente, em múltiplos da nominal (k = I / In)?',
+      answer: 2.6,
+      tolerance: 0.05,
+      unit: '× In',
+      explanation:
+        'I = 3.300 W ÷ 127 V ≈ 26 A, e k = 26 ÷ 10 = 2,6. É uma sobrecarga: o bimetal desarma em menos de meio minuto. Na simulação, a queda de tensão na rede deixa a corrente em 24,4 A (2,4 × In), e o disjuntor desarma em cerca de 20 s.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'O disjuntor do circuito de uma bomba d’água desarma toda vez que ela liga, e só na partida. O disjuntor é B16. Qual é a troca mais adequada?',
+      options: [
+        {
+          text: 'Um C16, de mesma corrente nominal',
+          correct: true,
+          feedback:
+            'Isso. A partida do motor passa do limite magnético da curva B, mas fica abaixo do da C. A corrente nominal, que protege o fio, continua a mesma.',
+        },
+        {
+          text: 'Um B25, maior',
+          feedback:
+            'Um disjuntor maior pode deixar de proteger o fio do circuito. O problema é a curva, não a corrente nominal.',
+        },
+        {
+          text: 'Um DR no lugar do disjuntor',
+          feedback:
+            'O DR não protege contra sobrecarga nem curto, e a partida do motor não é uma fuga. O circuito continua precisando de um disjuntor.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Um disjuntor de 20 A desliga o circuito quando uma pessoa leva um choque de 100 mA.',
+      answer: false,
+      explanation:
+        '100 mA são 0,1 A, meio por cento da nominal de 20 A. O disjuntor nem percebe. Quem desliga é o DR de 30 mA.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Depois da instalação de um DR, ele desarma assim que é armado, mesmo com todos os aparelhos desligados da tomada. Qual é a causa mais provável?',
+      options: [
+        {
+          text: 'Um erro de ligação, como o neutro encostando no terra depois do DR',
+          correct: true,
+          feedback:
+            'Isso. Sem aparelhos ligados, sobra a fiação. Neutro e terra juntos depois do DR, ou neutros misturados entre circuitos, fazem o DR ver uma diferença.',
+        },
+        {
+          text: 'O DR é sensível demais e precisa ser trocado por um de 300 mA',
+          feedback:
+            'O DR de 300 mA não protege pessoas. E um DR que desarma sem carga está mostrando um problema na fiação.',
+        },
+        {
+          text: 'O disjuntor do circuito é pequeno demais',
+          feedback:
+            'O disjuntor não tem nada a ver com o desarme do DR. O DR só olha a diferença entre a ida e a volta da corrente.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'O que o DPS faz?',
+      options: [
+        {
+          text: 'Desvia para a terra os picos de tensão que chegam pela rede',
+          correct: true,
+          feedback:
+            'Isso. Ele conduz quando a tensão dispara e manda a energia do surto para o aterramento. Por isso precisa de um bom terra.',
+        },
+        {
+          text: 'Desliga o circuito quando alguém leva choque',
+          feedback: 'Essa é a função do DR. O DPS não percebe fugas.',
+        },
+        {
+          text: 'Protege o fio contra sobrecarga',
+          feedback: 'Essa é a função do disjuntor. O DPS só age em surtos de tensão.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque na ordem como escolher o disjuntor de um circuito novo.',
+      items: [
+        'Calcular a corrente do circuito',
+        'Escolher o fio que aguenta mais que essa corrente',
+        'Escolher a corrente nominal entre a do circuito e a do fio',
+        'Escolher a curva pela carga, os polos pelo circuito e a capacidade pelo projeto',
+      ],
+      explanation:
+        'A carga define a corrente, a corrente define o fio, e o disjuntor fica entre os dois: I_B ≤ In ≤ I_Z. Só então vêm a curva, os polos e a capacidade de interrupção.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **disjuntor** termomagnético tem um **bimetal**, lento, para a sobrecarga, e uma **bobina**, instantânea, para o curto. Ele protege o fio, não a pessoa: a corrente nominal fica entre a do circuito e a que o fio aguenta.
+- A **curva** diz em quantas vezes a nominal o disparo é instantâneo: B de 3 a 5, C de 5 a 10, D de 10 a 20 × In. B para cargas resistivas e circuitos longos, C para uso geral e motores, D para picos de partida enormes.
+- A **capacidade de interrupção** (3 kA, 4,5 kA…) é o maior curto que o disjuntor corta com segurança; o projeto diz qual é preciso.
+- O **DR** de 30 mA protege pessoas contra a fuga para a terra. Fase e neutro passam por ele, o neutro depois dele não encosta no terra nem se mistura. Teste-o periodicamente pelo botão T; se ele desarma sozinho, há uma fuga real.
+- O **DPS** desvia surtos para a terra, precisa de um bom aterramento e avisa quando chega ao fim da vida.
+
+Na próxima aula, o outro lado da conta do disjuntor, o fio: <LinkAula id="m07-instalacoes/04-fios-e-cabos" />.

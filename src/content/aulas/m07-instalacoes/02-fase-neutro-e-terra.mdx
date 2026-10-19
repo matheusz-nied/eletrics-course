@@ -1,0 +1,339 @@
+---
+titulo: Fase, neutro e terra
+modulo: m07-instalacoes
+ordem: 2
+nivel: B
+duracaoMin: 35
+objetivos:
+  - Explicar o papel da fase, do neutro e do terra (PE), e por que o neutro fica perto de 0 V em relação à terra
+  - Conferir uma tomada com o multímetro (fase–neutro, fase–terra e neutro–terra) e interpretar cada leitura
+  - Explicar o que o fio terra faz numa falha de isolação, com e sem DR
+  - Diferenciar os esquemas de aterramento TN-S, TN-C-S e TT, e saber que o da sua casa depende da concessionária e da instalação
+  - Explicar por que o terra nunca vai no neutro e o que acontece quando o neutro se rompe
+prerequisitos:
+  - m00-comece-aqui/02-seguranca-em-eletricidade
+  - m03-medicoes/02-medindo-tensao
+tags: [fase, neutro, terra, aterramento, PE, TN-S, TN-C-S, TT, DR, máquina de lavar, NBR 5410]
+seguranca: rede
+---
+
+import EsquemaTN from '../../../lessons/m07/figures/EsquemaTN.astro';
+import EsquemaTT from '../../../lessons/m07/figures/EsquemaTT.astro';
+import TerraFalha from '../../../lessons/m07/figures/TerraFalha.astro';
+import NeutroRompido from '../../../lessons/m07/figures/NeutroRompido.astro';
+
+Você está descalço na lavanderia, estende a mão para abrir a tampa da máquina de lavar e sente um formigamento no braço. Quem mora na casa diz que "sempre foi assim" e que é só não encostar com a mão molhada. Esse formigamento tem uma explicação precisa: a carcaça de metal da máquina está com tensão, e o seu corpo está fechando um circuito até o chão.
+
+Nesta aula você vai entender os três fios de uma tomada, por que um deles existe só para proteger você, e o que acontece com aquela máquina com e sem fio terra, e com e sem DR.
+
+## Três fios, três papéis
+
+A tomada de três furos da sua casa recebe três condutores, cada um com uma função.
+
+- A <Term id="fase">fase</Term> é o fio energizado. É ela que traz a tensão da rede, 127 V ou 220 V em relação à terra, conforme a região.
+- O <Term id="neutro">neutro</Term> é o caminho de volta. A corrente que um aparelho recebe pela fase volta pelo neutro até o transformador da rua.
+- O terra, ou **condutor de proteção (PE)**, liga as partes metálicas dos aparelhos ao <Term id="aterramento">aterramento</Term> da instalação. Num circuito sem defeito, **nenhuma corrente passa por ele**. Ele só trabalha quando alguma coisa dá errado.
+
+A NBR 5410, a norma brasileira das instalações de baixa tensão, reserva cores para dois deles: o neutro, quando identificado por cor, é azul-claro, e o condutor de proteção é verde-amarelo (ou verde). A fase pode ter outra cor; preto, vermelho e marrom são comuns. Mas nem todo instalador seguiu a norma. **Cor de fio não é medida**: meça.
+
+### Por que o neutro fica perto de 0 V
+
+Os 127 V da tomada existem entre a fase e o neutro. Então por que se diz que o neutro "não tem tensão"? Porque a concessionária liga o centro do enrolamento do transformador da rua à terra, e o padrão de entrada da casa costuma aterrar o neutro de novo (a aula <LinkAula id="m07-instalacoes/01-da-rua-ate-a-tomada" /> mostra onde). Com o neutro preso à terra, a tensão dele em relação ao chão fica perto de zero, e a fase fica com os 127 V em relação ao chão.
+
+Perto de zero não é zero. O neutro carrega a corrente de volta, e um fio com corrente tem uma pequena queda de tensão: com aparelhos ligados, o neutro de uma tomada costuma ter alguns volts em relação ao terra (típico). E um neutro rompido pode ficar com a tensão inteira da fase. Por isso o neutro é tratado como energizado.
+
+## Conferindo uma tomada com o multímetro
+
+Com o multímetro em tensão alternada (V~), três medidas contam a história de uma tomada. A técnica, com as pontas e a escala certas, está na aula <LinkAula id="m03-medicoes/02-medindo-tensao" />.
+
+| Medida | Leitura típica numa tomada de 127 V | O que quer dizer |
+| --- | --- | --- |
+| Fase e neutro | cerca de 127 V | A tensão da tomada |
+| Fase e terra | praticamente o mesmo valor | O terra está ligado |
+| Neutro e terra | de zero a alguns volts | O neutro está aterrado e firme |
+
+Duas leituras pedem atenção. **Fase e terra em zero**, com 127 V entre fase e neutro, quer dizer que o furo do terra não está ligado a nada: a tomada tem três furos, mas funciona como se tivesse dois. **Neutro e terra com dezenas de volts** indica neutro mal apertado, sobrecarregado ou rompido em algum ponto, um defeito para um eletricista.
+
+Numa tomada de 220 V de uma rede 127/220 V, os dois furos laterais são duas fases: cada um mostra 127 V para o terra, e 220 V entre eles (aula <LinkAula id="m06-corrente-alternada/07-monofasico-bifasico-e-trifasico" />).
+
+A <Term id="chave-de-teste">chave de teste</Term> (a chave de fenda com uma neon no cabo) acende na fase e apaga no neutro e no terra. Ela ajuda a achar a fase, mas não mede e pode enganar: confira com o multímetro, e teste os instrumentos numa tomada sabidamente ligada, antes e depois.
+
+## Para que serve o terra
+
+Dentro de uma máquina de lavar, o motor e os fios ficam a poucos milímetros da carcaça de metal, separados só pelo isolamento. Com o tempo, a umidade, a vibração e o calor podem estragar esse isolamento. Quando a fase encosta na carcaça, ou passa para ela por um isolamento úmido, acontece uma <Term id="falha-de-isolacao">falha de isolação</Term>.
+
+<Figure
+  alt="Duas situações de uma máquina de lavar com a fase encostando na carcaça de metal. Em cima, sem fio terra: uma pessoa encosta na carcaça, e a corrente de falta desce pelo corpo dela até o chão. Embaixo, com fio terra: a carcaça está ligada ao fio verde, e a corrente de falta vai por ele, sem passar pela pessoa."
+  caption="Figura 1. A mesma falha de isolação, sem e com fio terra. Sem terra, o caminho de volta da corrente é a primeira pessoa que encostar na máquina. Com terra, o caminho é o fio verde, muito mais fácil, e a proteção consegue perceber a falha."
+>
+  <TerraFalha />
+</Figure>
+
+Sem fio terra, a carcaça fica com a tensão da fase **em silêncio**: nada desarma até alguém encostar. Com o fio terra, a corrente que sai pela falha tem um caminho de resistência baixíssima de volta à fonte. Essa corrente se chama <Term id="corrente-de-falta">corrente de falta</Term>. O terra faz dois trabalhos:
+
+1. **Segura a carcaça perto do potencial do chão.** Ligar todas as partes metálicas (carcaças, canos, estruturas) ao mesmo terra é a <Term id="equipotencializacao">equipotencialização</Term>: se tudo que você pode tocar ao mesmo tempo está no mesmo potencial, não sobra tensão entre as suas mãos e os seus pés.
+2. **Transforma a falha em algo que a proteção enxerga.** Ou a corrente de falta fica grande o bastante para o <Term id="disjuntor">disjuntor</Term> desarmar, ou ela vira uma fuga que o <Term id="dr">DR</Term> percebe. Qual dos dois acontece depende do esquema de aterramento, como você vai ver agora.
+
+### Quanto vale a corrente de falta
+
+A corrente de falta é a tensão da rede dividida pela resistência de todo o caminho que ela percorre, ida e volta, a chamada impedância da malha de falta:
+
+$$
+I_f = \frac{U_0}{Z_s}
+$$
+
+Aqui, $I_f$ é a corrente de falta em ampères (A), $U_0$ é a tensão entre a fase e a terra (127 V) e $Z_s$ é a impedância de toda a malha, em ohms (Ω): transformador, fios, a falha e o caminho de volta. Com volta só por fios, $Z_s$ é uma fração de ohm, e a corrente vai a centenas de ampères. Com volta pelo solo, $Z_s$ chega a dezenas de ohms, e a corrente fica em poucos ampères.
+
+Enquanto a corrente de falta passa, a carcaça fica com uma <Term id="tensao-de-contato">tensão de contato</Term>: a tensão entre a carcaça e o chão onde a pessoa pisa. É ela que empurra a corrente pelo corpo de quem encosta.
+
+## Os esquemas de aterramento
+
+O caminho de volta da corrente de falta depende de como o neutro e o terra se ligam, desde o transformador da rua até a tomada. Cada jeito de fazer essa ligação é um <Term id="esquema-de-aterramento">esquema de aterramento</Term>, e a NBR 5410 dá nome a eles com letras. Você não precisa decorar as letras, mas vai encontrá-las em projetos e manuais.
+
+<Figure
+  alt="Dois esquemas TN. Em cima, TN-C-S: do transformador da rua saem a fase e um condutor PEN, que é neutro e terra ao mesmo tempo; na entrada da casa, o PEN é aterrado numa haste e se divide em neutro e terra (PE), que seguem separados até a máquina, cuja carcaça vai no PE. Embaixo, TN-S: neutro e terra saem separados desde o transformador, que tem o centro aterrado."
+  caption="Figura 2. Os esquemas TN. No TN-C-S, um mesmo condutor (o PEN) faz o papel de neutro e de terra até a entrada, onde se divide; no TN-S, os dois vêm separados desde o transformador. Nos dois casos, o terra da casa está ligado ao neutro da rede por fios."
+>
+  <EsquemaTN />
+</Figure>
+
+- **TN**: o terra da instalação é ligado ao neutro aterrado da rede **por fios**. Uma falta para a carcaça fecha uma malha só de metal, e a corrente de falta fica enorme. Ele tem variações:
+  - **TN-S**: neutro e terra separados desde a origem, cada um no seu condutor.
+  - **TN-C-S**: neutro e terra chegam juntos num só condutor, o <Term id="condutor-pen">condutor PEN</Term>, e se separam num ponto, em geral na entrada ou no quadro. Depois desse ponto, nunca mais se encontram.
+  - **TN-C**: o mesmo condutor faz o papel de neutro e de terra até o aparelho. Não serve para os circuitos de tomadas de uma casa: se esse condutor rompe, as carcaças ficam ligadas à fase pelos próprios aparelhos.
+- **TT**: o terra da casa é uma <Term id="haste-de-aterramento">haste de aterramento</Term> própria, cravada no solo, **sem ligação com o neutro** da concessionária. O neutro é aterrado lá no transformador; a única ligação entre os dois aterramentos é o próprio solo.
+- **IT**: a fonte é isolada da terra. A primeira falta não desliga nada, só é sinalizada. É usado onde desligar seria pior, como em salas cirúrgicas; não aparece em casas.
+
+<Figure
+  alt="Esquema TT. O transformador da rua tem o neutro aterrado. A fase e o neutro vão até a casa; a carcaça da máquina vai ao fio terra, que desce até a haste de aterramento da casa, sem ligação com o neutro. Uma linha tracejada mostra a corrente de falta saindo da fase, passando pela carcaça e pelo fio terra, descendo pela haste, atravessando o solo e voltando pelo aterramento do neutro na rua."
+  caption="Figura 3. O esquema TT. Numa falta, a corrente volta pelo solo, entre a haste da casa e o aterramento do neutro na rua. Essas resistências somam dezenas de ohms, e a corrente de falta fica em poucos ampères."
+>
+  <EsquemaTT />
+</Figure>
+
+E qual é o da sua casa? **Depende da concessionária e da instalação.** O padrão de entrada de muitas distribuidoras aterra o neutro numa haste, e o terra da casa sai dali: um TN-C-S. Em outras instalações, o terra é uma haste separada do neutro: um TT. Quem diz qual é o seu é o projeto elétrico, a norma da distribuidora ou um eletricista olhando o padrão e o quadro.
+
+## Explore: a falha na máquina de lavar
+
+A simulação tem a rede de 127 V, um disjuntor de 20 A, um DR de 30 mA e uma máquina de lavar de 500 W. Você escolhe a falha, o esquema (TN ou TT), se a carcaça vai ao fio terra e em qual circuito a máquina está ligada, com ou sem DR. Uma pessoa descalça pode encostar na carcaça.
+
+O **chão** onde ela pisa é o símbolo de terra do esquema. No TT, o terra da casa só chega ao neutro pelo solo, entre a haste (30 Ω) e o aterramento do neutro na rua (10 Ω), valores típicos. A **chave no fio terra** só representa o fio ligado ou solto: na instalação real, o fio terra nunca passa por chave, fusível ou disjuntor.
+
+<Simulation circuit="m07/maquina-de-lavar" height={440} />
+
+Aperte o play (▶) e faça os testes nesta ordem. Os multímetros mostram a tensão da carcaça ao chão e as correntes pela pessoa, no disjuntor e no fio terra. Toque em **Reiniciar** (a seta circular) entre os testes, para religar o que desarmou.
+
+1. **Sem terra e sem DR.** Escolha a falha "Fio da fase encostado na carcaça". A máquina continua funcionando, e a carcaça fica com cerca de 125 V em relação ao chão. Faça a pessoa encostar: cerca de 107 mA pelo corpo, e em meio segundo o choque chega à zona AC-4, a de risco de fibrilação. O disjuntor não percebe nada, no TN ou no TT.
+2. **Com terra, no TN.** Reinicie, ligue a carcaça ao terra (PE) e escolha a mesma falha. A corrente de falta passa de 200 A, e o disjuntor desarma por curto-circuito no primeiro instante, antes de alguém conseguir encostar.
+3. **Com terra, no TT.** Reinicie, mude o esquema para TT e repita. Agora a corrente de falta é de cerca de 3 A: somada aos 3,9 A da máquina, o disjuntor de 20 A vê uns 7 A e não desarma nunca. A carcaça fica com cerca de 93 V em relação ao chão, mesmo com o fio terra ligado. Faça a pessoa encostar: cerca de 69 mA, zona AC-4.
+4. **Com DR.** Mude a tomada da máquina para o circuito com DR e repita o teste 3, e depois o teste 1. Nos dois, o DR vê a corrente que não voltou pelo neutro e desarma no primeiro passo da simulação. A pessoa sente o choque, mas ele para na zona AC-2. Um DR real leva algumas dezenas de milissegundos, ainda curto o bastante para proteger.
+5. **Uma falha pequena.** Reinicie, sem terra e sem DR, e escolha "Isolação úmida (20 kΩ)". Com a pessoa encostada, a carcaça fica com cerca de 14 V e passam menos de 6 mA: é o formigamento. Com "Isolação ruim (2 kΩ)", a carcaça cai para cerca de 59 V quando a pessoa encosta, e a corrente sobe para uns 34 mA, zona AC-3. Ligue o terra com a falha de 2 kΩ: a carcaça vai para perto de 0 V, e os 63 mA da falta descem pelo fio verde, onde só o DR consegue percebê-los.
+
+No teste 5, sem ninguém encostando, o multímetro mostra quase 127 V na carcaça, porque ele quase não puxa corrente; a tensão só cai quando a pessoa encosta. O formigamento de hoje e o choque grave de amanhã são a mesma falha, com outra umidade.
+
+## Exemplo resolvido: a corrente de falta no TT
+
+Uma casa em esquema TT tem a haste com $R_A = 30\,\Omega$, e o aterramento do neutro da concessionária tem $R_B = 10\,\Omega$ (valores típicos). A fase encosta na carcaça de uma máquina ligada ao terra, num circuito com disjuntor de 20 A. O disjuntor desarma?
+
+**Passo 1: a malha de falta.** A corrente sai pela fase, passa pela falha e pelo fio terra, desce pela haste, atravessa o solo e volta pelo aterramento do neutro. Os fios e o transformador somam bem menos de 1 Ω; quem manda são as duas resistências de terra:
+
+$$
+I_f \approx \frac{U_0}{R_A + R_B} = \frac{127\,\text{V}}{30\,\Omega + 10\,\Omega} \approx 3{,}2\,\text{A}
+$$
+
+A simulação, que inclui os fios e o transformador, dá 3,1 A.
+
+**Passo 2: o disjuntor.** Mesmo somando a corrente da máquina, a corrente fica muito abaixo dos 20 A. O disparo magnético de um disjuntor de 20 A precisa de mais de 100 A, e o térmico nem esquenta. **Não desarma.**
+
+**Passo 3: a tensão da carcaça.** A corrente de falta passa pela haste, e a carcaça fica com a queda de tensão na haste em relação ao solo onde a pessoa pisa:
+
+$$
+U_c \approx I_f \cdot R_A = 3{,}2\,\text{A} \times 30\,\Omega \approx 95\,\text{V}
+$$
+
+A simulação dá cerca de 93 V. Para comparar, a NBR 5410 usa 50 V em corrente alternada como tensão de contato limite em condições normais, e um valor menor em locais molhados.
+
+**Passo 4: com DR.** Os 3,1 A saem pela fase e não voltam pelo neutro: para o DR de 30 mA, uma fuga cem vezes maior que a sensibilidade dele. Desarma na hora. **No TT, quem resolve a falta é o DR**, e o TT não funciona sem ele.
+
+<DeepDive title="E se o TN tiver uma resistência alta no caminho?">
+O TN funciona porque a malha de falta é só de metal. Se o fio terra do circuito estiver frouxo num borne, oxidado ou com uma emenda ruim, a malha ganha resistência, a corrente de falta cai e o disparo magnético pode não acontecer. Por isso, numa instalação nova ou reformada, o eletricista mede a impedância da malha de falta com um instrumento próprio, para confirmar que a corrente de falta é suficiente para o disjuntor desarmar a tempo. Com DR no circuito, a proteção contra choque não depende só dessa conta.
+</DeepDive>
+
+## Neutro e terra não são a mesma coisa
+
+Se neutro e terra estão ligados na entrada, por que não usar o neutro como terra? A gambiarra é comum: na tomada sem fio terra, um pedacinho de fio liga o furo do terra ao neutro. A tomada passa a ter "terra", e a instalação fica mais perigosa do que antes.
+
+<Figure
+  alt="Duas situações com o neutro rompido. Em cima, uma lâmpada ligada entre a fase e o neutro, com o neutro rompido perto do quadro: o trecho do neutro entre a lâmpada e o ponto rompido está marcado com a tensão da fase. Embaixo, uma tomada com o furo do terra ligado ao neutro por um fio; o neutro está rompido antes da tomada, e a máquina de lavar ligada nela tem a carcaça no terra da tomada, que recebe a fase através do motor."
+  caption="Figura 4. O que um neutro rompido faz. Em cima: a lâmpada apaga, mas o neutro do lado dela fica com a tensão da fase, através da própria lâmpada. Embaixo: com o terra ligado no neutro dentro da tomada, um neutro rompido coloca a fase na carcaça da máquina, através do motor."
+>
+  <NeutroRompido />
+</Figure>
+
+O neutro pode se romper: um borne frouxo, uma emenda queimada, um fio partido no poste. Aí a corrente para, e o trecho do neutro do lado dos aparelhos fica ligado à fase **através dos próprios aparelhos**: uma lâmpada apagada ou um motor parado não seguram a tensão, só a repassam. Com a gambiarra, a carcaça recebe a fase. Ela tirou da máquina a proteção do terra e ainda criou um caminho novo para a tensão.
+
+Por isso:
+
+- **O terra nunca vai no neutro** dentro da tomada, do aparelho ou da caixa de passagem. A separação entre os dois só pode existir num lugar, o ponto previsto no esquema (a entrada ou o quadro), feito pelo eletricista.
+- **O fio terra não passa por interruptor, fusível nem disjuntor.** Se o terra for interrompido, a carcaça perde a proteção sem ninguém perceber. Ele vai direto, contínuo, do barramento de terra do quadro até a carcaça.
+- **Sem fio terra não se resolve com gambiarra.** A saída é passar o condutor de proteção até a tomada, e o DR ajuda enquanto isso não é feito. Isso é serviço de eletricista.
+
+### Neutro ou terra também dá choque?
+
+Dá. Um neutro rompido pode ter os 127 V inteiros, como na Figura 4, e no TT a carcaça aterrada ficou com 93 V durante a falta. Antes de mexer, desligue o disjuntor e teste a ausência de tensão **entre todos os pares**: fase e neutro, fase e terra, neutro e terra.
+
+<RealCase title="O choque na máquina de lavar">
+De volta à lavanderia do começo da aula. O formigamento ao encostar na máquina é a falha do teste 5 da simulação: uma isolação úmida ou gasta que coloca parte da tensão da fase na carcaça, e um circuito sem fio terra, ou sem DR, ou sem os dois.
+
+O que fazer, na ordem:
+
+1. **Não encoste de novo** na máquina, nem com a mão seca, e avise quem mora na casa.
+2. **Desligue o disjuntor** do circuito da lavanderia (ou o geral, se não souber qual é). Só então tire o plugue da tomada.
+3. **Chame um eletricista** para examinar a máquina, a tomada e o circuito. A falha está dentro da máquina, mas o choque só aconteceu porque a instalação não protegeu: as duas coisas precisam de conserto.
+
+Para saber se a tomada tem terra, use a tabela desta aula: fase e terra tem que mostrar praticamente o mesmo que fase e neutro. O **testador de tomadas** (um plugue com luzes) ajuda, mas tem um ponto cego: a gambiarra da Figura 4, terra ligado ao neutro, costuma acender como se estivesse certa, e o multímetro também não a separa. Se a casa nunca teve fio terra e as tomadas "têm terra", peça ao eletricista para abrir uma delas.
+
+O que **não** fazer: resolver com chinelo ou tapete, que só escondem o aviso; ligar o terra no neutro; puxar um fio da carcaça até o cano de água ou uma barra no quintal por conta própria. Um terra improvisado pode não levar a corrente de falta a lugar nenhum.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **"O neutro não dá choque."** Com carga, ele tem alguns volts; rompido, pode ter a tensão da fase. Teste sempre todos os pares.
+- **"A tomada tem três furos, então tem terra."** Muitas tomadas de três furos foram instaladas em casas sem condutor de proteção. Meça fase e terra.
+- **Ligar o terra no neutro ou interromper o fio terra.** Um neutro rompido coloca a fase na carcaça; um terra aberto tira a proteção sem aviso.
+- **Achar que o fio terra sozinho resolve.** No esquema TT, a carcaça aterrada ficou com 93 V na simulação. Fio terra e DR trabalham juntos.
+- **Trabalhar com o circuito energizado.** Desligue o disjuntor, sinalize o quadro e teste a ausência de tensão com um instrumento que você acabou de conferir numa tomada energizada.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Num circuito sem defeito, por qual condutor a corrente de um aparelho volta à fonte?',
+      options: [
+        {
+          text: 'Pelo neutro',
+          correct: true,
+          feedback: 'Isso. A corrente vai pela fase e volta pelo neutro. O terra só conduz quando há uma falha.',
+        },
+        {
+          text: 'Pelo terra',
+          feedback:
+            'O terra não faz parte do circuito normal. Se houver corrente nele, é porque existe uma falha ou uma ligação errada.',
+        },
+        {
+          text: 'Metade pelo neutro e metade pelo terra',
+          feedback:
+            'Num circuito sem defeito, toda a corrente volta pelo neutro. É justamente essa igualdade que o DR confere.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Numa tomada de 127 V, o multímetro mostra 127 V entre fase e neutro, 0 V entre fase e terra e 0 V entre neutro e terra. O que isso indica?',
+      options: [
+        {
+          text: 'O furo do terra não está ligado a nada',
+          correct: true,
+          feedback:
+            'Isso. Com o terra ligado, fase e terra mostrariam praticamente o mesmo que fase e neutro. A tomada tem três furos, mas funciona como se tivesse dois.',
+        },
+        {
+          text: 'A tomada está perfeita',
+          feedback: 'Numa tomada com terra, fase e terra mostram quase os mesmos 127 V que fase e neutro.',
+        },
+        {
+          text: 'O neutro está rompido',
+          feedback:
+            'Com o neutro rompido, fase e neutro não mostrariam 127 V com tanta firmeza, e neutro e terra poderiam mostrar tensão alta. Aqui o problema é o terra.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Numa casa em esquema TT, a haste tem 30 Ω e o aterramento do neutro da rua tem 10 Ω. A fase de 127 V encosta numa carcaça aterrada. Desprezando os fios, qual é a corrente de falta, em ampères?',
+      answer: 3.2,
+      tolerance: 0.05,
+      unit: 'A',
+      explanation:
+        'A corrente volta pelo solo, entre as duas resistências de terra: I = 127 V ÷ (30 Ω + 10 Ω) ≈ 3,2 A. É pouco para um disjuntor de 20 A; quem desliga essa falta é o DR.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'No esquema TN, com a carcaça ligada ao terra, a fase encostando na carcaça faz o disjuntor desarmar pelo disparo magnético.',
+      answer: true,
+      explanation:
+        'No TN, a malha de falta é só de fios, e a corrente de falta passa de centenas de ampères. Na simulação, mais de 200 A, e o disjuntor de 20 A desarma no primeiro instante.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma tomada sem fio terra recebeu um pedaço de fio ligando o furo do terra ao neutro. O que acontece se o neutro se romper antes dessa tomada?',
+      options: [
+        {
+          text: 'A carcaça do aparelho ligado nela recebe a fase, através do próprio aparelho',
+          correct: true,
+          feedback:
+            'Isso. Com o neutro rompido, o neutro do lado do aparelho fica com a tensão da fase, e a gambiarra leva essa tensão até a carcaça.',
+        },
+        {
+          text: 'Nada, porque o terra continua ligado ao neutro',
+          feedback:
+            'O terra improvisado está ligado justamente ao trecho do neutro que ficou sem saída. É ele que fica com a fase.',
+        },
+        {
+          text: 'O disjuntor desarma',
+          feedback:
+            'Com o neutro rompido, não passa corrente nenhuma pelo disjuntor. Nada desarma, e a carcaça fica com tensão em silêncio.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada esquema de aterramento à sua descrição.',
+      pairs: [
+        ['TN-S', 'Neutro e terra separados desde o transformador'],
+        ['TN-C-S', 'Neutro e terra juntos num condutor PEN até um ponto, separados depois'],
+        ['TT', 'Terra da casa numa haste própria, sem ligação com o neutro'],
+        ['IT', 'Fonte isolada da terra; a primeira falta não desliga, só avisa'],
+      ],
+      explanation:
+        'Nos TN, o terra está ligado ao neutro por fios, e a falta é uma corrente grande. No TT, a falta volta pelo solo e é pequena. O IT aparece em lugares como salas cirúrgicas.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que o fio terra não pode passar por um interruptor ou um disjuntor?',
+      options: [
+        {
+          text: 'Porque, aberto, ele deixaria a carcaça sem proteção sem ninguém perceber',
+          correct: true,
+          feedback:
+            'Isso. O aparelho continua funcionando com o terra aberto, e a falha seguinte deixa a carcaça com tensão.',
+        },
+        {
+          text: 'Porque o terra conduz a corrente normal dos aparelhos',
+          feedback: 'O terra não conduz corrente num circuito sem defeito. O problema é perder a proteção.',
+        },
+        {
+          text: 'Porque a corrente no terra queimaria o interruptor',
+          feedback:
+            'O motivo não é a corrente. É que qualquer interrupção no terra desfaz a proteção em silêncio.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- A **fase** traz a tensão, o **neutro** é o caminho de volta, aterrado na rua e em geral na entrada, e o **terra (PE)** só conduz quando há falha. Cor de fio não substitui medida.
+- Na tomada de 127 V com terra: fase–neutro e fase–terra perto de 127 V, neutro–terra de zero a alguns volts. Fase–terra em zero quer dizer terra desligado.
+- O terra segura as carcaças no potencial do chão e transforma uma falha em corrente que a proteção vê. No **TN**, a corrente de falta é enorme e o disjuntor desarma; no **TT**, ela é de poucos ampères, a carcaça fica com tensão perigosa e só o **DR** resolve.
+- O esquema da sua casa depende da concessionária e da instalação: TN-C-S é comum, TT também existe.
+- **Nunca** ligue o terra no neutro nem interrompa o fio terra. Um neutro rompido pode ter a tensão inteira da fase.
+
+Na próxima aula, as proteções que trabalham com o terra, por dentro: <LinkAula id="m07-instalacoes/03-disjuntores-dr-e-dps" />.

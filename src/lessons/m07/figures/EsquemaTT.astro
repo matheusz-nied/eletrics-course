@@ -1,0 +1,192 @@
+---
+/*
+ * 07.2: the TT earthing scheme. The utility grounds the neutral at the
+ * transformer; the house has its own earth rod for PE, not connected to the
+ * neutral. A fault to the case returns through the soil (rod + utility
+ * grounding, tens of ohms), so the fault current is a few amperes: too small
+ * for the breaker, enough to leave the case at a dangerous voltage. The
+ * dashed line is that fault current.
+ */
+---
+
+<svg viewBox="0 0 400 268" width="400" height="268" class="fig" aria-hidden="true">
+  <text x="8" y="18" class="title">
+    TT
+  </text>
+  <text x="8" y="36" class="small">
+    o terra da casa é só a haste dela, sem ligação com o neutro
+  </text>
+
+  <!-- Transformer, neutral grounded by the utility -->
+  <rect x="8" y="50" width="56" height="78" rx="6" class="box"></rect>
+  <text x="36" y="70" class="lbl mid">
+    trafo
+  </text>
+  <text x="36" y="84" class="lbl mid">
+    da rua
+  </text>
+  <path d="M64 100 H80 V176" class="neutro"></path>
+  <path d="M68 176 H92 M72 181 H88 M76 186 H84" class="pe"></path>
+  <text x="96" y="168" class="small">
+    aterramento
+  </text>
+  <text x="96" y="182" class="small">
+    do neutro
+  </text>
+
+  <path d="M64 62 H348" class="fase"></path>
+  <text x="72" y="56" class="tag fase-t">
+    F
+  </text>
+  <path d="M80 100 H348" class="neutro"></path>
+  <text x="96" y="94" class="tag neutro-t">
+    N
+  </text>
+
+  <!-- House with its own rod -->
+  <rect x="236" y="44" width="156" height="128" rx="8" class="house"></rect>
+  <text x="384" y="164" class="small end">
+    casa
+  </text>
+  <rect x="314" y="54" width="62" height="82" rx="4" class="case"></rect>
+  <path d="M348 62 V76 M348 100 V86" class="load"></path>
+  <rect x="341" y="76" width="14" height="10" class="load"></rect>
+  <path d="M314 128 H262 V176" class="pe"></path>
+  <circle cx="314" cy="128" r="3" class="dot pe-dot"></circle>
+  <text x="270" y="122" class="tag pe-t">
+    PE
+  </text>
+  <path d="M250 176 H274 M254 181 H270 M258 186 H266" class="pe"></path>
+  <text x="282" y="186" class="small">
+    haste da casa
+  </text>
+
+  <!-- Soil and the fault current through it -->
+  <path d="M8 200 H392" class="soil"></path>
+  <text x="392" y="218" class="small end">
+    solo
+  </text>
+  <path
+    d="M346 64 C332 90 326 110 318 126 M262 182 V206 H80 V190"
+    class="falta"
+    marker-end="url(#tt-arrow)"
+  ></path>
+  <defs>
+    <marker
+      id="tt-arrow"
+      viewBox="0 0 10 10"
+      refX="7"
+      refY="5"
+      markerWidth="7"
+      markerHeight="7"
+      orient="auto-start-reverse"
+    >
+      <path d="M0 0 L10 5 L0 10 z" class="arrow"></path>
+    </marker>
+  </defs>
+  <text x="170" y="232" class="note mid">
+    a corrente de falta volta pelo solo:
+  </text>
+  <text x="170" y="250" class="note mid">
+    poucos ampères, pouco para o disjuntor
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .fase,
+  .neutro,
+  .pe {
+    stroke-width: 2.6;
+  }
+  .fase {
+    stroke: var(--danger);
+  }
+  .neutro {
+    stroke: var(--accent);
+  }
+  .pe {
+    stroke: var(--success);
+  }
+  .box,
+  .house {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .house {
+    stroke-dasharray: 6 4;
+  }
+  .case {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+  }
+  .load {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .soil {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+    stroke-dasharray: 2 5;
+  }
+  .falta {
+    stroke: var(--warning);
+    stroke-width: 2;
+    stroke-dasharray: 6 4;
+  }
+  .arrow {
+    fill: var(--warning);
+    stroke: none;
+  }
+  .dot {
+    fill: var(--fg);
+    stroke: none;
+  }
+  .pe-dot {
+    fill: var(--success);
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .note {
+    fill: var(--warning);
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .lbl {
+    fill: var(--fg-muted);
+  }
+  .mid {
+    text-anchor: middle;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .tag {
+    font-weight: 700;
+  }
+  .fase-t {
+    fill: var(--danger);
+  }
+  .neutro-t {
+    fill: var(--accent);
+  }
+  .pe-t {
+    fill: var(--success);
+  }
+</style>
