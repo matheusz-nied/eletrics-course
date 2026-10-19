@@ -1,0 +1,349 @@
+---
+titulo: Sistemas monofásico, bifásico e trifásico
+modulo: m06-corrente-alternada
+ordem: 7
+nivel: I
+duracaoMin: 30
+objetivos:
+  - Explicar o que são as três fases e o neutro, e por que a energia é gerada e distribuída em três fases
+  - Calcular a tensão entre fases com o fator √3, nos sistemas de 127/220 V e de 220/380 V
+  - Diferenciar o fornecimento monofásico, bifásico e trifásico e descobrir qual é o da sua casa
+  - Explicar por que o neutro quase não leva corrente numa carga equilibrada e por que um neutro rompido queima aparelhos
+prerequisitos:
+  - m06-corrente-alternada/03-fase-e-fasores
+  - m06-corrente-alternada/02-pico-eficaz-e-medio
+tags:
+  [
+    trifásico,
+    bifásico,
+    monofásico,
+    fase,
+    neutro,
+    127/220,
+    220/380,
+    raiz de 3,
+    chuveiro 220 V,
+    padrão de entrada,
+    neutro rompido,
+  ]
+seguranca: rede
+rascunho: false
+---
+
+import TrifasicoFasores from '../../../lessons/m06/TrifasicoFasores.tsx';
+import TrifasicoEntrada from '../../../lessons/m06/figures/TrifasicoEntrada.astro';
+
+As tomadas da sua casa dão 127 V, mas o chuveiro é de 220 V e funciona normalmente. O eletricista explica: "a casa é bifásica, o chuveiro pega duas fases". Duas fases de 127 V deveriam dar 254 V, o dobro, e não 220 V. De onde sai esse número?
+
+A resposta está na forma como a energia é gerada: em **três fases**, três senoides atrasadas um terço de ciclo uma da outra. Nesta aula você vai entender as fases e o neutro, o porquê do 220 (e do 380), os tipos de fornecimento de uma casa e um defeito perigoso e comum: o neutro rompido.
+
+## Três bobinas em vez de uma
+
+Na aula <LinkAula id="m06-corrente-alternada/01-da-cc-a-ca" /> você viu o gerador mais simples: uma bobina girando num campo magnético dá uma senoide por volta. Os geradores de verdade fazem diferente. Neles, quem gira é o ímã (ou um eletroímã), e as bobinas ficam paradas, presas num anel de aço em volta dele. E em vez de uma bobina, há **três**, espaçadas de 120° (um terço da volta).
+
+<Model3D
+  part="ac-generator"
+  props={{ phases: 3 }}
+  annotations
+  caption="Gerador trifásico didático: um ímã gira dentro de três bobinas fixas, a 120° uma da outra. Cada bobina vai a um borne (L1, L2 e L3); as outras três pontas se unem no neutro (N)."
+/>
+
+Gire o modelo e ligue o **Corte** para ver o ímã dentro do anel. Quando o polo norte passa pela bobina de cima, a tensão dela chega ao pico. Um terço de volta depois, ele passa pela segunda bobina, que chega ao pico nesse momento. Mais um terço, e é a vez da terceira. Cada bobina dá uma senoide igual às outras, só que atrasada um terço de ciclo: 120°. Cada uma dessas senoides é uma <Term id="fase">fase</Term>, e o conjunto é um <Term id="sistema-trifasico">sistema trifásico</Term>. As fases são chamadas de L1, L2 e L3 (também aparecem como R, S e T, ou A, B e C).
+
+As usinas, das hidrelétricas às eólicas, geram em três fases, e a rede leva as três até os transformadores dos postes. Há bons motivos para isso:
+
+- **A potência não pulsa.** Numa fase só, a potência entregue a um aquecedor vai a zero duas vezes por ciclo. Com três fases equilibradas, quando uma está passando por zero as outras estão perto do pico, e a soma fica constante. Um motor grande trabalha mais suave.
+- **O motor trifásico parte sozinho.** As três correntes, defasadas, criam um campo magnético que gira e arrasta o rotor. É o motor das indústrias, das bombas grandes e dos elevadores (aula <LinkAula id="m08-motores/03-motor-de-inducao-trifasico" />).
+- **Economia de fio.** Três circuitos monofásicos precisariam de seis fios. Com as três fases dividindo um retorno só, bastam quatro, e você vai ver que esse retorno quase não leva corrente.
+
+## Fases e neutro
+
+Repare nos bornes do gerador: cada bobina tem duas pontas. Uma ponta de cada vai para a sua fase. As outras três pontas são unidas num ponto só, o centro da **ligação em estrela**. Desse centro sai o <Term id="neutro">neutro</Term>, o fio de retorno comum. O transformador do poste é ligado do mesmo jeito, e o neutro é aterrado na entrada de energia.
+
+Existem então dois tipos de tensão:
+
+- **Entre uma fase e o neutro:** a tensão de uma bobina sozinha. Numa região de 127/220 V, é 127 V. É a tensão das tomadas comuns.
+- **Entre duas fases:** a <Term id="tensao-de-linha">tensão de linha</Term>. São duas bobinas, mas as tensões delas estão defasadas, e a diferença entre as duas não é o dobro. É 220 V.
+
+### Explore: as três fases girando
+
+Na figura abaixo, cada fase é uma seta que gira, como os fasores da aula <LinkAula id="m06-corrente-alternada/03-fase-e-fasores" />. A altura da ponta da seta é a tensão daquela fase naquele instante, e o gráfico ao lado mostra um ciclo das três. A seta tracejada liga a ponta de uma fase à ponta de outra: é a tensão entre essas duas fases.
+
+<TrifasicoFasores client:visible />
+
+1. **Aperte Girar.** As três setas giram juntas, sempre a 120° uma da outra. No gráfico, cada senoide chega ao pico (179,6 V) um terço de ciclo depois da anterior.
+2. **Compare os comprimentos.** A seta tracejada, de L2 até L1, é visivelmente maior que as setas das fases. O painel mostra 127 V entre fase e neutro e 220 V entre L1 e L2: a tracejada é 1,73 vez maior.
+3. **Pause e arraste o instante para 90°.** L1 está no pico, 180 V; L2 e L3 estão em −90 V cada. Agora olhe a soma "L1 + L2 + L3": dá zero. Arraste para outro instante: continua zero. Guarde isso para a parte do neutro.
+4. **Troque para 220/380 V.** É o sistema de várias cidades, como Brasília e boa parte das capitais do Nordeste. A tomada comum, entre fase e neutro, dá 220 V, e entre duas fases dá 380 V.
+
+## Por que √3
+
+Duas fases estão a 120° uma da outra. A tensão entre elas é a diferença entre as duas setas, o lado de um triângulo com dois lados de 127 V e um ângulo de 120° entre eles. A geometria desse triângulo dá:
+
+$$
+V_\text{linha} = \sqrt{3} \cdot V_\text{fase} \approx 1{,}732 \cdot V_\text{fase}
+$$
+
+- $V_\text{fase}$ é a tensão entre uma fase e o neutro, em volts (valor eficaz);
+- $V_\text{linha}$ é a tensão entre duas fases, também eficaz.
+
+Com 127 V: $127 \times 1{,}732 \approx 220\,\text{V}$. Com 220 V: $220 \times 1{,}732 \approx 381\,\text{V}$, que é chamado de 380 V. Os picos seguem a mesma regra da aula <LinkAula id="m06-corrente-alternada/02-pico-eficaz-e-medio" />: 127 V de fase têm pico de 179,6 V, e 220 V de linha têm pico de $220 \times 1{,}414 \approx 311\,\text{V}$.
+
+O dobro, 254 V, só apareceria se as duas fases estivessem exatamente opostas (180°), uma no pico positivo enquanto a outra está no negativo. A 120°, elas nunca ficam totalmente opostas.
+
+<DeepDive title="A conta do √3">
+
+Escreva as duas fases como senoides com o mesmo pico $V_p$, a segunda atrasada 120°:
+
+$$
+v_1 = V_p \sin\theta, \qquad v_2 = V_p \sin(\theta - 120^\circ)
+$$
+
+A identidade da diferença de senos, $\sin a - \sin b = 2 \cos\frac{a+b}{2} \sin\frac{a-b}{2}$, dá:
+
+$$
+v_1 - v_2 = 2 V_p \sin 60^\circ \cos(\theta - 60^\circ) = \sqrt{3}\, V_p \sin(\theta + 30^\circ)
+$$
+
+porque $2 \sin 60^\circ = 2 \cdot \frac{\sqrt{3}}{2} = \sqrt{3}$. A tensão entre fases é uma senoide $\sqrt{3}$ vez maior e adiantada 30° em relação a $v_1$. Pelo triângulo: os dois lados de $V$ formam 120° no neutro, e a lei dos cossenos dá $V_\text{linha}^2 = V^2 + V^2 - 2V^2 \cos 120^\circ = 3V^2$.
+
+A mesma conta mostra que $v_1 + v_2 + v_3 = 0$ em qualquer instante: três setas iguais a 120° formam um triângulo fechado.
+
+</DeepDive>
+
+## Explore: tensões e corrente no neutro
+
+A simulação abaixo tem as três fases de 127 V ligadas em estrela e três lâmpadas de 100 W, uma em cada fase, todas voltando pelo mesmo neutro. As lâmpadas das fases L2 e L3 têm chave. O multímetro mostra as tensões e as correntes; o osciloscópio, as três fases.
+
+<Simulation
+  circuit="m06/trifasico"
+  instruments={[
+    { kind: 'multimetro', series: ['V1N', 'V12', 'IN', 'I1'] },
+    { kind: 'osciloscopio', series: ['V1N', 'V2N', 'V3N'] },
+  ]}
+  height={360}
+/>
+
+1. **Aperte o play (▶).** Entre L1 e o neutro, o multímetro marca 127 V. Entre L1 e L2, 220 V. Cada lâmpada puxa 0,79 A.
+2. **Olhe a corrente no neutro.** Com as três lâmpadas acesas, ela fica perto de zero (alguns miliampères). As três correntes voltam pelo mesmo fio, mas, defasadas de 120°, se cancelam, como a soma L1 + L2 + L3 da figura anterior.
+3. **Desligue a lâmpada da fase L3.** Agora o neutro leva 0,79 A, a mesma corrente de uma lâmpada. Ele carrega a sobra das correntes que não se cancelaram.
+4. **Desligue também a de L2.** O neutro continua com 0,79 A: agora é só o retorno da lâmpada de L1, como num circuito comum de uma fase.
+5. **Abra o osciloscópio.** As três senoides têm o mesmo tamanho e passam por zero em instantes diferentes, um terço de ciclo uma depois da outra.
+
+Uma carga com a mesma corrente nas três fases se chama **equilibrada**. Num prédio ou num bairro, as distribuidoras e os eletricistas tentam dividir as cargas entre as fases para chegar perto disso. O equilíbrio nunca é perfeito, e o neutro sempre leva alguma corrente. Por isso, nos circuitos de uma casa, ele tem a mesma bitola das fases.
+
+## Monofásico, bifásico e trifásico
+
+Toda casa recebe um pedaço do mesmo sistema trifásico. O que muda é quantas fases chegam pelo ramal que vem do poste até o **padrão de entrada** (a caixa com o medidor e o disjuntor geral).
+
+<Figure caption="Figura 1. Os três tipos de fornecimento numa região de 127/220 V. O monofásico recebe uma fase e o neutro; o bifásico, duas fases e o neutro; o trifásico, as três fases e o neutro. O disjuntor geral tem um polo para cada fase.">
+  <TrifasicoEntrada />
+</Figure>
+
+- **Monofásico:** uma fase e o neutro. Numa região de 127/220 V, a casa só tem 127 V. Não dá para ligar um chuveiro de 220 V.
+- **Bifásico:** duas fases e o neutro. Entre cada fase e o neutro, 127 V para as tomadas e a iluminação. Entre as duas fases, 220 V para o chuveiro, o ar-condicionado ou a torneira elétrica. Repare que não é um sistema "de duas fases" à parte: são duas das três fases do poste, ainda a 120° uma da outra. Por isso dá 220 V, e não 254 V.
+- **Trifásico:** as três fases e o neutro. As mesmas tensões do bifásico, com mais capacidade de carga dividida em três, e a possibilidade de ligar motores trifásicos.
+
+Numa região de 220/380 V, a conta é a mesma com outros números: o monofásico já dá 220 V nas tomadas, e o chuveiro de 220 V vai entre fase e neutro. Os 380 V entre fases aparecem em motores e máquinas de oficina.
+
+Quem decide o tipo de fornecimento é a distribuidora de energia, pela carga que a casa vai ter, segundo as regras dela. Para mudar de monofásico para bifásico, por exemplo, é preciso pedir à distribuidora; ninguém deve "puxar" uma fase por conta própria.
+
+### Exemplo resolvido: o chuveiro na casa bifásica
+
+Uma casa bifásica de 127/220 V tem um chuveiro de 5.500 W em 220 V e, no mesmo momento, uma TV e algumas lâmpadas somando 300 W em 127 V, na fase L1.
+
+1. **Corrente do chuveiro:** $I = P / V = 5.500 / 220 = 25\,\text{A}$. Essa corrente entra por uma fase e sai pela outra: as duas fases levam 25 A, e o chuveiro não usa o neutro.
+2. **Corrente da TV e das lâmpadas:** $300 / 127 \approx 2{,}4\,\text{A}$, pela fase L1 e de volta pelo neutro.
+3. **Disjuntor do chuveiro:** precisa ser **bipolar**, de dois polos com uma alavanca só, para cortar as duas fases juntas. Com um disjuntor de um polo, desligar o chuveiro deixaria a outra fase ligada nele, com 127 V em relação à terra, e quem fosse trocar a resistência levaria um choque.
+
+E se as duas fases fossem opostas, a 180°? O chuveiro receberia 254 V e esquentaria $(254/220)^2 \approx 1{,}33$ vez mais. A 120°, recebe os 220 V para os quais foi feito.
+
+## O neutro rompido
+
+O neutro quase não leva corrente quando a carga está equilibrada, mas ele tem um segundo trabalho, mais importante: manter cada aparelho preso a 127 V em relação ao centro da estrela. Se o neutro se rompe entre o poste e o quadro (uma emenda frouxa que esquentou, um fio partido no ramal), os aparelhos de fases diferentes perdem essa referência. Eles ficam em **série** entre as fases, na tensão de linha de 220 V, e dividem essa tensão de acordo com a resistência de cada um. É o <Term id="neutro-rompido">neutro rompido</Term>.
+
+### Explore: um neutro que se solta
+
+A simulação mostra uma casa bifásica. Entre L1 e o neutro há uma lâmpada pequena de 15 W (como a da geladeira); entre L2 e o neutro, um aquecedor de 1.500 W. A chave "Neutro" faz o papel do fio que vem do padrão até o quadro.
+
+<Simulation
+  circuit="m06/neutro-rompido"
+  instruments={['multimetro', { kind: 'osciloscopio', series: ['VL', 'VH'] }]}
+  height={340}
+/>
+
+1. **Aperte o play (▶).** Com o neutro ligado, a lâmpada e o aquecedor recebem 127 V cada, e entre as fases há 220 V. O neutro leva quase 12 A, a corrente do aquecedor, porque a carga está bem desequilibrada.
+2. **Rompa o neutro** (desligue a chave "Neutro ligado"). A lâmpada e o aquecedor ficam em série nos 220 V. A lâmpada, de resistência muito maior, fica com quase tudo, perto de 218 V: 1,7 vez a tensão dela. Ela brilha forte e queima em menos de um décimo de segundo. O aquecedor fica com uns 2 V.
+3. **Leia o multímetro depois que a lâmpada queima.** Ele marca 220 V nos terminais dela: o filamento abriu, e a tensão toda entre as fases fica ali. O aquecedor e o neutro ficam em zero.
+4. **Use Reiniciar, desligue o aquecedor e rompa o neutro de novo.** Agora nada acende: sem o neutro e sem a carga da outra fase, a corrente da lâmpada não tem por onde voltar.
+
+Numa casa de verdade, há muitos aparelhos em cada fase, e o resultado depende do que está ligado no momento. Os sinais típicos: lâmpadas de um lado da casa brilham demais enquanto as do outro ficam fracas, e tudo muda quando a geladeira ou o chuveiro liga. Aparelhos eletrônicos de 127 V que recebem perto de 220 V queimam: fontes de TV, roteadores, carregadores.
+
+**A conta da simulação:** a resistência da lâmpada de 15 W acesa é $127^2 / 15 \approx 1.075\,\Omega$, e a do aquecedor, $127^2 / 1.500 \approx 10{,}75\,\Omega$. Em série nos 220 V, a lâmpada fica com $220 \times \frac{1.075}{1.075 + 10{,}75} \approx 218\,\text{V}$, como num divisor de tensão (aula <LinkAula id="m02-circuitos-cc/06-divisores-de-tensao-e-corrente" />).
+
+<RealCase title="Que tipo de fornecimento tem a sua casa?">
+
+Saber se a casa é monofásica, bifásica ou trifásica responde perguntas práticas: dá para pôr um chuveiro de 220 V? Um ar-condicionado de 220 V? Qual disjuntor usar? Você descobre quase tudo sem abrir nada, nesta ordem:
+
+<Steps>
+  <Step title="Olhe a conta de luz">
+    A conta costuma informar o tipo de fornecimento (monofásico, bifásico ou trifásico). Também traz a tensão de atendimento, que diz se a sua região é de 127/220 V ou de 220/380 V.
+  </Step>
+  <Step title="Olhe o disjuntor geral do padrão de entrada">
+    Sem abrir o compartimento do medidor, que é lacrado e pertence à distribuidora. Um disjuntor de uma alavanca só (um polo) indica monofásico; duas alavancas unidas, bifásico; três, trifásico.
+  </Step>
+  <Step title="Olhe o quadro de distribuição da casa">
+    Com a tampa fechada. Disjuntores de dois polos alimentam circuitos entre duas fases, como o do chuveiro de 220 V numa casa de 127/220 V. Se todos os disjuntores forem de um polo e a região for de 127/220 V, a casa provavelmente é monofásica.
+  </Step>
+  <Step title="Medição, só para quem é habilitado">
+    Um eletricista confirma com o multímetro em V~, no quadro: em 127/220 V, 127 V entre cada fase e o neutro e 220 V entre duas fases. Mexer no quadro energizado exige formação e equipamento de proteção (veja a aula <LinkAula id="m00-comece-aqui/02-seguranca-em-eletricidade" />).
+  </Step>
+</Steps>
+
+Se a casa é monofásica e você precisa de 220 V, o caminho é pedir à distribuidora a mudança do fornecimento, com o padrão de entrada adequado, feito por um eletricista. E se aparecerem os sinais de neutro rompido (luzes brilhando demais de um lado da casa, aparelhos queimando juntos), desligue o disjuntor geral e chame um eletricista. Se o defeito estiver no ramal do poste ou no padrão, quem conserta é a distribuidora.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Achar que 220 V é o dobro de 127 V.** As fases estão a 120°, e a tensão entre elas é 127 × √3 ≈ 220 V. O dobro só aconteceria com fases opostas.
+- **Ligar um aparelho de 127 V entre duas fases.** Ele recebe 220 V, 1,73 vez a tensão dele, e queima. Confira a tensão do aparelho e a do circuito antes de ligar.
+- **Usar disjuntor de um polo num circuito de 220 V entre fases.** Desligar só uma fase deixa o outro fio energizado. Circuitos entre fases usam disjuntor bipolar, que corta as duas.
+- **Pôr fusível, disjuntor ou chave só no neutro.** Se ele abrir, você cria um neutro rompido de propósito, e os aparelhos continuam ligados na fase. Quem interrompe o circuito é o disjuntor da fase (o DR é diferente: corta fase e neutro juntos).
+- **Achar que o neutro não dá choque.** Com carga desequilibrada, ou com o neutro rompido, o neutro da casa pode ter tensão alta em relação à terra. Trate todos os fios como energizados até testar.
+- **Emendas frouxas no neutro.** Um neutro mal apertado no quadro ou no padrão esquenta, oxida e pode se romper. Aperto correto e conectores adequados evitam o problema.
+- **Mexer no padrão de entrada.** O medidor e o ramal são da distribuidora. Defeito ali é com ela.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Numa região de 220/380 V, a tensão entre uma fase e o neutro é 220 V. Qual é a tensão entre duas fases, em volts, pela conta com √3 (sem arredondar para o valor nominal)?',
+      answer: 381,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation:
+        'V linha = √3 × V fase = 1,732 × 220 ≈ 381 V. O valor nominal desse sistema é chamado de 380 V.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Numa casa de 127/220 V, qual é a tensão de pico entre duas fases, em volts? Use 220 V eficazes entre as fases.',
+      answer: 311,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation:
+        'Numa senoide, o pico é o valor eficaz vezes √2: 220 × 1,414 ≈ 311 V. Componentes ligados entre fases precisam aguentar esse pico.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que duas fases de 127 V dão 220 V, e não 254 V?',
+      options: [
+        {
+          text: 'Porque as fases estão defasadas de 120°, e a diferença entre duas senoides assim é √3 vez a tensão de uma',
+          correct: true,
+          feedback:
+            'Isso. 254 V só sairiam com as fases opostas (180°). A 120°, a tensão entre elas é 127 × 1,732 ≈ 220 V.',
+        },
+        {
+          text: 'Porque a fiação da casa perde 34 V no caminho',
+          feedback:
+            'A queda de tensão nos fios existe, mas é pequena e depende da carga. Os 220 V vêm da defasagem entre as fases.',
+        },
+        {
+          text: 'Porque a distribuidora regula as fases para dar 220 V entre elas',
+          feedback:
+            'A distribuidora regula a tensão de cada fase. Os 220 V entre fases são consequência da geometria: fases a 120° dão √3 vez a tensão de fase.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Num sistema trifásico com três cargas iguais, uma em cada fase, a corrente no neutro é a soma das três correntes, três vezes a corrente de uma carga.',
+      answer: false,
+      explanation:
+        'É o contrário: as três correntes estão defasadas de 120° e se cancelam no neutro. Com a carga equilibrada, o neutro fica quase sem corrente.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Numa casa bifásica, as lâmpadas de um lado brilham demais, as do outro ficam fracas, e o brilho muda quando o chuveiro liga. Qual é o defeito mais provável?',
+      options: [
+        {
+          text: 'Neutro rompido ou mal conectado entre a rede e o quadro',
+          correct: true,
+          feedback:
+            'Sem o neutro, os aparelhos de fases diferentes ficam em série nos 220 V e dividem a tensão conforme a carga. Desligue o disjuntor geral e chame um eletricista.',
+        },
+        {
+          text: 'Lâmpadas de má qualidade',
+          feedback:
+            'Lâmpadas ruins não fariam o brilho de um lado subir enquanto o do outro cai, nem mudar quando o chuveiro liga. Isso é sinal de neutro rompido.',
+        },
+        {
+          text: 'O disjuntor do chuveiro está pequeno',
+          feedback:
+            'Um disjuntor pequeno desarmaria, mas não mudaria o brilho das lâmpadas das duas fases em sentidos opostos.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um chuveiro de 220 V numa casa de 127/220 V é ligado entre duas fases. Que disjuntor ele deve ter?',
+      options: [
+        {
+          text: 'Um disjuntor bipolar, que corta as duas fases ao mesmo tempo',
+          correct: true,
+          feedback:
+            'Com o bipolar, desligar o chuveiro tira a tensão dos dois fios. É o que permite trocar a resistência com segurança, depois de testar a ausência de tensão.',
+        },
+        {
+          text: 'Um disjuntor de um polo em uma das fases',
+          feedback:
+            'Desligando só uma fase, a outra continua ligada no chuveiro, com 127 V em relação à terra. Quem mexer leva choque.',
+        },
+        {
+          text: 'Um disjuntor de um polo no neutro',
+          feedback:
+            'O chuveiro de 220 V nem usa o neutro, e disjuntor só no neutro nunca é a proteção certa.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Uma casa recebe do poste duas fases e o neutro, numa região de 127/220 V. Que tensões ela tem?',
+      options: [
+        {
+          text: '127 V entre cada fase e o neutro, e 220 V entre as duas fases',
+          correct: true,
+          feedback: 'É o fornecimento bifásico: tomadas de 127 V e circuitos de 220 V entre as fases.',
+        },
+        {
+          text: 'Só 220 V',
+          feedback:
+            'Entre cada fase e o neutro há 127 V. Os 220 V aparecem só entre as duas fases.',
+        },
+        {
+          text: '127 V entre fase e neutro e 254 V entre as fases',
+          feedback: 'As fases estão a 120°, não a 180°: entre elas há 127 × √3 ≈ 220 V.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- A energia é gerada em **três fases**: três senoides iguais, atrasadas 120° uma da outra. As três bobinas do gerador são unidas num ponto, de onde sai o **neutro**.
+- **Entre duas fases**, a tensão é $\sqrt{3}$ vez a tensão entre fase e neutro: 127/220 V e 220/380 V. Não é o dobro, porque as fases não estão opostas.
+- **Monofásico** é uma fase e o neutro; **bifásico**, duas fases e o neutro; **trifásico**, três fases e o neutro. Todos são pedaços do mesmo sistema trifásico.
+- Com a carga **equilibrada**, as correntes se cancelam e o neutro quase não leva corrente. Desequilibrada, ele leva a diferença.
+- Um **neutro rompido** põe os aparelhos de fases diferentes em série nos 220 V: os de carga pequena recebem tensão demais e queimam.
+- Circuitos entre fases usam **disjuntor bipolar**. Nunca ponha fusível ou disjuntor só no neutro.
+
+Com este módulo você fecha a corrente alternada. O próximo módulo leva tudo isso para dentro de casa, do padrão de entrada até a tomada: <LinkAula id="m07-instalacoes/01-da-rua-ate-a-tomada" />. E o motor que usa as três fases de uma vez está em <LinkAula id="m08-motores/03-motor-de-inducao-trifasico" />.
