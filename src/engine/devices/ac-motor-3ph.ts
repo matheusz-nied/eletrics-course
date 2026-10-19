@@ -12,7 +12,7 @@ import { implicitStep, type Shaft } from '../models/mechanics';
  * locked, a starting torque near 2,8 times the rated torque and a breakdown
  * torque near 3,6 times. Other ratings scale the impedances with V²/P.
  */
-const REF = { voltage: 220, power: 750, r1: 7.5, x1: 7, xm: 230, r2: 6.5, x2: 7.5 };
+export const REF = { voltage: 220, power: 750, r1: 7.5, x1: 7, xm: 230, r2: 6.5, x2: 7.5 };
 const REF_OMEGA = 2 * Math.PI * 60;
 /** Insulation class F: past this the winding is overheating (°C). */
 const HOT = 155;
