@@ -2,8 +2,8 @@
 termo: Valor eficaz (RMS)
 resumo: "O valor de uma tensão ou corrente alternada que produz o mesmo aquecimento que uma contínua de mesmo valor. Os 127 V e 220 V da tomada são valores eficazes."
 sinonimos: [RMS, valor RMS, true RMS, tensão eficaz, corrente eficaz]
-relacionados: [corrente-alternada, tensao, multimetro]
-aula: m03-medicoes/02-medindo-tensao
+relacionados: [corrente-alternada, tensao, multimetro, valor-medio, tensao-de-pico]
+aula: m06-corrente-alternada/02-pico-eficaz-e-medio
 ---
 A tensão da tomada é uma senoide: sobe até um pico, desce até o pico negativo e passa por zero 120 vezes por segundo. Uma lâmpada ligada em 127 V eficazes de corrente alternada esquenta e brilha igual a uma ligada em 127 V de corrente contínua.
 

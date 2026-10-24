@@ -1,0 +1,143 @@
+---
+/*
+ * 06.3: voltage and current in a resistor (in phase), a coil (current 90°
+ * behind) and a capacitor (current 90° ahead), each with its phasor diagram.
+ */
+const W = 160;
+const WX0 = 12;
+const WX1 = 148;
+const WY = 82;
+const AV = 34;
+const AI = 22;
+
+const panels = [
+  { title: 'Resistor', note: 'em fase', shift: 0 },
+  { title: 'Bobina', note: 'corrente atrasada 90°', shift: -90 },
+  { title: 'Capacitor', note: 'corrente adiantada 90°', shift: 90 },
+];
+
+const path = (ox: number, amp: number, shift: number) =>
+  Array.from({ length: 73 }, (_, i) => {
+    const deg = (360 * i) / 72;
+    const v = Math.sin(((deg + shift) * Math.PI) / 180);
+    const px = ox + WX0 + ((WX1 - WX0) * i) / 72;
+    return `${i === 0 ? 'M' : 'L'}${px.toFixed(1)} ${(WY - amp * v).toFixed(1)}`;
+  }).join(' ');
+
+const PY = 190; // centre of the phasor diagrams
+const LV = 46;
+const LI = 32;
+const head = (x: number, y: number, ux: number, uy: number) => {
+  const bx = x - ux * 8;
+  const by = y - uy * 8;
+  return `M${x} ${y}L${bx - uy * 4} ${by + ux * 4}L${bx + uy * 4} ${by - ux * 4}Z`;
+};
+
+const drawn = panels.map((p, k) => {
+  const ox = k * W;
+  const cx = ox + 62;
+  const a = (p.shift * Math.PI) / 180;
+  // In phase, the current arrow is drawn just above the voltage one so both show.
+  const y0 = p.shift === 0 ? PY - 8 : PY;
+  const ix = cx + LI * Math.cos(a);
+  const iy = y0 - LI * Math.sin(a);
+  const ux = Math.cos(a);
+  const uy = -Math.sin(a);
+  return {
+    ...p,
+    ox,
+    cx,
+    v: path(ox, AV, 0),
+    i: path(ox, AI, p.shift),
+    vLine: `M${cx} ${PY}H${cx + LV - 7}`,
+    vHead: head(cx + LV, PY, 1, 0),
+    iLine: `M${cx} ${y0}L${ix - ux * 7} ${iy - uy * 7}`,
+    iHead: head(ix, iy, ux, uy),
+    iLabel: { x: ix + (p.shift === 0 ? 0 : 12), y: iy + (p.shift === 0 ? -10 : 6) },
+  };
+});
+---
+
+<svg viewBox="0 0 480 240" width="480" height="240" class="fig" aria-hidden="true">
+  {drawn.map((p) => (
+    <g>
+      <text x={p.ox + W / 2} y="20" class="title">
+        {p.title}
+      </text>
+      <path d={`M${p.ox + WX0} ${WY}H${p.ox + WX1}`} class="axis" />
+      <path d={p.v} class="v" />
+      <path d={p.i} class="i" />
+      <text x={p.ox + W / 2} y={WY + AV + 24} class="note">
+        {p.note}
+      </text>
+      <path d={p.vLine} class="v" />
+      <path d={p.vHead} class="v-h" />
+      <path d={p.iLine} class="i" />
+      <path d={p.iHead} class="i-h" />
+      <text x={p.cx + LV + 10} y={PY + 5} class="lbl v-t start">
+        V
+      </text>
+      <text x={p.iLabel.x} y={p.iLabel.y} class="lbl i-t">
+        I
+      </text>
+    </g>
+  ))}
+  <path d="M160 34 V234 M320 34 V234" class="sep" />
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+  }
+  .sep {
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+  .v {
+    stroke: var(--copper);
+    stroke-width: 3;
+  }
+  .i {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  .v-h {
+    fill: var(--copper);
+  }
+  .i-h {
+    fill: var(--accent);
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .lbl {
+    font-weight: 700;
+  }
+  .v-t {
+    fill: var(--copper);
+  }
+  .i-t {
+    fill: var(--accent);
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>

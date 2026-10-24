@@ -1,0 +1,110 @@
+---
+/*
+ * 06.1: direct and alternating voltage over the same 50 ms. The battery's
+ * line stays at +12 V; the outlet's sine goes up to +179,6 V, down to
+ * −179,6 V and back, three times (60 Hz).
+ */
+const X0 = 70;
+const X1 = 540;
+const PANEL = [
+  { y0: 92, title: 'Corrente contínua (CC): uma bateria de 12 V', kind: 'cc' as const },
+  { y0: 262, title: 'Corrente alternada (CA): a tomada de 127 V, 60 Hz', kind: 'ca' as const },
+];
+const AMP = 58;
+const N = 300;
+const sine = (y0: number) =>
+  Array.from({ length: N + 1 }, (_, i) => {
+    const x = X0 + ((X1 - X0) * i) / N;
+    const y = y0 - AMP * Math.sin((2 * Math.PI * 3 * i) / N);
+    return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
+  }).join(' ');
+const ticks = [0, 10, 20, 30, 40, 50];
+---
+
+<svg viewBox="0 0 580 360" width="580" height="360" class="fig" aria-hidden="true">
+  {PANEL.map((p) => (
+    <g>
+      <text x={X0} y={p.y0 - AMP - 14} class="title">
+        {p.title}
+      </text>
+      <path d={`M${X0} ${p.y0} H${X1 + 10}`} class="axis" />
+      <path d={`M${X0} ${p.y0 - AMP - 4} V${p.y0 + AMP + 4}`} class="axis" />
+      <text x={X0 - 8} y={p.y0 + 4} class="lbl end">
+        0 V
+      </text>
+      {p.kind === 'cc' ? (
+        <>
+          <path d={`M${X0} ${p.y0 - 30} H${X1}`} class="wave" />
+          <text x={X0 - 8} y={p.y0 - 26} class="lbl end">
+            12 V
+          </text>
+          <text x={X1} y={p.y0 - 38} class="note end">
+            sempre o mesmo valor, sempre no mesmo sentido
+          </text>
+        </>
+      ) : (
+        <>
+          <path d={sine(p.y0)} class="wave" />
+          <text x={X0 - 8} y={p.y0 - AMP + 4} class="lbl end">
+            +180 V
+          </text>
+          <text x={X0 - 8} y={p.y0 + AMP + 4} class="lbl end">
+            −180 V
+          </text>
+          {ticks.map((t) => (
+            <text x={X0 + ((X1 - X0) * t) / 50} y={p.y0 + AMP + 26} class="tick">
+              {t}
+            </text>
+          ))}
+          <text x={X1 + 10} y={p.y0 + AMP + 26} class="tick start">
+            ms
+          </text>
+        </>
+      )}
+    </g>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .wave {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+  }
+  .title {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>
