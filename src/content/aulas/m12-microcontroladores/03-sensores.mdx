@@ -153,7 +153,7 @@ A figura interativa abaixo tem um sensor em cada aba. Em todas, você mexe na gr
 3. **Infravermelho:** aproxime um objeto branco e depois um preto. A partir de que distância cada um é detectado? Ligue o sol forte.
 4. **Corrente:** escolha uma carga e compare a saída do sensor Hall com a do alicate não invasivo.
 
-A 1 m, o som leva cerca de 5.831 µs para ir e voltar (2 m divididos por 343 m/s). A 35 °C, o eco volta mais cedo, e o programa que não corrige a temperatura mede uns 97 cm. No infravermelho, o objeto branco é detectado de bem mais longe que o preto, e o sol forte pode acionar o sensor sem objeto algum. Na corrente, repare no tamanho do sinal: o degrau do ADC, 4,9 mV, corresponde a uns 26 mA no sensor Hall de 5 A. Para cargas pequenas, isso é pouca resolução.
+A 1 m e 20 °C, o som leva cerca de 5.824 µs para ir e voltar (2 m divididos por 343,4 m/s). A 35 °C, o eco volta mais cedo, e o programa que não corrige a temperatura mede uns 97 cm. No infravermelho, com a sensibilidade no meio, o objeto branco é detectado a partir de uns 15 cm, e o preto só a uns 4,5 cm, porque reflete muito menos luz; o sol forte aciona o sensor sem objeto algum. Na corrente, repare no tamanho do sinal: o degrau do ADC, 4,9 mV, corresponde a uns 26 mA no sensor Hall de 5 A. Com o alicate de 100 A e resistor de carga de 33 Ω, cada degrau vale uns 0,3 A, e uma lâmpada LED de 9 W, com 0,071 A, nem aparece. O alicate de 100 A é para medir o consumo do quadro inteiro, não de uma lâmpada.
 
 ## Exemplo resolvido: o NTC a 40 °C
 

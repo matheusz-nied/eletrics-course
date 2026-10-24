@@ -139,7 +139,7 @@ Faça estes testes e acompanhe o diagrama:
 
 O caminho normal é FECHADO → ABRINDO → ABERTO → FECHANDO → FECHADO. Quem tira a central de ABRINDO é o **fim de curso de abertura**; quem tira de ABERTO, com o fechamento automático, é o **fim da pausa**. A fotocélula interrompida em FECHANDO leva de volta a ABRINDO: o portão nunca fecha sobre um carro. Um comando durante a abertura leva a PARADO, e o comando seguinte segue no sentido oposto ao último movimento, isto é, fecha. É a lógica "abre, para, fecha" que muitas centrais usam, e que confunde quem não sabe que ela existe.
 
-Há também um estado para quando algo dá errado: se o motor ficar ligado 40 s sem chegar a um fim de curso, a central vai para ERRO e desliga o motor, em vez de insistir com um ímã que caiu ou um reed quebrado.
+A abertura leva uns 16 s, e a pausa do fechamento automático começa em 10 s. Há também um estado para quando algo dá errado: se o motor ficar ligado 40 s sem chegar a um fim de curso, a central vai para ERRO e desliga o motor, em vez de insistir com um ímã que caiu ou um reed quebrado. Para ver isso, escolha no menu **Situação** o portão com o destravamento manual aberto: o motor gira em falso, o portão não anda, e 40 s depois a central desiste.
 
 ## Exemplo resolvido: o alarme da porta
 
