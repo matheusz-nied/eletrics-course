@@ -1,0 +1,46 @@
+/* ConversorAD.tsx: sampling and quantization (lesson 11.6). */
+
+.adc__graph {
+  display: block;
+  width: 100%;
+  max-width: 34rem;
+  margin-inline: auto;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.adc__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.adc__tick {
+  fill: var(--fg-muted);
+  font-size: 11px;
+  text-anchor: end;
+}
+
+.adc__analog {
+  fill: none;
+  stroke: var(--fg-muted);
+  stroke-width: 1.2;
+}
+
+.adc__stairs {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+}
+
+.adc__dot {
+  fill: var(--warning);
+  stroke: var(--bg);
+  stroke-width: 1;
+}
+
+.adc__values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+}

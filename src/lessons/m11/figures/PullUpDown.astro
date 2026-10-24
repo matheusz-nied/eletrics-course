@@ -1,0 +1,115 @@
+---
+/* 11.3: pull-up and pull-down. In the pull-up the resistor goes to +5 V and
+   the button to GND (released = 1, pressed = 0); in the pull-down it is the
+   other way around (released = 0, pressed = 1). */
+const resistor = (x: number, y: number) =>
+  `<path d="M${x} ${y}v8l-8 4 16 6-16 6 16 6-16 6 8 4v8" class="line"/>`;
+const button = (x: number, y: number) => `
+  <circle cx="${x}" cy="${y}" r="3" class="dot"/>
+  <circle cx="${x}" cy="${y + 36}" r="3" class="dot"/>
+  <path d="M${x + 14} ${y + 2}V${y + 34}M${x + 14} ${y + 18}H${x + 34}" class="blade"/>`;
+const supply = (x: number, y: number) => `
+  <path d="M${x - 14} ${y}H${x + 14}" class="bat"/>
+  <text x="${x}" y="${y - 8}" class="lab">+5 V</text>`;
+const ground = (x: number, y: number) =>
+  `<path d="M${x - 14} ${y}H${x + 14}M${x - 9} ${y + 5}H${x + 9}M${x - 4} ${y + 10}H${x + 4}" class="bat"/>`;
+const input = (x: number, y: number) => `
+  <path d="M${x} ${y}H${x + 60}" class="line"/>
+  <circle cx="${x}" cy="${y}" r="4" class="dot"/>
+  <path d="M${x + 60} ${y - 14}L${x + 84} ${y}L${x + 60} ${y + 14}Z" class="gate"/>
+  <text x="${x + 50}" y="${y - 10}" class="tag">entrada</text>`;
+---
+
+<svg viewBox="0 0 640 260" width="640" height="260" class="fig" aria-hidden="true">
+  <text x="160" y="20" class="title">
+    Pull-up
+  </text>
+  <text x="480" y="20" class="title">
+    Pull-down
+  </text>
+  <g>
+    <Fragment set:html={supply(100, 50)} />
+    <path d="M100 50V62M100 110V138M100 174V200" class="line" />
+    <Fragment set:html={resistor(100, 62)} />
+    <text x="122" y="100" class="tag start">
+      10 kΩ
+    </text>
+    <Fragment set:html={button(100, 138)} />
+    <Fragment set:html={ground(100, 200)} />
+    <Fragment set:html={input(100, 126)} />
+    <text x="160" y="236" class="note">
+      solto: 5 V (1) · apertado: 0 V (0)
+    </text>
+  </g>
+  <g transform="translate(320 0)">
+    <Fragment set:html={supply(100, 50)} />
+    <path d="M100 50V74M100 110V138M100 186V202" class="line" />
+    <Fragment set:html={button(100, 74)} />
+    <Fragment set:html={resistor(100, 138)} />
+    <text x="122" y="176" class="tag start">
+      10 kΩ
+    </text>
+    <Fragment set:html={ground(100, 202)} />
+    <Fragment set:html={input(100, 126)} />
+    <text x="160" y="236" class="note">
+      solto: 0 V (0) · apertado: 5 V (1)
+    </text>
+  </g>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .fig :global(.line) {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .fig :global(.blade) {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+  .fig :global(.dot) {
+    fill: var(--fg);
+  }
+  .fig :global(.bat) {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .fig :global(.gate) {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .fig :global(.lab) {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .fig :global(.tag) {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .fig :global(.start) {
+    text-anchor: start;
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 15px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+</style>

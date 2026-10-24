@@ -1,0 +1,250 @@
+---
+titulo: Analógico × digital
+modulo: m11-digital
+ordem: 1
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Diferenciar um sinal analógico de um sinal digital, com exemplos do dia a dia
+  - Contar em binário e converter um número de poucos bits para decimal
+  - Ler os níveis lógicos de uma família (VIL, VIH, VOL, VOH) e calcular a margem de ruído
+  - Explicar por que o ruído perto do limiar faz uma entrada trocar várias vezes, e como a histerese resolve
+  - Ligar com segurança um circuito de 5 V a um de 3,3 V
+prerequisitos:
+  - m01-eletricidade-do-zero/03-tensao
+  - m02-circuitos-cc/06-divisores-de-tensao-e-corrente
+  - m03-medicoes/05-osciloscopio
+tags: [digital, analógico, binário, bit, byte, nível lógico, margem de ruído, histerese, Schmitt trigger, '3,3 V', 5 V, ESP32, Arduino]
+seguranca: baixa-tensao
+---
+
+import BinarioBits from '../../../lessons/m11/BinarioBits';
+import LimiarRuido from '../../../lessons/m11/LimiarRuido';
+import NiveisLogicos from '../../../lessons/m11/figures/NiveisLogicos.astro';
+
+O fim de curso do portão é um contato que fecha quando o ímã chega perto. No fio que vai até a central, isso aparece como uma tensão: perto de 0 V com o ímã, perto de 5 V sem ele. Só que o fio passa dez metros ao lado dos cabos do motor, e a tensão que chega não é exatamente 0 V nem exatamente 5 V. Mesmo assim a central acerta, todas as vezes, se o portão chegou ou não. Ela não mede a tensão: ela só decide se é "zero" ou "um".
+
+Esta aula abre o módulo de eletrônica digital. Você vai ver o que separa um sinal analógico de um digital, como contar só com zeros e uns, quais tensões um circuito entende como 0 e como 1, e por que essa escolha de dois níveis torna o digital tão resistente ao ruído.
+
+## Contínuo ou em degraus
+
+Um sinal **analógico** pode ter qualquer valor dentro de uma faixa. A tensão de um sensor de temperatura, o ponteiro de um velocímetro, a pressão do som no microfone: entre 2,1 V e 2,2 V existem infinitos valores, e todos significam alguma coisa.
+
+Um sinal **digital** só pode ter alguns valores bem separados. No caso mais comum, dois: ligado ou desligado, sim ou não, **1 ou 0**. Um interruptor é digital por natureza: a lâmpada está acesa ou apagada. O display de um relógio também: ele salta de 10:59 para 11:00, sem passar por 10:59 e meio.
+
+O mundo físico é quase todo analógico. A eletrônica digital entra porque decidir entre dois estados é muito mais robusto do que medir um valor exato. Um fio que leva "uns 3,7 V" pode ter chegado com 3,6 V ou 3,8 V por causa do caminho, e um circuito analógico não tem como saber qual era o valor original. Um fio que leva "1" continua levando "1" mesmo que chegue com meio volt a menos.
+
+Muitos equipamentos misturam os dois mundos: um sensor analógico, um conversor que transforma a tensão em número (assunto da aula <LinkAula id="m11-digital/06-conversao-ad-da-e-pwm" />) e um <Term id="microcontrolador">microcontrolador</Term> que trabalha só com números.
+
+## Dois níveis bastam: o bit
+
+Cada zero ou um é um <Term id="bit">bit</Term> (de *binary digit*, dígito binário). Um fio, um bit. Com um bit só você responde a uma pergunta de sim ou não: o portão está fechado? Com vários bits juntos você escreve números, e é assim que um circuito digital guarda uma temperatura, um código de controle remoto ou a posição do portão.
+
+A ideia é a mesma da numeração decimal, só que com dois algarismos em vez de dez. Em decimal, cada posição vale dez vezes a da direita: unidades, dezenas, centenas. Em binário, cada posição vale **o dobro** da posição à direita: 1, 2, 4, 8, 16, 32, 64, 128. Para ler um número binário, some os pesos das posições que têm 1:
+
+$$
+1011_2 = 1 \cdot 8 + 0 \cdot 4 + 1 \cdot 2 + 1 \cdot 1 = 11
+$$
+
+O índice 2 avisa que o número está em binário. Com $n$ bits dá para escrever
+
+$$
+N = 2^n
+$$
+
+valores diferentes, de 0 a $2^n - 1$. Quatro bits dão 16 valores (0 a 15); oito bits, um **byte**, dão 256 (0 a 255); dez bits dão 1.024, a resolução da entrada analógica de um Arduino Uno.
+
+<BinarioBits client:visible />
+
+No quadro acima, ligue só os bits de peso 64, 32 e 4. Que número aparece? Depois tente escrever 200 em binário: comece pelo maior peso que cabe (128), veja quanto falta (72), e siga para a direita.
+
+Com 64 + 32 + 4 aparece 100, ou 01100100 em binário. E 200 = 128 + 64 + 8: 11001000. Repare que dobrar um número em binário é empurrar todos os bits uma casa para a esquerda, do mesmo jeito que multiplicar por dez em decimal é acrescentar um zero.
+
+<Callout type="nota" title="Hexadecimal">
+Programas e folhas de dados escrevem números binários longos em **hexadecimal** (base 16), em grupos de quatro bits: 0 a 9 e depois A (10) a F (15). O byte 11001000 vira C8, escrito `0xC8` em código. É só uma forma curta de escrever os mesmos bits.
+</Callout>
+
+## Que tensão vale 0 e que tensão vale 1
+
+Um circuito digital representa 0 e 1 com tensões. No mais comum, 0 é perto de 0 V (o GND) e 1 é perto da alimentação, 5 V ou 3,3 V. Mas "perto" precisa ter número, e cada família de circuitos define o seu. Esses números são os **<Term id="nivel-logico">níveis lógicos</Term>**, e estão na folha de dados de qualquer chip digital:
+
+| Símbolo | Nome | O que garante |
+|---------|------|---------------|
+| VIL | tensão de entrada baixa | Abaixo dela, a entrada lê **0** com certeza |
+| VIH | tensão de entrada alta | Acima dela, a entrada lê **1** com certeza |
+| VOL | tensão de saída baixa | Uma saída em 0 fica abaixo dela |
+| VOH | tensão de saída alta | Uma saída em 1 fica acima dela |
+
+Entre VIL e VIH fica uma faixa em que o fabricante **não garante** nada: a entrada pode ler 0, pode ler 1, e pode até ficar indecisa e esquentar. Um sinal só deve passar por essa faixa de passagem, rápido, na hora de trocar de nível.
+
+<Figure caption="Figura 1. Níveis de entrada de quatro famílias, na mesma escala. Em azul, a faixa que a entrada lê como 0; em vermelho, a que lê como 1; em amarelo, a faixa sem garantia. Valores das folhas de dados; na família CMOS e nos microcontroladores, eles são uma fração da tensão de alimentação." alt="Quatro barras verticais numa escala de 0 a 5 V. TTL 74LS com alimentação de 5 V: lê 0 até 0,8 V e 1 a partir de 2,0 V. CMOS 74HC com 5 V: 0 até 1,5 V e 1 a partir de 3,5 V. Arduino Uno, ATmega328P com 5 V: 0 até 1,5 V e 1 a partir de 3,0 V. ESP32 com 3,3 V: 0 até 0,83 V e 1 a partir de 2,48 V, numa barra que vai só até 3,3 V.">
+  <NiveisLogicos />
+</Figure>
+
+### Margem de ruído
+
+Uma saída boa fica bem longe da faixa sem garantia. A distância entre o que a saída garante e o que a entrada exige é a <Term id="margem-de-ruido">margem de ruído</Term>: quanto de ruído o fio pode somar ao sinal antes de a leitura errar.
+
+$$
+NM_\text{H} = V_\text{OH(min)} - V_\text{IH(min)} \qquad\qquad NM_\text{L} = V_\text{IL(max)} - V_\text{OL(max)}
+$$
+
+$NM_\text{H}$ é a margem no nível alto e $NM_\text{L}$ no nível baixo. Na folha de dados de uma porta 74HC alimentada com 4,5 V, com a saída quase sem carga, $V_\text{OH(min)} = 4{,}4\,\text{V}$, $V_\text{IH(min)} = 3{,}15\,\text{V}$, $V_\text{IL(max)} = 1{,}35\,\text{V}$ e $V_\text{OL(max)} = 0{,}1\,\text{V}$. As duas margens dão 1,25 V: um ruído de até 1,25 V em qualquer sentido não muda a leitura. Com a saída carregada, VOH cai e VOL sobe, e a margem diminui.
+
+## Por que o digital resiste ao ruído
+
+Imagine copiar uma foto numa copiadora, depois copiar a cópia, e assim por diante. Cada cópia acrescenta um pouco de sujeira, e a décima é uma mancha. Um sinal analógico que passa por vários amplificadores sofre o mesmo: cada etapa soma o seu ruído, e nenhuma sabe qual era o original.
+
+Uma porta digital faz o contrário. A entrada recebe "4,6 V com um pouco de sujeira", decide que é 1, e a saída entrega um 1 novo, limpo, perto de 5 V. Cada porta **regenera** o sinal. É por isso que uma música em MP3 copiada mil vezes continua igual, e que o código do controle remoto chega inteiro mesmo com o sinal de rádio fraco, desde que cada bit ainda seja reconhecível.
+
+O ponto fraco é a passagem pelo limiar. Quando um sinal lento, como a tensão de um sensor de luz ao entardecer, passa devagar pela faixa de decisão, o ruído por cima dele faz a tensão cruzar o limiar várias vezes para cima e para baixo. A leitura troca de 0 para 1, de 1 para 0, de novo para 1. Para um contador, cada troca é um evento.
+
+<LimiarRuido client:visible />
+
+Com 0,3 V de ruído e um limiar só, a entrada troca seis vezes, quando o certo seriam duas. Mude para a entrada com histerese: duas trocas.
+
+A solução está no segundo modo do quadro: dois limiares em vez de um. A entrada só passa a ler 1 quando o sinal sobe acima de 3 V, e só volta a ler 0 quando ele cai abaixo de 2 V. Isso é <Term id="histerese">histerese</Term>, a mesma ideia do termostato da geladeira, que liga o compressor numa temperatura e desliga em outra. Com histerese, o ruído só atrapalha se for maior que a distância entre os dois limiares. No quadro, com o ruído de até uns 0,7 V, a leitura fica limpa; perto de 0,8 V, nem a histerese segura mais.
+
+Uma entrada com histerese se chama **<Term id="schmitt-trigger">Schmitt trigger</Term>**, e existem portas feitas só para isso, como o 74HC14 (seis inversoras com entrada Schmitt trigger). Muitos microcontroladores já têm histerese nas entradas digitais.
+
+## Explore: o limiar de uma porta lógica
+
+No circuito abaixo, uma fonte ajustável faz o papel do sinal de um sensor, e uma segunda fonte, de 60 Hz, soma a ele o ruído que um fio comprido capta da rede elétrica. O sinal entra numa porta inversora U1, com entrada Schmitt trigger. A segunda inversora, U2, desfaz a inversão, então o LED acende quando U1 lê **1**. A simulação roda dez vezes mais devagar que o real. No esquema, os fios em nível 1 aparecem destacados nas portas.
+
+<Simulation
+  circuit="m11/limiar-entrada"
+  instruments={[{ kind: 'osciloscopio', series: ['VIN', 'VOUT'] }]}
+  autoplay
+/>
+
+1. Sem ruído, suba o nível do sinal devagar, a partir de 1 V. Em que tensão o LED acende?
+2. Agora desça devagar. Em que tensão ele apaga?
+3. Deixe o sinal em 2,5 V, no meio do caminho, e ligue o ruído de 0,4 V. Olhe o osciloscópio: o sinal balança, e a leitura?
+4. Passe o ruído para 0,8 V.
+
+Subindo, o LED acende quando o sinal passa de 3 V; descendo, só apaga abaixo de 2 V. Entre 2 V e 3 V a porta mantém o que leu por último: é a histerese do Schmitt trigger. No simulador os limiares são exatamente 3 V e 2 V; num 74HC14 real ficam perto disso, e a folha de dados dá a faixa de cada um.
+
+Com 2,5 V e 0,4 V de ruído, o sinal vai de 2,1 V a 2,9 V e nunca sai da faixa de histerese: a leitura não muda. Com 0,8 V de ruído, ele vai de 1,7 V a 3,3 V, passa pelos dois limiares em cada ciclo, e a leitura troca 120 vezes por segundo, duas por ciclo da rede. O LED pisca, e um contador ligado ali contaria 60 eventos por segundo que nunca aconteceram.
+
+## Exemplo resolvido: um Arduino de 5 V conversando com um ESP32 de 3,3 V
+
+Um projeto liga um Arduino Uno, alimentado com 5 V, a um ESP32, que funciona com 3,3 V. Um fio leva um sinal do Arduino para o ESP32, e outro faz o caminho contrário. Os dois funcionam?
+
+**Do Arduino para o ESP32.** A saída do Arduino em 1 fica perto de 5 V. A Espressif, fabricante do ESP32, não garante que as entradas aguentem mais que a alimentação, e 5 V passam dos 3,3 V com folga. Ligado direto, funciona por um tempo e pode danificar o pino. A solução barata é um <Term id="divisor-de-tensao">divisor de tensão</Term> com 2,2 kΩ em cima e 3,3 kΩ embaixo:
+
+$$
+V_\text{ESP32} = 5\,\text{V} \cdot \frac{3{,}3\,\text{k}\Omega}{2{,}2\,\text{k}\Omega + 3{,}3\,\text{k}\Omega} = 3{,}0\,\text{V}
+$$
+
+Confira com os níveis da Figura 1: o ESP32 lê 1 a partir de 0,75 × 3,3 V ≈ 2,48 V. Com 3,0 V, sobra uma margem de pouco mais de 0,5 V. Em 0, o divisor entrega 0 V, abaixo dos 0,83 V de VIL. O divisor puxa 5 V ÷ 5,5 kΩ ≈ 0,9 mA do pino do Arduino, bem pouco.
+
+**Do ESP32 para o Arduino.** A saída do ESP32 em 1 garante só 0,8 × 3,3 V ≈ 2,64 V na folha de dados (sem carga, costuma dar perto de 3,3 V). O Arduino Uno exige 0,6 × 5 V = 3,0 V para ler 1. No caso típico, sobram 0,3 V; no pior caso, falta 0,36 V. Pode funcionar na bancada e falhar num dia frio ou com outro lote de peças. A ligação correta usa um **conversor de nível**, por exemplo um módulo com MOSFETs (os "level shifters" vendidos para Arduino) ou uma porta da família 74HCT, que alimentada com 5 V lê 1 a partir de 2,0 V.
+
+A lição vale para qualquer ligação entre placas: compare o que a saída **garante** (VOH, VOL) com o que a entrada **exige** (VIH, VIL), e nunca passe da tensão máxima da entrada.
+
+<RealCase title="O que a central do portão lê nos fios">
+
+As entradas da central de um portão (fim de curso de abertura e de fechamento, botoeira, fotocélula) são entradas digitais do microcontrolador. Cada uma tem um resistor que puxa o fio para 5 V, e o contato do sensor liga o fio ao GND. A central não mede quantos volts chegam: lê 0 ou 1, e o programa decide o que fazer (veja <LinkAula id="m16-portao/04-fim-de-curso-e-sensores" />).
+
+Os fios dos sensores costumam correr dentro do mesmo eletroduto dos cabos do motor, de 127 V ou 220 V, e captam ruído de 60 Hz, como na simulação. Por isso as centrais filtram as entradas: um capacitor pequeno junto do borne, a histerese do microcontrolador e, no programa, a exigência de que a entrada fique estável por algumas dezenas de milissegundos antes de valer. A aula <LinkAula id="m11-digital/03-pull-up-pull-down-e-debounce" /> mostra esse filtro em detalhe.
+
+Os níveis lógicos também aparecem na loja. Módulos de relé para Arduino vêm escritos "acionamento em nível baixo" ou "em nível alto", e alguns funcionam a 5 V mas não aceitam os 3,3 V de um ESP32. Antes de comprar, confira a tensão do módulo e o nível que aciona o relé.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Ligar 5 V numa entrada de 3,3 V.** Muitas placas de 3,3 V (ESP32, Raspberry Pi) não aceitam 5 V nas entradas. Use divisor de tensão ou conversor de nível.
+- **Confiar no "funcionou na bancada".** Um sinal no limite da margem funciona hoje e falha com outra temperatura, outro lote ou um fio mais comprido. Faça a conta com os valores mínimos e máximos da folha de dados.
+- **Esquecer o GND comum.** Duas placas que trocam sinais precisam ter o GND ligado. Sem ele, "5 V" não tem referência, e a leitura vira loteria.
+- **Sinal lento numa entrada sem histerese.** A tensão de um LDR ou de um capacitor carregando passa devagar pelo limiar, e a entrada troca várias vezes. Use uma entrada Schmitt trigger ou trate no programa.
+- **Medir sinal digital com o multímetro.** O multímetro mostra a média de um sinal que troca de nível. Um sinal que fica metade do tempo em 5 V aparece como 2,5 V, que parece "indeciso". Use o <LinkAula id="m03-medicoes/05-osciloscopio">osciloscópio</LinkAula> para ver a forma do sinal.
+- **Fios de sinal junto dos fios da rede.** Na instalação, separe sempre que puder os cabos de sinal (sensores, botoeiras) dos cabos de força. Isso reduz o ruído e também a chance de um isolamento danificado colocar a tensão da rede na placa.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Qual destes é um sinal digital?',
+      options: [
+        {
+          text: 'O nível de um fim de curso lido pela central: ímã presente ou ausente',
+          correct: true,
+          feedback: 'Isso. Só dois estados importam, e a central decide qual deles está no fio.',
+        },
+        {
+          text: 'A tensão na saída de um sensor de temperatura',
+          feedback: 'Ela pode ter qualquer valor numa faixa contínua: é um sinal analógico.',
+        },
+        {
+          text: 'A pressão do som que chega a um microfone',
+          feedback: 'O som varia de forma contínua. Ele só vira digital depois de passar por um conversor.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Quanto vale, em decimal, o número binário 10110?',
+      answer: 22,
+      tolerance: 0,
+      explanation: '1 × 16 + 0 × 8 + 1 × 4 + 1 × 2 + 0 × 1 = 22.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Quantos valores diferentes dá para escrever com 12 bits?',
+      answer: 4096,
+      tolerance: 0,
+      explanation: '2¹² = 4.096 valores, de 0 a 4.095. É a resolução da entrada analógica de um ESP32.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Uma família garante VOH(min) = 2,4 V e exige VIH(min) = 2,0 V. Qual é a margem de ruído no nível alto, em volts?',
+      answer: 0.4,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation: 'NMH = VOH(min) − VIH(min) = 2,4 − 2,0 = 0,4 V.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'A tensão de um sensor de luz sobe devagar ao amanhecer e uma entrada digital simples conta três "amanheceres" em poucos segundos. O que resolve?',
+      options: [
+        {
+          text: 'Uma entrada com histerese (Schmitt trigger)',
+          correct: true,
+          feedback:
+            'Isso. Com dois limiares, o ruído só atrapalha se for maior que a distância entre eles.',
+        },
+        {
+          text: 'Alimentar o circuito com uma tensão maior',
+          feedback: 'Os limiares sobem junto, e o sinal continua passando devagar por eles com o mesmo ruído.',
+        },
+        {
+          text: 'Trocar o fio por um mais grosso',
+          feedback: 'O problema não é a resistência do fio, e sim o ruído somado a um sinal lento perto do limiar.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Ligar a saída de 5 V de um Arduino direto numa entrada de um ESP32 é seguro, porque o ESP32 lê 1 acima de 2,48 V.',
+      answer: false,
+      explanation:
+        'Ler 1 não é o problema: o fabricante não garante que a entrada aguente mais que a alimentação de 3,3 V. Use um divisor de tensão ou um conversor de nível.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- Um sinal **analógico** tem qualquer valor numa faixa; um **digital** tem só alguns, quase sempre dois: 0 e 1.
+- Cada 0 ou 1 é um **bit**. Em binário, cada posição vale o dobro da anterior (1, 2, 4, 8…), e $n$ bits escrevem $2^n$ valores. Oito bits são um **byte** (0 a 255).
+- Os **níveis lógicos** (VIL, VIH, VOL, VOH) dizem que tensões valem 0 e 1. A **margem de ruído** é a folga entre o que a saída garante e o que a entrada exige.
+- Cada porta **regenera** o sinal, e por isso o digital resiste ao ruído. O ponto fraco é a passagem lenta pelo limiar, resolvida com **histerese** (entrada **Schmitt trigger**).
+- Para ligar 5 V a 3,3 V, compare VOH com VIH, respeite a tensão máxima da entrada e use divisor ou conversor de nível.
+
+Na próxima aula, você vai combinar esses zeros e uns para tomar decisões com as [portas lógicas](../02-portas-logicas/).

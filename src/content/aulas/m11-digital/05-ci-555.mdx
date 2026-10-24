@@ -1,0 +1,238 @@
+---
+titulo: O CI 555
+modulo: m11-digital
+ordem: 5
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Explicar o que fazem os comparadores, o flip-flop e o transistor de descarga dentro do 555
+  - Calcular o tempo de um 555 monoestável com t = 1,1 · R · C
+  - Calcular a frequência e o ciclo de trabalho de um 555 astável
+  - Identificar os pinos do 555 e os cuidados de montagem (pino 4, pino 5, corrente de saída, relé)
+prerequisitos:
+  - m04-passivos/04-circuito-rc
+  - m11-digital/04-flip-flops-contadores-e-memoria
+tags: ['555', NE555, temporizador, astável, monoestável, oscilador, pisca-pisca, minuteria, constante de tempo, comparador, DIP-8, relé, luz de garagem]
+seguranca: baixa-tensao
+---
+
+import Calculadora555 from '../../../lessons/m11/Calculadora555';
+import Interno555 from '../../../lessons/m11/figures/Interno555.astro';
+
+A luz da garagem acende quando o portão começa a se mover e fica acesa mais um minuto depois que ele para. A sinaleira na calçada pisca enquanto o portão anda. O pisca-alerta de um carro antigo estala no painel, num ritmo constante. Os três precisam da mesma coisa: **medir tempo**, com um resistor e um capacitor.
+
+Hoje, num aparelho com microcontrolador, quem conta esse tempo é o programa. Mas há mais de 50 anos um chip de 8 pinos faz isso sozinho, sem programa nenhum: o **555**. Lançado em 1972, ele é provavelmente o circuito integrado mais vendido da história, e continua nas placas de pisca-pisca, temporizadores, alarmes, sirenes e kits de eletrônica. Nesta aula você vai abri-lo, entender as duas formas clássicas de ligá-lo e calcular os tempos.
+
+## O que tem dentro
+
+Por dentro, o 555 junta peças que você já conhece: um divisor de tensão, dois comparadores e um flip-flop.
+
+<Figure caption="Figura 1. O 555 por dentro. Três resistores iguais dividem a alimentação em 2/3 e 1/3. O comparador 1 desliga o flip-flop quando o limiar passa de 2/3 do VCC; o comparador 2 liga quando o disparo cai abaixo de 1/3. A saída Q comanda o pino 3, e o Q barrado liga o transistor que descarrega o capacitor pelo pino 7." alt="Diagrama de blocos dentro de um retângulo tracejado que representa o chip. À esquerda, três resistores de 5 kΩ em série entre o pino 8 (VCC) e o pino 1 (GND), com os pontos de 2/3 VCC (ligado ao pino 5, CTRL) e 1/3 VCC. O comparador 1 compara o pino 6 (limiar) com 2/3 VCC e vai à entrada R do flip-flop. O comparador 2 compara 1/3 VCC com o pino 2 (disparo) e vai à entrada S. O pino 4 (reset) chega ao flip-flop por cima. A saída Q passa por um buffer até o pino 3 (OUT). A saída Q barrado vai à base de um transistor cujo coletor é o pino 7 (DIS) e cujo emissor vai ao GND.">
+  <Interno555 />
+</Figure>
+
+- O **divisor**, com três resistores iguais, cria duas referências: $\tfrac{2}{3}V_{CC}$ e $\tfrac{1}{3}V_{CC}$. Com 9 V, são 6 V e 3 V.
+- Um <Term id="comparador">comparador</Term> é um amplificador que só dá duas respostas: "a entrada + está acima da −" ou "abaixo". O **comparador 2** vigia o pino de **disparo** (pino 2): se ele cai abaixo de 1/3 do VCC, liga o flip-flop. O **comparador 1** vigia o pino de **limiar** (pino 6): se ele passa de 2/3 do VCC, desliga.
+- O **flip-flop** é uma trava SR, como a da aula <LinkAula id="m11-digital/04-flip-flops-contadores-e-memoria" />. Ele lembra qual dos dois comparadores falou por último.
+- Com o flip-flop ligado, a **saída** (pino 3) vai a nível alto. Com ele desligado, a saída vai a 0 V e o **transistor de descarga** liga o pino 7 ao GND.
+
+As duas regras que você precisa guardar:
+
+1. Disparo **abaixo de 1/3** do VCC → saída **alta**, descarga aberta.
+2. Limiar **acima de 2/3** do VCC → saída **baixa**, descarga ligada ao GND.
+
+O pino 4 (**reset**) desliga tudo quando vai a 0 V; ligado ao VCC, não interfere. O pino 5 (**controle**) dá acesso direto à referência de 2/3, e por isso pede um capacitor de 10 nF para o GND, que filtra o ruído.
+
+<Model3D
+  part="ic-dip"
+  props={{ pins: 8, code: 'NE555P' }}
+  annotations
+  caption="O 555 no encapsulamento DIP-8. O pino 1 fica ao lado da marquinha; a contagem segue no sentido anti-horário, e o pino 8 fica do outro lado do pino 1."
+/>
+
+A versão original, bipolar (NE555), funciona de 4,5 V a 16 V e a saída aguenta até 200 mA, o bastante para um relé pequeno. A saída em nível alto fica uns 1,7 V abaixo do VCC. Há versões CMOS (como o TLC555 e o ICM7555), que gastam muito menos e funcionam desde 2 V, mas fornecem menos corrente. O 556 tem dois 555 num chip só.
+
+## Monoestável: um pulso de duração certa
+
+Na ligação **monoestável**, o 555 tem um estado estável (saída baixa) e um temporário (saída alta). Um aperto no botão de disparo dá um pulso na saída, com duração definida por R e C.
+
+Ligue um resistor R do VCC aos pinos 7 e 6, juntos, e um capacitor C desses pinos ao GND. Em repouso, a saída está baixa e o transistor de descarga segura o capacitor em 0 V. O botão leva o disparo a 0 V, abaixo de 1/3: a saída sobe e a descarga solta o capacitor, que começa a se carregar por R. Quando a tensão nele chega a 2/3 do VCC, o comparador 1 desliga o flip-flop, a saída volta a 0 e a descarga esvazia o capacitor de novo.
+
+A carga de um capacitor por um resistor segue a curva da aula <LinkAula id="m04-passivos/04-circuito-rc" />. Ir de 0 a 2/3 da tensão final leva:
+
+$$
+t = R \cdot C \cdot \ln 3 \approx 1{,}1 \cdot R \cdot C
+$$
+
+O tempo não depende da tensão de alimentação: se o VCC muda, as referências mudam junto. Esse é um dos segredos do sucesso do 555.
+
+## Explore: o temporizador
+
+O circuito abaixo é um 555 monoestável alimentado com 9 V. O botão de disparo tem um pull-up de 10 kΩ. O capacitor C1 tem 10 µF, e você escolhe o resistor R1. A saída acende um LED.
+
+<Simulation
+  circuit="m11/ci555-monoestavel"
+  height={420}
+  instruments={[{ kind: 'grafico', series: ['VC', 'VOUT'] }]}
+  autoplay
+/>
+
+1. Com R1 em 100 kΩ, aperte o botão rapidamente. Quanto tempo o LED fica aceso?
+2. No gráfico, observe o capacitor durante o pulso. Até que tensão ele sobe?
+3. Aperte de novo enquanto o LED ainda está aceso. O tempo recomeça?
+4. Troque R1 por 470 kΩ e repita.
+
+Com 100 kΩ, o LED fica aceso por 1,1 s: $1{,}1 \cdot 100\ \text{k}\Omega \cdot 10\ \mu\text{F} = 1{,}1$ s. No gráfico, o capacitor sobe de 0 até 6 V (2/3 de 9 V) e cai de uma vez quando a saída desliga. Apertar no meio do pulso não muda nada: o flip-flop já está ligado, e só o limiar o desliga. Com 220 kΩ, o pulso dura 2,4 s; com 470 kΩ, 5,2 s.
+
+## Astável: um oscilador
+
+Na ligação **astável**, nenhum estado é estável: o 555 dispara a si mesmo, sem parar, e a saída vira uma onda quadrada. Une-se o disparo ao limiar (pinos 2 e 6), e o capacitor fica entre esse ponto e o GND. Do VCC, um resistor R1 vai ao pino 7 e outro, R2, do pino 7 ao capacitor.
+
+1. Com a saída alta, o capacitor carrega por R1 + R2 até 2/3 do VCC.
+2. Aí o comparador 1 desliga a saída, e o transistor de descarga liga o pino 7 ao GND. O capacitor descarrega por R2 até 1/3 do VCC.
+3. Aí o comparador 2 liga a saída de novo, a descarga solta o pino 7, e o ciclo recomeça.
+
+Entre 1/3 e 2/3 do VCC, tanto na carga quanto na descarga, passa $\ln 2 \approx 0{,}693$ constante de tempo. Por isso:
+
+$$
+t_{\text{alto}} = 0{,}693 \cdot (R_1 + R_2) \cdot C \qquad t_{\text{baixo}} = 0{,}693 \cdot R_2 \cdot C
+$$
+
+$$
+f = \frac{1}{t_{\text{alto}} + t_{\text{baixo}}} = \frac{1{,}44}{(R_1 + 2R_2) \cdot C}
+$$
+
+A saída fica alta um pouco mais do que fica baixa, porque carrega por dois resistores e descarrega por um. O <Term id="ciclo-de-trabalho">ciclo de trabalho</Term> é $t_{\text{alto}} / (t_{\text{alto}} + t_{\text{baixo}})$, sempre acima de 50 % nessa ligação. Para chegar perto de 50 %, faça R2 muito maior que R1.
+
+## Explore: o pisca-pisca
+
+Este é o pisca-pisca clássico de dois LEDs. R1 tem 10 kΩ, C1 tem 10 µF e você escolhe R2. Com a saída alta, acende o LED 1, ligado da saída ao GND. Com a saída baixa, acende o LED 2, ligado do 9 V à saída.
+
+<Simulation
+  circuit="m11/ci555-astavel"
+  height={420}
+  instruments={[{ kind: 'grafico', series: ['VC', 'VOUT'] }]}
+  autoplay
+/>
+
+1. Com R2 em 68 kΩ, conte as piscadas em 10 segundos.
+2. No gráfico, entre que tensões o capacitor sobe e desce?
+3. Troque R2 por 33 kΩ e depois por 15 kΩ. O que acontece com a frequência e com o tempo que cada LED fica aceso?
+
+Com 68 kΩ, são umas 10 piscadas em 10 s: $f = 1{,}44 / ((10\ \text{k} + 136\ \text{k}) \cdot 10\ \mu) \approx 0{,}99$ Hz. O LED 1 fica 0,54 s aceso e o LED 2, 0,47 s. O capacitor oscila entre 3 V e 6 V, sem nunca chegar a zero (só a primeira carga começa em 0 V, por isso o primeiro ciclo é mais longo). Com 33 kΩ a frequência vai a 1,9 Hz, e com 15 kΩ a 3,6 Hz. Como R1 fica igual e R2 diminui, o tempo alto passa a pesar mais e o ciclo de trabalho sobe.
+
+<Calculadora555 client:visible />
+
+## Exemplo resolvido: a luz da garagem por um minuto
+
+**Problema.** Você quer que a luz da garagem fique acesa 60 s depois de um aperto num botão, com um 555 monoestável. Tem capacitores eletrolíticos de 100 µF. Que resistor usar, e quanto dura o pulso com o valor comercial mais próximo? Como ligar a lâmpada de 127 V?
+
+**Passo 1: isolar R.** De $t = 1{,}1 \cdot R \cdot C$:
+
+$$
+R = \frac{t}{1{,}1 \cdot C} = \frac{60\ \text{s}}{1{,}1 \cdot 100 \times 10^{-6}\ \text{F}} \approx 546\ \text{k}\Omega
+$$
+
+**Passo 2: o valor comercial.** O mais próximo da série E12 é 560 kΩ: $t = 1{,}1 \cdot 560\ \text{k}\Omega \cdot 100\ \mu\text{F} \approx 61{,}5$ s. Um capacitor eletrolítico costuma ter tolerância de ±20 %, então o tempo real pode ficar entre uns 50 s e 75 s. Para um tempo exato, use um trimpot em série com um resistor menor e ajuste com o cronômetro.
+
+**Passo 3: a lâmpada.** O 555 não liga uma lâmpada da rede. A saída aciona um relé de 9 V ou 12 V (até 200 mA, dentro do limite do pino 3), com um <Term id="diodo-de-roda-livre">diodo de roda livre</Term> em paralelo com a bobina para absorver o pico de tensão quando ela desliga (aula <LinkAula id="m09-semicondutores/06-transistor-como-chave" />). O contato do relé faz o papel do interruptor da lâmpada.
+
+**Resposta.** 560 kΩ com 100 µF dá cerca de 61,5 s. A lâmpada de 127 V é ligada por um contato de relé, nunca direto no 555.
+
+<Callout type="perigo" title="O contato do relé está na rede">
+O lado do contato do relé leva a tensão da rede, mesmo numa placa alimentada com 9 V. Monte e mexa com o disjuntor desligado, mantenha a fiação da rede separada da parte de baixa tensão e use bornes com tampa. Veja a aula <LinkAula id="m05-magnetismo/06-reles-e-contatores" />.
+</Callout>
+
+<RealCase title="Pisca-pisca e temporizadores no dia a dia">
+
+**A luz de garagem e a sinaleira do portão.** Na central do automatizador, a luz de garagem fica acesa durante o movimento e mais 60 s (aula <LinkAula id="m16-portao/03-a-central-por-dentro" />). Na CD-1, esse tempo é contado pelo programa do microcontrolador, mas a ideia é a do monoestável. Sinaleiras simples, que piscam sozinhas quando recebem tensão, costumam ter dentro um oscilador do tipo do 555 acionando o LED ou a lâmpada.
+
+**O pisca-alerta do carro.** O relé de pisca dos carros antigos era térmico: uma lâmina que esquentava, entortava e abria o contato. Os relés de pisca eletrônicos trocaram a lâmina por um oscilador, como o astável desta aula, acionando um relé ou um transistor de potência. A norma pede de 60 a 120 piscadas por minuto, e o "tic-tac" no painel é o relé batendo. Quando uma lâmpada queima, a corrente cai e muitos modelos piscam no dobro da velocidade, para avisar o motorista.
+
+**Minuterias e temporizadores.** A minuteria de escada de prédio (aperta o botão, a luz fica acesa um tempo e apaga) e os temporizadores de bancada de oficina usam monoestáveis, com 555 ou com um microcontrolador. Muitos módulos prontos vendidos para hobby ("módulo temporizador", "módulo NE555") são exatamente o circuito desta aula com um trimpot e um relé.
+
+**Onde o 555 perdeu espaço.** Quando o aparelho já tem um microcontrolador, como a central do portão, é mais barato contar o tempo no programa. O 555 continua onde não há programa: placas simples, consertos e kits.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Deixar o pino 4 (reset) solto.** Ele flutua e pode desligar o 555 ao acaso. Ligue ao VCC se não for usar.
+- **Esquecer o capacitor de 10 nF no pino 5.** Sem ele, ruído na referência muda os tempos e pode causar disparos falsos.
+- **Pedir corrente demais da saída.** O pino 3 aguenta até uns 200 mA. Motores, lâmpadas e fitas de LED precisam de um transistor ou de um relé.
+- **Relé sem diodo.** Ao desligar, a bobina gera um pico de tensão que pode queimar o 555. Ponha um diodo em paralelo com a bobina, com a faixa para o positivo.
+- **R1 muito baixo no astável.** Com a descarga ligada, o pino 7 liga R1 entre o VCC e o GND. Abaixo de 1 kΩ, a corrente esquenta o transistor de descarga.
+- **Capacitor eletrolítico velho ou com fuga.** A fuga rouba corrente da carga, e o tempo aumenta ou o capacitor nunca chega a 2/3 do VCC: a luz não apaga mais. Para tempos longos, prefira capacitores de boa qualidade e resistores de até uns 1 MΩ.
+- **Disparo segurado.** No monoestável, se o botão continua apertado depois do tempo, a saída continua alta. Para um pulso curto a partir de um sinal longo, ligue o disparo por um capacitor pequeno.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Num 555 com VCC = 12 V, a que tensão o pino de disparo precisa cair para ligar a saída?',
+      options: [
+        { text: 'Abaixo de 4 V', correct: true, feedback: 'Isso: 1/3 de 12 V = 4 V.' },
+        { text: 'Abaixo de 8 V', feedback: '8 V é 2/3 de 12 V, a referência do limiar, que desliga a saída.' },
+        { text: 'Abaixo de 6 V', feedback: 'O divisor interno tem três resistores iguais: as referências são 1/3 e 2/3, não a metade.' },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Um 555 monoestável tem R = 47 kΩ e C = 22 µF. Quanto tempo dura o pulso, em segundos?',
+      answer: 1.14,
+      tolerance: 0.03,
+      unit: 's',
+      explanation: 't = 1,1 · 47.000 Ω · 0,000022 F ≈ 1,14 s.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um 555 astável tem R1 = 1 kΩ, R2 = 10 kΩ e C = 100 µF. Qual a frequência, em Hz? (Duas casas decimais.)',
+      answer: 0.69,
+      tolerance: 0.02,
+      unit: 'Hz',
+      explanation: 'f = 1,44 / ((1.000 + 2 · 10.000) · 0,0001) = 1,44 / 2,1 ≈ 0,69 Hz.',
+    },
+    {
+      type: 'vf',
+      prompt: 'No astável, a saída fica sempre mais tempo em nível alto do que em nível baixo.',
+      answer: true,
+      explanation:
+        'O capacitor carrega por R1 + R2 e descarrega só por R2: o tempo alto é sempre maior, e o ciclo de trabalho fica acima de 50 %.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Num temporizador com 555, a luz nunca apaga depois de um aperto. Qual a causa mais provável?',
+      options: [
+        {
+          text: 'O capacitor tem fuga e nunca chega a 2/3 do VCC',
+          correct: true,
+          feedback: 'Isso: sem chegar ao limiar, o comparador 1 nunca desliga o flip-flop.',
+        },
+        { text: 'O resistor de temporização é pequeno demais', feedback: 'Um resistor menor deixa o tempo mais curto, não infinito.' },
+        { text: 'O capacitor de 10 nF do pino 5 está faltando', feedback: 'Sem ele aparecem disparos falsos e variação de tempo, mas o 555 ainda desliga.' },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada pino do 555 à sua função.',
+      pairs: [
+        ['2 (disparo)', 'Liga a saída abaixo de 1/3 do VCC'],
+        ['6 (limiar)', 'Desliga a saída acima de 2/3 do VCC'],
+        ['7 (descarga)', 'Vai ao GND com a saída baixa'],
+        ['4 (reset)', 'Desliga tudo em 0 V; ligue ao VCC'],
+        ['5 (controle)', 'Acesso à referência de 2/3; capacitor de 10 nF'],
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O 555 tem um divisor de três resistores iguais, dois comparadores e um flip-flop. Disparo abaixo de **1/3** do VCC liga a saída; limiar acima de **2/3** desliga e liga a descarga.
+- **Monoestável:** um aperto dá um pulso de $t = 1{,}1 \cdot R \cdot C$. Com 100 kΩ e 10 µF, 1,1 s.
+- **Astável:** oscila sozinho, com $f = 1{,}44 / ((R_1 + 2R_2) \cdot C)$, tempo alto $0{,}693 (R_1 + R_2) C$ e baixo $0{,}693 R_2 C$. Com 10 kΩ, 68 kΩ e 10 µF, cerca de 1 Hz.
+- Os tempos não dependem da tensão de alimentação, mas dependem da tolerância do capacitor.
+- Monte com o pino 4 no VCC, 10 nF no pino 5, no máximo 200 mA na saída e diodo na bobina de relés.

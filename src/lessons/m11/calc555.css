@@ -1,0 +1,31 @@
+/* Calculadora555.tsx: 555 timing calculator (lesson 11.5). */
+
+.calc555__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.75rem;
+}
+
+.calc555__values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+}
+
+.calc555__bar {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.calc555__bar span {
+  min-width: 2.75rem;
+  padding: 0.3rem 0.5rem;
+  text-align: center;
+}
+
+.calc555__bar span:first-child {
+  background: color-mix(in oklab, var(--accent) 30%, var(--bg));
+}

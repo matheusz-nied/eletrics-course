@@ -1,0 +1,240 @@
+---
+titulo: Flip-flops, contadores e memória
+modulo: m11-digital
+ordem: 4
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Explicar como duas portas ligadas em laço guardam um bit (a trava SR)
+  - Prever a saída de um flip-flop tipo D a partir do dado e do clock
+  - Ler um contador binário e calcular a divisão de frequência de uma cadeia de flip-flops
+  - Diferenciar memória volátil (RAM) de não volátil (EEPROM e flash) e saber onde cada uma aparece
+prerequisitos:
+  - m11-digital/02-portas-logicas
+  - m11-digital/03-pull-up-pull-down-e-debounce
+tags: [flip-flop, trava SR, latch, clock, contador, binário, divisor de frequência, cristal de quartzo, 32.768 Hz, memória, RAM, EEPROM, flash, 74HC74, CD4520]
+seguranca: baixa-tensao
+---
+
+import ContadorOndas from '../../../lessons/m11/figures/ContadorOndas.astro';
+
+Aperte o botão de uma lâmpada com interruptor de toque, daqueles de pulsar: ela acende e continua acesa depois que você tira o dedo. Aperte de novo e ela apaga. O botão só fica fechado enquanto você aperta, mas o circuito **lembra** do que aconteceu. As portas da aula anterior não fazem isso: a saída de uma porta depende só das entradas daquele instante. Tire o dedo, e a saída volta.
+
+Para lembrar, o circuito precisa de **estado**. Nesta aula você vai ver como duas portas ligadas em laço guardam um bit, como o clock organiza a hora de mudar, como uma fileira de flip-flops conta e divide frequência, e onde ficam guardados os controles cadastrados na central do portão quando falta energia.
+
+## Uma porta que olha para a outra
+
+Pegue duas portas NÃO-OU e ligue a saída de cada uma numa entrada da outra. Sobram duas entradas livres: **S** (de *set*, ligar) e **R** (de *reset*, desligar). A saída da porta de cima é **Q**, e a da de baixo é o contrário, $\overline{Q}$.
+
+Com S e R em 0, cada porta só inverte o que vem da outra. Se Q está em 1, a porta de baixo recebe 1 e dá 0; a porta de cima recebe 0 e 0 e dá 1. Q continua em 1, sustentado pelo laço. Se Q está em 0, o mesmo raciocínio mostra que Q continua em 0. O circuito tem dois estados estáveis e fica no que estiver. É a **trava SR** (*latch*), a memória de um bit mais simples que existe.
+
+- Um pulso em **S** força $\overline{Q}$ para 0, e o laço leva Q para 1. Solte S: Q fica em 1.
+- Um pulso em **R** força Q para 0. Solte R: Q fica em 0.
+- S e R juntos em 1 levam as duas saídas a 0. Não é um estado proibido para o circuito, mas é uma combinação sem sentido (Q e $\overline{Q}$ deveriam ser opostos), e quando os dois botões são soltos ao mesmo tempo não dá para saber onde a trava vai parar.
+
+Se você já viu a partida de motor com contato de selo na aula <LinkAula id="m05-magnetismo/06-reles-e-contatores" />, reconheça o desenho: o botão liga, um contato do próprio contator mantém a bobina energizada, e o botão desliga corta o laço. É a mesma trava, feita com um relé no lugar das portas.
+
+## Explore: a trava liga e desliga
+
+O circuito abaixo é a trava com duas portas NÃO-OU. Os botões "Liga (S)" e "Desliga (R)" levam cada entrada a 5 V e têm resistores de pull-down de 10 kΩ. O LED verde mostra Q.
+
+<Simulation
+  circuit="m11/latch-sr"
+  height={420}
+  instruments={[{ kind: 'multimetro', series: ['VQ', 'VNQ'] }]}
+  autoplay
+/>
+
+1. Em que estado a trava começa?
+2. Aperte e solte "Liga (S)". O LED fica aceso depois que você solta?
+3. Aperte e solte "Liga (S)" de novo. Muda alguma coisa?
+4. Aperte e solte "Desliga (R)".
+
+A trava começa com Q em 0, o LED apaga. Um aperto em S acende o LED, e ele continua aceso sem ninguém no botão: Q fica em uns 4,5 V (a porta perde um pouco de tensão para alimentar o LED) e $\overline{Q}$ em 0 V. Um segundo aperto em S não muda nada, porque Q já está em 1. Só R apaga.
+
+Repare no capacitor C1, de 10 µF, entre o 5 V e a entrada R. Quando o circuito é ligado, o capacitor está descarregado e leva R a 5 V por um instante, enquanto se carrega pelo pull-down de 10 kΩ ($\tau = 10\ \text{k}\Omega \cdot 10\ \mu\text{F} = 100$ ms). Isso zera a trava ao ligar. Sem ele, um circuito real pode acordar com Q em 0 ou em 1, ao acaso, conforme qual porta "ganhe a corrida". Esse truque se chama **reset ao ligar** (*power-on reset*), e todo microcontrolador tem um.
+
+## O clock: todos mudam juntos
+
+A trava SR muda na hora em que a entrada muda. Num circuito com centenas de bits, isso vira bagunça: cada sinal chega por um caminho de comprimento diferente, e por alguns nanossegundos as entradas passam por combinações erradas. A solução é combinar uma hora para mudar. Um sinal de onda quadrada, o **<Term id="clock">clock</Term>**, marca essa hora, e os circuitos só mudam na **borda de subida** dele, quando ele passa de 0 para 1.
+
+O **<Term id="flip-flop">flip-flop</Term> tipo D** é a memória de um bit que obedece ao clock. Ele tem uma entrada de dado, **D**, e a entrada de clock. Na subida do clock, a saída Q copia D. Fora da subida, D pode mudar à vontade: Q não muda.
+
+| Clock | D | Q depois |
+|:-:|:-:|:-:|
+| sobe (0 → 1) | 0 | 0 |
+| sobe (0 → 1) | 1 | 1 |
+| parado em 0, parado em 1 ou descendo | qualquer | o mesmo de antes |
+
+Um chip como o 74HC74 tem dois flip-flops D. Por dentro, cada um é feito de travas e portas, umas seis portas ao todo.
+
+## Explore: o flip-flop D e o divisor por 2
+
+No circuito abaixo, as entradas D e clock são fontes de 0 V ou 5 V que você escolhe. O flip-flop U1 acende o LED verde. O mesmo clock vai ao flip-flop U2, que tem a saída $\overline{Q}$ ligada de volta à própria entrada D, e acende o LED amarelo.
+
+<Simulation
+  circuit="m11/flip-flop-d"
+  height={420}
+  instruments={[{ kind: 'multimetro', series: ['VDADO', 'VCLK', 'VQ'] }]}
+/>
+
+1. Ponha D em 1 com o clock em 0. O LED verde acende?
+2. Agora suba o clock para 1.
+3. Com o clock em 1, volte D para 0. Depois desça o clock. Q mudou?
+4. Suba e desça o clock várias vezes, olhando o LED amarelo.
+
+Mudar D com o clock parado não muda Q. Só a subida do clock copia D para a saída: o LED verde acende quando o clock sobe com D em 1 e apaga na próxima subida com D em 0. A descida do clock não faz nada.
+
+O LED amarelo troca de estado a cada subida do clock. Como D recebe sempre o contrário de Q, cada subida copia o contrário do que está lá. São duas subidas do clock para cada ciclo completo do LED: U2 é um **divisor de frequência por 2**.
+
+## Contadores
+
+Ligue vários divisores por 2 em fila, cada um recebendo o clock do anterior, e as saídas contam em binário. A Figura 1 mostra as ondas de um contador de 3 bits. Q0 troca a cada subida do clock; Q1 troca com a metade dessa frequência; Q2, com um quarto. Lendo de baixo para cima, Q2 Q1 Q0, as saídas passam por 000, 001, 010, 011... até 111, que é 7, e voltam a 000.
+
+<Figure caption="Figura 1. Ondas de um contador de 3 bits. Cada saída tem a metade da frequência da anterior. Lidas de baixo para cima (Q2 Q1 Q0), as saídas formam o número binário da contagem." alt="Diagrama de tempo com quatro linhas de onda quadrada: Clock, Q0, Q1 e Q2, com linhas tracejadas verticais nas subidas do clock. Q0 troca a cada subida do clock; Q1 tem metade da frequência de Q0; Q2 tem metade da frequência de Q1. Embaixo, a contagem: 0, 1, 2, 3, 4, 5, 6, 7.">
+  <ContadorOndas />
+</Figure>
+
+Um **<Term id="contador-binario">contador binário</Term>** de $n$ bits conta de 0 a $2^n - 1$ e volta a zero. A última saída tem a frequência do clock dividida por $2^n$:
+
+$$
+f_{\text{saída}} = \frac{f_{\text{clock}}}{2^n}
+$$
+
+Chips como o CD4520 (dois contadores de 4 bits) e o CD4060 (14 estágios e um oscilador) fazem isso num só encapsulamento. Eles também têm uma entrada de **reset**, que zera a contagem.
+
+## Explore: o contador de 4 bits
+
+Aqui um clock de onda quadrada alimenta um contador de 4 bits. Os LEDs mostram as saídas, da esquerda para a direita: Q3 (vale 8), Q2 (vale 4), Q1 (vale 2) e Q0 (vale 1). O gráfico mostra a contagem.
+
+<Simulation
+  circuit="m11/contador"
+  height={360}
+  instruments={[{ kind: 'grafico', series: ['U1.count'] }]}
+  autoplay
+/>
+
+1. Com o clock em 1 Hz, observe os LEDs. Qual pisca mais rápido? E mais devagar?
+2. Pare a simulação quando a contagem estiver em 5. Quais LEDs estão acesos?
+3. Escolha 5 Hz e espere a contagem passar de 15. O que acontece?
+
+O LED de Q0 troca a cada segundo, o de Q3 a cada 8 segundos. Com a contagem em 5, acendem Q2 e Q0: $4 + 1 = 5$, ou 0101 em binário. Depois de 15 (1111, todos acesos), a contagem volta a 0 e o gráfico vira uma escada que recomeça a cada 16 pulsos.
+
+## Exemplo resolvido: o segundo do relógio de quartzo
+
+**Problema.** Um relógio de pulso tem um cristal de quartzo que oscila em 32.768 Hz. O ponteiro dos segundos precisa de 1 pulso por segundo. Quantos estágios de divisão por 2 o chip do relógio precisa? E qual a frequência depois de 14 estágios?
+
+**Passo 1: a divisão total.** De 32.768 Hz para 1 Hz, a divisão é por 32.768.
+
+**Passo 2: em potências de 2.** Dobrando a partir de 1: 2, 4, 8, 16... 1.024, 2.048, 4.096, 8.192, 16.384, 32.768. Contando os passos, $32.768 = 2^{15}$. São **15 estágios**:
+
+$$
+f = \frac{32.768\ \text{Hz}}{2^{15}} = \frac{32.768}{32.768} = 1\ \text{Hz}
+$$
+
+**Passo 3: com 14 estágios.** $32.768 / 2^{14} = 32.768 / 16.384 = 2$ Hz. É o que sai do último estágio de um CD4060: dois pulsos por segundo, e falta um flip-flop D como divisor por 2 para chegar a 1 Hz.
+
+**Resposta.** 15 estágios. É por isso que os cristais de relógio têm esse valor esquisito: 32.768 é uma potência de 2, e um contador simples chega exatamente a 1 Hz. Os cristais de relógio de computadores e de microcontroladores, que guardam a hora com a máquina desligada, usam a mesma frequência pelo mesmo motivo.
+
+## Memória
+
+Um flip-flop guarda um bit. Junte oito e você tem um byte; junte milhões, com a fiação para escolher qual ler, e você tem uma **memória**. Os tipos que aparecem nos aparelhos do dia a dia se separam por uma pergunta: o que acontece quando a energia cai?
+
+- **RAM** (memória de acesso aleatório). A SRAM é feita de flip-flops; a DRAM, dos computadores, de capacitores minúsculos que precisam ser recarregados o tempo todo. As duas são rápidas e aceitam gravações sem limite, mas são **voláteis**: sem energia, perdem tudo. É nela que o programa guarda o que está acontecendo agora.
+- **EEPROM e flash.** Guardam cada bit como uma carga presa numa ilha isolada dentro de um transistor, e a carga fica lá por anos sem alimentação. São **<Term id="memoria-nao-volatil">não voláteis</Term>**. Em troca, gravar é lento e o número de gravações é limitado: a EEPROM do ATmega328P aguenta umas 100 mil por posição, a flash, umas 10 mil. O programa do microcontrolador fica na flash; configurações e cadastros, na EEPROM.
+
+<RealCase title="O que a central do portão lembra, e o que esquece">
+
+A central do automatizador (aula <LinkAula id="m16-portao/03-a-central-por-dentro" />) usa os dois tipos de memória, e dá para ver a diferença num simples desligar do disjuntor.
+
+**Os controles cadastrados ficam.** Quando você cadastra um controle com o botão PROG (aula <LinkAula id="m16-portao/06-controle-remoto-e-receptor" />), a central grava o código dele na memória não volátil. A CD-1 do curso guarda até 32 botões. Falta luz, volta a luz, e o controle continua funcionando. Para apagar, só segurando o PROG por 10 s.
+
+**A posição do portão se perde.** Enquanto o portão anda, a central guarda na RAM se ele está abrindo, fechando, parado no meio. Quando a energia volta, essa informação sumiu. Por isso a CD-1 tem uma regra: se não sabe onde o portão está, o primeiro comando **abre**, até achar um fim de curso. Abrir é a escolha segura, porque fechar às cegas poderia prender alguém.
+
+**O programa fica na flash.** É ele que lê as entradas a cada 10 ms, faz o debounce dos botões e decide. Trocar o programa ("atualizar o firmware") é regravar a flash.
+
+**Contadores por toda parte.** Os tempos da central (pausa antes de fechar, tempo de motor, os 30 ms do debounce) são contados por temporizadores dentro do microcontrolador: contadores binários que recebem o clock do cristal, dividido. A aula <LinkAula id="m12-microcontroladores/02-maquinas-de-estado" /> mostra como o programa organiza esses estados.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Esquecer o estado inicial.** Uma trava ou um flip-flop pode ligar em qualquer estado. Se uma saída comanda um motor ou um relé, garanta o estado seguro ao ligar com um reset ao ligar ou com o programa.
+- **Clock com trepidação.** Um botão que trepida, ligado direto ao clock de um contador, conta vários pulsos (aula <LinkAula id="m11-digital/03-pull-up-pull-down-e-debounce" />). Todo clock que vem de um contato precisa de debounce.
+- **Entradas de reset e de ajuste soltas.** Num 74HC74, as entradas de *preset* e *clear* ficam em 1 para o flip-flop funcionar. Soltas, flutuam e zeram ou ligam a saída ao acaso.
+- **Gravar a EEPROM sem parar.** Um programa que grava um valor na EEPROM a cada passo, mesmo sem ele mudar, gasta as 100 mil gravações em poucas horas. Grave só quando o dado muda.
+- **Esperar que a RAM sobreviva.** Tudo o que precisa sobreviver a uma queda de energia tem de estar numa memória não volátil.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Numa trava SR com portas NÃO-OU, S e R estão em 0. O que acontece com Q?',
+      options: [
+        {
+          text: 'Continua no valor que tinha',
+          correct: true,
+          feedback: 'Isso. Com S e R em 0, o laço entre as portas sustenta o estado atual.',
+        },
+        { text: 'Vai para 0', feedback: 'Q vai para 0 com um pulso em R. Com as duas entradas em 0, nada muda.' },
+        { text: 'Oscila entre 0 e 1', feedback: 'A trava tem dois estados estáveis; com S e R em 0, ela fica no que estiver.' },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um flip-flop D está com Q = 0. O clock está parado em 1, e D muda de 0 para 1. O que acontece com Q?',
+      options: [
+        {
+          text: 'Continua em 0 até a próxima subida do clock',
+          correct: true,
+          feedback: 'Isso: o flip-flop só olha D na borda de subida do clock.',
+        },
+        { text: 'Vai para 1 na hora', feedback: 'Isso seria uma trava transparente. O flip-flop D espera a subida do clock.' },
+        { text: 'Vai para 1 quando o clock descer', feedback: 'A descida do clock não faz nada neste flip-flop.' },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um clock de 1 MHz passa por um contador de 10 bits. Qual a frequência da última saída, em Hz? (Arredonde para o inteiro mais próximo.)',
+      answer: 977,
+      tolerance: 1,
+      unit: 'Hz',
+      explanation: 'f = 1.000.000 Hz / 2¹⁰ = 1.000.000 / 1.024 ≈ 977 Hz.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Num contador de 4 bits, estão acesos os LEDs de Q3 e Q1. Qual a contagem?',
+      answer: 10,
+      tolerance: 0,
+      explanation: 'Q3 vale 8 e Q1 vale 2: 8 + 2 = 10, ou 1010 em binário.',
+    },
+    {
+      type: 'vf',
+      prompt: 'Um flip-flop D com a saída Q barrado ligada à própria entrada D divide a frequência do clock por 2.',
+      answer: true,
+      explanation:
+        'A cada subida, ele copia o contrário do que tinha: a saída troca a cada subida, e um ciclo completo dela leva dois ciclos do clock.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada informação da central do portão à memória onde ela fica.',
+      pairs: [
+        ['Controles cadastrados', 'EEPROM (não volátil)'],
+        ['Se o portão está abrindo ou fechando agora', 'RAM (volátil)'],
+        ['O programa da central', 'Flash (não volátil)'],
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Duas portas NÃO-OU ligadas em laço formam a **trava SR**: S liga, R desliga, e a saída lembra a última ordem. O contato de selo de um contator é a mesma ideia.
+- Uma trava pode ligar em qualquer estado; o **reset ao ligar** (um capacitor e um resistor, por exemplo) garante o estado inicial.
+- O **clock** marca a hora de mudar. O **flip-flop D** copia D para Q na subida do clock e segura o valor até a próxima subida.
+- Com $\overline{Q}$ ligado a D, o flip-flop divide a frequência por 2. Em fila, os divisores formam um **contador binário**: $n$ bits contam até $2^n - 1$ e dividem a frequência por $2^n$. 15 estágios levam os 32.768 Hz do cristal de relógio a 1 Hz.
+- A **RAM** é rápida mas perde tudo sem energia. A **EEPROM** e a **flash** guardam os dados sem energia, com um número limitado de gravações.

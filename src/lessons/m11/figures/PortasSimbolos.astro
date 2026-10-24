@@ -1,0 +1,119 @@
+---
+/* 11.2: the six basic gates, each with the distinctive-shape symbol (ANSI,
+   common in American datasheets and in many Brazilian books) and the
+   rectangular one (IEC 60617, the one the simulator draws). */
+const AND = 'M0 0H20A20 20 0 0 1 20 40H0Z';
+const OR = 'M-2 0Q14 20 -2 40Q28 40 44 20Q28 0 -2 0Z';
+const NOT = 'M0 2L34 20L0 38Z';
+type Gate = {
+  name: string;
+  en: string;
+  shape: string;
+  bubble: boolean;
+  xor?: boolean;
+  iec: string;
+  one?: boolean;
+};
+const gates: Gate[] = [
+  { name: 'E', en: 'AND', shape: AND, bubble: false, iec: '&' },
+  { name: 'OU', en: 'OR', shape: OR, bubble: false, iec: '≥1' },
+  { name: 'NÃO', en: 'NOT', shape: NOT, bubble: true, iec: '1', one: true },
+  { name: 'NÃO-E', en: 'NAND', shape: AND, bubble: true, iec: '&' },
+  { name: 'NÃO-OU', en: 'NOR', shape: OR, bubble: true, iec: '≥1' },
+  { name: 'OU exclusivo', en: 'XOR', shape: OR, bubble: false, xor: true, iec: '=1' },
+];
+const CW = 212;
+const CH = 132;
+---
+
+<svg viewBox="0 0 640 276" width="640" height="276" class="fig" aria-hidden="true">
+  {gates.map((g, k) => {
+    const x = 4 + (k % 3) * CW;
+    const y = 4 + Math.floor(k / 3) * CH;
+    const outX = g.one ? 34 : 44;
+    const end = g.bubble ? outX + 8 : outX;
+    return (
+      <g transform={`translate(${x} ${y})`}>
+        <rect x="0" y="0" width={CW - 8} height={CH - 8} rx="10" class="cell" />
+        <text x="12" y="22" class="name">
+          {g.name}
+        </text>
+        <text x={CW - 20} y="22" class="en">
+          {g.en}
+        </text>
+        <g transform="translate(26 50)">
+          {g.one ? (
+            <path d="M-14 20H0" class="lead" />
+          ) : (
+            <path d="M-14 10H4M-14 30H4" class="lead" />
+          )}
+          {g.xor && <path d="M-9 0Q7 20 -9 40" class="body" />}
+          <path d={g.shape} class="body" />
+          {g.bubble && <circle cx={outX + 4} cy="20" r="4" class="body" />}
+          <path d={`M${end} 20H${end + 14}`} class="lead" />
+          <text x="20" y="62" class="tag">
+            ANSI
+          </text>
+        </g>
+        <g transform="translate(124 50)">
+          {g.one ? (
+            <path d="M-14 20H0" class="lead" />
+          ) : (
+            <path d="M-14 10H0M-14 30H0" class="lead" />
+          )}
+          <rect x="0" y="0" width="34" height="40" class="body" />
+          <text x="17" y="25" class="iec">
+            {g.iec}
+          </text>
+          {g.bubble && <circle cx="38" cy="20" r="4" class="body" />}
+          <path d={`M${g.bubble ? 42 : 34} 20H${g.bubble ? 56 : 48}`} class="lead" />
+          <text x="17" y="62" class="tag">
+            IEC
+          </text>
+        </g>
+      </g>
+    );
+  })}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .cell {
+    fill: var(--surface);
+    stroke: var(--border);
+  }
+  .name {
+    fill: var(--fg);
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .en {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: end;
+  }
+  .body {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .lead {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .iec {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .tag {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+</style>

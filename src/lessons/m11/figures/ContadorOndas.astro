@@ -1,0 +1,82 @@
+---
+/* 11.4: timing diagram of a 3-bit counter. Each output changes on the
+   rising edges of the clock (Q0) or toggles at half the rate of the one
+   above (Q1, Q2); read top to bottom as Q2 Q1 Q0, the outputs count 0 to 7. */
+const X0 = 96;
+const P = 62;
+const N = 8;
+const H = 22;
+const rows = [
+  { label: 'Clock', y: 50, level: (t: number) => t % P < P / 2 },
+  { label: 'Q0', y: 100, level: (t: number) => (Math.floor(t / P) & 1) === 1 },
+  { label: 'Q1', y: 150, level: (t: number) => (Math.floor(t / P) & 2) === 2 },
+  { label: 'Q2', y: 200, level: (t: number) => (Math.floor(t / P) & 4) === 4 },
+];
+// The clock rises at the start of each period; the count changes there too.
+const wave = (y: number, level: (t: number) => boolean) => {
+  let d = '';
+  let last: boolean | undefined;
+  for (let t = 0; t <= N * P; t += P / 2) {
+    const v = t < N * P ? level(t) : last!;
+    const yy = v ? y - H : y;
+    d += last === undefined ? `M${X0 + t} ${yy}` : v !== last ? `V${yy}` : '';
+    d += `H${X0 + Math.min(t + P / 2, N * P)}`;
+    last = v;
+  }
+  return d;
+};
+const edges = Array.from({ length: N - 1 }, (_, k) => X0 + (k + 1) * P);
+---
+
+<svg viewBox="0 0 640 260" width="640" height="260" class="fig" aria-hidden="true">
+  {edges.map((x) => (
+    <path d={`M${x} 18V${rows[3].y + 4}`} class="edge" />
+  ))}
+  {rows.map((r) => (
+    <g>
+      <text x={X0 - 12} y={r.y - 6} class="lab">
+        {r.label}
+      </text>
+      <path d={wave(r.y, r.level)} class="wave" />
+    </g>
+  ))}
+  <text x={X0 - 12} y="238" class="lab">
+    Contagem
+  </text>
+  {Array.from({ length: N }, (_, k) => (
+    <text x={X0 + k * P + P / 2} y="238" class="num">
+      {k}
+    </text>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .wave {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+  }
+  .edge {
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+  }
+  .lab {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 700;
+    text-anchor: end;
+  }
+  .num {
+    fill: var(--fg);
+    font-size: 15px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+</style>

@@ -1,0 +1,50 @@
+/* LimiarRuido.tsx: noise on a digital input (lesson 11.1). */
+
+.limiar__graph {
+  display: block;
+  width: 100%;
+  max-width: 34rem;
+  margin-inline: auto;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.limiar__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.limiar__tick {
+  fill: var(--fg-muted);
+  font-size: 11px;
+  text-anchor: end;
+}
+
+.limiar__caption {
+  fill: var(--fg-muted);
+  font-size: 11px;
+}
+
+.limiar__band {
+  fill: color-mix(in oklab, var(--warning) 14%, transparent);
+}
+
+.limiar__th {
+  stroke: var(--warning);
+  stroke-dasharray: 5 4;
+  stroke-width: 1.5;
+}
+
+.limiar__analog {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.limiar__digital {
+  fill: none;
+  stroke: var(--success);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+}

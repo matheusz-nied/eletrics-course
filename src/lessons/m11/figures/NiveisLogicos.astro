@@ -1,0 +1,147 @@
+---
+/* 11.1: input levels of four logic families on the same voltage scale. Each
+   bar goes from 0 V to the supply: up to VIL the input reads 0, from VIH up
+   it reads 1, and in between the result is not guaranteed. Values from the
+   datasheets: 74LS (TTL), 74HC at 5 V (30 % and 70 % of VCC), ATmega328P
+   (30 % and 60 %) and ESP32 (25 % and 75 % of 3,3 V). */
+const Y0 = 262;
+const SCALE = 46; // px per volt
+const y = (v: number) => Y0 - v * SCALE;
+const families = [
+  {
+    name: 'TTL (74LS)',
+    sub: 'alimentação 5 V',
+    vcc: 5,
+    vil: 0.8,
+    vih: 2.0,
+    l: '0,8 V',
+    h: '2,0 V',
+  },
+  {
+    name: 'CMOS (74HC)',
+    sub: 'alimentação 5 V',
+    vcc: 5,
+    vil: 1.5,
+    vih: 3.5,
+    l: '1,5 V',
+    h: '3,5 V',
+  },
+  {
+    name: 'Arduino Uno',
+    sub: 'ATmega328P, 5 V',
+    vcc: 5,
+    vil: 1.5,
+    vih: 3.0,
+    l: '1,5 V',
+    h: '3,0 V',
+  },
+  {
+    name: 'ESP32',
+    sub: 'alimentação 3,3 V',
+    vcc: 3.3,
+    vil: 0.825,
+    vih: 2.475,
+    l: '0,83 V',
+    h: '2,48 V',
+  },
+];
+const X0 = 92;
+const STEP = 136;
+const W = 44;
+---
+
+<svg viewBox="0 0 640 316" width="640" height="316" class="fig" aria-hidden="true">
+  {[0, 1, 2, 3, 4, 5].map((v) => (
+    <g>
+      <path d={`M60 ${y(v)}H630`} class="grid" />
+      <text x="52" y={y(v) + 4} class="tick">
+        {v} V
+      </text>
+    </g>
+  ))}
+  {families.map((f, k) => {
+    const x = X0 + k * STEP;
+    return (
+      <g>
+        <rect x={x} y={y(f.vil)} width={W} height={f.vil * SCALE} class="zero" />
+        <rect x={x} y={y(f.vih)} width={W} height={(f.vih - f.vil) * SCALE} class="forbidden" />
+        <rect x={x} y={y(f.vcc)} width={W} height={(f.vcc - f.vih) * SCALE} class="one" />
+        <text x={x + W / 2} y={y(f.vil / 2) + 4} class="in">
+          0
+        </text>
+        <text x={x + W / 2} y={y((f.vil + f.vih) / 2) + 4} class="in muted">
+          ?
+        </text>
+        <text x={x + W / 2} y={y((f.vih + f.vcc) / 2) + 4} class="in">
+          1
+        </text>
+        <text x={x + W + 5} y={y(f.vih) + 4} class="val">
+          {f.h}
+        </text>
+        <text x={x + W + 5} y={y(f.vil) + 4} class="val">
+          {f.l}
+        </text>
+        <text x={x + W / 2} y={Y0 + 22} class="name">
+          {f.name}
+        </text>
+        <text x={x + W / 2} y={Y0 + 38} class="sub">
+          {f.sub}
+        </text>
+      </g>
+    );
+  })}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .grid {
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: end;
+  }
+  .zero {
+    fill: color-mix(in oklab, var(--info) 30%, transparent);
+    stroke: var(--info);
+  }
+  .one {
+    fill: color-mix(in oklab, var(--danger) 26%, transparent);
+    stroke: var(--danger);
+  }
+  .forbidden {
+    fill: color-mix(in oklab, var(--warning) 18%, transparent);
+    stroke: var(--warning);
+    stroke-dasharray: 4 3;
+  }
+  .in {
+    fill: var(--fg);
+    font-size: 15px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .muted {
+    fill: var(--fg-muted);
+  }
+  .val {
+    fill: var(--fg);
+    font-size: 12px;
+  }
+  .name {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .sub {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+</style>
