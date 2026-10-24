@@ -1,0 +1,343 @@
+---
+titulo: Motor de indução trifásico
+modulo: m08-motores
+ordem: 3
+nivel: I
+duracaoMin: 45
+objetivos:
+  - Explicar como três bobinas ligadas em três fases criam um campo magnético que gira
+  - Calcular a velocidade síncrona e o escorregamento de um motor de indução
+  - Ler a placa de um motor trifásico e ligar a caixa de ligação em estrela ou em triângulo
+  - Explicar a corrente de partida e para que servem a partida estrela-triângulo e o inversor de frequência
+  - Inverter o sentido de giro trocando duas fases e reconhecer os sinais da falta de fase
+prerequisitos:
+  - m05-magnetismo/03-inducao-eletromagnetica
+  - m06-corrente-alternada/07-monofasico-bifasico-e-trifasico
+  - m08-motores/01-motor-cc
+tags: [motor, motor trifásico, motor de indução, campo girante, gaiola de esquilo, estrela, triângulo, partida, inversor, bomba]
+seguranca: rede
+rascunho: false
+---
+
+import CampoGirante from '../../../lessons/m08/CampoGirante.tsx';
+import Nameplate from '../../../lessons/m08/figures/Nameplate.astro';
+import TerminalBox from '../../../lessons/m08/figures/TerminalBox.astro';
+import { TORQUE_CURVES } from '../../../lessons/m08/curva-torque';
+
+A bomba que enche a caixa d'água do prédio, o compressor da oficina, a esteira do supermercado e o exaustor da cozinha industrial têm quase sempre o mesmo motor: uma carcaça de ferro com aletas, um ventilador atrás, uma caixa de ligação em cima e três fios de fase. Ele não tem escovas nem comutador, e não há fio nenhum chegando à parte que gira. Mesmo assim, liga direto na rede e trabalha por décadas com pouca manutenção. Como um motor gira se ninguém leva corrente até o rotor? A resposta é um campo magnético que gira sozinho.
+
+## Três bobinas, três fases
+
+Na rede trifásica (aula <LinkAula id="m06-corrente-alternada/07-monofasico-bifasico-e-trifasico" />), as três fases têm a mesma tensão e a mesma frequência, mas atingem o pico em momentos diferentes, separadas por um terço de ciclo, ou 120°. Primeiro L1, depois L2, depois L3, e de novo L1.
+
+O <Term id="estator">estator</Term> do motor trifásico tem três <Term id="enrolamento">enrolamentos</Term> iguais, montados nas ranhuras do núcleo com os eixos a 120° um do outro, e cada um ligado a uma fase. Cada bobina sozinha cria um campo que só pulsa: cresce, diminui, inverte e volta, sempre na mesma direção. Mas as três juntas fazem uma coisa diferente.
+
+## O campo girante
+
+<CampoGirante client:visible />
+
+1. Deixe a ligação em **L1, L2 e L3 ligadas** e aperte **Girar**. Acompanhe a seta grossa.
+2. Pause e arraste o **Instante** de 0° a 120°. Qual bobina está no pico em 0°? E em 120°?
+3. Escolha **L2 e L3 trocadas** e ponha para girar de novo.
+4. Escolha **Faltando a fase L3**. O que a seta grossa faz agora?
+
+Em cada instante, as três setas finas têm tamanhos diferentes, e algumas apontam para trás (corrente negativa). A soma, a seta grossa, tem sempre o mesmo tamanho: 1,5 vez o campo de uma bobina sozinha. E ela vai apontando para a bobina que está no pico, uma depois da outra. Esse é o <Term id="campo-girante">campo girante</Term>: um campo de tamanho constante que dá uma volta a cada ciclo da rede, sem nenhuma peça se mexendo. Trocando duas fases, a ordem dos picos se inverte e o campo gira para o outro lado. Sem uma das fases, ele só cresce e encolhe sobre uma linha, e não gira mais.
+
+### A velocidade do campo
+
+Com três bobinas, como no desenho, o estator tem um polo norte e um polo sul: são 2 polos, e o campo dá uma volta por ciclo. Em 60 Hz, 60 voltas por segundo, ou 3.600 rpm. Se o estator tiver o dobro de bobinas, distribuídas em volta, forma 4 polos, e o campo anda só meia volta por ciclo. A velocidade do campo é a <Term id="velocidade-sincrona">velocidade síncrona</Term>:
+
+$$
+n_s = \frac{120 \cdot f}{p}
+$$
+
+em que $n_s$ é a velocidade síncrona em rpm, $f$ é a frequência da rede em hertz e $p$ é o número de polos. O 120 junta os 60 segundos de um minuto com os dois polos de cada par. Em 60 Hz:
+
+| Polos | Velocidade síncrona | Rotação típica com carga | Onde aparece |
+| --- | --- | --- | --- |
+| 2 | 3.600 rpm | perto de 3.450 rpm | bombas centrífugas, esmeril |
+| 4 | 1.800 rpm | perto de 1.720 rpm | o mais comum: compressor, esteira, ventilador |
+| 6 | 1.200 rpm | perto de 1.150 rpm | máquinas mais lentas |
+| 8 | 900 rpm | perto de 860 rpm | exaustores grandes, máquinas lentas |
+
+## O rotor gaiola de esquilo
+
+O rotor da maioria dos motores trifásicos é uma <Term id="gaiola-de-esquilo">gaiola de esquilo</Term>: um cilindro de chapas de aço empilhadas com barras de alumínio (ou de cobre) atravessando de ponta a ponta, todas unidas nas duas pontas por anéis do mesmo metal. Tire o aço e sobra uma gaiola, daí o nome. As barras estão em curto pelos anéis, e não há fio nenhum ligando o rotor ao resto do motor.
+
+<Model3D part="induction-motor" props={{ phases: 'trifasico', rpm: 300 }} cutaway annotations />
+
+O campo girante passa varrendo as barras. Pela lei de Faraday (aula <LinkAula id="m05-magnetismo/03-inducao-eletromagnetica" />), um campo que se move em relação a um condutor induz uma tensão nele, e como as barras estão em curto, aparecem correntes fortes na gaiola. Corrente dentro de campo magnético sofre força, como você viu no motor CC (aula <LinkAula id="m08-motores/01-motor-cc" />), e essa força arrasta o rotor junto com o campo. Pela lei de Lenz, o rotor tenta acompanhar o campo para diminuir a variação que o empurra. Por isso esse motor se chama <Term id="motor-de-inducao">motor de indução</Term>: a corrente do rotor é induzida, e não levada por fios.
+
+### O escorregamento
+
+O rotor nunca alcança o campo. Se girasse na velocidade síncrona, as barras andariam junto com o campo, nada mudaria para elas, não haveria tensão induzida, nem corrente, nem força. Então ele gira um pouco mais devagar, só o bastante para as barras serem varridas e criarem o torque que a carga pede. Essa diferença é o <Term id="escorregamento">escorregamento</Term>:
+
+$$
+s = \frac{n_s - n}{n_s}
+$$
+
+em que $s$ é o escorregamento (uma fração, que costuma ser dita em %), $n_s$ é a velocidade síncrona e $n$ é a rotação do rotor. Num motor pequeno de 4 polos que gira a 1.720 rpm, $s = (1.800 - 1.720) \div 1.800 \approx 4{,}4\,\%$. Sem carga, o escorregamento fica abaixo de 1 %; com carga, sobe para alguns por cento, e a corrente sobe junto. O motor se ajusta à carga girando um pouquinho mais devagar.
+
+## Torque, rotação e a corrente de partida
+
+<Plot
+  data={TORQUE_CURVES}
+  xUnit="%"
+  title="torque do motor de 1 CV conforme a rotação, em porcentagem da velocidade síncrona (1.800 rpm), em triângulo e em estrela"
+/>
+
+O gráfico é a curva do motor da simulação desta aula, de 1 CV e 4 polos. Parado (0 %), em triângulo, ele faz perto de 12 N·m, quase três vezes o torque nominal de 4,15 N·m, a linha reta. Conforme acelera, o torque sobe até um máximo e depois despenca perto da velocidade síncrona (100 %), onde vai a zero. O motor se firma onde a curva dele cruza a da carga: com a carga nominal, perto de 96 %, ou 1.720 rpm.
+
+Na partida, o rotor parado é varrido pelo campo na velocidade máxima, como um transformador com o secundário em curto. A <Term id="corrente-de-partida">corrente de partida</Term> fica de 6 a 8 vezes a nominal, durante o tempo que o motor leva para acelerar: uma fração de segundo num motor solto, alguns segundos numa bomba ou num ventilador grande. É esse pico que pisca as lâmpadas quando um motor grande liga, e é por causa dele que o disjuntor de um motor tem curva C ou D, que aguenta picos curtos (aula <LinkAula id="m07-instalacoes/03-disjuntores-dr-e-dps" />).
+
+## A placa do motor
+
+<Figure
+  caption="Figura 1. A placa de um motor trifásico de 1 CV e 4 polos, sem marca. O lado direito mostra como ligar a caixa para cada tensão."
+  alt="Placa metálica com o título Motor de indução trifásico e os campos CV 1, kW 0,75, V 220/380, A 3,02/1,75, Hz 60, rpm 1.720, rendimento 82,5 %, cos φ 0,79, Ip/In 6,8, FS 1,15, isolação F, IP 55, carcaça 80, regime S1, e dois desenhos dos seis bornes: em 220 V, três barras verticais; em 380 V, uma barra unindo 6, 4 e 5."
+>
+  <Nameplate />
+</Figure>
+
+A placa diz tudo o que você precisa para ligar e proteger o motor:
+
+- **CV e kW:** a potência **mecânica** que o motor entrega no eixo, e não a que ele puxa da rede. 1 CV vale 735,5 W; a placa arredonda para 0,75 kW. Mais sobre CV e W na aula <LinkAula id="m08-motores/06-redutores-torque-e-potencia" />.
+- **V 220/380 e A 3,02/1,75:** cada enrolamento é feito para 220 V. O motor liga em triângulo numa rede de 220 V entre fases e em estrela numa rede de 380 V, e a corrente de linha em cada caso é a que vem embaixo da tensão.
+- **rpm 1.720:** a rotação com a carga nominal. Com 60 Hz, ela entrega o número de polos: a velocidade síncrona logo acima de 1.720 é 1.800 rpm, então são 4 polos.
+- **η e cos φ:** o rendimento (quanto da potência elétrica vira mecânica) e o fator de potência (aula <LinkAula id="m06-corrente-alternada/05-potencia-e-fator-de-potencia" />).
+- **Ip/In 6,8:** a corrente de partida é 6,8 vezes a nominal.
+- **FS 1,15:** o fator de serviço. O motor aguenta trabalhar com até 15 % a mais de carga, sem passar da temperatura da isolação.
+- **Isol. F, IP 55, Regime S1:** a classe da isolação (F aguenta até 155 °C no enrolamento), a proteção contra poeira e jatos d'água, e o regime contínuo (pode ficar ligado o dia todo).
+
+## Estrela e triângulo na caixa de ligação
+
+Os três enrolamentos têm as duas pontas soltas na caixa de ligação, num total de seis bornes. Na numeração mais comum no Brasil, o enrolamento de L1 vai do borne 1 ao 4, o de L2 do 2 ao 5 e o de L3 do 3 ao 6, com os bornes montados em duas fileiras: 6, 4, 5 em cima e 1, 2, 3 embaixo. Assim, com plaquinhas de metal, as **pontes**, você escolhe a ligação sem trocar fio nenhum.
+
+<Figure
+  caption="Figura 2. Os seis bornes de um motor 220/380 V, com as pontes de cada ligação. As fases sempre chegam em 1, 2 e 3. Embaixo, a mesma ligação desenhada como esquema."
+  alt="Duas caixas de ligação com seis bornes. Na do triângulo, três pontes verticais unem 6 com 1, 4 com 2 e 5 com 3. Na da estrela, uma ponte horizontal une 6, 4 e 5. Embaixo, o triângulo com uma bobina em cada lado e a estrela com três bobinas saindo de um ponto central."
+  wide
+>
+  <TerminalBox />
+</Figure>
+
+- Na <Term id="ligacao-triangulo">ligação triângulo</Term> (Δ), cada enrolamento fica entre duas fases e recebe a tensão de linha. Num motor 220/380 V, é a ligação para a rede de 220 V entre fases. A corrente de linha é $\sqrt{3}$ vezes a corrente de cada enrolamento.
+- Na <Term id="ligacao-estrela">ligação estrela</Term> (Y), as pontas 4, 5 e 6 são unidas num ponto só, e cada enrolamento fica entre uma fase e esse ponto. Ele recebe a tensão de linha dividida por $\sqrt{3}$: em 380 V, $380 \div \sqrt{3} \approx 220\,\text{V}$, a tensão certa do enrolamento.
+
+No Brasil há redes de 127/220 V (127 V entre fase e neutro, 220 V entre fases) e de 220/380 V, conforme a região e a concessionária. Por isso o mesmo motor 220/380 V serve nas duas: em triângulo na primeira, em estrela na segunda. Ligar em triângulo numa rede de 380 V põe 380 V em enrolamentos de 220 V, e o motor queima em minutos. Ligar em estrela numa rede de 220 V põe só 127 V em cada enrolamento: o motor fica fraco, com um terço do torque, e com carga ele não parte ou esquenta.
+
+## Explore: o motor em estrela e em triângulo
+
+A simulação tem uma rede trifásica de 127/220 V alimentando o motor de 1 CV da placa, com uma carga no eixo. A inércia é a de uma bomba ou de um ventilador, então a partida em triângulo dura menos de um segundo. Os amperímetros mostram a corrente de cada linha. Clique no motor para ver a rotação, o torque e a temperatura.
+
+<Simulation circuit="m08/estrela-triangulo" instruments={['multimetro']} />
+
+1. Aperte o play (▶) em triângulo, com a carga de 2 N·m. Veja a corrente no instante da partida e depois de o motor pegar velocidade.
+2. Mude a ligação para estrela, com o motor girando. O que acontece com a rotação e a corrente?
+3. Reinicie a simulação (↺) em estrela e veja a partida de novo. Compare a corrente com a do item 1.
+4. Ainda em estrela, suba a carga para 4,25 N·m, um pouco acima da nominal, e reinicie. O motor parte?
+5. Volte para triângulo, com a carga em 2 N·m, e com o motor girando desligue **Fase L3 ligada**. Depois reinicie com a fase L3 desligada.
+
+Em triângulo, a partida puxa perto de 19 A por linha, e menos de um segundo depois a corrente cai para 1,9 A, com o motor a 1.764 rpm. Passando para estrela com ele girando, a rotação cai para uns 1.680 rpm e a corrente para 1,3 A: cada enrolamento tem agora 127 V, e o motor fraco precisa escorregar mais para dar o mesmo torque. Partindo em estrela, a corrente de partida é de 6,4 A, um terço da de triângulo, e o motor leva uns três segundos para acelerar. Com 4,25 N·m em estrela, ele nem sai do lugar: o torque de partida em estrela, perto de 4 N·m, é menor que a carga. Em triângulo, a mesma carga roda a 1.722 rpm com 2,9 A.
+
+Sem a fase L3, o motor que já girava continua girando, a 1.755 rpm, mas a corrente em L1 e L2 sobe para 3,3 A, quase o dobro, e o motor esquenta mais. Parado, ele não parte: só ronca, com 16,6 A nas duas linhas que sobraram. Em uns 30 segundos o simulador avisa que o enrolamento passou de 155 °C, e pouco depois o motor queima.
+
+## Exemplo resolvido: os números da placa
+
+Com a placa da Figura 1, um motor de 1 CV, 4 polos, 220/380 V, ligado em triângulo numa rede de 220 V:
+
+**Velocidade síncrona e escorregamento.**
+
+$$
+n_s = \frac{120 \times 60}{4} = 1.800\,\text{rpm} \qquad s = \frac{1.800 - 1.720}{1.800} \approx 0{,}044 = 4{,}4\,\%
+$$
+
+**Potência que ele puxa da rede.** Na rede trifásica, a potência ativa é $P = \sqrt{3} \cdot V \cdot I \cdot \cos\varphi$, com a tensão e a corrente de linha:
+
+$$
+P = 1{,}732 \times 220 \times 3{,}02 \times 0{,}79 \approx 909\,\text{W}
+$$
+
+O rendimento confere com a placa: $\eta = 750 \div 909 \approx 0{,}825 = 82{,}5\,\%$. Os 159 W que sobram viram calor nos enrolamentos, no rotor, no ferro e no atrito, e o ventilador do próprio motor joga esse calor fora pelas aletas.
+
+**Torque nominal.** Torque é potência dividida pela velocidade em rad/s:
+
+$$
+\omega = \frac{2\pi \times 1.720}{60} \approx 180{,}1\,\text{rad/s} \qquad T = \frac{P}{\omega} = \frac{750}{180{,}1} \approx 4{,}16\,\text{N·m}
+$$
+
+**Corrente de partida.** Em partida direta, $6{,}8 \times 3{,}02 \approx 20{,}5\,\text{A}$ por linha, perto do que a simulação mostra. Com partida estrela-triângulo, um terço disso, uns 6,8 A.
+
+## Partida estrela-triângulo, soft-starter e inversor
+
+Num motor pequeno, o pico de partida não incomoda. Num motor de 20 CV em 220 V, a corrente de partida passa de 300 A, derruba a tensão da rede vizinha e pode fazer disjuntores desarmarem. As concessionárias limitam a potência de motores com partida direta, e acima disso é preciso reduzir o pico.
+
+A <Term id="partida-estrela-triangulo">partida estrela-triângulo</Term> liga o motor em estrela, com um terço da corrente, e passa para triângulo quando ele chega perto da rotação de trabalho. São três <Term id="contator">contatores</Term> (aula <LinkAula id="m05-magnetismo/06-reles-e-contatores" />): um que leva as fases aos bornes 1, 2 e 3, um que fecha a estrela unindo 4, 5 e 6, e um que fecha o triângulo. Um temporizador troca a estrela pelo triângulo depois de alguns segundos, e os dois nunca podem fechar juntos, o que pede intertravamento. Para funcionar, a tensão de triângulo do motor tem que ser a tensão da rede: um motor 220/380 V numa rede de 220 V, ou um motor 380/660 V numa rede de 380 V. E a carga precisa partir com pouco torque, como bombas e ventiladores, porque em estrela o torque também cai para um terço.
+
+O **soft-starter** faz a mesma coisa com tiristores, subindo a tensão aos poucos durante a partida. E o <Term id="inversor-de-frequencia">inversor de frequência</Term> vai além: ele retifica a rede e cria, com transistores e PWM (aula <LinkAula id="m08-motores/02-ponte-h-e-pwm" />), uma nova rede trifásica de frequência ajustável. Como a velocidade síncrona é $120 f / p$, mudar a frequência muda a velocidade do motor. O inversor parte o motor com frequência baixa, sem pico de corrente, controla a velocidade, freia e inverte o sentido. É assim que funcionam os portões rápidos com motor trifásico, os elevadores modernos e as bombas de velocidade variável. Para o motor não saturar, o inversor baixa a tensão junto com a frequência, mantendo a relação tensão/frequência (V/f) quase constante.
+
+Muitos inversores pequenos funcionam com entrada monofásica de 220 V e saída trifásica de 220 V: um jeito comum de usar um motor trifásico onde só há rede monofásica.
+
+## Invertendo o sentido
+
+Trocar **duas** fases quaisquer inverte a ordem em que as bobinas atingem o pico, e o campo gira para o outro lado, como no item 3 do campo girante. Trocar as três de lugar em rodízio (L1 no lugar de L2, L2 no de L3 e L3 no de L1) não muda nada: a ordem continua a mesma.
+
+Para um motor que gira para os dois lados, como o de um portão industrial ou de uma ponte rolante, o painel tem dois contatores, um para cada sentido, e o segundo troca duas fases. Eles nunca podem fechar juntos, porque isso põe duas fases em curto: daí o <Term id="intertravamento">intertravamento</Term> elétrico e o mecânico.
+
+<RealCase title="A bomba que passou a girar ao contrário">
+
+Num condomínio, a concessionária troca o padrão de entrada, ou um eletricista mexe no quadro, e a bomba de recalque passa a encher a caixa d'água devagar. O motor liga, não faz barulho estranho, a corrente parece normal, mas a água quase não sobe. A causa é a sequência de fases: duas fases foram trocadas na nova ligação, e a bomba centrífuga, girando ao contrário, ainda empurra um pouco de água, só que muito menos.
+
+Antes de desligar a bomba de vez, olhe a seta na carcaça da bomba, que indica o sentido certo, e veja para onde gira o ventilador do motor, pela grade da tampa traseira, no instante em que ele desliga e desacelera. O conserto é trocar duas fases na saída do contator da bomba, com o painel desligado. Um **sequencímetro**, o indicador de sequência de fases, mostra a sequência da rede antes de ligar o motor, e alguns painéis têm um relé de sequência de fases que não deixa o motor ligar com a sequência trocada.
+
+</RealCase>
+
+## A falta de fase
+
+A <Term id="falta-de-fase">falta de fase</Term> acontece quando uma das três fases some: um fusível que queimou, um borne frouxo, um contato do contator gasto, um fio rompido. Com duas fases, os enrolamentos que sobram ficam em série entre elas, e o campo só pulsa sobre uma linha, como no item 4 do campo girante.
+
+- **Com o motor parado**, ele não parte. Fica roncando, com a corrente de partida nas duas fases que sobraram, e esquenta rápido.
+- **Com o motor girando**, ele continua girando, porque o rotor em movimento ajuda a formar o campo girante. Mas as duas fases que sobraram carregam a potência toda, com corrente bem maior, e o motor esquenta além do normal.
+
+Nos dois casos, quem salva o motor é o <Term id="rele-de-sobrecarga">relé de sobrecarga</Term> (o relé térmico), ajustado na corrente nominal da placa. Ele desliga o contator quando a corrente fica alta por tempo demais. Muitos painéis têm também um relé de falta de fase, que desliga o motor assim que uma fase some.
+
+## Erros comuns e segurança
+
+- **Mexer na caixa de ligação com o motor energizado.** Desligue o disjuntor do motor, sinalize e tranque o painel, e confirme a ausência de tensão entre as três fases e de cada fase para o terra, com um instrumento testado. Em 380 V, a tensão entre fases é ainda mais perigosa que a da tomada de casa.
+- **Errar a ligação para a tensão da rede.** Leia a placa e meça a tensão entre fases antes de fechar a caixa. Triângulo em 380 V num motor 220/380 V queima o motor; estrela em 220 V deixa o motor fraco.
+- **Deixar a carcaça sem terra.** O motor tem um borne de aterramento na caixa ou na carcaça. Uma falha de isolação sem terra deixa a carcaça energizada, e quem encosta nela leva choque (aula <LinkAula id="m07-instalacoes/02-fase-neutro-e-terra" />).
+- **Ajustar o relé de sobrecarga muito acima da placa.** Ele existe para desligar antes de o enrolamento passar da temperatura da isolação. Ajustado alto demais, deixa o motor queimar.
+- **Achar que o motor queimou porque não parte.** Antes de condenar o motor, meça as três tensões entre fases no borne e a continuidade de cada enrolamento, com o motor desligado: uma fase faltando é muito mais comum que um motor queimado.
+- **Trabalhar com rede trifásica e painéis de motor sem formação.** Serviços em instalações e painéis de força pedem um profissional habilitado e os cuidados da <Term id="nr-10">NR-10</Term>. Na dúvida, chame quem tem.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Como o motor de indução trifásico consegue girar sem nenhum fio ligado ao rotor?',
+      options: [
+        {
+          text: 'O campo girante do estator induz correntes nas barras em curto do rotor, e a força nessas correntes arrasta o rotor junto com o campo',
+          correct: true,
+          feedback:
+            'É indução: o campo que varre as barras induz tensão nelas, as barras em curto conduzem, e corrente dentro de campo sofre força.',
+        },
+        {
+          text: 'O rotor tem ímãs permanentes que seguem o campo do estator',
+          feedback:
+            'Esse é o motor síncrono de ímãs, como o brushless. O rotor gaiola de esquilo não tem ímã: as correntes nele são induzidas.',
+        },
+        {
+          text: 'Escovas escondidas levam a corrente até as barras do rotor',
+          feedback:
+            'O rotor gaiola de esquilo não tem escovas nem comutador. As barras estão em curto pelos anéis das pontas e recebem corrente por indução.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Qual é a velocidade síncrona de um motor de 6 polos em 60 Hz, em rpm?',
+      answer: 1200,
+      tolerance: 0.01,
+      unit: 'rpm',
+      explanation: 'ns = 120 × f ÷ p = 120 × 60 ÷ 6 = 1.200 rpm.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'A placa de um motor diz 3.450 rpm em 60 Hz. Qual é o escorregamento com a carga nominal, em porcentagem?',
+      answer: 4.17,
+      tolerance: 0.03,
+      unit: '%',
+      explanation:
+        'A velocidade síncrona logo acima de 3.450 rpm é 3.600 rpm (2 polos). s = (3.600 − 3.450) ÷ 3.600 ≈ 0,0417 = 4,17 %.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um motor de placa 220/380 V vai ser ligado numa rede de 220 V entre fases. Qual ligação usar?',
+      options: [
+        {
+          text: 'Triângulo, com as pontes unindo 6 a 1, 4 a 2 e 5 a 3',
+          correct: true,
+          feedback:
+            'Em triângulo, cada enrolamento fica entre duas fases e recebe os 220 V para os quais foi feito.',
+        },
+        {
+          text: 'Estrela, com a ponte unindo 4, 5 e 6',
+          feedback:
+            'Em estrela numa rede de 220 V, cada enrolamento recebe só 220 ÷ √3 ≈ 127 V, e o motor fica com um terço do torque. A estrela é para a rede de 380 V.',
+        },
+        {
+          text: 'Tanto faz: o motor se ajusta à rede',
+          feedback:
+            'Não se ajusta. A ligação errada deixa o motor fraco (estrela em 220 V) ou o queima (triângulo em 380 V).',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Para inverter o sentido de um motor trifásico, basta trocar dois fios de fase quaisquer entre si.',
+      answer: true,
+      explanation:
+        'Trocar duas fases inverte a ordem dos picos nas bobinas, e o campo gira para o outro lado. Trocar as três em rodízio não muda o sentido.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um motor tem corrente nominal de 10 A e Ip/In = 7. Com partida estrela-triângulo, qual é a corrente de partida, em ampères?',
+      answer: 23.3,
+      tolerance: 0.03,
+      unit: 'A',
+      explanation:
+        'Em partida direta seriam 7 × 10 = 70 A. Em estrela, a corrente de linha cai para um terço: 70 ÷ 3 ≈ 23,3 A.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um motor trifásico que trabalhava normalmente passou a esquentar mais que o normal. Desligado e religado, ele não parte: só ronca. Qual é a causa mais provável?',
+      options: [
+        {
+          text: 'Falta de fase: só duas fases chegam ao motor',
+          correct: true,
+          feedback:
+            'Com duas fases o campo só pulsa. Girando, o motor continua, mas com corrente alta; parado, não parte. Confira se as três fases chegam ao motor: fusíveis, bornes e contatos do contator.',
+        },
+        {
+          text: 'Duas fases trocadas',
+          feedback:
+            'Com duas fases trocadas, o motor parte normalmente, só que para o outro lado.',
+        },
+        {
+          text: 'O motor está ligado em triângulo em vez de estrela',
+          feedback:
+            'A ligação errada deixa o motor fraco ou o queima, mas não muda de um dia para o outro. Esquentar girando e roncar parado é sinal de falta de fase.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada dado da placa ao que ele informa.',
+      pairs: [
+        ['CV ou kW', 'Potência mecânica no eixo'],
+        ['rpm', 'Rotação com a carga nominal'],
+        ['Ip/In', 'Quantas vezes a corrente de partida é maior que a nominal'],
+        ['FS', 'Quanto de sobrecarga o motor aguenta em serviço contínuo'],
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Três enrolamentos a 120°, ligados nas três fases, criam um **campo girante** de tamanho constante, sem nenhuma peça se mexendo.
+- A **velocidade síncrona** é $n_s = 120 f / p$: em 60 Hz, 3.600 rpm com 2 polos, 1.800 rpm com 4 polos.
+- O rotor **gaiola de esquilo** recebe corrente por indução e gira um pouco abaixo da síncrona; a diferença é o **escorregamento**, de poucos por cento.
+- A **corrente de partida** é de 6 a 8 vezes a nominal. **Estrela-triângulo** e soft-starter reduzem o pico; o **inversor de frequência** muda a velocidade mudando a frequência.
+- Num motor 220/380 V, **triângulo** para 220 V entre fases e **estrela** para 380 V. As fases chegam em 1, 2 e 3.
+- Trocar **duas fases** inverte o sentido. Na **falta de fase**, o motor parado não parte e ronca; girando, continua, mas esquenta. O relé de sobrecarga protege nos dois casos.
+
+Na próxima aula, você vai ver como um motor parecido gira com uma fase só, a da tomada de casa, com a ajuda de um capacitor: o <LinkAula id="m08-motores/04-motor-monofasico-capacitor" />.

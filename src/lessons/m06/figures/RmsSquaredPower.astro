@@ -1,0 +1,113 @@
+---
+/*
+ * 06.2: why the RMS value is the peak divided by √2. A 127 V, 1.000 W heater
+ * on the outlet: the voltage swings ±179,6 V; the power, v²/R, never goes
+ * negative and swings between 0 and 2.000 W, twice per cycle. Its average is
+ * exactly half the peak, 1.000 W: the same as 127 V of DC.
+ */
+const X0 = 80;
+const X1 = 560;
+const V0 = 90; // zero of the voltage plot
+const VAMP = 62;
+const P0 = 330; // zero of the power plot
+const PH = 124; // height of 2.000 W
+const N = 400;
+const pts = (f: (u: number) => number) =>
+  Array.from({ length: N + 1 }, (_, i) => {
+    const u = (2 * i) / N; // two cycles
+    const px = X0 + ((X1 - X0) * i) / N;
+    return `${i === 0 ? 'M' : 'L'}${px.toFixed(1)} ${f(u).toFixed(1)}`;
+  }).join(' ');
+const vWave = pts((u) => V0 - VAMP * Math.sin(2 * Math.PI * u));
+const pWave = pts((u) => P0 - PH * Math.sin(2 * Math.PI * u) ** 2);
+const pFill = `${pWave} L${X1} ${P0} L${X0} ${P0} Z`;
+---
+
+<svg viewBox="0 0 640 360" width="640" height="360" class="fig" aria-hidden="true">
+  <text x={X0} y="14" class="title">
+    tensão na resistência
+  </text>
+  <path d={`M${X0} ${V0}H${X1 + 8}`} class="axis" />
+  <path d={`M${X0} ${V0 - VAMP - 6}V${V0 + VAMP + 6}`} class="axis" />
+  <path d={vWave} class="wave" />
+  <text x={X0 - 8} y={V0 - VAMP + 5} class="lbl end">
+    +179,6 V
+  </text>
+  <text x={X0 - 8} y={V0 + 5} class="lbl end">
+    0
+  </text>
+  <text x={X0 - 8} y={V0 + VAMP + 5} class="lbl end">
+    −179,6 V
+  </text>
+
+  <text x={X0} y={P0 - PH - 22} class="title">
+    potência no aquecedor: p = v² / R
+  </text>
+  <path d={pFill} class="pfill" />
+  <path d={`M${X0} ${P0}H${X1 + 8}`} class="axis" />
+  <path d={`M${X0} ${P0 - PH - 6}V${P0 + 6}`} class="axis" />
+  <path d={`M${X0} ${P0 - PH / 2}H${X1}`} class="mean" />
+  <path d={pWave} class="pwave" />
+  <text x={X0 - 8} y={P0 - PH + 5} class="lbl end">
+    2.000 W
+  </text>
+  <text x={X0 - 8} y={P0 - PH / 2 + 5} class="lbl end mean-t">
+    1.000 W
+  </text>
+  <text x={X0 - 8} y={P0 + 5} class="lbl end">
+    0
+  </text>
+  <text x={X1} y={P0 + 24} class="note end">
+    a média (tracejada) fica exatamente na metade do pico: 1.000 W
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .wave {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  .pwave {
+    stroke: var(--danger);
+    stroke-width: 3;
+  }
+  .pfill {
+    fill: var(--danger);
+    opacity: 0.12;
+    stroke: none;
+  }
+  .mean {
+    stroke: var(--warning);
+    stroke-width: 2;
+    stroke-dasharray: 7 5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+  }
+  .title {
+    font-size: 14.5px;
+    font-weight: 700;
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

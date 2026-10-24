@@ -1,0 +1,124 @@
+---
+/*
+ * 06.7: the three kinds of supply a house can get in a 127/220 V region,
+ * side by side: the wires that come from the street, the poles of the main
+ * breaker in the service entrance and the voltages available inside.
+ */
+const COLS = [
+  {
+    x: 110,
+    title: 'Monofásico',
+    wires: ['L1', 'N'],
+    volts: ['127 V entre L1 e N'],
+  },
+  {
+    x: 330,
+    title: 'Bifásico',
+    wires: ['L1', 'L2', 'N'],
+    volts: ['127 V entre fase e N', '220 V entre L1 e L2'],
+  },
+  {
+    x: 550,
+    title: 'Trifásico',
+    wires: ['L1', 'L2', 'L3', 'N'],
+    volts: ['127 V entre fase e N', '220 V entre duas fases'],
+  },
+];
+const GAP = 22;
+const TOP = 52;
+const BOX = 176;
+const BOX_H = 64;
+---
+
+<svg viewBox="0 0 660 330" width="660" height="330" class="fig" aria-hidden="true">
+  {COLS.map((c) => {
+    const n = c.wires.length;
+    const xs = c.wires.map((_, i) => c.x + (i - (n - 1) / 2) * GAP);
+    const phases = n - 1;
+    return (
+      <g>
+        <text x={c.x} y="22" class="title">
+          {c.title}
+        </text>
+        {c.wires.map((w, i) => (
+          <g>
+            <text x={xs[i]} y={TOP - 8} class={w === 'N' ? 'wl n' : 'wl'}>
+              {w}
+            </text>
+            <path d={`M${xs[i]} ${TOP} V${BOX}`} class={w === 'N' ? 'wire n' : 'wire'} />
+          </g>
+        ))}
+        <rect x={c.x - 86} y={BOX} width="172" height={BOX_H} rx="8" class="box" />
+        {Array.from({ length: phases }, (_, i) => (
+          <rect x={xs[i]! - 8} y={BOX + 12} width="16" height="26" rx="3" class="pole" />
+        ))}
+        <path d={`M${xs[n - 1]} ${BOX} V${BOX + 38}`} class="wire n" />
+        <text x={c.x} y={BOX + 54} class="small">
+          disjuntor geral de {phases} polo{phases > 1 ? 's' : ''}
+        </text>
+        {c.volts.map((v, i) => (
+          <text x={c.x} y={BOX + BOX_H + 26 + i * 20} class="volts">
+            {v}
+          </text>
+        ))}
+      </g>
+    );
+  })}
+  <text x="330" y="322" class="note">
+    Fios que chegam da rua, no padrão de entrada, numa região de 127/220 V
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+  }
+  .wire {
+    stroke: var(--danger);
+    stroke-width: 3.5;
+  }
+  .wire.n {
+    stroke: var(--info);
+  }
+  .box {
+    fill: var(--surface);
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+  }
+  .pole {
+    fill: var(--fg);
+    stroke: none;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .wl {
+    fill: var(--danger);
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .wl.n {
+    fill: var(--info);
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .volts {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+</style>
