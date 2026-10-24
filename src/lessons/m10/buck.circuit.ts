@@ -37,7 +37,7 @@ export default defineCircuit({
       a: [4, -4],
       b: [10, -4],
       label: 'PWM',
-      params: { high: 10, low: 0, frequency: 50e3, duty: 0.42 },
+      params: { high: 10, low: 0, frequency: 50e3, duty: 0.44 },
       control: {
         param: 'duty',
         label: 'Ciclo de trabalho',
@@ -119,7 +119,7 @@ export default defineCircuit({
       a: [36, 4],
       b: [36, 16],
       label: 'Carga',
-      params: { resistance: 5, watts: 20 },
+      params: { resistance: 10, watts: 20 },
       control: {
         param: 'resistance',
         label: 'Carga',
@@ -148,5 +148,6 @@ export default defineCircuit({
     { id: 'VSW', kind: 'voltage', plus: 'Q1.d', minus: 'GND', label: 'Nó de chaveamento' },
     { id: 'IL', kind: 'current', element: 'L1', label: 'Corrente no indutor' },
     { id: 'VOUT', kind: 'voltage', plus: 'RL.a', minus: 'GND', label: 'Saída' },
+    { id: 'IIN', kind: 'current', element: 'V1', label: 'Corrente da entrada' },
   ],
 });
