@@ -1,0 +1,135 @@
+---
+/*
+ * 06.1: one and a half cycles of the 127 V, 60 Hz outlet with the names of
+ * the parts: peak, positive and negative half cycles, zero crossings and the
+ * period T = 1/60 s ≈ 16,7 ms.
+ */
+const X0 = 70;
+const PX_PER_MS = 21; // 25 ms across 525 px
+const Y0 = 160;
+const AMP = 90;
+const T = 1000 / 60;
+const x = (ms: number) => X0 + ms * PX_PER_MS;
+const y = (v: number) => Y0 - (AMP * v) / 179.6;
+const N = 400;
+const wave = Array.from({ length: N + 1 }, (_, i) => {
+  const ms = (25 * i) / N;
+  const v = 179.6 * Math.sin((2 * Math.PI * ms) / T);
+  return `${i === 0 ? 'M' : 'L'}${x(ms).toFixed(1)} ${y(v).toFixed(1)}`;
+}).join(' ');
+const half = Array.from({ length: 101 }, (_, i) => {
+  const ms = ((T / 2) * i) / 100;
+  return `L${x(ms).toFixed(1)} ${y(179.6 * Math.sin((2 * Math.PI * ms) / T)).toFixed(1)}`;
+}).join(' ');
+const ticks = [0, 4.17, 8.33, 12.5, 16.67, 20.83, 25];
+const tickText = ['0', '4,2', '8,3', '12,5', '16,7', '20,8', '25'];
+---
+
+<svg viewBox="0 0 640 300" width="640" height="300" class="fig" aria-hidden="true">
+  <path d={`M${x(0)} ${Y0}H${x(25) + 12}`} class="axis" />
+  <path d={`M${X0} ${Y0 - AMP - 14}V${Y0 + AMP + 14}`} class="axis" />
+
+  <!-- half cycle shading -->
+  <path d={`M${x(0)} ${Y0} ${half} Z`} class="pos" />
+  <path d={wave} class="wave" />
+
+  {ticks.map((ms, i) => (
+    <g>
+      <path d={`M${x(ms)} ${Y0 - 4}V${Y0 + 4}`} class="axis" />
+      <text x={x(ms)} y={Y0 + AMP + 34} class="tick">
+        {tickText[i]}
+      </text>
+    </g>
+  ))}
+  <text x={x(25) + 14} y={Y0 + AMP + 34} class="tick start">
+    ms
+  </text>
+
+  <text x={X0 - 8} y={y(179.6) + 4} class="lbl end">
+    +179,6 V
+  </text>
+  <text x={X0 - 8} y={Y0 + 4} class="lbl end">
+    0
+  </text>
+  <text x={X0 - 8} y={y(-179.6) + 4} class="lbl end">
+    −179,6 V
+  </text>
+
+  <circle cx={x(T / 4)} cy={y(179.6)} r="5" class="dot" />
+  <text x={x(T / 4)} y={y(179.6) - 12} class="lbl">
+    pico
+  </text>
+  <circle cx={x(T / 2)} cy={Y0} r="5" class="dot" />
+  <circle cx={x(T)} cy={Y0} r="5" class="dot" />
+  <text x={x(T / 2) + 8} y={Y0 - 12} class="note start">
+    passa por zero
+  </text>
+
+  <text x={x(T / 4)} y={Y0 - 14} class="note">
+    semiciclo positivo
+  </text>
+  <text x={x((3 * T) / 4)} y={Y0 + 26} class="note">
+    semiciclo negativo
+  </text>
+
+  <!-- period -->
+  <path d={`M${x(0)} 28H${x(T)}`} class="dim" />
+  <path d={`M${x(0)} 20V36M${x(T)} 20V36`} class="dim" />
+  <text x={x(T / 2)} y="18" class="lbl">
+    um ciclo: período T = 16,7 ms
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .wave {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  .pos {
+    fill: var(--accent);
+    opacity: 0.12;
+    stroke: none;
+  }
+  .dot {
+    fill: var(--accent);
+    stroke: var(--bg);
+    stroke-width: 2;
+  }
+  .dim {
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 12.5px;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

@@ -1,0 +1,314 @@
+---
+titulo: Ressonância e filtros
+modulo: m06-corrente-alternada
+ordem: 6
+nivel: A
+duracaoMin: 35
+objetivos:
+  - Explicar como um resistor e um capacitor (ou uma bobina) separam frequências baixas e altas
+  - Calcular a frequência de corte de um filtro RC e ler o ganho em decibéis
+  - Ler um diagrama de Bode
+  - Calcular a frequência de ressonância de um circuito RLC e explicar o que acontece nela
+  - Entender o divisor de frequências de uma caixa de som e por que o tweeter não pode ser ligado direto
+prerequisitos:
+  - m06-corrente-alternada/04-reatancia-e-impedancia
+  - m04-passivos/04-circuito-rc
+tags: [filtro, passa-baixas, passa-altas, frequência de corte, decibel, Bode, ressonância, RLC, crossover, caixa de som]
+seguranca: baixa-tensao
+rascunho: false
+---
+
+import { REACTANCE_CURVES } from '../../../lessons/m06/ressonancia-curvas';
+import SpeakerCrossover from '../../../lessons/m06/figures/SpeakerCrossover.astro';
+
+Abra uma caixa de som de dois alto-falantes e, entre os fios que chegam do amplificador e os falantes, você vai achar uma plaquinha com uma bobina de fio de cobre e um capacitor. O alto-falante grande, o woofer, toca os graves; o pequeno, o tweeter, toca os agudos. Quem separa o som para cada um são essas duas peças. E quem já ligou um tweeter direto no amplificador, sem o capacitor, costuma descobrir o que ele faz do pior jeito: o tweeter queima.
+
+Nesta aula você vai ver como capacitores e bobinas escolhem frequências, como ler o gráfico que mostra isso e o que acontece quando os dois trabalham juntos na ressonância.
+
+## Peças que preferem certas frequências
+
+Na aula <LinkAula id="m06-corrente-alternada/04-reatancia-e-impedancia" /> você viu que a oposição de um capacitor e de uma bobina à corrente alternada muda com a frequência:
+
+- A reatância do **capacitor** cai quando a frequência sobe: $X_C = \dfrac{1}{2\pi f C}$. Para frequências baixas ele é quase um circuito aberto; para altas, quase um fio.
+- A reatância da **bobina** sobe com a frequência: $X_L = 2\pi f L$. Para frequências baixas ela é quase um fio; para altas, quase um circuito aberto.
+
+Junte uma dessas peças com um resistor num divisor de tensão, como os da aula <LinkAula id="m02-circuitos-cc/06-divisores-de-tensao-e-corrente" />, e a divisão passa a depender da frequência. Isso é um **filtro**.
+
+## O filtro RC
+
+Ligue um resistor $R$ em série com um capacitor $C$ e aplique uma senoide na entrada.
+
+- **Saída no capacitor.** Em frequência baixa, o capacitor tem reatância enorme e fica com quase toda a tensão. Em frequência alta, a reatância dele cai, e quase toda a tensão fica no resistor. A saída no capacitor deixa passar os graves e segura os agudos: é um <Term id="filtro-passa-baixas">filtro passa-baixas</Term>.
+- **Saída no resistor.** É o contrário: quase nada em frequência baixa, quase tudo em frequência alta. É um <Term id="filtro-passa-altas">filtro passa-altas</Term>.
+
+A fronteira entre as duas faixas é a <Term id="frequencia-de-corte">frequência de corte</Term>, em que a reatância do capacitor fica igual à resistência:
+
+$$
+X_C = R \quad\Rightarrow\quad f_c = \frac{1}{2\pi R C}
+$$
+
+- $f_c$ é a frequência de corte, em hertz (Hz);
+- $R$ é a resistência, em ohms (Ω), e $C$ é a capacitância, em farads (F).
+
+Na frequência de corte, a tensão não se divide ao meio, porque as tensões no resistor e no capacitor estão defasadas de 90° (aula <LinkAula id="m06-corrente-alternada/03-fase-e-fasores" />). Cada uma fica com $1/\sqrt{2} \approx 70{,}7\%$ da entrada. Para o passa-baixas, a relação entre a saída e a entrada em qualquer frequência é:
+
+$$
+\frac{V_\text{saída}}{V_\text{entrada}} = \frac{1}{\sqrt{1 + (f/f_c)^2}}
+$$
+
+Abaixo de $f_c$, a saída é quase a entrada inteira. Bem acima de $f_c$, a saída cai na mesma proporção em que a frequência sobe: com o dobro da frequência, metade da tensão; com dez vezes a frequência, um décimo.
+
+O filtro RC tem um parente com bobina: um resistor com uma bobina em série. A saída na bobina é um passa-altas, e a saída no resistor, um passa-baixas, com $f_c = R / (2\pi L)$. É o que você vai ver no divisor da caixa de som.
+
+## Decibéis e o diagrama de Bode
+
+Um filtro trabalha em frequências que vão de poucos hertz a dezenas de milhares. E as tensões de saída vão de quase a entrada inteira a milésimos dela. Para caber tudo num gráfico, usam-se duas escalas logarítmicas.
+
+A frequência vai num eixo em que cada década (de 10 a 100 Hz, de 100 Hz a 1 kHz, de 1 a 10 kHz) ocupa o mesmo espaço. E a relação entre as tensões vai em <Term id="decibel">decibéis</Term> (dB):
+
+$$
+G_\text{dB} = 20 \cdot \log_{10} \frac{V_\text{saída}}{V_\text{entrada}}
+$$
+
+| Relação de tensões | Em decibéis |
+|---|---|
+| 2 (o dobro) | +6 dB |
+| 1 (igual) | 0 dB |
+| 0,707 | −3 dB |
+| 0,5 (metade) | −6 dB |
+| 0,1 (um décimo) | −20 dB |
+| 0,01 (um centésimo) | −40 dB |
+
+Por isso a frequência de corte também se chama **ponto de −3 dB**. O gráfico com o ganho em decibéis e a fase em graus contra a frequência em escala logarítmica é o <Term id="diagrama-de-bode">diagrama de Bode</Term>. Nele, a queda de um filtro RC vira uma reta: −20 dB por década.
+
+### Exemplo resolvido: o filtro da aula do osciloscópio
+
+Na aula <LinkAula id="m03-medicoes/05-osciloscopio" />, um gerador de 5 V de pico alimentava um resistor de 1 kΩ em série com um capacitor de 2,7 µF, e em 600 Hz a tensão no capacitor ficava abaixo de 0,6 V. Agora dá para fazer a conta.
+
+1. **Frequência de corte:** $f_c = 1 / (2\pi \cdot 1.000 \cdot 2{,}7 \times 10^{-6}) \approx 58{,}9\,\text{Hz}$.
+2. **Relação em 600 Hz:** $f / f_c = 600 / 58{,}9 \approx 10{,}2$, então $1 / \sqrt{1 + 10{,}2^2} \approx 0{,}098$.
+3. **Tensão no capacitor:** $5 \times 0{,}098 \approx 0{,}49\,\text{V}$ de pico. Em decibéis, $20 \cdot \log_{10} 0{,}098 \approx -20\,\text{dB}$.
+
+## Explore: o filtro RC no gráfico de Bode
+
+A simulação abaixo é o mesmo circuito, analisado de outro jeito: em vez de rodar no tempo, ela aplica uma frequência de cada vez, de 1 Hz a 100 kHz, e desenha o diagrama de Bode. A curva do capacitor é o passa-baixas; a do resistor, o passa-altas. As linhas cheias são o ganho, e as tracejadas, a fase.
+
+<Simulation circuit="m06/filtro-rc-bode" height={260} />
+
+1. **Ache a frequência de corte.** O gráfico marca a frequência de −3 dB da curva do capacitor com uma linha vertical: perto de 59 Hz. Passe o mouse (ou o dedo) sobre o gráfico ali: as duas curvas se cruzam em −3 dB, e as fases estão em −45° e +45°.
+2. **Vá até 600 Hz.** O passa-baixas está perto de −20 dB, o décimo do exemplo. Em 6 kHz, perto de −40 dB: dez vezes a frequência, mais 20 dB de queda.
+3. **Olhe o passa-altas.** A curva do resistor é o espelho: perto de 0 dB nos agudos e caindo 20 dB por década nos graves.
+4. **Mude o resistor para 100 Ω.** A frequência de corte sobe dez vezes, para perto de 590 Hz. O formato das curvas não muda; elas só andam para a direita.
+
+## Ressonância
+
+Agora ponha os três juntos em série: um resistor, uma bobina e um capacitor. Em frequência baixa, quem manda é o capacitor, com reatância enorme. Em frequência alta, quem manda é a bobina. Mas existe uma frequência em que as duas reatâncias ficam iguais. Como a tensão na bobina e a tensão no capacitor estão sempre em oposição (uma adiantada e a outra atrasada 90° em relação à corrente), elas se cancelam, e só sobra o resistor para limitar a corrente. É a <Term id="ressonancia">ressonância</Term>.
+
+$$
+X_L = X_C \quad\Rightarrow\quad f_0 = \frac{1}{2\pi\sqrt{L \cdot C}}
+$$
+
+- $f_0$ é a frequência de ressonância, em Hz;
+- $L$ é a indutância, em henrys (H), e $C$ é a capacitância, em farads (F).
+
+Com $L = 10\,\text{mH}$ e $C = 10\,\text{µF}$, $f_0 = 1 / (2\pi\sqrt{0{,}01 \times 10 \times 10^{-6}}) \approx 503\,\text{Hz}$. Nessa frequência, cada reatância vale $2\pi \cdot 503 \cdot 0{,}01 \approx 31{,}6\,\Omega$.
+
+<Plot
+  data={REACTANCE_CURVES}
+  xUnit="Hz"
+  title="reatâncias e impedância do RLC série (10 Ω, 10 mH, 10 µF)"
+/>
+
+No gráfico, a reatância da bobina é uma reta que sobe, e a do capacitor uma curva que desce. Elas se cruzam perto de 500 Hz, e é ali que a impedância do conjunto cai ao mínimo: os 10 Ω do resistor.
+
+Pense num balanço. Empurrado no ritmo certo, ele sobe cada vez mais com pouco esforço; fora do ritmo, os empurrões brigam com o movimento. O circuito ressonante tem um ritmo próprio, em que a energia passa de um lado para o outro, do campo magnético da bobina para o campo elétrico do capacitor, sem a fonte precisar ajudar. A analogia para no amortecimento: no balanço quem freia é o atrito do ar; no circuito, é o resistor que transforma parte da energia em calor a cada ciclo.
+
+## Explore: o pico da ressonância
+
+<Simulation circuit="m06/rlc-ressonancia" height={260} />
+
+1. **Ache o pico.** Com o resistor de 10 Ω, a curva do resistor, que acompanha a corrente, sobe até 0 dB perto de 503 Hz. Ali o resistor recebe a tensão inteira do gerador: a bobina e o capacitor, juntos, valem zero. Longe dali, em 100 Hz ou em 2,5 kHz, a corrente fica uns 24 dB abaixo, menos de um décimo.
+2. **Olhe o capacitor.** Na ressonância, a curva dele passa de 0 dB: chega a uns +10 dB, mais de três vezes a tensão do gerador. Não é energia de graça. A tensão na bobina é igual e oposta, e as duas se cancelam fora do par.
+3. **Aumente o resistor para 30 Ω e depois 100 Ω.** O pico do capacitor cai para cerca de 1,2 vez a entrada e, com 100 Ω, some. A corrente continua máxima em 503 Hz, mas a curva fica larga: o circuito escolhe a frequência com menos precisão.
+
+<DeepDive title="O fator de qualidade">
+
+A largura do pico se mede pelo **fator de qualidade**, $Q$ (não confunda com a potência reativa da aula anterior, que usa a mesma letra). Num RLC série:
+
+$$
+Q = \frac{1}{R}\sqrt{\frac{L}{C}} = \frac{X_L}{R} \text{ na ressonância}
+$$
+
+Com 10 Ω: $Q = 31{,}6 / 10 \approx 3{,}16$. Na ressonância, a tensão no capacitor e na bobina é $Q$ vezes a do gerador: os +10 dB da simulação ($20 \cdot \log_{10} 3{,}16 \approx 10$). Com 100 Ω, $Q \approx 0{,}32$ e não há sobretensão.
+
+A faixa de frequências em que a corrente fica acima de 70,7% do pico tem largura $f_0 / Q$. Um rádio sintoniza com circuitos de $Q$ alto, para ouvir uma estação e não a vizinha.
+
+Ressonância tem um lado perigoso. Num circuito de $Q$ alto, a tensão no capacitor pode ser muitas vezes a da fonte, e o capacitor precisa aguentá-la. Em instalações industriais, bancos de capacitores de correção podem entrar em ressonância com a indutância da rede em frequências múltiplas de 60 Hz, geradas por cargas eletrônicas; o projeto da correção leva isso em conta.
+
+</DeepDive>
+
+<RealCase title="O divisor de frequências da caixa de som">
+
+Um alto-falante grande tem um cone pesado, que move muito ar e reproduz bem os graves, mas não consegue vibrar rápido o bastante para os agudos. O pequeno faz o contrário, e queima com graves fortes: o cone tenta seguir a vibração lenta e grande, a bobina dele esquenta e pode sair do lugar. O <Term id="divisor-de-frequencias">divisor de frequências</Term> (ou crossover) manda para cada um a parte do som que ele aguenta.
+
+<Figure caption="Figura 1. Caixa de som de duas vias. O sinal do amplificador chega ao divisor: a bobina em série com o woofer deixa passar os graves, e o capacitor em série com o tweeter deixa passar os agudos.">
+  <SpeakerCrossover />
+</Figure>
+
+O divisor mais simples, o de primeira ordem, tem só essas duas peças. A bobina e o woofer formam um passa-baixas RL; o capacitor e o tweeter, um passa-altas RC. Um alto-falante de "8 Ω" não é exatamente um resistor (a impedância dele muda com a frequência), mas, para escolher as peças, a conta com 8 Ω é o ponto de partida.
+
+### Exemplo resolvido: escolhendo as peças para 3 kHz
+
+Para um woofer e um tweeter de 8 Ω, com a divisão perto de 3 kHz:
+
+1. **Capacitor do tweeter:** $C = 1 / (2\pi \cdot 3.000 \cdot 8) \approx 6{,}63\,\text{µF}$. O valor comercial mais próximo é 6,8 µF, que dá $f_c = 1 / (2\pi \cdot 6{,}8 \times 10^{-6} \cdot 8) \approx 2.926\,\text{Hz}$.
+2. **Bobina do woofer:** $L = R / (2\pi f) = 8 / (2\pi \cdot 3.000) \approx 0{,}42\,\text{mH}$. Com 0,47 mH, $f_c = 8 / (2\pi \cdot 0{,}47 \times 10^{-3}) \approx 2.709\,\text{Hz}$.
+
+Os dois cortes ficam perto um do outro, e a transição entre os alto-falantes acontece em torno de 2,8 kHz.
+
+<Simulation circuit="m06/divisor-frequencias" height={300} />
+
+1. **Confira os cortes.** O gráfico vai de 20 Hz a 20 kHz, a faixa que o ouvido humano escuta. A linha vertical marca o corte do woofer: perto de 2,7 kHz. Passe o mouse e ache o −3 dB do tweeter perto de 2,9 kHz.
+2. **Veja quanto grave chega ao tweeter.** Em 100 Hz, o tweeter recebe −29 dB, cerca de 3% da tensão. O woofer recebe tudo.
+3. **Repare na queda suave.** Em 10 kHz, o woofer ainda recebe −12 dB, um quarto da tensão. Um divisor de primeira ordem cai só 20 dB por década. Caixas melhores usam divisores de segunda ordem ou mais, com mais bobinas e capacitores, que caem mais rápido.
+4. **Ligue o tweeter direto.** Marque "Tweeter ligado direto (sem o capacitor)". A curva do tweeter fica em 0 dB do começo ao fim: ele passa a receber os graves com a força toda. Com o volume alto, é assim que tweeters queimam.
+
+<Model3D
+  part="film-capacitor"
+  props={{ farads: 6.8e-6, voltage: 100, variant: 'caixa' }}
+  caption="Capacitor de poliéster de 6,8 µF, do tipo usado em divisores de frequências. Ele não tem polaridade, porque o sinal de áudio é alternado."
+/>
+
+Filtros também estão em outros lugares da casa. O receptor do controle remoto do portão usa um circuito ressonante para ouvir só a frequência do controle, como você vai ver em <LinkAula id="m13-sem-fio" />. As fontes de alimentação têm filtros de bobinas e capacitores na entrada, para não espalhar ruído na rede. E as caixas de som amplificadas e os equalizadores fazem os mesmos filtros com componentes eletrônicos.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Ligar o tweeter sem o capacitor.** Ao trocar um alto-falante ou montar uma caixa, o tweeter vai sempre atrás do capacitor (ou do divisor). Direto no amplificador, ele recebe os graves e queima.
+- **Trocar o capacitor do divisor por um eletrolítico comum.** O sinal de áudio é alternado. Use capacitor de poliéster, polipropileno ou eletrolítico bipolar (não polarizado), com a mesma capacitância e tensão igual ou maior.
+- **Achar que a frequência de corte é um muro.** Em $f_c$ o filtro ainda deixa passar 70,7% da tensão. O corte é gradual: num filtro de primeira ordem, 20 dB por década.
+- **Esquecer a sobretensão da ressonância.** Num circuito ressonante, a tensão no capacitor e na bobina pode passar muito da tensão da fonte. Escolha a tensão nominal dos componentes por ela, e não só pela tensão da fonte.
+- **Confundir as letras.** $Q$ na ressonância é o fator de qualidade; $Q$ na aula de potência é a potência reativa. O contexto diz qual é qual.
+- **Mexer no amplificador ligado.** A saída de um amplificador de som é de baixa tensão, mas a fonte dele, por dentro, é ligada na rede e tem capacitores grandes. Abra só com ele desligado da tomada e com os capacitores descarregados.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Um filtro passa-baixas RC tem R = 10 kΩ e C = 100 nF. Qual a frequência de corte, em Hz?',
+      answer: 159,
+      tolerance: 0.02,
+      unit: 'Hz',
+      explanation: 'fc = 1 ÷ (2π × 10.000 × 100 × 10⁻⁹) = 1 ÷ 0,00628 ≈ 159 Hz.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Qual a frequência de ressonância de uma bobina de 1 mH com um capacitor de 1 µF, em Hz?',
+      answer: 5033,
+      tolerance: 0.02,
+      unit: 'Hz',
+      explanation:
+        'f0 = 1 ÷ (2π × √(0,001 × 0,000001)) = 1 ÷ (2π × 3,16 × 10⁻⁵) ≈ 5.033 Hz, cerca de 5 kHz.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'A saída de um filtro está em −20 dB numa certa frequência. O que isso quer dizer?',
+      options: [
+        {
+          text: 'A tensão de saída é um décimo da tensão de entrada',
+          correct: true,
+          feedback: '20 × log₁₀(0,1) = −20 dB. Cada −20 dB divide a tensão por 10.',
+        },
+        {
+          text: 'A tensão de saída é 20 V menor que a de entrada',
+          feedback:
+            'Decibel é uma relação, não uma diferença em volts. −20 dB é um décimo, seja a entrada de 1 V ou de 100 V.',
+        },
+        {
+          text: 'A tensão de saída é a metade da de entrada',
+          feedback: 'A metade é cerca de −6 dB. −20 dB é bem menos: um décimo.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Num RLC série, na frequência de ressonância, o que limita a corrente?',
+      options: [
+        {
+          text: 'Só o resistor, porque as reatâncias da bobina e do capacitor se cancelam',
+          correct: true,
+          feedback:
+            'Em f0, XL = XC, e as tensões na bobina e no capacitor são opostas. A impedância do conjunto cai para R, e a corrente é máxima.',
+        },
+        {
+          text: 'A bobina, porque a reatância dela é a maior',
+          feedback: 'Na ressonância as duas reatâncias são iguais. Elas se cancelam, e sobra só o resistor.',
+        },
+        {
+          text: 'Nada: a corrente fica infinita',
+          feedback:
+            'Só ficaria infinita sem nenhuma resistência. Os fios, a bobina e a fonte sempre têm alguma, e ela limita a corrente.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Na frequência de corte de um filtro RC, a tensão de saída é exatamente a metade da tensão de entrada.',
+      answer: false,
+      explanation:
+        'É 70,7% (1/√2), ou −3 dB. As tensões no resistor e no capacitor estão defasadas de 90° e não se somam direto.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Numa caixa de duas vias, alguém tirou o capacitor e ligou o tweeter direto no amplificador. O que acontece?',
+      options: [
+        {
+          text: 'O tweeter recebe os graves com força total e pode queimar com o volume alto',
+          correct: true,
+          feedback:
+            'O capacitor era o filtro passa-altas. Sem ele, o tweeter recebe todas as frequências, e os graves fortes esquentam e deslocam a bobina dele.',
+        },
+        {
+          text: 'O som fica mais agudo, sem risco para o tweeter',
+          feedback:
+            'O tweeter continua recebendo os agudos, mas agora recebe também os graves, que ele não aguenta.',
+        },
+        {
+          text: 'O woofer para de tocar',
+          feedback:
+            'O woofer continua com a bobina dele e recebe os graves normalmente. Quem sofre é o tweeter.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada circuito ao que ele faz com as frequências.',
+      pairs: [
+        ['Resistor e capacitor, saída no capacitor', 'Deixa passar os graves'],
+        ['Capacitor e resistor, saída no resistor', 'Deixa passar os agudos'],
+        ['Bobina em série com o woofer', 'Segura os agudos do woofer'],
+        ['RLC série, saída no resistor', 'Deixa passar uma faixa em torno de f0'],
+      ],
+      explanation:
+        'O capacitor bloqueia frequências baixas e a bobina bloqueia as altas. Onde se pega a saída decide se o filtro é passa-baixas ou passa-altas. Os três juntos, em série, deixam passar só a faixa perto da ressonância.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- A reatância do capacitor cai com a frequência e a da bobina sobe. Num divisor com um resistor, isso vira um **filtro**: passa-baixas ou passa-altas, conforme onde se pega a saída.
+- **Frequência de corte** de um filtro RC: $f_c = 1/(2\pi RC)$. Nela, a saída é 70,7% da entrada, ou **−3 dB**. Acima dela, um filtro de primeira ordem cai 20 dB por década.
+- **Decibel** em tensão: $20 \log_{10}(V_\text{saída}/V_\text{entrada})$. O **diagrama de Bode** mostra o ganho em dB e a fase contra a frequência em escala logarítmica.
+- **Ressonância** de um RLC: $f_0 = 1/(2\pi\sqrt{LC})$. As reatâncias se cancelam, a corrente é máxima e a tensão no capacitor pode passar da tensão da fonte.
+- O **divisor de frequências** de uma caixa de som é um passa-baixas para o woofer e um passa-altas para o tweeter. Sem o capacitor, o tweeter queima.
+
+A última aula do módulo sai do som e volta para a rede elétrica: as três fases que chegam à rua e por que 127 V e 220 V convivem na mesma casa, em <LinkAula id="m06-corrente-alternada/07-monofasico-bifasico-e-trifasico" />.

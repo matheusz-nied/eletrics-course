@@ -1,0 +1,101 @@
+---
+/*
+ * 06.2: the average value only means something when the wave does not
+ * cancel itself. The 127 V sine averages 0 V over a cycle; rectified, the
+ * half-wave version averages 57,2 V (Vp/π) and the full-wave one 114,3 V
+ * (2·Vp/π). That average is what a DC meter shows.
+ */
+const X0 = 80;
+const X1 = 560;
+const AMP = 70;
+const N = 400;
+const rows = [
+  {
+    y0: 110,
+    title: 'meia onda: só os semiciclos positivos passam',
+    f: (u: number) => Math.max(0, Math.sin(2 * Math.PI * u)),
+    mean: 1 / Math.PI,
+    text: 'média 57,2 V',
+  },
+  {
+    y0: 250,
+    title: 'onda completa: os semiciclos negativos são invertidos',
+    f: (u: number) => Math.abs(Math.sin(2 * Math.PI * u)),
+    mean: 2 / Math.PI,
+    text: 'média 114,3 V',
+  },
+].map((r) => ({
+  ...r,
+  path: Array.from({ length: N + 1 }, (_, i) => {
+    const px = X0 + ((X1 - X0) * i) / N;
+    const py = r.y0 - AMP * r.f((2 * i) / N);
+    return `${i === 0 ? 'M' : 'L'}${px.toFixed(1)} ${py.toFixed(1)}`;
+  }).join(' '),
+}));
+---
+
+<svg viewBox="0 0 640 290" width="640" height="290" class="fig" aria-hidden="true">
+  {rows.map((r) => (
+    <g>
+      <text x={X0} y={r.y0 - AMP - 16} class="title">
+        {r.title}
+      </text>
+      <path d={`M${X0} ${r.y0}H${X1 + 8}`} class="axis" />
+      <path d={`M${X0} ${r.y0 - AMP - 6}V${r.y0 + 6}`} class="axis" />
+      <path d={`M${X0} ${r.y0 - AMP * r.mean}H${X1}`} class="mean" />
+      <path d={r.path} class="wave" />
+      <text x={X0 - 8} y={r.y0 - AMP + 5} class="lbl end">
+        179,6 V
+      </text>
+      <text x={X0 - 8} y={r.y0 + 5} class="lbl end">
+        0
+      </text>
+      <text x={X1 + 10} y={r.y0 - AMP * r.mean + 5} class="lbl start">
+        {r.text.split(' ')[0]}
+      </text>
+      <text x={X1 + 10} y={r.y0 - AMP * r.mean + 22} class="lbl start">
+        {r.text.split(' ').slice(1).join(' ')}
+      </text>
+    </g>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .wave {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  .mean {
+    stroke: var(--warning);
+    stroke-width: 2;
+    stroke-dasharray: 7 5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+  }
+  .title {
+    font-size: 14.5px;
+    font-weight: 700;
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

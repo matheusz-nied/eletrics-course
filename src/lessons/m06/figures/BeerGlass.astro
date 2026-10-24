@@ -1,0 +1,140 @@
+---
+/*
+ * 06.5: the classic analogy of the beer glass. The beer is the active power
+ * (what you drink), the foam the reactive power (takes room, quenches
+ * nothing), the full glass the apparent power (what the bar has to serve).
+ * Next to it, the power triangle it stands for.
+ */
+---
+
+<svg viewBox="0 0 680 270" width="680" height="270" class="fig" aria-hidden="true">
+  <!-- Glass: a trapezoid, wider at the top. -->
+  <path d="M60 40 L80 236 H190 L210 40 Z" class="beer" clip-path="url(#m06-beer-clip)" />
+  <defs>
+    <clipPath id="m06-beer-clip">
+      <rect x="40" y="96" width="200" height="150"></rect>
+    </clipPath>
+    <clipPath id="m06-foam-clip">
+      <rect x="40" y="40" width="200" height="56"></rect>
+    </clipPath>
+  </defs>
+  <path d="M60 40 L80 236 H190 L210 40 Z" class="foam" clip-path="url(#m06-foam-clip)" />
+  <circle cx="92" cy="58" r="7" class="bubble" />
+  <circle cx="122" cy="70" r="9" class="bubble" />
+  <circle cx="160" cy="56" r="8" class="bubble" />
+  <circle cx="186" cy="74" r="6" class="bubble" />
+  <path d="M60 40 L80 236 H190 L210 40" class="glass" />
+  <path d="M210 70 C 250 72, 252 150, 204 160" class="glass" />
+
+  <path d="M262 40 H280 M262 236 H280 M271 40 V236" class="dim" />
+  <text x="288" y="134" class="lbl start">
+    copo cheio
+  </text>
+  <text x="288" y="152" class="sub start">
+    aparente (S, em VA)
+  </text>
+
+  <text x="135" y="20" class="lbl">
+    espuma: reativa (Q, em var)
+  </text>
+  <text x="135" y="176" class="lbl on-beer">
+    chope:
+  </text>
+  <text x="135" y="194" class="lbl on-beer">
+    ativa (P, em W)
+  </text>
+
+  <!-- The triangle the analogy stands for. -->
+  <g transform="translate(460 40)">
+    <path d="M0 180 H180 V40 Z" class="tri" />
+    <path d="M0 180 H180" class="p" />
+    <path d="M180 180 V40" class="q" />
+    <path d="M0 180 L180 40" class="s" />
+    <path d="M42 180 A 42 42 0 0 0 33.2 154.3" class="arc" />
+    <text x="52" y="170" class="sub start">
+      φ
+    </text>
+    <text x="90" y="200" class="lbl">
+      P
+    </text>
+    <text x="194" y="116" class="lbl start">
+      Q
+    </text>
+    <text x="78" y="100" class="lbl end">
+      S
+    </text>
+    <text x="90" y="224" class="sub">
+      S² = P² + Q²
+    </text>
+  </g>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .beer {
+    fill: #e0a526;
+  }
+  .foam {
+    fill: #f7f1e1;
+  }
+  .bubble {
+    fill: #fffaf0;
+    stroke: #d9cfb6;
+    stroke-width: 1;
+  }
+  .glass {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .dim {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .tri {
+    fill: var(--surface-2);
+    stroke: none;
+  }
+  .p {
+    stroke: var(--accent);
+    stroke-width: 4;
+  }
+  .q {
+    stroke: var(--warning);
+    stroke-width: 4;
+  }
+  .s {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .arc {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .lbl {
+    font-weight: 700;
+  }
+  .sub {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .on-beer {
+    fill: #2b1d05;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>
