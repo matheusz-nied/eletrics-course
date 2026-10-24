@@ -1,0 +1,155 @@
+---
+/* 12.1: what is inside a microcontroller. The processor core, the three
+   memories and the clock in the middle; around them the peripherals that
+   reach the pins; outside, what a board usually connects to them. */
+const INSIDE = [
+  { x: 214, y: 62, w: 112, h: 58, title: 'Processador', note: 'executa o programa', cls: 'core' },
+  { x: 336, y: 62, w: 90, h: 58, title: 'Flash', note: 'o programa', cls: 'mem' },
+  { x: 214, y: 128, w: 70, h: 50, title: 'RAM', note: 'variáveis', cls: 'mem' },
+  { x: 290, y: 128, w: 70, h: 50, title: 'EEPROM', note: 'ajustes', cls: 'mem' },
+  { x: 366, y: 128, w: 60, h: 50, title: 'Relógio', note: 'oscilador', cls: 'mem' },
+];
+const PERIPHERALS = [
+  { x: 214, y: 196, title: 'GPIO', note: 'entradas e saídas digitais' },
+  { x: 214, y: 232, title: 'ADC', note: 'lê tensões' },
+  { x: 322, y: 196, title: 'Timers e PWM', note: 'contam tempo, geram pulsos' },
+  { x: 322, y: 232, title: 'Comunicação', note: 'serial, I²C, SPI, Wi-Fi' },
+];
+const LEFT = ['botão', 'sensor de presença', 'potenciômetro', 'sensor de temperatura'];
+const RIGHT = ['LED', 'relé (com transistor)', 'motor (com MOSFET)', 'outro chip, celular'];
+---
+
+<svg viewBox="0 0 640 300" width="640" height="300" class="fig" aria-hidden="true">
+  <rect x="196" y="36" width="248" height="246" rx="10" class="chip" />
+  <text x="320" y="26" class="title">
+    microcontrolador (um chip só)
+  </text>
+
+  {INSIDE.map((b) => (
+    <g>
+      <rect x={b.x} y={b.y} width={b.w} height={b.h} rx="6" class={b.cls} />
+      <text x={b.x + b.w / 2} y={b.y + b.h / 2 - 3} class="blk">
+        {b.title}
+      </text>
+      <text x={b.x + b.w / 2} y={b.y + b.h / 2 + 13} class="note">
+        {b.note}
+      </text>
+    </g>
+  ))}
+
+  {PERIPHERALS.map((p) => (
+    <g>
+      <rect x={p.x} y={p.y} width="104" height="30" rx="5" class="per" />
+      <text x={p.x + 52} y={p.y + 13} class="per-t">
+        {p.title}
+      </text>
+      <text x={p.x + 52} y={p.y + 25} class="per-n">
+        {p.note}
+      </text>
+    </g>
+  ))}
+
+  <!-- Pins -->
+  {LEFT.map((name, i) => (
+    <g>
+      <path d={`M150 ${88 + i * 50}H196`} class="pin" />
+      <text x="144" y={92 + i * 50} class="ext end">
+        {name}
+      </text>
+      <path d={`M184 ${84 + i * 50}L192 ${88 + i * 50}L184 ${92 + i * 50}`} class="arrow" />
+    </g>
+  ))}
+  {RIGHT.map((name, i) => (
+    <g>
+      <path d={`M444 ${88 + i * 50}H490`} class="pin" />
+      <text x="496" y={92 + i * 50} class="ext">
+        {name}
+      </text>
+      <path d={`M478 ${84 + i * 50}L486 ${88 + i * 50}L478 ${92 + i * 50}`} class="arrow" />
+    </g>
+  ))}
+  <text x="140" y="56" class="side end">
+    entradas
+  </text>
+  <text x="500" y="56" class="side">
+    saídas
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .chip {
+    fill: var(--surface-2);
+    stroke: var(--border-strong);
+    stroke-width: 1.5;
+  }
+  .core {
+    fill: var(--accent-soft);
+    stroke: var(--info-border);
+  }
+  .mem {
+    fill: var(--bg);
+    stroke: var(--border-strong);
+  }
+  .per {
+    fill: var(--success-soft);
+    stroke: var(--success-border);
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .blk {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .note,
+  .per-n {
+    fill: var(--fg-muted);
+    font-size: 10.5px;
+    text-anchor: middle;
+  }
+  .per-t {
+    fill: var(--success);
+    font-size: 12px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .per-n {
+    font-size: 9px;
+  }
+  .pin {
+    stroke: var(--copper);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+  .arrow {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ext {
+    fill: var(--fg);
+    font-size: 12.5px;
+  }
+  .side {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

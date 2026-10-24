@@ -1,0 +1,305 @@
+---
+titulo: Máquinas de estado
+modulo: m12-microcontroladores
+ordem: 2
+nivel: I
+duracaoMin: 35
+objetivos:
+  - Descrever o comportamento de um equipamento com estados, eventos, transições e ações
+  - Desenhar o diagrama de estados e a tabela de transições de um sistema simples
+  - Escrever a estrutura de uma máquina de estados num programa, sem esperas que travam
+  - Ler a lógica da central do portão como uma máquina de estados e prever o que ela faz
+prerequisitos:
+  - m12-microcontroladores/01-o-que-e-um-microcontrolador
+tags: [máquina de estados, firmware, programação, millis, debounce, portão, minuteria]
+seguranca: nenhum
+---
+
+import DiagramaMinuteria from '../../../lessons/m12/figuras/DiagramaMinuteria.astro';
+import MaquinaDeEstados from '../../../lessons/m12/MaquinaDeEstados';
+
+Você aperta o controle e o portão começa a abrir. No meio do caminho, aperta de novo: ele para. Aperta mais uma vez: ele fecha. A mesma tecla, três resultados diferentes. A central não é confusa, ela **lembra onde está**: abrindo, parado, fechando. O que ela faz com cada comando depende disso.
+
+Essa forma de organizar um programa se chama **máquina de estados**. Ela está na central do portão, no micro-ondas, no elevador, no semáforo e na máquina de lavar. Nesta aula você vai aprender a desenhá-la, a escrevê-la num programa e a ver a da central do portão funcionando ao vivo.
+
+## Estados, eventos e transições
+
+Uma <Term id="maquina-de-estados">máquina de estados</Term> descreve um equipamento com quatro ideias:
+
+- **Estado:** a situação em que o equipamento está agora, e que determina como ele reage. A luz da escada está **apagada**, **acesa** (contando o tempo) ou **fixa** (acesa direto).
+- **Evento:** algo que acontece e pode mudar o estado: um toque no botão, um tempo que se esgotou, um sensor que mudou.
+- **Transição:** a mudança de um estado para outro, provocada por um evento. "Apagada, recebeu um toque: vai para acesa."
+- **Ação:** o que o equipamento faz na transição ou enquanto está num estado: ligar a luz, começar a contar.
+
+O segredo é que o equipamento está sempre em **um** estado, e só um. E só os eventos previstos para aquele estado mudam alguma coisa. Um toque na luz apagada acende; o mesmo toque na luz fixa apaga.
+
+### O diagrama de estados
+
+A forma mais clara de mostrar uma máquina de estados é um desenho: cada estado é uma caixa, cada transição é uma seta com o evento escrito em cima e, depois de uma barra, a ação. Veja a minuteria de uma escada (a luz que acende por um tempo e apaga sozinha), com uma função a mais: segurar o botão por 2 s deixa a luz acesa direto, para quando alguém vai fazer uma mudança.
+
+<Figure caption="Figura 1. Diagrama de estados da minuteria. A placa liga no estado APAGADA. Um toque acende a luz e começa a contagem; um toque com a luz acesa recomeça a contagem; o fim do tempo apaga. Segurar o botão por 2 s leva ao estado FIXA, e um toque volta para APAGADA." alt="Três estados em caixas arredondadas: APAGADA à esquerda, ACESA à direita e FIXA embaixo. Uma seta tracejada, ligar a placa, entra em APAGADA. De APAGADA para ACESA, a seta toque, barra, começa a contar o tempo. De ACESA para APAGADA, a seta tempo esgotado. Em ACESA, uma seta que volta para ela mesma: toque, barra, recomeça. De APAGADA e de ACESA para FIXA, setas segurar 2 s. De FIXA para APAGADA, a seta toque.">
+  <DiagramaMinuteria />
+</Figure>
+
+### A tabela de transições
+
+O mesmo comportamento cabe numa tabela, com uma linha para cada combinação de estado e evento. É a forma que ajuda a não esquecer nenhum caso.
+
+| Estado atual | Evento | Próximo estado | Ação |
+|---|---|---|---|
+| APAGADA | toque | ACESA | liga a luz, começa a contar |
+| APAGADA | segurar 2 s | FIXA | liga a luz |
+| ACESA | toque | ACESA | recomeça a contagem |
+| ACESA | tempo esgotado | APAGADA | desliga a luz |
+| ACESA | segurar 2 s | FIXA | para a contagem |
+| FIXA | toque | APAGADA | desliga a luz |
+| FIXA | tempo esgotado | (não acontece) | nada |
+
+A última linha parece inútil, mas é ela que obriga você a pensar: o que acontece se um evento chega num estado em que não deveria? Muitos defeitos de equipamentos são linhas dessa tabela que ninguém escreveu.
+
+Em termos formais, a máquina de estados é uma regra que, a cada passo, calcula o próximo estado a partir do estado atual e das entradas:
+
+$$
+\text{estado}_{\text{próximo}} = f(\text{estado}_{\text{atual}},\ \text{entradas})
+$$
+
+e as saídas (a luz, o relé, o motor) dependem do estado. É exatamente o que um microcontrolador faz milhares de vezes por segundo.
+
+<DeepDive title="Moore e Mealy">
+
+Há dois jeitos clássicos de ligar as saídas aos estados. Na **máquina de Moore**, as saídas dependem só do estado: "em ACESA, a luz está ligada". Na **máquina de Mealy**, elas dependem do estado e da entrada do momento: "em ACESA, se chegar um toque, dê um bipe". A minuteria desta aula é de Moore, com uma exceção: recomeçar a contagem é uma ação da transição. Na prática, os programas misturam os dois jeitos sem cerimônia; o importante é que cada saída tenha uma regra clara.
+
+Os contadores e os flip-flops da eletrônica digital (veja <LinkAula id="m11-digital/04-flip-flops-contadores-e-memoria" />) são máquinas de estados feitas em hardware: o estado fica guardado nos flip-flops, e portas lógicas calculam o próximo estado a cada pulso de relógio.
+
+</DeepDive>
+
+## Como fica no programa
+
+O programa de uma máquina de estados tem sempre o mesmo esqueleto: uma variável guarda o estado, e o `loop()`, que o microcontrolador repete sem parar, olha o estado atual, lê as entradas e decide. Um trecho da minuteria, no estilo do Arduino:
+
+```text
+enum Estado { APAGADA, ACESA, FIXA };
+Estado estado = APAGADA;
+unsigned long inicio;        // quando a contagem começou (ms)
+const unsigned long TEMPO = 10000;
+
+void loop() {
+  bool toque = toqueNoBotao();          // lê o botão, já sem trepidação
+  unsigned long agora = millis();
+
+  switch (estado) {
+    case APAGADA:
+      if (toque) { estado = ACESA; inicio = agora; }
+      break;
+    case ACESA:
+      if (toque) inicio = agora;                       // recomeça
+      else if (agora - inicio >= TEMPO) estado = APAGADA;
+      break;
+    case FIXA:
+      if (toque) estado = APAGADA;
+      break;
+  }
+  digitalWrite(LUZ, estado != APAGADA);   // a saída depende do estado
+}
+```
+
+Repare no que **não** está aí: nenhum `delay(10000)`. Se o programa ficasse parado 10 s esperando, não veria um novo toque nesse tempo, e a contagem não recomeçaria. Em vez disso, ele anota a hora em que a luz acendeu e, a cada volta do `loop()`, compara com o relógio. Cada volta dura microssegundos, e o programa está sempre pronto para o próximo evento. Esse é o jeito de um microcontrolador fazer várias coisas "ao mesmo tempo".
+
+A função `toqueNoBotao()` esconde uma máquina de estados pequena: o **debounce**. O contato de um botão trepida por alguns milissegundos quando muda, e o pino lê uma rajada de 0 e 1. O programa só aceita um nível novo depois de ele ficar parado uns 30 ms, e só conta um toque na mudança, não enquanto o botão está apertado. A aula <LinkAula id="m11-digital/03-pull-up-pull-down-e-debounce" /> mostra a trepidação no osciloscópio.
+
+## Explore: a minuteria
+
+Na simulação, um microcontrolador roda a máquina de estados da Figura 1. O botão da escada vai a um pino com pull-up, um trimpot numa entrada analógica ajusta o tempo de 5 a 60 s, e a saída acende um LED branco no lugar da lâmpada. Aperte o play (▶) e clique no microcontrolador para ver o estado (`estado`), o tempo que falta (`restante`) e a última transição (`transicao`).
+
+<Simulation circuit="m12/minuteria" />
+
+1. Dê um toque no botão (aperte e solte). A luz acende por quanto tempo?
+2. Com a luz acesa e uns 3 s faltando, dê outro toque. O que acontece com o tempo que falta?
+3. Segure o botão por mais de 2 s e solte. Em que estado a máquina fica? A luz apaga sozinha?
+4. Dê um toque no estado FIXA.
+5. Gire o trimpot até o fim e repita o primeiro teste.
+
+Com o trimpot no começo, o tempo é de 10 s. O toque conta quando você **solta** o botão: é assim que a máquina distingue um toque de um "segurar". Um toque com a luz acesa leva o tempo restante de volta a 10 s. Segurando 2 s, a transição vai para FIXA ainda com o botão apertado, e soltar não muda mais nada: a luz fica acesa sem contar. O toque seguinte apaga. Com o trimpot no fim, o tempo passa para 60 s.
+
+Compare com o temporizador analógico da aula <LinkAula id="m04-passivos/04-circuito-rc" />, em que um capacitor descarregando fazia a contagem. O resultado é parecido, mas a versão com microcontrolador ganha funções novas (o modo fixo, por exemplo) só mudando o programa.
+
+## Explore: a central do portão por dentro
+
+A central do portão é uma máquina de estados maior. A figura interativa abaixo roda o programa da central genérica do curso, o mesmo da aula <LinkAula id="m16-portao/03-a-central-por-dentro" />, ligado a um portão simulado. O diagrama mostra os estados e destaca o atual, e a seta da última transição acende quando ela acontece. Embaixo, você vê as entradas que o programa lê a cada passo (fins de curso, botoeira, fotocélula, corrente do motor) e as saídas que ele comanda (relés e TRIAC).
+
+<MaquinaDeEstados client:visible />
+
+Faça estes testes e acompanhe o diagrama:
+
+1. Aperte o controle com o portão fechado. Por quais estados ele passa até parar aberto?
+2. Com o fechamento automático ligado, espere a pausa terminar. Qual evento leva de ABERTO para FECHANDO?
+3. Durante o fechamento, interrompa a fotocélula. Para onde vai a máquina?
+4. Aperte o controle durante a abertura. E depois aperte de novo.
+5. Desligue o fechamento automático, abra o portão e aperte o controle duas vezes seguidas.
+
+O caminho normal é FECHADO → ABRINDO → ABERTO → FECHANDO → FECHADO. Quem tira a central de ABRINDO é o **fim de curso de abertura**; quem tira de ABERTO, com o fechamento automático, é o **fim da pausa**. A fotocélula interrompida em FECHANDO leva de volta a ABRINDO: o portão nunca fecha sobre um carro. Um comando durante a abertura leva a PARADO, e o comando seguinte segue no sentido oposto ao último movimento, isto é, fecha. É a lógica "abre, para, fecha" que muitas centrais usam, e que confunde quem não sabe que ela existe.
+
+A abertura leva uns 16 s, e a pausa do fechamento automático começa em 10 s. Há também um estado para quando algo dá errado: se o motor ficar ligado 40 s sem chegar a um fim de curso, a central vai para ERRO e desliga o motor, em vez de insistir com um ímã que caiu ou um reed quebrado. Para ver isso, escolha no menu **Situação** o portão com o destravamento manual aberto: o motor gira em falso, o portão não anda, e 40 s depois a central desiste.
+
+## Exemplo resolvido: o alarme da porta
+
+Você vai projetar a máquina de estados de um alarme simples: um sensor na porta (reed e ímã, como em <LinkAula id="m05-magnetismo/05-sensores-magneticos" />), uma sirene e um teclado que aceita a senha. Requisitos: ao armar, o morador tem 30 s para sair; com o alarme armado, se a porta abrir, ele tem 20 s para digitar a senha antes de a sirene tocar; a senha certa desarma em qualquer estado.
+
+**Passo 1: os estados.** DESARMADO, SAINDO (contagem de 30 s), ARMADO, ENTRANDO (contagem de 20 s) e DISPARADO (sirene tocando).
+
+**Passo 2: os eventos.** Armar, senha certa, porta aberta, tempo esgotado.
+
+**Passo 3: a tabela.**
+
+| Estado | Evento | Próximo | Ação |
+|---|---|---|---|
+| DESARMADO | armar | SAINDO | começa a contar 30 s, bipe lento |
+| SAINDO | tempo esgotado | ARMADO | bipe longo |
+| SAINDO | senha certa | DESARMADO | — |
+| ARMADO | porta aberta | ENTRANDO | começa a contar 20 s, bipe rápido |
+| ARMADO | senha certa | DESARMADO | — |
+| ENTRANDO | senha certa | DESARMADO | para o bipe |
+| ENTRANDO | tempo esgotado | DISPARADO | liga a sirene |
+| DISPARADO | senha certa | DESARMADO | desliga a sirene |
+
+**Passo 4: os casos que faltam.** E se a porta abrir em SAINDO? É o próprio morador saindo: nada muda. E se ficar aberta quando a contagem de saída acabar? Um alarme bem feito avisa ("porta aberta, não armou") em vez de disparar na cara do dono: é mais uma linha na tabela, e talvez um estado a mais. E a sirene tocando para sempre? Muitas cidades limitam o tempo de sirene, e é comum o alarme voltar a ARMADO depois de alguns minutos. Escrever a tabela é o que faz essas perguntas aparecerem antes de a placa estar pronta.
+
+<RealCase title="O portão que &quot;não obedece&quot;">
+
+Um morador reclama que o portão "às vezes não fecha quando aperta o controle". O técnico que conhece a máquina de estados da central pergunta: o portão estava parado no meio do caminho? Ele parou porque alguém apertou o controle durante a abertura (estado PARADO); o comando seguinte segue o sentido oposto ao último movimento, e o último foi abrir, então ele fecha. Se o último fosse fechar, ele abriria. Não é defeito, é a tabela de transições.
+
+Outro caso: "o portão abre sozinho quando começa a fechar". Na máquina de estados, só três eventos levam de FECHANDO para ABRINDO: um comando, a fotocélula interrompida e um obstáculo (corrente do motor acima do limite). Sabendo disso, o diagnóstico é olhar o LED da fotocélula na placa e o ajuste de força, em vez de trocar a central. A aula <LinkAula id="m16-portao/09-diagnostico-do-portao" /> usa essa lógica em vários defeitos.
+
+</RealCase>
+
+## Erros comuns
+
+- **Usar esperas que travam.** Um `delay()` longo deixa o programa cego: não vê botão, sensor nem fotocélula. Anote a hora e compare com o relógio.
+- **Esquecer um evento num estado.** Escreva a tabela inteira, com todas as combinações; as linhas "não deveria acontecer" são as mais importantes.
+- **Não prever o estado inicial.** Ao ligar, em que estado a máquina começa? A central do portão olha os fins de curso: se nenhum estiver ativo, ela não sabe onde o portão está e começa em PARADO.
+- **Não ter saída para o erro.** Um motor esperando um fim de curso que nunca chega precisa de um tempo máximo. Sem ele, o motor queima.
+- **Ler o botão sem debounce.** A trepidação do contato vira vários toques, e a máquina pula estados.
+- **Espalhar o estado em várias variáveis soltas.** "portaoAbrindo", "portaoParado", "pausaContando"… Com variáveis soltas, duas podem ficar verdadeiras ao mesmo tempo, e o programa fica num estado que não existe. Uma variável só para o estado evita isso.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Numa máquina de estados, o que define como o equipamento reage a um evento?',
+      options: [
+        {
+          text: 'O estado em que ele está quando o evento chega',
+          correct: true,
+          feedback:
+            'Isso. O mesmo toque acende a luz apagada e apaga a luz fixa. O estado é a memória do que já aconteceu.',
+        },
+        {
+          text: 'Só o evento: cada botão tem uma função fixa',
+          feedback: 'Assim não daria para o mesmo botão abrir, parar e fechar o portão.',
+        },
+        {
+          text: 'A ordem em que os fios foram ligados',
+          feedback: 'A ligação define o que o programa lê, mas a reação depende do estado.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada termo ao exemplo da central do portão.',
+      pairs: [
+        ['Estado', 'ABRINDO'],
+        ['Evento', 'O ímã chegou ao fim de curso de abertura'],
+        ['Transição', 'De ABRINDO para ABERTO'],
+        ['Ação', 'Desligar o relé do motor'],
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Na central do curso, o portão está FECHANDO e alguém passa pela fotocélula. Para qual estado a central vai?',
+      options: [
+        {
+          text: 'ABRINDO: o portão volta a abrir',
+          correct: true,
+          feedback: 'Isso. A fotocélula interrompida durante o fechamento sempre reverte o portão.',
+        },
+        {
+          text: 'PARADO: o portão só para',
+          feedback: 'Parar no meio deixaria o portão encostado no carro. A central reverte e abre.',
+        },
+        {
+          text: 'FECHADO: ela ignora e continua',
+          feedback: 'Ignorar a fotocélula é justamente o que ela não pode fazer: é um dispositivo de segurança.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Um programa que usa delay(10000) para manter a luz acesa 10 s consegue recomeçar a contagem se alguém tocar no botão durante esse tempo.',
+      answer: false,
+      explanation:
+        'Durante o delay, o programa fica parado e não lê o botão. Para reagir a qualquer momento, ele anota a hora do toque e compara com millis() a cada volta.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Na minuteria desta aula, você segura o botão por 3 s e solta. Em que estado a máquina termina?',
+      options: [
+        {
+          text: 'FIXA',
+          correct: true,
+          feedback:
+            'Isso. Aos 2 s, com o botão ainda apertado, ela vai para FIXA, e soltar o botão depois não conta como toque.',
+        },
+        {
+          text: 'ACESA, contando o tempo',
+          feedback: 'Seria assim com um toque curto. Segurando 2 s ou mais, a máquina vai para FIXA.',
+        },
+        {
+          text: 'APAGADA',
+          feedback: 'Ela só apaga com um toque no estado FIXA ou com o fim do tempo em ACESA.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem o caminho normal da central do portão, a partir do portão fechado.',
+      items: ['FECHADO', 'ABRINDO', 'ABERTO', 'FECHANDO', 'FECHADO de novo'],
+      explanation:
+        'O comando leva a ABRINDO; o fim de curso de abertura, a ABERTO; o fim da pausa (ou um comando), a FECHANDO; o fim de curso de fechamento, de volta a FECHADO.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Para que serve o estado ERRO da central, com o limite de 40 s de percurso?',
+      options: [
+        {
+          text: 'Para desligar o motor se ele não chegar a um fim de curso no tempo esperado',
+          correct: true,
+          feedback:
+            'Isso. Com um ímã caído ou um reed quebrado, o motor ficaria ligado para sempre e esquentaria. O estado de erro é a saída segura.',
+        },
+        {
+          text: 'Para o portão abrir mais depressa',
+          feedback: 'O tempo máximo não muda a velocidade; ele só protege o motor quando algo dá errado.',
+        },
+        {
+          text: 'Para apagar os controles cadastrados',
+          feedback: 'Os controles ficam na EEPROM e não têm relação com o tempo de percurso.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Uma **máquina de estados** descreve um equipamento com **estados** (a situação atual), **eventos** (o que acontece), **transições** (a mudança de estado) e **ações** (o que ele faz).
+- O **diagrama de estados** mostra o comportamento de relance; a **tabela de transições** obriga a pensar em todas as combinações, inclusive as que "não deveriam acontecer".
+- No programa, uma variável guarda o estado e o `loop()` decide a cada volta: próximo estado $= f(\text{estado}, \text{entradas})$. Nada de esperas longas: compare com o relógio.
+- A central do portão é uma máquina de estados: FECHADO, ABRINDO, ABERTO, FECHANDO, PARADO e ERRO. A fotocélula em FECHANDO reverte; um comando em ABRINDO para; o tempo máximo leva a ERRO.
+- Conhecer a máquina de estados de um equipamento ajuda a separar defeito de comportamento normal.
+
+Na próxima aula, você vai ver de onde vêm as entradas: os [sensores](../03-sensores/) de temperatura, luz, presença, distância e corrente.

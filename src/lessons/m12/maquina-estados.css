@@ -1,0 +1,576 @@
+/*
+ * MaquinaDeEstados.tsx: the live state diagram of lesson 12.2. Site tokens
+ * only (src/styles/global.css), so both themes work. Classes start with med.
+ */
+
+.med {
+  container-type: inline-size;
+}
+
+.med .lw__body {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.med .lw__body > * {
+  min-width: 0;
+}
+
+.med__muted {
+  color: var(--fg-muted);
+}
+
+/* Top bar: state, clock, simulation buttons */
+
+.med__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.med__now {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.med__now-label {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.med__pill {
+  padding: 0.15rem 0.7rem;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.med__pill--abrindo,
+.med__pill--fechando {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.med__pill--aberto,
+.med__pill--fechado {
+  border-color: var(--success-border);
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.med__pill--parado {
+  border-color: var(--warning-border);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.med__pill--erro {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.med__clock {
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.med__sim {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.med__select {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9375rem;
+}
+
+.med__select > span {
+  color: var(--fg-muted);
+}
+
+.med__select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.med__select select {
+  min-width: 0;
+  min-height: 2.5rem;
+  max-width: 100%;
+  padding: 0 0.6rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.625rem;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+}
+
+.med :where(button, select, input):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Diagram */
+
+.med__figure {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.med-diagram {
+  display: block;
+  width: 100%;
+  max-width: 50rem;
+  height: auto;
+  margin: 0 auto;
+  font-family: var(--font-sans);
+}
+
+/* Portrait layout for phones: the drawing is smaller, so the text is bigger. */
+
+.med-diagram--estreito .med-seta text {
+  font-size: 14px;
+}
+
+.med-diagram--estreito .med-no__nome {
+  font-size: 17px;
+}
+
+.med-diagram--estreito .med-no__sub {
+  font-size: 13px;
+}
+
+.med-no rect {
+  fill: var(--bg);
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+  transition:
+    fill 200ms,
+    stroke 200ms;
+}
+
+.med-no text {
+  fill: var(--fg);
+  text-anchor: middle;
+}
+
+.med-no__nome {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.med-no__sub {
+  fill: var(--fg-muted) !important;
+  font-size: 12.5px;
+}
+
+.med-no.is-atual rect {
+  fill: var(--accent);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.med-no.is-atual text {
+  fill: var(--on-accent) !important;
+}
+
+.med-no--erro.is-atual rect {
+  fill: var(--danger);
+  stroke: var(--danger);
+}
+
+.med-no--parado.is-atual rect {
+  fill: var(--warning);
+  stroke: var(--warning);
+}
+
+.med-no.is-atual .med-no__barra {
+  fill: var(--on-accent);
+  stroke: none;
+  opacity: 0.85;
+}
+
+.med-seta path {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1.75;
+  transition: stroke 200ms;
+}
+
+.med-seta text {
+  fill: var(--fg-subtle);
+  font-size: 12.5px;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+
+.med-seta--saida path {
+  stroke: var(--fg-muted);
+}
+
+.med-seta--saida text {
+  fill: var(--fg);
+}
+
+.med-seta--ultima path {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+.med-seta--ultima text {
+  fill: var(--accent-strong);
+  font-weight: 650;
+}
+
+.med-ponta {
+  fill: var(--border-strong);
+}
+
+.med-ponta--saida {
+  fill: var(--fg-muted);
+}
+
+.med-ponta--ultima {
+  fill: var(--accent);
+}
+
+.med-seta .med-seta__pulso {
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 10 400;
+  opacity: 0.7;
+  animation: med-pulso 1.1s linear infinite;
+}
+
+@keyframes med-pulso {
+  from {
+    stroke-dashoffset: 10;
+  }
+  to {
+    stroke-dashoffset: -400;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .med-seta .med-seta__pulso {
+    animation: none;
+    stroke-dasharray: none;
+    opacity: 0.25;
+  }
+}
+
+/* Gate strip */
+
+.med-strip {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.med-strip svg {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+  height: auto;
+  margin: 0 auto;
+}
+
+.med-strip__wall {
+  fill: var(--border-strong);
+}
+
+.med-strip__post {
+  fill: var(--fg-subtle);
+}
+
+.med-strip__track {
+  stroke: var(--border);
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+}
+
+.med-strip__leaf rect:first-child {
+  fill: var(--surface);
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+
+.med-strip__magnet--fca,
+.med-key--fca {
+  fill: var(--success);
+  background: var(--success);
+}
+
+.med-strip__magnet--fcf,
+.med-key--fcf {
+  fill: var(--danger);
+  background: var(--danger);
+}
+
+.med-strip__motor {
+  fill: var(--surface);
+  stroke: var(--fg-subtle);
+  stroke-width: 1.5;
+}
+
+.med-strip__reed,
+.med-key--reed {
+  fill: var(--fg-subtle);
+  background: var(--fg-subtle);
+}
+
+.med-strip__reed.is-on {
+  fill: var(--accent);
+}
+
+.med-strip__photo {
+  fill: var(--warning);
+}
+
+.med-strip__beam,
+.med-key--beam {
+  stroke: var(--warning);
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+  background: var(--warning);
+}
+
+.med-strip__beam.is-blocked {
+  stroke: var(--danger);
+}
+
+.med-strip__person {
+  fill: var(--copper);
+}
+
+.med-strip__obstacle {
+  fill: var(--copper);
+  opacity: 0.85;
+}
+
+.med-strip__text {
+  fill: var(--fg-muted);
+  font-size: 13px;
+}
+
+.med-strip__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 1rem;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+
+.med-strip__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.med-key {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.45rem;
+  border-radius: 2px;
+}
+
+.med-key--beam {
+  height: 2px;
+}
+
+/* Controls */
+
+.med__controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.med__actions,
+.med__settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.med__toggle[aria-pressed='true'] {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.med__toggle[aria-pressed='true']::before {
+  content: '●';
+  font-size: 0.7em;
+}
+
+/* Inputs → program → outputs */
+
+.med-io {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+@container (min-width: 44rem) {
+  .med-io {
+    grid-template-columns: 1fr auto minmax(12rem, 0.7fr);
+    align-items: center;
+  }
+}
+
+.med-io__col {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.med-io__col ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.med-io__mid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--fg-muted);
+}
+
+.med-io__arrow {
+  font-size: 1.25rem;
+}
+
+@container (max-width: 44rem) {
+  .med-io__arrow {
+    transform: rotate(90deg);
+  }
+}
+
+.med-io__brain {
+  display: grid;
+  justify-items: center;
+  padding: 0.4rem 0.8rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: 0.6rem;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+
+.med-io__brain strong {
+  font-family: var(--font-mono);
+}
+
+.med-io__brain small {
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+}
+
+.med-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.med-chip__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--border-strong);
+}
+
+.med-chip__nome {
+  font-weight: 650;
+}
+
+.med-chip__valor {
+  color: var(--fg-muted);
+}
+
+.med-chip.is-on {
+  border-color: var(--success-border);
+}
+
+.med-chip.is-on .med-chip__dot {
+  background: var(--success);
+  box-shadow: 0 0 0 3px var(--success-soft);
+}
+
+.med-chip.is-alerta {
+  border-color: var(--danger-border);
+}
+
+.med-chip.is-alerta .med-chip__dot {
+  background: var(--danger);
+  box-shadow: 0 0 0 3px var(--danger-soft);
+}
+
+/* Log */
+
+.med__log {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.med__log ol {
+  display: grid;
+  gap: 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.med__log li:first-child:not(.med__log-empty) {
+  color: var(--accent-strong);
+  font-weight: 650;
+}
+
+.med__log li.is-recusado {
+  color: var(--warning);
+}
+
+.med__log-empty {
+  color: var(--fg-muted);
+  font-family: var(--font-sans);
+}

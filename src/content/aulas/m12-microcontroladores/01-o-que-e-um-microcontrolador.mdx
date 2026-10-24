@@ -1,0 +1,310 @@
+---
+titulo: O que é um microcontrolador
+modulo: m12-microcontroladores
+ordem: 1
+nivel: I
+duracaoMin: 30
+objetivos:
+  - Explicar o que é um microcontrolador e o que existe dentro dele
+  - Reconhecer as partes de uma placa de desenvolvimento estilo Arduino Uno e estilo ESP32
+  - Diferenciar entrada digital, saída digital, entrada analógica (ADC) e saída PWM
+  - Calcular a leitura do conversor analógico-digital para uma tensão
+  - Respeitar os limites de tensão e de corrente dos pinos
+prerequisitos:
+  - m09-semicondutores/06-transistor-como-chave
+  - m02-circuitos-cc/06-divisores-de-tensao-e-corrente
+tags: [microcontrolador, Arduino, ESP32, GPIO, ADC, PWM, timer, memória, firmware]
+seguranca: baixa-tensao
+---
+
+import BlocosMicrocontrolador from '../../../lessons/m12/figuras/BlocosMicrocontrolador.astro';
+import NiveisLogicos from '../../../lessons/m12/figuras/NiveisLogicos.astro';
+import MosfetPwm from '../../../lessons/m09/figures/MosfetPwm.astro';
+
+O micro-ondas conta o tempo e apita no fim. A máquina de lavar sabe em que etapa está e quanto falta. A central do portão espera o controle, liga o motor para o lado certo e para quando o ímã chega ao fim de curso. Nenhum deles tem um computador com teclado e tela, mas todos têm um dentro: um chip do tamanho de uma unha, que lê botões e sensores, roda um programa e comanda o resto do aparelho.
+
+Esse chip é o **microcontrolador**. Nesta aula você vai ver o que existe dentro dele, como é uma placa de desenvolvimento do tipo que se compra para estudar, e as quatro coisas que um pino sabe fazer.
+
+## Um computador inteiro num chip
+
+Um computador comum tem o processador num chip, a memória em pentes separados e as portas (USB, vídeo, rede) em outros chips da placa-mãe. Um <Term id="microcontrolador">microcontrolador</Term> junta tudo isso num chip só, numa versão pequena e econômica:
+
+- **Processador (núcleo):** executa as instruções do programa, uma depois da outra, milhões de vezes por segundo.
+- **Memória flash:** guarda o programa. Não se apaga quando a energia cai.
+- **RAM:** guarda as variáveis enquanto o programa roda (a leitura de um sensor, um contador). Apaga quando a energia cai.
+- **EEPROM** (ou um pedaço da flash usado como tal): guarda ajustes que precisam sobreviver a uma queda de energia, como os controles cadastrados numa central de portão.
+- **Relógio:** um oscilador, muitas vezes controlado por um cristal, que dá o ritmo do processador e serve de base para contar o tempo.
+- **Periféricos:** circuitos prontos, dentro do chip, que cuidam dos pinos: entradas e saídas digitais, conversor analógico-digital, temporizadores, PWM e comunicação.
+
+<Figure caption="Figura 1. Dentro do microcontrolador, o processador, as memórias e o relógio; em volta, os periféricos que chegam aos pinos. Do lado de fora, o que uma placa costuma ligar a eles: sensores e botões nas entradas, LEDs e, por meio de transistores, relés e motores nas saídas." alt="Diagrama de blocos. No centro, um retângulo grande chamado microcontrolador, com os blocos processador, flash, RAM, EEPROM e relógio, e abaixo deles os periféricos GPIO, ADC, timers e PWM, e comunicação. À esquerda, setas entrando no chip vindas de botão, sensor de presença, potenciômetro e sensor de temperatura. À direita, setas saindo para LED, relé com transistor, motor com MOSFET e outro chip ou celular.">
+  <BlocosMicrocontrolador />
+</Figure>
+
+O programa gravado na flash é o **<Term id="firmware">firmware</Term>**: ele decide o que o aparelho faz. Trocar o firmware muda o comportamento sem mudar uma peça da placa. É por isso que uma central de portão pode ganhar funções novas com uma "atualização", e é também por isso que duas placas iguais podem fazer coisas diferentes.
+
+Comparado ao processador de um computador, o microcontrolador é modesto. O ATmega328P, o chip do Arduino Uno, roda a 16 MHz e tem 32 KB de flash, 2 KB de RAM e 1 KB de EEPROM. O ESP32, muito usado em automação, roda a até 240 MHz, tem 520 KB de RAM, Wi-Fi e Bluetooth, e costuma vir num módulo com 4 MB de flash. Parece pouco perto de um celular, mas sobra para ler sensores e acionar relés. E as vantagens são outras: custa pouco, consome pouca energia, liga em milissegundos e não trava por causa de outro programa rodando junto.
+
+## A placa de desenvolvimento
+
+O chip sozinho precisa de uma fonte estável, de um relógio e de um jeito de receber o programa. Para estudar e montar protótipos, usa-se uma **placa de desenvolvimento**, que já traz tudo isso e expõe os pinos em barras de conectores. As mais conhecidas são as do tipo Arduino Uno e as do tipo ESP32 DevKit.
+
+<Model3D
+  part="dev-board"
+  props={{ variant: 'uno' }}
+  annotations
+  caption="Placa estilo Arduino Uno. Gire o modelo e passe pelas anotações: o microcontrolador, o cristal que dá o ritmo, o regulador de tensão, o conector USB e as barras de pinos."
+/>
+
+Repare nas partes:
+
+- **Conector USB:** alimenta a placa com 5 V e é por onde o computador envia o programa.
+- **Regulador de tensão:** permite alimentar a placa com uma fonte maior pelo conector de energia (o Uno aceita de 7 a 12 V, segundo o fabricante) e entrega os 5 V estáveis que o chip precisa.
+- **Cristal:** o oscilador de 16 MHz, o "metrônomo" do processador.
+- **Barras de pinos:** os pinos digitais (D0 a D13), as entradas analógicas (A0 a A5) e os pinos de alimentação (5V, 3V3, GND, VIN). Os nomes estão na serigrafia, ao lado de cada furo.
+- **Botão de reset:** reinicia o programa do começo.
+- **LED "L":** ligado ao pino 13, útil para o primeiro teste.
+
+A placa estilo ESP32 tem as mesmas ideias num formato menor, com dois botões (EN, que reinicia, e BOOT, usado na gravação) e um módulo metálico com o processador, a memória flash e o rádio. A antena é aquela trilha em zigue-zague que sai do módulo.
+
+<Model3D
+  part="dev-board"
+  props={{ variant: 'esp32' }}
+  annotations
+  caption="Placa estilo ESP32 DevKit. O módulo coberto pela blindagem metálica tem o processador, a memória e o rádio Wi-Fi e Bluetooth; a antena é a trilha em zigue-zague na ponta."
+/>
+
+Uma diferença importante: o ESP32 trabalha com **3,3 V**, e o Uno com **5 V**. Um sensor de 5 V ligado direto num pino do ESP32 pode danificá-lo. Os pinos do ESP32 não toleram 5 V.
+
+## O que um pino sabe fazer
+
+Os pinos de uso geral se chamam **<Term id="gpio">GPIO</Term>** (do inglês _general purpose input/output_, entrada e saída de uso geral). O programa decide, pino a pino, o papel de cada um. São quatro papéis principais.
+
+### Entrada digital
+
+O pino só quer saber se a tensão nele é **alta** (1) ou **baixa** (0). Para o ATmega328P alimentado com 5 V, a folha de dados garante que até 0,3 × VCC (1,5 V) é lido como 0 e que a partir de 0,6 × VCC (3 V) é lido como 1. No meio, o resultado não é garantido, e um sinal que passa muito tempo nessa faixa pode ser lido ora como 0, ora como 1. O ESP32, com 3,3 V, tem limiares de 0,25 e 0,75 × VDD.
+
+<Figure caption="Figura 2. As faixas de uma entrada digital. Acima do limiar de nível alto, o pino lê 1; abaixo do limiar de nível baixo, lê 0. No meio, a leitura não é garantida, e um bom circuito passa por essa faixa depressa. Limiares das folhas de dados do ATmega328P e do ESP32." alt="Duas barras verticais. A da placa de 5 V vai de 0 a 5 V: de 0 a 1,5 V é nível baixo, de 1,5 a 3 V é indefinido e de 3 a 5 V é nível alto. A da placa de 3,3 V: de 0 a 0,83 V baixo, de 0,83 a 2,48 V indefinido e de 2,48 a 3,3 V alto.">
+  <NiveisLogicos />
+</Figure>
+
+Um botão ligado entre o pino e o negativo (GND) só puxa o pino para baixo quando é apertado. Solto, o pino ficaria **flutuando**, sem nada que defina a tensão nele, e leria ruído. Por isso, a entrada precisa de um <Term id="pull-up">resistor de pull-up</Term>, que puxa o pino para o positivo enquanto o botão está solto. Os microcontroladores têm pull-ups internos, de algumas dezenas de quilo-ohms, que o programa liga com uma linha (no Arduino, `pinMode(2, INPUT_PULLUP)`). Com o pull-up, a lógica fica invertida: **solto lê 1, apertado lê 0**. Nos fins de curso e na fotocélula da central do portão é a mesma coisa.
+
+### Saída digital
+
+O pino liga a carga ao positivo (nível alto, 5 V ou 3,3 V) ou ao negativo (nível baixo, 0 V). Por dentro, são dois transistores, um para cada lado. A corrente que um pino aguenta é pequena: no ATmega328P, o máximo absoluto é 40 mA por pino, e o recomendado é bem menos. Um LED com resistor, uns 10 mA, vai direto no pino. Um relé, um motor ou uma fita de LED precisam de um transistor ou de um MOSFET no meio, como você viu em <LinkAula id="m09-semicondutores/06-transistor-como-chave" /> e em <LinkAula id="m09-semicondutores/08-mosfet" />.
+
+### Entrada analógica (ADC)
+
+Algumas entradas medem a **tensão** de verdade, e não só alto ou baixo. Quem faz isso é o <Term id="conversor-analogico-digital">conversor analógico-digital</Term> (ADC, do inglês _analog-to-digital converter_). Ele compara a tensão do pino com uma tensão de referência e devolve um número inteiro. No Arduino Uno, o ADC é de **10 bits**: são $2^{10} = 1024$ degraus, e a leitura vai de 0 a 1023:
+
+$$
+\text{leitura} = \left\lfloor \frac{V_\text{pino}}{V_\text{ref}} \cdot 1024 \right\rfloor
+$$
+
+em que $V_\text{pino}$ é a tensão no pino, $V_\text{ref}$ é a referência (5 V, por padrão) e os colchetes "pela metade" querem dizer arredondar para baixo. A leitura máxima é 1023. Cada degrau vale $5\,\text{V} / 1024 \approx 4{,}9\,\text{mV}$: é a **resolução** do conversor, a menor variação de tensão que ele percebe. O ESP32 tem ADC de 12 bits (0 a 4095), mas a leitura dele é menos linear, sobretudo perto dos extremos.
+
+Com o ADC, o microcontrolador lê um potenciômetro, um sensor de temperatura ou de luz, um trimpot de ajuste. Os trimpots de PAUSA e FORÇA da central do portão são lidos assim. A aula <LinkAula id="m11-digital/06-conversao-ad-da-e-pwm" /> mostra como o conversor funciona por dentro.
+
+### Saída PWM
+
+Uma saída digital só tem dois valores, mas dá para fazer o "meio-termo" ligando e desligando depressa. É o <Term id="pwm">PWM</Term>, a modulação por largura de pulso: a fração de cada ciclo em que o pino fica ligado, o **ciclo de trabalho**, define a média de tensão e de potência na carga.
+
+<Figure caption="Figura 3. A mesma frequência com três ciclos de trabalho. A média de tensão (tracejada) acompanha a fração do tempo em que o pino fica ligado. Figura da aula sobre o MOSFET." alt="Três ondas quadradas de mesma frequência com ciclos de trabalho de 25, 50 e 75 por cento, e a média de cada uma marcada por uma linha tracejada.">
+  <MosfetPwm />
+</Figure>
+
+No Arduino, `analogWrite(9, 64)` deixa o pino 9 ligado 64/255 do tempo, cerca de 25 %. A frequência é de uns 490 Hz na maioria dos pinos do Uno. É assim que o microcontrolador controla o brilho de um LED e a velocidade de um motor, assunto da aula <LinkAula id="m12-microcontroladores/04-atuadores" />.
+
+## Contar o tempo sem parar
+
+Além dos pinos, o microcontrolador tem **temporizadores** (_timers_): contadores que andam sozinhos, no ritmo do relógio, enquanto o processador faz outra coisa. São eles que geram o PWM e que permitem ao programa saber quanto tempo passou. No Arduino, `millis()` devolve os milissegundos desde que a placa ligou.
+
+Isso permite um truque essencial: em vez de "esperar 500 ms" parado (e não ver nada do que acontece nesse meio-tempo), o programa olha o relógio a cada volta e só age quando chegou a hora. Assim, ele pisca um LED, lê um botão e vigia um sensor ao mesmo tempo. Na próxima aula, esse jeito de pensar vira **máquina de estados**.
+
+## Explore: entradas e saídas
+
+Na simulação abaixo, uma placa alimentada pela porta USB tem um potenciômetro na entrada analógica A0, um botão no pino D2 (com o pull-up interno ligado) e dois LEDs com resistores de 220 Ω: um no pino D13 e outro no D12. O programa gravado faz três coisas ao mesmo tempo: acende o LED do D13 enquanto o botão está apertado, pisca o LED do D12 uma vez por segundo pelo relógio e lê o potenciômetro.
+
+<Simulation circuit="m12/primeiro-programa" />
+
+Aperte o play (▶) e faça os testes. Para ver o que o programa leu, clique no microcontrolador: o painel mostra o nível de cada pino, a leitura do ADC (`leitura`) e a tensão que ela representa.
+
+1. Com o potenciômetro no meio, quanto marca a tensão em A0? E a leitura do ADC?
+2. Leve o potenciômetro a 25 % e depois ao máximo. Confira as leituras com a fórmula.
+3. Segure o botão. O que acontece com a tensão em D2 e com o LED do D13? Quanto de corrente passa nesse LED?
+4. Repare no LED do D12: ele continua piscando no mesmo ritmo enquanto você mexe no resto?
+
+Com o potenciômetro no meio, A0 recebe cerca de 2,49 V e o ADC lê 510, perto da metade da escala (512). Em 25 %, a tensão cai para cerca de 1,25 V e a leitura para 255. No máximo, 5 V e 1023. Solto, o pino D2 fica em quase 5 V, puxado pelo pull-up; apertado, vai a 0 V, o programa lê 0 e acende o LED do D13, que recebe cerca de 11,5 mA. O LED do D12 não liga para nada disso: continua 500 ms aceso e 500 ms apagado, porque o programa só olha o relógio a cada volta, sem parar para esperar.
+
+## Exemplo resolvido: o que o ADC lê
+
+Um sensor entrega 3,3 V numa entrada analógica de um Arduino Uno, com referência de 5 V. Qual é a leitura? E qual é a menor variação de temperatura que dá para perceber, se o sensor varia 10 mV por grau?
+
+**Passo 1: a fração da referência.**
+
+$$
+\frac{3{,}3\,\text{V}}{5\,\text{V}} = 0{,}66
+$$
+
+**Passo 2: a leitura.**
+
+$$
+0{,}66 \times 1024 = 675{,}84 \;\Rightarrow\; \text{leitura} = 675
+$$
+
+**Passo 3: a resolução.** Cada degrau vale 4,9 mV. Com 10 mV por grau, o ADC percebe variações de cerca de meio grau:
+
+$$
+\frac{4{,}9\,\text{mV}}{10\,\text{mV}/^\circ\text{C}} \approx 0{,}5\,^\circ\text{C}
+$$
+
+**Passo 4: o caminho de volta.** O programa faz a conta ao contrário para mostrar a tensão: $675 \times 5 / 1024 \approx 3{,}296\,\text{V}$. A pequena diferença para 3,3 V é o arredondamento do degrau.
+
+<RealCase title="O microcontrolador da central do portão">
+
+Abra uma central de portão e procure o chip com mais pernas: é o microcontrolador. Na aula <LinkAula id="m16-portao/03-a-central-por-dentro" />, você vê cada bloco dela. Com o que viu agora, dá para ler a placa:
+
+- Os **fins de curso**, a **botoeira** e a **fotocélula** chegam em entradas digitais com pull-up. Contato fechado lê 0.
+- Os trimpots de **pausa** e de **força**, e o sensor de corrente do motor, chegam em entradas analógicas (ADC).
+- Os **relés** que escolhem o sentido do motor são acionados por saídas digitais, cada um com seu transistor e seu diodo.
+- O **TRIAC** que liga o motor com partida suave recebe pulsos de uma saída, sincronizados com a rede.
+- Os controles cadastrados ficam na **EEPROM**, e por isso não se perdem quando falta energia.
+
+O mesmo vale para a máquina de lavar, o ar-condicionado e o carregador inteligente: troca o programa e os sensores, mas o microcontrolador lê entradas, decide e comanda saídas do mesmo jeito.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Ligar 5 V num pino de 3,3 V.** Os pinos do ESP32 não toleram 5 V. Use um divisor de tensão ou um conversor de nível lógico entre um sensor de 5 V e o ESP32.
+- **Ligar a carga direto no pino.** Relé, motor, fita de LED, buzzer grande: entre o pino e a carga vai um transistor ou um MOSFET. O pino aguenta poucos miliampères.
+- **Deixar uma entrada flutuando.** Um botão sem pull-up (interno ou externo) faz o programa ler ruído: o LED acende sozinho quando você aproxima a mão.
+- **Esquecer o negativo comum.** Quando a carga tem fonte própria, o GND dela precisa estar ligado ao GND da placa.
+- **Alimentar motores pelo 5 V da placa.** O regulador e a porta USB aguentam pouca corrente; um motor que parte pode derrubar a tensão e reiniciar o microcontrolador. Use uma fonte separada para a carga, com o negativo em comum.
+- **Passar da tensão de entrada do ADC.** Uma tensão acima da referência (ou negativa) no pino analógico pode danificar a entrada. Um divisor de tensão traz sinais maiores para a faixa certa.
+- **Mexer na placa com o circuito de potência ligado.** Se a placa comanda algo ligado à rede, desligue o disjuntor antes de mexer na fiação.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'O que diferencia um microcontrolador do processador de um computador?',
+      options: [
+        {
+          text: 'O microcontrolador junta processador, memórias, relógio e periféricos dos pinos num chip só',
+          correct: true,
+          feedback:
+            'Isso. Ele é um computador pequeno e completo, feito para ler sensores e comandar saídas dentro de um aparelho.',
+        },
+        {
+          text: 'O microcontrolador é sempre mais rápido',
+          feedback: 'Não: ele costuma ser bem mais lento que o processador de um computador ou de um celular.',
+        },
+        {
+          text: 'O microcontrolador não tem memória para o programa',
+          feedback: 'Tem, sim: a memória flash, dentro do próprio chip, guarda o firmware.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada memória ao que ela guarda.',
+      pairs: [
+        ['Flash', 'O programa (firmware); não apaga sem energia'],
+        ['RAM', 'As variáveis enquanto o programa roda; apaga sem energia'],
+        ['EEPROM', 'Ajustes que precisam sobreviver a uma queda de energia'],
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Num Arduino Uno com referência de 5 V, uma entrada analógica recebe 1,8 V. Qual é a leitura do ADC de 10 bits?',
+      answer: 368,
+      tolerance: 0.005,
+      explanation: '1,8 ÷ 5 = 0,36; 0,36 × 1024 = 368,64, que arredonda para baixo: 368.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um botão está ligado entre o pino D2 e o GND, com o pull-up interno ligado. O que o programa lê com o botão solto e apertado?',
+      options: [
+        {
+          text: 'Solto, 1 (alto); apertado, 0 (baixo)',
+          correct: true,
+          feedback:
+            'Isso. O pull-up puxa o pino para o positivo; o botão apertado liga o pino ao GND. A lógica fica invertida.',
+        },
+        {
+          text: 'Solto, 0; apertado, 1',
+          feedback:
+            'Seria assim com um resistor de pull-down e o botão ligado ao positivo. Com pull-up e botão ao GND, é o contrário.',
+        },
+        {
+          text: 'Solto, um valor aleatório; apertado, 0',
+          feedback: 'Sem o pull-up seria assim. O pull-up existe justamente para o pino solto ler 1.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Um sensor que entrega 5 V pode ser ligado direto num pino de entrada do ESP32.',
+      answer: false,
+      explanation:
+        'Os pinos do ESP32 trabalham com 3,3 V e não toleram 5 V. Use um divisor de tensão ou um conversor de nível lógico.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que um relé de 12 V não pode ser ligado direto num pino do Arduino?',
+      options: [
+        {
+          text: 'O pino dá só 5 V e poucos miliampères; a bobina precisa de um transistor no meio',
+          correct: true,
+          feedback:
+            'Isso. O transistor (ou um módulo de relé, que já o traz) obedece ao pino e aguenta a tensão e a corrente da bobina.',
+        },
+        {
+          text: 'Porque o relé é uma carga analógica e o pino é digital',
+          feedback: 'O relé só liga ou desliga, como um pino digital. O problema é a tensão e a corrente.',
+        },
+        {
+          text: 'Porque o relé precisa de PWM',
+          feedback: 'Um relé comum é ligado ou desligado. O que falta é corrente e tensão, que o transistor fornece.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um programa precisa piscar um LED a cada meio segundo e, ao mesmo tempo, responder a um botão na hora. Qual é o jeito certo?',
+      options: [
+        {
+          text: 'Olhar o relógio (millis) a cada volta e só inverter o LED quando chegar a hora',
+          correct: true,
+          feedback:
+            'Isso. O programa nunca fica parado esperando, e por isso vê o botão a qualquer momento. É a base da máquina de estados.',
+        },
+        {
+          text: 'Esperar 500 ms parado entre cada inversão do LED',
+          feedback:
+            'Enquanto espera parado, o programa não lê o botão: um toque curto pode passar despercebido.',
+        },
+        {
+          text: 'Usar um microcontrolador para cada tarefa',
+          feedback: 'Funciona, mas não é preciso: um só dá conta das duas tarefas se não ficar parado esperando.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **microcontrolador** é um computador pequeno num chip só: processador, memória flash (programa), RAM (variáveis), EEPROM (ajustes), relógio e periféricos. O programa gravado nele é o **firmware**.
+- As **placas de desenvolvimento** (estilo Arduino Uno, de 5 V, e estilo ESP32, de 3,3 V, com Wi-Fi) trazem regulador, cristal, USB e os pinos em barras.
+- Os pinos (**GPIO**) fazem quatro papéis: entrada digital (alto ou baixo, com **pull-up** para botões), saída digital (poucos miliampères), entrada analógica (**ADC**: no Uno, 0 a 1023 para 0 a 5 V, cerca de 4,9 mV por degrau) e saída **PWM** (ciclo de trabalho define a média).
+- **Temporizadores** contam o tempo sozinhos; olhar o relógio em vez de esperar parado deixa o programa fazer várias coisas ao mesmo tempo.
+- Respeite os limites: 3,3 V não é 5 V, cargas maiores precisam de transistor, e o negativo é comum.
+
+Na próxima aula, você vai ver como organizar o programa de um equipamento em [máquinas de estado](../02-maquinas-de-estado/), com a lógica da central do portão funcionando ao vivo.

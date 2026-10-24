@@ -1,0 +1,159 @@
+---
+/* 12.2: state diagram of the staircase light timer (firmware m12/minuteria):
+   three states, the events on the arrows and the action after the slash. */
+---
+
+<svg viewBox="0 0 560 360" width="560" height="360" class="fig" aria-hidden="true">
+  <defs>
+    <marker
+      id="m12-mst-arrow"
+      viewBox="0 0 10 10"
+      refX="9"
+      refY="5"
+      markerWidth="7"
+      markerHeight="7"
+      orient="auto-start-reverse"
+    >
+      <path d="M0 0L10 5L0 10Z" class="head"></path>
+    </marker>
+  </defs>
+
+  <!-- Start: power on -->
+  <path d="M24 70H52Q70 70 76 100" class="arr start" marker-end="url(#m12-mst-arrow)"></path>
+  <text x="20" y="60" class="ev begin">
+    liga a placa
+  </text>
+
+  <!-- States -->
+  <g>
+    <rect x="58" y="110" width="128" height="62" rx="31" class="st off"></rect>
+    <text x="122" y="138" class="name">
+      APAGADA
+    </text>
+    <text x="122" y="156" class="out">
+      luz desligada
+    </text>
+  </g>
+  <g>
+    <rect x="374" y="110" width="128" height="62" rx="31" class="st on"></rect>
+    <text x="438" y="138" class="name">
+      ACESA
+    </text>
+    <text x="438" y="156" class="out">
+      luz ligada, contando
+    </text>
+  </g>
+  <g>
+    <rect x="216" y="272" width="128" height="62" rx="31" class="st fix"></rect>
+    <text x="280" y="300" class="name">
+      FIXA
+    </text>
+    <text x="280" y="318" class="out">
+      luz ligada direto
+    </text>
+  </g>
+
+  <!-- APAGADA → ACESA -->
+  <path d="M170 116Q280 60 390 116" class="arr" marker-end="url(#m12-mst-arrow)"></path>
+  <text x="280" y="72" class="ev">
+    toque
+  </text>
+  <text x="280" y="88" class="act">
+    / começa a contar o tempo
+  </text>
+
+  <!-- ACESA → APAGADA -->
+  <path d="M374 150H190" class="arr" marker-end="url(#m12-mst-arrow)"></path>
+  <text x="280" y="142" class="ev">
+    tempo esgotado
+  </text>
+
+  <!-- ACESA self loop -->
+  <path d="M470 112Q520 40 500 132" class="arr" marker-end="url(#m12-mst-arrow)"></path>
+  <text x="514" y="58" class="ev">
+    toque
+  </text>
+  <text x="514" y="74" class="act">
+    / recomeça
+  </text>
+
+  <!-- APAGADA ⇄ FIXA -->
+  <path d="M110 172Q120 260 214 296" class="arr" marker-end="url(#m12-mst-arrow)"></path>
+  <text x="92" y="240" class="ev end">
+    segurar 2 s
+  </text>
+  <path d="M230 278Q170 236 150 176" class="arr" marker-end="url(#m12-mst-arrow)"></path>
+  <text x="206" y="218" class="ev">
+    toque
+  </text>
+
+  <!-- ACESA → FIXA -->
+  <path d="M440 172Q440 260 346 296" class="arr" marker-end="url(#m12-mst-arrow)"></path>
+  <text x="456" y="240" class="ev">
+    segurar 2 s
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .st {
+    stroke-width: 1.6;
+  }
+  .off {
+    fill: var(--surface-2);
+    stroke: var(--border-strong);
+  }
+  .on {
+    fill: var(--warning-soft);
+    stroke: var(--warning-border);
+  }
+  .fix {
+    fill: var(--success-soft);
+    stroke: var(--success-border);
+  }
+  .name {
+    fill: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .out {
+    fill: var(--fg-muted);
+    font-size: 11px;
+    text-anchor: middle;
+  }
+  .arr {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.8;
+  }
+  .start {
+    stroke: var(--fg-muted);
+    stroke-dasharray: 4 3;
+  }
+  .head {
+    fill: var(--accent);
+  }
+  .ev {
+    fill: var(--fg);
+    font-size: 12.5px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .act {
+    fill: var(--fg-muted);
+    font-size: 11.5px;
+    text-anchor: middle;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .begin {
+    text-anchor: start;
+  }
+</style>
