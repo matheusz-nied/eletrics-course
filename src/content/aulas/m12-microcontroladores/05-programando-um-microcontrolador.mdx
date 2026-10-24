@@ -27,7 +27,7 @@ Não é preciso saber programar antes. Os programas de microcontrolador para aut
 
 Placas tipo Arduino são programadas numa versão de C++ com algumas funções prontas para mexer nos pinos. Todo programa tem duas partes obrigatórias:
 
-```cpp
+```text
 void setup() {
   // roda uma vez só, quando a placa liga ou reinicia
 }
@@ -118,7 +118,7 @@ O `delay()` é cômodo, mas tem um preço: enquanto ele espera, o microcontrolad
 
 A solução é a mesma da máquina de estados da aula <LinkAula id="m12-microcontroladores/02-maquinas-de-estado" />: em vez de esperar, o programa **olha o relógio** a cada volta do `loop()` e só age quando chegou a hora.
 
-```cpp
+```text
 unsigned long ultimaTroca = 0;
 
 void loop() {

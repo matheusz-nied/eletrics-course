@@ -77,7 +77,7 @@ Os contadores e os flip-flops da eletrônica digital (veja <LinkAula id="m11-dig
 
 O programa de uma máquina de estados tem sempre o mesmo esqueleto: uma variável guarda o estado, e o `loop()`, que o microcontrolador repete sem parar, olha o estado atual, lê as entradas e decide. Um trecho da minuteria, no estilo do Arduino:
 
-```cpp
+```text
 enum Estado { APAGADA, ACESA, FIXA };
 Estado estado = APAGADA;
 unsigned long inicio;        // quando a contagem começou (ms)

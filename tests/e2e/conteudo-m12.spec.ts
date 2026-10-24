@@ -89,7 +89,7 @@ test.describe('módulo 12: microcontroladores', () => {
     await expect(reading(sim, 'IK')).toContainText(/30,\d\smA/, { timeout: 15_000 });
     await expect(reading(sim, 'IL')).toContainText(/41\d\smA/, { timeout: 15_000 });
     await tap(page, button);
-    await expect(reading(sim, 'IL')).toContainText(/: -?0 A|: -?\d+(,\d+)?\s[nµp]A/, {
+    await expect(reading(sim, 'IL')).toContainText(/:\s-?0\sA|:\s-?\d+(,\d+)?\s[nµp]A/, {
       timeout: 15_000,
     });
     errors.expectClean();
@@ -103,9 +103,9 @@ test.describe('módulo 12: microcontroladores', () => {
     await sim.getByRole('button', { name: 'Iniciar simulação', exact: true }).click();
     const sw = sim.locator('.sim-controls').getByRole('switch', { name: /Interruptor da parede/ });
     await sw.click();
-    await expect(reading(sim, 'VL')).toContainText(/126,\d\sV/, { timeout: 15_000 });
+    await expect(reading(sim, 'VL')).toContainText(/:\s127\sV/, { timeout: 15_000 });
     await sw.click();
-    await expect(reading(sim, 'VL')).not.toContainText(/126,\d\sV/, { timeout: 15_000 });
+    await expect(reading(sim, 'VL')).not.toContainText(/:\s127\sV/, { timeout: 15_000 });
     errors.expectClean();
   });
 
