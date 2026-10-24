@@ -1,0 +1,216 @@
+---
+titulo: Infravermelho, Bluetooth e Wi-Fi
+modulo: m13-sem-fio
+ordem: 4
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Explicar como o controle da TV manda comandos por infravermelho e por que usa uma portadora de 38 kHz
+  - Testar um controle infravermelho com a câmera do celular
+  - Ler um quadro do protocolo NEC
+  - Comparar infravermelho, 433 MHz, Bluetooth, Wi-Fi e RFID em alcance, consumo e uso
+  - Escolher a tecnologia sem fio certa para um projeto e cuidar da segurança de aparelhos conectados
+prerequisitos:
+  - m13-sem-fio/01-ondas-eletromagneticas
+  - m13-sem-fio/03-controles-remotos
+  - m09-semicondutores/04-leds
+tags: [infravermelho, controle da TV, NEC, 38 kHz, Bluetooth, Wi-Fi, RFID, ESP32, automação]
+seguranca: baixa-tensao
+---
+
+import ControleIR from '../../../lessons/m13/ControleIR.tsx';
+
+O controle da TV parou de funcionar. Você troca as pilhas e nada. Antes de comprar outro, aponte o controle para a câmera do celular e aperte um botão: se aparecer uma luzinha lilás piscando na tela, o controle está mandando sinal, e o problema está na TV ou no caminho. Se não aparecer nada, o defeito é no controle. Esse teste de dez segundos funciona porque o controle da TV fala com uma luz que os olhos não veem, mas a câmera vê.
+
+## Infravermelho: o controle da TV
+
+O controle da TV não usa rádio. Na ponta dele há um <Term id="led">LED</Term> que emite <Term id="infravermelho">infravermelho</Term>, perto de 940 nm, um pouco além do vermelho que conseguimos enxergar (aula <LinkAula id="m13-sem-fio/01-ondas-eletromagneticas" />). Na TV, atrás de uma janelinha escura, há um receptor que transforma essa luz em sinal elétrico.
+
+O infravermelho é perfeito para o controle da TV por três motivos: o LED é barato e gasta pouco, a luz é invisível e não incomoda, e ela **não atravessa paredes**. O controle da sala não liga a TV do quarto. Em troca, precisa de linha de visada: alguém na frente, ou o controle virado para o lado errado, e o comando não chega. Paredes claras e o teto refletem o infravermelho, e por isso às vezes funciona mesmo apontando para o lado.
+
+### A portadora de 38 kHz
+
+O sol, as lâmpadas e o próprio calor do ambiente também emitem infravermelho. Se o LED só acendesse e apagasse no ritmo dos bits, o receptor confundiria tudo isso com comandos. A solução é a mesma do rádio: uma <Term id="portadora">portadora</Term>. Durante cada pulso, o LED **pisca** 38 mil vezes por segundo, e o receptor tem um filtro que só deixa passar luz piscando nesse ritmo. A luz do sol, que não pisca, é ignorada.
+
+O receptor da TV é um componente de três terminais (alimentação, terra e saída) que faz tudo sozinho: um fotodiodo capta a luz, um amplificador reforça o sinal, um filtro escolhe os 38 kHz e um detector entrega na saída os pulsos já sem a portadora, prontos para o microcontrolador.
+
+<Model3D
+  part="ir-receiver"
+  cutaway
+  annotations
+  caption="Receptor infravermelho de 38 kHz em corte: a lente escura, o fotodiodo atrás dela, o chip que amplifica, filtra e demodula, e os três terminais."
+/>
+
+O plástico do receptor é escuro de propósito: ele deixa passar o infravermelho e barra boa parte da luz visível, que só atrapalharia. A ordem dos três terminais muda de modelo para modelo, então confira a folha de dados antes de ligar.
+
+## Um quadro do protocolo NEC
+
+Cada fabricante tem o seu "idioma" de pulsos. Um dos mais comuns é o **NEC**, usado por muitas TVs, receptores e aparelhos de som. Um aperto manda:
+
+- um pulso de 9 ms e uma pausa de 4,5 ms, para o receptor acordar e se preparar;
+- 32 bits, cada um começando com um pulso de 562,5 µs; a **pausa** depois do pulso diz o valor: 562,5 µs para 0, 1.687,5 µs para 1;
+- um pulso final de 562,5 µs.
+
+Os 32 bits são quatro bytes: o **endereço** do aparelho, o endereço invertido, o **comando** do botão e o comando invertido. A cópia invertida é uma conferência: se um byte e a cópia não forem exatamente opostos, a TV ignora a mensagem. O endereço é o que faz o controle da TV não mexer no aparelho de som. Segurando o botão, o controle manda um código curto de repetição a cada 108 ms, e a TV continua subindo o volume.
+
+<ControleIR client:visible />
+
+1. Escolha **Liga/desliga** e aperte. Identifique o pulso inicial, o endereço, o comando e as cópias invertidas.
+2. Troque para **Volume +**. Que partes da mensagem mudaram?
+3. Marque **Segurar o botão apertado**. O que o controle manda depois da primeira mensagem?
+4. Marque **Ver pela câmera do celular** e aperte de novo.
+
+No passo 2, só o comando e o comando invertido mudam; o endereço é o mesmo, porque é a mesma TV. No passo 3, aparecem dois códigos curtos de repetição, sem endereço nem comando: só um "continuo apertado". No passo 4, o LED aparece aceso na tela, como no teste do começo da aula. Os códigos dos botões da figura são exemplos; cada fabricante tem os seus.
+
+Outros protocolos usam a mesma ideia com números diferentes: o RC-5, por exemplo, usa portadora de 36 kHz, e o da Sony, 40 kHz. Por isso um controle universal precisa ser configurado com a marca do aparelho. O controle do ar-condicionado é diferente: em vez de um comando, cada aperto manda o **estado inteiro** (modo, temperatura, ventilação), numa mensagem bem mais longa. Se o ar-condicionado ficar fora de alcance por um aperto, o próximo corrige tudo.
+
+## Exemplo resolvido: tempos de um quadro NEC
+
+**1. Quanto dura a mensagem?** Como cada byte vai junto com a cópia invertida, metade dos 32 bits é 1 e metade é 0, qualquer que seja o botão. Cada 0 dura $562{,}5 + 562{,}5 = 1{,}125\,\text{ms}$; cada 1, $562{,}5 + 1.687{,}5 = 2{,}25\,\text{ms}$:
+
+$$
+9 + 4{,}5 + 16 \times 1{,}125 + 16 \times 2{,}25 + 0{,}5625 \approx 68{,}1\,\text{ms}
+$$
+
+**2. Quantas piscadas cabem num pulso de bit?** A 38 kHz, um ciclo dura $1/38.000 \approx 26{,}3\,\mu\text{s}$:
+
+$$
+\frac{562{,}5\,\mu\text{s}}{26{,}3\,\mu\text{s}} \approx 21\ \text{piscadas}
+$$
+
+O pulso inicial de 9 ms tem cerca de 342. O receptor precisa de algumas piscadas para "reconhecer" a portadora, e é por isso que os pulsos não podem ser muito curtos.
+
+## Rádio de 2,4 GHz: Bluetooth e Wi-Fi
+
+O infravermelho e o controle de 433 MHz mandam poucos bits, num sentido só. O celular, o fone e o roteador precisam trocar muitos dados nos dois sentidos, com senha. Para isso existem o Bluetooth e o Wi-Fi, que usam rádio na faixa de 2,4 GHz (o Wi-Fi também em 5 GHz e, nos aparelhos mais novos, 6 GHz).
+
+O <Term id="bluetooth">Bluetooth</Term> liga aparelhos próximos direto, sem roteador: fone, caixa de som, relógio, teclado, sensores. Ele salta de canal muitas vezes por segundo dentro da faixa, o que o torna resistente a interferências, e a versão de baixo consumo (BLE) funciona meses com uma bateria de moeda. Antes de conversar, os aparelhos fazem o **pareamento**, uma troca de chaves que impede outro aparelho de entrar na conversa.
+
+O <Term id="wi-fi">Wi-Fi</Term> liga aparelhos a um roteador, e por ele à internet. É o que permite comandar a luz, o portão ou o ar-condicionado pelo celular de qualquer lugar. Placas como o ESP32, um microcontrolador com Wi-Fi e Bluetooth embutidos e a antena desenhada na própria placa, tornaram isso barato (aula <LinkAula id="m12-microcontroladores/06-automacao-residencial" />). O preço é o consumo: um aparelho Wi-Fi precisa de fonte ou de bateria grande.
+
+### E o cartão da portaria?
+
+A tag do condomínio, o crachá e o cartão de transporte usam **RFID**, outra forma de comunicação sem fio. O leitor cria um campo magnético que alimenta o chip do cartão por indução (aula <LinkAula id="m05-magnetismo/03-inducao-eletromagnetica" />), e o chip responde. Como não há bateria no cartão, o alcance é de poucos centímetros: é preciso aproximar. As tags de condomínio costumam trabalhar em 125 kHz ou em 13,56 MHz, a mesma frequência do NFC do celular.
+
+## Quem é quem
+
+| Tecnologia | Frequência | Alcance típico | Consumo | Atravessa paredes | Onde aparece |
+| --- | --- | --- | --- | --- | --- |
+| Infravermelho | cerca de 940 nm (luz) | poucos metros, com visada | muito baixo | não | Controle da TV, do ar-condicionado, sensores de barreira |
+| Rádio de 433 MHz | 433,92 MHz | dezenas de metros | muito baixo | sim, com perdas | Controle de portão, alarme, sensores sem fio, campainha |
+| Bluetooth | 2,4 GHz | alguns metros a dezenas de metros | baixo (BLE: muito baixo) | parcialmente | Fone, caixa de som, relógio, fechadura |
+| Wi-Fi | 2,4, 5 e 6 GHz | dezenas de metros até o roteador | alto | parcialmente | Internet, automação residencial, câmeras |
+| RFID e NFC | 125 kHz, 13,56 MHz | centímetros | o cartão não tem bateria | não precisa | Tag de condomínio, crachá, pagamento por aproximação |
+
+Os alcances são típicos e mudam muito com antena, potência e obstáculos. Uma regra útil: quanto maior a frequência, mais dados cabem e pior o sinal atravessa paredes. O 433 MHz atravessa o muro melhor que o Wi-Fi de 5 GHz, mas manda alguns bits por aperto; o Wi-Fi manda um vídeo.
+
+<RealCase title="O portão pelo celular">
+Um morador quer abrir o portão pelo celular, além do controle. Há dois caminhos comuns:
+
+- **Central com Wi-Fi ou com módulo Wi-Fi do fabricante.** O módulo se liga à central e ao roteador, e um aplicativo manda o comando. Quando chega um comando, o módulo fecha um contato, igual ao da botoeira (aula <LinkAula id="m16-portao/05-seguranca-e-acessorios" />).
+- **Placa genérica com relé**, como a da aula <LinkAula id="m13-sem-fio/03-controles-remotos" />, só que com Wi-Fi: o contato seco do relé vai na entrada de botoeira da central.
+
+Nos dois casos, o Wi-Fi tem que chegar ao portão, que costuma ficar longe do roteador e atrás de muro: teste o sinal com o celular parado no lugar da central antes de comprar. E o portão passa a depender da segurança da rede: senha forte no Wi-Fi, senha própria no aplicativo, firmware atualizado e, se der, uma rede separada para os aparelhos da casa. Um portão que abre pela internet é tão seguro quanto a senha mais fraca do caminho.
+</RealCase>
+
+<Callout type="atencao" title="A instalação do módulo é na central do portão">
+O módulo Wi-Fi é ligado na placa da central, que tem bornes de rede e do motor. Desligue o disjuntor do portão antes de abrir, teste a ausência de tensão e siga o manual do módulo. A troca e a ligação da central estão na aula <LinkAula id="m16-portao/07-trocar-motor-e-central" />.
+</Callout>
+
+## Erros comuns e segurança
+
+- **Trocar o controle da TV sem testar.** O teste da câmera do celular mostra em segundos se o controle transmite. Se a câmera traseira não mostrar nada, tente a frontal: algumas câmeras traseiras têm filtro que barra o infravermelho.
+- **Culpar o controle quando é a luz.** Algumas lâmpadas fluorescentes, telas e o sol direto na janela do receptor atrapalham o infravermelho. Teste com a luz apagada e a cortina fechada.
+- **Encarar iluminadores infravermelhos de perto.** Os LEDs do controle são fracos, mas os iluminadores das câmeras de segurança são fortes e invisíveis: o olho não pisca nem fecha a pupila para eles. Não olhe de perto por muito tempo.
+- **Ligar o receptor infravermelho com os pinos na ordem errada.** A ordem muda de um modelo para outro. Confira a folha de dados.
+- **Esquecer a segurança do que está conectado.** Senha padrão em aparelho Wi-Fi é porta aberta. Troque a senha no primeiro dia e atualize o firmware.
+- **Esperar que o Bluetooth alcance o portão da rua.** Bluetooth é para perto. Para distância, use o rádio de 433 MHz ou o Wi-Fi com sinal testado.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Por que o LED do controle da TV pisca a 38 kHz durante cada pulso?',
+      options: [
+        {
+          text: 'Para o receptor separar o comando da luz do sol e das lâmpadas, que não piscam nesse ritmo',
+          correct: true,
+        },
+        {
+          text: 'Para economizar a pilha',
+          feedback: 'Piscando, o LED gasta menos, mas o motivo principal é o filtro do receptor, que só aceita luz piscando a 38 kHz.',
+        },
+        {
+          text: 'Porque o LED não consegue ficar aceso direto',
+          feedback: 'O LED fica aceso direto sem problema. A portadora é para o receptor ignorar outras fontes de infravermelho.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Se o LED do controle não aparece na câmera do celular, com pilhas novas, o defeito provavelmente está no controle.',
+      answer: true,
+      explanation:
+        'A câmera vê o infravermelho. Sem luz nenhuma na tela (testando também a câmera frontal), o controle não está transmitindo: pilhas mal encaixadas, contato oxidado ou defeito na placa.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'No protocolo NEC, o que diz se um bit é 0 ou 1?',
+      options: [
+        { text: 'A duração da pausa depois do pulso de 562,5 µs', correct: true },
+        {
+          text: 'A frequência da portadora',
+          feedback: 'A portadora fica em 38 kHz o tempo todo. O valor do bit está no tempo da pausa.',
+        },
+        {
+          text: 'A intensidade do LED',
+          feedback: 'O receptor não mede a intensidade. Ele mede quando há e quando não há luz piscando.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um pulso de 9 ms tem portadora de 38 kHz. Quantas piscadas do LED cabem nele? (arredonde para um número inteiro)',
+      answer: 342,
+      tolerance: 0.01,
+      explanation: '38.000 × 0,009 = 342 piscadas.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada situação à tecnologia mais adequada.',
+      pairs: [
+        ['Abrir o portão do carro a 30 m', 'Rádio de 433 MHz'],
+        ['Mudar o canal da TV no sofá', 'Infravermelho'],
+        ['Ouvir música num fone sem fio', 'Bluetooth'],
+        ['Acender a luz de casa estando no trabalho', 'Wi-Fi'],
+        ['Entrar no prédio aproximando uma tag', 'RFID'],
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'O controle da sala não liga a TV do quarto, mesmo com a porta aberta e a TV logo atrás da parede. Por quê?',
+      options: [
+        { text: 'O infravermelho não atravessa paredes', correct: true },
+        {
+          text: 'Cada TV tem uma frequência de rádio diferente',
+          feedback: 'O controle da TV não usa rádio. Se as TVs forem da mesma marca, o controle até liga a outra, se ela estiver à vista.',
+        },
+        {
+          text: 'O endereço da TV do quarto é sempre diferente',
+          feedback: 'TVs da mesma marca costumam ter o mesmo endereço. O que bloqueia é a parede.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O controle da TV usa um LED infravermelho de cerca de 940 nm. A luz é invisível, barata e não atravessa paredes, mas precisa de visada.
+- Durante cada pulso, o LED pisca a 38 kHz, e o receptor de três terminais só aceita essa portadora: a luz do sol e das lâmpadas é ignorada.
+- No protocolo NEC, um aperto manda 9 ms + 4,5 ms de início e 32 bits (endereço, comando e as cópias invertidas), com o valor de cada bit na duração da pausa. Segurando, vai um código de repetição a cada 108 ms.
+- A câmera do celular vê o infravermelho: é o teste mais rápido de um controle.
+- Bluetooth liga aparelhos próximos, com pouco consumo; Wi-Fi liga ao roteador e à internet, com mais consumo; RFID funciona por aproximação, sem bateria no cartão. Aparelho conectado precisa de senha forte e firmware atualizado.

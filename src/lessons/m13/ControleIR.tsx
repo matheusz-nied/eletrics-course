@@ -68,9 +68,7 @@ export default function ControleIR() {
   const message = encode(ADDRESS, k.command);
   const decoded = decode(message);
   const placed = place(message);
-  const repeats = held
-    ? [1, 2].flatMap((n) => place(repeatCode(), n * REPEAT_PERIOD))
-    : [];
+  const repeats = held ? [1, 2].flatMap((n) => place(repeatCode(), n * REPEAT_PERIOD)) : [];
   const span = held ? 2 * REPEAT_PERIOD + totalDuration(repeatCode()) : totalDuration(message);
   const x = (t: number) => WX0 + (t / span) * (WX1 - WX0);
   const all = [...placed, ...repeats];

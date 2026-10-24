@@ -104,8 +104,7 @@ export function solveLink(input: LinkInput): LinkResult {
     .map((id) => OBSTACLES.find((o) => o.id === id)?.loss ?? 0)
     .reduce((a, b) => a + b, 0);
   const battery = input.weakBattery ? -WEAK_BATTERY_DB : 0;
-  const budget =
-    TX_EIRP_DBM - RX_SENSITIVITY_DBM - FADE_MARGIN_DB + antenna + obstacles + battery;
+  const budget = TX_EIRP_DBM - RX_SENSITIVITY_DBM - FADE_MARGIN_DB + antenna + obstacles + battery;
   const range =
     budget >= LOSS_1M
       ? 10 ** ((budget - LOSS_1M) / (10 * env.n))

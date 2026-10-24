@@ -47,8 +47,17 @@ export default defineFirmware<State>({
   period: 0.005,
   vcc: 5,
   pins: [
-    { name: 'APRENDER', kind: 'digital-in', pullUp: true, label: 'Botão APRENDER (fecha para o GND)' },
-    { name: 'LED', kind: 'digital-out', label: 'LED de cadastro (acende com o pino em nível baixo)' },
+    {
+      name: 'APRENDER',
+      kind: 'digital-in',
+      pullUp: true,
+      label: 'Botão APRENDER (fecha para o GND)',
+    },
+    {
+      name: 'LED',
+      kind: 'digital-out',
+      label: 'LED de cadastro (acende com o pino em nível baixo)',
+    },
     { name: 'RELE', kind: 'digital-out', label: 'Transistor do relé' },
   ],
   init: (memory) => ({
@@ -123,7 +132,8 @@ export default defineFirmware<State>({
           s.refused++;
           events.push({
             kind: 'warning',
-            message: 'Código repetido recusado: o contador não avançou (cópia de um aperto antigo).',
+            message:
+              'Código repetido recusado: o contador não avançou (cópia de um aperto antigo).',
           });
           continue;
         }

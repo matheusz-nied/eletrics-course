@@ -202,7 +202,11 @@ export default function TransmissaoBits() {
               ))}
             </div>
             <div className="bits__buttons">
-              <button type="button" className="lw__btn lw__btn--primary" onClick={() => press(true)}>
+              <button
+                type="button"
+                className="lw__btn lw__btn--primary"
+                onClick={() => press(true)}
+              >
                 Apertar o botão
               </button>
               <button type="button" className="lw__btn" onClick={() => press(false)}>
@@ -355,8 +359,8 @@ export default function TransmissaoBits() {
           {kind === 'rolling' && (
             <p className="lw__note">
               O receptor aceita um contador até {WINDOW} apertos à frente do último. Na figura, a
-              parte cifrada usa um embaralhamento de brinquedo; nos controles reais é uma cifra
-              com chave secreta.
+              parte cifrada usa um embaralhamento de brinquedo; nos controles reais é uma cifra com
+              chave secreta.
             </p>
           )}
         </div>

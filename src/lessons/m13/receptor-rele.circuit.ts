@@ -143,7 +143,5 @@ export default defineCircuit({
     wire('W19', [0, 30], [3, 30], [12, 30], [20, 30], [36, 30], [44, 30], [50, 30]),
     { id: 'G', type: 'ground', at: [0, 30] },
   ],
-  probes: [
-    { id: 'IL', kind: 'current', element: 'L1', label: 'Corrente na lâmpada' },
-  ],
+  probes: [{ id: 'IL', kind: 'current', element: 'L1', label: 'Corrente na lâmpada' }],
 });

@@ -1,0 +1,258 @@
+---
+titulo: Antenas
+modulo: m13-sem-fio
+ordem: 2
+nivel: I
+duracaoMin: 35
+objetivos:
+  - Explicar por que uma antena funciona melhor com um quarto ou meia onda de comprimento
+  - Calcular o comprimento de uma antena de ¼ de onda para uma frequência
+  - Usar decibéis para somar ganhos e perdas de um enlace de rádio
+  - Estimar o efeito de antena curta, obstáculos e bateria fraca no alcance de um controle
+  - Instalar a antena da central do portão do jeito certo
+prerequisitos:
+  - m13-sem-fio/01-ondas-eletromagneticas
+tags: [antena, quarto de onda, 433 MHz, alcance, decibel, dBm, portão, coaxial]
+seguranca: rede
+---
+
+import AntenaAlcance from '../../../lessons/m13/AntenaAlcance.tsx';
+
+Um técnico troca a central de um portão. Na hora de fechar a caixa, sobra um fio amarelo de uns 17 cm saindo da placa, e ele enrola o fio em volta de um dedo para caber. Na semana seguinte, o cliente reclama: o controle, que abria o portão da esquina, agora só funciona colado no portão. Nada queimou e nenhum código mudou. O que mudou foi a **antena**.
+
+## O que uma antena faz
+
+Uma <Term id="antena">antena</Term> é um condutor que troca energia entre o circuito e o espaço. No transmissor, a corrente de alta frequência que vai e volta no fio cria a onda (aula <LinkAula id="m13-sem-fio/01-ondas-eletromagneticas" />). No receptor, a onda que passa empurra os elétrons livres do fio para lá e para cá e cria uma corrente minúscula, que o receptor amplifica. A mesma antena serve para as duas coisas.
+
+Qualquer pedaço de fio faz isso um pouco. Mas um fio de tamanho qualquer faz muito mal.
+
+### Ressonância: o balanço empurrado no ritmo certo
+
+Pense numa criança num balanço. Se você empurra no ritmo do balanço, cada empurrão soma, e com pouca força ela vai alto. Se empurra fora do ritmo, parte dos empurrões trava o movimento, e a energia volta para a sua mão.
+
+Um fio também tem um ritmo próprio. Quando a corrente corre de uma ponta à outra, a carga se acumula nas pontas e volta, como uma onda numa corda presa nas duas extremidades. O fio "balança" melhor quando a ida e a volta cabem certinho em um ciclo do sinal. Isso acontece quando o fio tem **meia onda** de comprimento: a antena **dipolo**, alimentada no meio, com uma metade para cada lado.
+
+Fora desse comprimento, a antena se comporta como um capacitor (fio curto demais) ou como um indutor (fio comprido demais), e parte da energia é refletida de volta ao circuito em vez de ir para o espaço. A antena está **fora de ressonância**. A reatância de capacitores e indutores aparece na aula <LinkAula id="m06-corrente-alternada/04-reatancia-e-impedancia" />.
+
+### O quarto de onda e o espelho de metal
+
+Meia onda em 433,92 MHz são quase 35 cm. Dá para encurtar pela metade com um truque: um fio de **um quarto de onda**, em pé sobre uma superfície de metal. O metal funciona como um espelho para a onda: aparece nele a "imagem" do fio, como se houvesse a outra metade do dipolo para baixo. O conjunto se comporta como uma antena de meia onda.
+
+Essa superfície se chama <Term id="plano-de-terra">plano de terra</Term>. Na central do portão, é o cobre do GND da placa; nas antenas externas, são as hastes inclinadas na base; no carro, é o teto metálico.
+
+O comprimento do fio de ¼ de onda é:
+
+$$
+L = \frac{\lambda}{4} = \frac{c}{4f}
+$$
+
+em que $L$ é o comprimento do fio em metros, $c \approx 3{,}00 \times 10^8\,\text{m/s}$ e $f$ é a frequência em hertz. Em 433,92 MHz, $L \approx 17{,}3\,\text{cm}$: o fio de 17 cm das centrais.
+
+Na prática, o fio ressoa um pouco mais curto que a conta, uns 5 % menos (perto de 16,4 cm em 433,92 MHz), porque a ponta do fio também acumula carga e "alonga" a antena eletricamente. É por isso que alguns manuais pedem 16 cm e outros 17 cm. Os dois funcionam.
+
+<Model3D
+  part="rf-module-433"
+  props={{ kind: 'receptor', antenna: 'fio', antennaLength: 173 }}
+  annotations
+  caption="Módulo receptor de 433,92 MHz, igual ao das centrais de portão, com a antena de fio de ¼ de onda soldada no canto da placa."
+/>
+
+Alguns módulos trazem, no lugar do fio, uma **antena de mola**: um fio enrolado numa espiral curta. Ela ressoa na mesma frequência, mas capta menos que o fio esticado. É a troca que os fabricantes fazem quando falta espaço.
+
+### Para onde a antena irradia
+
+Uma antena de fio em pé irradia para os lados, em todas as direções do horizonte, e quase nada para cima, na direção da ponta. Ela também tem **polarização**: o campo elétrico da onda fica no mesmo plano do fio. Uma antena em pé capta melhor ondas de uma antena em pé. Se o controle estiver deitado e a antena da central em pé, perde-se parte do sinal. Na prática isso conta pouco perto de paredes e portões, que espalham a onda em todas as direções, mas ajuda a explicar por que levantar a mão melhora o alcance.
+
+## Decibéis: as contas do rádio
+
+As potências do rádio variam demais para escrever em watts. O controle irradia algo como um décimo de miliwatt, e o receptor ainda entende um sinal 3 bilhões de vezes mais fraco. Por isso se usa o <Term id="decibel">decibel</Term>, uma escala logarítmica:
+
+$$
+G = 10 \log_{10}\frac{P_2}{P_1}
+$$
+
+em que $G$ é a relação em decibéis (dB) entre a potência $P_2$ e a potência $P_1$. Algumas relações que valem decorar:
+
+| Em dB | Potência |
+| --- | --- |
+| +3 dB | o dobro |
+| −3 dB | a metade |
+| +10 dB | 10 vezes |
+| −10 dB | um décimo |
+| −30 dB | um milésimo |
+
+Quando a referência é 1 mW, escreve-se **dBm**: 0 dBm = 1 mW, −10 dBm = 0,1 mW, −100 dBm = $10^{-13}$ W. A vantagem dos decibéis é que ganhos e perdas se **somam**. Um rádio funciona quando:
+
+$$
+P_{tx} - L_{caminho} - L_{obstáculos} + G_{antena} \geq S_{rx}
+$$
+
+em que $P_{tx}$ é a potência que o transmissor irradia (dBm), $L_{caminho}$ é a perda no caminho, que cresce com a distância (dB), $L_{obstáculos}$ é o que paredes e portões tiram (dB), $G_{antena}$ é o quanto a antena do receptor perde ou ganha (dB), e $S_{rx}$ é a **sensibilidade** do receptor, o sinal mais fraco que ele ainda entende (dBm). Os valores típicos de um controle de portão são algo como −10 dBm irradiados e −105 dBm de sensibilidade no receptor.
+
+No espaço livre, cada vez que a distância dobra, o sinal perde 6 dB. Perto do chão, com casas, muros e árvores, perde mais, perto de 10 dB a cada vez que a distância dobra. Esse é o modelo que a figura abaixo usa.
+
+## Explore: o fio da antena e o alcance
+
+<AntenaAlcance client:visible />
+
+A figura parte da antena de 17 cm, com o controle na rua. Faça um teste de cada vez e volte ao começo antes do próximo:
+
+1. Anote o alcance com a antena de 17 cm. Depois corte a antena para **8 cm**. Quanto o alcance caiu?
+2. Leve a antena a **0 cm**, como uma central sem antena ou com o fio arrancado.
+3. Volte a 17 cm e marque **Central dentro de caixa de metal**.
+4. Desmarque a caixa e marque **Bateria do controle fraca**.
+5. Mude para **Campo aberto, com visada** e procure o comprimento que dá o maior alcance.
+
+Com 17 cm, o controle alcança cerca de 64 m na rua. Com 8 cm, a antena fica muito fora de ressonância, perde perto de 14 dB, e o alcance cai para uns 25 m. Sem antena, uns 8 m: é o "só funciona colado no portão". A caixa de metal tira cerca de 25 dB, e o alcance cai para uns 11 m, quase o mesmo que não ter antena. A bateria fraca tira uns 6 dB e leva o alcance a cerca de 42 m. No campo aberto, o alcance passa de 150 m, e o pico fica em torno de 16,4 cm, um pouco abaixo do quarto de onda.
+
+Os números de obstáculos e de alcance são típicos e mudam muito de um lugar para outro. O que a figura mostra bem é a **proporção**: alguns decibéis a mais ou a menos mudam o alcance pela metade ou pelo dobro.
+
+## Tipos de antena que você vai encontrar
+
+| Antena | Como é | Onde aparece |
+| --- | --- | --- |
+| Fio de ¼ de onda (*whip*) | Fio rígido ou flexível, reto, de 16 a 17 cm em 433 MHz | Centrais de portão, receptores de alarme |
+| Mola (helicoidal) | Fio enrolado em espiral curta | Módulos pequenos, sensores sem fio |
+| Laço impresso | Trilha de cobre em volta da placa | Dentro do controle remoto |
+| Impressa em F ou em zigue-zague | Trilha de cobre no canto da placa | Módulos Wi-Fi e Bluetooth, como o ESP32 |
+| Externa com plano de terra | Haste vertical com hastes inclinadas na base, ligada por cabo coaxial | Portões longe da casa, condomínios |
+
+A antena do controle é a pior delas: um laço pequeno, dentro do plástico, encostado na sua mão. Por isso quase todo o "trabalho" de alcance fica com a antena da central.
+
+## Exemplo resolvido: comprimento e alcance
+
+**1. Comprimento da antena.** Para 433,92 MHz:
+
+$$
+L = \frac{3{,}00 \times 10^8\,\text{m/s}}{4 \times 433{,}92 \times 10^6\,\text{Hz}} \approx 0{,}173\,\text{m} = 17{,}3\,\text{cm}
+$$
+
+Com o encurtamento de 5 %: $17{,}3 \times 0{,}95 \approx 16{,}4\,\text{cm}$.
+
+**2. Quanto sobra para a distância.** O controle irradia −10 dBm; o receptor entende até −105 dBm; reservamos 10 dB de margem para o sinal oscilar (folhas, pessoas passando, reflexos):
+
+$$
+-10 - (-105) - 10 = 85\,\text{dB}
+$$
+
+**3. Alcance.** O primeiro metro custa cerca de 25 dB nessa frequência. Sobram $85 - 25 = 60$ dB, que, na rua, se gastam a cerca de 33 dB a cada vez que a distância é multiplicada por 10:
+
+$$
+d = 10^{60/33} \approx 10^{1{,}82} \approx 66\,\text{m}
+$$
+
+A figura dá 64 m porque usa os valores sem arredondar e porque o fio de 17 cm fica um pouquinho fora do ponto de ressonância. Se uma caixa de metal tirar 25 dB, sobram 35 dB para a distância, e o alcance cai para $10^{35/33} \approx 11\,\text{m}$.
+
+<RealCase title="A antena da central do portão">
+O portão do exemplo do começo tinha dois problemas juntos: a antena enrolada, fora de ressonância, e a central dentro de uma caixa de chapa, colada na coluna do portão de aço. O conserto não precisou de peça nenhuma:
+
+1. Com o disjuntor do portão desligado, o técnico desenrolou o fio e deixou a antena reta, apontando para cima, longe das partes metálicas.
+2. Como a caixa era de metal, levou a antena para fora: um pedaço de cabo coaxial de 50 Ω, com o fio do centro no borne `ANT` da central e a malha no `GND`, e uma antena de ¼ de onda (ou uma antena externa pronta, de 433 MHz) na ponta, acima do muro. Alguns fabricantes, como a Rossi, indicam esse caminho no manual.
+3. Fechou a caixa, ligou o disjuntor e testou o controle da distância de uso, com e sem o carro no caminho.
+
+Se o controle continua fraco com a antena boa, troque a bateria do controle: é a causa mais comum (aula <LinkAula id="m16-portao/06-controle-remoto-e-receptor" />).
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Mexer na antena com a central ligada.** O borne `ANT` fica na mesma placa dos bornes de rede e do motor. Desligue o disjuntor do portão antes de soltar ou trocar a antena, e só religue com a tampa fechada.
+- **Enrolar, dobrar ou cortar o fio para "arrumar".** O comprimento é parte do projeto. Deixe o fio reto e inteiro.
+- **Deixar a antena dentro de caixa de metal ou encostada no portão.** O metal blinda a onda. Leve a antena para fora com coaxial.
+- **Usar fio comum no lugar do coaxial.** Um par de fios qualquer vira antena ele mesmo e desafina tudo. O cabo coaxial leva o sinal sem irradiar.
+- **Esticar a antena "para pegar mais".** Um fio comprido demais também sai de ressonância. Siga o comprimento do manual.
+- **Culpar a antena quando a bateria está fraca.** Teste com um controle de bateria nova antes de mexer na instalação.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Qual o comprimento de uma antena de ¼ de onda para 868 MHz, em centímetros? Use c = 3,00 × 10⁸ m/s.',
+      answer: 8.64,
+      tolerance: 0.02,
+      unit: 'cm',
+      explanation: 'L = c / (4f) = 3,00 × 10⁸ / (4 × 868 × 10⁶) ≈ 0,0864 m = 8,64 cm. Frequência dobrou, antena caiu pela metade.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que a antena de ¼ de onda precisa de um plano de terra?',
+      options: [
+        {
+          text: 'Porque o metal embaixo faz o papel da outra metade de uma antena de meia onda',
+          correct: true,
+        },
+        {
+          text: 'Porque a antena precisa estar aterrada para não dar choque',
+          feedback: 'O plano de terra não tem a ver com segurança: é parte elétrica da antena, como um espelho.',
+        },
+        {
+          text: 'Para segurar a antena em pé',
+          feedback: 'A função é elétrica. Sem o plano de terra, a antena de ¼ de onda rende bem menos.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Um obstáculo tira 10 dB do sinal. Que fração da potência passa?',
+      answer: 0.1,
+      tolerance: 0.02,
+      explanation: '−10 dB é um décimo da potência: 10^(−10/10) = 0,1.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Depois da troca da central, o controle só funciona de perto. O que conferir primeiro?',
+      options: [
+        { text: 'Se a antena está ligada no borne certo, reta e longe de metal', correct: true },
+        {
+          text: 'Se o motor está com o capacitor certo',
+          feedback: 'O capacitor afeta a partida do motor, não o alcance do rádio.',
+        },
+        {
+          text: 'Se a fotocélula está alinhada',
+          feedback: 'A fotocélula só impede o fechamento. Ela não muda o alcance do controle.',
+        },
+        {
+          text: 'Se o fim de curso está regulado',
+          feedback: 'O fim de curso decide onde o portão para, não se o comando chega.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Uma antena duas vezes mais comprida que o quarto de onda capta melhor, porque tem mais fio.',
+      answer: false,
+      explanation:
+        'Mais fio não é melhor: fora do comprimento de ressonância, a antena reflete parte da energia. Na figura, 35 cm rendem bem menos que 17 cm.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Na rua, o alcance de 64 m caiu para 42 m com a bateria fraca. Quantos decibéis a bateria fraca tirou, segundo o modelo da figura?',
+      options: [
+        { text: 'Cerca de 6 dB', correct: true },
+        { text: 'Cerca de 22 dB', feedback: 'Isso seria a diferença em metros. Em decibéis, a perda foi de cerca de 6 dB.' },
+        { text: 'Cerca de 1,5 dB', feedback: 'Pouco demais: 1,5 dB mudaria o alcance em uns 10 %.' },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Ordene a troca da antena de uma central dentro de caixa de metal.',
+      items: [
+        'Desligar o disjuntor do portão',
+        'Soltar a antena enrolada do borne ANT',
+        'Ligar o cabo coaxial: centro no ANT, malha no GND',
+        'Fixar a antena externa reta, acima do muro',
+        'Fechar a caixa e ligar o disjuntor',
+        'Testar o controle da distância de uso',
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- A antena troca energia entre o circuito e o espaço e funciona melhor em ressonância: meia onda (dipolo) ou um quarto de onda sobre um plano de terra.
+- $L = c/(4f)$: em 433,92 MHz, 17,3 cm; o fio real ressoa uns 5 % mais curto, perto de 16,4 cm.
+- Decibéis somam ganhos e perdas: −3 dB é metade, −10 dB é um décimo. O enlace funciona enquanto o sinal que chega fica acima da sensibilidade do receptor.
+- Antena curta ou enrolada, caixa de metal, portão de aço e bateria fraca tiram decibéis, e alguns decibéis mudam o alcance pela metade.
+- Na central do portão: disjuntor desligado, antena reta e longe de metal, coaxial para levar a antena para fora quando a caixa for de metal.

@@ -1,0 +1,276 @@
+---
+titulo: Controles remotos
+modulo: m13-sem-fio
+ordem: 3
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Reconhecer as peças de um controle remoto de 433 MHz e o papel de cada uma
+  - Explicar como o OOK transforma bits em rádio e o que vai num quadro
+  - Diferenciar code learning de rolling code e explicar por que a cópia de um rolling code é recusada
+  - Cadastrar e apagar controles num receptor e saber o que fazer com um controle perdido
+  - Avaliar o risco de clonagem de cada tipo de controle
+prerequisitos:
+  - m13-sem-fio/02-antenas
+  - m12-microcontroladores/01-o-que-e-um-microcontrolador
+tags: [controle remoto, 433 MHz, OOK, ASK, code learning, rolling code, clonagem, receptor, portão]
+seguranca: rede
+---
+
+import TransmissaoBits from '../../../lessons/m13/TransmissaoBits.tsx';
+
+Você compra um controle de portão na loja, igual ao que já tem, aperta e nada acontece. O vendedor diz que é preciso "cadastrar". No grupo do condomínio, alguém avisa que um carro estranho ficou parado na frente do prédio com um aparelho na mão, e pergunta se dá para copiar o controle. As duas histórias têm a mesma explicação: o que o controle manda pelo ar e o que o receptor faz com isso.
+
+## O que tem dentro do controle
+
+Abra um controle de portão (são dois parafusos ou uma trava na lateral) e você vai encontrar quase sempre as mesmas peças:
+
+<Model3D
+  part="remote-control-433"
+  props={{ buttons: 2, battery: 'a23', pressed: 1 }}
+  explode
+  annotations
+  caption="Controle remoto de 433,92 MHz em vista explodida: carcaça, botões, placa com o chip codificador, o ressonador que fixa a frequência, a antena de laço impressa, o LED e a bateria de 12 V."
+/>
+
+- **Bateria.** A mais comum é a A23, um cilindro pequeno de 12 V. Outros controles usam a CR2032, uma bateria de moeda de 3 V.
+- **Botões.** Cada um fecha um contato na placa. Um controle de dois botões manda dois códigos diferentes, e pode abrir dois portões.
+- **Chip codificador.** Um pequeno <Term id="microcontrolador">microcontrolador</Term> que monta o código e liga e desliga o transmissor no ritmo dos bits.
+- **Ressonador SAW** (de onda acústica de superfície). Uma pastilha que vibra em 433,92 MHz e fixa a frequência do oscilador, como o cristal de um relógio.
+- **Transistor e antena de laço.** O transistor oscila na frequência do ressonador; a antena é uma trilha de cobre que contorna a placa (aula <LinkAula id="m13-sem-fio/02-antenas" />).
+- **LED.** Acende enquanto o controle transmite. Se acende fraco, a bateria está no fim.
+
+O controle não tem receptor: ele só fala, não ouve. Ele não sabe se a central recebeu o comando, e por isso você aperta de novo quando o portão não abre.
+
+## Bits pelo rádio: portadora e OOK
+
+O oscilador do controle produz uma onda de 433,92 MHz, a <Term id="portadora">portadora</Term>. Sozinha, ela não diz nada; para levar informação, alguma coisa nela precisa mudar no tempo. Essa mudança se chama <Term id="modulacao">modulação</Term>. O rádio AM muda a amplitude da portadora com o som, o FM muda a frequência.
+
+O controle de portão usa o jeito mais simples de todos, o <Term id="ook">OOK</Term> (*on-off keying*, chaveamento liga-desliga): o chip liga e desliga o oscilador. Portadora ligada é um pulso; desligada, uma pausa. O valor de cada bit fica na **largura** do pulso: num formato comum, um pulso curto seguido de uma pausa longa é um 0, e um pulso longo seguido de uma pausa curta é um 1. Alguns controles usam FSK, que muda a frequência em vez de ligar e desligar, mas a ideia de pulsos e pausas é a mesma.
+
+O receptor da central é sintonizado em 433,92 MHz. Ele amplifica o sinal, verifica se há ou não portadora e entrega na saída um sinal digital: 5 V durante cada pulso, 0 V durante cada pausa. O microcontrolador da central mede as larguras e remonta os bits.
+
+Cada aperto manda um **quadro**, um pacote de bits com começo e fim. Enquanto você segura o botão, o controle repete o quadro várias vezes por segundo. Se uma cópia chega com ruído, a próxima chega inteira.
+
+## Código fixo: o code learning
+
+No controle de código fixo, o quadro tem o **serial**, um número gravado na fábrica que funciona como o nome do controle, e os **botões**. Num formato muito usado (o do chip EV1527 e seus parecidos), são 20 bits de serial e 4 de botão, depois de um pulso de sincronismo. Todo aperto manda exatamente o mesmo quadro.
+
+O receptor "aprende" esse quadro no cadastro e, dali em diante, obedece sempre que recebe o mesmo serial e botão. Esse esquema se chama <Term id="code-learning">code learning</Term>. Os controles antigos tinham uma fileira de chaves DIP dentro, e você escolhia o código nelas; no code learning o código vem pronto e o receptor é que aprende.
+
+O problema é a simplicidade. Quem gravar o quadro uma vez pode repetir quando quiser, e a central não tem como saber que é uma cópia.
+
+## Rolling code: um contador cifrado
+
+No <Term id="rolling-code">rolling code</Term> (código rolante), o controle guarda um **contador** que avança a cada aperto. No quadro vai o serial, os botões e uma parte **cifrada** com o contador, embaralhada por uma chave secreta que o controle e a central conhecem. Num formato muito usado (o do chip HCS301), são 32 bits cifrados, 28 de serial e 4 de botão, e o sistema de cifra se chama KeeLoq; controles mais novos usam AES, um padrão de criptografia bem mais forte.
+
+A central decifra a parte cifrada, confere se o serial bate e olha o contador. Ela guarda o último contador aceito de cada controle e só aceita um número **maior**. Como a cifra muda tudo a cada aperto, dois apertos seguidos parecem dois números sem relação nenhuma para quem só escuta.
+
+Duas consequências práticas:
+
+- **Uma cópia é recusada.** O copiador grava o aperto 103; quando repete, a central já aceitou o 103 e espera o 104 ou mais. E ele não consegue fabricar o 104, porque não conhece a chave.
+- **O controle apertado longe da central adianta o contador.** Por isso a central aceita um salto para a frente, dentro de uma **janela**: alguns apertos que ela não ouviu. Passou da janela, o controle precisa ser cadastrado de novo. O tamanho da janela muda de central para central.
+
+## Explore: o quadro, o receptor e o copiador
+
+<TransmissaoBits client:visible />
+
+Comece com **código fixo** dos dois lados:
+
+1. Aperte o botão do controle. O receptor recusa: o controle não está na memória. Olhe o quadro desenhado: o sincronismo, o serial e os botões.
+2. Toque em **Cadastrar** e aperte o botão do controle. O receptor guarda o serial e o botão.
+3. Aperte de novo: aceito. Aperte mais duas vezes e compare os quadros: são idênticos.
+4. Aperte **Repetir o código copiado**. O copiador gravou o seu último aperto, e o receptor aceita a cópia.
+
+Agora mude os dois lados para **rolling code** e repita:
+
+5. Cadastre o controle e aperte algumas vezes. A parte cifrada muda inteira a cada aperto, e o contador do controle sobe de um em um.
+6. Repita o código copiado. Recusado: o contador decifrado não é maior que o último aceito.
+7. Aperte **Apertar longe da central** três vezes e depois aperte perto. Aceito: o salto ficou dentro da janela. Agora aperte longe 17 vezes seguidas e aperte perto.
+8. Por fim, deixe o controle em rolling code e o receptor em código fixo, e tente cadastrar.
+
+No passo 7, o salto de 17 passa da janela de 16 apertos desta figura, e o receptor pede um novo cadastro. No passo 8, o receptor nem entende o quadro: um receptor de código fixo não decodifica rolling code, e o contrário também vale. É o motivo mais comum de "comprei o controle e não cadastra".
+
+## Exemplo resolvido: tempo, combinações e força bruta
+
+**1. Quanto dura um quadro de código fixo?** O formato do EV1527 usa uma unidade de tempo $T$ que depende do oscilador do controle; um valor típico é 350 µs. O sincronismo ocupa $32\,T$, e cada um dos 24 bits ocupa $4\,T$:
+
+$$
+(32 + 24 \times 4) \times 350\,\mu\text{s} = 128 \times 350\,\mu\text{s} = 44{,}8\,\text{ms}
+$$
+
+É o número que a figura mostra embaixo do quadro.
+
+**2. Quantos seriais diferentes existem?** Com 20 bits:
+
+$$
+2^{20} = 1.048.576
+$$
+
+**3. Dá para adivinhar um controle de código fixo?** Se um aparelho mandasse um serial atrás do outro, cada um em 45 ms, levaria no máximo:
+
+$$
+1.048.576 \times 0{,}045\,\text{s} \approx 47.000\,\text{s} \approx 13\,\text{h}
+$$
+
+Menos ainda para achar só o botão certo de um serial conhecido. Não é rápido, mas é possível, e é por isso que o código fixo é considerado fraco. No rolling code, a parte cifrada sozinha tem $2^{32}$, mais de 4 bilhões de valores, a central só aceita poucos deles a cada momento, e eles mudam a cada aperto.
+
+## Explore: a placa receptora com relé
+
+Esta é uma placa receptora como as que se vendem para abrir um portão social, acionar uma fechadura ou acender a luz da garagem pelo controle. O módulo receptor entrega os quadros ao microcontrolador, que confere a memória e liga ou desliga um relé. O contato do relé acende uma lâmpada de 12 V.
+
+<Simulation circuit="m13/receptor-rele" />
+
+1. Inicie a simulação e aperte o botão do controle. Leia a mensagem: o controle não está cadastrado.
+2. Dê um toque em **APRENDER**. O LED de cadastro acende. Aperte o botão do controle: o LED pisca, e o controle foi gravado.
+3. Aperte o controle de novo: o relé atraca e a lâmpada acende. Aperte outra vez: apaga.
+4. Use **Copiador: repetir o último código**. A placa recusa, porque o controle está em rolling code.
+5. Mude o **Controle na mão** para o controle do vizinho e aperte: recusado.
+6. Segure **APRENDER** por 5 segundos. O LED pisca rápido: todos os controles foram apagados. Aperte o seu controle para conferir.
+7. Reinicie a simulação, desmarque **Controle rolling code**, cadastre de novo e use o copiador. O que muda?
+
+No passo 7, a placa aceita a cópia: com código fixo, para o receptor, a cópia é o próprio controle.
+
+## Cadastrar e apagar controles
+
+Em qualquer receptor ou central, o roteiro tem os mesmos passos, com nomes e tempos diferentes:
+
+<Steps>
+  <Step title="Ache o botão de programação">
+    Costuma se chamar PROG, LEARN, APRENDER ou TX, perto do receptor e de um LED. O manual diz qual.
+  </Step>
+  <Step title="Um toque curto entra no cadastro">
+    O LED acende. A central espera um controle por alguns segundos.
+  </Step>
+  <Step title="Aperte o botão do controle">
+    O LED pisca para confirmar. Cada botão de cada controle ocupa um lugar na memória.
+  </Step>
+  <Step title="Teste de longe e feche a tampa">
+    Teste da distância de uso, com o portão e o carro no lugar de sempre.
+  </Step>
+</Steps>
+
+Para **apagar todos**, quase sempre se segura o mesmo botão por alguns segundos: 10 s numa central, 5 s em outra, só 3 s em outra. Segurar "só mais um pouco" pode apagar a memória inteira, então leia o manual antes. Os procedimentos de centrais reais, com os tempos e o tamanho da memória de cada uma, estão na aula <LinkAula id="m16-portao/06-controle-remoto-e-receptor" />.
+
+<Callout type="atencao" title="O cadastro é feito com a central ligada">
+O botão de programação só funciona com a placa energizada, e na central do portão os bornes de rede e do motor ficam na mesma placa. Abra só a tampa necessária, com as mãos secas, e toque só no botão. Se o botão fica perto dos bornes de rede, ou se você não tem segurança, chame um técnico ou um eletricista.
+</Callout>
+
+<RealCase title="O controle perdido e o carro parado na frente do prédio">
+**Controle perdido.** Se for rolling code, uma cópia gravada no ar não abre o portão, mas quem achar o **próprio controle** abre: para a central, ele continua cadastrado. O caminho seguro é apagar todos os controles e cadastrar de novo os que ficaram. Em prédio, vale manter uma lista de quem tem cada controle e refazer o cadastro sempre que um some.
+
+**O carro com o aparelho.** Se os controles do prédio são de código fixo, o risco é real: o copiador grava um aperto e abre o portão depois. A defesa é trocar a central, ou o receptor, por um de rolling code e trocar todos os controles junto. Os controles "copiadores" vendidos em loja usam o mesmo princípio, só que para o bem: copiam um controle de código fixo que você já tem. Se o copiador da loja não consegue copiar o seu controle, é um bom sinal de que ele é rolling code.
+
+Nenhum sistema é perfeito. Existem ataques mais elaborados contra o rolling code, como interferir no rádio para a central não ouvir um aperto e guardar esse aperto para depois. Por isso, desconfie quando o controle "falha" bem na frente de um estranho, e não deixe o portão aberto sem ninguém olhando.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Comprar controle sem conferir o padrão.** Uma central de code learning não aprende um controle rolling code, e vice-versa. Confira no manual quais controles ela aceita.
+- **Apagar a memória sem querer.** Segurar o botão de cadastro demais apaga tudo. Leia o manual e conte os segundos.
+- **Esquecer de recadastrar depois de perder um controle.** O controle perdido continua abrindo o portão até você apagar a memória.
+- **Manter código fixo em lugar com muita gente.** Em condomínio e garagem coletiva, prefira rolling code.
+- **Abrir o controle e trocar a bateria pela errada.** A A23 de 12 V e a A27 de 12 V têm tamanhos diferentes; uma de 3 V no lugar de uma de 12 V não faz o transmissor funcionar. Confira o que está escrito na bateria velha.
+- **Encostar em outras partes da central durante o cadastro.** Ela está ligada. Toque só no botão.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'No OOK, como o controle transforma bits em rádio?',
+      options: [
+        { text: 'Ligando e desligando a portadora de 433,92 MHz', correct: true },
+        {
+          text: 'Mudando a frequência da portadora para cada bit',
+          feedback: 'Isso é FSK, usado por alguns controles. No OOK, a portadora só liga e desliga.',
+        },
+        {
+          text: 'Mudando a cor do LED',
+          feedback: 'O LED só indica que o controle está transmitindo. O sinal vai pelo rádio.',
+        },
+        {
+          text: 'Mandando a tensão da bateria pela antena',
+          feedback: 'A bateria alimenta o oscilador. O que sai pela antena é a portadora ligando e desligando.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Um copiador grava um aperto de um controle de código fixo e repete depois. O que a central faz?',
+      options: [
+        { text: 'Obedece, porque o quadro é idêntico ao do controle original', correct: true },
+        {
+          text: 'Recusa, porque o contador já foi usado',
+          feedback: 'Controle de código fixo não tem contador. Todo aperto manda o mesmo quadro.',
+        },
+        {
+          text: 'Apaga o controle original da memória',
+          feedback: 'A central não tem como saber que é uma cópia, então não faz nada de diferente.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Um controle de código fixo tem 24 bits de serial. Quantas combinações existem, em milhões? (arredonde para uma casa decimal)',
+      answer: 16.8,
+      tolerance: 0.01,
+      unit: 'milhões',
+      explanation: '2²⁴ = 16.777.216, cerca de 16,8 milhões.',
+    },
+    {
+      type: 'vf',
+      prompt: 'No rolling code, a central aceita qualquer contador maior que o último aceito, por maior que seja o salto.',
+      answer: false,
+      explanation:
+        'A central aceita um salto só dentro de uma janela. Fora dela, o controle precisa ser cadastrado de novo.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que o ladrão não consegue fabricar o próximo código de um rolling code a partir do que gravou?',
+      options: [
+        {
+          text: 'Porque o contador vai cifrado com uma chave que só o controle e a central conhecem',
+          correct: true,
+        },
+        {
+          text: 'Porque o rolling code usa uma frequência secreta',
+          feedback: 'A frequência é a mesma, 433,92 MHz, e qualquer receptor ouve o quadro. O segredo é a chave.',
+        },
+        {
+          text: 'Porque o quadro é curto demais para ser gravado',
+          feedback: 'O quadro é gravado sem dificuldade. O problema é que a cópia já foi usada e o próximo é imprevisível.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um quadro tem 32 unidades de sincronismo e 24 bits de 4 unidades cada, com unidade de 400 µs. Quanto ele dura, em milissegundos?',
+      answer: 51.2,
+      tolerance: 0.01,
+      unit: 'ms',
+      explanation: '(32 + 24 × 4) × 400 µs = 128 × 400 µs = 51,2 ms.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Uma moradora perdeu um controle rolling code. Coloque na ordem o que fazer.',
+      items: [
+        'Juntar todos os controles que ainda existem',
+        'Abrir só a tampa da central, com as mãos secas',
+        'Apagar todos os controles da memória',
+        'Cadastrar de novo cada controle que ficou',
+        'Fechar a tampa e testar cada controle de longe',
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O controle tem bateria, botões, um chip codificador, um ressonador que fixa 433,92 MHz, um transistor oscilador, uma antena de laço e um LED. Ele só transmite.
+- No OOK, a portadora liga e desliga; a largura de cada pulso diz se o bit é 0 ou 1. Cada aperto manda um quadro, repetido enquanto o botão fica apertado.
+- Code learning manda sempre o mesmo quadro (serial e botão): uma cópia gravada abre o portão.
+- Rolling code manda um contador cifrado que só anda para a frente, dentro de uma janela: a cópia é recusada e o próximo código não pode ser fabricado sem a chave.
+- Cadastrar: toque no botão de programação, LED aceso, aperte o controle, LED pisca. Apagar todos: segurar o botão. Controle perdido: apagar todos e cadastrar de novo os que ficaram.

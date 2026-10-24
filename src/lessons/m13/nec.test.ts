@@ -22,10 +22,11 @@ describe('NEC infrared protocol', () => {
   });
 
   it('decodes what it encodes and rejects a corrupted bit', () => {
-    for (const k of KEYS) expect(decode(encode(ADDRESS, k.command))).toEqual({
-      address: ADDRESS,
-      command: k.command,
-    });
+    for (const k of KEYS)
+      expect(decode(encode(ADDRESS, k.command))).toEqual({
+        address: ADDRESS,
+        command: k.command,
+      });
     const m = encode(ADDRESS, 0x08);
     const i = m.findIndex((p, j) => j > 1 && !p.on);
     m[i] = { ...m[i]!, duration: m[i]!.duration === UNIT ? 3 * UNIT : UNIT };

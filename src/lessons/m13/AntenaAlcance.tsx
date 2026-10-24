@@ -33,7 +33,8 @@ const MX1 = 344;
 const MAX_M = 200;
 const mx = (m: number) => MX0 + (Math.min(m, MAX_M) / MAX_M) * (MX1 - MX0);
 
-const db = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${formatNumber(Math.abs(v), 1)}${NBSP}dB`;
+const db = (v: number) =>
+  `${v > 0 ? '+' : v < 0 ? '−' : ''}${formatNumber(Math.abs(v), 1)}${NBSP}dB`;
 const meters = (m: number) => `${formatNumber(roundRange(m), 1)}${NBSP}m`;
 
 export default function AntenaAlcance() {
@@ -175,7 +176,13 @@ export default function AntenaAlcance() {
             role="img"
             aria-label={`Alcance estimado de ${meters(r.range)}, numa escala de 0 a 200 m. Com a antena no comprimento certo, seria ${meters(best.range)}.`}
           >
-            <rect x={MX0} y={42} width={mx(best.range) - MX0} height={24} className="antena__best" />
+            <rect
+              x={MX0}
+              y={42}
+              width={mx(best.range) - MX0}
+              height={24}
+              className="antena__best"
+            />
             <rect x={MX0} y={42} width={mx(r.range) - MX0} height={24} className="antena__reach" />
             {[0, 50, 100, 150, 200].map((m) => (
               <g key={m}>
@@ -189,7 +196,13 @@ export default function AntenaAlcance() {
               metros até a central
             </text>
             <rect x={10} y={40} width={22} height={28} rx={3} className="antena__box" />
-            <line x1={24} x2={24} y1={40} y2={40 - Math.min(cm, MAX_CM) * 0.9} className="antena__wire" />
+            <line
+              x1={24}
+              x2={24}
+              y1={40}
+              y2={40 - Math.min(cm, MAX_CM) * 0.9}
+              className="antena__wire"
+            />
             {r.range > MAX_M && (
               <text x={MX1} y={34} className="antena__t antena__t--end">
                 passa de 200 m →
@@ -232,8 +245,8 @@ export default function AntenaAlcance() {
             </dl>
             <p className="lw__note">
               Na rua, cada 6 dB a menos corta o alcance em cerca de um terço. O fio ressoa com cerca
-              de 16,4 cm, um pouco menos que o quarto de onda, porque a ponta do fio também
-              acumula carga. Com o fio no ponto certo, o alcance aqui seria {meters(best.range)}.
+              de 16,4 cm, um pouco menos que o quarto de onda, porque a ponta do fio também acumula
+              carga. Com o fio no ponto certo, o alcance aqui seria {meters(best.range)}.
             </p>
           </div>
         </div>

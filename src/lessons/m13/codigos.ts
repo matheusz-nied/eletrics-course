@@ -196,12 +196,7 @@ export interface Receiver {
 }
 
 export type Verdict =
-  | 'cadastrado'
-  | 'aceito'
-  | 'desconhecido'
-  | 'repetido'
-  | 'fora-da-janela'
-  | 'formato';
+  'cadastrado' | 'aceito' | 'desconhecido' | 'repetido' | 'fora-da-janela' | 'formato';
 
 export const VERDICTS: Record<Verdict, { ok: boolean; text: string }> = {
   cadastrado: { ok: true, text: 'Cadastrado: o receptor guardou este controle e este botão.' },

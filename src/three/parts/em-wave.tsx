@@ -645,22 +645,22 @@ export default function EmWave(props: EmWaveProps) {
       <Label
         text="E"
         color={E_COLOR}
-        position={[l.xe - l.lambda * 0.1, l.axisY + l.amp * 1.15, 0]}
-        height={l.lambda * 0.06}
+        position={[l.xe + l.lambda * 0.07, l.axisY + l.amp * 0.95, 0]}
+        height={l.cycles * l.lambda * 0.03}
       />
       {p.magnetic && (
         <Label
           text="B"
           color={B_COLOR}
-          position={[l.xe - l.lambda * 0.1, l.axisY + l.r * 6, l.amp * 1.15]}
-          height={l.lambda * 0.06}
+          position={[l.xe + l.lambda * 0.07, l.axisY, l.amp * 0.95]}
+          height={l.cycles * l.lambda * 0.03}
         />
       )}
       <Label
         text={`λ = ${cm(l.lambda)} cm`}
         color="#2b3038"
-        position={[(l.bx0 + l.bx1) / 2, l.by + l.lambda * 0.045, 0]}
-        height={l.lambda * 0.06}
+        position={[(l.bx0 + l.bx1) / 2, l.by + l.cycles * l.lambda * 0.022, 0]}
+        height={l.cycles * l.lambda * 0.03}
       />
     </group>
   );
