@@ -125,4 +125,40 @@ test.describe('módulo 12: microcontroladores', () => {
     await expect(ide.locator('.mide__status')).toContainText('ponto e vírgula');
     errors.expectClean();
   });
+
+  test('the live state diagram of lesson 12.2 opens the gate on a command', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}02-maquinas-de-estado/`);
+    const med = await widget(page, '.med');
+    await expect(med).toHaveAttribute('data-estado', 'FECHADO');
+    await med.getByRole('button', { name: 'Apertar o controle' }).click();
+    await expect(med).toHaveAttribute('data-estado', 'ABRINDO', { timeout: 5_000 });
+    await expect(med.locator('.med__log li').first()).toContainText('FECHADO → ABRINDO');
+    errors.expectClean();
+  });
+
+  test('the ultrasound tab of lesson 12.3 times the echo at 1 m', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}03-sensores/`);
+    const lab = await widget(page, '.labsens');
+    await lab.getByRole('tab', { name: 'Distância (ultrassom)' }).click();
+    await expect(lab.locator('[data-sensor]')).toHaveAttribute('data-sensor', 'ultrassom');
+    await expect(lab.locator('[data-leitura="largura"]')).toContainText('5.824');
+    errors.expectClean();
+  });
+
+  test('the wall switch of lesson 12.6 still works when the internet is down', async ({ page }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}06-automacao-residencial/`);
+    const caminho = await widget(page, '.caminho');
+    await caminho.getByRole('checkbox', { name: 'Internet caiu' }).check();
+    await caminho.getByRole('button', { name: 'Acender pelo app' }).click();
+    await expect(caminho.locator('.caminho__status')).toContainText('não chega', {
+      timeout: 15_000,
+    });
+    await expect(caminho).toHaveAttribute('data-lampada', 'apagada');
+    await caminho.getByRole('button', { name: 'Apertar o interruptor' }).click();
+    await expect(caminho).toHaveAttribute('data-lampada', 'acesa', { timeout: 15_000 });
+    errors.expectClean();
+  });
 });
