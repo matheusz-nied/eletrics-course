@@ -1,0 +1,276 @@
+---
+titulo: Atuadores
+modulo: m12-microcontroladores
+ordem: 4
+nivel: I
+duracaoMin: 45
+objetivos:
+  - Escolher como ligar cada atuador ao microcontrolador, direto no pino ou por um transistor, MOSFET, driver ou relé
+  - Calcular o resistor de base de um transistor que aciona um relé e conferir se ele satura
+  - Explicar por que bobinas e motores precisam de diodo de roda livre
+  - Usar o programa para proteger o circuito, com partida suave de motor e confirmação sonora
+  - Diferenciar buzzer ativo e passivo, servo e motor de passo do ponto de vista de quem programa
+prerequisitos:
+  - m12-microcontroladores/03-sensores
+  - m09-semicondutores/06-transistor-como-chave
+  - m09-semicondutores/08-mosfet
+tags: [atuadores, relé, módulo relé, transistor, MOSFET, PWM, partida suave, buzzer, servo, motor de passo, solenoide]
+seguranca: baixa-tensao
+---
+
+Na aula anterior, o microcontrolador aprendeu a perceber o mundo. Agora ele precisa agir: acender a lâmpada da garagem, ligar o motor do portão, destravar a fechadura, apitar quando alguém aperta um botão. Quem faz isso são os <Term id="atuador">atuadores</Term>.
+
+O problema é que o pino do microcontrolador é fraco. Ele entrega 5 V (ou 3,3 V) e uns 20 mA, cerca de um décimo de watt. Uma lâmpada de 12 V e 5 W, um motor que puxa 1 A ou uma fechadura elétrica precisam de muito mais. Esta aula é sobre o que vai no meio, e sobre como o programa ajuda a cuidar do circuito.
+
+## Quanto o pino aguenta
+
+No ATmega328P, o chip do Arduino Uno, cada pino aguenta no máximo absoluto 40 mA, e o chip inteiro, uns 200 mA somando todos os pinos. "Máximo absoluto" quer dizer o limite antes de estragar, não o valor para trabalhar: o razoável é ficar em 20 mA por pino. O ESP32 trabalha em 3,3 V e também fornece algumas dezenas de miliampères por pino, com a tensão caindo bastante quando a corrente sobe. Na prática, vale a regra: **direto no pino, só o que puxa poucos miliampères**.
+
+| Atuador | Corrente típica | Como ligar |
+|---|---|---|
+| LED de sinalização | 5 a 15 mA | Direto no pino, com resistor |
+| Buzzer pequeno de 5 V | 10 a 30 mA | Direto no pino (os pequenos) ou com transistor |
+| Relé de 5 V ou 12 V | 30 a 90 mA na bobina | Transistor e diodo, ou módulo relé pronto |
+| Motor CC pequeno | 0,1 a alguns ampères | MOSFET e diodo; ponte H para inverter |
+| Solenoide, fechadura elétrica | 0,3 a 1 A | MOSFET e diodo |
+| Servo | Sinal: quase nada. Motor: até 1 A | Sinal direto no pino; alimentação separada |
+| Motor de passo | 0,2 a 2 A por fase | Driver de motor de passo |
+| Lâmpada ou aparelho na rede | Até alguns ampères | Relé ou relé de estado sólido |
+
+Repare que, em todos os casos, o pino continua dando só o **comando**. Quem fornece a potência é outra fonte, ligada pelo transistor, pelo MOSFET ou pelo relé. Por isso uma regra aparece em toda a aula: **o negativo do microcontrolador e o negativo da fonte da carga são ligados juntos**. Sem essa referência comum, os 5 V do pino não querem dizer nada para o transistor.
+
+## O relé comandado pelo pino
+
+O <Term id="rele">relé</Term> é o atuador mais usado em automação: com uma bobina pequena, ele fecha um contato que pode estar num circuito totalmente separado, de 12 V ou da rede. Mas a bobina de um relé de 12 V precisa de 12 V e uns 30 mA, e o pino tem 5 V. A solução é a que você viu em <LinkAula id="m09-semicondutores/06-transistor-como-chave" />: um transistor NPN como chave no negativo da bobina.
+
+- O pino comanda a **base** por um resistor, que limita a corrente que sai do pino.
+- Um resistor de 10 kΩ da base ao negativo garante que o transistor fique desligado enquanto o microcontrolador liga, quando os pinos ainda estão soltos.
+- O **coletor** liga o negativo da bobina; o outro lado da bobina vai aos 12 V.
+- Um <Term id="diodo-de-roda-livre">diodo de roda livre</Term> em paralelo com a bobina, com o catodo no positivo, dá caminho à corrente da bobina quando o transistor desliga. Sem ele, a bobina gera um pico de dezenas ou centenas de volts que queima o transistor (aula <LinkAula id="m05-magnetismo/06-reles-e-contatores" />).
+
+O programa desta simulação é o de muitos aparelhos: cada toque no botão inverte o relé, e um buzzer dá um bipe curto para confirmar. O botão passa pelo mesmo filtro contra repique da aula de máquinas de estado, e o programa age no **aperto**, não enquanto o botão está apertado: segurar o botão não fica ligando e desligando o relé.
+
+<Simulation circuit="m12/rele-lampada" />
+
+1. Aperte o play (▶) e toque no botão. Quanto de corrente sai do pino D7 para a base? E quanto passa na bobina?
+2. Com o relé ligado, clique no transistor e veja a tensão entre coletor e emissor. Ele está saturado?
+3. Quanto de corrente passa na lâmpada? Compare com a corrente da bobina e com a da base.
+4. Toque de novo. Repare no bipe, na corrente do buzzer e no relé soltando.
+
+Com o relé ligado, o pino fornece cerca de 4,05 mA à base, a bobina recebe 30,5 mA e o transistor fica com só 0,04 V entre coletor e emissor: está saturado, como uma chave fechada. A lâmpada puxa 0,42 A. É uma cadeia de amplificação: 4 mA no pino comandam 30 mA na bobina, que comandam 420 mA na lâmpada. Com um contato de 10 A, o mesmo pino comandaria um aparelho de 1.000 W. O buzzer, no bipe, puxa uns 10,4 mA, pouco o bastante para ir direto no pino D8.
+
+Um detalhe que a simulação mostra no primeiro instante: o filamento frio da lâmpada tem resistência baixa, e a corrente passa de 1,4 A antes de ele esquentar. Toda lâmpada incandescente, todo motor e toda fonte com capacitor de entrada têm esse pico na partida, e é ele que desgasta os contatos do relé. Por isso o relé é escolhido com folga.
+
+## O módulo relé
+
+Em projetos com placas de desenvolvimento, quase ninguém monta esse circuito à mão: usa um **módulo relé**, uma plaquinha que já traz o relé, o transistor, o resistor de base, o diodo e um LED que mostra quando a bobina está ligada. O módulo tem três pinos de comando (VCC, GND e IN) e, do outro lado, o borne com os contatos: o comum (C), o normalmente aberto (NA) e o normalmente fechado (NF).
+
+<Model3D
+  part="relay-module"
+  props={{ on: true }}
+  annotations
+  explode
+  caption="Módulo relé de um canal, de 5 V. Do lado esquerdo, os pinos de comando, o transistor que aciona a bobina, o diodo de roda livre e o LED indicador; do lado direito, o relé e o borne com os contatos NA, C e NF, que podem estar ligados à rede de 127 ou 220 V."
+/>
+
+Três cuidados com os módulos:
+
+- **A tensão do módulo.** Um módulo de 5 V tem relé de 5 V: ele precisa de 5 V no VCC, mesmo que a placa seja de 3,3 V, como o ESP32. O sinal de 3,3 V no IN aciona alguns módulos e outros não; existem versões feitas para 3,3 V.
+- **O nível que aciona.** Muitos módulos, principalmente os que têm optoacoplador, ligam o relé com o IN em **nível baixo** (0 V). O programa precisa saber disso, ou o relé vai fazer o contrário do esperado e, pior, ligar sozinho enquanto a placa reinicia.
+- **O lado dos contatos.** O borne pode estar na rede elétrica. Nesse caso, toda a parte dos contatos segue as regras de segurança da rede, e as trilhas de cobre de muitos módulos baratos não aguentam de verdade a corrente impressa no relé. Isso é assunto da aula de [automação residencial](../06-automacao-residencial/).
+
+## Motores: MOSFET, PWM e partida suave
+
+Para motores, o comando é um MOSFET de nível lógico, que conduz bem com 5 V no gate (aula <LinkAula id="m09-semicondutores/08-mosfet" />). E, como você viu em <LinkAula id="m08-motores/02-ponte-h-e-pwm" />, o mesmo pino que liga e desliga controla a velocidade com <Term id="pwm">PWM</Term>: o <Term id="ciclo-de-trabalho">ciclo de trabalho</Term> define a tensão média que o motor recebe.
+
+Aqui entra uma coisa que só o programa pode fazer. Um motor parado não tem força contraeletromotriz: na partida, ele é só a resistência do enrolamento, e a corrente vai lá em cima. Se o programa salta de 0 a 100 % de uma vez, o motor puxa um pico que derruba a tensão da bateria, faz a placa reiniciar e castiga o MOSFET e as engrenagens. A **partida suave** é subir o ciclo de trabalho aos poucos, em rampa. Não custa um componente sequer: são três linhas de programa.
+
+A simulação tem um motor CC de 12 V, um MOSFET comandado pelo pino D9 com PWM de 1 kHz, e um diodo em paralelo com o motor. O potenciômetro escolhe a velocidade, de 5 em 5 %. A chave "Suave", no pino D4, liga a rampa de 0 a 100 % em 1 s. A simulação roda dez vezes mais devagar que o tempo real.
+
+<Simulation circuit="m12/motor-pwm" instruments={['grafico']} />
+
+1. Aperte o play (▶). Com a partida suave ligada, leve o potenciômetro ao máximo e acompanhe no gráfico a corrente do motor (IM). Qual é o pico?
+2. Volte o potenciômetro a zero, espere o motor parar, desligue a chave "Suave" e repita. E agora?
+3. Clique no microcontrolador e no motor. Com o potenciômetro no meio, qual é o ciclo de trabalho e quanto o motor gira? E no máximo?
+
+Com a partida suave, o pico de corrente fica em cerca de 1,54 A. Sem ela, chega a 5,59 A, mais de três vezes e meia, e é isso que a bateria e o MOSFET sentem a cada partida. Nos dois casos, o motor chega à mesma rotação, uns 5.220 rpm no máximo, e só demora um pouco mais com a rampa. Com o potenciômetro no meio, o ciclo de trabalho vai a 50 % e o motor gira a uns 3.100 rpm. Não é a metade exata de 5.220, porque a carga do eixo e a queda no enrolamento não são proporcionais.
+
+O diodo em paralelo com o motor faz o mesmo papel do diodo do relé: a cada pulso desligado do PWM, a corrente do enrolamento continua por ele, em vez de criar um pico no dreno.
+
+## Som: buzzer ativo e passivo
+
+O <Term id="buzzer">buzzer</Term> é o atuador da confirmação e do alarme. Por fora, os dois tipos são quase iguais; para quem programa, são bem diferentes.
+
+- O **buzzer ativo** tem um oscilador dentro. Basta ligar a tensão contínua, e ele apita sempre no mesmo tom. O programa só liga e desliga o pino, com `digitalWrite`. Foi o caso da simulação do relé.
+- O **buzzer passivo** é um pequeno alto-falante. Com tensão contínua, ele dá só um estalo. O programa precisa gerar a onda quadrada na frequência do som, e em placas tipo Arduino isso é a função `tone(pino, frequência)`. Em troca, ele toca notas diferentes: 440 Hz é o lá, e uma sirene é uma frequência subindo e descendo.
+
+<Model3D
+  part="buzzer"
+  props={{ variant: 'ativo', sounding: true }}
+  annotations
+  explode
+  caption="Buzzer ativo de 5 V. Troque o tipo nos controles para ver o passivo e o disco piezoelétrico, e abra a vista explodida para ver a bobina, o ímã e o diafragma."
+/>
+
+Um jeito simples de saber qual é qual: ligue o buzzer em 5 V por um instante. O ativo apita; o passivo só estala. Muitos buzzers ativos vêm com um adesivo por cima, que deve ser tirado depois da soldagem.
+
+## Servo, motor de passo e solenoide
+
+Três atuadores aparecem muito em automação e robótica, cada um com seu jeito de comandar (detalhes de como funcionam por dentro em <LinkAula id="m08-motores/05-passo-servo-e-brushless" />):
+
+- O <Term id="servomotor">servo</Term> recebe no fio de sinal um pulso a cada 20 ms (50 Hz). A duração do pulso diz o ângulo: perto de 1 ms para um extremo, 1,5 ms para o meio e 2 ms para o outro extremo, em valores típicos, que variam de um modelo para outro. O sinal vai direto no pino, porque quase não puxa corrente; o motor do servo, não. Ele precisa de uma alimentação de 5 V própria, com o negativo comum à placa.
+- O <Term id="motor-de-passo">motor de passo</Term> anda um ângulo fixo a cada pulso. O microcontrolador não liga as bobinas diretamente: ele manda pulsos de passo e um sinal de sentido a um **driver**, que cuida da corrente nas bobinas.
+- O <Term id="solenoide">solenoide</Term> e a fechadura elétrica são uma bobina que puxa um núcleo de ferro. Para o circuito, são como a bobina de um relé, só que maiores: MOSFET e diodo de roda livre.
+
+## Exemplo resolvido: o resistor de base do relé
+
+Um relé de 12 V tem bobina de 400 Ω. Ele vai ser acionado por um transistor NPN com ganho mínimo de 100, comandado por um pino de 5 V. Que resistor de base usar?
+
+**Passo 1: a corrente da bobina.** Com o transistor saturado, quase toda a tensão fica na bobina:
+
+$$
+I_C = \frac{12\,\text{V}}{400\,\Omega} = 30\,\text{mA}
+$$
+
+**Passo 2: a corrente mínima de base.** Com ganho mínimo de 100, o transistor precisaria de pelo menos $30\,\text{mA} / 100 = 0{,}3\,\text{mA}$. Para garantir a saturação, com folga para a variação do ganho e da temperatura, usa-se uma corrente de base perto de dez vezes isso: uns 3 mA.
+
+**Passo 3: o resistor.** A base fica uns 0,7 V acima do emissor, e o resto da tensão do pino cai no resistor:
+
+$$
+R_B = \frac{5\,\text{V} - 0{,}7\,\text{V}}{3\,\text{mA}} \approx 1{,}43\,\text{k}\Omega
+$$
+
+O valor comercial mais próximo abaixo é 1,2 kΩ; 1 kΩ também serve. Com 1 kΩ, a base recebe $4{,}3\,\text{V} / 1\,\text{k}\Omega = 4{,}3\,\text{mA}$, menos os 0,07 mA que o resistor de 10 kΩ desvia ao negativo: perto dos 4,05 mA da simulação. Isso é bem menos que os 20 mA do pino, e o transistor satura com folga.
+
+**Passo 4: o transistor aguenta?** A corrente de 30 mA está muito abaixo do limite de um BC337 ou de um 2N2222, e com 0,04 V sobre ele, a potência é de pouco mais de 1 mW. Ele nem esquenta.
+
+<RealCase title="A central do portão e a placa que reinicia">
+
+Na central do portão do módulo <LinkAula id="m16-portao" />, o microcontrolador comanda o motor por relés: um para abrir, outro para fechar, cada um com seu transistor e seu diodo, e o programa nunca liga os dois ao mesmo tempo. Quando um desses transistores queima, o sintoma é claro: o portão abre, mas não fecha (ou o contrário), e o LED de comando acende normalmente. O relé não estala porque o transistor abriu. Se o diodo daquele relé estiver aberto ou faltando, o transistor novo também vai queimar em pouco tempo.
+
+Outro defeito muito comum em projetos com placas de desenvolvimento é a **placa que reinicia** toda vez que o motor ou o relé liga. Os suspeitos são três: a corrente de partida derrubando a tensão de uma fonte fraca ou de uma bateria compartilhada, a falta do diodo de roda livre, e o fio de negativo do motor passando pelo negativo da placa. A solução é alimentar a carga por uma fonte que aguente o pico, pôr o diodo, ligar o negativo da carga direto na fonte e, no motor, usar partida suave.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Ligar a carga direto no pino.** Relé, motor, solenoide e buzzer grande precisam de transistor, MOSFET ou módulo. O pino queima em silêncio, às vezes levando o chip junto.
+- **Esquecer o diodo de roda livre.** Toda bobina (relé, motor, solenoide, fechadura) gera um pico ao desligar. O diodo vai em paralelo, com o catodo no positivo.
+- **Esquecer o negativo comum.** Sem ele, o transistor não "vê" a tensão do pino.
+- **Alimentar o servo ou o motor pelo 5 V da placa.** O regulador e o cabo USB não aguentam os picos. Use uma fonte separada para a carga.
+- **Ignorar o nível que aciona o módulo relé.** Se o módulo liga com nível baixo, o programa deve começar com o pino em nível alto, para o relé não pulsar na partida.
+- **Usar um transistor comum para cargas grandes.** Acima de algumas centenas de miliampères, use um MOSFET de nível lógico, que conduz por completo com 5 V (ou com 3,3 V, no ESP32) no gate.
+- **Ligar o contato do relé na rede sem preparo.** O lado dos contatos de um módulo relé pode carregar 127 ou 220 V. Desligue o disjuntor, teste a ausência de tensão, isole os bornes e ponha o módulo numa caixa fechada. Se não tiver segurança, chame um eletricista habilitado.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'associar',
+      prompt: 'Associe cada atuador ao jeito mais comum de ligá-lo a um microcontrolador.',
+      pairs: [
+        ['LED de sinalização', 'Direto no pino, com resistor'],
+        ['Relé de 12 V', 'Transistor com diodo de roda livre'],
+        ['Motor CC de 2 A com velocidade variável', 'MOSFET com PWM e diodo'],
+        ['Motor de passo', 'Driver que recebe pulsos de passo e sentido'],
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um relé de 5 V tem bobina de 70 Ω e vai ser acionado por um transistor saturado. Qual é a corrente na bobina, em miliampères?',
+      answer: 71,
+      tolerance: 0.03,
+      unit: 'mA',
+      explanation: 'I = 5 V ÷ 70 Ω ≈ 0,071 A = 71 mA, bem acima do que um pino deve fornecer.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um pino de 5 V comanda a base de um transistor por um resistor de 2,2 kΩ. Com a base em 0,7 V, qual é a corrente de base, em miliampères?',
+      answer: 1.95,
+      tolerance: 0.03,
+      unit: 'mA',
+      explanation: 'I = (5 V − 0,7 V) ÷ 2,2 kΩ = 4,3 V ÷ 2.200 Ω ≈ 1,95 mA.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Para que serve o diodo em paralelo com a bobina do relé?',
+      options: [
+        {
+          text: 'Dar caminho à corrente da bobina quando o transistor desliga, evitando o pico de tensão que o queimaria',
+          correct: true,
+          feedback: 'Isso. A bobina tenta manter a corrente, e o diodo deixa ela circular até se apagar, sem o pico.',
+        },
+        {
+          text: 'Impedir que a bobina receba corrente ao contrário',
+          feedback:
+            'O diodo fica polarizado ao contrário enquanto a bobina está ligada e não conduz. Ele só age no desligamento.',
+        },
+        {
+          text: 'Acelerar o fechamento do contato',
+          feedback: 'Ele não acelera nada; na verdade, faz o contato soltar um pouquinho mais devagar.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que a partida suave reduz o pico de corrente de um motor CC?',
+      options: [
+        {
+          text: 'Porque a tensão média sobe aos poucos, enquanto o motor ganha velocidade e passa a gerar força contraeletromotriz',
+          correct: true,
+          feedback:
+            'Isso. Parado, o motor é só a resistência do enrolamento; girando, a força contraeletromotriz segura a corrente.',
+        },
+        {
+          text: 'Porque o PWM diminui a resistência do motor',
+          feedback: 'A resistência do enrolamento é a mesma. O que muda é a tensão média aplicada no começo.',
+        },
+        {
+          text: 'Porque o MOSFET esquenta menos e limita a corrente',
+          feedback: 'O MOSFET funciona como chave e não limita a corrente. Quem limita é a rampa do programa.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Um buzzer passivo apita sozinho, sempre no mesmo tom, quando recebe 5 V contínuos.',
+      answer: false,
+      explanation:
+        'Esse é o buzzer ativo, que tem oscilador interno. O passivo só estala com tensão contínua; o programa precisa gerar a onda na frequência do som, com tone().',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um módulo relé que aciona com nível baixo foi ligado a um ESP32. Toda vez que a placa liga, o relé dá um pulso rápido. Qual é a correção mais adequada no programa?',
+      options: [
+        {
+          text: 'Pôr o pino em nível alto antes de configurá-lo como saída, logo no começo do programa',
+          correct: true,
+          feedback:
+            'Isso. Com o pino já em nível alto, o relé fica desligado desde o primeiro instante. Ajuda também escolher um pino que não muda de estado durante a partida do chip.',
+        },
+        {
+          text: 'Pôr um atraso de 5 s no começo do programa',
+          feedback: 'O atraso não muda o nível do pino durante a partida. O pulso continua acontecendo.',
+        },
+        {
+          text: 'Trocar o diodo do módulo',
+          feedback: 'O diodo não tem a ver com isso. O relé pulsa porque o pino passa pelo nível que o aciona.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- O pino dá o **comando**; a potência vem de outra fonte, por um **transistor**, um **MOSFET**, um **driver** ou um **relé**, com o **negativo comum**.
+- Para o relé: resistor de base que dê umas dez vezes a corrente mínima (no exemplo, 1 kΩ e cerca de 4 mA para uma bobina de 30 mA), resistor da base ao negativo e **diodo de roda livre** na bobina.
+- O **módulo relé** já traz tudo isso; confira a tensão do módulo e o nível que aciona, e trate o lado dos contatos como rede elétrica quando for o caso.
+- Motores: MOSFET de nível lógico e **PWM**. A **partida suave** é uma rampa no programa que corta o pico de partida (5,59 A para 1,54 A na simulação).
+- **Buzzer ativo** liga e desliga; **passivo** precisa da frequência. **Servo**: pulso de 1 a 2 ms a cada 20 ms, com alimentação própria. **Motor de passo**: driver.
+
+Na próxima aula, você vai escrever o programa: [programar um microcontrolador](../05-programando-um-microcontrolador/), com o código rodando numa placa simulada.
