@@ -27,6 +27,7 @@ export default defineFirmware<State>({
     { name: 'D7', kind: 'digital-out', label: 'Comando do relé (pino D7)' },
     { name: 'D8', kind: 'digital-out', label: 'Buzzer (pino D8)' },
   ],
+  readouts: { rele: { label: 'Relé' } },
   init: () => ({ rele: false, bipe: 0, button: released() }),
   step(state, { pins, dt }) {
     const { button, edge } = debounce(state.button, closed(pins, 'D2'), dt);

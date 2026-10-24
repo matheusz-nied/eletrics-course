@@ -52,7 +52,7 @@ export default defineCircuit({
       type: 'ntc',
       a: [12, 12],
       b: [12, 22],
-      label: 'NTC 10 kΩ',
+      label: 'NTC',
       params: { r25: 10000, beta: 3950, temperature: 25, thermalTime: 3 },
       control: {
         param: 'temperature',

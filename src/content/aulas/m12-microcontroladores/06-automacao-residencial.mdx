@@ -1,0 +1,249 @@
+---
+titulo: Automação residencial
+modulo: m12-microcontroladores
+ordem: 6
+nivel: I
+duracaoMin: 45
+objetivos:
+  - Reconhecer o que existe dentro de um relé inteligente Wi-Fi e como ele se liga à fiação de uma lâmpada
+  - Explicar por que o relé interrompe a fase e o que muda no interruptor da parede
+  - Comparar o comando pela nuvem e pela rede local, e prever o que funciona quando a internet ou o Wi-Fi caem
+  - Ligar um módulo Wi-Fi à central do portão como uma botoeira, sem anular as proteções
+  - Escolher a carga que um relé inteligente pode comandar e reconhecer quando é preciso um contator
+prerequisitos:
+  - m12-microcontroladores/04-atuadores
+  - m05-magnetismo/06-reles-e-contatores
+tags: [automação residencial, ESP32, Wi-Fi, relé inteligente, nuvem, rede local, portão, NBR 5410, segurança]
+seguranca: rede
+---
+
+import CaminhoDoComando from '../../../lessons/m12/CaminhoDoComando';
+
+Você chega em casa à noite, com as mãos ocupadas, e acende a luz da varanda pelo celular. Ou abre o portão da garagem pelo aplicativo, de dentro do carro. Parece mágica, mas é tudo o que você viu neste módulo junto: um microcontrolador com Wi-Fi, uma entrada que lê um interruptor, um relé que comanda a carga e uma máquina de estados decidindo o que fazer.
+
+Esta aula abre a caixinha do relé inteligente e segue o caminho do comando, do celular até a lâmpada. E, como agora a fiação é a da rede elétrica, a segurança vem antes de tudo.
+
+## Dentro do relé inteligente
+
+O relé inteligente que vai dentro da caixa do interruptor (a caixa 4×2 da parede) é uma placa pequena com quatro partes:
+
+1. **Uma fonte**, que tira da própria rede de 127 ou 220 V os 5 V do relé e os 3,3 V do microcontrolador. Ela é uma fonte chaveada em miniatura, como a de um carregador de celular.
+2. **Um microcontrolador com Wi-Fi**, quase sempre um ESP32, um ESP8266 ou um chip parecido. É ele que conversa com o roteador e roda o programa.
+3. **Um relé**, comandado por um transistor, exatamente como na aula de [atuadores](../04-atuadores/). Alguns modelos usam um triac no lugar do relé (aula <LinkAula id="m09-semicondutores/09-tiristores-e-isolamento" />).
+4. **Uma entrada para o interruptor da parede**, que não liga mais a lâmpada: só avisa o microcontrolador.
+
+Os bornes costumam ser marcados assim: **L** (fase que chega), **N** (neutro), **L1** ou **OUT** (fase que sai para a lâmpada) e **S1**, **S2** ou **SW** (o interruptor). Há modelos "sem neutro", que tiram a alimentação deixando passar uma correntezinha pela própria lâmpada; eles só funcionam com algumas lâmpadas e podem fazer uma lâmpada LED piscar fraquinho apagada. Quando a caixa tem neutro, prefira o modelo com neutro.
+
+### Por que o relé corta a fase
+
+O contato do relé fica no fio da <Term id="fase">fase</Term>, entre o borne L e a lâmpada. O <Term id="neutro">neutro</Term> vai direto à lâmpada. Com a fase cortada, a lâmpada apagada fica sem tensão, e quem troca a lâmpada não leva choque no soquete. Se o relé cortasse o neutro, a lâmpada também apagaria, mas o soquete continuaria na fase o tempo todo. É a mesma regra do interruptor comum.
+
+### O interruptor vira um sensor
+
+O interruptor da parede passa a ser uma entrada digital, com pull-up, como o botão da primeira aula. O programa mais comum inverte a lâmpada **a cada mudança de posição** do interruptor: para cima ou para baixo, tanto faz. Assim, depois de apagar a luz pelo celular, o interruptor continua funcionando, sem ficar "invertido" de vez. É o mesmo efeito de um interruptor paralelo (three-way), feito por programa.
+
+## Explore: o relé inteligente
+
+A simulação mostra o circuito de comando de um relé inteligente. O microcontrolador, de 3,3 V, recebe os comandos do aplicativo pelo Wi-Fi; aqui, cada comando é um toque no botão "App". O interruptor da parede vai à entrada INT. A saída comanda, por um transistor, um relé de 5 V, cujo contato corta a fase de uma lâmpada de 127 V e 40 W. As fontes de 3,3 V e 5 V fazem o papel da fonte interna do relé.
+
+<Simulation circuit="m12/rele-inteligente" />
+
+1. Aperte o play (▶) e mude o interruptor de posição. A lâmpada acende? Quanto marca a tensão nela?
+2. Mude o interruptor de novo, para a outra posição. E agora?
+3. Toque no botão "App" para acender a luz "pelo celular". Depois, apague pelo interruptor. Clique no microcontrolador e veja de onde veio o último comando.
+4. Com a lâmpada acesa, quanto de corrente sai do pino? E quanto passa na bobina do relé?
+
+Cada mudança do interruptor inverte a lâmpada, em qualquer posição dele. Acesa, ela recebe cerca de 126,9 V, quase a tensão toda da rede, porque o contato do relé está fechado. O pino de 3,3 V fornece só uns 2,4 mA à base, e o transistor liga os 72 mA da bobina do relé de 5 V. É a mesma cadeia da aula anterior, com um detalhe: o pino de 3,3 V tem menos tensão para empurrar a base, e o resistor de base precisa levar isso em conta.
+
+## O caminho do comando
+
+Quando você toca no botão do aplicativo, o comando não vai direto do celular ao relé. Na maioria dos produtos, ele faz uma viagem:
+
+- **Pela nuvem.** O aplicativo do fabricante manda o comando pela internet a um servidor do fabricante. O relé inteligente, que fica o tempo todo conectado a esse servidor pelo Wi-Fi da casa, recebe o comando de volta. Funciona de qualquer lugar do mundo, mas depende da internet de casa, do servidor do fabricante e de o fabricante continuar existindo.
+- **Na rede local.** O celular e o relé conversam dentro da casa, pelo roteador, sem sair para a internet. Isso exige um relé que aceite comandos locais (muitos com ESP32 aceitam, alguns com programa alternativo) e, em geral, um computador pequeno em casa rodando um sistema de automação, como o Home Assistant. É mais rápido e continua funcionando sem internet; para comandar de fora de casa, é preciso configurar um acesso remoto.
+
+<CaminhoDoComando client:visible />
+
+1. No modo pela nuvem, acenda a luz pelo aplicativo e repare no caminho e no tempo que o comando leva.
+2. Derrube a internet e tente de novo. E pelo interruptor?
+3. Troque para o modo na rede local. Com a internet caída, o aplicativo funciona? E com o celular fora de casa?
+4. Simule uma falta de energia com a luz acesa e escolha o que o relé faz quando a energia volta.
+
+Pela nuvem, o comando leva tipicamente de 0,3 s a 1,5 s; na rede local, de 50 a 200 ms, porque não sai de casa. Sem internet, o comando pela nuvem não chega. O interruptor da parede continua funcionando nos dois modos, porque está ligado direto à entrada do relé, e quem decide é o programa que roda no próprio ESP32. Essa é a primeira regra de uma boa automação: **o comando local nunca pode depender da internet**.
+
+A falta de energia é outra decisão do projeto. Quando a energia volta, o relé pode voltar como estava ou voltar desligado. Para uma luz de varanda, voltar como estava é conveniente; para uma bomba d'água ou um aquecedor, voltar desligado é mais seguro.
+
+## Exemplo resolvido: o relé de 10 A aguenta?
+
+Um relé inteligente tem contato de 10 A. Ele vai comandar, em 127 V, (a) um circuito de oito lâmpadas LED de 9 W; (b) um aquecedor de 1.500 W; (c) um chuveiro de 5.500 W. Quais servem?
+
+**(a) As lâmpadas.** A potência total é $8 \times 9 = 72\,\text{W}$. A corrente:
+
+$$
+I = \frac{P}{V} = \frac{72\,\text{W}}{127\,\text{V}} \approx 0{,}57\,\text{A}
+$$
+
+Serve com folga. O cuidado é o pico de partida das fontes das lâmpadas LED, que carregam capacitores ao ligar e podem puxar dezenas de vezes a corrente normal por uma fração de milissegundo. Por isso alguns fabricantes dão um limite menor de potência para lâmpadas LED do que para incandescentes.
+
+**(b) O aquecedor.**
+
+$$
+I = \frac{1.500\,\text{W}}{127\,\text{V}} \approx 11{,}8\,\text{A}
+$$
+
+Passa de 10 A. Não serve, mesmo que "funcione" por um tempo: o contato e as trilhas esquentam além do previsto.
+
+**(c) O chuveiro.** $5.500 / 127 \approx 43\,\text{A}$ (ou 25 A, se for de 220 V). Nem pensar.
+
+Para cargas grandes, o relé inteligente comanda a **bobina** de um <Term id="contator">contator</Term> dimensionado para a carga, instalado no quadro com o disjuntor certo (aula <LinkAula id="m05-magnetismo/06-reles-e-contatores" />). O relé comanda só a bobina, que puxa poucos watts.
+
+<RealCase title="A luz da varanda e o portão pelo celular">
+
+A instalação mais comum é a da luz da varanda. O relé inteligente vai na caixa do interruptor, com a fase, o neutro, o retorno da lâmpada e os dois fios do interruptor. Quando o cliente reclama que "a luz acende sozinha", o suspeito costuma ser uma rotina programada no aplicativo ou a configuração de retorno após falta de energia. Quando "o interruptor parou de funcionar", em muitos modelos é porque o interruptor está configurado para outro tipo de chave (pulsador em vez de interruptor). E quando "o aplicativo diz que está desconectado", a causa mais comum é o Wi-Fi fraco dentro da caixa de metal ou de alvenaria grossa, ou uma troca de senha do roteador.
+
+O **portão** pelo celular usa outro tipo de módulo: um relé Wi-Fi com **contato seco** (sem tensão), configurado para dar um pulso de cerca de 1 s. O contato vai nos bornes da botoeira da central (`BOT` e `GND` na central da aula <LinkAula id="m16-portao/05-seguranca-e-acessorios" />), em paralelo com a botoeira. Para a central, o pulso do módulo é um toque na botoeira, e ela segue a mesma máquina de estados de sempre: fechado, abre; aberto, fecha; abrindo, para. Um sensor magnético no portão, ligado a uma entrada do módulo, mostra no aplicativo se ele está aberto ou fechado.
+
+Como o portão agora pode fechar sem ninguém olhando, a **fotocélula** e a **reversão por obstáculo** são obrigatórias e precisam estar funcionando. Nunca use um módulo para fechar o portão por rotina ou de longe sem ver o portão.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Instalar com o circuito energizado.** Desligue o disjuntor do circuito, teste a ausência de tensão nos fios com um instrumento que você acabou de testar numa tomada energizada, sinalize o quadro e só então mexa. Se não tiver segurança, chame um eletricista habilitado.
+- **Confundir fase e neutro.** O relé corta a fase. Identifique os fios com o instrumento antes de ligar, sem confiar só na cor.
+- **Ligar USB ou programar a placa com ela ligada na rede.** A fonte de muitos relés inteligentes e módulos baratos **não é isolada**: o negativo do circuito pode estar na tensão da rede. Encostar ali, ou ligar um cabo USB ao computador, pode dar choque e queimar o computador. Programe a placa desligada da rede, alimentada só pelo USB.
+- **Passar da corrente do relé.** Some as cargas, considere os picos de partida e, acima do limite, use um contator no quadro.
+- **Esmagar fios na caixa.** O relé ocupa espaço. Fios apertados e emendas mal feitas esquentam. Use conectores adequados e uma caixa que comporte tudo.
+- **Fazer a instalação fora das normas.** A instalação elétrica de uma casa segue a NBR 5410: proteção por disjuntor, seção dos fios, dispositivo DR e aterramento. O relé inteligente entra numa instalação que já precisa estar de acordo com ela.
+- **Deixar a automação depender só da nuvem.** O comando local (o interruptor da parede, a botoeira) deve continuar funcionando sem internet. E use senhas fortes no roteador e no aplicativo: o que está na internet pode ser acessado por outros.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Por que o contato do relé inteligente deve ficar no fio da fase, e não no do neutro?',
+      options: [
+        {
+          text: 'Para que, com a lâmpada apagada, o soquete fique sem tensão',
+          correct: true,
+          feedback:
+            'Isso. Cortando o neutro, a lâmpada apaga, mas o soquete continua na fase, e quem troca a lâmpada pode levar choque.',
+        },
+        {
+          text: 'Porque o relé não funciona no neutro',
+          feedback: 'O contato abre e fecha qualquer fio. A questão é a segurança de quem mexe na lâmpada.',
+        },
+        {
+          text: 'Para gastar menos energia',
+          feedback: 'O consumo é o mesmo nos dois casos. A diferença é o soquete ficar ou não energizado.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um relé inteligente funciona pela nuvem do fabricante. A internet da casa caiu. O que continua funcionando?',
+      options: [
+        {
+          text: 'O interruptor da parede, ligado à entrada do relé',
+          correct: true,
+          feedback:
+            'Isso. O programa que lê o interruptor roda no próprio relé. Só o comando pelo aplicativo, que passa pelo servidor, deixa de chegar.',
+        },
+        {
+          text: 'O comando pelo aplicativo, desde que o celular esteja em casa',
+          feedback: 'Pela nuvem, o comando sai para a internet e volta. Sem internet, ele não chega, mesmo com o celular em casa.',
+        },
+        {
+          text: 'Nada: sem internet, o relé desliga',
+          feedback: 'O relé continua alimentado pela rede e lendo o interruptor. Só perde a conexão com o servidor.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um aquecedor de 1.200 W vai ser ligado em 127 V por um relé inteligente. Qual é a corrente, em ampères?',
+      answer: 9.45,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation:
+        'I = P ÷ V = 1.200 W ÷ 127 V ≈ 9,45 A. Num relé de 10 A, fica no limite, sem folga: o melhor é comandar um contator.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Num relé inteligente com fonte não isolada, é seguro ligar o cabo USB ao computador para atualizar o programa com a placa ligada na rede.',
+      answer: false,
+      explanation:
+        'Sem isolação, o negativo do circuito pode estar na tensão da rede. A placa deve ser programada desligada da rede, alimentada só pelo USB.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Um módulo Wi-Fi vai abrir o portão pelo celular. Onde e como ele é ligado à central?',
+      options: [
+        {
+          text: 'Com um contato seco que dá um pulso, em paralelo com a botoeira',
+          correct: true,
+          feedback:
+            'Isso. Para a central, o pulso é um toque na botoeira, e ela segue a mesma lógica, com a fotocélula e a reversão funcionando.',
+        },
+        {
+          text: 'Com o contato fechado o tempo todo, nos bornes da fotocélula',
+          feedback:
+            'Os bornes da fotocélula são de segurança e não servem para comando. E um contato sempre fechado não dá toques.',
+        },
+        {
+          text: 'Direto nos fios do motor, no lugar da central',
+          feedback: 'Assim o motor fica sem fim de curso, sem fotocélula e sem reversão. É perigoso.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem os passos para instalar um relé inteligente na caixa do interruptor.',
+      items: [
+        'Desligar o disjuntor do circuito e sinalizar o quadro',
+        'Testar o instrumento numa tomada energizada e confirmar a ausência de tensão nos fios',
+        'Identificar fase, neutro e retorno da lâmpada',
+        'Ligar os fios nos bornes L, N, saída e interruptor, com conectores adequados',
+        'Acomodar o relé na caixa, fechar e religar o disjuntor',
+        'Testar pelo interruptor e pelo aplicativo',
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma bomba d\'água é comandada por um relé inteligente. Depois de uma falta de energia, o que o relé deve fazer quando a energia volta?',
+      options: [
+        {
+          text: 'Voltar desligado, para a bomba não ligar sem alguém decidir',
+          correct: true,
+          feedback:
+            'Isso. Para cargas que podem causar problema se ligarem sozinhas (bomba, aquecedor, motor), voltar desligado é o mais seguro.',
+        },
+        {
+          text: 'Voltar como estava, sempre',
+          feedback:
+            'É conveniente para uma luz, mas uma bomba ligando sozinha pode trabalhar a seco ou transbordar a caixa.',
+        },
+        {
+          text: 'Tanto faz: a bomba tem proteção',
+          feedback: 'Nem toda bomba tem proteção contra trabalho a seco. A escolha certa é no relé.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Um **relé inteligente** tem fonte (tirada da rede), microcontrolador com **Wi-Fi**, relé com transistor e uma entrada para o interruptor da parede.
+- O relé corta a **fase**; o interruptor vira uma **entrada**, e cada mudança dele inverte a lâmpada.
+- **Pela nuvem**, o comando passa por um servidor e depende da internet; **na rede local**, é mais rápido e funciona sem ela. O comando local (interruptor, botoeira) nunca deve depender da internet.
+- O **portão** pelo celular é um contato seco em paralelo com a botoeira, com a fotocélula e a reversão funcionando.
+- Some as cargas: acima da corrente do relé, comande um **contator**. Fontes não isoladas: nunca programe a placa ligada na rede. A instalação segue a **NBR 5410**.
+
+Com isto, termina o módulo de microcontroladores. O próximo, <LinkAula id="m13-sem-fio" />, explica como o comando viaja pelo ar: ondas, antenas, controles remotos de 433 MHz, Bluetooth e Wi-Fi.

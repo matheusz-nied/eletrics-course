@@ -91,6 +91,12 @@ export default defineFirmware<MinuteriaState>({
     { name: 'TEMPO', kind: 'analog-in', label: 'Trimpot do tempo' },
     { name: 'LUZ', kind: 'digital-out', label: 'Saída da luz' },
   ],
+  readouts: {
+    estado: { label: 'Estado' },
+    restante: { label: 'Tempo restante', unit: 's' },
+    tempo: { label: 'Tempo programado', unit: 's' },
+    transicao: { label: 'Última transição' },
+  },
   init: initMinuteria,
   step(state, { pins, dt }) {
     const tempo = tempoMinuteria(volts(pins, 'TEMPO'));

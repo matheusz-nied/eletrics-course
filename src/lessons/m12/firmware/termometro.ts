@@ -47,6 +47,7 @@ export default defineFirmware<State>({
     { name: 'A0', kind: 'analog-in', label: 'Divisor com o NTC (entrada A0)' },
     { name: 'VENT', kind: 'digital-out', label: 'Ventilador (pino D7)' },
   ],
+  readouts: { leitura: { label: 'Leitura do ADC (A0)' }, ventilador: { label: 'Ventilador ligado' } },
   init: () => ({ ventilador: false }),
   step(state, { pins }) {
     const leitura = adc10(volts(pins, 'A0'));

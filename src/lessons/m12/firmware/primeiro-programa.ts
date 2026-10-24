@@ -33,6 +33,7 @@ export default defineFirmware<State>({
     { name: 'D13', kind: 'digital-out', label: 'LED do botão (pino D13)' },
     { name: 'D12', kind: 'digital-out', label: 'LED que pisca (pino D12)' },
   ],
+  readouts: { leitura: { label: 'Leitura do ADC (A0)' } },
   init: () => ({ next: BLINK_HALF, blink: true }),
   step(state, { t, pins }) {
     let { next, blink } = state;

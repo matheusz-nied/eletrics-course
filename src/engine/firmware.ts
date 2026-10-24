@@ -9,6 +9,8 @@
  * module wrote first; firmware files may import the types from either.
  */
 
+import type { ReadoutInfo } from './contract';
+
 /** Digital level (true = high) or analog value (V), see `FirmwarePin.kind`. */
 export type PinValue = boolean | number;
 
@@ -76,6 +78,8 @@ export interface FirmwareDoc<S> {
   step(state: S, input: FirmwareInput): FirmwareOutput<S>;
   /** Part of the state kept without power (EEPROM). */
   persist?(state: S): unknown;
+  /** Label and unit of the step's own readouts (`ciclo`, `estado`…), shown in the inspector. */
+  readouts?: Record<string, ReadoutInfo>;
 }
 
 /** Typed identity for firmware files. */

@@ -56,6 +56,7 @@ export default defineFirmware<State>({
     { name: 'A0', kind: 'analog-in', label: 'Divisor com o LDR (entrada A0)' },
     { name: 'LUZ', kind: 'digital-out', label: 'Luz (pino D8)' },
   ],
+  readouts: { leitura: { label: 'Leitura do ADC (A0)' }, estado: { label: 'Estado' } },
   init: () => ({ estado: 'DIA', t: 0 }),
   step(state, { pins, dt }) {
     const leitura = adc10(volts(pins, 'A0'));

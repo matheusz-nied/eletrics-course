@@ -69,9 +69,9 @@ O circuito tem o divisor com um NTC de 10 kΩ e o programa liga a saída do vent
 
 1. A 25 °C, quanto o programa calcula? E qual é a leitura do ADC?
 2. Suba a temperatura até 32 °C. O ventilador liga?
-3. Agora desça devagar: 30, 29, 28 °C. Em que temperatura o ventilador desliga?
+3. Agora desça devagar, esperando a leitura firmar a cada passo: 30, 29, 28, 27 °C. Em que temperatura o ventilador desliga?
 
-A 25 °C, o ADC lê cerca de 508 e o programa calcula uns 25,4 °C. A pequena diferença vem do degrau do conversor (cada degrau aqui vale uns 0,1 °C) e de um leve aquecimento do próprio NTC pela corrente do divisor. Em 32 °C, o ventilador liga. Na descida, ele continua ligado em 30 e 29 °C e só desliga quando a temperatura chega a 28 °C.
+A 25 °C, o ADC lê cerca de 508 e o programa calcula uns 25,4 °C. A pequena diferença vem do degrau do conversor (cada degrau aqui vale uns 0,1 °C) e de um leve aquecimento do próprio NTC pela corrente do divisor, que o deixa uns 0,3 °C acima do ar em volta. Em 32 °C, o ventilador liga. Na descida, ele continua ligado em 30, 29 e até 28 °C (o programa calcula 28,6 °C) e só desliga em 27 °C, quando o cálculo passa para baixo de 28 °C. Num termostato de verdade, esse meio grau de diferença é corrigido na calibração.
 
 Esse intervalo entre ligar e desligar é a <Term id="histerese">histerese</Term>. Sem ela, com a temperatura parada perto de 30 °C, o ruído da leitura faria o ventilador ligar e desligar várias vezes por segundo, o que gasta o relé e irrita qualquer um. É o mesmo princípio do termostato da geladeira.
 
@@ -173,7 +173,7 @@ $$
 
 **Passo 3: a leitura.** $1{,}73 / 5 \times 1024 \approx 354{,}8$, que arredonda para baixo: **354**.
 
-**Passo 4: o caminho de volta.** O programa calcula $R = 10\,\text{k}\Omega \cdot 354 / (1024 - 354) \approx 5{,}28\,\text{k}\Omega$ e, pela equação Beta, cerca de **40,1 °C**. O simulador mostra 352 e 40,3 °C, dois degraus abaixo: a entrada analógica também puxa um pouquinho de corrente do divisor. Na prática, a tolerância do próprio NTC (1 % a 5 %) pesa mais que isso.
+**Passo 4: o caminho de volta.** O programa calcula $R = 10\,\text{k}\Omega \cdot 354 / (1024 - 354) \approx 5{,}28\,\text{k}\Omega$ e, pela equação Beta, cerca de **40,1 °C**. O simulador, depois de a temperatura firmar, mostra 350 e 40,5 °C, quatro degraus abaixo: a corrente do divisor aquece o NTC um pouco acima do ambiente, e a entrada analógica também puxa um pouquinho de corrente. Na prática, a tolerância do próprio NTC (1 % a 5 %) pesa mais que isso.
 
 <RealCase title="A luz da garagem e o motor que força">
 

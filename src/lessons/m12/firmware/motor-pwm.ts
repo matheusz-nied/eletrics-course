@@ -36,6 +36,11 @@ export default defineFirmware<State>({
     { name: 'D4', kind: 'digital-in', pullUp: true, label: 'Chave da partida suave (D4)' },
     { name: 'D9', kind: 'digital-out', label: 'Saída PWM para o MOSFET (D9)' },
   ],
+  readouts: {
+    ciclo: { label: 'Ciclo de trabalho', unit: '%' },
+    alvo: { label: 'Ciclo pedido pelo potenciômetro', unit: '%' },
+    partidaSuave: { label: 'Partida suave' },
+  },
   init: () => ({ count: 0, duty: 0, onSteps: 0 }),
   step(state, { pins, dt }) {
     const target = Math.round((volts(pins, 'A0') / VCC_5V) * STEPS) / STEPS;
@@ -50,7 +55,7 @@ export default defineFirmware<State>({
     return {
       state: { count, duty, onSteps },
       pins: { D9: count < onSteps },
-      readouts: { ciclo: onSteps / STEPS, alvo: target, partidaSuave: suave },
+      readouts: { ciclo: (100 * onSteps) / STEPS, alvo: 100 * target, partidaSuave: suave },
       events: [],
     };
   },

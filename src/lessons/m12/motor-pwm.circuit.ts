@@ -235,7 +235,7 @@ export default defineCircuit({
     {
       id: 'metade',
       description: 'Gire o potenciômetro até o meio: o ciclo de trabalho vai a 50 %.',
-      check: { readout: 'U1.ciclo', op: 'between', value: [0.49, 0.51] },
+      check: { readout: 'U1.ciclo', op: 'between', value: [49, 51] },
       solution: { 'P1.position': 0.5 },
       at: 0.7,
     },

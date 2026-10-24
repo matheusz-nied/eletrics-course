@@ -127,6 +127,7 @@ export default defineDevice({
     const fw = findFirmware(String(params.firmware ?? ''));
     const readoutInfo = { ...info.readoutInfo };
     for (const p of firmwarePins(fw)) readoutInfo[`level.${p.name}`] = { label: p.label };
+    Object.assign(readoutInfo, fw?.readouts);
     return {
       ...info,
       pins,

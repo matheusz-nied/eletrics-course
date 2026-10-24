@@ -30,6 +30,7 @@ export default defineFirmware<State>({
     { name: 'INT', kind: 'digital-in', pullUp: true, label: 'Interruptor da parede (S1)' },
     { name: 'RELE', kind: 'digital-out', label: 'Comando do relé (GPIO 4)' },
   ],
+  readouts: { lampada: { label: 'Lâmpada' }, origem: { label: 'Último comando' } },
   init: () => ({ lampada: false, app: released(), interruptor: released(), origem: '—' }),
   step(state, { pins, dt }) {
     const app = debounce(state.app, closed(pins, 'APP'), dt);
