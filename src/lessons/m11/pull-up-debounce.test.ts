@@ -113,12 +113,4 @@ describe('11.3 bounce and the RC filter', () => {
     expect(at * 1e3).toBeGreaterThan(3);
     expect(at * 1e3).toBeLessThan(12);
   });
-
-  it('the reset button clears the count', () => {
-    const { sim } = presses(false, 1);
-    set(sim, 'B2.pressed', true);
-    runTo(sim, sim.t + 0.001);
-    set(sim, 'B2.pressed', false);
-    expect(num(runTo(sim, sim.t + 0.001), 'U2.count')).toBe(0);
-  });
 });

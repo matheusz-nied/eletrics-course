@@ -96,7 +96,7 @@ Para uma lâmpada, isso não faz diferença: ela nem chega a piscar. Para um cir
 
 ## Explore: o contador que conta demais
 
-O circuito abaixo tem um botão com pull-up de 10 kΩ, cujo contato trepida por uns 4 ms a cada aperto. Uma chave escolhe o caminho até a porta inversora: direto do contato, ou por um filtro RC (10 kΩ e 470 nF). A saída da porta fica em nível alto com o botão apertado e alimenta um contador de 4 bits, que mostra quantos apertos ele viu. O botão "Zerar" volta o contador a 0. A simulação roda 50 vezes mais devagar que o tempo real, para que você veja os quiques.
+O circuito abaixo tem um botão com pull-up de 10 kΩ, cujo contato trepida por uns 4 ms a cada aperto. Uma chave escolhe o caminho até a porta inversora: direto do contato, ou por um filtro RC (10 kΩ e 470 nF). A saída da porta fica em nível alto com o botão apertado e alimenta um contador de 4 bits, que mostra quantos apertos ele viu. Para zerar o contador, recomece a simulação. A simulação roda 50 vezes mais devagar que o tempo real, para que você veja os quiques.
 
 <Simulation
   circuit="m11/debounce"
@@ -107,7 +107,7 @@ O circuito abaixo tem um botão com pull-up de 10 kΩ, cujo contato trepida por 
 
 1. Com o filtro desligado, aperte e solte o botão algumas vezes, olhando o contador. Quanto ele avança a cada aperto?
 2. No osciloscópio, observe o contato logo depois de um aperto. Quantas vezes ele vai de 5 V a 0 V antes de parar?
-3. Zere o contador, ligue o filtro e repita.
+3. Recomece a simulação, ligue o filtro e repita.
 
 Sem o filtro, cada aperto avança o contador de 3 a 7, conforme os quiques daquela vez. No osciloscópio, o contato desce e sobe várias vezes nos primeiros 4 ms. Com o filtro, cada aperto conta exatamente um. A tensão na entrada da porta desce devagar, numa curva, e cruza o limiar uma vez só.
 

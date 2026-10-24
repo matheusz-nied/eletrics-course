@@ -1,0 +1,139 @@
+---
+/* 11.5: inside the 555. Three equal resistors set 2/3 and 1/3 of VCC;
+   comparator 1 resets the flip-flop when the threshold passes 2/3, and
+   comparator 2 sets it when the trigger falls below 1/3. Q drives the
+   output through a buffer; Q̄ turns on the discharge transistor. */
+const zig = (x: number, y0: number, y1: number) => {
+  const h = (y1 - y0) / 6;
+  return `M${x} ${y0}l-8 ${h / 2}l16 ${h}l-16 ${h}l16 ${h}l-16 ${h}l16 ${h}l-8 ${h / 2}`;
+};
+const comparator = (x: number, y: number) =>
+  `M${x} ${y - 25}L${x + 60} ${y}L${x} ${y + 25}Z`;
+const pin = (x: number, y: number) => `<rect x="${x - 6}" y="${y - 6}" width="12" height="12" class="pin"/>`;
+---
+
+<svg viewBox="0 0 700 320" width="700" height="320" class="fig" aria-hidden="true">
+  <rect x="60" y="50" width="530" height="240" rx="10" class="chip" />
+  <text x="575" y="72" class="tag end">555</text>
+
+  <!-- Divider -->
+  <path
+    d={`M60 70H120V80${zig(120, 80, 115).slice(0)}V150${zig(120, 150, 185)}V220${zig(120, 220, 255)}V270H60`}
+    class="line"
+  />
+  <path d="M60 135H190M120 205H190" class="line" />
+  <circle cx="120" cy="135" r="3.5" class="dot" />
+  <circle cx="120" cy="205" r="3.5" class="dot" />
+  <text x="136" y="101" class="tag start">5 kΩ</text>
+  <text x="136" y="171" class="tag start">5 kΩ</text>
+  <text x="136" y="241" class="tag start">5 kΩ</text>
+  <text x="150" y="129" class="ref">2/3 VCC</text>
+  <text x="150" y="199" class="ref">1/3 VCC</text>
+
+  <!-- Comparators -->
+  <path d="M170 50V115H190M170 290V225H190" class="line" />
+  <path d={comparator(190, 125)} class="block" />
+  <path d={comparator(190, 215)} class="block" />
+  <text x="197" y="119" class="sign">+</text>
+  <text x="197" y="140" class="sign">−</text>
+  <text x="197" y="209" class="sign">+</text>
+  <text x="197" y="230" class="sign">−</text>
+  <text x="220" y="93" class="tag">Comparador 1</text>
+  <text x="220" y="258" class="tag">Comparador 2</text>
+
+  <!-- Flip-flop -->
+  <path d="M250 125H310M250 215H310M355 50V100" class="line" />
+  <rect x="310" y="100" width="90" height="140" rx="4" class="block" />
+  <text x="355" y="174" class="tag">Flip-flop</text>
+  <text x="318" y="130" class="sign start">R</text>
+  <text x="318" y="220" class="sign start">S</text>
+  <text x="392" y="130" class="sign end">Q</text>
+  <text x="392" y="220" class="sign end">Q̄</text>
+
+  <!-- Output buffer -->
+  <path d="M400 125H440M480 125H590" class="line" />
+  <path d="M440 105L480 125L440 145Z" class="block" />
+  <text x="460" y="96" class="tag">Saída</text>
+
+  <!-- Discharge transistor -->
+  <path d="M400 215H440V240H462M465 234L495 218V190H590M465 246L495 262V275" class="line" />
+  <path d="M465 226V254" class="bar" />
+  <path d="M483 268l12 -6l-7 -9" class="line" />
+  <path d="M483 275H507M487 280H503M491 285H499" class="line" />
+  <text x="530" y="230" class="tag">Transistor</text>
+  <text x="530" y="246" class="tag">de descarga</text>
+
+  <!-- Pins -->
+  <Fragment set:html={pin(60, 70) + pin(60, 135) + pin(60, 270) + pin(170, 50) + pin(355, 50) + pin(170, 290) + pin(590, 125) + pin(590, 190)} />
+  <text x="48" y="75" class="plab end">8 VCC</text>
+  <text x="48" y="140" class="plab end">5 CTRL</text>
+  <text x="48" y="275" class="plab end">1 GND</text>
+  <text x="170" y="36" class="plab">6 THR (limiar)</text>
+  <text x="355" y="36" class="plab">4 RESET</text>
+  <text x="170" y="312" class="plab">2 TRIG (disparo)</text>
+  <text x="602" y="130" class="plab start">3 OUT</text>
+  <text x="602" y="195" class="plab start">7 DIS</text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .chip {
+    fill: color-mix(in oklab, var(--fg) 4%, var(--bg));
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+  }
+  .line {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .bar {
+    stroke: var(--fg);
+    stroke-width: 4;
+  }
+  .block {
+    fill: var(--bg);
+    stroke: var(--accent);
+    stroke-width: 2.5;
+  }
+  .dot {
+    fill: var(--fg);
+  }
+  .fig :global(.pin) {
+    fill: var(--fg);
+  }
+  .tag {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+  .ref {
+    fill: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .sign {
+    fill: var(--fg);
+    font-size: 15px;
+    font-weight: 700;
+    text-anchor: start;
+  }
+  .plab {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

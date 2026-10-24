@@ -13,7 +13,7 @@ export default defineCircuit({
   id: 'm11/debounce',
   title: 'Botão que trepida e o filtro RC',
   description:
-    'Um botão liga ao GND uma entrada com resistor de pull-up de 10 kΩ para 5 V. O contato do botão trepida por alguns milissegundos a cada aperto. Uma chave escolhe o que vai para a entrada de uma porta inversora com entrada Schmitt trigger: o contato direto, ou o contato passando por um filtro RC, com um resistor de 10 kΩ e um capacitor de 470 nF. A saída da porta fica em nível alto com o botão apertado e alimenta o clock de um contador de 4 bits, que mostra quantos apertos ele viu. Um segundo botão zera o contador. A simulação roda 50 vezes mais devagar que o tempo real.',
+    'Um botão liga ao GND uma entrada com resistor de pull-up de 10 kΩ para 5 V. O contato do botão trepida por alguns milissegundos a cada aperto. Uma chave escolhe o que vai para a entrada de uma porta inversora com entrada Schmitt trigger: o contato direto, ou o contato passando por um filtro RC, com um resistor de 10 kΩ e um capacitor de 470 nF. A saída da porta fica em nível alto com o botão apertado e alimenta o clock de um contador de 4 bits, que mostra quantos apertos ele viu. Para zerar o contador, recomece a simulação. A simulação roda 50 vezes mais devagar que o tempo real.',
   analysis: { kind: 'transient', dt: 2e-5, speed: 0.02 },
   elements: [
     {
@@ -31,7 +31,6 @@ export default defineCircuit({
       points: [
         [0, 0],
         [6, 0],
-        [31, 0],
       ],
     },
     {
@@ -86,7 +85,7 @@ export default defineCircuit({
       a: [15, 14],
       b: [15, 20],
       label: 'C1',
-      params: { capacitance: 470e-9 },
+      params: { capacitance: 470e-9, ic: 5 },
     },
     { id: 'G3', type: 'ground', at: [15, 20] },
     {
@@ -116,30 +115,15 @@ export default defineCircuit({
     },
     { id: 'U2', type: 'counter-4bit', at: [37, 10], label: 'Contador' },
     {
-      id: 'B2',
-      type: 'push-button',
-      a: [31, 0],
-      b: [31, 12],
-      label: 'Zerar',
-      control: { param: 'pressed', label: 'Zerar o contador', kind: 'momentary' },
-    },
-    {
       id: 'W6',
       type: 'wire',
       points: [
-        [31, 12],
         [33, 12],
+        [31, 12],
+        [31, 16],
       ],
     },
-    {
-      id: 'R3',
-      type: 'resistor',
-      a: [31, 12],
-      b: [31, 20],
-      label: 'R3',
-      params: { resistance: 10000 },
-    },
-    { id: 'G4', type: 'ground', at: [31, 20] },
+    { id: 'G4', type: 'ground', at: [31, 16] },
   ],
   probes: [
     { id: 'VCONT', kind: 'voltage', plus: 'B1.a', minus: 'GND', label: 'Contato do botão' },
