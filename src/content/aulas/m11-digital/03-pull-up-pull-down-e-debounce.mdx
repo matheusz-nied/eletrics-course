@@ -3,9 +3,255 @@ titulo: Pull-up, pull-down e debounce
 modulo: m11-digital
 ordem: 3
 nivel: I
-duracaoMin: 30
+duracaoMin: 35
 objetivos:
-  - Em construção
+  - Explicar por que uma entrada digital solta lê 0 ou 1 ao acaso
+  - Ligar um botão ou contato com resistor de pull-up ou de pull-down e calcular a corrente
+  - Reconhecer a trepidação de um contato no osciloscópio e o efeito dela num contador
+  - Fazer o debounce com um filtro RC e uma entrada Schmitt trigger, ou no programa
+prerequisitos:
+  - m11-digital/02-portas-logicas
+  - m04-passivos/04-circuito-rc
+  - m04-passivos/07-chaves-botoes-e-reles
+tags: [pull-up, pull-down, entrada flutuante, debounce, trepidação, repique, filtro RC, Schmitt trigger, 74HC14, botoeira, central do portão]
+seguranca: baixa-tensao
 ---
 
-Em construção.
+import PullUpDown from '../../../lessons/m11/figures/PullUpDown.astro';
+
+Um técnico troca a central de um portão, liga tudo e, antes de mexer em qualquer coisa, o portão começa a abrir sozinho. Ele desliga e confere a fiação: a botoeira da garagem ficou desconectada, com o borne vazio. Bastou isso. A entrada da botoeira ficou solta, e uma entrada digital solta não lê "nada": lê 0 e 1 ao acaso, conforme a interferência que chega até ela.
+
+Outro defeito clássico: um contador de peças numa esteira que marca três peças quando passa uma só. O sensor é uma chave mecânica, e o contato dela quica ao fechar. O circuito é rápido o bastante para ver cada quique.
+
+Nesta aula você vai ver os dois problemas acontecendo no simulador e as duas curas, que estão em quase toda placa: o resistor de **pull-up** (ou pull-down) e o **debounce**.
+
+## A entrada que flutua
+
+Uma entrada de porta CMOS, como a de um 74HC ou de um microcontrolador, funciona como a porta (gate) de um MOSFET (aula <LinkAula id="m09-semicondutores/08-mosfet" />): é uma plaquinha isolada, e quase não passa corrente por ela, menos de 1 µA. Isso é ótimo para não carregar quem a alimenta, mas tem um preço. Se nada estiver ligado à entrada, nada define a tensão dela. Ela fica **<Term id="entrada-flutuante">flutuando</Term>**, e qualquer carga elétrica que chegar, por mais pequena, muda a tensão.
+
+E sempre chega alguma coisa. Um fio de entrada que corre alguns metros junto de um fio da rede forma com ele um pequeno capacitor, de dezenas de picofarads. Pela fórmula da reatância (aula <LinkAula id="m06-corrente-alternada/04-reatancia-e-impedancia" />), 50 pF em 60 Hz são:
+
+$$
+X_C = \frac{1}{2 \pi f C} = \frac{1}{2 \pi \cdot 60 \cdot 50 \times 10^{-12}} \approx 53\ \text{M}\Omega
+$$
+
+É uma resistência enorme, mas a entrada é ainda maior. Os 180 V de pico da rede de 127 V empurram por ali uns 3,4 µA, e isso basta para levar a entrada de um extremo ao outro a cada meio ciclo. Dentro do chip, dois diodos de proteção (os diodos de grampeamento) ligam a entrada ao VCC e ao GND, e seguram a tensão entre uns −0,3 V e 5,3 V. A porta lê essa onda como um sinal digital de 60 Hz.
+
+## Explore: a entrada solta e o pull-up
+
+No circuito abaixo, um botão liga a entrada de uma porta inversora (com entrada <Term id="schmitt-trigger">Schmitt trigger</Term>) ao GND. O LED na saída deve acender só com o botão apertado. O fio da entrada passa perto de um fio da rede, representado pelos capacitores "Fio–rede" e "Fio–GND". Uma chave liga ou desliga um resistor de 10 kΩ entre a entrada e os 5 V. A simulação roda dez vezes mais devagar que o tempo real.
+
+<Simulation
+  circuit="m11/entrada-flutuante"
+  height={380}
+  instruments={[{ kind: 'osciloscopio', series: ['VIN'] }]}
+  autoplay
+/>
+
+1. Com o pull-up desligado e o botão solto, observe o LED e o osciloscópio. A entrada fica parada?
+2. Ligue o pull-up. O que acontece com a tensão da entrada e com o LED?
+3. Com o pull-up ligado, aperte o botão.
+
+Sem o pull-up, a entrada sobe até 5,3 V e desce até −0,3 V, presa pelos diodos, e o LED pisca 60 vezes por segundo (6 vezes por segundo na simulação lenta). Ninguém apertou nada. Com o pull-up ligado, a entrada fica em 5 V, com uma ondulação de uns 70 mV de pico a pico, longe de qualquer limiar. Ao apertar o botão, ela vai a 0 V e o LED acende.
+
+## Pull-up e pull-down
+
+O resistor que você ligou se chama **<Term id="pull-up">resistor de pull-up</Term>** ("puxa para cima"). Ele dá à entrada um caminho até um nível definido. Com o botão solto, a entrada fica no nível do resistor. Com o botão apertado, o contato vence o resistor e leva a entrada ao outro nível.
+
+<Figure caption="Figura 1. Pull-up e pull-down. No pull-up, o resistor vai ao +5 V e o botão ao GND: solto lê 1, apertado lê 0. No pull-down, é o contrário." alt="Dois circuitos lado a lado. À esquerda, o pull-up: do +5 V desce um resistor de 10 kΩ até um ponto que vai para a entrada de uma porta; desse ponto, um botão vai ao GND. Embaixo, a legenda: solto, 5 V (1); apertado, 0 V (0). À direita, o pull-down: do +5 V, um botão desce até o ponto da entrada; desse ponto, um resistor de 10 kΩ vai ao GND. Legenda: solto, 0 V (0); apertado, 5 V (1).">
+  <PullUpDown />
+</Figure>
+
+Com pull-up, o sinal é **ativo em nível baixo**: "apertado" vira 0. Parece ao contrário, mas é a ligação mais usada, por três motivos:
+
+- O contato só precisa levar o GND, que é comum a todos os sensores. Um cabo com GND e um fio por sensor basta.
+- Se o fio do sensor encostar na carcaça ou no GND, nada queima: o resistor limita a corrente.
+- Os microcontroladores têm pull-ups internos, que o programa liga com uma linha. No ATmega328P (o chip do Arduino Uno), eles têm entre 20 kΩ e 50 kΩ.
+
+Com o contato fechado, a corrente pelo resistor é a lei de Ohm:
+
+$$
+I = \frac{V_{CC}}{R} = \frac{5\ \text{V}}{10\ \text{k}\Omega} = 0{,}5\ \text{mA}
+$$
+
+### Qual valor de resistor?
+
+O valor é um meio-termo. Quanto **menor** o resistor, mais firme ele segura a entrada contra interferência (os 3,4 µA da rede, em 10 kΩ, dão só 34 mV), mas mais corrente passa com o contato fechado e mais a bateria sofre num aparelho portátil. Quanto **maior**, menos corrente, mas a entrada fica mais "mole": com 1 MΩ, os mesmos 3,4 µA dariam 3,4 V, o bastante para trocar de nível.
+
+Na prática:
+
+- **4,7 kΩ a 10 kΩ** para sensores e botoeiras com fios compridos, como os da central do portão.
+- **47 kΩ a 100 kΩ** em placas pequenas, com o botão ao lado do chip e alimentação por bateria.
+- Nunca ligue a entrada direto ao VCC sem resistor quando ela tiver um botão para o GND: ao apertar, o botão vira um curto na fonte.
+
+<Callout type="dica" title="Pinos que sobram">
+Entradas de chips CMOS que você não usa também flutuam, e uma porta que troca de nível sem parar gasta energia e gera ruído. Ligue as entradas que sobram ao GND ou ao VCC. Num microcontrolador, deixe os pinos sem uso como entrada com pull-up interno ou como saída.
+</Callout>
+
+## O contato que trepida
+
+Resolvida a entrada solta, aparece o segundo problema. As lâminas de um botão são de metal elástico. Quando uma bate na outra, ela quica, como uma bola que cai no chão: o contato fecha, abre, fecha, abre, e só depois de alguns milissegundos fica fechado de vez. Ao soltar, acontece o mesmo, em menor grau. Essa **trepidação** (bounce, ou repique) dura de menos de 1 ms a uns 20 ms, conforme o botão, o desgaste e a força do dedo.
+
+Para uma lâmpada, isso não faz diferença: ela nem chega a piscar. Para um circuito digital, que reage em nanossegundos, cada quique é um aperto. Um contador de apertos conta três, cinco, sete de uma vez.
+
+## Explore: o contador que conta demais
+
+O circuito abaixo tem um botão com pull-up de 10 kΩ, cujo contato trepida por uns 4 ms a cada aperto. Uma chave escolhe o caminho até a porta inversora: direto do contato, ou por um filtro RC (10 kΩ e 470 nF). A saída da porta fica em nível alto com o botão apertado e alimenta um contador de 4 bits, que mostra quantos apertos ele viu. O botão "Zerar" volta o contador a 0. A simulação roda 50 vezes mais devagar que o tempo real, para que você veja os quiques.
+
+<Simulation
+  circuit="m11/debounce"
+  height={360}
+  instruments={[{ kind: 'osciloscopio', series: ['VCONT', 'VIN'] }]}
+  autoplay
+/>
+
+1. Com o filtro desligado, aperte e solte o botão algumas vezes, olhando o contador. Quanto ele avança a cada aperto?
+2. No osciloscópio, observe o contato logo depois de um aperto. Quantas vezes ele vai de 5 V a 0 V antes de parar?
+3. Zere o contador, ligue o filtro e repita.
+
+Sem o filtro, cada aperto avança o contador de 3 a 7, conforme os quiques daquela vez. No osciloscópio, o contato desce e sobe várias vezes nos primeiros 4 ms. Com o filtro, cada aperto conta exatamente um. A tensão na entrada da porta desce devagar, numa curva, e cruza o limiar uma vez só.
+
+### Como o filtro resolve
+
+Quando o contato fecha, o capacitor de 470 nF se descarrega pelo resistor de 10 kΩ, com a <Term id="constante-de-tempo">constante de tempo</Term>:
+
+$$
+\tau = R \cdot C = 10\ \text{k}\Omega \cdot 470\ \text{nF} = 4{,}7\ \text{ms}
+$$
+
+Cada vez que o contato abre num quique, o capacitor recomeça a carregar, mas só por uma fração de milissegundo: a tensão mal sobe antes do contato fechar de novo. A entrada só cai até o limiar de 2 V (40 % de 5 V) quando os quiques já acabaram. No simulador, isso acontece uns 6 ms depois do aperto. Ao soltar, o capacitor carrega pelos dois resistores em série (20 kΩ, $\tau = 9{,}4$ ms) e a entrada cruza os 3 V uns 10 ms depois.
+
+O filtro sozinho não basta. A tensão que desce devagar passaria um tempo perto do limiar, e uma porta comum, com um limiar só, poderia trocar de nível várias vezes com qualquer ruído, como você viu na aula <LinkAula id="m11-digital/01-analogico-e-digital" />. A entrada Schmitt trigger, com os dois limiares (3 V para subir, 2 V para descer), troca uma vez e só volta quando a tensão percorre todo o caminho de volta. Por isso o debounce clássico é **filtro RC + 74HC14**.
+
+Para escolher o capacitor, a regra é deixar a constante de tempo maior que a trepidação esperada, sem atrasar demais a resposta. Um aperto humano dura mais de 50 ms, então 5 ms a 20 ms de atraso passam despercebidos.
+
+## Exemplo resolvido: debounce no programa
+
+A maioria dos aparelhos de hoje lê os botões com um microcontrolador e faz o **<Term id="debounce">debounce</Term>** no programa, sem capacitor. A ideia: só aceitar uma troca de nível quando ela ficar parada por um tempo mínimo.
+
+**Problema.** Uma botoeira com pull-up está num pino que o programa lê a cada 1 ms. O fabricante do botão garante trepidação menor que 10 ms. Escreva a lógica do debounce e diga quantos milissegundos depois do aperto o programa reage, com uma espera de 30 ms.
+
+**Passo 1: guardar o último nível aceito e há quanto tempo o pino está diferente dele.** Se o pino volta ao nível aceito, o contador zera: foi um quique.
+
+**Passo 2: aceitar a troca só depois da espera.** Em C, num programa que roda a cada 1 ms:
+
+```c
+// Chamada a cada 1 ms. pino: 1 = solto (pull-up), 0 = apertado.
+bool aceito = 1;     // último nível aceito
+int  diferente = 0;  // ms seguidos com o pino diferente de "aceito"
+
+bool apertou(bool pino) {
+  if (pino == aceito) { diferente = 0; return false; }
+  if (++diferente < 30) return false;  // ainda pode ser trepidação
+  aceito = pino;
+  diferente = 0;
+  return pino == 0;  // só a descida (aperto) conta
+}
+```
+
+**Passo 3: o atraso.** Durante a trepidação, cada vez que o contato abre, `diferente` volta a zero. Depois do último quique (até 10 ms após o aperto), o pino fica 30 ms parado em 0. O programa reage entre 30 ms e 40 ms depois do dedo: rápido demais para alguém perceber.
+
+**Resposta.** A espera de 30 ms cobre com folga os 10 ms de trepidação, e a resposta fica entre 30 ms e 40 ms. A central do portão do curso faz exatamente isso.
+
+<RealCase title="As entradas da central do portão">
+
+A central do automatizador (veja <LinkAula id="m16-portao/03-a-central-por-dentro" />) lê fim de curso, botoeira, fotocélula, botão PROG e jumpers, todos com o mesmo truque: **pull-up de 10 kΩ para 5 V** e o contato fechando para o GND. Com o contato fechado passam 0,5 mA, o bastante para os cabos de alguns metros que vão até o motor e a garagem.
+
+O pull-up também define o que acontece quando um fio se solta, e o projeto da central aproveita isso. A fotocélula usa o contato NF: com o feixe livre, a entrada fica em 0 V. Um fio partido deixa a entrada em 5 V, o mesmo que "alguém no feixe", e o portão não fecha em cima de ninguém (aula <LinkAula id="m16-portao/05-seguranca-e-acessorios" />). Já a botoeira usa o contato NA: um fio solto deixa a entrada em 5 V, "solto", e o portão fica parado.
+
+O programa faz o debounce de cada botão com uma espera de 30 ms, como no exemplo resolvido. Sem isso, um único toque na botoeira poderia ser lido como "abre, para, fecha" e o portão daria trancos.
+
+E o portão que abria sozinho do começo da aula? Uma central sem pull-up naquela entrada, ou com o pull-up queimado, deixaria a entrada flutuando, e o cabo comprido da botoeira, que corre junto da fiação da rede, faria o resto. Um multímetro no borne da botoeira mostra o defeito: em vez de 5 V firmes com a botoeira solta, uma tensão que não para de mudar.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Esquecer o pull-up.** No protoboard o circuito pode até funcionar, porque a entrada flutua para o lado certo por acaso. Com o fio comprido ou na mão de outra pessoa, ele começa a falhar.
+- **Pull-up e pull-down ao mesmo tempo.** Dois resistores formam um divisor, e a entrada pode ficar no meio, perto dos limiares. Use um ou outro. Atenção ao pull-up interno: ele também conta.
+- **Botão direto entre o VCC e o GND.** Sem resistor, apertar o botão é um curto na fonte.
+- **Debounce com porta comum.** Um filtro RC ligado a uma entrada sem histerese pode trocar de nível várias vezes durante a descida lenta. Use uma entrada Schmitt trigger (74HC14) ou o debounce no programa.
+- **Capacitor grande demais.** Um debounce com 1 s de constante de tempo engole apertos rápidos e deixa o aparelho com cara de travado.
+- **Cabos de sensor junto da fiação da rede.** Separe-os sempre que puder. Além do ruído, um isolamento danificado pode levar a rede à placa. Nunca encoste no fio de um sensor para "testar" com a instalação ligada: confira com o multímetro.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Uma entrada de porta CMOS ficou sem nada ligado. O que ela lê?',
+      options: [
+        {
+          text: 'Qualquer coisa: o nível muda com a interferência que chega ao pino',
+          correct: true,
+          feedback: 'Isso. A entrada quase não puxa corrente, e qualquer carga muda a tensão dela.',
+        },
+        { text: 'Sempre 0, porque não há tensão', feedback: 'Sem um caminho até o GND, nada garante 0 V no pino.' },
+        { text: 'Sempre 1, como nas portas TTL antigas', feedback: 'Entradas TTL soltas tendem a ler 1, mas as CMOS não têm essa tendência.' },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Uma entrada tem pull-up de 4,7 kΩ para 3,3 V. Com o botão apertado, qual a corrente no resistor, em mA?',
+      answer: 0.7,
+      tolerance: 0.02,
+      unit: 'mA',
+      explanation: 'I = 3,3 V / 4.700 Ω ≈ 0,70 mA.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Num circuito com pull-down, o que a entrada lê com o botão solto e com ele apertado?',
+      options: [
+        { text: '0 solto, 1 apertado', correct: true, feedback: 'Isso: o resistor puxa para o GND, e o botão leva a entrada ao VCC.' },
+        { text: '1 solto, 0 apertado', feedback: 'Esse é o pull-up.' },
+        { text: '1 nos dois casos', feedback: 'Solto, o resistor leva a entrada ao GND.' },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Um filtro de debounce usa 22 kΩ e 470 nF. Qual a constante de tempo, em ms?',
+      answer: 10.34,
+      tolerance: 0.2,
+      unit: 'ms',
+      explanation: 'τ = R · C = 22.000 Ω · 0,000000470 F ≈ 0,0103 s ≈ 10,3 ms.',
+    },
+    {
+      type: 'vf',
+      prompt: 'Para o debounce com filtro RC funcionar bem, a entrada que recebe o sinal filtrado deve ter histerese (Schmitt trigger).',
+      answer: true,
+      explanation: 'A tensão filtrada desce devagar e passa um tempo perto do limiar. Com histerese, a entrada troca uma vez só.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Ponha em ordem o que acontece num debounce no programa, depois de um aperto.',
+      items: [
+        'O contato fecha e quica algumas vezes',
+        'A cada quique, a contagem de tempo volta a zero',
+        'O contato assenta e o pino fica parado em 0',
+        'Depois do tempo de espera parado, o programa aceita o aperto',
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que a fotocélula da central usa contato NF com pull-up?',
+      options: [
+        {
+          text: 'Um fio partido deixa a entrada em 5 V, que a central lê como "alguém no feixe"',
+          correct: true,
+          feedback: 'Isso: a falha do cabo leva ao estado seguro, e o portão não fecha.',
+        },
+        { text: 'Porque o contato NF gasta menos corrente', feedback: 'Com o feixe livre o NF fica fechado e passa 0,5 mA o tempo todo: gasta mais, não menos.' },
+        { text: 'Porque o NF não trepida', feedback: 'Todo contato mecânico pode trepidar. O motivo é a segurança diante de uma falha.' },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Uma entrada digital CMOS quase não puxa corrente. Solta, ela **flutua** e lê 0 ou 1 conforme a interferência; perto da rede, troca de nível 120 vezes por segundo.
+- O **pull-up** liga a entrada ao VCC por um resistor, e o contato a leva ao GND: solto = 1, apertado = 0. O **pull-down** é o contrário. A corrente com o contato fechado é $V_{CC}/R$: 0,5 mA com 10 kΩ em 5 V.
+- Resistores de 4,7 kΩ a 10 kΩ seguram bem entradas com fios compridos. Valores altos economizam corrente, mas deixam a entrada sensível.
+- Contatos mecânicos **trepidam** por alguns milissegundos ao fechar e ao abrir, e um circuito digital conta cada quique.
+- O **debounce** por hardware usa um filtro RC (constante de tempo de alguns milissegundos) e uma entrada **Schmitt trigger**. No programa, a troca só é aceita quando o nível fica parado por um tempo, como os 30 ms da central do portão.
