@@ -108,4 +108,21 @@ test.describe('módulo 12: microcontroladores', () => {
     await expect(reading(sim, 'VL')).not.toContainText(/126,\d\sV/, { timeout: 15_000 });
     errors.expectClean();
   });
+
+  test('the board of lesson 12.5 runs the blink program and reports a missing semicolon', async ({
+    page,
+  }) => {
+    const errors = watchErrors(page);
+    await page.goto(`${MODULE}05-programando-um-microcontrolador/`);
+    const ide = await widget(page, '.mide');
+    await ide.getByRole('button', { name: 'Enviar para a placa' }).click();
+    await expect(ide).toHaveAttribute('data-estado', 'rodando');
+    await expect(ide).toHaveAttribute('data-led13', 'on', { timeout: 5_000 });
+    await expect(ide).toHaveAttribute('data-led13', 'off', { timeout: 5_000 });
+    const code = ide.locator('.mide__textarea');
+    await code.fill((await code.inputValue()).replace('delay(1000);', 'delay(1000)'));
+    await ide.getByRole('button', { name: 'Enviar para a placa' }).click();
+    await expect(ide.locator('.mide__status')).toContainText('ponto e vírgula');
+    errors.expectClean();
+  });
 });

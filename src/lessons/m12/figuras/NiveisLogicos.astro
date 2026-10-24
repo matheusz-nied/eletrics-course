@@ -13,45 +13,45 @@ const fmt = (v: number) => v.toLocaleString('pt-BR', { maximumFractionDigits: 2 
 ---
 
 <svg viewBox="0 0 520 290" width="520" height="290" class="fig" aria-hidden="true">
-  {
-    BARS.map((b) => {
-      const y = (v: number) => TOP + H - (v / b.vcc) * H;
-      return (
-        <g>
-          <rect x={b.x} y={y(b.vcc)} width="56" height={y(b.high) - y(b.vcc)} class="hi" />
-          <rect x={b.x} y={y(b.high)} width="56" height={y(b.low) - y(b.high)} class="mid" />
-          <rect x={b.x} y={y(b.low)} width="56" height={y(0) - y(b.low)} class="lo" />
-          <text x={b.x + 28} y={(y(b.vcc) + y(b.high)) / 2 + 4} class="band">
-            alto (1)
-          </text>
-          <text x={b.x + 28} y={(y(b.high) + y(b.low)) / 2 - 3} class="band muted">
-            indefinido
-          </text>
-          <text x={b.x + 28} y={(y(b.high) + y(b.low)) / 2 + 12} class="band muted small">
-            evite
-          </text>
-          <text x={b.x + 28} y={(y(b.low) + y(0)) / 2 + 4} class="band">
-            baixo (0)
-          </text>
-          {[b.vcc, b.high, b.low, 0].map((v) => (
-            <>
-              <path d={`M${b.x - 6} ${y(v)}H${b.x}`} class="tick" />
-              <text x={b.x - 10} y={y(v) + 4} class="val">
-                {fmt(v)} V
-              </text>
-            </>
-          ))}
-          <text x={b.x + 28} y={TOP + H + 26} class="name">
-            {b.name}
-          </text>
-          <text x={b.x + 28} y={TOP + H + 44} class="chip">
-            {b.chip}
-          </text>
-        </g>
-      );
-    })
-  }
-  <text x="260" y="18" class="title">o que uma entrada digital entende como 0 e como 1</text>
+  {BARS.map((b) => {
+    const y = (v: number) => TOP + H - (v / b.vcc) * H;
+    return (
+      <g>
+        <rect x={b.x} y={y(b.vcc)} width="56" height={y(b.high) - y(b.vcc)} class="hi" />
+        <rect x={b.x} y={y(b.high)} width="56" height={y(b.low) - y(b.high)} class="mid" />
+        <rect x={b.x} y={y(b.low)} width="56" height={y(0) - y(b.low)} class="lo" />
+        <text x={b.x + 28} y={(y(b.vcc) + y(b.high)) / 2 + 4} class="band">
+          alto (1)
+        </text>
+        <text x={b.x + 28} y={(y(b.high) + y(b.low)) / 2 - 3} class="band muted">
+          indefinido
+        </text>
+        <text x={b.x + 28} y={(y(b.high) + y(b.low)) / 2 + 12} class="band muted small">
+          evite
+        </text>
+        <text x={b.x + 28} y={(y(b.low) + y(0)) / 2 + 4} class="band">
+          baixo (0)
+        </text>
+        {[b.vcc, b.high, b.low, 0].map((v) => (
+          <>
+            <path d={`M${b.x - 6} ${y(v)}H${b.x}`} class="tick" />
+            <text x={b.x - 10} y={y(v) + 4} class="val">
+              {fmt(v)} V
+            </text>
+          </>
+        ))}
+        <text x={b.x + 28} y={TOP + H + 26} class="name">
+          {b.name}
+        </text>
+        <text x={b.x + 28} y={TOP + H + 44} class="chip">
+          {b.chip}
+        </text>
+      </g>
+    );
+  })}
+  <text x="260" y="18" class="title">
+    o que uma entrada digital entende como 0 e como 1
+  </text>
 </svg>
 
 <style>

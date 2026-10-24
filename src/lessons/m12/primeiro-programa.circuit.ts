@@ -183,7 +183,8 @@ export default defineCircuit({
   goals: [
     {
       id: 'metade',
-      description: 'Com o potenciômetro no meio, A0 tem cerca de 2,5 V e o conversor lê perto de 512.',
+      description:
+        'Com o potenciômetro no meio, A0 tem cerca de 2,5 V e o conversor lê perto de 512.',
       check: { readout: 'U1.leitura', op: 'between', value: [505, 515] },
       at: 0.05,
     },

@@ -116,9 +116,7 @@ export default defineCircuit({
     },
     { id: 'G', type: 'ground', at: [0, 22] },
   ],
-  probes: [
-    { id: 'VA0', kind: 'voltage', plus: 'U1.A0', minus: 'GND', label: 'Tensão em A0' },
-  ],
+  probes: [{ id: 'VA0', kind: 'voltage', plus: 'U1.A0', minus: 'GND', label: 'Tensão em A0' }],
   goals: [
     {
       id: 'dia',
