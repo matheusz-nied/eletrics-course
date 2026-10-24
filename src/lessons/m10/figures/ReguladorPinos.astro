@@ -1,0 +1,277 @@
+---
+/*
+ * 10.1: the pinout of a 7812 and of an LM317, seen from the front (code
+ * towards you, legs down), and the basic circuit of each one: the 7812 with
+ * 330 nF at the input and 100 nF at the output; the LM317 with R1 = 240 Ω
+ * from the output to ADJ and R2 from ADJ to ground. One SVG per regulator,
+ * so the two stack on a phone.
+ */
+interface Part {
+  title: string;
+  tab: string;
+  code: string;
+  pins: [string, string, string];
+  adjustable: boolean;
+}
+
+const parts: Part[] = [
+  {
+    title: 'Regulador fixo (78xx)',
+    tab: 'aba ligada ao terra',
+    code: '7812',
+    pins: ['entrada', 'terra', 'saída'],
+    adjustable: false,
+  },
+  {
+    title: 'Regulador ajustável (LM317)',
+    tab: 'aba ligada à saída',
+    code: 'LM317',
+    pins: ['ajuste', 'saída', 'entrada'],
+    adjustable: true,
+  },
+];
+
+const LEGS = [94, 150, 206];
+const RAIL = 300;
+const GND = 420;
+
+const ZIG = Array.from({ length: 6 }, (_, k) => (k % 2 === 0 ? 8 : -8));
+const resistor = (x: number, y1: number, y2: number) => {
+  const step = (y2 - y1) / 7;
+  return (
+    `M${x} ${y1}` +
+    ZIG.map((dx, k) => `L${x + dx} ${(y1 + step * (k + 0.5)).toFixed(1)}`).join('') +
+    `L${x} ${y2}`
+  );
+};
+/** A capacitor from the rail to ground at x, plates around y. */
+const capacitor = (x: number, y: number) => ({
+  wire: `M${x} ${RAIL}V${y - 4}M${x} ${y + 4}V${GND}`,
+  plates: `M${x - 13} ${y - 4}H${x + 13}M${x - 13} ${y + 4}H${x + 13}`,
+});
+const c1 = capacitor(62, 356);
+const c2 = capacitor(238, 356);
+---
+
+<div class="pair">
+  {parts.map((p) => (
+    <svg viewBox="0 0 300 440" width="300" height="440" class="fig" aria-hidden="true">
+      <text x="150" y="18" class="title">
+        {p.title}
+      </text>
+      <text x="150" y="36" class="sub">
+        {p.tab}
+      </text>
+
+      {/* The part, seen from the front */}
+      <rect x="66" y="46" width="168" height="48" rx="3" class="tab" />
+      <circle cx="150" cy="68" r="11" class="hole" />
+      <rect x="66" y="88" width="168" height="82" rx="4" class="case" />
+      <text x="150" y="135" class="code">
+        {p.code}
+      </text>
+      {LEGS.map((x, k) => (
+        <g>
+          <path d={`M${x} 170V214`} class="leg" />
+          <text x={x} y="234" class="num">
+            {k + 1}
+          </text>
+          <text x={x} y="252" class="pin">
+            {p.pins[k]}
+          </text>
+        </g>
+      ))}
+
+      {/* The basic circuit */}
+      <path d={`M26 ${RAIL}H115M185 ${RAIL}H274M26 ${GND}H274`} class="wire" />
+      <circle cx="26" cy={RAIL} r="4" class="term" />
+      <circle cx="274" cy={RAIL} r="4" class="term" />
+      <circle cx="26" cy={GND} r="4" class="term" />
+      <circle cx="274" cy={GND} r="4" class="term" />
+      <text x="18" y={RAIL - 14} class="lbl">
+        entrada
+      </text>
+      <text x="282" y={RAIL - 14} class="lbl end">
+        saída
+      </text>
+      <text x="150" y={GND + 18} class="small">
+        terra (0 V)
+      </text>
+      <rect x="115" y={RAIL - 16} width="70" height="42" rx="4" class="ic" />
+      <text x="150" y={RAIL + 9} class="ic-code">
+        {p.code}
+      </text>
+
+      {p.adjustable ? (
+        <>
+          <text x="109" y={RAIL - 6} class="pinno end">
+            3
+          </text>
+          <text x="191" y={RAIL - 6} class="pinno">
+            2
+          </text>
+          <text x="156" y={RAIL + 42} class="pinno">
+            1 (ajuste)
+          </text>
+          <circle cx="238" cy={RAIL} r="3.5" class="dot" />
+          <path d={`M238 ${RAIL}V312`} class="wire" />
+          <path d={resistor(238, 312, 352)} class="wire" />
+          <path d={`M238 352V368M150 ${RAIL + 26}V368H238`} class="wire" />
+          <circle cx="238" cy="368" r="3.5" class="dot" />
+          <path d={resistor(238, 380, 412)} class="wire" />
+          <path d={`M238 368V380M238 412V${GND}`} class="wire" />
+          <circle cx="238" cy={GND} r="3.5" class="dot" />
+          <text x="254" y="330" class="lbl">
+            R1
+          </text>
+          <text x="254" y="346" class="small start">
+            240 Ω
+          </text>
+          <text x="254" y="400" class="lbl">
+            R2
+          </text>
+        </>
+      ) : (
+        <>
+          <text x="109" y={RAIL - 6} class="pinno end">
+            1
+          </text>
+          <text x="191" y={RAIL - 6} class="pinno">
+            3
+          </text>
+          <text x="156" y={RAIL + 42} class="pinno">
+            2
+          </text>
+          <path d={`M150 ${RAIL + 26}V${GND}`} class="wire" />
+          <circle cx="150" cy={GND} r="3.5" class="dot" />
+          <path d={c1.wire} class="wire" />
+          <path d={c1.plates} class="plates" />
+          <path d={c2.wire} class="wire" />
+          <path d={c2.plates} class="plates" />
+          <circle cx="62" cy={RAIL} r="3.5" class="dot" />
+          <circle cx="238" cy={RAIL} r="3.5" class="dot" />
+          <circle cx="62" cy={GND} r="3.5" class="dot" />
+          <circle cx="238" cy={GND} r="3.5" class="dot" />
+          <text x="80" y="361" class="small start">
+            330 nF
+          </text>
+          <text x="220" y="361" class="small end">
+            100 nF
+          </text>
+        </>
+      )}
+    </svg>
+  ))}
+</div>
+
+<style>
+  .pair {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 2rem;
+  }
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .sub {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .tab {
+    fill: var(--border-strong);
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .hole {
+    fill: var(--bg);
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .case {
+    fill: var(--fg);
+  }
+  .code {
+    fill: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    text-anchor: middle;
+    letter-spacing: 0.04em;
+  }
+  .leg {
+    stroke: var(--fg-subtle);
+    stroke-width: 7;
+  }
+  .num {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .pin {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .wire {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .plates {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .dot {
+    fill: var(--fg);
+  }
+  .term {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .ic {
+    fill: var(--surface);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .ic-code {
+    fill: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .pinno {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .lbl {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 650;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

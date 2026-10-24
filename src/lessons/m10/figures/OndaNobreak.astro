@@ -1,0 +1,113 @@
+---
+/*
+ * 10.3: one cycle (1/60 s) of the outlet's sine, 180 V peak, and of a
+ * "modified sine" inverter with the same 127 V RMS: a plateau, a pause at
+ * zero, the negative plateau, another pause. With the plateau at 160 V, the
+ * RMS is 160 · √d, so the plateau lasts d = (127/160)² ≈ 63 % of each half.
+ */
+const X0 = 84;
+const X1 = 534;
+const W = X1 - X0;
+const AMP = 52;
+const PER_V = AMP / 180;
+
+const sineMid = 92;
+const sine = Array.from({ length: 121 }, (_, k) => {
+  const t = k / 120;
+  return `${k ? 'L' : 'M'}${(X0 + W * t).toFixed(1)} ${(sineMid - AMP * Math.sin(2 * Math.PI * t)).toFixed(1)}`;
+}).join('');
+
+const stepMid = 256;
+const PLATEAU = 160 * PER_V;
+const duty = (127 / 160) ** 2;
+const gap = ((1 - duty) * W) / 4;
+const half = W / 2;
+const step =
+  `M${X0} ${stepMid}H${(X0 + gap).toFixed(1)}V${(stepMid - PLATEAU).toFixed(1)}` +
+  `H${(X0 + half - gap).toFixed(1)}V${stepMid}H${(X0 + half + gap).toFixed(1)}` +
+  `V${(stepMid + PLATEAU).toFixed(1)}H${(X1 - gap).toFixed(1)}V${stepMid}H${X1}`;
+
+const graphs = [
+  { mid: sineMid, title: 'Tomada: senoide', wave: sine },
+  { mid: stepMid, title: 'Inversor semi-senoidal: degraus', wave: step },
+];
+---
+
+<svg viewBox="0 0 560 360" width="560" height="360" class="fig" aria-hidden="true">
+  {graphs.map((g) => (
+    <g>
+      <text x="16" y={g.mid - AMP - 18} class="title">
+        {g.title}
+      </text>
+      <text x={X1} y={g.mid - AMP - 18} class="rms">
+        127 V eficazes
+      </text>
+      <path d={`M${X0} ${g.mid - AMP}H${X1}M${X0} ${g.mid + AMP}H${X1}`} class="guide" />
+      <path d={`M${X0} ${g.mid - AMP - 6}V${g.mid + AMP + 6}M${X0} ${g.mid}H${X1}`} class="axis" />
+      <text x={X0 - 8} y={g.mid - AMP + 4} class="tick">
+        +180 V
+      </text>
+      <text x={X0 - 8} y={g.mid + 4} class="tick">
+        0
+      </text>
+      <text x={X0 - 8} y={g.mid + AMP + 4} class="tick">
+        −180 V
+      </text>
+      <path d={g.wave} class="wave" />
+    </g>
+  ))}
+
+  <path d={`M${X0} 326V336M${X1} 326V336M${X0} 331H${X1}`} class="dim" />
+  <text x={(X0 + X1) / 2} y="352" class="small">
+    um ciclo: 1/60 s
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .rms {
+    fill: var(--accent);
+    font-size: 13px;
+    font-weight: 650;
+    text-anchor: end;
+  }
+  .axis {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 1.4;
+  }
+  .guide {
+    stroke: var(--border-strong);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: end;
+  }
+  .wave {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.6;
+    stroke-linejoin: round;
+  }
+  .dim {
+    stroke: var(--fg-muted);
+    stroke-width: 1.4;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+</style>

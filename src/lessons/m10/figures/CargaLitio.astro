@@ -1,0 +1,146 @@
+---
+/*
+ * 10.3: charging a lithium cell (typical shape, not to scale). First half,
+ * constant current: the current is flat and the voltage climbs from 3,0 V
+ * to 4,2 V. Second half, constant voltage: the voltage stays at 4,2 V and the
+ * current falls off. The charger stops when the current gets small.
+ */
+const X0 = 64;
+const XC = 284;
+const X1 = 504;
+const TOP = 28;
+const BASE = 230;
+
+const vy = (v: number) => 190 - (v - 3) * 88.33;
+const iy = (i: number) => BASE - 110 * i;
+const N = 80;
+
+// Constant current: a quick first rise, then slower, then faster near the end.
+const rise = (s: number) => 0.45 * (1 - Math.exp(-s / 0.08)) + 0.55 * Math.pow(s, 2.2);
+const voltageCC = Array.from({ length: N + 1 }, (_, k) => {
+  const s = k / N;
+  return `${k ? 'L' : 'M'}${(X0 + (XC - X0) * s).toFixed(1)} ${vy(3 + 1.2 * rise(s)).toFixed(1)}`;
+}).join('');
+const voltage = `${voltageCC}H${X1}`;
+
+// Constant voltage: the current decays to 1/12 of its first value.
+const TAU = (X1 - XC) / Math.log(12);
+const currentCV = Array.from({ length: N + 1 }, (_, k) => {
+  const x = XC + ((X1 - XC) * k) / N;
+  return `L${x.toFixed(1)} ${iy(Math.exp(-(x - XC) / TAU)).toFixed(1)}`;
+}).join('');
+const current = `M${X0} ${iy(1)}H${XC}${currentCV}`;
+const IEND = iy(1 / 12);
+---
+
+<svg viewBox="0 0 560 262" width="560" height="262" class="fig" aria-hidden="true">
+  <rect x={X0} y={TOP} width={XC - X0} height={BASE - TOP} class="band cc" />
+  <rect x={XC} y={TOP} width={X1 - XC} height={BASE - TOP} class="band cv" />
+  <text x={(X0 + XC) / 2} y={TOP + 18} class="stage">
+    corrente constante
+  </text>
+  <text x={(XC + X1) / 2} y={TOP + 18} class="stage">
+    tensão constante
+  </text>
+
+  <path d={`M${X0} ${TOP}V${BASE}H520`} class="axis" />
+  <path d={`M512 ${BASE - 4}L520 ${BASE}L512 ${BASE + 4}`} class="axis" />
+  <text x="520" y={BASE + 20} class="tick end">
+    tempo
+  </text>
+  <text x={X0 - 6} y={vy(4.2) + 4} class="tick end">
+    4,2 V
+  </text>
+  <text x={X0 - 6} y={vy(3) + 4} class="tick end">
+    3,0 V
+  </text>
+  <path d={`M${X0} ${vy(3)}h-4`} class="axis" />
+  <path d={`M${X0} ${vy(4.2)}h-4`} class="axis" />
+
+  <path d={voltage} class="volt" />
+  <path d={current} class="amp" />
+  <text x="300" y={vy(4.2) - 8} class="label volt-t">
+    tensão
+  </text>
+  <text x="74" y={iy(1) - 8} class="label amp-t">
+    corrente
+  </text>
+
+  <!-- The charger stops -->
+  <path d={`M${X1} ${vy(4.2)}V${BASE}`} class="stop" />
+  <circle cx={X1} cy={IEND} r="4.5" class="end-dot" />
+  <text x={X1 - 8} y="168" class="note end">
+    o carregador
+  </text>
+  <text x={X1 - 8} y="184" class="note end">
+    desliga
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .band.cc {
+    fill: var(--info-soft);
+  }
+  .band.cv {
+    fill: var(--warning-soft);
+  }
+  .stage {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .axis {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 12px;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .volt,
+  .amp {
+    fill: none;
+    stroke-width: 2.6;
+    stroke-linejoin: round;
+  }
+  .volt {
+    stroke: var(--accent);
+  }
+  .amp {
+    stroke: var(--copper);
+  }
+  .label {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .volt-t {
+    fill: var(--accent);
+  }
+  .amp-t {
+    fill: var(--copper);
+  }
+  .stop {
+    stroke: var(--fg-muted);
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+  .end-dot {
+    fill: var(--copper);
+  }
+  .note {
+    fill: var(--fg);
+    font-size: 12px;
+    font-weight: 600;
+  }
+</style>

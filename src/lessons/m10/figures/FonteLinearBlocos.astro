@@ -1,0 +1,235 @@
+---
+/*
+ * 10.1: the four stages of a 12 V linear supply (plus the outlet and the
+ * load) and a small sketch of the voltage after each one. The filter and the
+ * regulator share one scale (0 to 22 V), so the gap between the ripple's
+ * valley and the 12 V output can be drawn as a band. Two SVGs of three
+ * blocks each, so they stack on a phone.
+ */
+const BX = 100;
+const BY = 20;
+const BH = 52;
+const GY = 96;
+const GH = 100;
+
+interface Block {
+  x: number;
+  lines: string[];
+  mains?: boolean;
+}
+
+const left: Block[] = [
+  { x: 4, lines: ['tomada'], mains: true },
+  { x: 120, lines: ['transformador'] },
+  { x: 236, lines: ['ponte', 'retificadora'] },
+];
+const right: Block[] = [
+  { x: 14, lines: ['capacitor', 'de filtro'] },
+  { x: 130, lines: ['regulador'] },
+  { x: 246, lines: ['carga'] },
+];
+
+const N = 121;
+/** Samples f(t), t from 0 to 1, across a graph that starts at x0. */
+const plot = (x0: number, f: (t: number) => number) =>
+  Array.from({ length: N }, (_, k) => {
+    const t = k / (N - 1);
+    return `${k ? 'L' : 'M'}${(x0 + 4 + (BX - 8) * t).toFixed(1)} ${f(t).toFixed(1)}`;
+  }).join('');
+
+const MID = GY + GH / 2;
+const mains = plot(4, (t) => MID - 42 * Math.sin(4 * Math.PI * t));
+const secondary = plot(120, (t) => MID - 22 * Math.sin(4 * Math.PI * t));
+const PULSE0 = MID + 14;
+const pulses = plot(236, (t) => PULSE0 - 22 * Math.abs(Math.sin(4 * Math.PI * t)));
+
+// Filter and regulator: 0 V at the bottom of the frame, 22 V at the top.
+const vy = (v: number) => GY + GH - (GH * v) / 22;
+const PEAK = 18.5;
+const VALLEY = 17.1;
+const ripple = plot(14, (t) => {
+  // Four cycles: a quick charge on each peak, then a slow linear discharge.
+  const p = (t * 4) % 1;
+  const v =
+    p < 0.15 ? VALLEY + ((PEAK - VALLEY) * p) / 0.15 : PEAK - ((PEAK - VALLEY) * (p - 0.15)) / 0.85;
+  return vy(t === 0 ? PEAK : v);
+});
+const Y12 = vy(12);
+const YV = vy(VALLEY);
+
+const arrow = (x1: number, x2: number, y: number) =>
+  `M${x1} ${y}H${x2 - 1}M${x2 - 8} ${y - 5}L${x2} ${y}L${x2 - 8} ${y + 5}`;
+---
+
+<div class="pair">
+  <svg viewBox="0 0 350 226" width="350" height="226" class="fig" aria-hidden="true">
+    {left.map((b) => (
+      <g>
+        <rect
+          x={b.x}
+          y={BY}
+          width={BX}
+          height={BH}
+          rx="6"
+          class:list={['block', { mains: b.mains }]}
+        />
+        {b.lines.map((l, k) => (
+          <text
+            x={b.x + BX / 2}
+            y={BY + BH / 2 + 5 + (k - (b.lines.length - 1) / 2) * 16}
+            class="name"
+          >
+            {l}
+          </text>
+        ))}
+        <rect x={b.x} y={GY} width={BX} height={GH} rx="4" class="graph" />
+      </g>
+    ))}
+    <path d={arrow(104, 120, BY + BH / 2)} class="flow" />
+    <path d={arrow(220, 236, BY + BH / 2)} class="flow" />
+    <path d={arrow(336, 350, BY + BH / 2)} class="flow" />
+
+    <path d={`M8 ${MID}H100M124 ${MID}H216M240 ${PULSE0}H332`} class="zero" />
+    <path d={mains} class="wave danger" />
+    <path d={secondary} class="wave" />
+    <path d={pulses} class="wave" />
+
+    <text x="54" y="216" class="value">
+      127 V
+    </text>
+    <text x="170" y="216" class="value">
+      15 V
+    </text>
+    <text x="286" y="216" class="value">
+      só para cima
+    </text>
+  </svg>
+
+  <svg viewBox="0 0 350 226" width="350" height="226" class="fig" aria-hidden="true">
+    <path d={arrow(0, 14, BY + BH / 2)} class="flow" />
+    {right.map((b) => (
+      <g>
+        <rect x={b.x} y={BY} width={BX} height={BH} rx="6" class="block" />
+        {b.lines.map((l, k) => (
+          <text
+            x={b.x + BX / 2}
+            y={BY + BH / 2 + 5 + (k - (b.lines.length - 1) / 2) * 16}
+            class="name"
+          >
+            {l}
+          </text>
+        ))}
+      </g>
+    ))}
+    <path d={arrow(114, 130, BY + BH / 2)} class="flow" />
+    <path d={arrow(230, 246, BY + BH / 2)} class="flow" />
+
+    <rect x="14" y={GY} width={BX} height={GH} rx="4" class="graph" />
+    <rect x="130" y={GY} width={BX} height={GH} rx="4" class="graph" />
+
+    {/* The headroom: from the valley of the ripple down to the 12 V output */}
+    <rect x="18" y={YV} width={BX - 8} height={Y12 - YV} class="band" />
+    <text x="64" y={(YV + Y12) / 2 + 4} class="band-label">
+      folga mín. 2 V
+    </text>
+    <path d={`M18 ${Y12}H134`} class="guide" />
+
+    <path d={ripple} class="wave" />
+    <path d={`M134 ${Y12}H226`} class="wave strong" />
+    <text x="64" y={vy(PEAK) - 6} class="tick">
+      ≈ 18 V
+    </text>
+    <text x="180" y={Y12 - 7} class="tick">
+      12 V
+    </text>
+
+    <text x="64" y="216" class="value">
+      quase lisa
+    </text>
+    <text x="180" y="216" class="value">
+      12 V lisos
+    </text>
+  </svg>
+</div>
+
+<style>
+  .pair {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem 0;
+  }
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .block {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .block.mains {
+    fill: var(--danger-soft);
+    stroke: var(--danger);
+  }
+  .name {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .flow {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .graph {
+    fill: var(--surface);
+    stroke: var(--border);
+  }
+  .zero {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  .wave {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .wave.danger {
+    stroke: var(--danger);
+  }
+  .wave.strong {
+    stroke-width: 2.6;
+  }
+  .band {
+    fill: var(--warning-soft);
+    stroke: var(--warning-border);
+  }
+  .band-label {
+    fill: var(--warning);
+    font-size: 12px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .guide {
+    stroke: var(--fg-muted);
+    stroke-width: 1.2;
+    stroke-dasharray: 4 3;
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .value {
+    fill: var(--fg-muted);
+    font-size: 13px;
+    text-anchor: middle;
+  }
+</style>

@@ -1,0 +1,134 @@
+---
+/*
+ * 10.3: the blocks of a home/office UPS (the offline kind). The outlet feeds
+ * the transfer relay and the charger; the charger keeps the 12 V battery
+ * topped up; the battery feeds the inverter; the relay picks the outlet or
+ * the inverter and hands the result to the UPS's own sockets. The control
+ * block, at the bottom, measures the mains and drives the relay and the
+ * inverter (dashed lines).
+ */
+interface Block {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  lines: string[];
+  kind?: string;
+}
+
+const blocks: Block[] = [
+  { x: 16, y: 60, w: 84, h: 44, lines: ['tomada', '(rede)'], kind: 'mains' },
+  { x: 290, y: 56, w: 110, h: 52, lines: ['relé de', 'transferência'] },
+  { x: 450, y: 56, w: 100, h: 52, lines: ['tomadas do', 'nobreak'] },
+  { x: 100, y: 150, w: 86, h: 44, lines: ['carregador'] },
+  { x: 210, y: 150, w: 80, h: 44, lines: ['bateria', '12 V'], kind: 'battery' },
+  { x: 316, y: 150, w: 94, h: 44, lines: ['inversor'] },
+  { x: 100, y: 238, w: 310, h: 42, lines: ['controle'], kind: 'control' },
+];
+
+const head = (x: number, y: number, dir: 'r' | 'u') =>
+  dir === 'r'
+    ? `M${x - 8} ${y - 5}L${x} ${y}L${x - 8} ${y + 5}`
+    : `M${x - 5} ${y + 8}L${x} ${y}L${x + 5} ${y + 8}`;
+---
+
+<svg viewBox="0 0 560 296" width="560" height="296" class="fig" aria-hidden="true">
+  <!-- Power -->
+  <path d={`M100 82H289${head(290, 82, 'r')}`} class="power" />
+  <path d={`M400 82H449${head(450, 82, 'r')}`} class="power" />
+  <path d={`M58 104V172H99${head(100, 172, 'r')}`} class="power" />
+  <path d={`M186 172H209${head(210, 172, 'r')}`} class="power" />
+  <path d={`M290 172H315${head(316, 172, 'r')}`} class="power" />
+  <path d={`M363 150V109${head(363, 108, 'u')}`} class="power" />
+  <circle cx="58" cy="172" r="3.5" class="dot" />
+
+  <!-- Measurement and commands -->
+  <path d="M58 176V259H99" class="cmd" />
+  <path d={head(100, 259, 'r')} class="cmd-head" />
+  <text x="66" y="226" class="note">
+    mede a rede
+  </text>
+  <path d="M363 238V195" class="cmd" />
+  <path d={head(363, 194, 'u')} class="cmd-head" />
+  <path d="M410 259H440V124H385V109" class="cmd" />
+  <path d={head(385, 108, 'u')} class="cmd-head" />
+  <text x="448" y="196" class="note">
+    comanda
+  </text>
+
+  {blocks.map((b) => (
+    <g>
+      <rect x={b.x} y={b.y} width={b.w} height={b.h} rx="6" class:list={['block', b.kind]} />
+      {b.lines.map((l, k) => (
+        <text
+          x={b.x + b.w / 2}
+          y={b.y + b.h / 2 + 5 + (k - (b.lines.length - 1) / 2) * 16}
+          class="name"
+        >
+          {l}
+        </text>
+      ))}
+    </g>
+  ))}
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .block {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .block.mains {
+    fill: var(--danger-soft);
+    stroke: var(--danger);
+  }
+  .block.battery {
+    fill: var(--success-soft);
+    stroke: var(--success);
+  }
+  .block.control {
+    fill: var(--accent-soft);
+    stroke: var(--accent);
+  }
+  .name {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .power {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .cmd {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.8;
+    stroke-dasharray: 5 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .cmd-head {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .dot {
+    fill: var(--fg);
+  }
+  .note {
+    fill: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+  }
+</style>
