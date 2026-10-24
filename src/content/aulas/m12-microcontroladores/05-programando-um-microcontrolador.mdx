@@ -1,0 +1,260 @@
+---
+titulo: Programando um microcontrolador
+modulo: m12-microcontroladores
+ordem: 5
+nivel: I
+duracaoMin: 50
+objetivos:
+  - Ler e escrever um programa no estilo Arduino, com setup() e loop()
+  - Usar as funções da placa para pinos digitais, entradas analógicas, PWM, tempo e monitor serial
+  - Escolher o tipo certo de variável e evitar o estouro do int de 16 bits
+  - Trocar delay() por millis() para o programa atender várias coisas ao mesmo tempo
+  - Encontrar erros com as mensagens do compilador e com o monitor serial
+prerequisitos:
+  - m12-microcontroladores/04-atuadores
+  - m12-microcontroladores/02-maquinas-de-estado
+tags: [programação, Arduino, C++, setup, loop, digitalWrite, analogRead, analogWrite, millis, delay, monitor serial]
+seguranca: baixa-tensao
+---
+
+import MicroIDE from '../../../lessons/m12/programa/MicroIDE';
+
+Até aqui, você viu programas prontos rodando nas simulações: a minuteria, o termômetro, o relé com bipe, a partida suave do motor. Agora é a sua vez de escrever. Nesta aula, o código roda numa placa simulada parecida com um Arduino Uno, com LEDs, botão, potenciômetro, LDR, buzzer e relé já ligados. Você muda o programa, envia para a placa e vê o circuito responder.
+
+Não é preciso saber programar antes. Os programas de microcontrolador para automação são curtos e quase sempre têm a mesma forma.
+
+## A forma de um programa
+
+Placas tipo Arduino são programadas numa versão de C++ com algumas funções prontas para mexer nos pinos. Todo programa tem duas partes obrigatórias:
+
+```cpp
+void setup() {
+  // roda uma vez só, quando a placa liga ou reinicia
+}
+
+void loop() {
+  // roda de novo e de novo, para sempre
+}
+```
+
+A função `setup()` prepara a placa: diz quais pinos são entradas e quais são saídas, liga a comunicação serial, define o estado inicial das saídas. A função `loop()` é o laço principal da aula <LinkAula id="m12-microcontroladores/01-o-que-e-um-microcontrolador" />: ler as entradas, decidir, comandar as saídas, e começar de novo. Não existe "fim do programa": o microcontrolador só para quando falta energia.
+
+Algumas regras da linguagem que pegam todo mundo no começo:
+
+- Cada instrução termina com **ponto e vírgula** (`;`).
+- Blocos ficam entre **chaves** (`{` e `}`), e cada chave aberta precisa ser fechada.
+- **Maiúsculas e minúsculas contam**: `digitalWrite` funciona, `digitalwrite` não.
+- Tudo depois de `//` numa linha é **comentário**: o compilador ignora, e quem lê agradece.
+
+Quando você manda o programa para a placa (o botão **Carregar** da IDE do Arduino, ou **Enviar para a placa** na placa simulada desta aula), duas coisas acontecem. Primeiro, o **compilador** traduz o texto para as instruções que o chip entende, e reclama se encontrar um erro. Depois, o programa traduzido é gravado na memória flash do chip pelo cabo USB. Daí em diante, o programa é o <Term id="firmware">firmware</Term> da placa: roda sozinho toda vez que ela liga, mesmo sem computador.
+
+## Explore: o primeiro programa
+
+A placa simulada abaixo começa com o programa clássico, o que faz o LED do pino 13 piscar. Leia o código, aperte **Enviar para a placa** e veja o LED.
+
+<MicroIDE client:visible exemplo="pisca" />
+
+1. Mude os dois `delay(1000)` para `delay(200)` e envie de novo. O que muda?
+2. Deixe o LED aceso 100 ms e apagado 900 ms. Ele parece piscar mais rápido ou mais devagar?
+3. Apague o ponto e vírgula do fim de uma linha e envie. Leia a mensagem de erro.
+4. No menu de exemplos, escolha **Botão acende o LED**. Envie e segure o botão da placa. Depois troque `INPUT_PULLUP` por `INPUT`, envie e não aperte nada. O que o LED faz?
+5. Escolha **Potenciômetro e PWM**, envie e gire o potenciômetro. Acompanhe os números no monitor serial.
+
+Com 100 ms aceso e 900 ms apagado, o LED parece dar "flashes", sem piscar mais rápido: o período continua sendo de 1 s. Sem o ponto e vírgula, a placa nem recebe o programa novo: o compilador para na hora e aponta a linha. Com `INPUT` no lugar de `INPUT_PULLUP`, o pino do botão fica solto, sem nada que o puxe para 5 V ou para 0 V, e lê valores ao acaso: o LED acende e apaga sozinho. É o pino flutuante da primeira aula. No exemplo do potenciômetro, com ele no meio, o monitor mostra `A0 = 512   brilho = 127`.
+
+## As funções da placa
+
+Quase todo programa de automação usa só um punhado de funções:
+
+| Função | O que faz | Exemplo |
+|---|---|---|
+| `pinMode(pino, modo)` | Configura o pino como `OUTPUT`, `INPUT` ou `INPUT_PULLUP` | `pinMode(13, OUTPUT);` |
+| `digitalWrite(pino, nível)` | Põe a saída em `HIGH` (5 V) ou `LOW` (0 V) | `digitalWrite(13, HIGH);` |
+| `digitalRead(pino)` | Lê a entrada: `HIGH` ou `LOW` | `if (digitalRead(2) == LOW)` |
+| `analogRead(pino)` | Lê a tensão de A0 a A5 no ADC: de 0 a 1023 | `int v = analogRead(A0);` |
+| `analogWrite(pino, valor)` | PWM de 0 (sempre desligado) a 255 (sempre ligado) | `analogWrite(9, 127);` |
+| `delay(ms)` | Espera, parado, esse número de milissegundos | `delay(500);` |
+| `millis()` | Milissegundos desde que a placa ligou | `if (millis() - t >= 500)` |
+| `Serial.println(valor)` | Manda um texto ou número ao computador | `Serial.println(v);` |
+| `tone(pino, Hz)` / `noTone(pino)` | Toca e cala um buzzer passivo | `tone(8, 880);` |
+
+Dois detalhes do Uno. O `analogWrite` só funciona nos pinos com PWM, os marcados com `~` na placa: 3, 5, 6, 9, 10 e 11. O PWM deles é de uns 490 Hz (980 Hz nos pinos 5 e 6), a "cantoria" que você ouviu em motores na aula <LinkAula id="m08-motores/02-ponte-h-e-pwm" />. E o nome é enganoso: `analogWrite` não gera uma tensão analógica, gera <Term id="pwm">PWM</Term>, que um LED ou um motor transformam em média.
+
+## Variáveis e tipos
+
+Uma **variável** é um nome para um valor guardado na memória. Ela tem um **tipo**, que diz que tipo de número cabe nela:
+
+| Tipo | No Uno | Para quê |
+|---|---|---|
+| `bool` | `true` ou `false` | Estados: armado, aceso |
+| `int` | Inteiro de −32.768 a 32.767 (16 bits) | Leituras, contagens, pinos |
+| `unsigned long` | Inteiro de 0 a 4.294.967.295 (32 bits) | Tempo em milissegundos, com `millis()` |
+| `float` | Número com casas decimais | Tensões, temperaturas |
+| `const int` | Inteiro que não muda | Números de pinos e limites |
+
+O `int` do Uno é pequeno. Uma conta como `200 * 200` deveria dar 40.000, mas não cabe em 16 bits: o resultado "dá a volta" e vira −25.536, sem aviso nenhum na placa real. A placa simulada avisa. É por isso que tempo, que cresce sem parar, vai sempre em `unsigned long`. (No ESP32, o `int` tem 32 bits e o problema aparece só com números muito maiores.)
+
+A divisão entre inteiros também é inteira: `7 / 2` dá 3, não 3,5. Quando o resultado precisa de casas decimais, pelo menos um dos números precisa ser `float`: `7.0 / 2` dá 3,5. Repare no ponto: no código, as casas decimais são separadas por ponto, como no inglês.
+
+## Exemplo resolvido: do potenciômetro ao brilho
+
+No exemplo do potenciômetro, o programa lê `A0` e calcula o brilho com `map(leitura, 0, 1023, 0, 255)`. Com o potenciômetro no meio, que valor vai para o `analogWrite`, e qual é o ciclo de trabalho?
+
+**Passo 1: a leitura.** O cursor no meio dá 2,5 V. O ADC de 10 bits lê $2{,}5 / 5 \times 1024 = 512$.
+
+**Passo 2: a conta do `map`.** A função faz uma regra de três, com números inteiros:
+
+$$
+\text{brilho} = \frac{(\text{leitura} - 0) \times (255 - 0)}{1023 - 0} + 0 = \frac{512 \times 255}{1023} = \frac{130.560}{1023} \approx 127{,}6
+$$
+
+Como a conta é inteira, a parte decimal é jogada fora: o resultado é **127**, sem arredondar para 128.
+
+**Passo 3: o ciclo de trabalho.** $127 / 255 \approx 0{,}498$, ou **49,8 %**. O LED verde recebe 5 V durante metade de cada período do PWM e fica com metade do brilho máximo, para o olho um pouco mais que isso, porque a visão não é linear.
+
+## O problema do delay()
+
+O `delay()` é cômodo, mas tem um preço: enquanto ele espera, o microcontrolador não faz **mais nada**. Num programa que pisca um LED com `delay(1000)` e também lê um botão, o botão só é lido entre um `delay` e outro: até um segundo de atraso. Num alarme, numa central de portão ou num termostato, isso é inaceitável.
+
+A solução é a mesma da máquina de estados da aula <LinkAula id="m12-microcontroladores/02-maquinas-de-estado" />: em vez de esperar, o programa **olha o relógio** a cada volta do `loop()` e só age quando chegou a hora.
+
+```cpp
+unsigned long ultimaTroca = 0;
+
+void loop() {
+  if (millis() - ultimaTroca >= 500) {  // já passou meio segundo?
+    ultimaTroca = millis();             // anota quando trocou
+    // ...troca o LED...
+  }
+  // ...aqui o programa atende o botão, o sensor, o resto...
+}
+```
+
+Como o `loop()` agora não para, ele roda milhares de vezes por segundo, e cada entrada é atendida na hora. Escrito assim, com a subtração `millis() - ultimaTroca`, o programa continua certo mesmo quando o contador do `millis()` estoura e volta a zero, depois de uns 49 dias ligado.
+
+<MicroIDE client:visible exemplo="sem-delay" />
+
+1. Envie o programa e aperte o botão enquanto o LED 13 pisca. O LED verde responde na hora?
+2. Agora reescreva o pisca com `delay(500)` no lugar do `if` com `millis()`, deixando a linha do botão no fim do `loop()`. Envie e aperte o botão de novo.
+
+Com `millis()`, o LED verde acompanha o botão na hora, sem importar o pisca. Com `delay(500)`, o botão só é lido duas vezes por segundo, e um toque rápido pode passar despercebido. Na central de um portão, um toque no controle "perdido" assim seria um defeito.
+
+<RealCase title="O alarme da garagem e o firmware de verdade">
+
+No menu de exemplos, o **alarme com LDR** junta tudo desta aula e da anterior: o botão arma e desarma, o LED 13 mostra que o alarme está armado, e, quando escurece no LDR (alguém passou na frente da luz), o relé acende a lâmpada e o buzzer toca. Experimente, e repare num defeito do programa: ele espera o botão ser solto com um `while` vazio, e durante esse tempo nada mais funciona. É o mesmo problema do `delay()`, e a correção é a mesma.
+
+Os produtos de verdade são feitos assim, só que maiores. O firmware da central do portão do módulo <LinkAula id="m16-portao" /> é um `loop()` que, a cada volta, lê os fins de curso, a botoeira, o receptor e a corrente do motor, decide pela máquina de estados e comanda os relés, sem nenhum `delay()` que trave a leitura da fotocélula. A mesma IDE do Arduino programa o ESP32, com outras diferenças que você já viu: 3,3 V nos pinos e um ADC de 12 bits, que lê de 0 a 4095.
+
+</RealCase>
+
+## Erros comuns
+
+- **Esquecer o `pinMode`.** Sem ele, o pino continua como entrada. Um `digitalWrite(13, HIGH)` só liga o pull-up interno, e o LED fica com um brilho fraquinho.
+- **Escrever `=` no lugar de `==`.** `if (x = 5)` não compara: guarda 5 em `x`, e o `if` é sempre verdadeiro. Comparar é `==`.
+- **Usar `int` para o tempo.** O `millis()` passa de 32.767 em meio minuto. Use `unsigned long`.
+- **Ler um botão sem pull-up.** Com `INPUT` e sem resistor externo, o pino flutua e o programa vê toques fantasmas. Use `INPUT_PULLUP` e ligue o botão ao GND.
+- **Travar o programa com `delay()` ou laços de espera.** Para fazer várias coisas juntas, use `millis()` e uma máquina de estados.
+- **Mandar texto pela serial sem `Serial.begin(9600)`.** Nada aparece no monitor. A velocidade escolhida no monitor precisa ser a mesma do programa.
+- **Ligar a carga direto no pino porque "o programa está certo".** O programa não aumenta a corrente do pino. Os cuidados da aula de [atuadores](../04-atuadores/) continuam valendo.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'Qual é a diferença entre setup() e loop()?',
+      options: [
+        {
+          text: 'setup() roda uma vez quando a placa liga; loop() se repete para sempre',
+          correct: true,
+          feedback: 'Isso. A preparação fica em setup(); o trabalho de ler, decidir e comandar fica em loop().',
+        },
+        {
+          text: 'setup() roda quando o botão é apertado; loop() roda o resto do tempo',
+          feedback: 'setup() não depende de botão: roda uma vez, ao ligar ou reiniciar a placa.',
+        },
+        {
+          text: 'As duas rodam uma vez só, uma depois da outra',
+          feedback: 'loop() roda sem parar, enquanto a placa estiver ligada.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'O programa faz map(leitura, 0, 1023, 0, 255) com a leitura em 300. Com a conta inteira do Arduino, qual é o resultado?',
+      answer: 74,
+      tolerance: 0,
+      explanation: '300 × 255 ÷ 1023 = 76.500 ÷ 1023 ≈ 74,8. A parte decimal é descartada: 74.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um programa pisca um LED com delay(1000) e lê um botão no fim do loop(). O que acontece com o botão?',
+      options: [
+        {
+          text: 'Ele só é lido entre os delays, e um toque rápido pode passar despercebido',
+          correct: true,
+          feedback: 'Isso. Durante o delay(), o microcontrolador não faz mais nada. A saída é usar millis().',
+        },
+        {
+          text: 'Ele é lido normalmente, porque o delay() roda em paralelo',
+          feedback: 'O delay() para tudo. Num Uno, não há outro programa rodando junto.',
+        },
+        {
+          text: 'O botão para de funcionar de vez',
+          feedback: 'Ele funciona, mas só nos momentos entre um delay() e outro.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'No Arduino Uno, uma variável int guarda o valor 40.000 sem problema.',
+      answer: false,
+      explanation:
+        'O int do Uno tem 16 bits e vai só até 32.767. 40.000 "dá a volta" e vira −25.536. Para valores grandes, use long ou unsigned long.',
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada tarefa à função da placa que a faz.',
+      pairs: [
+        ['Saber se o botão está apertado', 'digitalRead'],
+        ['Ler a tensão do potenciômetro', 'analogRead'],
+        ['Controlar o brilho de um LED', 'analogWrite'],
+        ['Saber quanto tempo passou sem parar o programa', 'millis'],
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'O LED ligado ao pino 13 acende com um brilho muito fraco, mesmo com digitalWrite(13, HIGH). Qual é a causa mais provável?',
+      options: [
+        {
+          text: 'Faltou pinMode(13, OUTPUT) no setup()',
+          correct: true,
+          feedback:
+            'Isso. Como entrada, o HIGH só liga o pull-up interno, de dezenas de quiloohms, e passa pouquíssima corrente.',
+        },
+        {
+          text: 'O delay() está curto demais',
+          feedback: 'O delay() muda o ritmo, não o brilho de um LED aceso.',
+        },
+        {
+          text: 'O pino 13 não tem PWM',
+          feedback: 'digitalWrite não usa PWM. O brilho fraco é de um pino que continua como entrada.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Todo programa tem **setup()**, que roda uma vez, e **loop()**, que se repete para sempre. O compilador traduz o texto, e o resultado é gravado na flash como **firmware**.
+- **pinMode**, **digitalWrite** e **digitalRead** cuidam dos pinos digitais; **analogRead** lê de 0 a 1023; **analogWrite** gera PWM de 0 a 255, só nos pinos com `~`.
+- Escolha o tipo da variável: **int** do Uno vai só até 32.767; tempo vai em **unsigned long**. Conta entre inteiros descarta a parte decimal.
+- **delay()** para tudo. Com **millis()** e uma máquina de estados, o programa atende várias coisas ao mesmo tempo.
+- O **monitor serial** e as mensagens do compilador são as ferramentas para achar erros.
+
+Na próxima aula, o microcontrolador ganha Wi-Fi e vai para dentro da parede: a [automação residencial](../06-automacao-residencial/).
