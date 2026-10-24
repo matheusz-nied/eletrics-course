@@ -30,7 +30,7 @@ export default defineCircuit({
         [0, 0],
         [4, 0],
         [8, 0],
-        [14, 0],
+        [16, 0],
       ],
     },
     // R: button and power-on capacitor to 5 V, pull-down to GND.
@@ -45,8 +45,8 @@ export default defineCircuit({
     {
       id: 'C1',
       type: 'capacitor',
-      a: [14, 0],
-      b: [14, 8],
+      a: [16, 0],
+      b: [16, 8],
       label: 'C1',
       params: { capacitance: 10e-6 },
     },
@@ -55,20 +55,20 @@ export default defineCircuit({
       type: 'wire',
       points: [
         [8, 8],
-        [14, 8],
-        [18, 8],
+        [16, 8],
+        [19, 8],
         [23, 8],
       ],
     },
     {
       id: 'R2',
       type: 'resistor',
-      a: [18, 8],
-      b: [18, 14],
+      a: [19, 8],
+      b: [19, 14],
       label: 'R2',
       params: { resistance: 10000 },
     },
-    { id: 'G2', type: 'ground', at: [18, 14] },
+    { id: 'G2', type: 'ground', at: [19, 14] },
     // S: button to 5 V, pull-down to GND.
     {
       id: 'W3',

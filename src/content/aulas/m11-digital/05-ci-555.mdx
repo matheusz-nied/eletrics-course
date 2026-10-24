@@ -12,7 +12,7 @@ objetivos:
 prerequisitos:
   - m04-passivos/04-circuito-rc
   - m11-digital/04-flip-flops-contadores-e-memoria
-tags: [555, NE555, temporizador, astável, monoestável, oscilador, pisca-pisca, minuteria, constante de tempo, comparador, DIP-8, relé, luz de garagem]
+tags: ['555', NE555, temporizador, astável, monoestável, oscilador, pisca-pisca, minuteria, constante de tempo, comparador, DIP-8, relé, luz de garagem]
 seguranca: baixa-tensao
 ---
 
@@ -73,16 +73,16 @@ O circuito abaixo é um 555 monoestável alimentado com 9 V. O botão de disparo
 <Simulation
   circuit="m11/ci555-monoestavel"
   height={420}
-  instruments={[{ kind: 'osciloscopio', series: ['VC', 'VOUT'] }]}
+  instruments={[{ kind: 'grafico', series: ['VC', 'VOUT'] }]}
   autoplay
 />
 
 1. Com R1 em 100 kΩ, aperte o botão rapidamente. Quanto tempo o LED fica aceso?
-2. No osciloscópio, observe o capacitor durante o pulso. Até que tensão ele sobe?
+2. No gráfico, observe o capacitor durante o pulso. Até que tensão ele sobe?
 3. Aperte de novo enquanto o LED ainda está aceso. O tempo recomeça?
 4. Troque R1 por 470 kΩ e repita.
 
-Com 100 kΩ, o LED fica aceso por 1,1 s: $1{,}1 \cdot 100\ \text{k}\Omega \cdot 10\ \mu\text{F} = 1{,}1$ s. O capacitor sobe de 0 até 6 V (2/3 de 9 V) e cai de uma vez quando a saída desliga. Apertar no meio do pulso não muda nada: o flip-flop já está ligado, e só o limiar o desliga. Com 220 kΩ, o pulso dura 2,4 s; com 470 kΩ, 5,2 s.
+Com 100 kΩ, o LED fica aceso por 1,1 s: $1{,}1 \cdot 100\ \text{k}\Omega \cdot 10\ \mu\text{F} = 1{,}1$ s. No gráfico, o capacitor sobe de 0 até 6 V (2/3 de 9 V) e cai de uma vez quando a saída desliga. Apertar no meio do pulso não muda nada: o flip-flop já está ligado, e só o limiar o desliga. Com 220 kΩ, o pulso dura 2,4 s; com 470 kΩ, 5,2 s.
 
 ## Astável: um oscilador
 
@@ -111,12 +111,12 @@ Este é o pisca-pisca clássico de dois LEDs. R1 tem 10 kΩ, C1 tem 10 µF e voc
 <Simulation
   circuit="m11/ci555-astavel"
   height={420}
-  instruments={[{ kind: 'osciloscopio', series: ['VC', 'VOUT'] }]}
+  instruments={[{ kind: 'grafico', series: ['VC', 'VOUT'] }]}
   autoplay
 />
 
 1. Com R2 em 68 kΩ, conte as piscadas em 10 segundos.
-2. No osciloscópio, entre que tensões o capacitor sobe e desce?
+2. No gráfico, entre que tensões o capacitor sobe e desce?
 3. Troque R2 por 33 kΩ e depois por 15 kΩ. O que acontece com a frequência e com o tempo que cada LED fica aceso?
 
 Com 68 kΩ, são umas 10 piscadas em 10 s: $f = 1{,}44 / ((10\ \text{k} + 136\ \text{k}) \cdot 10\ \mu) \approx 0{,}99$ Hz. O LED 1 fica 0,54 s aceso e o LED 2, 0,47 s. O capacitor oscila entre 3 V e 6 V, sem nunca chegar a zero (só a primeira carga começa em 0 V, por isso o primeiro ciclo é mais longo). Com 33 kΩ a frequência vai a 1,9 Hz, e com 15 kΩ a 3,6 Hz. Como R1 fica igual e R2 diminui, o tempo alto passa a pesar mais e o ciclo de trabalho sobe.

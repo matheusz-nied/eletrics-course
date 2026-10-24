@@ -135,7 +135,7 @@ A maioria dos aparelhos de hoje lê os botões com um microcontrolador e faz o *
 
 **Passo 2: aceitar a troca só depois da espera.** Em C, num programa que roda a cada 1 ms:
 
-```c
+```text
 // Chamada a cada 1 ms. pino: 1 = solto (pull-up), 0 = apertado.
 bool aceito = 1;     // último nível aceito
 int  diferente = 0;  // ms seguidos com o pino diferente de "aceito"

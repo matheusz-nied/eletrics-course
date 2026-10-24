@@ -4,47 +4,47 @@ import type { ElementDoc } from '../../engine/contract';
 /**
  * 11.4: a 4-bit binary counter. A square wave clock feeds a counter whose
  * outputs light four LEDs, Q3 (worth 8) on the left and Q0 (worth 1) on
- * the right, so the LEDs read as the binary number. Each output goes right
- * through 220 Ω to its LED; the outputs higher up go further right, so no
- * wires cross. Checked in ./flip-flops.test.ts.
+ * the right, so the LEDs read as the binary number. Each output runs right
+ * and then down to its 220 Ω resistor and LED; the outputs higher up go
+ * further right, so no wires cross. Checked in ./flip-flops.test.ts.
  */
 const OUTPUTS = [
-  { pin: 'q3', y: 13, x: 49, weight: 8 },
+  { pin: 'q3', y: 13, x: 47, weight: 8 },
   { pin: 'q2', y: 11, x: 57, weight: 4 },
-  { pin: 'q1', y: 9, x: 65, weight: 2 },
-  { pin: 'q0', y: 7, x: 73, weight: 1 },
+  { pin: 'q1', y: 9, x: 67, weight: 2 },
+  { pin: 'q0', y: 7, x: 77, weight: 1 },
 ];
-const GND_Y = 22;
+/** Where the resistors start, the LEDs start and the grounds are. */
+const R_Y = 16;
+const LED_Y = 22;
+const GND_Y = 30;
 
 const leds: ElementDoc[] = OUTPUTS.flatMap(({ pin, y, x, weight }, k): ElementDoc[] => {
   const n = 4 - k;
   return [
     {
+      id: `WL${n}`,
+      type: 'wire',
+      points: [
+        [41, y],
+        [x, y],
+        [x, R_Y],
+      ],
+    },
+    {
       id: `R${n}`,
       type: 'resistor',
-      a: [41, y],
-      b: [47, y],
+      a: [x, R_Y],
+      b: [x, LED_Y],
       label: `R${n}`,
       params: { resistance: 220 },
     },
-    ...(x > 47
-      ? [
-          {
-            id: `WL${n}`,
-            type: 'wire',
-            points: [
-              [47, y],
-              [x, y],
-            ],
-          } as ElementDoc,
-        ]
-      : []),
     {
       id: `D${n}`,
       type: 'led',
-      a: [x, y],
+      a: [x, LED_Y],
       b: [x, GND_Y],
-      label: `${pin.toUpperCase()} (vale ${weight})`,
+      label: `${pin.toUpperCase()} · ${weight}`,
       params: { color: 'red' },
     },
     { id: `GL${n}`, type: 'ground', at: [x, GND_Y] },

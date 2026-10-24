@@ -30,7 +30,12 @@ export default defineDevice({
       high: { default: 5, label: 'Nível alto', unit: 'V' },
       low: { default: 0, label: 'Nível baixo', unit: 'V' },
       frequency: { default: 1, label: 'Frequência', unit: 'Hz', min: 0 },
-      duty: { default: 0.5, label: 'Ciclo de trabalho (fração do período em nível alto)', min: 0, max: 1 },
+      duty: {
+        default: 0.5,
+        label: 'Ciclo de trabalho (fração do período em nível alto)',
+        min: 0,
+        max: 1,
+      },
     },
     readouts: ['current', 'voltage', 'power', 'high'],
     readoutInfo: {

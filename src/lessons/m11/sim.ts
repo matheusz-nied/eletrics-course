@@ -21,7 +21,11 @@ export function set(sim: Simulator, key: string, value: number | boolean | strin
 }
 
 /** Runs until `t` (s), calling `each` with the readouts after every step. */
-export function runTo(sim: Simulator, t: number, each?: (r: Readouts, t: number) => void): Readouts {
+export function runTo(
+  sim: Simulator,
+  t: number,
+  each?: (r: Readouts, t: number) => void,
+): Readouts {
   while (sim.t < t - 1e-12) {
     sim.step();
     if (each) each(sim.frame({ samples: false }).readouts, sim.t);

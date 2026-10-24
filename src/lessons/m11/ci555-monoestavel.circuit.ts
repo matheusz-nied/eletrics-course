@@ -109,7 +109,7 @@ export default defineCircuit({
         [20, 12],
       ],
     },
-    { id: 'U1', type: 'timer-555', at: [24, 12], label: '555' },
+    { id: 'U1', type: 'timer-555', at: [24, 12], label: 'U1' },
     {
       id: 'W5',
       type: 'wire',

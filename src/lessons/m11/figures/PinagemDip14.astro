@@ -3,11 +3,24 @@
    74HC32, 74HC86), seen from the top with the notch on the left: pin 1 at
    the bottom left, numbering counterclockwise. */
 const names: Record<number, string> = {
-  1: '1A', 2: '1B', 3: '1Y', 4: '2A', 5: '2B', 6: '2Y', 7: 'GND',
-  8: '3Y', 9: '3A', 10: '3B', 11: '4Y', 12: '4A', 13: '4B', 14: 'VCC',
+  1: '1A',
+  2: '1B',
+  3: '1Y',
+  4: '2A',
+  5: '2B',
+  6: '2Y',
+  7: 'GND',
+  8: '3Y',
+  9: '3A',
+  10: '3B',
+  11: '4Y',
+  12: '4A',
+  13: '4B',
+  14: 'VCC',
 };
 const px = (p: number) => (p <= 7 ? 150 + (p - 1) * 50 : 150 + (14 - p) * 50);
-const kind = (p: number) => (p === 7 ? 'gnd' : p === 14 ? 'vcc' : /Y$/.test(names[p]!) ? 'out' : 'in');
+const kind = (p: number) =>
+  p === 7 ? 'gnd' : p === 14 ? 'vcc' : /Y$/.test(names[p]!) ? 'out' : 'in';
 const pins = Array.from({ length: 14 }, (_, k) => k + 1);
 ---
 
@@ -30,8 +43,12 @@ const pins = Array.from({ length: 14 }, (_, k) => k + 1);
   <rect x="112" y="80" width="376" height="120" rx="6" class="body" />
   <path d="M112 124A16 16 0 0 1 112 156" class="notch" />
   <circle cx="136" cy="182" r="5" class="dimple" />
-  <text x="300" y="136" class="code">74HC08</text>
-  <text x="300" y="158" class="sub">quatro portas E de duas entradas</text>
+  <text x="300" y="136" class="code">
+    74HC08
+  </text>
+  <text x="300" y="158" class="sub">
+    quatro portas E de duas entradas
+  </text>
   <text x="300" y="282" class="legend">
     Vista de cima, chanfro à esquerda: pino 1 embaixo à esquerda, contagem no sentido anti-horário.
   </text>

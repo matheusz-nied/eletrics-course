@@ -3,9 +3,229 @@ titulo: Conversão AD/DA e PWM
 modulo: m11-digital
 ordem: 6
 nivel: I
-duracaoMin: 30
+duracaoMin: 40
 objetivos:
-  - Em construção
+  - Explicar como um conversor AD transforma uma tensão num número, com resolução e taxa de amostragem
+  - Calcular o tamanho do degrau de um conversor e converter uma leitura de volta em tensão
+  - Reconhecer o critério de Nyquist e o efeito de amostrar devagar demais
+  - Calcular a saída de um conversor DA R-2R e a tensão média de um sinal PWM filtrado
+prerequisitos:
+  - m11-digital/01-analogico-e-digital
+  - m04-passivos/04-circuito-rc
+tags: [conversor AD, ADC, conversor DA, DAC, R-2R, resolução, amostragem, Nyquist, aliasing, PWM, ciclo de trabalho, filtro RC, analogRead, analogWrite, Arduino, ESP32, LM35]
+seguranca: baixa-tensao
 ---
 
-Em construção.
+import ConversorAD from '../../../lessons/m11/ConversorAD';
+
+O termômetro digital da cozinha mostra 23,5 °C. O sensor dentro dele não sabe nada de números: ele dá uma tensão que sobe um pouquinho a cada grau. Quem transforma essa tensão em "23,5" é um circuito que mede e escreve o resultado em binário. No caminho contrário, o microcontrolador de uma fita de LED tem saídas que só sabem dar 0 V ou 5 V, e mesmo assim a fita acende em qualquer brilho entre o apagado e o máximo.
+
+O mundo é analógico; o microcontrolador é digital. Nesta aula você vai ver as pontes entre os dois: o **conversor AD**, que transforma tensão em número, o **conversor DA**, que faz o contrário, e o **PWM**, o jeito mais usado de imitar uma tensão variável com uma saída que só liga e desliga.
+
+## Do analógico para o digital
+
+Um **<Term id="conversor-ad">conversor AD</Term>** (ADC, do inglês) faz duas coisas com o sinal:
+
+1. **Amostra.** Mede a tensão em instantes separados, a uma certa **<Term id="taxa-de-amostragem">taxa de amostragem</Term>**: 10 medidas por segundo, mil, 44.100.
+2. **Quantiza.** Arredonda cada medida para um dos degraus que ele consegue escrever. Com $n$ bits, são $2^n$ degraus entre 0 V e a tensão de referência.
+
+O tamanho de cada degrau, a **resolução** em volts, é:
+
+$$
+\Delta V = \frac{V_{\text{ref}}}{2^n}
+$$
+
+E o número que o conversor entrega, o **código**, é a tensão dividida pelo degrau, arredondada para baixo:
+
+$$
+\text{código} = \left\lfloor \frac{V}{\Delta V} \right\rfloor \qquad V \approx \text{código} \cdot \Delta V
+$$
+
+O Arduino Uno tem um ADC de 10 bits com referência de 5 V: são 1.024 degraus de $5\ \text{V} / 1.024 = 4{,}88$ mV, e `analogRead()` devolve um número de 0 a 1.023. O ESP32 tem 12 bits com 3,3 V: 4.096 degraus de 0,806 mV.
+
+<ConversorAD client:visible />
+
+Teste no conversor acima:
+
+1. Com 10 amostras por segundo, vá de 1 bit até 10 bits. A partir de quantos bits a escada fica parecida com o sinal?
+2. Com 8 bits, diminua as amostras para 4 e depois para 1,5 por segundo.
+
+Com 1 bit, o conversor só sabe dizer "abaixo" ou "acima de 2,5 V": é a entrada digital da aula <LinkAula id="m11-digital/01-analogico-e-digital" />. Com 3 bits, os degraus de 0,625 V ainda aparecem. Com 8 bits (19,5 mV), a escada já cola no sinal. Já com poucas amostras, nem 10 bits ajudam: com 4 por segundo a forma fica grosseira, e com 1,5 por segundo os pontos desenham uma onda lenta que não existe.
+
+### O critério de Nyquist
+
+Para registrar um sinal que oscila $f$ vezes por segundo, é preciso amostrar **mais que o dobro** disso:
+
+$$
+f_{\text{amostragem}} > 2 f_{\text{sinal}}
+$$
+
+Abaixo disso aparece o **aliasing**: as amostras se encaixam numa onda mais lenta, e o conversor não tem como saber que errou. É o mesmo efeito que faz a roda de um carro parecer girar para trás num vídeo. O áudio de CD usa 44.100 amostras por segundo porque o ouvido humano vai até uns 20.000 Hz. Antes do conversor, um filtro passa-baixas corta o que estiver acima da metade da taxa.
+
+## Exemplo resolvido: o termômetro com LM35
+
+**Problema.** O sensor de temperatura LM35 dá 10 mV por grau Celsius: 0,25 V a 25 °C. Ele está ligado à entrada analógica de um Arduino Uno (10 bits, 5 V). Que número o `analogRead()` devolve a 30 °C? Que temperatura o programa mostra se ler 62? Qual a menor variação de temperatura que o Arduino percebe?
+
+**Passo 1: a tensão a 30 °C.** $30 \cdot 10\ \text{mV} = 300\ \text{mV}$.
+
+**Passo 2: o código.** $300\ \text{mV} / 4{,}88\ \text{mV} = 61{,}4$. Arredondando para baixo, o Arduino lê **61**.
+
+**Passo 3: do código para a temperatura.** Com 62: $62 \cdot 4{,}88\ \text{mV} = 302{,}7\ \text{mV}$, ou seja, **30,3 °C**. Em programa:
+
+```text
+int codigo = analogRead(A0);              // 0 a 1023
+float volts = codigo * 5.0 / 1024.0;      // um degrau = 4,88 mV
+float graus = volts * 100.0;              // LM35: 10 mV por °C
+```
+
+**Passo 4: a resolução em graus.** Um degrau de 4,88 mV vale $4{,}88 / 10 = 0{,}49$ °C. O Arduino só percebe a temperatura de meio em meio grau.
+
+**Resposta.** 61 a 30 °C; o código 62 vira 30,3 °C; cada degrau é cerca de meio grau. Para um termômetro de cozinha, serve. Para ver décimos de grau, use um conversor com mais bits, uma referência menor (a de 1,1 V interna do ATmega328P dá degraus de 1,07 mV, ou 0,11 °C) ou um sensor com saída digital.
+
+## Do digital para o analógico
+
+Um **<Term id="conversor-da">conversor DA</Term>** (DAC) faz o caminho inverso: recebe um número e entrega uma tensão proporcional a ele. O jeito mais simples é a **escada R-2R**. Cada bit é uma saída digital (0 V ou 5 V) que entra por um resistor de valor 2R; resistores de valor R ligam os pontos da escada, e um 2R fecha a ponta do bit menos significativo. Graças ao arranjo, cada bit contribui com a metade do bit seguinte, e a saída é:
+
+$$
+V_{\text{saída}} = V_{\text{alto}} \cdot \frac{\text{código}}{2^n}
+$$
+
+## Explore: a escada R-2R
+
+O circuito abaixo é um DAC de 4 bits com R = 10 kΩ e 2R = 20 kΩ. Cada fonte é um bit, de 0 V ou 5 V.
+
+<Simulation
+  circuit="m11/dac-r2r"
+  height={340}
+  instruments={[{ kind: 'multimetro', series: ['VOUT'] }]}
+/>
+
+1. Ligue só o bit 0. Que tensão aparece na saída?
+2. Ligue só o bit 3.
+3. Monte o número 1011 (bits 3, 1 e 0) e confira com a fórmula.
+4. Ligue todos. A saída chega a 5 V?
+
+O bit 0 sozinho dá 0,3125 V, um degrau: $5\ \text{V} / 16$. O bit 3 sozinho dá 2,5 V, a metade da escala. O número 1011 é 11 em decimal: $5 \cdot 11 / 16 = 3{,}4375$ V. Com todos ligados (15), a saída fica em 4,6875 V: o DAC nunca chega à referência, e falta sempre um degrau.
+
+A saída da escada tem resistência de R (10 kΩ). Uma carga ligada direto a ela muda as tensões; por isso os DACs reais têm um amplificador operacional na saída.
+
+## PWM: imitar uma tensão ligando e desligando
+
+Muitos microcontroladores, como o do Arduino Uno, não têm DAC. Eles usam o **<Term id="pwm">PWM</Term>**: a saída liga e desliga muito depressa, numa frequência fixa, e o que muda é a fração de cada período em que ela fica ligada, o <Term id="ciclo-de-trabalho">ciclo de trabalho</Term> $D$. A tensão **média** do sinal é:
+
+$$
+V_{\text{média}} = D \cdot V_{\text{alto}}
+$$
+
+Com 5 V e 25 %, a média é 1,25 V. No Arduino, `analogWrite(pino, 64)` dá um ciclo de trabalho de $64/255 \approx 25\ \%$, a uns 490 Hz.
+
+Muitas cargas fazem a média sozinhas: um motor CC tem inércia, e o olho não vê um LED piscando centenas de vezes por segundo, só o brilho médio (aula <LinkAula id="m08-motores/02-ponte-h-e-pwm" />). Quando o circuito precisa de uma tensão de verdade, um filtro RC passa-baixas (aula <LinkAula id="m04-passivos/04-circuito-rc" />) transforma o PWM numa tensão contínua, com uma pequena ondulação.
+
+## Explore: o PWM filtrado
+
+Aqui uma fonte de onda quadrada de 0 V e 5 V, a 100 Hz, faz o papel da saída PWM. Ela passa por um resistor de 10 kΩ até um capacitor que você escolhe. A simulação roda dez vezes mais devagar que o tempo real.
+
+<Simulation
+  circuit="m11/pwm-filtro"
+  height={300}
+  instruments={[
+    { kind: 'grafico', series: ['VPWM', 'VMED'] },
+    { kind: 'multimetro', series: ['VMED'] },
+  ]}
+  autoplay
+/>
+
+1. Com 25 % e 10 µF, espere a saída do filtro assentar. Que tensão ela mostra?
+2. Passe por 50 %, 75 % e 90 %. A saída segue $D \cdot 5$ V?
+3. Volte a 25 % e troque o capacitor por 1 µF. O que acontece com a ondulação?
+
+Com 25 %, a saída assenta em 1,25 V; com 50 %, 2,5 V; com 75 %, 3,75 V. Com 10 µF, a constante de tempo é $10\ \text{k}\Omega \cdot 10\ \mu\text{F} = 0{,}1$ s, a saída leva meio segundo para assentar e a ondulação fica em uns 0,1 V (de 1,20 V a 1,30 V). Com 1 µF, ela responde dez vezes mais rápido, mas a ondulação vai a quase 1 V (de 0,8 V a 1,7 V). É sempre essa troca: filtro mais lento, tensão mais lisa. Uma frequência de PWM mais alta melhora as duas coisas, porque a ondulação cai na mesma proporção.
+
+Uma conta rápida para a ondulação de pico a pico, quando ela é pequena:
+
+$$
+\Delta V \approx \frac{V_{\text{alto}} \cdot D \cdot (1 - D)}{f \cdot R \cdot C}
+$$
+
+Com 5 V, 25 %, 100 Hz, 10 kΩ e 10 µF: $5 \cdot 0{,}25 \cdot 0{,}75 / (100 \cdot 0{,}1) \approx 0{,}094$ V.
+
+<RealCase title="Conversores e PWM na vida real">
+
+**A central do portão mede com o ADC.** A CD-1 (aula <LinkAula id="m16-portao/03-a-central-por-dentro" />) lê três tensões analógicas: os trimpots `PAUSA` e `FORÇA`, de 0 a 5 V, e o sensor de corrente do motor, que dá 0,5 V por ampère. Com um conversor de 10 bits como o do Arduino, um degrau de 4,88 mV corresponde a uns 10 mA de corrente no motor, resolução de sobra para perceber um portão que encontrou um obstáculo (aula <LinkAula id="m16-portao/05-seguranca-e-acessorios" />).
+
+**Dimmer de fita de LED.** O controlador da fita usa PWM, com um MOSFET como chave (aula <LinkAula id="m09-semicondutores/08-mosfet" />). Abaixo de umas 100 vezes por segundo o olho percebe a piscada; câmeras de celular às vezes mostram faixas escuras na imagem porque pegam o PWM.
+
+**Música digital.** Um arquivo de áudio é uma fila de amostras: 44.100 por segundo, de 16 bits cada (65.536 degraus), no padrão do CD. O celular usa um DAC para transformar os números de volta em tensão para o fone, e um ADC para gravar a sua voz pelo microfone.
+
+**Inversores de frequência e fontes chaveadas.** Também são PWM: transistores que ligam e desligam milhares de vezes por segundo, com bobinas e capacitores fazendo a média. É por isso que esses aparelhos esquentam tão pouco para a potência que controlam.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Passar da referência.** Uma tensão acima da referência do ADC lê sempre o código máximo, e acima da alimentação pode queimar a entrada. Para medir 12 V num Arduino, use um divisor de tensão. Para medir qualquer coisa da rede elétrica, use um módulo isolado, nunca uma ligação direta.
+- **Confiar no último dígito.** Um ADC de 10 bits mostra mudanças de 4,88 mV, mas ruído, a precisão da referência e a impedância da fonte do sinal tornam os últimos degraus pouco confiáveis. Tirar a média de várias leituras ajuda.
+- **Amostrar devagar demais.** Um sinal amostrado abaixo do dobro da sua frequência vira outro sinal (aliasing). Amostre mais rápido ou filtre antes.
+- **Esperar que o PWM seja uma tensão.** Sem filtro, o multímetro mostra a média, mas a carga recebe pulsos de 0 V e 5 V. Um circuito sensível, como a entrada de outro ADC, pode ler os pulsos.
+- **Carregar a saída do DAC ou do filtro.** A escada R-2R e o filtro RC têm resistência de saída alta. Uma carga pesada derruba a tensão; use um amplificador operacional como seguidor.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Um ADC de 8 bits tem referência de 5 V. Qual o tamanho de cada degrau, em mV? (Uma casa decimal.)',
+      answer: 19.5,
+      tolerance: 0.1,
+      unit: 'mV',
+      explanation: '5 V ÷ 2⁸ = 5 ÷ 256 ≈ 0,0195 V = 19,5 mV.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Um Arduino Uno (10 bits, 5 V) lê o código 512. Que tensão está na entrada, em volts?',
+      answer: 2.5,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation: '512 × 5 V ÷ 1.024 = 2,5 V: a metade da escala.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Um sinal tem componentes até 3 kHz. Qual a menor taxa de amostragem que respeita o critério de Nyquist?',
+      options: [
+        { text: 'Mais de 6.000 amostras por segundo', correct: true, feedback: 'Isso: mais que o dobro da maior frequência.' },
+        { text: '3.000 amostras por segundo', feedback: 'Com uma amostra por ciclo, o conversor não vê a oscilação: aparece aliasing.' },
+        { text: '1.500 amostras por segundo', feedback: 'Isso é metade da frequência do sinal, longe do necessário.' },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt: 'Num DAC R-2R de 4 bits com 5 V, qual a saída para o número binário 0110, em volts? (Três casas decimais.)',
+      answer: 1.875,
+      tolerance: 0.005,
+      unit: 'V',
+      explanation: '0110 = 6. Saída = 5 × 6 ÷ 16 = 1,875 V.',
+    },
+    {
+      type: 'numerica',
+      prompt: 'Uma saída PWM de 3,3 V tem ciclo de trabalho de 40 %. Qual a tensão média, em volts?',
+      answer: 1.32,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation: '0,4 × 3,3 V = 1,32 V.',
+    },
+    {
+      type: 'vf',
+      prompt: 'Num filtro RC para PWM, um capacitor maior deixa a saída mais lisa, mas mais lenta para responder.',
+      answer: true,
+      explanation: 'A constante de tempo RC aumenta: a ondulação cai, e a saída leva mais tempo para chegar a uma nova média.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- O **conversor AD** amostra o sinal a uma taxa e arredonda cada medida para um de $2^n$ degraus de $V_{\text{ref}} / 2^n$. Arduino Uno: 10 bits, 4,88 mV; ESP32: 12 bits, 0,806 mV.
+- Para não perder o sinal, amostre a **mais que o dobro** da sua maior frequência (Nyquist). Abaixo disso, aparece uma onda falsa (aliasing).
+- O **conversor DA** R-2R soma os bits com pesos 1, 2, 4, 8...: $V = V_{\text{alto}} \cdot \text{código} / 2^n$. O máximo fica um degrau abaixo da referência.
+- O **PWM** liga e desliga a saída numa frequência fixa; a média é $D \cdot V_{\text{alto}}$. Motores e o olho fazem a média sozinhos; um filtro RC a transforma em tensão, trocando velocidade por ondulação.

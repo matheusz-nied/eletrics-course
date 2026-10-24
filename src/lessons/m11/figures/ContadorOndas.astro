@@ -2,8 +2,8 @@
 /* 11.4: timing diagram of a 3-bit counter. Each output changes on the
    rising edges of the clock (Q0) or toggles at half the rate of the one
    above (Q1, Q2); read top to bottom as Q2 Q1 Q0, the outputs count 0 to 7. */
-const X0 = 70;
-const P = 64;
+const X0 = 96;
+const P = 62;
 const N = 8;
 const H = 22;
 const rows = [
@@ -29,29 +29,25 @@ const edges = Array.from({ length: N - 1 }, (_, k) => X0 + (k + 1) * P);
 ---
 
 <svg viewBox="0 0 640 260" width="640" height="260" class="fig" aria-hidden="true">
-  {
-    edges.map((x) => (
-      <path d={`M${x} 18V${rows[3].y + 4}`} class="edge" />
-    ))
-  }
-  {
-    rows.map((r) => (
-      <g>
-        <text x={X0 - 12} y={r.y - 6} class="lab">
-          {r.label}
-        </text>
-        <path d={wave(r.y, r.level)} class="wave" />
-      </g>
-    ))
-  }
-  <text x={X0 - 12} y="238" class="lab">Contagem</text>
-  {
-    Array.from({ length: N }, (_, k) => (
-      <text x={X0 + k * P + P / 2} y="238" class="num">
-        {k}
+  {edges.map((x) => (
+    <path d={`M${x} 18V${rows[3].y + 4}`} class="edge" />
+  ))}
+  {rows.map((r) => (
+    <g>
+      <text x={X0 - 12} y={r.y - 6} class="lab">
+        {r.label}
       </text>
-    ))
-  }
+      <path d={wave(r.y, r.level)} class="wave" />
+    </g>
+  ))}
+  <text x={X0 - 12} y="238" class="lab">
+    Contagem
+  </text>
+  {Array.from({ length: N }, (_, k) => (
+    <text x={X0 + k * P + P / 2} y="238" class="num">
+      {k}
+    </text>
+  ))}
 </svg>
 
 <style>

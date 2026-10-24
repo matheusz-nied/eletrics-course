@@ -5,7 +5,15 @@
 const AND = 'M0 0H20A20 20 0 0 1 20 40H0Z';
 const OR = 'M-2 0Q14 20 -2 40Q28 40 44 20Q28 0 -2 0Z';
 const NOT = 'M0 2L34 20L0 38Z';
-type Gate = { name: string; en: string; shape: string; bubble: boolean; xor?: boolean; iec: string; one?: boolean };
+type Gate = {
+  name: string;
+  en: string;
+  shape: string;
+  bubble: boolean;
+  xor?: boolean;
+  iec: string;
+  one?: boolean;
+};
 const gates: Gate[] = [
   { name: 'E', en: 'AND', shape: AND, bubble: false, iec: '&' },
   { name: 'OU', en: 'OR', shape: OR, bubble: false, iec: '≥1' },

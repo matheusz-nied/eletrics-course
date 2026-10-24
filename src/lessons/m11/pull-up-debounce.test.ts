@@ -82,7 +82,7 @@ describe('11.3 bounce and the RC filter', () => {
     let settled = 0;
     runTo(sim, t0 + 0.02, (r, t) => {
       const v = num(r, 'VCONT');
-      if ((v < 2.5) !== (last < 2.5)) {
+      if (v < 2.5 !== last < 2.5) {
         flips++;
         settled = t - t0;
       }

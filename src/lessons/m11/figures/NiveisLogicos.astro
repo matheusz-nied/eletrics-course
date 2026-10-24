@@ -8,10 +8,42 @@ const Y0 = 262;
 const SCALE = 46; // px per volt
 const y = (v: number) => Y0 - v * SCALE;
 const families = [
-  { name: 'TTL (74LS)', sub: 'alimentação 5 V', vcc: 5, vil: 0.8, vih: 2.0, l: '0,8 V', h: '2,0 V' },
-  { name: 'CMOS (74HC)', sub: 'alimentação 5 V', vcc: 5, vil: 1.5, vih: 3.5, l: '1,5 V', h: '3,5 V' },
-  { name: 'Arduino Uno', sub: 'ATmega328P, 5 V', vcc: 5, vil: 1.5, vih: 3.0, l: '1,5 V', h: '3,0 V' },
-  { name: 'ESP32', sub: 'alimentação 3,3 V', vcc: 3.3, vil: 0.825, vih: 2.475, l: '0,83 V', h: '2,48 V' },
+  {
+    name: 'TTL (74LS)',
+    sub: 'alimentação 5 V',
+    vcc: 5,
+    vil: 0.8,
+    vih: 2.0,
+    l: '0,8 V',
+    h: '2,0 V',
+  },
+  {
+    name: 'CMOS (74HC)',
+    sub: 'alimentação 5 V',
+    vcc: 5,
+    vil: 1.5,
+    vih: 3.5,
+    l: '1,5 V',
+    h: '3,5 V',
+  },
+  {
+    name: 'Arduino Uno',
+    sub: 'ATmega328P, 5 V',
+    vcc: 5,
+    vil: 1.5,
+    vih: 3.0,
+    l: '1,5 V',
+    h: '3,0 V',
+  },
+  {
+    name: 'ESP32',
+    sub: 'alimentação 3,3 V',
+    vcc: 3.3,
+    vil: 0.825,
+    vih: 2.475,
+    l: '0,83 V',
+    h: '2,48 V',
+  },
 ];
 const X0 = 92;
 const STEP = 136;

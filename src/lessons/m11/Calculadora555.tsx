@@ -47,6 +47,12 @@ function time(t: number) {
   return formatSI(t, 's');
 }
 
+/** Frequencies as "0,99 Hz" or "986 Hz" (no millihertz), "1,2 kHz" from 1 kHz up. */
+function hertz(f: number) {
+  if (f >= 1000) return formatSI(f, 'Hz');
+  return `${formatNumber(f, f < 10 ? 2 : f < 100 ? 1 : 0)} Hz`;
+}
+
 export default function Calculadora555() {
   const id = useId();
   const [mode, setMode] = useState<Mode>('astavel');
@@ -110,7 +116,13 @@ export default function Calculadora555() {
               onChange={setR2}
             />
           )}
-          <Pick label="C (dos pinos 6 e 2 ao GND)" value={c} values={CAPACITORS} unit="F" onChange={setC} />
+          <Pick
+            label="C (dos pinos 6 e 2 ao GND)"
+            value={c}
+            values={CAPACITORS}
+            unit="F"
+            onChange={setC}
+          />
         </div>
 
         <div className="lw__output" aria-live="polite">
@@ -119,7 +131,7 @@ export default function Calculadora555() {
               <div className="calc555__values">
                 <div>
                   <p className="lw__value-label">Frequência</p>
-                  <p className="lw__value">{formatSI(a.frequency, 'Hz')}</p>
+                  <p className="lw__value">{hertz(a.frequency)}</p>
                 </div>
                 <div>
                   <p className="lw__value-label">Ciclo de trabalho</p>
@@ -131,8 +143,7 @@ export default function Calculadora555() {
                 <span style={{ flexGrow: a.low }}>baixo</span>
               </div>
               <p className="lw__formula">
-                Alto: 0,693 · (R1 + R2) · C = {time(a.high)}. Baixo: 0,693 · R2 · C ={' '}
-                {time(a.low)}.
+                Alto: 0,693 · (R1 + R2) · C = {time(a.high)}. Baixo: 0,693 · R2 · C = {time(a.low)}.
               </p>
               {r2 < r1 / 10 && (
                 <p className="lw__note">

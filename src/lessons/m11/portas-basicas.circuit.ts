@@ -51,11 +51,7 @@ const elements: ElementDoc[] = [
   {
     id: 'WA',
     type: 'wire',
-    points: [
-      ...two.map((r): Vec2 => [BUS_A, r.y - 1]),
-      [BUS_A, notRow.y],
-      [BUS_A, SRC_TOP],
-    ],
+    points: [...two.map((r): Vec2 => [BUS_A, r.y - 1]), [BUS_A, notRow.y], [BUS_A, SRC_TOP]],
   },
   {
     id: 'WB',
@@ -79,14 +75,42 @@ for (const r of ROWS) {
   const n = r.id.slice(1);
   if (r.type === 'not') {
     elements.push(
-      { id: `WA${n}`, type: 'wire', points: [[BUS_A, r.y], [GATE_X - 2, r.y]] },
+      {
+        id: `WA${n}`,
+        type: 'wire',
+        points: [
+          [BUS_A, r.y],
+          [GATE_X - 2, r.y],
+        ],
+      },
       { id: r.id, type: r.type, at: [GATE_X, r.y], label: r.label },
-      { id: `WY${n}`, type: 'wire', points: [[GATE_X + 2, r.y], [GATE_X + 3, r.y]] },
+      {
+        id: `WY${n}`,
+        type: 'wire',
+        points: [
+          [GATE_X + 2, r.y],
+          [GATE_X + 3, r.y],
+        ],
+      },
     );
   } else {
     elements.push(
-      { id: `WA${n}`, type: 'wire', points: [[BUS_A, r.y - 1], [GATE_X - 3, r.y - 1]] },
-      { id: `WB${n}`, type: 'wire', points: [[BUS_B, r.y + 1], [GATE_X - 3, r.y + 1]] },
+      {
+        id: `WA${n}`,
+        type: 'wire',
+        points: [
+          [BUS_A, r.y - 1],
+          [GATE_X - 3, r.y - 1],
+        ],
+      },
+      {
+        id: `WB${n}`,
+        type: 'wire',
+        points: [
+          [BUS_B, r.y + 1],
+          [GATE_X - 3, r.y + 1],
+        ],
+      },
       { id: r.id, type: r.type, at: [GATE_X, r.y], label: r.label },
     );
   }
@@ -105,7 +129,14 @@ for (const r of ROWS) {
       b: [GATE_X + 16, r.y],
       params: { color: 'red' },
     },
-    { id: `WL${n}`, type: 'wire', points: [[GATE_X + 16, r.y], [RAIL_X, r.y]] },
+    {
+      id: `WL${n}`,
+      type: 'wire',
+      points: [
+        [GATE_X + 16, r.y],
+        [RAIL_X, r.y],
+      ],
+    },
   );
 }
 
