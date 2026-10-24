@@ -1,0 +1,443 @@
+/*
+ * LaboratorioSensores.tsx: the sensor lab of lesson 12.3. Site tokens only,
+ * so both themes work. Classes start with labsens.
+ */
+
+.labsens {
+  container-type: inline-size;
+}
+
+/* Tabs */
+
+.labsens__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.labsens__tab {
+  min-height: 2.5rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 0.6rem 0.6rem 0 0;
+  margin-bottom: -1px;
+  background: transparent;
+  color: var(--fg-muted);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.labsens__tab:hover {
+  color: var(--fg);
+}
+
+.labsens__tab[aria-selected='true'] {
+  border-color: var(--border);
+  background: var(--bg);
+  color: var(--accent-strong);
+}
+
+.labsens :where(button, select, input, [role='tabpanel']):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Panel layout */
+
+.labsens__panel {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.labsens__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+.labsens__grid > * {
+  min-width: 0;
+}
+
+@container (min-width: 44rem) {
+  .labsens__grid {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .labsens__out {
+    grid-column: 1 / -1;
+  }
+}
+
+.labsens__out {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.labsens__out > * {
+  min-width: 0;
+}
+
+.labsens__scene {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.labsens__scene svg,
+.labsens__plot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.labsens__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.labsens .lw__field select {
+  min-width: 0;
+}
+
+/* Readouts */
+
+.labsens__readouts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.labsens__readouts dt {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.labsens__readouts dd {
+  margin: 0.1rem 0 0;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.labsens__readouts .is-destaque dd {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 650;
+}
+
+.labsens__plot {
+  margin: 0;
+  display: grid;
+  gap: 0.25rem;
+  max-width: 30rem;
+}
+
+.labsens__code pre {
+  margin: 0.3rem 0 0;
+  padding: 0.65rem 0.8rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.labsens .lw__status p,
+.labsens .lw__status span:not(.lw__status-dot) {
+  font-size: 0.875rem;
+}
+
+/* SVG pieces */
+
+.labsens-label {
+  fill: var(--fg-muted);
+  font-size: 12px;
+}
+
+.labsens-label--chip {
+  fill: var(--fg);
+  font-family: var(--font-mono);
+  font-weight: 650;
+}
+
+.labsens-label--perigo {
+  fill: var(--danger);
+  font-weight: 600;
+}
+
+.labsens-axis {
+  fill: var(--fg-muted);
+  font-size: 11px;
+}
+
+.labsens-axis--strong {
+  fill: var(--accent-strong);
+  font-weight: 650;
+}
+
+.labsens-axis--limit {
+  fill: var(--warning);
+  font-weight: 600;
+}
+
+.labsens-axis--tick {
+  fill: var(--copper);
+}
+
+.labsens-grid {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.labsens-grid--range {
+  stroke-dasharray: 3 3;
+}
+
+.labsens-trace {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.labsens-trace--main {
+  stroke-width: 2.5;
+}
+
+.labsens-trace--soft {
+  stroke: var(--fg-subtle);
+  stroke-width: 1.5;
+}
+
+.labsens-trace--faint {
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+
+.labsens-tick {
+  stroke: var(--copper);
+  stroke-width: 2;
+}
+
+.labsens-limit {
+  stroke: var(--warning);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 3;
+}
+
+.labsens-point {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.labsens-sample {
+  fill: var(--copper);
+}
+
+.labsens-dim {
+  stroke: var(--fg-subtle);
+  stroke-width: 1;
+}
+
+/* PIR */
+
+.labsens-zone {
+  fill: var(--accent-soft);
+  stroke: var(--border);
+  stroke-width: 0.75;
+}
+
+.labsens-zone.is-alt {
+  fill: var(--surface);
+}
+
+.labsens-zone.is-here {
+  fill: var(--warning-soft);
+  stroke: var(--warning-border);
+}
+
+.labsens-walk {
+  stroke: var(--border-strong);
+  stroke-dasharray: 4 4;
+}
+
+.labsens-person circle {
+  fill: var(--copper);
+  opacity: 0.85;
+}
+
+.labsens-person .labsens-person__head {
+  fill: var(--bg);
+  opacity: 1;
+}
+
+.labsens-pir rect {
+  fill: var(--surface);
+  stroke: var(--fg-subtle);
+  stroke-width: 1.5;
+}
+
+.labsens-pir path {
+  fill: var(--bg);
+  stroke: var(--fg-subtle);
+  stroke-width: 1.5;
+}
+
+.labsens-pir.is-on path {
+  fill: var(--success-soft);
+  stroke: var(--success);
+}
+
+/* Ultrasound */
+
+.labsens-hcsr04 rect {
+  fill: var(--info-soft);
+  stroke: var(--info);
+  stroke-width: 1.5;
+}
+
+.labsens-hcsr04 circle {
+  fill: var(--surface);
+  stroke: var(--fg-subtle);
+  stroke-width: 2;
+}
+
+.labsens-wave {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.labsens-wave--eco {
+  stroke: var(--copper);
+}
+
+.labsens-wall {
+  fill: var(--fg-subtle);
+}
+
+.labsens-wall.is-macia {
+  fill: var(--copper);
+  opacity: 0.45;
+}
+
+.labsens-wall.is-longe {
+  opacity: 0.35;
+}
+
+/* Infrared */
+
+.labsens-irmod rect {
+  fill: var(--success-soft);
+  stroke: var(--success);
+  stroke-width: 1.5;
+}
+
+.labsens-irmod__tx {
+  fill: var(--fg-subtle);
+}
+
+.labsens-irmod__rx {
+  fill: var(--fg);
+}
+
+.labsens-irmod__led {
+  fill: var(--border-strong);
+}
+
+.labsens-irmod__led.is-on {
+  fill: var(--danger);
+  filter: drop-shadow(0 0 3px var(--danger));
+}
+
+.labsens-ray {
+  stroke: var(--danger);
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+
+.labsens-ray--back {
+  stroke: var(--copper);
+}
+
+.labsens-surface {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.labsens-surface--branco {
+  fill: #f4f4f2;
+}
+
+.labsens-surface--cinza {
+  fill: #8a8d92;
+}
+
+.labsens-surface--preto {
+  fill: #18191b;
+}
+
+.labsens-sun circle {
+  fill: var(--warning);
+}
+
+.labsens-sun line {
+  stroke: var(--warning);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Current */
+
+.labsens-box {
+  fill: var(--surface);
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+}
+
+.labsens-wire {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.labsens-wire--fase {
+  stroke: var(--danger);
+}
+
+.labsens-wire--neutro {
+  stroke: var(--info);
+}
+
+.labsens-wire--sinal {
+  stroke: var(--fg-subtle);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.labsens-chip {
+  fill: var(--bg);
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+
+.labsens-clamp {
+  fill: none;
+  stroke: var(--fg-muted);
+  stroke-width: 6;
+}

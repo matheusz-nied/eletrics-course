@@ -1,0 +1,213 @@
+/*
+ * CaminhoDoComando.tsx: the smart-home command path of lesson 12.6. Site
+ * tokens only, so both themes work. Classes start with caminho.
+ */
+
+.caminho .lw__body {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.caminho .lw__body > * {
+  min-width: 0;
+}
+
+.caminho :where(button, select, input):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.caminho__controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 48rem) {
+  .caminho__controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .caminho__controls > .lw__group {
+    grid-column: 1 / -1;
+  }
+}
+
+.caminho .lw__field select {
+  min-width: 0;
+}
+
+.caminho__toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+}
+
+.caminho__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.caminho__figure {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.caminho-mapa {
+  display: block;
+  width: 100%;
+  max-width: 50rem;
+  height: auto;
+  margin: 0 auto;
+  font-family: var(--font-sans);
+}
+
+.caminho-casa {
+  fill: var(--bg);
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+}
+
+.caminho-casa__nome {
+  fill: var(--fg-subtle);
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.caminho-link {
+  stroke: var(--border-strong);
+  stroke-width: 2.5;
+  transition: stroke 150ms;
+}
+
+.caminho-link.is-sem-fio {
+  stroke-dasharray: 6 5;
+}
+
+.caminho-link.is-usada {
+  stroke: var(--accent);
+  stroke-width: 3.5;
+}
+
+.caminho-link.is-quebrada {
+  stroke: var(--danger);
+  opacity: 0.55;
+}
+
+.caminho-x {
+  fill: var(--danger);
+  font-size: 18px;
+  font-weight: 700;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 4px;
+}
+
+.caminho-no rect {
+  fill: var(--surface);
+  stroke: var(--fg-subtle);
+  stroke-width: 1.5;
+}
+
+.caminho-no text {
+  text-anchor: middle;
+}
+
+.caminho-no__nome {
+  fill: var(--fg);
+  font-size: 13.5px;
+  font-weight: 650;
+}
+
+.caminho-no__sub {
+  fill: var(--fg-muted);
+  font-size: 11px;
+}
+
+.caminho-no--rele rect {
+  stroke: var(--accent);
+}
+
+.caminho-no.is-off rect {
+  fill: var(--surface);
+  stroke: var(--border);
+  stroke-dasharray: 4 3;
+}
+
+.caminho-no.is-off text {
+  fill: var(--fg-subtle);
+}
+
+.caminho-no.is-acesa rect {
+  fill: var(--warning-soft);
+  stroke: var(--warning);
+  stroke-width: 2;
+}
+
+.caminho-brilho {
+  fill: var(--warning);
+  opacity: 0.18;
+}
+
+.caminho-pacote {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 3;
+}
+
+.caminho-parada circle {
+  fill: var(--danger);
+}
+
+.caminho-parada text {
+  fill: var(--bg);
+  font-size: 15px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.caminho__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 1rem;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+
+.caminho__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.caminho-key {
+  display: inline-block;
+  width: 1.4rem;
+  height: 0;
+  border-top: 2.5px solid var(--border-strong);
+}
+
+.caminho-key--wifi {
+  border-top-style: dashed;
+}
+
+.caminho-key--off {
+  border-top-color: var(--danger);
+}
+
+.caminho__status {
+  min-height: 5.5rem;
+}
+
+.caminho__lat {
+  color: var(--fg-muted);
+}
