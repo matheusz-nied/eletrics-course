@@ -6,7 +6,7 @@
  * - J1, 2-way 5,08 mm screw terminal for the 127 V mains input, and F1, a
  *   5 × 20 mm T 250 mA glass fuse in PCB clips;
  * - T1, a PCB-mount EI-48 transformer (core 48 × 40 mm, 25 mm stack, black
- *   bobbin with pin rails, typical of 10–12 VA board transformers);
+ *   bobbin with pin rails, typical of 10–20 VA board transformers);
  * - BR1, a KBP in-line bridge rectifier (14,2 × 10,3 × 3,6 mm);
  * - C1, the 3.300 µF 25 V filter capacitor (18 × 35 mm can, general-purpose
  *   105 °C series);
@@ -61,7 +61,7 @@ const VERSIONS: Record<
   PsuOutput,
   { regulator: string; secondary: number; va: number; r1: number; out: string }
 > = {
-  12: { regulator: '7812', secondary: 12, va: 12, r1: 1000, out: '+12V' },
+  12: { regulator: '7812', secondary: 15, va: 20, r1: 1000, out: '+12V' },
   5: { regulator: '7805', secondary: 9, va: 9, r1: 330, out: '+5V' },
 };
 
@@ -322,7 +322,7 @@ export const meta: PartMeta = {
       kind: 'select',
       label: 'Tensão de saída',
       options: [
-        { value: 12, label: '12 V (7812, transformador de 12 V)' },
+        { value: 12, label: '12 V (7812, transformador de 15 V)' },
         { value: 5, label: '5 V (7805, transformador de 9 V)' },
       ],
     },
