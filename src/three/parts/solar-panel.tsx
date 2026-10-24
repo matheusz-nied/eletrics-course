@@ -4,7 +4,7 @@
  * - 60 cells, the residential module of the 2010s: 1.650 × 992 × 35 mm,
  *   6 × 10 monocrystalline cells of 156,75 mm (pseudo-square, 5 busbars),
  *   3 bypass diodes, 4 mm² cables with quick connectors; 330 W, Voc 40,6 V,
- *   Isc 10,4 A, Vmp 33,6 V, Imp 9,8 A (typical datasheet figures);
+ *   Isc 10,4 A, Vmp 33,7 V, Imp 9,8 A (typical datasheet figures);
  * - 36 cells, the small "12 V" panel: 540 × 350 × 25 mm, 4 × 9
  *   polycrystalline cells cut to 52 × 78 mm, 2 bypass diodes; 20 W, Voc
  *   21,6 V, Isc 1,23 A, Vmp 17,5 V, Imp 1,14 A.
@@ -92,7 +92,7 @@ const SPECS: Record<Cells, Spec> = {
     box: { x: 85, z: 120, h: 20 },
     cable: { r: 3, run: 420 },
     connector: 7.5,
-    ratings: { p: 330, voc: 40.6, isc: 10.4, vmp: 33.6, imp: 9.8, vmax: 1000 },
+    ratings: { p: 330, voc: 40.6, isc: 10.4, vmp: 33.7, imp: 9.8, vmax: 1000 },
   },
   36: {
     cells: 36,
