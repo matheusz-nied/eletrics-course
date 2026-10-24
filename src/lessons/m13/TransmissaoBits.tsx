@@ -27,7 +27,7 @@ import {
 import '../m00/widget.css';
 import './transmissao.css';
 
-/* Frame drawing (viewBox 0 0 640 100). */
+/* Frame drawing (viewBox 0 -6 640 90). */
 const FX0 = 8;
 const FX1 = 632;
 const HIGH = 40;
@@ -285,7 +285,7 @@ export default function TransmissaoBits() {
 
         <figure className="bits__frame">
           <svg
-            viewBox="0 0 640 100"
+            viewBox="0 -6 640 90"
             role="img"
             aria-label={`Último quadro enviado, ${kind === 'fixo' ? 'código fixo' : 'rolling code'}: ${frameText(last)}. Dura ${ms} milissegundos.`}
           >
@@ -313,14 +313,14 @@ export default function TransmissaoBits() {
             {sent > 0 && (
               <rect key={sent} x={FX0} y={16} width={3} height={64} className="bits__cursor" />
             )}
-            <text x={FX0} y={94} className="bits__axis-t">
-              portadora de 433,92 MHz: ligada (barra) ou desligada (linha)
-            </text>
-            <text x={FX1} y={94} className="bits__axis-t bits__axis-t--end">
+          </svg>
+          <p className="bits__axis">
+            <span>portadora de 433,92{NBSP}MHz: ligada (barra) ou desligada (linha)</span>
+            <span className="num">
               {ms}
               {NBSP}ms
-            </text>
-          </svg>
+            </span>
+          </p>
           <figcaption className="bits__fields">
             {fields
               .filter((f) => f.bits.length)

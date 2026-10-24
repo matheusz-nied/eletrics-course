@@ -142,13 +142,21 @@
   }
 }
 
-.bits__axis-t {
-  fill: var(--fg-subtle);
-  font-size: 10px;
+.bits__axis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  justify-content: space-between;
+  margin: 0.25rem 0 0.5rem;
+  color: var(--fg-subtle);
+  font-size: 0.8125rem;
 }
 
-.bits__axis-t--end {
-  text-anchor: end;
+/* On a phone the drawing shrinks to half its size: scale the labels up. */
+@media (max-width: 35.99rem) {
+  .bits__field-t {
+    font-size: 18px;
+  }
 }
 
 .bits__fields {

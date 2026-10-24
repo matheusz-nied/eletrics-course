@@ -25,7 +25,7 @@ import {
 import '../m00/widget.css';
 import './controle-ir.css';
 
-/* Waveform (viewBox 0 0 640 150). */
+/* Waveform (viewBox 0 -4 640 154). */
 const WX0 = 10;
 const WX1 = 630;
 const LED_HI = 34;
@@ -173,7 +173,7 @@ export default function ControleIR() {
 
         <svg
           className="ir__wave"
-          viewBox="0 0 640 150"
+          viewBox="0 -4 640 154"
           role="img"
           aria-label={`Mensagem do botão ${k.label}: pulso inicial de 9 ms, pausa de 4,5 ms e 32 bits, endereço ${hexByte(ADDRESS)}, o endereço invertido, comando ${hexByte(k.command)} e o comando invertido. Dura ${ms} ms.${held ? ' Com o botão seguro, seguem códigos curtos de repetição a cada 108 ms.' : ''} A saída do receptor é o mesmo desenho de cabeça para baixo, sem a portadora.`}
         >

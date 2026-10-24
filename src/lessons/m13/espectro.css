@@ -99,3 +99,15 @@
   color: var(--fg-muted);
   font-weight: 400;
 }
+
+/* On a phone the ruler shrinks to half its size: bigger labels, and the axis
+   names go (the units already say which scale is which). */
+@media (max-width: 35.99rem) {
+  .espectro__tick-t {
+    font-size: 18px;
+  }
+
+  .espectro__axis-t {
+    display: none;
+  }
+}

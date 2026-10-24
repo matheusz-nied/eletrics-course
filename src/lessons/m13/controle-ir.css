@@ -153,3 +153,14 @@
 .ir__bytes code {
   font-family: var(--font-mono);
 }
+
+/* On a phone the drawings shrink to half their size: scale the labels up. */
+@media (max-width: 35.99rem) {
+  .ir__wave .ir__t {
+    font-size: 16px;
+  }
+
+  .ir__wave .ir__t--start {
+    font-size: 18px;
+  }
+}
