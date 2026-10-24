@@ -1,0 +1,307 @@
+---
+titulo: Pico, eficaz (RMS) e médio
+modulo: m06-corrente-alternada
+ordem: 2
+nivel: B
+duracaoMin: 30
+objetivos:
+  - Diferenciar valor de pico, pico a pico, médio e eficaz de uma tensão alternada
+  - Explicar por que a tomada de 127 V chega a cerca de 180 V no pico
+  - Calcular o valor eficaz de uma senoide a partir do pico, e o contrário
+  - Saber quando o multímetro comum erra e quando é preciso um true RMS
+  - Escolher componentes pela tensão de pico, e não pela eficaz
+prerequisitos:
+  - m06-corrente-alternada/01-da-cc-a-ca
+  - m01-eletricidade-do-zero/05-potencia-e-energia
+  - m03-medicoes/02-medindo-tensao
+tags: [valor eficaz, RMS, true RMS, tensão de pico, pico a pico, valor médio, multímetro, nobreak, dimmer]
+seguranca: rede
+rascunho: false
+---
+
+import PeakRmsLevels from '../../../lessons/m06/figures/PeakRmsLevels.astro';
+import RectifiedAverages from '../../../lessons/m06/figures/RectifiedAverages.astro';
+import RmsSquaredPower from '../../../lessons/m06/figures/RmsSquaredPower.astro';
+import FormasDeOnda from '../../../lessons/m06/FormasDeOnda.tsx';
+
+O capacitor grande da fonte de um aparelho de 127 V estufou, e você vai trocar. No corpo do velho está escrito **220 µF 250 V**. A loja só tem de 160 V, e o vendedor garante: "a tomada é 127 V, 160 V sobra". Não sobra. Esse capacitor vai receber quase 180 V, e um capacitor trabalhando acima da tensão dele estufa de novo, às vezes com estalo.
+
+A tomada de 127 V passa dos 127 V. Nesta aula você vai ver os quatro números que descrevem uma tensão alternada, o que cada um quer dizer e qual deles importa em cada situação.
+
+## Quatro números para uma senoide
+
+Na aula anterior, <LinkAula id="m06-corrente-alternada/01-da-cc-a-ca" />, você viu que a tensão da tomada é uma senoide. Uma tensão contínua se descreve com um número só. Uma senoide pede quatro, e cada um responde a uma pergunta diferente.
+
+<Figure caption="Figura 1. Os quatro números da tomada de 127 V. O pico é 179,6 V; de um pico ao outro são 359,2 V; a linha tracejada é o valor eficaz, 127 V; e a média de um ciclo inteiro é zero.">
+  <PeakRmsLevels />
+</Figure>
+
+- O **pico** ($V_p$) é o ponto mais alto da onda: 179,6 V na tomada de 127 V. É a <Term id="tensao-de-pico">tensão de pico</Term>, e responde à pergunta "até onde a tensão chega?".
+- O **pico a pico** ($V_{pp}$) vai do pico positivo ao negativo: $2 \times 179{,}6 = 359{,}2\,\text{V}$. É o que se lê mais fácil no osciloscópio, contando as divisões de cima a baixo.
+- O **médio** é a média da tensão ao longo do tempo. Num ciclo inteiro da tomada, ele é zero.
+- O **eficaz** ($V_\text{ef}$, ou RMS) é 127 V. É o número da etiqueta e o que o multímetro mostra em V~. Ele responde à pergunta "quanto essa tensão aquece?".
+
+## O valor médio
+
+Os semiciclos da senoide são iguais e de sinais opostos: tudo o que a tensão sobe no positivo, ela desce no negativo. A média de um ciclo inteiro, o <Term id="valor-medio">valor médio</Term>, é zero. É por isso que o multímetro em V⎓ mostra quase zero numa tomada de 127 V, como você viu na aula <LinkAula id="m03-medicoes/02-medindo-tensao" />.
+
+A média só vira um número útil quando a onda deixa de se cancelar. É o que faz um <Term id="retificador">retificador</Term>: deixa passar só os semiciclos positivos (meia onda) ou inverte os negativos (onda completa).
+
+<Figure caption="Figura 2. A tomada de 127 V retificada. Em meia onda, a média (tracejada) é 57,2 V; em onda completa, 114,3 V. Esse é o valor que um multímetro em V⎓ mostra na saída de um retificador sem filtro.">
+  <RectifiedAverages />
+</Figure>
+
+As contas, para uma senoide de pico $V_p$:
+
+$$
+V_\text{méd, meia onda} = \frac{V_p}{\pi} \approx 0{,}318 \cdot V_p
+\qquad\qquad
+V_\text{méd, onda completa} = \frac{2 \cdot V_p}{\pi} \approx 0{,}637 \cdot V_p
+$$
+
+Para a tomada de 127 V, isso dá 57,2 V e 114,3 V. O retificador e o capacitor que alisa a saída estão na aula <LinkAula id="m09-semicondutores/03-retificadores" />.
+
+Mas a média não diz quanto uma tensão aquece. Uma tomada tem média zero e esquenta um chuveiro muito bem.
+
+## O valor eficaz: quanto a tensão aquece
+
+Pense num aquecedor, uma resistência pura. Para ele, o sentido da corrente não importa: corrente para um lado esquenta, corrente para o outro lado esquenta igual. A potência num resistor é $p = v^2 / R$, e o quadrado nunca é negativo. Então a potência no aquecedor sobe e desce, mas fica sempre positiva.
+
+<Figure caption="Figura 3. Um aquecedor de 127 V e 1.000 W na tomada. A tensão vai de +179,6 V a −179,6 V. A potência, que depende do quadrado da tensão, vai de 0 a 2.000 W, duas vezes por ciclo, e a média fica exatamente na metade do pico: 1.000 W.">
+  <RmsSquaredPower />
+</Figure>
+
+Repare na Figura 3: a curva da potência é simétrica em volta da linha tracejada. Tudo o que passa acima dela preenche o que falta abaixo, e a média é **metade da potência de pico**. Esse resultado vale para qualquer senoide.
+
+O <Term id="valor-eficaz">valor eficaz</Term> é definido assim: **a tensão contínua que aqueceria a mesma resistência do mesmo jeito.** Para dar a mesma potência média, a tensão contínua precisa de um quadrado igual à média dos quadrados da tensão alternada. Daí o nome em inglês, RMS (*root mean square*): a raiz quadrada da média dos quadrados. Para a senoide, a média do quadrado é metade do pico ao quadrado, e a conta fica:
+
+$$
+V_\text{ef} = \frac{V_p}{\sqrt{2}} \approx 0{,}707 \cdot V_p
+\qquad\qquad
+V_p = \sqrt{2} \cdot V_\text{ef} \approx 1{,}414 \cdot V_\text{ef}
+$$
+
+em que $V_\text{ef}$ é o valor eficaz e $V_p$ o pico, os dois em volts. Com elas:
+
+- **Tomada de 127 V:** $V_p = 1{,}414 \times 127 \approx 179{,}6\,\text{V}$.
+- **Tomada de 220 V:** $V_p = 1{,}414 \times 220 \approx 311\,\text{V}$.
+- **Secundário de um trafo de 12 V:** $V_p \approx 17\,\text{V}$.
+
+A corrente segue a mesma regra. Quando se diz que um aparelho puxa 10 A da tomada, são 10 A eficazes, com picos de 14,1 A. Daqui em diante, no curso, toda tensão e corrente alternada sem outra indicação é o valor eficaz.
+
+<DeepDive title="Por que a média do seno ao quadrado é 1/2">
+
+Uma identidade de trigonometria diz que
+
+$$
+\sin^2(x) = \frac{1 - \cos(2x)}{2}
+$$
+
+O termo $\cos(2x)$ é uma onda que sobe e desce em volta de zero; num ciclo inteiro, a média dele é zero. Sobra a média de $1/2$, que é $1/2$. Então a média de $V_p^2 \sin^2(\omega t)$ é $V_p^2 / 2$, e a raiz dá $V_p / \sqrt{2}$.
+
+Para qualquer forma de onda, a definição é a mesma, só que a média tem de ser calculada caso a caso:
+
+$$
+V_\text{ef} = \sqrt{\frac{1}{T} \int_0^T v(t)^2 \, dt}
+$$
+
+Uma onda quadrada que vai de $+V_p$ a $-V_p$ tem $v^2 = V_p^2$ o tempo todo, então o eficaz é o próprio pico. Uma triangular dá $V_p / \sqrt{3}$. O fator $\sqrt{2}$ só vale para a senoide.
+
+</DeepDive>
+
+### Explore: o que quer dizer 127 V eficazes
+
+Na simulação, três lâmpadas iguais, de 127 V e 100 W, têm cada uma a sua fonte. L1 está numa fonte contínua de 127 V. L2 está numa fonte alternada de 127 V eficazes, como a tomada. L3 está numa fonte alternada cujo **pico** é 127 V.
+
+<Simulation
+  circuit="m06/eficaz-lampadas"
+  instruments={['multimetro', { kind: 'osciloscopio', series: ['V2', 'V3'] }]}
+  height={320}
+/>
+
+1. **Aperte o play (▶)** e compare as lâmpadas. L1 e L2 brilham igual. L3 fica bem mais fraca, com cerca de 30% do brilho das outras.
+2. **No multímetro**, L1 mostra 127 V em V⎓. L2 mostra 127 V em V~, e quase zero em V⎓: é a média zero. L3 mostra 89,8 V em V~, que é $127 / 1{,}414$.
+3. **No osciloscópio**, L2 sobe até 179,6 V (359,2 V de pico a pico) e L3 só até 127 V. As duas fontes "de 127 V" são bem diferentes.
+
+Um resistor comum no lugar de L3 receberia exatamente metade da potência, porque $(127 / 179{,}6)^2 = 0{,}5$. A lâmpada recebe um pouco mais, cerca de 59 W em vez de 50 W: com menos potência, o filamento fica mais frio e a resistência dele cai, como você viu na aula <LinkAula id="m01-eletricidade-do-zero/04-lei-de-ohm" />.
+
+### Exemplo resolvido: o chuveiro de 220 V
+
+Um chuveiro de 5.500 W, ligado em 220 V. Quanto ele puxa, e quais são os picos?
+
+1. **Corrente eficaz:** $I = P / V = 5.500 / 220 = 25\,\text{A}$. É com esse valor que se escolhem o disjuntor e a bitola do fio (veja <LinkAula id="m07-instalacoes/04-fios-e-cabos" />).
+2. **Resistência:** $R = V / I = 220 / 25 = 8{,}8\,\Omega$.
+3. **Picos:** a tensão chega a $1{,}414 \times 220 \approx 311\,\text{V}$, e a corrente, a $1{,}414 \times 25 \approx 35{,}4\,\text{A}$.
+4. **Potência instantânea:** no pico, $311 \times 35{,}4 \approx 11.000\,\text{W}$, o dobro da etiqueta. A média, que é o que esquenta a água e o que o medidor de energia conta, é 5.500 W.
+
+O aquecimento e o consumo seguem o valor eficaz. O isolamento dos fios e dos componentes precisa aguentar o pico.
+
+## Quando a onda não é senoide
+
+O multímetro mede o valor eficaz em V~. Mas há dois jeitos de fazer isso. Os modelos **true RMS** ("RMS verdadeiro") calculam a raiz da média dos quadrados de verdade. Os modelos comuns, mais baratos, fazem um atalho: retificam o sinal, tiram a média e multiplicam por 1,11, que é a relação entre o eficaz e a média de meio ciclo de uma senoide. Na senoide, o atalho acerta. Em qualquer outra forma de onda, erra.
+
+<FormasDeOnda client:visible />
+
+1. **Senoide:** os dois multímetros mostram 127 V.
+2. **Semi-senoidal**, a onda dos nobreaks mais baratos: o eficaz verdadeiro é 127 V, o mesmo aquecimento da tomada. O multímetro comum mostra 99,7 V, 21,5% a menos.
+3. **Dimmer** com disparo em 90°: o eficaz verdadeiro é 89,8 V, e um aquecedor ligado nele recebe metade da potência. O multímetro comum mostra 63,5 V, 29,3% a menos. Mexa no ângulo e veja o erro mudar.
+4. **Quadrada:** aqui o comum erra para cima, 199,5 V contra 179,6 V.
+
+Ondas que não são senoides aparecem na saída de dimmers, de controles de velocidade de ventilador, de nobreaks e inversores mais baratos e na corrente puxada por fontes eletrônicas. Para medir qualquer uma delas, só um multímetro true RMS (a inscrição vem no painel) dá o valor certo.
+
+<RealCase title="O nobreak que dá 100 V">
+
+Na falta de energia, o nobreak do portão segura a central, mas o motor zumbe e esquenta. Alguém mede a saída do nobreak com um multímetro comum e lê uns 100 V. Conclusão apressada: "o nobreak está fraco". Pode não estar.
+
+<Steps>
+  <Step title="Leia a etiqueta e o manual do nobreak">
+    Procure a forma de onda da saída em bateria: "senoidal" (ou "senoidal pura") ou "semi-senoidal" (ou "senoidal modificada", "onda aproximada"). A etiqueta também diz a tensão de saída.
+  </Step>
+  <Step title="Confira o multímetro">
+    Veja se ele é true RMS. Meça antes uma tomada que você sabe que está energizada, em V~, para confirmar que o instrumento funciona e para ter a referência da rede.
+  </Step>
+  <Step title="Meça a saída com o nobreak na rede">
+    Pontas de prova numa tomada de saída do nobreak, mãos nos cabos isolados, sem tocar nas pontas. Muitos nobreaks passam a própria rede para a saída quando ela está presente, e a leitura bate com a tomada.
+  </Step>
+  <Step title="Meça a saída em bateria">
+    Desligue o cabo do nobreak da tomada e meça de novo. Num nobreak semi-senoidal, um multímetro comum mostra bem menos que 127 V; um true RMS mostra perto do valor da etiqueta.
+  </Step>
+  <Step title="Tire a conclusão certa">
+    Se o true RMS mostra a tensão da etiqueta, o nobreak está bom e a leitura baixa era erro do multímetro comum. Se o motor zumbe e esquenta em bateria, o problema é a forma de onda, não a tensão.
+  </Step>
+</Steps>
+
+A onda semi-senoidal tem o valor eficaz certo, e lâmpadas, centrais e carregadores costumam funcionar bem com ela. Motores e transformadores sofrem mais: a forma quadrada tem subidas bruscas que eles não gostam, e o resultado é zumbido e aquecimento. Para alimentar o motor do portão em bateria, costuma ser recomendado um nobreak senoidal; o manual da central diz o que ela aceita.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Escolher componentes pela tensão eficaz.** Capacitores, diodos e isolamentos ligados à rede veem o pico: 179,6 V em 127 V e 311 V em 220 V. O capacitor do começo da aula precisa ser de 200 V ou 250 V numa fonte de 127 V, e de 400 V numa de 220 V (valores comerciais comuns, com folga sobre o pico).
+- **Achar que um capacitor desligado está sem tensão.** O capacitor de filtro de uma fonte de 127 V carrega com quase 180 V e pode guardar essa carga depois que o aparelho sai da tomada. Descarregue-o com segurança antes de mexer, como na aula <LinkAula id="m04-passivos/03-capacitores" />.
+- **Confundir pico a pico com pico.** No osciloscópio, a tomada de 127 V ocupa 359,2 V de cima a baixo. O pico é a metade, 179,6 V, e o eficaz é 127 V.
+- **Medir a tomada em V⎓.** O multímetro mostra quase zero numa tomada energizada, porque a média é zero. Zero na escala errada não quer dizer que não há tensão: confira sempre em V~.
+- **Confiar no multímetro comum em onda não senoidal.** Na saída de dimmers, nobreaks semi-senoidais e controles de velocidade, ele erra em dezenas de por cento. Use um true RMS.
+- **Achar que média zero quer dizer energia zero.** A tomada tem média zero e aquece um chuveiro. Quem diz quanto aquece é o valor eficaz.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Qual a tensão de pico de uma tomada de 220 V, em volts?',
+      answer: 311,
+      tolerance: 0.01,
+      unit: 'V',
+      explanation: 'Vp = √2 × Vef = 1,414 × 220 ≈ 311 V. De pico a pico, são 622 V.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'O osciloscópio mostra uma senoide de 34 V de pico a pico no secundário de um transformador. Quanto um multímetro mostra em V~, em volts?',
+      answer: 12,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation:
+        'O pico é metade do pico a pico, 17 V. O eficaz é 17 ÷ 1,414 ≈ 12 V: é um trafo de 12 V.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um forno elétrico de 2.200 W funciona em 220 V. Qual a corrente eficaz, em ampères?',
+      answer: 10,
+      tolerance: 0.01,
+      unit: 'A',
+      explanation:
+        'I = P ÷ V = 2.200 ÷ 220 = 10 A eficazes. Os picos de corrente chegam a 14,1 A, mas o disjuntor e o fio se escolhem pelo eficaz.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um resistor recebe 100 W numa fonte contínua de 127 V. Na mesma resistência, uma fonte alternada com 127 V de pico entrega:',
+      options: [
+        {
+          text: '50 W',
+          correct: true,
+          feedback:
+            'Com 127 V de pico, o eficaz é 127 ÷ 1,414 ≈ 89,8 V. A potência cai com o quadrado: (89,8 ÷ 127)² = 0,5.',
+        },
+        {
+          text: '100 W',
+          feedback:
+            'Daria 100 W se os 127 V fossem eficazes, como na tomada. Aqui 127 V é o pico, e o eficaz é só 89,8 V.',
+        },
+        {
+          text: '71 W',
+          feedback:
+            'O eficaz é 71% do pico, mas a potência depende do quadrado da tensão: 0,707² = 0,5.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Como a média da tensão da tomada é zero, um aparelho ligado nela recebe, em média, energia zero.',
+      answer: false,
+      explanation:
+        'A tensão se cancela, mas a potência num resistor depende do quadrado da tensão e é sempre positiva. Quem diz quanto aquece é o valor eficaz.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um multímetro comum (não true RMS) mostra 63 V na saída de um dimmer ligado em 127 V. O que dá para concluir?',
+      options: [
+        {
+          text: 'Pouca coisa: a onda do dimmer não é senoide, e o multímetro comum erra nela',
+          correct: true,
+          feedback:
+            'O multímetro comum é calibrado para senoides. Com o dimmer em 90°, ele mostraria 63,5 V para um eficaz verdadeiro de 89,8 V.',
+        },
+        {
+          text: 'Que a lâmpada recebe 63 V eficazes',
+          feedback:
+            'Só um true RMS daria o eficaz certo. Na onda cortada do dimmer, o multímetro comum mostra menos que o eficaz verdadeiro.',
+        },
+        {
+          text: 'Que o dimmer está com defeito',
+          feedback:
+            'Uma leitura baixa é exatamente o que o dimmer deve fazer, e o multímetro comum ainda exagera essa queda. Não dá para concluir defeito.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Que tensão nominal mínima faz sentido para o capacitor de filtro de uma fonte ligada em 127 V?',
+      options: [
+        {
+          text: '200 V ou 250 V',
+          correct: true,
+          feedback:
+            'O capacitor carrega com o pico, quase 180 V. Um valor comercial acima disso, com folga, é o certo.',
+        },
+        {
+          text: '160 V, porque a tomada é de 127 V',
+          feedback:
+            '127 V é o eficaz. O pico, que é o que o capacitor vê, chega a 179,6 V, acima dos 160 V.',
+        },
+        {
+          text: '63 V, porque a média da tomada é zero',
+          feedback:
+            'Depois do retificador a tensão não se cancela mais, e o capacitor carrega com o pico de 180 V.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Uma senoide tem quatro números: **pico** (179,6 V na tomada de 127 V), **pico a pico** (359,2 V), **médio** (zero num ciclo) e **eficaz** (127 V).
+- O **valor eficaz** (RMS) é a tensão contínua que aquece uma resistência do mesmo jeito. Na senoide, $V_\text{ef} = V_p / \sqrt{2}$ e $V_p \approx 1{,}414 \cdot V_\text{ef}$. As tensões e correntes de etiqueta são eficazes.
+- O **valor médio** de uma senoide é zero; depois de um retificador, vale $V_p / \pi$ (meia onda) ou $2V_p / \pi$ (onda completa).
+- Consumo, aquecimento, disjuntor e bitola seguem o **eficaz**; capacitores, diodos e isolamentos precisam aguentar o **pico**.
+- O multímetro comum só acerta o eficaz de senoides. Em dimmers, nobreaks semi-senoidais e controles de velocidade, use um **true RMS**.
+
+Até aqui, cada onda foi vista sozinha. Na próxima aula, você vai comparar duas ondas da mesma frequência que não sobem e descem juntas: <LinkAula id="m06-corrente-alternada/03-fase-e-fasores" />.

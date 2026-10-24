@@ -1,0 +1,83 @@
+/* FormasDeOnda.tsx: peak, average and RMS of common waves, lesson 6.2. */
+
+.formas__body {
+  align-items: start;
+}
+
+@media (min-width: 52rem) {
+  .formas__body {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  }
+}
+
+.formas__views,
+.formas__side {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.formas__plot {
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.formas__axis {
+  stroke: var(--fg-subtle);
+  stroke-width: 1.25;
+}
+
+.formas__peak {
+  stroke: var(--border-strong);
+  stroke-dasharray: 2 4;
+  stroke-width: 1;
+}
+
+.formas__rms {
+  stroke: var(--warning);
+  stroke-dasharray: 6 4;
+  stroke-width: 1.75;
+}
+
+.formas__wave {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+}
+
+.formas__tick {
+  fill: var(--fg-muted);
+  font-size: 11px;
+  text-anchor: end;
+}
+
+.formas__rms-text {
+  fill: var(--fg);
+  font-size: 12px;
+  font-weight: 650;
+  text-anchor: end;
+}
+
+.formas__caption {
+  fill: var(--fg-muted);
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.formas__values {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.formas__value {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.formas__value--rms {
+  color: var(--accent);
+}

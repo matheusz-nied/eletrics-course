@@ -1,0 +1,118 @@
+---
+/*
+ * 06.3: two 60 Hz sine waves, B lagging A by a quarter cycle (90°, 4,17 ms),
+ * with the distance between the two peaks marked.
+ */
+const X0 = 48;
+const X1 = 460;
+const SPAN = 450; // degrees drawn: a cycle and a quarter
+const Y0 = 132;
+const AMP = 72;
+const x = (deg: number) => X0 + ((X1 - X0) * deg) / SPAN;
+const y = (v: number) => Y0 - AMP * v;
+
+const wave = (shift: number) =>
+  Array.from({ length: 151 }, (_, i) => {
+    const deg = (SPAN * i) / 150;
+    const v = Math.sin(((deg - shift) * Math.PI) / 180);
+    return `${i === 0 ? 'M' : 'L'}${x(deg).toFixed(1)} ${y(v).toFixed(1)}`;
+  }).join(' ');
+
+const ticks = [
+  { deg: 0, text: '0' },
+  { deg: 90, text: '4,17 ms' },
+  { deg: 180, text: '8,33 ms' },
+  { deg: 270, text: '12,5 ms' },
+  { deg: 360, text: '16,7 ms' },
+];
+const BRACKET = 34;
+---
+
+<svg viewBox="0 0 480 250" width="480" height="250" class="fig" aria-hidden="true">
+  <path d={`M${X0} ${Y0} H${X1 + 8}`} class="axis" />
+  <path d={`M${X0} ${Y0 - AMP - 14} V${Y0 + AMP + 14}`} class="axis" />
+  {ticks.map((t) => (
+    <g>
+      <path d={`M${x(t.deg)} ${Y0 - 4} V${Y0 + 4}`} class="axis" />
+      <text x={x(t.deg)} y={Y0 + AMP + 34} class="tick">
+        {t.text}
+      </text>
+    </g>
+  ))}
+  <path d={wave(0)} class="wave a" />
+  <path d={wave(90)} class="wave b" />
+
+  <path d={`M${x(90)} ${y(1)} V${BRACKET}`} class="guide" />
+  <path d={`M${x(180)} ${y(1)} V${BRACKET}`} class="guide" />
+  <path d={`M${x(90)} ${BRACKET} H${x(180)}`} class="bracket" />
+  <text x={(x(90) + x(180)) / 2} y={BRACKET - 8} class="lbl">
+    90° = 4,17 ms
+  </text>
+
+  <text x={x(30)} y={y(0.5) - 12} class="name a">
+    A
+  </text>
+  <text x={x(120)} y={y(0.5) + 26} class="name b">
+    B
+  </text>
+  <text x={X1} y={Y0 + AMP + 34} class="tick end">
+    tempo
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .wave {
+    stroke-width: 3;
+  }
+  .wave.a {
+    stroke: var(--copper);
+  }
+  .wave.b {
+    stroke: var(--accent);
+  }
+  .guide {
+    stroke: var(--border-strong);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+  }
+  .bracket {
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .lbl {
+    font-weight: 700;
+  }
+  .tick {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .name {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .name.a {
+    fill: var(--copper);
+  }
+  .name.b {
+    fill: var(--accent);
+  }
+</style>

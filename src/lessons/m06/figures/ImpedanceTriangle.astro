@@ -1,0 +1,107 @@
+---
+/*
+ * 06.4: impedance triangle of a motor winding (teaching model of lesson
+ * 16.2): R = 30 Ω, X_L = 2π·60·0,066 ≈ 24,9 Ω, Z ≈ 39 Ω, φ ≈ 39,7°.
+ */
+const R = 30;
+const X = 2 * Math.PI * 60 * 0.066;
+const Z = Math.hypot(R, X);
+const PHI = (Math.atan(X / R) * 180) / Math.PI;
+const K = 7; // px per ohm
+const OX = 56;
+const OY = 206;
+const RX = OX + R * K;
+const TY = OY - X * K;
+const fmt = (v: number) => v.toFixed(1).replace('.', ',');
+
+const ARC = 46;
+const arcEnd = {
+  x: OX + ARC * Math.cos((PHI * Math.PI) / 180),
+  y: OY - ARC * Math.sin((PHI * Math.PI) / 180),
+};
+const mid = (PHI / 2) * (Math.PI / 180);
+---
+
+<svg viewBox="0 0 420 240" width="420" height="240" class="fig" aria-hidden="true">
+  <path d={`M${OX} ${OY} H${RX}`} class="r" />
+  <path d={`M${RX} ${OY} V${TY}`} class="x" />
+  <path d={`M${OX} ${OY} L${RX} ${TY}`} class="z" />
+  <path d={`M${RX - 12} ${OY} V${OY - 12} H${RX}`} class="guide" />
+  <path d={`M${OX + ARC} ${OY} A${ARC} ${ARC} 0 0 0 ${arcEnd.x} ${arcEnd.y}`} class="guide" />
+
+  <text x={(OX + RX) / 2} y={OY + 26} class="lbl r-t">
+    resistência R = 30 Ω
+  </text>
+  <text x={RX + 12} y={(OY + TY) / 2} class="lbl x-t start">
+    reatância
+  </text>
+  <text x={RX + 12} y={(OY + TY) / 2 + 18} class="lbl x-t start">
+    X = {fmt(X)} Ω
+  </text>
+  <text x={(OX + RX) / 2 - 18} y={(OY + TY) / 2 - 16} class="lbl z-t end">
+    impedância
+  </text>
+  <text x={(OX + RX) / 2 - 18} y={(OY + TY) / 2 + 2} class="lbl z-t end">
+    Z = {fmt(Z)} Ω
+  </text>
+  <text
+    x={OX + (ARC + 14) * Math.cos(mid)}
+    y={OY - (ARC + 14) * Math.sin(mid) + 5}
+    class="ang start"
+  >
+    φ = {fmt(PHI)}°
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .r {
+    stroke: var(--copper);
+    stroke-width: 4;
+  }
+  .x {
+    stroke: var(--accent);
+    stroke-width: 4;
+  }
+  .z {
+    stroke: var(--success);
+    stroke-width: 4;
+  }
+  .guide {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 15px;
+    text-anchor: middle;
+  }
+  .lbl {
+    font-weight: 650;
+  }
+  .ang {
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .r-t {
+    fill: var(--copper);
+  }
+  .x-t {
+    fill: var(--accent);
+  }
+  .z-t {
+    fill: var(--success);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

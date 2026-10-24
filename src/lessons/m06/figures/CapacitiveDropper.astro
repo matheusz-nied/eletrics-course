@@ -1,0 +1,155 @@
+---
+/*
+ * 06.4: the capacitive dropper of a cheap LED bulb. A capacitor in series
+ * with the mains limits the current by its reactance, a resistor across it
+ * discharges it, a bridge rectifies and an electrolytic smooths the current
+ * of the LED string. Nothing isolates the LEDs from the mains.
+ */
+const leds = [128, 154, 180];
+---
+
+<svg viewBox="0 0 480 254" width="480" height="254" class="fig" aria-hidden="true">
+  <rect x="64" y="10" width="408" height="236" rx="10" class="zone" />
+  <text x="460" y="238" class="warn end">
+    toda a placa fica ligada à rede
+  </text>
+
+  <!-- terminals -->
+  <circle cx="26" cy="60" r="5" class="term" />
+  <circle cx="26" cy="190" r="5" class="term" />
+  <text x="26" y="40" class="lbl">
+    F
+  </text>
+  <text x="26" y="216" class="lbl">
+    N
+  </text>
+
+  <!-- phase through the dropper capacitor, with the discharge resistor across it -->
+  <path d="M31 60 H120 M132 60 H250 V82" class="wire" />
+  <path d="M120 46 V74 M132 46 V74" class="plate" />
+  <path d="M96 60 V30 H108 M144 30 H156 V60" class="wire" />
+  <rect x="108" y="23" width="36" height="14" rx="2" class="part" />
+  <text x="126" y="96" class="small">
+    capacitor X2
+  </text>
+  <text x="126" y="112" class="small">
+    0,33 µF
+  </text>
+  <text x="162" y="34" class="small start">
+    resistor de descarga
+  </text>
+
+  <!-- neutral -->
+  <path d="M31 190 H184 A6 6 0 0 1 196 190 H250 V168" class="wire" />
+
+  <!-- bridge -->
+  <path d="M250 82 L293 125 L250 168 L207 125 Z" class="part" />
+  <text x="250" y="130" class="small">
+    ponte
+  </text>
+  <text x="262" y="100" class="sign">
+    ~
+  </text>
+  <text x="262" y="160" class="sign">
+    ~
+  </text>
+  <text x="303" y="118" class="sign">
+    +
+  </text>
+  <text x="197" y="118" class="sign">
+    −
+  </text>
+
+  <!-- DC side: electrolytic and LED string -->
+  <path d="M293 125 H420 V118" class="wire" />
+  <path d="M207 125 H190 V214 H420 V204" class="wire" />
+  <path d="M340 125 V166 M340 176 V214" class="wire" />
+  <path d="M326 166 H354" class="plate" />
+  <path d="M326 176 H354" class="plate neg" />
+  <text x="360" y="162" class="small start">
+    +
+  </text>
+  <text x="340" y="200" class="small start" dx="14">
+    filtro
+  </text>
+  {leds.map((y) => (
+    <g>
+      <path d={`M410 ${y - 8} H430 L420 ${y + 6} Z`} class="led" />
+      <path d={`M410 ${y + 6} H430`} class="plate" />
+    </g>
+  ))}
+  <path d="M420 118 V120 M420 134 V146 M420 160 V172 M420 186 V204" class="wire" />
+  <text x="446" y="160" class="small start">
+    LEDs
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .zone {
+    stroke: var(--danger);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 5;
+    fill: var(--danger-soft);
+    opacity: 0.8;
+  }
+  .wire {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .plate {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .plate.neg {
+    stroke: var(--fg-muted);
+  }
+  .part {
+    stroke: var(--fg);
+    stroke-width: 2;
+    fill: var(--surface);
+  }
+  .term {
+    stroke: var(--fg);
+    stroke-width: 2;
+    fill: var(--bg);
+  }
+  .led {
+    stroke: var(--fg);
+    stroke-width: 1.5;
+    fill: var(--accent-soft);
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .lbl {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .small {
+    font-size: 13px;
+  }
+  .sign {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .warn {
+    fill: var(--danger);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

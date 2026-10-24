@@ -1,0 +1,115 @@
+---
+/*
+ * 06.2: the four numbers of the 127 V outlet's sine. Peak 179,6 V,
+ * peak-to-peak 359,2 V, RMS 127 V (the dashed line), average over a cycle 0 V.
+ */
+const X0 = 70;
+const X1 = 500;
+const Y0 = 150;
+const AMP = 110;
+const y = (v: number) => Y0 - (AMP * v) / 179.6;
+const N = 400;
+const wave = Array.from({ length: N + 1 }, (_, i) => {
+  const px = X0 + ((X1 - X0) * i) / N;
+  const v = 179.6 * Math.sin((2 * Math.PI * 2 * i) / N);
+  return `${i === 0 ? 'M' : 'L'}${px.toFixed(1)} ${y(v).toFixed(1)}`;
+}).join(' ');
+const XA = 540;
+---
+
+<svg viewBox="0 0 640 300" width="640" height="300" class="fig" aria-hidden="true">
+  <path d={`M${X0} ${Y0}H${X1 + 10}`} class="axis" />
+  <path d={`M${X0} ${y(179.6) - 12}V${y(-179.6) + 12}`} class="axis" />
+  <path d={`M${X0} ${y(179.6)}H${XA}`} class="guide" />
+  <path d={`M${X0} ${y(-179.6)}H${XA}`} class="guide" />
+  <path d={`M${X0} ${y(127)}H${X1}`} class="rms" />
+  <path d={wave} class="wave" />
+
+  <text x={X0 - 8} y={y(179.6) + 5} class="lbl end">
+    179,6 V
+  </text>
+  <text x={X0 - 8} y={y(127) + 5} class="lbl end rms-t">
+    127 V
+  </text>
+  <text x={X0 - 8} y={Y0 + 5} class="lbl end">
+    0
+  </text>
+  <text x={X0 - 8} y={y(-179.6) + 5} class="lbl end">
+    −179,6 V
+  </text>
+
+  <text x={X0 + 54} y={y(179.6) - 8} class="note">
+    pico
+  </text>
+  <text x={175} y={y(127) - 8} class="note start rms-t">
+    valor eficaz
+  </text>
+  <text x={X0} y={y(-179.6) + 32} class="note start">
+    média de um ciclo inteiro: 0 V
+  </text>
+
+  <path d={`M${XA} ${y(179.6) + 6}V${y(-179.6) - 6}`} class="dim" />
+  <path
+    d={`M${XA - 6} ${y(179.6) + 12}L${XA} ${y(179.6) + 2}L${XA + 6} ${y(179.6) + 12}M${XA - 6} ${y(-179.6) - 12}L${XA} ${y(-179.6) - 2}L${XA + 6} ${y(-179.6) - 12}`}
+    class="dim"
+  />
+  <text x={XA + 10} y={Y0 - 4} class="lbl start">
+    pico a pico
+  </text>
+  <text x={XA + 10} y={Y0 + 14} class="lbl start">
+    359,2 V
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .guide {
+    stroke: var(--border-strong);
+    stroke-width: 1;
+    stroke-dasharray: 2 4;
+  }
+  .rms {
+    stroke: var(--warning);
+    stroke-width: 2;
+    stroke-dasharray: 7 5;
+  }
+  .wave {
+    stroke: var(--accent);
+    stroke-width: 3;
+  }
+  .dim {
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .rms-t {
+    fill: var(--fg);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>
