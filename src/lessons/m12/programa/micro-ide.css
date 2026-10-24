@@ -1,0 +1,501 @@
+/*
+ * Microcontroller widget (MicroIDE.tsx), on top of the shared .lw card
+ * (m00/widget.css). Two columns when the card is wide, one on phones.
+ * Colors come from the site's variables, so dark mode follows.
+ */
+
+.mide {
+  container-type: inline-size;
+}
+
+.mide__grid {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+@container (min-width: 50rem) {
+  .mide__grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.mide__col {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.mide__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mide__selects {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+}
+
+.mide__code-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mide__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.875rem;
+  letter-spacing: 0;
+  text-decoration: underline;
+  text-transform: none;
+}
+
+/* Editor */
+
+.mide__code {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.625rem;
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 40rem) {
+  /* 16 px keeps phones from zooming in when the editor gets focus. */
+  .mide__code {
+    font-size: 16px;
+  }
+}
+
+.mide__code:focus-within {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.mide__gutter {
+  flex: none;
+  overflow: hidden;
+  padding: 0.75rem 0.5rem 0.75rem 0.6rem;
+  border-right: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--fg-subtle);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  user-select: none;
+  height: 22.5em;
+}
+
+.mide__ln {
+  display: block;
+  min-width: 1.6em;
+  height: 1.5em;
+}
+
+.mide__ln--erro {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.mide__area {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.mide__band {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 1.5em;
+  border-left: 3px solid var(--danger);
+  background: var(--danger-soft);
+  pointer-events: none;
+}
+
+.mide__textarea {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 22.5em;
+  min-height: 9em;
+  margin: 0;
+  padding: 0.75rem;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  line-height: 1.5;
+  tab-size: 2;
+  white-space: pre;
+  overflow: auto;
+  resize: none;
+  outline: none;
+}
+
+.mide__mod {
+  color: var(--warning);
+}
+
+/* Board and controls */
+
+.mide__board {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  padding: 0.5rem;
+}
+
+.pc {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+  user-select: none;
+  touch-action: none;
+}
+
+.pc text {
+  font-size: 14px;
+}
+
+.pc .pc-small {
+  font-size: 12px;
+  fill: var(--fg-muted);
+}
+
+.pc-label {
+  fill: var(--fg);
+  font-weight: 600;
+}
+
+.pc-board {
+  fill: #146a73;
+  stroke: #0b4a51;
+  stroke-width: 2;
+}
+
+.pc .pc-board-text {
+  fill: #e9f6f7;
+  font-weight: 600;
+}
+
+.pc .pc-board-text.pc-small {
+  fill: #cfe8ea;
+}
+
+.pc-strong {
+  letter-spacing: 0.02em;
+}
+
+.pc-usb {
+  fill: #b8bec6;
+  stroke: #7d848d;
+}
+
+.pc-jack {
+  fill: #2a2a2a;
+}
+
+.pc-reset {
+  fill: #c62828;
+  stroke: #7a1515;
+  stroke-width: 2;
+}
+
+.pc-chip {
+  fill: #1b1b1b;
+}
+
+.pc-leg {
+  fill: #c9ced4;
+}
+
+.pc .pc-chip-text {
+  fill: #d7d7d7;
+  font-size: 11px;
+}
+
+.pc-pin {
+  fill: #111;
+  stroke: #c9ced4;
+  stroke-width: 1.5;
+}
+
+.pc-wire,
+.pc-wire path,
+.pc-gnd path,
+.pc-waves path,
+.pc-light path {
+  fill: none;
+  stroke: var(--fg-muted);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.pc-wire circle {
+  fill: var(--surface);
+  stroke: var(--fg-muted);
+  stroke-width: 2;
+}
+
+.pc-gnd path {
+  stroke-width: 2;
+}
+
+.pc-res {
+  fill: #e6cfa1;
+  stroke: #a88b55;
+}
+
+.pc-relay {
+  fill: #1f4fa3;
+  stroke: #143670;
+}
+
+.pc .pc-relay-text {
+  fill: #fff;
+  font-weight: 600;
+}
+
+.pc-lamp {
+  fill: var(--surface-2);
+  stroke: var(--fg-muted);
+  stroke-width: 2;
+}
+
+.pc-lamp--on {
+  fill: #ffe066;
+  stroke: #b38600;
+}
+
+.pc-filament {
+  fill: none;
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+
+.pc-button {
+  cursor: pointer;
+}
+
+.pc-cap {
+  fill: var(--accent);
+}
+
+.pc-pot {
+  fill: #2c2c2c;
+  stroke: #777;
+  stroke-width: 2;
+}
+
+.pc-knob {
+  stroke: #f2f2f2;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.pc-module {
+  fill: var(--surface-2);
+  stroke: var(--border-strong);
+}
+
+.pc-ldr {
+  fill: #e8c48a;
+  stroke: #8b6a37;
+}
+
+.pc-ldr-line {
+  fill: none;
+  stroke: #6b2a2a;
+  stroke-width: 1.5;
+}
+
+.pc-light path {
+  stroke: var(--warning);
+}
+
+.pc-waves path {
+  stroke: var(--accent);
+  animation: mide-wave 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes mide-wave {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pc-waves path {
+    animation: none;
+  }
+}
+
+.mide__inputs {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mide__hold {
+  min-height: 3rem;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.mide__hold[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  transform: translateY(1px);
+}
+
+.mide__readouts {
+  display: grid;
+  gap: 0.35rem 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  font-size: 0.875rem;
+}
+
+@container (min-width: 32rem) {
+  .mide__readouts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.mide__readouts dt {
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mide__readouts dd {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.mide__legend {
+  display: grid;
+  gap: 0.2rem;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+
+.mide__legend b {
+  color: var(--fg);
+}
+
+/* Status and serial monitor */
+
+.mide__bottom {
+  display: grid;
+  gap: 1rem;
+  padding: 0 1.25rem 1.25rem;
+}
+
+.mide__status-body {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.mide__status-body p {
+  overflow-wrap: anywhere;
+}
+
+.mide__avisos {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.mide__avisos li {
+  padding-left: 0.6rem;
+  border-left: 3px solid var(--warning);
+  overflow-wrap: anywhere;
+}
+
+.mide__info {
+  padding-left: 0.6rem;
+  border-left: 3px solid var(--info);
+}
+
+.mide__monitor {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.mide__monitor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mide__small {
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.mide .mide__serial {
+  height: 10rem;
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  overflow: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: 0.625rem;
+  background: var(--surface-2);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  white-space: pre;
+}
+
+.mide__serial:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mide__empty {
+  color: var(--fg-subtle);
+  font-family: var(--font-sans);
+  white-space: normal;
+}
