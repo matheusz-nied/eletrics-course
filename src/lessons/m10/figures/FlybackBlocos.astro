@@ -1,0 +1,285 @@
+---
+/*
+ * 10.2: the blocks of a phone charger (flyback). A dashed line, the
+ * isolation barrier, splits it in two. Mains side, in the danger colours:
+ * outlet, fuse, bridge, input capacitor (180 V or 311 V) and the switch on
+ * the transformer's primary, driven by the controller. Output side: the
+ * secondary, a diode, the output capacitor and the 5 V USB connector. The
+ * transformer and the optocoupler are the only things that cross the
+ * barrier; the optocoupler carries the feedback back to the controller.
+ */
+const BAR = 400;
+const ROW = 74;
+const RH = 44;
+const CT = 164;
+const CB = 236;
+
+/** A winding drawn as bumps on a vertical line, bulging to `side`. */
+function coil(x: number, side: 1 | -1) {
+  const turns = 6;
+  const h = (CB - CT) / turns;
+  let d = `M${x} ${CT}`;
+  for (let k = 0; k < turns; k++) d += `a${h / 2} ${h / 2} 0 0 ${side === 1 ? 1 : 0} 0 ${h}`;
+  return d;
+}
+
+const arrowR = (x1: number, x2: number, y: number) =>
+  `M${x1} ${y}H${x2 - 1}M${x2 - 8} ${y - 5}L${x2} ${y}L${x2 - 8} ${y + 5}`;
+
+// The switch (an N-channel MOSFET): drain up to the primary, source to the primary's negative.
+const MX = 366;
+const GATE = 282;
+---
+
+<svg viewBox="0 0 600 404" width="600" height="404" class="fig" aria-hidden="true">
+  <!-- The two sides and the barrier -->
+  <rect x="6" y="36" width="382" height="350" rx="8" class="zone danger" />
+  <rect x="412" y="36" width="182" height="350" rx="8" class="zone safe" />
+  <path d={`M${BAR} 28V392`} class="barrier" />
+  <text x={BAR} y="20" class="head halo">
+    barreira de isolação
+  </text>
+  <text x="20" y="58" class="side danger">
+    lado da rede: perigo
+  </text>
+  <text x="424" y="58" class="side safe">
+    lado da saída: seguro
+  </text>
+
+  <!-- Mains side -->
+  <rect x="16" y={ROW} width="84" height={RH} rx="6" class="block" />
+  <text x="58" y={ROW + 19} class="name">
+    tomada
+  </text>
+  <text x="58" y={ROW + 35} class="small">
+    127 ou 220 V
+  </text>
+  <rect x="114" y={ROW} width="76" height={RH} rx="6" class="block" />
+  <text x="152" y={ROW + 27} class="name">
+    fusível
+  </text>
+  <rect x="206" y={ROW} width="96" height={RH} rx="6" class="block" />
+  <text x="254" y={ROW + 19} class="name">
+    ponte
+  </text>
+  <text x="254" y={ROW + 35} class="name">
+    retificadora
+  </text>
+  <path d={arrowR(100, 114, ROW + RH / 2)} class="flow" />
+  <path d={arrowR(190, 206, ROW + RH / 2)} class="flow" />
+  <path d={`M254 ${ROW + RH}V145M249 137L254 145L259 137`} class="flow" />
+
+  <rect x="206" y="146" width="96" height="52" rx="6" class="block" />
+  <text x="254" y="167" class="name">
+    capacitor
+  </text>
+  <text x="254" y="185" class="small">
+    180 V ou 311 V
+  </text>
+
+  <!-- Primary, core, secondary -->
+  <path d={`M302 ${CT}H376`} class="wire" />
+  <path d={coil(376, -1)} class="wire" />
+  <path d={`M393 ${CT - 8}V${CB + 8}M407 ${CT - 8}V${CB + 8}`} class="core" />
+  <path d={coil(424, 1)} class="wire" />
+  <text x={BAR} y="134" class="name halo">
+    transformador
+  </text>
+  <text x={BAR} y="150" class="small halo">
+    de ferrite
+  </text>
+  <text x="358" y="204" class="small end">
+    primário
+  </text>
+
+  <!-- Switch -->
+  <path
+    d={`M376 ${CB}V${GATE - 14}H${MX}M${MX} ${GATE}H376V${GATE + 14}M${MX} ${GATE + 14}H376V316`}
+    class="wire"
+  />
+  <path
+    d={`M${MX} ${GATE - 20}V${GATE - 8}M${MX} ${GATE - 5}V${GATE + 5}M${MX} ${GATE + 8}V${GATE + 20}`}
+    class="channel"
+  />
+  <path d={`M${MX - 8} ${GATE - 16}V${GATE + 16}`} class="gate" />
+  <path d={`M${MX + 2} ${GATE}L${MX + 10} ${GATE - 4}V${GATE + 4}Z`} class="fill" />
+  <path d="M365 316H387M369 321H383M373 326H379" class="wire thin" />
+  <text x="352" y="258" class="small end">
+    chave
+  </text>
+
+  <rect x="206" y="262" width="104" height="42" rx="6" class="block" />
+  <text x="258" y="288" class="name">
+    controlador
+  </text>
+  <path d={arrowR(310, MX - 8, GATE)} class="flow" />
+
+  <!-- Output side -->
+  <path d={`M424 ${CT}H448M468 ${CT}H532M424 ${CB}H532`} class="wire" />
+  <path d={`M448 ${CT - 11}L448 ${CT + 11}L468 ${CT}Z`} class="fill" />
+  <path d={`M468 ${CT - 11}V${CT + 11}`} class="bar" />
+  <text x="458" y={CT - 18} class="small">
+    diodo
+  </text>
+  <path d={`M500 ${CT}V196M500 204V${CB}`} class="wire" />
+  <path d="M487 196H513M487 204H513" class="plates" />
+  <circle cx="500" cy={CT} r="3.5" class="fill" />
+  <circle cx="500" cy={CB} r="3.5" class="fill" />
+  <text x="418" y="258" class="small start">
+    secundário
+  </text>
+  <text x="506" y="150" class="small">
+    capacitor
+  </text>
+  <rect x="532" y="150" width="54" height="96" rx="6" class="block safe-block" />
+  <text x="559" y="194" class="name">
+    USB
+  </text>
+  <text x="559" y="212" class="name">
+    5 V
+  </text>
+
+  <!-- Feedback through the optocoupler -->
+  <rect x="376" y="340" width="48" height="34" rx="4" class="opto" />
+  <path d="M410 348L418 348L414 356Z" class="fill" />
+  <path d="M410 357H418" class="wire thin" />
+  <path d="M406 362H390M394 359L389 362L394 365" class="light" />
+  <path d="M386 348V368" class="bar" />
+  <path d="M559 246V357H425" class="flow fb" />
+  <path d="M433 352L425 357L433 362" class="flow fb-head" />
+  <path d="M375 357H258V305" class="flow fb" />
+  <path d="M253 313L258 305L263 313" class="flow fb-head" />
+  <text x="316" y="350" class="small fbtext">
+    realimentação
+  </text>
+  <text x={BAR} y="398" class="small halo">
+    optoacoplador
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .zone.danger {
+    fill: var(--danger-soft);
+    stroke: var(--danger-border);
+  }
+  .zone.safe {
+    fill: var(--success-soft);
+    stroke: var(--success-border);
+  }
+  .barrier {
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+    stroke-dasharray: 7 5;
+  }
+  .halo {
+    paint-order: stroke;
+    stroke: var(--bg);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+  }
+  .head {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .side {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .side.danger {
+    fill: var(--danger);
+  }
+  .side.safe {
+    fill: var(--success);
+  }
+  .block {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .opto {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .name {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .flow {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .flow.fb {
+    stroke: var(--accent);
+    stroke-dasharray: 6 4;
+  }
+  .flow.fb-head {
+    stroke: var(--accent);
+  }
+  .fbtext {
+    fill: var(--accent);
+    font-weight: 600;
+  }
+  .wire {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .wire.thin {
+    stroke-width: 1.6;
+  }
+  .core {
+    stroke: var(--fg-subtle);
+    stroke-width: 4;
+  }
+  .channel {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .gate {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .fill {
+    fill: var(--fg);
+  }
+  .bar {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .plates {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .light {
+    fill: none;
+    stroke: var(--danger);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>

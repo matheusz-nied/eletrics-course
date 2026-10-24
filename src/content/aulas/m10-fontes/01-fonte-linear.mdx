@@ -1,0 +1,302 @@
+---
+titulo: Fonte linear completa
+modulo: m10-fontes
+ordem: 1
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Montar uma fonte linear completa, do transformador ao regulador, e dizer o que cada etapa faz
+  - Usar os reguladores da família 78xx e o LM317, com a pinagem e os capacitores certos
+  - Verificar se sobra tensão suficiente para o regulador no vale da ondulação
+  - Calcular a potência que o regulador transforma em calor e escolher o dissipador
+  - Ajustar a saída de um LM317 com dois resistores
+prerequisitos:
+  - m09-semicondutores/03-retificadores
+  - m09-semicondutores/05-diodo-zener
+tags:
+  [
+    fonte linear,
+    regulador de tensão,
+    '7805',
+    '7812',
+    LM317,
+    dissipador,
+    dropout,
+    resistência térmica,
+    fonte de 12 V,
+  ]
+seguranca: rede
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import FonteLinearBlocos from '../../../lessons/m10/figures/FonteLinearBlocos.astro';
+import ReguladorInterno from '../../../lessons/m10/figures/ReguladorInterno.astro';
+import ReguladorPinos from '../../../lessons/m10/figures/ReguladorPinos.astro';
+
+Na aula de retificadores, a fonte de 12 V que você montou media quase 17 V sem carga, descia para menos de 15 V com meio ampère e ainda tremia com uma ondulação de 120 Hz. Um aparelho de verdade, como a placa de um alarme ou um rádio, quer 12 V e ponto, com pouca ou muita carga, com a tomada alta ou baixa. Falta a última peça da fonte: um componente de três pernas que custa poucos reais e corta tudo o que passa de 12 V.
+
+Nesta aula você completa a fonte linear, vê onde ela deixa de funcionar e descobre por que esse componente esquenta tanto.
+
+## A fonte completa
+
+Uma fonte linear tem quatro etapas, nesta ordem. As três primeiras você já conhece: o <Term id="transformador">transformador</Term> baixa a tensão da tomada e isola o circuito da rede; a <Term id="ponte-retificadora">ponte retificadora</Term> faz a corrente andar num sentido só; o <Term id="filtro-capacitivo">capacitor de filtro</Term> alisa os pulsos. A quarta é o <Term id="regulador-de-tensao">regulador de tensão</Term>, que pega a tensão alta e ondulada do filtro e entrega uma tensão fixa.
+
+<Figure caption="Figura 1. As quatro etapas de uma fonte linear de 12 V e a tensão depois de cada uma. O regulador recebe a tensão do filtro, com ondulação, e entrega 12 V lisos, desde que a entrada fique sempre uns 2 V acima da saída." alt="Diagrama de blocos da esquerda para a direita: tomada de 127 V, transformador, ponte retificadora, capacitor de filtro, regulador e carga. Embaixo de cada bloco, um pequeno gráfico da tensão: senoide de 127 V, senoide menor de 15 V, pulsos todos para cima, tensão quase lisa com uma ondulação perto de 18 V e, no fim, uma linha reta em 12 V. Uma faixa entre o vale da ondulação e a linha de 12 V está marcada como folga mínima de 2 V.">
+  <FonteLinearBlocos />
+</Figure>
+
+A fonte se chama **linear** por causa do jeito como o regulador trabalha: ele fica o tempo todo conduzindo, ajustando quanto deixa passar. Na próxima aula, você vai ver as fontes **chaveadas**, que ligam e desligam milhares de vezes por segundo.
+
+## O regulador: um resistor que se ajusta sozinho
+
+Imagine um resistor entre o capacitor de filtro e a carga, que muda de valor sozinho, milhares de vezes por segundo, para que sobre sempre 12 V na carga. Quando a entrada sobe, ele aumenta; quando a carga pede mais corrente, ele diminui. É isso que um regulador linear faz.
+
+Por dentro, o "resistor" é um <Term id="transistor">transistor</Term> de potência, o **transistor de passagem**, por onde passa toda a corrente da carga. Quem o comanda é um pequeno amplificador que compara uma fração da saída com uma tensão de referência, feita com uma junção parecida com a do <LinkAula id="m09-semicondutores/05-diodo-zener">diodo zener</LinkAula>. Se a saída fica abaixo do que devia, o amplificador abre mais o transistor; se fica acima, fecha. A correção é contínua e rápida, por isso a ondulação de 120 Hz da entrada quase não chega à saída.
+
+<Figure caption="Figura 2. O regulador por dentro, simplificado. O amplificador de erro compara a saída (dividida por R1 e R2) com a referência e ajusta o transistor de passagem. A tensão que sobra entre a entrada e a saída fica no transistor." alt="Esquema com a entrada à esquerda e a saída à direita, ligadas por um transistor NPN no alto, o transistor de passagem. Da saída, dois resistores em série, R1 e R2, descem até o terra; o ponto entre eles vai à entrada negativa de um amplificador triangular. A entrada positiva do amplificador recebe uma referência, desenhada como um zener ligado ao terra. A saída do amplificador vai à base do transistor. Uma seta sobre o transistor indica a tensão que sobra, de entrada menos saída, que vira calor.">
+  <ReguladorInterno />
+</Figure>
+
+A analogia da torneira com boia ajuda: o regulador é uma torneira que abre e fecha sozinha para manter o nível da caixa sempre igual. Ela falha num ponto importante: a torneira não esquenta, e o regulador esquenta. A pressão que "sobra" antes da torneira, no caso elétrico, vira calor no transistor.
+
+### O que entra, o que sai e o que fica
+
+Três contas descrevem um regulador linear:
+
+$$
+V_\text{saída} = V_\text{nominal} \quad \text{desde que} \quad V_\text{entrada} \geq V_\text{saída} + V_\text{folga}
+$$
+
+em que $V_\text{folga}$ é a menor diferença entre entrada e saída que o regulador precisa para funcionar (em inglês, *dropout voltage*). Nos reguladores da família 78xx, ela fica perto de 2 V (típico). Abaixo disso, o transistor já está todo aberto, não tem mais o que ajustar, e a saída acompanha a entrada, com ondulação e tudo.
+
+$$
+I_\text{entrada} \approx I_\text{saída} + I_q
+$$
+
+A corrente de entrada é praticamente igual à de saída: o regulador não converte tensão em corrente, só corta o excesso. $I_q$, a corrente quiescente, é o consumo do circuito interno, uns poucos miliampères num 78xx.
+
+$$
+P = (V_\text{entrada} - V_\text{saída}) \cdot I_\text{saída}
+$$
+
+$P$ é a potência que vira calor no regulador, em watts. Com 18 V na entrada, 12 V na saída e 0,5 A, são $(18 - 12) \times 0{,}5 = 3\ \text{W}$, perto do que dissipa um resistor de 3 W trabalhando no limite. Por isso a eficiência de uma fonte linear é baixa: a carga recebe $12 \times 0{,}5 = 6\ \text{W}$ e o regulador desperdiça 3 W, um terço do total.
+
+## Os reguladores 78xx e o LM317
+
+A família mais comum é a **78xx**, em que os dois últimos dígitos dão a tensão: 7805 (5 V), 7809 (9 V), 7812 (12 V), 7815 (15 V). Existe também a 79xx, para tensões negativas. No encapsulamento TO-220, eles aguentam cerca de 1 A com dissipador. Todos têm proteção contra curto (limitam a corrente) e **proteção térmica**: se o chip passa de uns 150 °C, o regulador desliga a saída sozinho e só volta quando esfria.
+
+Os fabricantes recomendam dois capacitores pequenos, bem perto dos terminais: 330 nF na entrada e 100 nF na saída (valores típicos das folhas de dados). Eles evitam que o regulador oscile por causa dos fios. Na prática, muita fonte ainda põe um eletrolítico de uns 100 µF na saída, para segurar picos rápidos de consumo.
+
+<Figure caption="Figura 3. A pinagem, vista de frente (com o código virado para você e os terminais para baixo), e o circuito básico de cada regulador. No 78xx, o terminal do meio e a aba são o terra; no LM317, o do meio e a aba são a saída." alt="Duas partes. À esquerda, um regulador 7812 de frente, com os terminais numerados 1, 2 e 3 da esquerda para a direita: entrada, terra e saída; embaixo, o circuito com um capacitor de 330 nF da entrada ao terra e um de 100 nF da saída ao terra. À direita, um LM317 de frente com os terminais ajuste, saída e entrada; embaixo, o circuito com R1 de 240 ohms entre a saída e o ajuste, e R2 do ajuste ao terra.">
+  <ReguladorPinos />
+</Figure>
+
+O **LM317** é o regulador ajustável. Ele mantém sempre 1,25 V entre a saída e o terminal de ajuste (ADJ), e quem escolhe a tensão de saída são dois resistores. A corrente que passa por R1, de 240 Ω, desce por R2 até o negativo; quanto maior R2, mais tensão sobra entre o ajuste e o terra, e mais alta fica a saída:
+
+$$
+V_\text{saída} = 1{,}25\ \text{V} \cdot \left(1 + \frac{R_2}{R_1}\right) + I_\text{adj} \cdot R_2
+$$
+
+O segundo termo é a corrente que sai do próprio terminal de ajuste, uns 50 µA, multiplicada por R2. Ela soma alguns centésimos de volt e costuma ser desprezada.
+
+<Simulation circuit="m10/lm317" />
+
+1. Leia a tensão em R1. Mude R2 e confira que ela fica sempre em 1,25 V.
+2. Ajuste R2 para cerca de 720 Ω. Quanto dá a saída? Confira com a fórmula.
+3. Leve R2 para 1,5 kΩ e depois para o mínimo. Qual é a menor tensão que o LM317 consegue entregar?
+
+Com 720 Ω, a fórmula dá $1{,}25 \times (1 + 720/240) = 5{,}0\ \text{V}$, e a simulação mostra 5,04 V, por causa dos 50 µA do ajuste. Com 1,5 kΩ, a saída vai a 9,1 V. Com R2 no mínimo, a saída fica em 1,3 V: o LM317 não desce abaixo de 1,25 V. Perto do máximo do ajuste, com a entrada de 15 V, a saída passa de 12,8 V e a folga começa a faltar.
+
+## A fonte inteira na simulação
+
+Agora as quatro etapas juntas: a fonte com ponte da aula de retificadores, com um 7812 depois do capacitor de filtro. O canal 1 do osciloscópio mostra a entrada do regulador (o capacitor de filtro); o canal 2, a saída.
+
+<Simulation circuit="m10/fonte-linear" instruments={['osciloscopio', 'multimetro']} />
+
+1. Aperte o play e espere alguns ciclos. Com o transformador de 12 V, 2.200 µF e 0,5 A, a saída fica lisa? Leia o mínimo do canal 1 e o pico a pico do canal 2.
+2. Escolha a carga de 0,25 A. O que muda no canal 2?
+3. Volte para 0,5 A e troque o transformador para 15 V. Clique no regulador e veja a potência dissipada.
+4. Com o transformador de 15 V, ponha a carga de 1 A. Depois troque o capacitor para 1.000 µF.
+
+Com o transformador de 12 V e 0,5 A, a entrada do regulador ondula entre 13,2 V e 14,5 V. No vale, sobram só 1,2 V acima dos 12 V, menos que a folga de que o 7812 precisa, e a saída afunda até 11,3 V a cada 1/120 de segundo: o canal 2 mostra uma ondulação de 0,7 V de pico a pico. Com 0,25 A, a ondulação da entrada diminui, o vale sobe para 14,0 V e a saída fica lisa em 12,0 V. Nem um capacitor de 4.700 µF salva o transformador de 12 V com 0,5 A: o vale para em 13,5 V.
+
+Com o transformador de 15 V, a entrada ondula entre 17,1 V e 18,5 V, a folga sobra e a saída fica em 12,0 V, sem ondulação visível. O preço aparece no regulador: cerca de 3 W de calor. Com 1 A, são quase 5 W, e com 1.000 µF o vale da entrada cai para 13,5 V e a ondulação volta a aparecer na saída.
+
+A lição é a regra prática de quem projeta fontes: **o vale da ondulação, com a tomada baixa e a carga máxima, precisa ficar acima da saída mais a folga**. E cada volt de folga a mais vira calor.
+
+## Calor: a parte que ninguém vê
+
+O regulador transforma em calor toda a potência que sobra. Para saber se ele aguenta, usa-se a **resistência térmica**, em °C/W: quantos graus a junção (o chip lá dentro) sobe acima do ar para cada watt dissipado.
+
+$$
+T_\text{junção} = T_\text{ar} + P \cdot R_\theta
+$$
+
+$T_\text{junção}$ é a temperatura do chip, $T_\text{ar}$ a do ar em volta, $P$ a potência dissipada e $R_\theta$ a resistência térmica total, do chip até o ar. Um TO-220 sem dissipador tem algo como 50 °C/W (típico). Com um <Term id="dissipador">dissipador</Term>, a resistência total é a soma da do encapsulamento (uns 5 °C/W, do chip à aba), da pasta térmica e da do próprio dissipador. Os 78xx funcionam até 125 °C na junção; acima de uns 150 °C, a proteção térmica desliga a saída.
+
+<Simulation circuit="m10/regulador-dissipacao" />
+
+1. Com 12 V na entrada, 0,5 A e sem dissipador, clique no regulador e acompanhe a potência e a temperatura. O que acontece depois de alguns segundos?
+2. Escolha o dissipador grande. Onde a temperatura se estabiliza?
+3. Volte para sem dissipador e baixe a entrada para 8 V.
+
+Com 12 V e 0,5 A, o 7805 dissipa $(12 - 5) \times 0{,}5 = 3{,}5\ \text{W}$, mais 0,06 W da corrente quiescente: 3,56 W. Sem dissipador, a conta dá $25 + 3{,}56 \times 50 \approx 200\ \text{°C}$, muito acima do limite. Em uns 15 segundos de simulação, a proteção térmica desliga a saída; o chip esfria, a saída volta, esquenta de novo e desliga outra vez. A saída fica piscando, e o aparelho ligado nela reinicia sem parar. Com o dissipador grande, de 8 °C/W no total, a temperatura para perto de 54 °C. Com 8 V na entrada, a potência cai para 1,5 W e, mesmo sem dissipador, a temperatura para perto de 100 °C: quente, mas dentro do limite. Diminuir a tensão que sobra é tão eficaz quanto pôr dissipador.
+
+Na simulação, o aquecimento foi acelerado para caber em menos de um minuto. Um regulador real leva alguns minutos para chegar à temperatura final, e é por isso que uma fonte mal projetada funciona no teste rápido e desliga meia hora depois.
+
+<Part3D
+  part="linear-psu-board"
+  props={{ output: 12, heatsink: true, powered: true }}
+  annotations
+  alt="Placa de fonte linear de 12 V vista de cima. Da esquerda para a direita: borne de entrada de 127 V e fusível de vidro, transformador de núcleo de ferro, ponte retificadora preta, capacitor eletrolítico grande, regulador 7812 parafusado num dissipador de alumínio com aletas, capacitores pequenos perto do regulador, LED verde aceso e o borne de saída de 12 V."
+  caption="Uma fonte linear de 12 V numa placa: as quatro etapas em fila, da entrada de 127 V à saída de 12 V. O regulador fica no dissipador."
+/>
+
+## Exemplo resolvido: a fonte de 12 V e 0,5 A
+
+Você vai montar uma fonte de 12 V para uma placa que puxa até 0,5 A, numa caixa fechada onde o ar chega a 40 °C. A tomada pode variar 10 % para cima ou para baixo. Escolha o transformador, o capacitor e o dissipador.
+
+**Passo 1: a tensão mínima na entrada do regulador.** O 7812 precisa de 12 V mais uns 2 V de folga: 14 V no vale da ondulação.
+
+**Passo 2: o capacitor.** Com a fórmula da aula de retificadores, 2.200 µF e 0,5 A dão uma ondulação de
+
+$$
+\Delta V \approx \frac{I}{f \cdot C} = \frac{0{,}5}{120 \times 0{,}0022} \approx 1{,}9\ \text{V}
+$$
+
+**Passo 3: o transformador.** O pico depois da ponte precisa ser pelo menos o vale mais a ondulação: $14 + 1{,}9 \approx 15{,}9\ \text{V}$. Somando as duas quedas da ponte, uns 1,6 V, o pico do secundário precisa de 17,5 V **com a tomada baixa**. Com 10 % a menos na tomada, um transformador de 12 V dá $12 \times 1{,}414 \times 0{,}9 \approx 15{,}3\ \text{V}$ de pico: não serve. Um de 15 V dá $15 \times 1{,}414 \times 0{,}9 \approx 19{,}1\ \text{V}$: serve, com folga para a queda interna do próprio transformador sob carga.
+
+**Passo 4: a potência no regulador.** Na simulação, com o transformador de 15 V, 2.200 µF e 0,5 A, a entrada do regulador fica em média em 17,8 V, e o regulador dissipa cerca de 3 W. Com a tomada 10 % acima, a entrada sobe para perto de 19,6 V:
+
+$$
+P \approx (19{,}6 - 12) \times 0{,}5 \approx 3{,}8\ \text{W}
+$$
+
+**Passo 5: o dissipador.** Para a junção ficar em no máximo 125 °C com o ar a 40 °C:
+
+$$
+R_\theta \leq \frac{125 - 40}{3{,}8} \approx 22\ \text{°C/W}
+$$
+
+Tirando uns 5 °C/W do encapsulamento e uns 0,5 °C/W da pasta térmica, o dissipador precisa ter no máximo uns 16 °C/W. Um dissipador de aletas para TO-220 de uns 4 cm de altura costuma ficar nessa faixa (veja o valor no catálogo do fornecedor). Com folga, melhor ainda: cada 10 °C a menos aumenta a vida dos componentes em volta.
+
+**Resultado:** transformador de 15 V e pelo menos 15 VA, ponte de 2 A, capacitor de 2.200 µF e 35 V, 7812 com dissipador de 16 °C/W ou menor, capacitores de 330 nF e 100 nF junto aos terminais. É a placa do modelo 3D acima.
+
+<RealCase title="O 7805 que queimava o dedo">
+
+Um técnico instala uma câmera de 5 V num portão, alimentada pela fonte de 12 V da central. Para tirar 5 V, ele usa um 7805 sem dissipador, que já tinha na gaveta. A câmera puxa 0,6 A com o infravermelho ligado. Pela conta, o regulador dissipa $(12 - 5) \times 0{,}6 = 4{,}2\ \text{W}$, e sem dissipador isso leva a junção bem além do limite. De dia, com o infravermelho desligado, a câmera puxa menos e funciona. À noite, ela reinicia a cada poucos minutos. O cliente reclama que "a câmera cai de noite".
+
+O defeito não está na câmera: é a proteção térmica do 7805 desligando e religando, como na simulação. Duas saídas: um dissipador de verdade, que resolve o calor mas desperdiça 4 W o tempo todo, ou um **módulo regulador chaveado** (um conversor buck) de 12 V para 5 V, que faz o mesmo serviço esquentando uma fração disso. A segunda opção é o assunto da próxima aula.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+<Callout type="perigo" title="O primário e o capacitor de filtro">
+O fusível, a chave, o cabo e o primário do transformador estão na tensão da rede. Mexa na placa só com o plugue fora da tomada, e lembre que o capacitor de filtro continua carregado depois de desligado: meça a tensão nele e, se for o caso, descarregue com um resistor, como na <LinkAula id="m09-semicondutores/03-retificadores">aula de retificadores</LinkAula>. As medidas desta aula são todas no secundário, depois do transformador.
+</Callout>
+
+- **Transformador sem folga.** Um "trafo de 12 V" com 7812 funciona sem carga e falha com carga: o vale da ondulação fica abaixo de 14 V e a saída passa a tremer. Para um 78xx, a regra prática é um transformador uns 3 V acima da saída, ou fazer a conta do exemplo.
+- **Trocar a pinagem.** No 78xx, a ordem é entrada, terra, saída. No LM317, é ajuste, saída, entrada. Montar um no lugar do outro sem conferir faz a saída ir à tensão da entrada, e pode queimar o que estiver ligado.
+- **Esquecer que a aba é um terminal.** No 78xx, a aba é o terra; no LM317, é a saída. Se o dissipador encosta no chassi ou em outro componente, faz um curto. Use isolante de mica (ou de silicone) e bucha no parafuso quando o dissipador não pode ficar na tensão da aba.
+- **Dissipador sem pasta térmica, ou parafuso frouxo.** Uma camada de ar entre a aba e o dissipador pode dobrar a resistência térmica. Pasta fina, só o suficiente, e parafuso firme.
+- **Capacitores longe do regulador.** Os 330 nF e 100 nF precisam ficar a poucos centímetros dos terminais. Com fios longos, o regulador pode oscilar em alta frequência, e a saída fica com ruído que o multímetro não mostra, mas o osciloscópio mostra.
+- **Usar o regulador linear para cair muita tensão.** De 24 V para 5 V com 1 A são 19 W de calor, mais que um ferro de solda pequeno. Acima de uns 2 a 3 W, pense numa fonte chaveada.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Um 7805 recebe 9 V e alimenta uma carga de 0,4 A. Quanta potência ele transforma em calor (despreze a corrente quiescente)?',
+      answer: 1.6,
+      tolerance: 0.03,
+      unit: 'W',
+      explanation:
+        'P = (9 − 5) × 0,4 = 1,6 W. A carga recebe 5 × 0,4 = 2 W; quase metade da energia vira calor no regulador.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Uma fonte com 7812 funciona bem sem carga, mas com carga a saída mostra uma ondulação de 120 Hz no osciloscópio. A causa mais provável é:',
+      options: [
+        {
+          text: 'O vale da ondulação do filtro está abaixo de uns 14 V',
+          correct: true,
+          feedback:
+            'Isso. Sem a folga de uns 2 V, o regulador não tem o que ajustar e a saída acompanha a entrada. Transformador maior ou capacitor maior resolvem.',
+        },
+        {
+          text: 'O regulador está com tensão demais na entrada',
+          feedback: 'Tensão demais esquenta o regulador, mas não faz a ondulação passar para a saída.',
+        },
+        {
+          text: 'Falta o capacitor de 100 nF na saída',
+          feedback:
+            'Sem ele, o regulador pode oscilar em alta frequência, não a 120 Hz. Os 120 Hz vêm do retificador.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Num LM317 com R1 = 240 Ω, qual R2 dá 12 V na saída? Despreze a corrente do terminal de ajuste.',
+      answer: 2064,
+      tolerance: 0.03,
+      unit: 'Ω',
+      explanation:
+        '12 = 1,25 × (1 + R2/240), então R2/240 = 8,6 e R2 ≈ 2.064 Ω. Na prática, um resistor de 2 kΩ com um trimpot de 100 Ω em série, ou um de 2,2 kΩ se 12,7 V servirem.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um regulador dissipa 2 W, sem dissipador, com resistência térmica de 50 °C/W, num ambiente a 30 °C. Qual a temperatura da junção?',
+      answer: 130,
+      tolerance: 0.02,
+      unit: '°C',
+      explanation:
+        'T = 30 + 2 × 50 = 130 °C. Acima dos 125 °C de operação: precisa de dissipador, ou de menos tensão sobrando.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Num regulador linear, a corrente que entra é praticamente igual à corrente que sai.',
+      answer: true,
+      explanation:
+        'Isso. O regulador só corta o excesso de tensão; a corrente passa por ele. Por isso a potência perdida é a tensão que sobra vezes a corrente da carga.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Você vai parafusar um LM317 num dissipador que encosta no chassi metálico, ligado ao negativo. O que fazer?',
+      options: [
+        {
+          text: 'Usar isolante entre a aba e o dissipador e bucha no parafuso',
+          correct: true,
+          feedback:
+            'Isso. A aba do LM317 é a saída; encostada no chassi, ela poria a saída em curto com o negativo.',
+        },
+        {
+          text: 'Parafusar direto, porque a aba do LM317 é o terra',
+          feedback: 'No 78xx a aba é o terra. No LM317, a aba é a saída.',
+        },
+        {
+          text: 'Dispensar o dissipador',
+          feedback: 'Se a potência pede dissipador, tirá-lo leva à proteção térmica ou à queima.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- A fonte linear tem quatro etapas: **transformador, retificador, filtro e regulador**. O regulador entrega uma tensão fixa a partir da tensão ondulada do filtro.
+- O regulador linear é um transistor que se ajusta sozinho. Ele precisa de uma **folga** entre entrada e saída (uns 2 V nos 78xx), e essa folga tem de existir **no vale** da ondulação, com a tomada baixa e a carga máxima.
+- A corrente que entra é praticamente a que sai, e a **potência perdida** é $P = (V_\text{entrada} - V_\text{saída}) \cdot I$. A eficiência é baixa quando sobra muita tensão.
+- **78xx**: tensão fixa, pinagem entrada, terra, saída, aba no terra. **LM317**: ajustável, $V = 1{,}25 \cdot (1 + R_2/R_1)$, pinagem ajuste, saída, entrada, aba na saída. Capacitores de 330 nF e 100 nF junto aos terminais.
+- A temperatura do chip é $T = T_\text{ar} + P \cdot R_\theta$. Sem dissipador, um TO-220 aguenta só 1 a 2 W; acima do limite, a **proteção térmica** desliga a saída e ela fica piscando.
+
+Na próxima aula, a fonte que não esquenta: as <LinkAula id="m10-fontes/02-fontes-chaveadas">fontes chaveadas</LinkAula>.

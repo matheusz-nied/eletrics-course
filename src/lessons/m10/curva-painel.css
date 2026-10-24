@@ -1,0 +1,144 @@
+/* CurvaPainel.tsx: the live curves of a photovoltaic module, lesson 10.4. */
+
+.cpainel__body {
+  align-items: start;
+}
+
+@media (min-width: 52rem) {
+  .cpainel__body {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  }
+}
+
+.cpainel__figure,
+.cpainel__side {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.cpainel__plot {
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.cpainel__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.cpainel__axis {
+  stroke: var(--fg-muted);
+  stroke-width: 1.5;
+}
+
+.cpainel__tick {
+  fill: var(--fg-muted);
+  font-size: 12px;
+}
+
+.cpainel__tick--i,
+.cpainel__axis-label--i {
+  fill: var(--accent-strong);
+}
+
+.cpainel__tick--p,
+.cpainel__axis-label--p {
+  fill: var(--copper);
+}
+
+.cpainel__axis-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 36rem) {
+  .cpainel__tick {
+    font-size: 14px;
+  }
+
+  .cpainel__axis-label {
+    font-size: 15px;
+  }
+}
+
+.cpainel__curve-i {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.cpainel__curve-p {
+  fill: none;
+  stroke: var(--copper);
+  stroke-width: 2.5;
+  stroke-dasharray: 7 4;
+  stroke-linejoin: round;
+}
+
+.cpainel__guide {
+  fill: none;
+  stroke: var(--fg-subtle);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.cpainel__dot-i {
+  fill: var(--accent);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.cpainel__dot-p {
+  fill: var(--copper);
+  stroke: var(--bg);
+  stroke-width: 2.5;
+}
+
+.cpainel__false {
+  fill: none;
+  stroke: var(--warning);
+  stroke-width: 2.5;
+  stroke-dasharray: 3 2;
+}
+
+.cpainel__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+}
+
+.cpainel__key {
+  display: inline-block;
+  width: 1.2rem;
+  height: 0;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+
+.cpainel__key--i {
+  border-top: 3px solid var(--accent);
+}
+
+.cpainel__key--p {
+  border-top: 2.5px dashed var(--copper);
+}
+
+.cpainel__key--dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--copper);
+}
+
+.cpainel__values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.cpainel .cpainel__value {
+  font-size: 1.3rem;
+}

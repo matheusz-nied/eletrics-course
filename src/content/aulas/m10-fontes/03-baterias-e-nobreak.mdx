@@ -1,0 +1,272 @@
+---
+titulo: Baterias e nobreak
+modulo: m10-fontes
+ordem: 3
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Comparar as baterias de chumbo-ácido e de lítio pela tensão, pela capacidade e pelos cuidados de cada uma
+  - Carregar cada tipo do jeito certo e saber por que a carga em tensão constante protege a bateria
+  - Calcular a autonomia de uma bateria de backup com as perdas reais, para o portão e para o nobreak
+  - Explicar como funciona um nobreak e a diferença entre onda senoidal e semi-senoidal
+  - Testar uma bateria de backup e mexer em baterias com segurança
+prerequisitos:
+  - m02-circuitos-cc/07-fontes-reais-e-baterias
+  - m10-fontes/02-fontes-chaveadas
+tags:
+  [
+    bateria,
+    chumbo-ácido,
+    bateria selada,
+    lítio,
+    nobreak,
+    UPS,
+    inversor,
+    autonomia,
+    portão,
+    flutuação,
+    semi-senoidal,
+  ]
+seguranca: rede
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import AutonomiaBateria from '../../../lessons/m10/AutonomiaBateria.tsx';
+import CargaLitio from '../../../lessons/m10/figures/CargaLitio.astro';
+import NobreakBlocos from '../../../lessons/m10/figures/NobreakBlocos.astro';
+import OndaNobreak from '../../../lessons/m10/figures/OndaNobreak.astro';
+
+Falta luz às dez da noite, e o portão da garagem não abre. A central tem uma bateria de backup, que devia aguentar horas, mas ela durou dez minutos. No escritório, o nobreak do computador começa a apitar e desliga tudo antes de dar tempo de salvar o arquivo, embora a caixa prometesse "600 VA". As duas histórias têm a mesma explicação: a conta simples de capacidade dividida por corrente esconde perdas que dobram ou triplicam o consumo real, e a bateria envelhece sem avisar.
+
+Nesta aula você vai conhecer as baterias que aparecem no dia a dia, aprender a carregá-las e a calcular quanto tempo elas seguram uma carga de verdade.
+
+## O que tem dentro de uma bateria
+
+Uma <Term id="bateria">bateria</Term> guarda energia numa reação química reversível. Na descarga, a reação empurra elétrons do terminal negativo, pelo circuito, até o positivo; na carga, uma fonte externa força a reação ao contrário. Cada célula tem uma tensão que depende só da química, e as baterias de tensão maior são várias células em série: a de 12 V de chumbo tem seis células de 2 V.
+
+Duas famílias dominam o que você vai encontrar:
+
+| Química | Tensão por célula | Onde aparece | Pontos fortes | Cuidados |
+|---------|-------------------|--------------|---------------|----------|
+| Chumbo-ácido | 2 V (12 V com seis células) | Carro, moto, portão, alarme, nobreak, cerca elétrica | Barata, aguenta ficar carregada anos, fácil de carregar | Pesada; morre se ficar descarregada; solta gás na sobrecarga |
+| Íon de lítio | 3,6 a 3,7 V nominal, 4,2 V cheia (típico) | Celular, notebook, power bank, ferramenta sem fio, patinete | Leve, guarda muita energia, muitos ciclos | Precisa de circuito de proteção; pega fogo se perfurada, em curto ou sobrecarregada |
+
+Há variações. Entre as de chumbo, a de carro tem o eletrólito líquido e solta gás pela tampa; a **selada** (em inglês, VRLA), de portões, alarmes e nobreaks, tem o eletrólito absorvido numa manta de fibra de vidro (AGM) e uma válvula que só abre em emergência. Entre as de lítio, a de **lítio-ferro-fosfato** (LiFePO4), de 3,2 V por célula, é mais segura e dura mais, e aparece em sistemas solares e em substitutas de baterias de chumbo. As pilhas recarregáveis AA e AAA são de níquel-hidreto metálico, com 1,2 V por célula.
+
+<Part3D
+  part="sla-battery"
+  props={{ capacity: 7 }}
+  cutaway
+  annotations
+  alt="Bateria selada de chumbo-ácido de 12 V e 7 Ah, um bloco retangular de plástico com dois terminais tipo faston no alto, um vermelho e um preto. Em corte, aparecem seis células lado a lado, cada uma com placas marrons e cinzentas intercaladas e separadores brancos, ligadas em série por tiras de chumbo."
+  caption="A bateria selada de 12 V e 7 Ah, a do portão e do nobreak. No corte, as seis células de 2 V em série, com as placas positivas, as negativas e os separadores de fibra de vidro."
+/>
+
+O rótulo da bateria selada traz quase tudo de que você precisa: tensão, capacidade (normalmente medida numa descarga de 20 horas), a tensão de carga em **uso em ciclo** e em **flutuação** (*stand-by*) e a corrente inicial máxima de carga. Os valores do modelo 3D são os típicos de uma bateria de 12 V e 7 Ah.
+
+## Carregar do jeito certo
+
+### Chumbo-ácido: tensão constante
+
+Uma bateria de chumbo se carrega com uma **tensão fixa**, com a corrente limitada. No começo, com a bateria descarregada, a corrente seria grande, e o limite a segura (numa bateria de 7 Ah, a etiqueta típica pede no máximo 2,1 A, cerca de 30 % da capacidade). Conforme a bateria enche, a tensão dela sobe e se aproxima da do carregador, e a corrente cai sozinha. A tensão escolhida depende do uso:
+
+- **Flutuação**, de 13,5 a 13,8 V (típico): para a bateria que fica ligada o tempo todo esperando uma falta de energia, como no portão, no alarme e no nobreak. Nessa tensão, ela fica cheia sem se desgastar e pode ficar anos ligada.
+- **Uso em ciclo**, de 14,4 a 15,0 V (típico): para a bateria que é descarregada e recarregada todo dia. Enche mais depressa, mas não pode ficar ligada nessa tensão depois de cheia, porque o excesso decompõe a água do eletrólito em hidrogênio e oxigênio.
+
+A central do portão faz exatamente isso: a fonte de 13,8 V alimenta a placa e mantém a bateria em flutuação, por um resistor ou por um circuito que limita a corrente.
+
+<Simulation circuit="m10/bateria-backup" instruments={['multimetro']} />
+
+1. Com a rede ligada e a central em espera, leia as três correntes. Para onde vai a corrente da fonte?
+2. Abra a chave da rede. A tensão na carga cai a zero em algum momento? Quem alimenta a carga agora?
+3. Escolha o motor abrindo o portão, com a rede ligada e depois sem rede.
+
+Com a rede, a fonte entrega 0,59 A: 0,06 A para a central, pelo diodo D1, e 0,53 A para carregar a bateria, pelo resistor de 2,2 Ω. A corrente da bateria aparece negativa porque está **entrando** nela. A carga recebe 13,1 V, e o diodo D2 fica reverso. Sem rede, D2 conduz e a bateria assume na hora, sem interrupção: a carga cai para 11,9 V, a queda do diodo abaixo da bateria. Com o motor, a carga vai a 3 A; com a rede, a fonte segura tudo e a bateria continua carregando; sem rede, a bateria entrega 2,7 A, e a tensão na carga cai para 11,5 V por causa da resistência interna e do diodo.
+
+O resistor de carga é um jeito simples de limitar a corrente: ela cai sozinha conforme a bateria enche e a tensão dela sobe. Na simulação, a bateria está meio carregada (12,6 V); cheia, perto de 13,6 V, quase não receberia corrente.
+
+### Lítio: corrente constante, depois tensão constante
+
+Uma célula de lítio se carrega em duas etapas: primeiro com **corrente constante**, até a tensão chegar a 4,2 V (típico; algumas químicas usam 4,35 V ou outro valor); depois com **tensão constante** em 4,2 V, enquanto a corrente vai caindo. Quando a corrente cai abaixo de uma fração da inicial, o carregador desliga. A diferença para o chumbo é que a célula de lítio **não aceita flutuação nem um pouco de sobretensão**: passar do limite degrada a célula e pode iniciar um superaquecimento que se alimenta sozinho.
+
+<Figure caption="Figura 1. A carga de uma célula de lítio (valores típicos). Na primeira etapa, a corrente é constante e a tensão sobe; ao chegar em 4,2 V, a tensão fica fixa e a corrente cai. A carga termina quando a corrente fica pequena." alt="Gráfico com o tempo no eixo horizontal. Uma linha de tensão sobe de 3,0 V até 4,2 V na primeira metade e depois fica reta em 4,2 V. Uma linha de corrente fica reta no alto durante a primeira metade e depois cai em curva até perto de zero. Duas faixas no fundo nomeiam as etapas: corrente constante e tensão constante. Uma marca no fim indica que o carregador desliga.">
+  <CargaLitio />
+</Figure>
+
+Por isso toda bateria de lítio tem um **circuito de proteção** (em inglês, BMS), que corta a carga acima da tensão máxima, a descarga abaixo da mínima (perto de 2,5 a 3,0 V por célula, típico), o curto e o excesso de corrente. Nas baterias com várias células em série, como as de patinete e de ferramenta, ele também equilibra as células.
+
+### Por que não descarregar até o fim
+
+Uma bateria de chumbo que fica descarregada forma cristais de sulfato nas placas, que endurecem e não se desfazem mais na carga. Uma semana parada vazia já tira parte da capacidade para sempre. Além disso, cada descarga profunda gasta a bateria: ela aguenta muito mais ciclos descarregando até a metade do que até o fim. Na prática, quem projeta um backup conta com no máximo 50 % da capacidade de uma bateria de chumbo, ou 80 % em emergências raras. Esse número se chama **profundidade de descarga**.
+
+## Quanto tempo a bateria segura
+
+A conta simples da aula sobre <LinkAula id="m01-eletricidade-do-zero/02-corrente-eletrica">corrente elétrica</LinkAula> divide a capacidade pela corrente. Ela erra para o lado otimista por três motivos:
+
+1. **Profundidade de descarga:** só uma parte da capacidade deve ser usada.
+2. **Correntes altas rendem menos:** a capacidade do rótulo vale numa descarga de 20 horas. Com correntes bem maiores, a bateria entrega menos ampères-hora. A <Term id="lei-de-peukert">lei de Peukert</Term> estima esse efeito: tudo se passa como se a corrente fosse maior do que é.
+3. **O inversor perde energia:** no nobreak, a bateria de 12 V alimenta aparelhos de 127 V por um inversor, que desperdiça de 10 % a 20 % (típico).
+
+<DeepDive title="A conta com Peukert">
+
+Pela lei de Peukert, o tempo de descarga com a corrente $I$ é
+
+$$
+t = H \cdot \left(\frac{C}{I \cdot H}\right)^k
+$$
+
+em que $C$ é a capacidade do rótulo (Ah), $H$ as horas em que ela foi medida (20), e $k$ o expoente de Peukert, de 1,1 a 1,3 em baterias de chumbo seladas (típico; o interativo usa 1,15). Com $k = 1$, a fórmula vira a conta simples. Dá no mesmo pensar numa **corrente efetiva**, $I_\text{ef} = I \cdot (I / I_{20})^{k-1}$, em que $I_{20} = C/20$ é a corrente das 20 horas: 5 A tirados de uma bateria de 7 Ah ($I_{20} = 0{,}35\ \text{A}$) gastam a carga como 7,45 A.
+
+</DeepDive>
+
+<AutonomiaBateria client:visible />
+
+1. No caso do portão, com os valores iniciais (central em espera com 60 mA e quatro manobras de 15 segundos por hora com 5 A), compare a estimativa com a conta simples.
+2. Zere as manobras. Quanto tempo a central fica em espera?
+3. Mude para o nobreak, com 120 W de aparelhos (um computador e o roteador) e uma bateria de 7 Ah. Quanto tempo dá para descarregar até 80 %?
+
+No portão, a conta simples dá 49 horas; a estimativa, 19 horas. Uma manobra gasta $5 \times 15 / 3.600 \approx 0{,}021\ \text{Ah}$, o mesmo que 21 minutos de espera. Sem manobras, a central fica 58 horas em espera, usando metade da bateria. No nobreak, a bateria fornece $120 / (12 \times 0{,}85) \approx 11{,}8\ \text{A}$: mais de 30 vezes a corrente das 20 horas. A conta simples, com a energia do rótulo ($12 \times 7 = 84\ \text{Wh}$), daria 42 minutos; a estimativa dá 17 minutos até 80 %. Com uma bateria velha, menos ainda.
+
+## O nobreak por dentro
+
+Um <Term id="nobreak">nobreak</Term> (em inglês, UPS) é um carregador, uma bateria e um <Term id="inversor">inversor</Term> na mesma caixa. O inversor é uma fonte chaveada ao contrário: transforma os 12 V (ou 24 V, ou mais) da bateria em 127 V ou 220 V alternados, ligando e desligando transistores e passando por um transformador.
+
+<Figure caption="Figura 2. Um nobreak do tipo mais comum em casa e no escritório. Com rede, os aparelhos recebem a tomada direto, pelo relé, e o carregador mantém a bateria em flutuação. Na falta de energia, o relé muda de posição em alguns milissegundos e o inversor assume, alimentado pela bateria." alt="Diagrama de blocos. A tomada entra à esquerda e vai a um relé de transferência e a um carregador. O carregador liga à bateria de 12 V. A bateria liga ao inversor. O relé escolhe entre a tomada e a saída do inversor e entrega o resultado às tomadas do nobreak, à direita. Um bloco de controle, embaixo, mede a rede e comanda o relé e o inversor.">
+  <NobreakBlocos />
+</Figure>
+
+Nos modelos de casa e escritório, com rede, os aparelhos recebem a própria tomada (às vezes com um ajuste de tensão), e o inversor fica parado. Quando a rede falta ou sai da faixa, o controle desliga o relé da rede e liga o inversor, em alguns milissegundos (típico). As fontes chaveadas dos computadores atravessam essa interrupção sem perceber, porque os capacitores delas seguram a saída por mais tempo que isso. Os nobreaks de servidores e equipamentos médicos (chamados de dupla conversão, ou *online*) passam a energia sempre pela bateria e pelo inversor, sem tempo nenhum de transferência.
+
+### VA não é W
+
+A caixa do nobreak diz "600 VA", mas os aparelhos que ele aguenta somam bem menos que 600 W. O <Term id="volt-ampere">volt-ampère</Term> é a tensão vezes a corrente eficaz, e muitas cargas puxam uma corrente que não se converte toda em potência, como você vai ver na aula sobre <LinkAula id="m06-corrente-alternada/05-potencia-e-fator-de-potencia">potência e fator de potência</LinkAula>. Os nobreaks pequenos costumam aguentar de 50 % a 60 % do valor em VA como watts (típico; o valor certo está no manual). Um de 600 VA aguenta uns 300 W.
+
+### Senoidal ou semi-senoidal
+
+O inversor mais barato não produz uma senoide, e sim uma onda em degraus, chamada de **semi-senoidal** ou senoidal modificada, com o mesmo valor eficaz da tomada.
+
+<Figure caption="Figura 3. A tensão da tomada (senoide) e a de um inversor semi-senoidal com o mesmo valor eficaz, 127 V (forma típica). A onda em degraus fica um tempo no máximo, um tempo em zero e um tempo no mínimo." alt="Dois gráficos de tensão ao longo de um ciclo de 1/60 de segundo. O de cima é uma senoide suave que vai de mais 180 V a menos 180 V. O de baixo é uma onda em degraus: sobe de zero direto para um patamar positivo, fica um tempo lá, volta a zero, fica um tempo em zero, desce para um patamar negativo e volta. As duas estão marcadas com 127 V eficazes.">
+  <OndaNobreak />
+</Figure>
+
+Computador, roteador, televisor e carregadores, que têm fonte chaveada, funcionam bem com ela. Motores, bombas, geladeiras, ventiladores, alguns aparelhos com transformador e algumas fontes com correção de fator de potência podem zumbir, esquentar ou nem ligar. Para essas cargas, e para o motor do portão, o nobreak precisa ser de **onda senoidal pura** (ou "senoidal"), como os vendidos especificamente para automatizadores.
+
+<RealCase title="O portão que parou na queda de energia">
+
+Um condomínio tem um automatizador com central de motor CC e bateria de backup de 12 V e 7 Ah. Numa queda de energia, o portão abre duas vezes e para. O técnico mede a bateria parada: 12,6 V, o que parece bom. Mas a bateria tem quatro anos, e uma bateria de chumbo em flutuação dura de três a cinco anos (típico). A tensão em aberto engana, como você viu na aula sobre <LinkAula id="m02-circuitos-cc/07-fontes-reais-e-baterias">fontes reais e baterias</LinkAula>: o que falha é a resistência interna, que cresceu.
+
+O teste certo é **com carga**. O técnico desliga o disjuntor da central, comanda o portão pela bateria e mede a tensão nos terminais dela durante a manobra. A tensão desaba para menos de 10 V, e a central desliga por subtensão. Bateria nova, data anotada na própria bateria com caneta, e a recomendação de trocá-la a cada três anos. No mesmo dia, ele confere a tensão de flutuação da central (13,7 V, dentro da faixa) para ter certeza de que a bateria nova não vai secar por sobrecarga.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+<Callout type="perigo" title="Bateria não dá choque, mas dá fogo">
+Uma bateria de 12 V não dá choque perceptível na pele seca, e por isso parece inofensiva. Em curto, porém, uma bateria de chumbo pequena entrega dezenas de ampères, e uma de carro, centenas: uma chave de boca encostada nos dois terminais fica vermelha, solta faíscas e pode fazer a bateria explodir. Tire relógio, anel e pulseira antes de mexer, isole a ponta das ferramentas e desconecte sempre o negativo primeiro e ligue-o por último.
+</Callout>
+
+- **Faísca perto de bateria carregando.** A bateria de chumbo solta hidrogênio na carga, principalmente na sobrecarga. Nobreak e bateria ficam em lugar ventilado, e as conexões se fazem com o carregador desligado.
+- **A tomada do nobreak continua viva sem rede.** Um eletricista que desliga o disjuntor pode esquecer que o nobreak (ou um gerador, ou um inversor solar) continua alimentando o circuito. Desligue o nobreak e tire os aparelhos dele antes de mexer na instalação que ele alimenta. E nunca ligue a saída de um nobreak numa tomada da casa para "alimentar a casa toda": isso põe tensão na rede da rua, onde alguém pode estar trabalhando.
+- **Ligar a bateria invertida.** A maioria das centrais tem um fusível ou um diodo de proteção, mas nem todas. Vermelho no positivo, preto no negativo, e confira com o multímetro antes de ligar.
+- **Bateria estufada.** Uma bateria de chumbo estufada esquentou ou foi sobrecarregada: troque e confira a tensão do carregador. Uma bateria de lítio estufada tem gás inflamável dentro: não perfure, não aperte, não carregue mais. Guarde em lugar não inflamável e leve para descarte.
+- **Carregador errado.** Bateria de lítio só com o carregador feito para ela. Um carregador de chumbo numa bateria de lítio, ou vice-versa, pode estragar a bateria ou provocar incêndio.
+- **Jogar no lixo comum.** Baterias de chumbo e de lítio têm descarte próprio: as lojas que vendem são obrigadas a receber as usadas. O chumbo é reciclado quase todo.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Uma central de alarme puxa 80 mA da bateria de 12 V e 7 Ah. Usando no máximo metade da capacidade, quantas horas ela segura? (a corrente está abaixo da de 20 horas, então não há perda de Peukert)',
+      answer: 43.75,
+      tolerance: 0.02,
+      unit: 'h',
+      explanation: 'Metade de 7 Ah são 3,5 Ah. 3,5 ÷ 0,08 = 43,75 horas, quase dois dias.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Que tensão de carga uma central de portão deve manter na bateria selada que fica ligada o tempo todo?',
+      options: [
+        {
+          text: 'Flutuação, de 13,5 a 13,8 V',
+          correct: true,
+          feedback: 'Isso. Nessa tensão a bateria fica cheia sem se desgastar e dura anos ligada.',
+        },
+        {
+          text: 'Uso em ciclo, de 14,4 a 15,0 V',
+          feedback:
+            'Essa tensão é para carregar depressa e desligar. Ligada o tempo todo, ela seca a bateria.',
+        },
+        {
+          text: '12 V, a tensão da bateria',
+          feedback: 'Com 12 V, a bateria nunca enche: uma bateria cheia de 12 V tem perto de 12,8 V em repouso.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um nobreak alimenta 200 W com um inversor de 80 % de eficiência, a partir de uma bateria de 12 V. Qual a corrente na bateria?',
+      answer: 20.8,
+      tolerance: 0.03,
+      unit: 'A',
+      explanation:
+        'I = P ÷ (V × η) = 200 ÷ (12 × 0,8) ≈ 20,8 A. Muito acima da corrente das 20 horas de uma bateria pequena: a autonomia fica em poucos minutos.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Uma bateria de chumbo de 12 V que mede 12,6 V em repouso está boa para o backup.',
+      answer: false,
+      explanation:
+        'A tensão em repouso diz quanta carga ela tem, não se ela aguenta corrente. Uma bateria velha mede bem parada e desaba com carga. O teste certo é medir durante o uso.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Qual destas cargas pode ter problema num nobreak semi-senoidal?',
+      options: [
+        {
+          text: 'O motor de um portão ou de uma bomba',
+          correct: true,
+          feedback:
+            'Isso. Motores esquentam e zumbem com a onda em degraus. Para eles, o nobreak precisa ser senoidal.',
+        },
+        {
+          text: 'Um roteador de internet',
+          feedback: 'A fonte chaveada do roteador retifica a tensão e funciona bem com a onda semi-senoidal.',
+        },
+        {
+          text: 'O carregador de um notebook',
+          feedback: 'Também é uma fonte chaveada, que aceita a onda semi-senoidal sem problema.',
+        },
+      ],
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem a troca da bateria de backup da central do portão.',
+      items: [
+        'Desligar o disjuntor da central',
+        'Soltar o cabo negativo da bateria velha',
+        'Soltar o cabo positivo',
+        'Ligar o positivo na bateria nova',
+        'Ligar o negativo',
+        'Religar o disjuntor e medir a tensão de flutuação',
+      ],
+      explanation:
+        'Negativo sai primeiro e entra por último: assim, se a ferramenta encostar na carcaça durante a troca, não há curto pelo positivo.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- A bateria de **chumbo-ácido** tem células de 2 V (12 V com seis) e é a do carro, do portão e do nobreak. A de **lítio** tem cerca de 3,7 V por célula, é leve e precisa de circuito de proteção.
+- Chumbo se carrega com **tensão constante** e corrente limitada: **flutuação** (13,5 a 13,8 V) para backup, **ciclo** (14,4 a 15,0 V) para recarga rápida. Lítio, com corrente constante até 4,2 V e depois tensão constante, sem flutuação.
+- A conta simples (Ah ÷ A) é otimista. Use só parte da capacidade (**profundidade de descarga**), conte que correntes altas rendem menos (**Peukert**) e, no nobreak, as perdas do inversor.
+- O **nobreak** é carregador, bateria e inversor. VA não é W: um de 600 VA aguenta uns 300 W. Motores pedem **onda senoidal**.
+- Bateria se testa **com carga**. Bateria não dá choque, mas em curto dá fogo: negativo sai primeiro e entra por último.
+
+Na última aula do módulo, a energia que vem do sol: <LinkAula id="m10-fontes/04-energia-solar">energia solar fotovoltaica</LinkAula>.

@@ -1,0 +1,287 @@
+---
+titulo: Fontes chaveadas
+modulo: m10-fontes
+ordem: 2
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Explicar como uma chave que liga e desliga muito depressa, com um indutor e um capacitor, baixa a tensão quase sem perder energia
+  - Calcular a saída de um conversor buck pelo ciclo de trabalho, e a corrente que ele puxa da entrada
+  - Dizer o que fazem o conversor boost e o flyback, e onde cada um aparece
+  - Reconhecer as partes de um carregador de celular e o que separa a rede da saída
+  - Mexer numa fonte chaveada com segurança, sabendo onde fica a tensão perigosa
+prerequisitos:
+  - m10-fontes/01-fonte-linear
+  - m09-semicondutores/08-mosfet
+  - m04-passivos/05-indutores-e-circuito-rl
+tags:
+  [
+    fonte chaveada,
+    conversor buck,
+    step-down,
+    boost,
+    flyback,
+    carregador de celular,
+    eficiência,
+    PWM,
+    optoacoplador,
+    isolação,
+  ]
+seguranca: rede
+---
+
+import BuckEtapas from '../../../lessons/m10/figures/BuckEtapas.astro';
+import FlybackBlocos from '../../../lessons/m10/figures/FlybackBlocos.astro';
+import Part3D from '../../../lessons/m02/Part3D.astro';
+
+Um carregador de celular de 20 W cabe na palma da mão, pesa uns 50 gramas e mal esquenta. Uma fonte linear de 20 W, como a da aula anterior, precisaria de um transformador de ferro do tamanho de um punho, com mais de meio quilo, e de um dissipador. A diferença não está em componentes melhores: está numa ideia diferente. Em vez de jogar fora a tensão que sobra, a fonte chaveada liga e desliga a energia dezenas de milhares de vezes por segundo e entrega à carga só a fatia de que ela precisa.
+
+## A ideia: ligar e desligar, e alisar
+
+Pense no regulador linear como uma torneira meio fechada: a água passa devagar, mas a pressão que sobra se perde na torneira. Agora pense numa torneira que só fica toda aberta ou toda fechada, e que você abre e fecha muito depressa sobre um balde furado. Se ela fica aberta 40 % do tempo, a vazão média é 40 % da máxima. A torneira nunca trabalha "meio fechada", então não desperdiça nada.
+
+O equivalente elétrico é o <Term id="pwm">PWM</Term> que você viu na aula sobre o <LinkAula id="m09-semicondutores/08-mosfet">MOSFET</LinkAula>: um transistor que fica todo ligado ou todo desligado. Ligado, ele tem quase zero de tensão; desligado, quase zero de corrente. Nos dois casos, a potência nele, tensão vezes corrente, fica perto de zero.
+
+Para uma lâmpada ou um motor, os pulsos bastam. Um circuito eletrônico, porém, precisa de tensão lisa. Quem alisa os pulsos são duas peças que guardam energia: o <Term id="indutor">indutor</Term>, que resiste a mudanças de corrente, e o <Term id="capacitor">capacitor</Term>, que resiste a mudanças de tensão. A analogia da água deixa de valer aqui: o indutor se comporta como um volante pesado, que continua girando quando você para de empurrar.
+
+## O conversor buck
+
+O conversor que baixa a tensão se chama **buck** (em inglês, algo como "tranco"; os módulos à venda aparecem como *step-down*). Ele tem quatro peças: a chave (um MOSFET), um diodo, um indutor e um capacitor.
+
+<Figure caption="Figura 1. Os dois tempos de um conversor buck. Com a chave fechada, a corrente vem da entrada, passa pelo indutor e alimenta a carga, e o indutor guarda energia. Com a chave aberta, o indutor mantém a corrente andando no mesmo sentido, agora pelo diodo, e devolve a energia. O capacitor alisa o que sobra." alt="Dois esquemas iguais, um em cima do outro. Em cada um: fonte de 12 V à esquerda, chave em série, um nó de chaveamento com um diodo descendo até o negativo, um indutor em série até a saída, e o capacitor e a carga em paralelo na saída. No de cima, com a chave fechada, o caminho destacado sai da fonte, passa pela chave, pelo indutor e pela carga. No de baixo, com a chave aberta, o caminho destacado sai do negativo, sobe pelo diodo, passa pelo indutor e pela carga. Ao lado, a corrente no indutor em forma de dente de serra: sobe no primeiro tempo e desce no segundo.">
+  <BuckEtapas />
+</Figure>
+
+Com a chave fechada, o nó de chaveamento fica nos 12 V da entrada. O indutor tem 12 V de um lado e uns 5 V do outro, e a corrente nele sobe aos poucos. Com a chave aberta, o indutor não deixa a corrente parar de uma vez: ela continua, puxada agora do negativo pelo diodo, e vai caindo aos poucos. O nó de chaveamento fica numa onda quadrada entre 12 V e quase zero, e o indutor e o capacitor entregam à carga a **média** dessa onda.
+
+Se a chave fica fechada uma fração $D$ de cada ciclo (o <Term id="ciclo-de-trabalho">ciclo de trabalho</Term>), a média é
+
+$$
+V_\text{saída} \approx D \cdot V_\text{entrada}
+$$
+
+Com 12 V e $D = 0{,}42$, a saída é 5 V. Na prática, a queda do diodo e as resistências pedem um ciclo um pouco maior.
+
+### A corrente da entrada é menor que a da saída
+
+Num regulador linear, a corrente da entrada é igual à da saída. Num conversor chaveado, quem se conserva é a **potência**, menos as perdas. Com eficiência $\eta$ (a fração da energia que chega à carga):
+
+$$
+I_\text{entrada} = \frac{V_\text{saída} \cdot I_\text{saída}}{\eta \cdot V_\text{entrada}}
+$$
+
+Com 5 V e 2 A na saída, 12 V na entrada e 90 % de eficiência, a entrada fornece $10 / (0{,}9 \times 12) \approx 0{,}93\ \text{A}$, menos da metade da corrente da saída. Um 7805 no mesmo lugar puxaria 2 A da entrada e transformaria 14 W em calor.
+
+<Simulation
+  circuit="m10/buck"
+  instruments={[{ kind: 'osciloscopio', series: ['VSW', 'IL'] }, 'multimetro']}
+/>
+
+Na simulação, o MOSFET liga e desliga 50 mil vezes por segundo. A simulação anda em câmera muito lenta: cada segundo na tela é meio milésimo de segundo no circuito.
+
+1. Aperte o play e espere a saída assentar. No multímetro, leia a saída. No osciloscópio, veja o nó de chaveamento (canal 1) e a corrente no indutor (canal 2).
+2. No multímetro, em CC, leia a corrente média da entrada e a corrente média no indutor, que é a da carga. Multiplique cada uma pela sua tensão: qual é a eficiência?
+3. Mude o ciclo de trabalho para 25 % e depois para 75 %. A saída segue a fórmula?
+4. Volte para 44 % e escolha a carga de 0,1 A. O que acontece com a saída?
+
+Com 44 %, a saída fica em 5,0 V, com uma ondulação de só 15 mV. O canal 1 mostra a onda quadrada, de 12 V a −0,4 V (a queda do diodo Schottky); o canal 2 mostra a corrente no indutor subindo e descendo entre 0,2 A e 0,8 A, em torno dos 0,5 A da carga. A entrada fornece em média só 0,22 A, menos da metade dos 0,5 A da carga. São $12 \times 0{,}22 = 2{,}64\ \text{W}$ na entrada e $5{,}0 \times 0{,}5 = 2{,}5\ \text{W}$ na carga: 95 % de eficiência. Na simulação, a chave é quase perfeita; numa fonte real, as perdas no chaveamento, no indutor e no capacitor deixam a eficiência entre 80 % e 95 % (típico). Com 25 %, a saída cai para 2,7 V; com 75 %, sobe para 8,8 V.
+
+Repare também no começo: ao apertar o play, a saída passa de 8 V antes de assentar em 5 V. O indutor e o capacitor formam um circuito que oscila quando recebe um degrau. Os controladores reais ligam devagar (*partida suave*) justamente para evitar isso.
+
+### Sem realimentação, a saída muda com a carga
+
+Com a carga de 0,1 A, a saída sobe para 7,3 V, com o mesmo ciclo de trabalho. Com tão pouca corrente, a corrente no indutor chega a zero antes do fim de cada ciclo (veja no canal 2) e a fórmula $D \cdot V$ deixa de valer. Para voltar a 5 V, o ciclo precisa descer para uns 25 %.
+
+Por isso nenhuma fonte chaveada trabalha com o ciclo fixo, como a simulação. Um circuito de controle mede a saída o tempo todo e ajusta o ciclo de trabalho, do mesmo jeito que o amplificador de erro do regulador linear ajusta o transistor. Nos módulos buck à venda, esse controle está num chip de oito terminais, e o trimpot do módulo muda a fração da saída que ele mede.
+
+<DeepDive title="A ondulação da corrente no indutor">
+
+Com a chave fechada, o indutor tem $V_\text{entrada} - V_\text{saída}$ sobre ele durante $D/f$ segundos. Pela relação do indutor, $V = L \cdot \Delta I / \Delta t$, a corrente sobe
+
+$$
+\Delta I = \frac{(V_\text{entrada} - V_\text{saída}) \cdot D}{f \cdot L} = \frac{(12 - 5) \times 0{,}44}{50.000 \times 0{,}0001} \approx 0{,}62\ \text{A}
+$$
+
+A simulação mostra 0,6 A de pico a pico. A conta explica por que as fontes chaveadas trabalham em frequências altas: com o dobro da frequência, o mesmo $\Delta I$ sai com metade da indutância, num indutor menor. Por outro lado, cada liga e desliga custa um pouco de energia, e, acima de algumas centenas de quilohertz, essas perdas pesam. Os módulos baratos trabalham entre 50 kHz e 500 kHz (típico).
+
+Se a corrente da carga for menor que metade de $\Delta I$, a corrente no indutor chega a zero em cada ciclo: é o **modo descontínuo**, em que a saída sobe acima de $D \cdot V$, como na carga de 0,1 A.
+
+</DeepDive>
+
+## Boost: subir a tensão
+
+Trocando as posições da chave, do indutor e do diodo, o conversor passa a **subir** a tensão. No **boost** (em inglês, "empurrão"), o indutor fica na entrada e a chave liga a ponta dele ao negativo. Com a chave fechada, o indutor carrega energia direto da entrada. Quando a chave abre, o indutor não deixa a corrente parar e empurra a tensão para cima, somando-se à da entrada, até o diodo conduzir e carregar o capacitor de saída. A saída ideal é
+
+$$
+V_\text{saída} \approx \frac{V_\text{entrada}}{1 - D}
+$$
+
+Com $D = 0{,}26$, 3,7 V viram 5 V. É o que acontece num carregador portátil (*power bank*): a bateria de lítio, de cerca de 3,7 V, vira os 5 V do USB. Os drivers de LED que acendem uma fileira de LEDs a partir de uma bateria pequena também são boosts.
+
+## A fonte que liga direto na tomada: o flyback
+
+O buck e o boost não isolam a saída da entrada. Para ligar na tomada, a fonte precisa de um transformador, que isola e baixa a tensão. A solução das fontes pequenas, até umas dezenas de watts, é o **flyback**: retificar a rede logo na entrada e chavear essa tensão alta num transformador pequeno, em alta frequência.
+
+<Figure caption="Figura 2. Os blocos de um carregador de celular (flyback). Do lado da rede, a tensão é retificada e filtrada em cerca de 180 V (tomada de 127 V) ou 311 V (220 V) e chaveada num transformador de ferrite. Do lado da saída, um diodo e um capacitor entregam 5 V. O optoacoplador leva a medida da saída de volta ao controlador, atravessando a barreira de isolação com luz." alt="Diagrama em duas metades separadas por uma linha tracejada vertical, a barreira de isolação. Na metade esquerda, lado da rede, em perigo: tomada, fusível, ponte retificadora, capacitor de entrada marcado 180 V ou 311 V, e um transistor chave ligado ao primário do transformador, comandado por um controlador. O transformador atravessa a barreira. Na metade direita, lado da saída, segura: secundário, diodo, capacitor de saída e o conector USB de 5 V. Um optoacoplador também atravessa a barreira, de volta da saída para o controlador, com uma seta indicando a realimentação.">
+  <FlybackBlocos />
+</Figure>
+
+Funciona assim:
+
+1. **Entrada:** fusível, ponte de diodos e um capacitor eletrolítico de 400 V. Na tomada de 127 V, o capacitor carrega com cerca de 180 V; na de 220 V, com cerca de 311 V.
+2. **Chave e transformador:** um MOSFET liga o primário do transformador nesses 180 V ou 311 V, dezenas de milhares de vezes por segundo. Com a chave fechada, o transformador guarda energia no núcleo; quando ela abre, a energia sai pelo secundário. Como a frequência é alta, o núcleo é de ferrite e o transformador é pequeno, como explicado na aula sobre <LinkAula id="m05-magnetismo/04-transformadores">transformadores</LinkAula>.
+3. **Saída:** um diodo (quase sempre Schottky, de queda baixa) e um capacitor entregam os 5 V.
+4. **Realimentação isolada:** um pequeno circuito mede a saída e acende mais ou menos o LED de um <Term id="optoacoplador">optoacoplador</Term>. O fototransistor do outro lado diz ao controlador se deve chavear mais ou menos. A informação atravessa a barreira de isolação como luz, sem fio nenhum ligando os dois lados.
+
+O controlador ajusta o chaveamento para qualquer tensão de entrada dentro da faixa, por isso a etiqueta diz "100–240 V~": a mesma fonte funciona em 127 V e em 220 V sem chave seletora. É a fonte que você viu na <LinkAula id="m16-portao/03-a-central-por-dentro">central do portão</LinkAula>, e a mesma ideia está nas fontes de notebook, de TV, de fita de LED e de computador, essas maiores e com outras topologias.
+
+<Part3D
+  part="phone-charger"
+  props={{ quality: 'certificado' }}
+  explode
+  annotations
+  alt="Carregador de celular aberto, com a carcaça branca afastada e a placa à mostra. Do lado dos pinos da tomada ficam o fusível, a ponte de diodos, o capacitor eletrolítico de entrada e o controlador. No meio, o transformador de ferrite com fita amarela, o optoacoplador e um capacitor azul em forma de disco atravessam um rasgo na placa. Do lado oposto ficam o diodo, o capacitor de saída e o conector USB."
+  caption="Um carregador de celular por dentro. Gire, afaste as partes e compare com a versão sem certificação: veja o que some do lado da isolação."
+/>
+
+Repare no rasgo na placa, entre o lado da rede e o lado da saída: o ar e a distância entre as trilhas fazem parte da isolação. O transformador tem fita entre os enrolamentos, e o capacitor azul (um capacitor Y, de segurança) é construído para abrir, nunca entrar em curto, se falhar. Mude o modelo para **sem certificação** e veja o que desaparece.
+
+## Exemplo resolvido: 5 V para um aparelho a partir de 12 V
+
+Um aparelho de 5 V e 2 A vai funcionar num carro (12 V, que chegam a 14,4 V com o motor ligado). Compare um 7805 com um módulo buck de 90 % de eficiência.
+
+**Passo 1: o regulador linear.** A potência perdida, com o motor ligado:
+
+$$
+P = (14{,}4 - 5) \times 2 = 18{,}8\ \text{W}
+$$
+
+Mais que um ferro de solda pequeno, num componente de 1 A. Não serve.
+
+**Passo 2: o buck.** A potência entregue é $5 \times 2 = 10\ \text{W}$. Com 90 % de eficiência, a entrada fornece $10 / 0{,}9 \approx 11{,}1\ \text{W}$; a perda é de 1,1 W, espalhada entre a chave, o diodo e o indutor.
+
+**Passo 3: a corrente da entrada.** Com 14,4 V:
+
+$$
+I_\text{entrada} = \frac{11{,}1\ \text{W}}{14{,}4\ \text{V}} \approx 0{,}77\ \text{A}
+$$
+
+O fio e o fusível da entrada podem ser dimensionados para menos de 1 A, enquanto a saída entrega 2 A.
+
+**Passo 4: o ciclo de trabalho.** Pela fórmula, $D \approx 5/14{,}4 \approx 0{,}35$ com o motor ligado e $5/12 \approx 0{,}42$ com o motor desligado. O controlador do módulo ajusta isso sozinho.
+
+<RealCase title="O carregador barato que dava choque no fone">
+
+Uma pessoa compra um carregador sem marca, de camelô, e percebe um formigamento na mão quando encosta na parte metálica do fone de ouvido com o celular carregando. Às vezes, o celular nem reconhece o toque na tela. Abrindo um carregador desses (sempre fora da tomada, depois de descarregar o capacitor de entrada), o técnico encontra o que a versão sem certificação do modelo 3D mostra: placa sem rasgo de isolação, trilhas do lado da rede a menos de 1 mm das do lado da saída, transformador sem fita entre os enrolamentos e nenhum fusível.
+
+Todo carregador tem uma pequena fuga pelo capacitor Y, que causa um formigamento fraco e inofensivo em alguns aparelhos com partes metálicas. Num carregador mal isolado, porém, uma falha do transformador ou um arco entre trilhas próximas põe a tensão da rede direto no cabo USB. Já houve casos de morte por choque com carregadores assim, principalmente com a pessoa usando o celular na tomada, molhada ou deitada.
+
+A recomendação prática é simples: use carregadores certificados (no Brasil, carregadores de celular precisam de homologação da Anatel, com o selo no corpo ou na embalagem), desconfie de carregadores leves demais pelo preço e aposente qualquer um que esquente muito, chie, tenha a carcaça trincada ou dê choque.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+<Callout type="perigo" title="Uma fonte chaveada tem 180 V ou 311 V lá dentro">
+O lado da rede de uma fonte chaveada trabalha com a tensão da tomada retificada: cerca de 180 V na de 127 V e 311 V na de 220 V, em corrente contínua, num capacitor que pode guardar carga por minutos depois de desligado. Nunca abra uma fonte ligada. Tire da tomada, espere, meça a tensão no capacitor de entrada em CC e descarregue-o com um resistor (por exemplo, 2,2 kΩ e 5 W, preso com garras) antes de tocar na placa.
+</Callout>
+
+- **Ligar o osciloscópio no lado da rede.** A garra de terra da ponta de prova está ligada ao terra da tomada. No primário de uma fonte chaveada, ela faz um curto pela ponta, com faísca e estrago. Medidas no primário só com ponta diferencial ou transformador isolador, por quem sabe o que está fazendo.
+- **Achar que a fonte morta está descarregada.** Muitas fontes queimam na saída e deixam o capacitor de entrada carregado, sem nenhum resistor para descarregá-lo.
+- **Trocar o capacitor de saída por qualquer um.** O capacitor de saída de uma fonte chaveada trabalha com corrente alternada de dezenas de quilohertz. Os próprios para isso são marcados como de baixa resistência série (*low ESR*) ou de 105 °C. Um comum esquenta, estufa e a fonte volta a falhar em semanas.
+- **Ligar o módulo buck com a polaridade invertida.** A maioria dos módulos baratos não tem proteção. Ligar a entrada ao contrário queima o chip na hora.
+- **Esperar que a fonte chaveada seja silenciosa e limpa.** O chaveamento gera ruído em alta frequência, que pode atrapalhar rádios e circuitos de áudio. As fontes boas têm filtros na entrada e na saída; as ruins chiam e interferem no AM do rádio.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'Um conversor buck recebe 24 V e trabalha com ciclo de trabalho de 50 %. Qual a tensão ideal na saída?',
+      answer: 12,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation: 'V = D × Vin = 0,5 × 24 = 12 V. Na prática, um pouco menos, pela queda do diodo.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um buck entrega 5 V e 3 A, com 90 % de eficiência, a partir de 12 V. Qual a corrente na entrada?',
+      answer: 1.39,
+      tolerance: 0.03,
+      unit: 'A',
+      explanation:
+        'Potência na saída: 15 W. Na entrada: 15 ÷ 0,9 ≈ 16,7 W. Corrente: 16,7 ÷ 12 ≈ 1,39 A, menos da metade da saída.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que o MOSFET de uma fonte chaveada esquenta pouco?',
+      options: [
+        {
+          text: 'Porque passa o tempo todo totalmente ligado ou totalmente desligado',
+          correct: true,
+          feedback:
+            'Isso. Ligado, tem pouca tensão; desligado, pouca corrente. A potência, tensão vezes corrente, fica pequena nos dois casos.',
+        },
+        {
+          text: 'Porque a corrente que passa por ele é pequena',
+          feedback: 'A corrente passa toda por ele enquanto está ligado. O que é pequeno é a tensão sobre ele.',
+        },
+        {
+          text: 'Porque trabalha em alta frequência',
+          feedback:
+            'A frequência alta deixa o indutor e o transformador menores. Ela até aumenta as perdas de chaveamento.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Num carregador de celular, o que leva a medida da saída de volta ao controlador sem ligar eletricamente os dois lados?',
+      options: [
+        {
+          text: 'O optoacoplador',
+          correct: true,
+          feedback: 'Isso. Um LED do lado da saída acende mais ou menos, e um fototransistor do lado da rede lê essa luz.',
+        },
+        {
+          text: 'O capacitor Y',
+          feedback:
+            'O capacitor Y atravessa a barreira para reduzir o ruído, não para levar a medida da saída.',
+        },
+        {
+          text: 'O diodo Schottky',
+          feedback: 'O diodo retifica a saída do transformador; fica todo do lado da saída.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Com o plugue fora da tomada, o capacitor de entrada de uma fonte chaveada está sempre descarregado.',
+      answer: false,
+      explanation:
+        'Ele pode guardar cerca de 180 V (127 V) ou 311 V (220 V) por minutos. Meça e descarregue com um resistor antes de mexer.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um boost ideal recebe 3,7 V de uma bateria de lítio e entrega 5 V. Qual o ciclo de trabalho? Responda em fração (por exemplo, 0,5).',
+      answer: 0.26,
+      tolerance: 0.04,
+      explanation: 'V = Vin ÷ (1 − D), então 1 − D = 3,7 ÷ 5 = 0,74 e D = 0,26.',
+    },
+  ]}
+/>
+
+## Resumo
+
+- A fonte chaveada liga e desliga a energia muito depressa e alisa os pulsos com um **indutor** e um **capacitor**. A chave fica toda ligada ou toda desligada, por isso quase não esquenta: eficiência de 80 % a 95 % (típico).
+- **Buck** baixa a tensão: $V_\text{saída} \approx D \cdot V_\text{entrada}$. Quem se conserva é a **potência**, então a corrente da entrada é menor que a da saída.
+- **Boost** sobe a tensão: $V_\text{saída} \approx V_\text{entrada} / (1 - D)$, como no power bank.
+- Um controlador mede a saída e ajusta o ciclo de trabalho; sem isso, a tensão muda com a carga.
+- O **flyback** liga direto na tomada: retifica a rede (180 V ou 311 V), chaveia um transformador de ferrite pequeno e devolve a medida da saída por um **optoacoplador**. A isolação entre os lados (rasgo na placa, fita no transformador, capacitor Y) é o que protege quem usa.
+- O lado da rede de uma fonte chaveada é perigoso mesmo desligado: meça e descarregue o capacitor de entrada antes de mexer.
+
+Na próxima aula, de onde vem a energia quando a tomada falta: <LinkAula id="m10-fontes/03-baterias-e-nobreak">baterias e nobreak</LinkAula>.

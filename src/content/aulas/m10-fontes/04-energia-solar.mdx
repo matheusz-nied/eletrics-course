@@ -1,0 +1,265 @@
+---
+titulo: Energia solar fotovoltaica
+modulo: m10-fontes
+ordem: 4
+nivel: I
+duracaoMin: 40
+objetivos:
+  - Explicar como uma célula solar transforma luz em corrente e por que o painel tem várias células em série
+  - Ler a curva de corrente por tensão de um painel e achar nela o ponto de máxima potência
+  - Prever o efeito do sol, do calor e da sombra na potência de um painel
+  - Explicar o que fazem o rastreador de máxima potência (MPPT), os diodos de bypass e o inversor
+  - Estimar quantos painéis uma casa precisa e reconhecer os riscos da corrente contínua no telhado
+prerequisitos:
+  - m09-semicondutores/01-juncao-pn
+  - m02-circuitos-cc/09-maxima-transferencia-de-potencia
+  - m10-fontes/03-baterias-e-nobreak
+tags:
+  [
+    energia solar,
+    fotovoltaica,
+    painel solar,
+    célula solar,
+    curva I×V,
+    MPPT,
+    sombreamento,
+    diodo de bypass,
+    inversor,
+    on-grid,
+    off-grid,
+  ]
+seguranca: rede
+---
+
+import Part3D from '../../../lessons/m02/Part3D.astro';
+import CurvaPainel from '../../../lessons/m10/CurvaPainel.tsx';
+import CelulaSolar from '../../../lessons/m10/figures/CelulaSolar.astro';
+import SistemaSolar from '../../../lessons/m10/figures/SistemaSolar.astro';
+
+Um vizinho instala painéis no telhado e a conta de luz cai para quase nada. Outro instala o mesmo tanto de painéis e reclama que gera um terço a menos do que o vendedor prometeu. A diferença, muitas vezes, é uma caixa d'água que faz sombra em uma fileira de painéis depois das três da tarde. Um painel solar não se comporta como uma bateria nem como uma tomada: ele é uma fonte que muda de tensão conforme a corrente que você tira dele, e uma sombra pequena pode derrubar boa parte da potência.
+
+Nesta aula você vai ver como a célula gera energia, ler a curva que descreve o painel e entender o que o inversor faz para tirar dele o máximo.
+
+## A célula: um diodo que recebe luz
+
+Uma <Term id="celula-fotovoltaica">célula solar</Term> é uma <Term id="juncao-pn">junção PN</Term> de silício, como a do diodo da <LinkAula id="m09-semicondutores/01-juncao-pn">aula sobre a junção PN</LinkAula>, mas larga e fina, com o lado N virado para o sol. Quando um fóton de luz é absorvido perto da junção, ele solta um elétron e deixa uma lacuna. O campo elétrico da camada de depleção separa os dois: o elétron vai para o lado N e a lacuna para o lado P. Ligando os dois lados por um fio, esses elétrons dão a volta pelo circuito. É uma corrente gerada pela luz.
+
+<Figure caption="Figura 1. Uma célula solar em corte. A luz entra pela face de cima, que tem uma camada antirreflexo e dedos finos de metal para recolher os elétrons. Perto da junção, cada fóton absorvido cria um par elétron-lacuna, que o campo da junção separa." alt="Corte de uma célula solar. Em cima, setas amarelas de luz descem até a célula. Abaixo delas, uma camada fina azul antirreflexo com três dedos de metal cinzentos. Abaixo, uma faixa fina tipo N e uma faixa grossa tipo P, separadas por uma linha tracejada marcada junção. Perto da junção, um par de bolinhas: um elétron que segue para cima, para o lado N, e uma lacuna que segue para baixo, para o lado P. Embaixo de tudo, o contato de metal traseiro. Um fio sai do dedo de cima, passa por uma lâmpada e volta ao contato de baixo.">
+  <CelulaSolar />
+</Figure>
+
+Duas coisas definem a célula:
+
+- **A corrente é proporcional à luz e à área.** Uma célula de telhado, de uns 16 cm de lado, dá cerca de 10 A no sol forte do meio-dia e metade disso com metade da luz. A luz se mede em watts por metro quadrado, a <Term id="irradiancia">irradiância</Term>: perto de 1.000 W/m² ao meio-dia de céu limpo, 100 a 300 W/m² num dia nublado.
+- **A tensão é pequena e quase não muda com a luz.** Sem carga, a célula de silício mede perto de 0,6 a 0,7 V, como a queda de um diodo. Com metade da luz, a tensão cai só um pouco.
+
+Por isso um painel tem várias células **em série**: 60 células dão uns 40 V. Os painéis de telhado de hoje têm 60, 72 ou 144 meias-células, e as plaquinhas de luminária de jardim têm poucas células pequenas.
+
+<Part3D
+  part="solar-panel"
+  props={{ cells: 60 }}
+  annotations
+  alt="Painel solar de 60 células, um retângulo com moldura de alumínio e vidro escuro. As células azul-escuras formam uma grade de 6 colunas por 10 linhas, com finas linhas prateadas de contato. Na parte de trás, uma pequena caixa de junção preta com dois cabos que terminam em conectores de engate."
+  caption="Um painel de 60 células, como os de telhado: as células em série atrás do vidro e, na traseira, a caixa de junção com os diodos de bypass e os dois cabos de saída."
+/>
+
+## A curva do painel
+
+Ligue um painel a uma carga variável, meça a tensão e a corrente para cada valor e desenhe os pontos: o resultado é a **curva I×V**. Ela tem três pontos que aparecem na etiqueta de todo painel:
+
+- **Corrente de curto-circuito (Isc).** Com os terminais em curto, a tensão é zero e a corrente é toda a gerada pela luz, 10,4 A num painel de 330 W. Curto num painel não estraga nada: a corrente não passa disso.
+- **Tensão em aberto (Voc).** Sem carga, a corrente é zero e a tensão é a maior possível, 40,6 V.
+- **Ponto de máxima potência.** Entre os dois, a potência (tensão vezes corrente) passa por um máximo: 33,7 V e 9,8 A, que dão 330 W. É o número que dá nome ao painel.
+
+À esquerda do joelho da curva, o painel se comporta como uma fonte de corrente: a corrente quase não muda, e a potência sobe com a tensão. À direita, os diodos das células começam a conduzir e roubam a corrente, que despenca. O máximo fica no joelho. Os valores da etiqueta valem para a **condição padrão de teste** (STC, em inglês): 1.000 W/m², 25 °C nas células. No telhado, as condições quase nunca são essas.
+
+<CurvaPainel client:visible />
+
+### Sol e calor
+
+Experimente o interativo. Com 500 W/m², a corrente de curto cai pela metade, para 5,2 A, enquanto a tensão em aberto quase não muda (39,3 V); a potência fica em 162 W, pouco menos da metade. A corrente acompanha a luz; a tensão, não.
+
+O calor faz o contrário: mexe na tensão. Cada grau a mais tira uns 0,3 % da tensão de uma célula de silício (típico). No verão, um painel ao sol chega a 60 °C, com o ar a 30 °C. A 60 °C, a tensão em aberto cai para 36,8 V e a potência para 293 W, 11 % a menos que na etiqueta. Por isso os painéis rendem melhor num dia frio e ensolarado do que num dia quente, e por isso se deixa um vão de ar embaixo deles.
+
+## O rastreador de máxima potência
+
+Na <LinkAula id="m02-circuitos-cc/09-maxima-transferencia-de-potencia">aula sobre máxima transferência de potência</LinkAula> você viu que uma fonte entrega o máximo para uma carga certa. Com o painel é igual, mas a carga certa muda o tempo todo: 33,7 V ÷ 9,8 A ≈ 3,4 Ω ao meio-dia, quase o dobro com metade do sol. Uma carga fixa ligada direto ao painel só fica no ponto de máxima potência por acaso.
+
+Quem resolve é o <Term id="mppt">rastreador de máxima potência</Term> (MPPT, em inglês), um conversor CC-CC como os da <LinkAula id="m10-fontes/02-fontes-chaveadas">aula sobre fontes chaveadas</LinkAula>. Mudando o ciclo de trabalho, ele escolhe a tensão em que o painel trabalha, sem se importar com a tensão do lado de lá. O jeito mais comum de achar o máximo se chama **perturbar e observar**: o controlador muda a tensão um pouquinho, mede a potência e, se ela subiu, continua no mesmo sentido; se caiu, volta. Ele fica rondando o pico, ajustando várias vezes por segundo conforme as nuvens passam.
+
+Todo inversor solar e todo bom controlador de carga de bateria tem MPPT. Os controladores mais baratos, chamados PWM, só ligam o painel direto na bateria: o painel trabalha na tensão da bateria, longe do máximo, e perde boa parte da potência.
+
+## A sombra
+
+Um painel é uma fileira de células em série, e numa ligação em série a corrente é uma só. Se uma célula recebe menos luz, ela gera menos corrente e vira o gargalo de todas as outras. Pior: as outras células empurram a corrente delas pela célula sombreada, que fica polarizada ao contrário e passa a **consumir** energia, esquentando. Esse é o **ponto quente**, que queima a célula, escurece o plástico de trás e pode trincar o vidro.
+
+Para evitar isso, a caixa de junção tem <Term id="diodo-de-bypass">diodos de bypass</Term>, geralmente três, cada um em paralelo com um grupo de 20 células. Quando um grupo fica fraco, o diodo dele conduz e a corrente das outras células contorna o grupo inteiro. Perde-se a potência daquele terço do painel, mas os outros dois terços seguem trabalhando na corrente cheia.
+
+No interativo, ponha 100 % de sombra numa célula. A máxima potência cai de 330 para 215 W, num ponto de 22 V: um dos três grupos foi contornado pelo diodo. Uma folha cobrindo 1,7 % da área do painel tirou 35 % da potência. Aparecem dois picos na curva de potência: o verdadeiro, em 22 V, e um falso, de 65 W, em 31,6 V. Um MPPT simples, que só sobe a ladeira mais próxima, pode ficar preso no pico menor; os inversores atuais varrem a curva de tempos em tempos para achar o maior.
+
+Agora desmarque os diodos de bypass. A potência fica em 174 W, e a célula sombreada passa a dissipar perto de 150 W numa área do tamanho de uma mão. Com os diodos, ela dissipa uns 30 W, o que ainda esquenta, mas não destrói.
+
+<DeepDive title="Por que a sombra numa célula vale um grupo inteiro">
+
+Com a célula toda à sombra, sobra a luz difusa, uns 15 % do sol, e ela só consegue gerar perto de 1,6 A. Para o grupo dela passar os 9,8 A do resto do painel, essa célula precisaria ficar com tensão negativa até romper, como um diodo polarizado ao contrário. Antes disso, a tensão do grupo inteiro fica negativa, perto de −0,4 V, e o diodo de bypass conduz.
+
+A partir daí, o grupo sombreado contribui com −0,4 V em vez de +11 V, e o painel trabalha com os dois grupos bons: 2 × 11 V ≈ 22 V a 9,8 A, uns 215 W.
+
+O pico falso, em tensão mais alta, é o painel trabalhando com os três grupos, mas na corrente pequena da célula sombreada: tensão quase toda, corrente de 2 A, uns 65 W. Com meia célula à sombra, a conta muda: a célula gera 6 A, e os três grupos a 6 A (225 W em 37,9 V) já rendem um pouco mais que dois grupos a 9,8 A. O pico verdadeiro passa para o outro lado.
+
+</DeepDive>
+
+Em telhados com sombra em parte do dia, há duas saídas além de evitar a sombra: **microinversores**, um pequeno inversor por painel, ou **otimizadores**, um conversor CC-CC com MPPT em cada painel. Assim, cada painel trabalha no próprio máximo e um painel sombreado não puxa os outros para baixo.
+
+## O sistema completo
+
+Vários painéis em série formam uma **string**: dez painéis de 40 V somam 400 V em aberto. O inversor recebe essa tensão contínua, faz o MPPT e a transforma em tensão alternada de 127 ou 220 V, 60 Hz, como o <Term id="inversor">inversor</Term> do nobreak da <LinkAula id="m10-fontes/03-baterias-e-nobreak">aula anterior</LinkAula>, mas com onda senoidal limpa e sincronizada com a rede.
+
+<Figure caption="Figura 2. Os dois tipos de sistema. No conectado à rede (on-grid), o inversor entrega a energia ao quadro da casa, e o que sobra volta para a rede pelo medidor bidirecional. No isolado (off-grid), um controlador de carga com MPPT carrega um banco de baterias, e um inversor alimenta a casa a partir delas." alt="Dois diagramas de blocos lado a lado. À esquerda, sistema conectado à rede: painéis ligam a um inversor, que liga ao quadro de distribuição da casa; o quadro liga às tomadas e a um medidor bidirecional, que liga à rede da rua. Setas mostram a energia indo da rede para a casa e da casa para a rede. À direita, sistema isolado: painéis ligam a um controlador de carga, que liga a um banco de baterias; as baterias ligam a um inversor, que alimenta as tomadas.">
+  <SistemaSolar />
+</Figure>
+
+- **Conectado à rede (on-grid).** É o das casas na cidade. Durante o dia, a casa usa a energia dos painéis e o excedente vai para a rede. O medidor bidirecional da concessionária conta a energia nos dois sentidos, e o que a casa injetou vira crédito para abater o consumo da noite (é a geração distribuída, regulada pela ANEEL). Não tem bateria.
+- **Isolado (off-grid).** É o do sítio sem rede, da cerca elétrica ou da câmera no poste. Um controlador de carga com MPPT carrega baterias, e um inversor alimenta os aparelhos a partir delas. Tudo que se consome à noite precisa caber na bateria.
+- **Híbrido.** Conectado à rede e com bateria: continua alimentando a casa (ou parte dela) quando falta luz.
+
+Um ponto surpreende muita gente: **o sistema on-grid comum desliga quando falta luz**, mesmo com sol forte. O inversor tem proteção <Term id="anti-ilhamento">anti-ilhamento</Term>: ao perceber que a rede sumiu, ele para de gerar em alguns décimos de segundo. Se não parasse, colocaria tensão nos fios da rua, onde um eletricista pode estar trabalhando achando que estão desligados. É a mesma regra do nobreak que nunca se liga numa tomada da casa.
+
+### Quantos painéis
+
+A energia que um painel gera num dia depende de quantas **horas de sol pleno** (o sol do dia somado como se fosse 1.000 W/m² o tempo todo) o lugar recebe. Na maior parte do Brasil, a média fica entre 4 e 6 horas por dia (típico, varia com a região e a estação). Descontando calor, sujeira, fiação e inversor, conta-se uns 80 % do que a etiqueta promete:
+
+$$
+E_\text{dia} = P_\text{painel} \times h_\text{sol} \times 0{,}8 = 330\ \text{W} \times 4{,}5\ \text{h} \times 0{,}8 \approx 1{,}2\ \text{kWh}
+$$
+
+Por mês, uns 36 kWh por painel. Uma casa que consome 200 kWh por mês precisa de 200 ÷ 36 ≈ 5,6, ou seja, seis painéis de 330 W, perto de 2 kW de pico. A conta serve para ter uma ordem de grandeza; o projeto real usa os dados de sol da cidade, a inclinação e a direção do telhado (no Brasil, voltado para o norte) e a sombra ao longo do ano.
+
+<RealCase title="A caixa d'água que roubava um terço da geração">
+
+Uma casa com oito painéis num inversor de string gerava bem até o meio-dia, mas o aplicativo do inversor mostrava a produção caindo pela metade a partir das 14 h, em dias de céu limpo. Nada estava quebrado: os painéis mediam a tensão em aberto certa e o inversor não acusava erro.
+
+O instalador subiu no telhado às 15 h e achou a causa: a sombra da caixa d'água cobria a ponta de baixo de dois painéis. Em cada um, as células sombreadas acionavam os diodos de bypass e tiravam um ou dois terços da tensão do painel. Como os oito painéis estavam numa string só, a tensão total caía, e o MPPT do inversor ainda ficava preso num pico falso, de corrente baixa, que puxava a corrente da string inteira para baixo.
+
+A solução foi dividir os painéis em duas strings, uma em cada entrada de MPPT do inversor: os dois painéis da sombra numa, os seis livres na outra. A geração da tarde voltou quase toda. Num telhado com sombra mais espalhada, a resposta seria otimizadores ou microinversores.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+<Callout type="perigo" title="Painel ao sol não tem botão de desligar">
+Qualquer painel com luz está gerando, e uma string de dez painéis tem perto de 400 V contínuos, que matam. Desligar o disjuntor da casa ou o inversor não tira a tensão dos cabos que descem do telhado. Além disso, a corrente contínua não passa por zero como a alternada, e um arco aberto num conector não se apaga sozinho: ele derrete o conector e começa incêndios. Instalação e manutenção de sistema fotovoltaico são trabalho de profissional habilitado, com projeto aprovado pela concessionária.
+</Callout>
+
+- **Desconectar um conector com corrente.** Os conectores de engate dos cabos solares não são chaves. Primeiro abra a chave seccionadora de corrente contínua (a que fica perto do inversor) e confira com o alicate amperímetro que a corrente é zero; só então desconecte.
+- **Juntar painéis diferentes na mesma string.** A corrente da string é a do painel mais fraco. Um painel antigo ou menor no meio de painéis novos derruba todos.
+- **Somar tensões sem olhar o frio.** A tensão em aberto sobe nos dias frios, e o inversor tem uma tensão máxima de entrada. O projeto confere a string na menor temperatura do lugar.
+- **Esquecer a sombra.** Antena, chaminé, caixa d'água, árvore que cresce, prédio vizinho: uma sombra pequena tira muito mais potência do que a área que cobre.
+- **Lavar o painel quente com água fria.** O choque térmico pode trincar o vidro. Limpe de manhã cedo ou no fim da tarde, com água e pano macio, sem subir no telhado sem equipamento de segurança.
+- **Ligar um inversor sem anti-ilhamento na rede.** Inversores para ligar à rede precisam ser certificados (no Brasil, pelo Inmetro). Um inversor off-grid ligado numa tomada põe tensão na rede da rua quando falta luz.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'multipla',
+      prompt: 'O que acontece com um painel solar quando a luz cai pela metade?',
+      options: [
+        {
+          text: 'A corrente cai pela metade e a tensão quase não muda',
+          correct: true,
+          feedback: 'Isso. A corrente é proporcional à luz; a tensão depende da junção e cai pouco.',
+        },
+        {
+          text: 'A tensão cai pela metade e a corrente quase não muda',
+          feedback: 'É o contrário. Quem acompanha a luz é a corrente; o que mexe na tensão é a temperatura.',
+        },
+        {
+          text: 'As duas caem pela metade, e a potência cai para um quarto',
+          feedback: 'A tensão cai bem pouco. Com metade da luz, a potência fica perto da metade, não de um quarto.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um painel de 72 células tem 0,68 V em aberto por célula. Qual a tensão em aberto do painel?',
+      answer: 49,
+      tolerance: 0.02,
+      unit: 'V',
+      explanation: 'As células estão em série: 72 × 0,68 ≈ 49 V.',
+    },
+    {
+      type: 'vf',
+      prompt:
+        'Com sol forte, um sistema solar conectado à rede, sem bateria, continua alimentando a casa durante uma falta de energia.',
+      answer: false,
+      explanation:
+        'O inversor tem proteção anti-ilhamento e para de gerar quando a rede some, para não pôr tensão nos fios da rua. Para ter energia na falta de luz, o sistema precisa de bateria (híbrido ou isolado).',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Para que servem os diodos de bypass na caixa de junção do painel?',
+      options: [
+        {
+          text: 'Para a corrente contornar um grupo de células sombreado, que senão esquentaria e derrubaria o painel todo',
+          correct: true,
+          feedback:
+            'Isso. Perde-se a potência daquele grupo, mas o resto do painel continua na corrente cheia e a célula sombreada não vira um ponto quente.',
+        },
+        {
+          text: 'Para impedir que a bateria descarregue pelo painel à noite',
+          feedback:
+            'Essa função é do controlador de carga (ou de um diodo de bloqueio em série). Os diodos de bypass ficam em paralelo com as células.',
+        },
+        {
+          text: 'Para retificar a corrente do painel',
+          feedback: 'A corrente do painel já é contínua. Não há o que retificar.',
+        },
+      ],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Numa cidade com 5 horas de sol pleno por dia, quanta energia um painel de 400 W gera num mês de 30 dias, contando 80 % de rendimento?',
+      answer: 48,
+      tolerance: 0.03,
+      unit: 'kWh',
+      explanation: '400 W × 5 h × 0,8 = 1,6 kWh por dia. Em 30 dias, 48 kWh.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Um controlador de carga liga o painel de 330 W direto numa bateria de 12 V, que está com 13 V. Por que ele aproveita bem menos de 330 W?',
+      options: [
+        {
+          text: 'O painel é obrigado a trabalhar em 13 V, longe dos 33,7 V do ponto de máxima potência',
+          correct: true,
+          feedback:
+            'Isso. Em 13 V a corrente é quase a de curto, 10,4 A, e a potência fica perto de 135 W. Um controlador com MPPT converteria os 33,7 V para a bateria e aproveitaria quase tudo.',
+        },
+        {
+          text: 'A bateria de 12 V não aceita mais que 100 W',
+          feedback: 'A bateria aceita a corrente que o carregador mandar, dentro do limite dela. O problema está no lado do painel.',
+        },
+        {
+          text: 'A corrente do painel cai quando a tensão é baixa',
+          feedback: 'Em tensão baixa a corrente do painel é a maior possível, a de curto. Falta tensão, não corrente.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- A **célula solar** é uma junção PN que gera corrente com a luz: a corrente é proporcional à luz e à área, a tensão é de uns 0,6 a 0,7 V. O painel tem dezenas de células em série.
+- A **curva I×V** vai da corrente de curto (Isc) à tensão em aberto (Voc), e a potência máxima fica no joelho. A etiqueta vale para 1.000 W/m² e 25 °C.
+- Menos luz derruba a **corrente**; mais calor derruba a **tensão** (uns 11 % de potência a 60 °C).
+- O **MPPT** é um conversor CC-CC que mantém o painel no ponto de máxima potência, que muda o tempo todo.
+- **Sombra** em uma célula derruba o grupo inteiro; os **diodos de bypass** limitam a perda e evitam o ponto quente. A sombra pode criar picos falsos na curva.
+- No sistema **on-grid**, o inversor entrega a energia à casa e à rede, e desliga quando a rede cai (anti-ilhamento). No **off-grid**, a energia passa por baterias.
+- Painel ao sol está sempre ligado, e a corrente contínua de uma string mata e faz arco. Sistema fotovoltaico é trabalho de profissional habilitado.
+
+Este é o fim do módulo de fontes. No próximo, a eletrônica que conta e decide: <LinkAula id="m11-digital/01-analogico-e-digital">eletrônica digital</LinkAula>.

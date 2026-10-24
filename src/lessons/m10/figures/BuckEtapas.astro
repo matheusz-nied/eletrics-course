@@ -1,0 +1,290 @@
+---
+/*
+ * 10.2: the two moments of a buck converter, the same circuit drawn twice.
+ * Switch closed: the current comes from the 12 V source through the switch
+ * and the inductor to the load. Switch open: it comes up from the negative
+ * through the diode, then through the inductor to the load. Beside it, the
+ * inductor current as a sawtooth: it rises with the switch closed and falls
+ * with it open (same colours as the highlighted paths).
+ */
+interface Panel {
+  y0: number;
+  closed: boolean;
+  title: string;
+}
+
+const panels: Panel[] = [
+  { y0: 0, closed: true, title: 'Chave fechada: o indutor guarda energia' },
+  { y0: 162, closed: false, title: 'Chave aberta: o indutor devolve a energia' },
+];
+
+const BAT = 60;
+const SW1 = 104;
+const SW2 = 140;
+const NODE = 180;
+const L1 = 200;
+const L2 = 280;
+const CAP = 330;
+const LOAD = 384;
+
+const ZIG = Array.from({ length: 6 }, (_, k) => (k % 2 === 0 ? 8 : -8));
+
+function geometry(p: Panel) {
+  const top = p.y0 + 66;
+  const bot = p.y0 + 148;
+  const mid = (top + bot) / 2;
+  const coil = `M${L1} ${top}` + Array.from({ length: 4 }, () => `a10 10 0 0 1 20 0`).join('');
+  const load =
+    `M${LOAD} ${mid - 28}` +
+    ZIG.map((dx, k) => `L${LOAD + dx} ${mid - 24 + k * 9.6}`).join('') +
+    `L${LOAD} ${mid + 28}`;
+  const path = p.closed
+    ? `M${BAT} ${mid - 6}V${top}H${LOAD}V${bot}H${BAT}V${mid + 6}`
+    : `M${NODE} ${bot}V${top}H${LOAD}V${bot}H${NODE}`;
+  const lever = p.closed
+    ? `M${SW1} ${top}L${SW2 - 3} ${top}`
+    : `M${SW1} ${top}L${SW2 - 4} ${top - 20}`;
+  // Little arrowheads along the highlighted path: right on top, down the load, left at the bottom.
+  const back = p.closed ? 120 : 250;
+  const heads =
+    `M${305} ${top - 6}L${313} ${top}L${305} ${top + 6}` +
+    `M${LOAD - 6} ${mid + 34}L${LOAD} ${mid + 42}L${LOAD + 6} ${mid + 34}` +
+    `M${back + 8} ${bot - 6}L${back} ${bot}L${back + 8} ${bot + 6}`;
+  return { top, bot, mid, coil, load, path, lever, heads };
+}
+
+// The inductor current: D = 5/12 of each period rising, the rest falling.
+const GX = 36;
+const PERIOD = 66;
+const D = 5 / 12;
+const LO = 132;
+const HI = 82;
+const rising: string[] = [];
+const falling: string[] = [];
+for (let k = 0; k < 3; k++) {
+  const x = GX + k * PERIOD;
+  rising.push(`M${x} ${LO}L${(x + D * PERIOD).toFixed(1)} ${HI}`);
+  falling.push(`M${(x + D * PERIOD).toFixed(1)} ${HI}L${x + PERIOD} ${LO}`);
+}
+---
+
+<div class="pair">
+  <svg viewBox="0 0 440 318" width="440" height="318" class="fig" aria-hidden="true">
+    {panels.map((p) => {
+      const g = geometry(p);
+      const kind = p.closed ? 'on' : 'off';
+      return (
+        <g>
+          <path d={`M14 ${p.y0 + 14}H32`} class:list={['key', kind]} />
+          <text x="40" y={p.y0 + 19} class="title">
+            {p.title}
+          </text>
+
+          <path d={g.path} class:list={['path', kind]} />
+
+          {/* Source */}
+          <path d={`M${BAT} ${g.top}V${g.mid - 6}M${BAT} ${g.mid + 6}V${g.bot}`} class="wire" />
+          <path d={`M${BAT - 15} ${g.mid - 6}H${BAT + 15}`} class="plate" />
+          <path d={`M${BAT - 8} ${g.mid + 6}H${BAT + 8}`} class="plate thick" />
+          <text x={BAT - 20} y={g.mid - 10} class="pol">
+            +
+          </text>
+          <text x={BAT - 22} y={g.mid + 26} class="lbl end">
+            12 V
+          </text>
+
+          {/* Switch */}
+          <path d={`M${BAT} ${g.top}H${SW1}M${SW2} ${g.top}H${L1}`} class="wire" />
+          <path d={g.lever} class="wire" />
+          <circle cx={SW1} cy={g.top} r="3" class="contact" />
+          <circle cx={SW2} cy={g.top} r="3" class="contact" />
+          <text x={(SW1 + SW2) / 2} y={g.top - 28} class="small">
+            chave
+          </text>
+
+          {/* Diode from the negative up to the switching node */}
+          <path d={`M${NODE} ${g.top}V${g.mid - 9}M${NODE} ${g.mid + 9}V${g.bot}`} class="wire" />
+          <path
+            d={`M${NODE - 11} ${g.mid + 9}L${NODE + 11} ${g.mid + 9}L${NODE} ${g.mid - 9}Z`}
+            class="diode"
+          />
+          <path d={`M${NODE - 11} ${g.mid - 9}H${NODE + 11}`} class="bar" />
+          <circle cx={NODE} cy={g.top} r="3.5" class="dot" />
+          <text x={NODE - 16} y={g.mid + 5} class="small end">
+            diodo
+          </text>
+
+          {/* Inductor, then capacitor and load in parallel */}
+          <path d={g.coil} class="wire" />
+          <text x={(L1 + L2) / 2} y={g.top - 18} class="small">
+            indutor
+          </text>
+          <path
+            d={`M${L2} ${g.top}H${LOAD}V${g.mid - 28}M${LOAD} ${g.mid + 28}V${g.bot}H${BAT}`}
+            class="wire"
+          />
+          <path d={`M${CAP} ${g.top}V${g.mid - 4}M${CAP} ${g.mid + 4}V${g.bot}`} class="wire" />
+          <path
+            d={`M${CAP - 13} ${g.mid - 4}H${CAP + 13}M${CAP - 13} ${g.mid + 4}H${CAP + 13}`}
+            class="plate"
+          />
+          <path d={g.load} class="wire" />
+          <circle cx={CAP} cy={g.top} r="3.5" class="dot" />
+          <circle cx={CAP} cy={g.bot} r="3.5" class="dot" />
+          <circle cx={NODE} cy={g.bot} r="3.5" class="dot" />
+          <text x={CAP - 18} y={g.mid + 5} class="small end">
+            capacitor
+          </text>
+          <text x={LOAD + 14} y={g.mid + 5} class="small start">
+            carga
+          </text>
+
+          <path d={g.heads} class:list={['head', kind]} />
+        </g>
+      );
+    })}
+  </svg>
+
+  <svg viewBox="0 0 260 232" width="260" height="232" class="fig" aria-hidden="true">
+    <text x="20" y="22" class="title">
+      Corrente no indutor
+    </text>
+    <path d={`M${GX - 6} 40V170H250`} class="axis" />
+    <path d="M26 46L30 38L34 46M244 166L252 170L244 174" class="axis" />
+    <text x="250" y="188" class="small end">
+      tempo
+    </text>
+    {rising.map((d) => (
+      <path d={d} class="saw on" />
+    ))}
+    {falling.map((d) => (
+      <path d={d} class="saw off" />
+    ))}
+
+    <path d="M20 206H40" class="key on" />
+    <text x="48" y="210" class="small start">
+      fechada: sobe
+    </text>
+    <path d="M20 226H40" class="key off" />
+    <text x="48" y="230" class="small start">
+      aberta: desce
+    </text>
+  </svg>
+</div>
+
+<style>
+  .pair {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem 1.5rem;
+  }
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .wire {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .plate {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .plate.thick {
+    stroke-width: 5;
+  }
+  .contact {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .dot {
+    fill: var(--fg);
+  }
+  .diode {
+    fill: var(--fg);
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .bar {
+    stroke: var(--fg);
+    stroke-width: 3;
+  }
+  .path {
+    fill: none;
+    stroke-width: 10;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    opacity: 0.3;
+  }
+  .path.on,
+  .key.on,
+  .saw.on {
+    stroke: var(--accent);
+  }
+  .path.off,
+  .key.off,
+  .saw.off {
+    stroke: var(--copper);
+  }
+  .head {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .head.on {
+    stroke: var(--accent);
+  }
+  .head.off {
+    stroke: var(--copper);
+  }
+  .key {
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+  .saw {
+    fill: none;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+  }
+  .axis {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+  }
+  .pol {
+    fill: var(--fg);
+    font-size: 15px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .lbl {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 650;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

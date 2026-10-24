@@ -1,0 +1,214 @@
+---
+/*
+ * 10.4: a solar cell in section. Light comes down onto the anti-reflective
+ * layer and its three metal fingers; under it, a thin N layer, the junction
+ * (dashed) and a thick P layer, then the rear metal contact. Near the
+ * junction a photon makes an electron-hole pair: the electron goes up into
+ * N, the hole down into P. A wire runs from a finger through a lamp and back
+ * to the rear contact.
+ */
+const CX0 = 140;
+const CX1 = 440;
+const AR = 76;
+const NTOP = 84;
+const JUNC = 124;
+const PBOT = 264;
+const BACK = 278;
+const FINGERS = [190, 290, 390];
+const RAYS = [164, 240, 334];
+const LAMP = { x: 500, y: 170, r: 16 };
+
+const rayHead = (x: number, y: number) => `M${x - 6} ${y - 9}L${x} ${y}L${x + 6} ${y - 9}`;
+
+interface Label {
+  y: number;
+  text: string;
+  to: number;
+  ly?: number;
+}
+const labels: Label[] = [
+  { y: 70, text: 'dedos de metal', to: FINGERS[0]! - 7, ly: 66 },
+  { y: 86, text: 'antirreflexo', to: CX0, ly: 80 },
+  { y: 108, text: 'tipo N', to: CX0 },
+  { y: 128, text: 'junção', to: CX0, ly: JUNC },
+  { y: 200, text: 'tipo P', to: CX0 },
+  { y: 275, text: 'contato traseiro', to: CX0, ly: (PBOT + BACK) / 2 },
+];
+---
+
+<svg viewBox="0 0 580 296" width="580" height="296" class="fig" aria-hidden="true">
+  <!-- Light -->
+  <text x="150" y="38" class="light-t">
+    luz
+  </text>
+  {RAYS.map((x) => (
+    <g>
+      <path d={`M${x} 10V58`} class="ray" />
+      <path d={rayHead(x, 60)} class="ray-head" />
+    </g>
+  ))}
+
+  <!-- Layers -->
+  <rect x={CX0} y={JUNC} width={CX1 - CX0} height={PBOT - JUNC} class="p" />
+  <rect x={CX0} y={NTOP} width={CX1 - CX0} height={JUNC - NTOP} class="n" />
+  <rect x={CX0} y={AR} width={CX1 - CX0} height={NTOP - AR} class="ar" />
+  <rect x={CX0} y={PBOT} width={CX1 - CX0} height={BACK - PBOT} class="metal" />
+  {FINGERS.map((x) => (
+    <rect x={x - 6} y="62" width="12" height={NTOP - 62} rx="1.5" class="metal" />
+  ))}
+  <path d={`M${CX0} ${JUNC}H${CX1}`} class="junction" />
+
+  {labels.map((l) => (
+    <g>
+      <text x="128" y={l.y} class="lbl">
+        {l.text}
+      </text>
+      <path d={`M132 ${l.ly ?? l.y - 4}H${l.to}`} class="leader" />
+    </g>
+  ))}
+
+  <!-- A photon reaches the junction and makes a pair -->
+  <path d="M240 62V126" class="ray thin" />
+  <circle cx="229" cy="138" r="7" class="electron" />
+  <text x="229" y="142" class="sign e">
+    −
+  </text>
+  <path d="M229 128V98M224 105L229 97L234 105" class="e-arrow" />
+  <text x="220" y="106" class="pair end">
+    elétron
+  </text>
+  <circle cx="252" cy="138" r="7" class="hole" />
+  <text x="252" y="142.5" class="sign h">
+    +
+  </text>
+  <path d="M252 148V178M247 171L252 179L257 171" class="h-arrow" />
+  <text x="262" y="176" class="pair">
+    lacuna
+  </text>
+
+  <!-- External circuit -->
+  <path
+    d={`M${FINGERS[2]} 62V40H${LAMP.x}V${LAMP.y - LAMP.r}M${LAMP.x} ${LAMP.y + LAMP.r}V${(PBOT + BACK) / 2}H${CX1}`}
+    class="wire"
+  />
+  <circle cx={LAMP.x} cy={LAMP.y} r={LAMP.r} class="lamp" />
+  <path
+    d={`M${LAMP.x - 11} ${LAMP.y - 11}L${LAMP.x + 11} ${LAMP.y + 11}M${LAMP.x + 11} ${LAMP.y - 11}L${LAMP.x - 11} ${LAMP.y + 11}`}
+    class="wire"
+  />
+  <text x={LAMP.x + 24} y={LAMP.y + 5} class="lbl start">
+    lâmpada
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .ray {
+    stroke: var(--warning);
+    stroke-width: 2.5;
+  }
+  .ray.thin {
+    stroke-width: 1.6;
+    stroke-dasharray: 4 3;
+  }
+  .ray-head {
+    fill: none;
+    stroke: var(--warning);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .light-t {
+    fill: var(--warning);
+    font-size: 13px;
+    font-weight: 700;
+    text-anchor: end;
+  }
+  .ar {
+    fill: var(--info);
+  }
+  .n {
+    fill: var(--info-soft);
+    stroke: var(--info-border);
+  }
+  .p {
+    fill: var(--danger-soft);
+    stroke: var(--danger-border);
+  }
+  .metal {
+    fill: var(--fg-subtle);
+  }
+  .junction {
+    stroke: var(--fg);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+  }
+  .lbl {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 600;
+    text-anchor: end;
+  }
+  .start {
+    text-anchor: start;
+  }
+  .leader {
+    stroke: var(--fg-muted);
+    stroke-width: 1;
+  }
+  .electron {
+    fill: var(--info);
+  }
+  .hole {
+    fill: var(--bg);
+    stroke: var(--danger);
+    stroke-width: 2;
+  }
+  .sign {
+    font-size: 13px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .sign.e {
+    fill: var(--bg);
+  }
+  .sign.h {
+    fill: var(--danger);
+  }
+  .e-arrow,
+  .h-arrow {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .e-arrow {
+    stroke: var(--info);
+  }
+  .h-arrow {
+    stroke: var(--danger);
+  }
+  .pair {
+    fill: var(--fg);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .pair.end {
+    text-anchor: end;
+  }
+  .wire {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .lamp {
+    fill: var(--warning-soft);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+</style>

@@ -1,0 +1,209 @@
+---
+/*
+ * 10.1: inside a linear regulator, simplified. The NPN pass transistor joins
+ * the input to the output; the error amplifier compares the output divided
+ * by R1 and R2 with a zener reference and drives the transistor's base. The
+ * span over the transistor is the voltage left over, which turns into heat.
+ */
+const RAIL = 72;
+const GND = 276;
+const DIV = 460;
+const NODE = 176;
+
+const ZIG = Array.from({ length: 6 }, (_, k) => (k % 2 === 0 ? 8 : -8));
+/** A vertical resistor between y1 and y2 (the zigzag fills the whole span). */
+const resistor = (x: number, y1: number, y2: number) => {
+  const step = (y2 - y1) / 7;
+  return (
+    `M${x} ${y1}` +
+    ZIG.map((dx, k) => `L${x + dx} ${(y1 + step * (k + 0.5)).toFixed(1)}`).join('') +
+    `L${x} ${y2}`
+  );
+};
+
+// Pass transistor: base at the bottom, collector to the left, emitter to the right.
+const TX = 220;
+const BAR = 98;
+const C = { x: 194, y: RAIL };
+const E = { x: 246, y: RAIL };
+const e0 = { x: 228, y: BAR };
+const len = Math.hypot(E.x - e0.x, E.y - e0.y);
+const u = { x: (E.x - e0.x) / len, y: (E.y - e0.y) / len };
+const tip = { x: e0.x + u.x * len * 0.8, y: e0.y + u.y * len * 0.8 };
+const back = { x: tip.x - u.x * 10, y: tip.y - u.y * 10 };
+const emitterArrow = `M${tip.x.toFixed(1)} ${tip.y.toFixed(1)}L${(back.x - u.y * 5).toFixed(1)} ${(back.y + u.x * 5).toFixed(1)}L${(back.x + u.y * 5).toFixed(1)} ${(back.y - u.x * 5).toFixed(1)}Z`;
+
+// Reference zener, cathode up.
+const ZX = 360;
+const ZY = 250;
+---
+
+<svg viewBox="0 0 540 304" width="540" height="304" class="fig" aria-hidden="true">
+  <!-- The voltage left over across the pass transistor -->
+  <text x={TX} y="16" class="head">
+    tensão que sobra
+  </text>
+  <text x={TX} y="32" class="heat">
+    entrada − saída: vira calor
+  </text>
+  <path
+    d={`M${C.x} 44H${E.x}M${C.x + 8} 39L${C.x} 44L${C.x + 8} 49M${E.x - 8} 39L${E.x} 44L${E.x - 8} 49M${C.x} 38V52M${E.x} 38V52`}
+    class="span"
+  />
+
+  <!-- Rails and terminals -->
+  <path d={`M30 ${RAIL}H${C.x}M${E.x} ${RAIL}H510M30 ${GND}H510`} class="wire" />
+  <circle cx="30" cy={RAIL} r="4" class="term" />
+  <circle cx="510" cy={RAIL} r="4" class="term" />
+  <circle cx="30" cy={GND} r="4" class="term" />
+  <circle cx="510" cy={GND} r="4" class="term" />
+  <text x="22" y={RAIL - 14} class="lbl">
+    entrada
+  </text>
+  <text x="518" y={RAIL - 14} class="lbl end">
+    saída
+  </text>
+  <text x="22" y={GND + 22} class="lbl">
+    terra
+  </text>
+  <text x="518" y={GND + 22} class="lbl end">
+    terra
+  </text>
+
+  <!-- Pass transistor (NPN) -->
+  <circle cx={TX} cy="86" r="26" class="body" />
+  <path d={`M${TX - 16} ${BAR}H${TX + 16}`} class="bar" />
+  <path d={`M212 ${BAR}L${C.x} ${C.y}M${e0.x} ${e0.y}L${E.x} ${E.y}`} class="wire" />
+  <path d={emitterArrow} class="fill" />
+  <text x="196" y="128" class="note end">
+    transistor
+  </text>
+  <text x="196" y="144" class="note end">
+    de passagem
+  </text>
+
+  <!-- Divider R1 + R2 from the output to ground -->
+  <circle cx={DIV} cy={RAIL} r="3.5" class="fill" />
+  <path d={`M${DIV} ${RAIL}V100`} class="wire" />
+  <path d={resistor(DIV, 100, 150)} class="wire" />
+  <path d={`M${DIV} 150V200`} class="wire" />
+  <path d={resistor(DIV, 200, 250)} class="wire" />
+  <path d={`M${DIV} 250V${GND}`} class="wire" />
+  <circle cx={DIV} cy={NODE} r="3.5" class="fill" />
+  <circle cx={DIV} cy={GND} r="3.5" class="fill" />
+  <text x={DIV + 16} y="130" class="lbl">
+    R1
+  </text>
+  <text x={DIV + 16} y="230" class="lbl">
+    R2
+  </text>
+
+  <!-- Error amplifier -->
+  <path d="M320 160L320 240L250 200Z" class="amp" />
+  <text x="310" y="181" class="sign">
+    −
+  </text>
+  <text x="310" y="229" class="sign">
+    +
+  </text>
+  <path d={`M${DIV} ${NODE}H320M320 224H${ZX}V${ZY - 9}M250 200H${TX}V${BAR}`} class="wire" />
+  <text x="270" y="258" class="note">
+    amplificador de erro
+  </text>
+
+  <!-- Reference: a zener to ground -->
+  <path d={`M${ZX - 11} ${ZY + 9}L${ZX + 11} ${ZY + 9}L${ZX} ${ZY - 9}Z`} class="fill" />
+  <path
+    d={`M${ZX - 15} ${ZY - 5}L${ZX - 11} ${ZY - 9}H${ZX + 11}L${ZX + 15} ${ZY - 13}`}
+    class="zbar"
+  />
+  <path d={`M${ZX} ${ZY + 9}V${GND}`} class="wire" />
+  <circle cx={ZX} cy={GND} r="3.5" class="fill" />
+  <text x={ZX + 20} y={ZY + 4} class="note start">
+    referência
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .wire {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .fill {
+    fill: var(--fg);
+  }
+  .term {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .body {
+    fill: var(--surface);
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .bar {
+    stroke: var(--fg);
+    stroke-width: 4;
+  }
+  .zbar {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 3;
+    stroke-linejoin: round;
+  }
+  .amp {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+  .sign {
+    fill: var(--fg);
+    font-size: 16px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .span {
+    fill: none;
+    stroke: var(--danger);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .head {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .heat {
+    fill: var(--danger);
+    font-size: 12px;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+  .lbl {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 650;
+  }
+  .note {
+    fill: var(--fg-muted);
+    font-size: 12px;
+    text-anchor: middle;
+  }
+  .end {
+    text-anchor: end;
+  }
+  .start {
+    text-anchor: start;
+  }
+</style>

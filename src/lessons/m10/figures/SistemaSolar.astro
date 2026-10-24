@@ -1,0 +1,163 @@
+---
+/*
+ * 10.4: the two kinds of solar system, as two block diagrams that sit side
+ * by side on a wide screen and stack on a phone. On-grid: panels, inverter,
+ * the house's distribution board (feeding the sockets), the bidirectional
+ * meter and the street grid, with energy going both ways between the house
+ * and the grid. Off-grid: panels, charge controller (MPPT), battery bank,
+ * inverter, sockets.
+ */
+interface Block {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  lines: string[];
+  kind?: string;
+}
+
+const onGrid: Block[] = [
+  { x: 80, y: 36, w: 120, h: 40, lines: ['painéis'], kind: 'sun' },
+  { x: 80, y: 100, w: 120, h: 40, lines: ['inversor'] },
+  { x: 80, y: 164, w: 120, h: 48, lines: ['quadro de', 'distribuição'] },
+  { x: 226, y: 168, w: 70, h: 40, lines: ['tomadas'] },
+  { x: 80, y: 248, w: 120, h: 48, lines: ['medidor', 'bidirecional'] },
+  { x: 80, y: 332, w: 120, h: 40, lines: ['rede da rua'], kind: 'grid' },
+];
+const offGrid: Block[] = [
+  { x: 80, y: 36, w: 120, h: 40, lines: ['painéis'], kind: 'sun' },
+  { x: 60, y: 100, w: 160, h: 48, lines: ['controlador de carga', '(MPPT)'] },
+  { x: 80, y: 172, w: 120, h: 48, lines: ['banco de', 'baterias'], kind: 'battery' },
+  { x: 80, y: 244, w: 120, h: 40, lines: ['inversor'] },
+  { x: 80, y: 308, w: 120, h: 40, lines: ['tomadas'] },
+];
+
+const down = (x: number, y1: number, y2: number) =>
+  `M${x} ${y1}V${y2 - 1}M${x - 5} ${y2 - 8}L${x} ${y2}L${x + 5} ${y2 - 8}`;
+const up = (x: number, y1: number, y2: number) =>
+  `M${x} ${y1}V${y2 + 1}M${x - 5} ${y2 + 8}L${x} ${y2}L${x + 5} ${y2 + 8}`;
+
+const systems = [
+  {
+    title: 'Conectado à rede (on-grid)',
+    blocks: onGrid,
+    flow: [down(140, 76, 100), down(140, 140, 164), `M200 188H225M218 183L226 188L218 193`],
+  },
+  {
+    title: 'Isolado (off-grid)',
+    blocks: offGrid,
+    flow: [down(140, 76, 100), down(140, 148, 172), down(140, 220, 244), down(140, 284, 308)],
+  },
+];
+---
+
+<div class="pair">
+  {systems.map((s, k) => (
+    <svg viewBox="0 0 300 380" width="300" height="380" class="fig" aria-hidden="true">
+      <text x="150" y="20" class="title">
+        {s.title}
+      </text>
+      {s.flow.map((d) => (
+        <path d={d} class="flow" />
+      ))}
+      {k === 0 && (
+        <>
+          {/* Both ways between the house and the grid */}
+          <path d={up(128, 248, 212)} class="flow buy" />
+          <path d={down(152, 212, 248)} class="flow sell" />
+          <path d={up(128, 332, 296)} class="flow buy" />
+          <path d={down(152, 296, 332)} class="flow sell" />
+          <text x="118" y="318" class="note buy end">
+            da rede
+          </text>
+          <text x="162" y="318" class="note sell">
+            para a rede
+          </text>
+        </>
+      )}
+      {s.blocks.map((b) => (
+        <g>
+          <rect x={b.x} y={b.y} width={b.w} height={b.h} rx="6" class:list={['block', b.kind]} />
+          {b.lines.map((l, i) => (
+            <text
+              x={b.x + b.w / 2}
+              y={b.y + b.h / 2 + 5 + (i - (b.lines.length - 1) / 2) * 16}
+              class="name"
+            >
+              {l}
+            </text>
+          ))}
+        </g>
+      ))}
+    </svg>
+  ))}
+</div>
+
+<style>
+  .pair {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 2rem;
+  }
+  .fig {
+    font-family: var(--font-sans);
+    max-width: 100%;
+    height: auto;
+  }
+  .title {
+    fill: var(--fg);
+    font-size: 14px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+  .block {
+    fill: var(--bg);
+    stroke: var(--fg);
+    stroke-width: 1.5;
+  }
+  .block.sun {
+    fill: var(--warning-soft);
+    stroke: var(--warning);
+  }
+  .block.battery {
+    fill: var(--success-soft);
+    stroke: var(--success);
+  }
+  .block.grid {
+    fill: var(--surface);
+    stroke: var(--fg-subtle);
+  }
+  .name {
+    fill: var(--fg);
+    font-size: 13px;
+    font-weight: 650;
+    text-anchor: middle;
+  }
+  .flow {
+    fill: none;
+    stroke: var(--fg-muted);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .flow.buy {
+    stroke: var(--accent);
+  }
+  .flow.sell {
+    stroke: var(--success);
+  }
+  .note {
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .note.buy {
+    fill: var(--accent);
+  }
+  .note.sell {
+    fill: var(--success);
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>
