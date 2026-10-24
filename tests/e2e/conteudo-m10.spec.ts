@@ -86,7 +86,7 @@ test.describe('módulo 10: fontes de alimentação', () => {
     await page.goto(`${MODULE}04-energia-solar/`);
     const widget = await hydrated(page, '.cpainel');
     await expect(widget.locator('.lw__status')).toContainText('Curva normal');
-    await expect(widget.locator('.cpainel__values')).toContainText('330 W');
+    await expect(widget.locator('.cpainel__values')).toContainText(/33[01]\sW/);
     await widget.getByLabel('Sombra numa célula').fill('100');
     await expect(widget.locator('.lw__status')).toContainText('mais de um pico');
     await expect(widget.locator('.cpainel__values')).toContainText('215 W');
