@@ -1,0 +1,105 @@
+/* AntenaAlcance.tsx, lesson 13.2. */
+
+.antena__body {
+  align-items: start;
+}
+
+@media (min-width: 52rem) {
+  .antena__body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.antena__side {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.antena__ruler,
+.antena__map {
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.antena__axis {
+  stroke: var(--fg-muted);
+  stroke-width: 1;
+}
+
+.antena__t {
+  fill: var(--fg-muted);
+  font-size: 11px;
+  text-anchor: middle;
+}
+
+.antena__t--end {
+  text-anchor: end;
+}
+
+.antena__t--start {
+  text-anchor: start;
+}
+
+.antena__sweet {
+  fill: var(--success-soft);
+  stroke: var(--success);
+  stroke-dasharray: 3 3;
+}
+
+.antena__quarter {
+  stroke: var(--success);
+  stroke-width: 1.5;
+}
+
+.antena__wire {
+  stroke: light-dark(#c99a06, #e3bd1c);
+  stroke-linecap: round;
+  stroke-width: 4;
+}
+
+.antena__solder {
+  fill: var(--fg-subtle);
+}
+
+.antena__best {
+  fill: var(--surface);
+  stroke: var(--border-strong);
+  stroke-dasharray: 4 3;
+}
+
+.antena__reach {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+}
+
+.antena__box {
+  fill: var(--fg-subtle);
+}
+
+.antena__remote {
+  fill: var(--fg);
+}
+
+.antena__remote-led {
+  fill: var(--danger);
+}
+
+.antena__budget {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.2rem 1rem;
+  font-size: 0.875rem;
+}
+
+.antena__budget dt {
+  color: var(--fg-muted);
+}
+
+.antena__budget dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}

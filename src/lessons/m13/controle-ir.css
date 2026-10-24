@@ -1,0 +1,166 @@
+/* ControleIR.tsx, lesson 13.4. */
+
+.ir {
+  --ir-inicio: light-dark(#e1e5eb, #2a313c);
+  --ir-endereco: light-dark(#dbe8fb, #1d2f4d);
+  --ir-endereco-inv: light-dark(#eaf1fc, #172539);
+  --ir-comando: light-dark(#fbe7c6, #4a3712);
+  --ir-comando-inv: light-dark(#fdf2df, #382a0e);
+  --ir-fim: light-dark(#e1e5eb, #2a313c);
+}
+
+.ir__top {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.ir__remote {
+  width: 100%;
+  height: auto;
+}
+
+.ir__body {
+  fill: light-dark(#2c3138, #1b1f25);
+  stroke: var(--border-strong);
+}
+
+.ir__window {
+  fill: #121418;
+}
+
+.ir__led {
+  fill: #3a3f47;
+}
+
+.ir__led--on {
+  fill: #f3e9ff;
+}
+
+.ir__glow {
+  fill: #c9a7ff;
+  opacity: 0.55;
+  filter: blur(4px);
+}
+
+.ir__key {
+  fill: #5b626d;
+}
+
+.ir__key--power {
+  fill: #b5372c;
+}
+
+.ir__controls {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  justify-items: start;
+}
+
+.ir__wave,
+.ir__zoom svg {
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.ir__zoom {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ir__zoom svg {
+  max-width: 28rem;
+}
+
+.ir__part--inicio {
+  --ir-bg: var(--ir-inicio);
+}
+
+.ir__part--endereco {
+  --ir-bg: var(--ir-endereco);
+}
+
+.ir__part--endereco-inv {
+  --ir-bg: var(--ir-endereco-inv);
+}
+
+.ir__part--comando {
+  --ir-bg: var(--ir-comando);
+}
+
+.ir__part--comando-inv {
+  --ir-bg: var(--ir-comando-inv);
+}
+
+.ir__part--fim {
+  --ir-bg: var(--ir-fim);
+}
+
+.ir__part-bg {
+  fill: var(--ir-bg);
+}
+
+.ir__t {
+  fill: var(--fg-muted);
+  font-size: 10px;
+  text-anchor: middle;
+}
+
+.ir__t--start {
+  text-anchor: start;
+}
+
+.ir__base {
+  stroke: var(--fg-subtle);
+  stroke-width: 1;
+}
+
+.ir__burst {
+  fill: var(--danger);
+}
+
+.ir__burst-line,
+.ir__rx {
+  fill: none;
+  stroke: var(--fg);
+  stroke-width: 1.5;
+}
+
+.ir__burst-line {
+  stroke: var(--danger);
+}
+
+.ir__bytes {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.ir__bytes :where(th, td) {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.ir__bytes thead th {
+  color: var(--fg-muted);
+  font-weight: 600;
+}
+
+.ir__bytes code {
+  font-family: var(--font-mono);
+}
+
+/* On a phone the drawings shrink to half their size: scale the labels up. */
+@media (max-width: 35.99rem) {
+  .ir__wave .ir__t {
+    font-size: 16px;
+  }
+
+  .ir__wave .ir__t--start {
+    font-size: 18px;
+  }
+}

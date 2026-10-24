@@ -1,0 +1,239 @@
+---
+titulo: Ondas eletromagnéticas
+modulo: m13-sem-fio
+ordem: 1
+nivel: B
+duracaoMin: 25
+objetivos:
+  - Explicar como uma corrente que muda de sentido numa antena cria uma onda que viaja sem fio
+  - Relacionar frequência, comprimento de onda e velocidade da luz
+  - Calcular o comprimento de onda de um sinal a partir da frequência
+  - Situar rádio, Wi-Fi, infravermelho, luz e raio X no espectro eletromagnético
+  - Diferenciar radiação ionizante de não ionizante
+prerequisitos:
+  - m05-magnetismo/01-imas-e-campo-magnetico
+  - m05-magnetismo/03-inducao-eletromagnetica
+  - m06-corrente-alternada/01-da-cc-a-ca
+tags: [onda eletromagnética, frequência, comprimento de onda, espectro, rádio, 433 MHz, Wi-Fi]
+seguranca: nenhum
+---
+
+import Espectro from '../../../lessons/m13/Espectro.tsx';
+
+Você aperta o controle na calçada e o portão, a 20 metros, começa a abrir. Não há fio entre os dois, e o ar não conduz eletricidade. O celular no seu bolso conversa com uma torre a quilômetros, e a luz do sol chega aqui depois de atravessar 150 milhões de quilômetros de vácuo. Os três são a mesma coisa: uma **onda eletromagnética**, só que em frequências diferentes.
+
+## Um campo que puxa o outro
+
+Você já viu dois fatos que, juntos, explicam o rádio:
+
+- Corrente elétrica cria campo magnético em volta do fio (aula <LinkAula id="m05-magnetismo/01-imas-e-campo-magnetico" />).
+- Campo magnético que **muda** cria tensão, ou seja, campo elétrico (a indução da aula <LinkAula id="m05-magnetismo/03-inducao-eletromagnetica" />).
+
+O físico escocês James Clerk Maxwell percebeu, por volta de 1865, que o contrário também vale: um campo elétrico que muda cria campo magnético, mesmo sem fio nenhum. Então, se uma corrente vai e volta num fio muito depressa, ela cria um campo magnético que muda, que cria um campo elétrico que muda, que cria outro campo magnético, e assim por diante. Os dois campos se sustentam um ao outro e se soltam do fio. Isso é uma <Term id="onda-eletromagnetica">onda eletromagnética</Term>.
+
+Ela tem três propriedades que valem para qualquer frequência:
+
+1. **Não precisa de meio.** Viaja no ar, no vácuo, através de paredes finas e de plástico. O som precisa do ar; a onda eletromagnética não.
+2. **Anda na velocidade da luz.** No vácuo, $c \approx 3{,}00 \times 10^8\,\text{m/s}$, cerca de 300.000 km por segundo. No ar, quase igual.
+3. **Os campos são perpendiculares.** O campo elétrico oscila numa direção, o magnético na direção perpendicular, e a onda anda na terceira direção, perpendicular aos dois.
+
+<Model3D
+  part="em-wave"
+  props={{ frequencyMHz: 433.92 }}
+  annotations
+  caption="Onda de 433,92 MHz saindo de uma antena de fio de ¼ de onda. O campo elétrico (E) sobe e desce no plano da antena; o campo magnético (B) oscila de lado. A onda anda para a direita a 300.000 km/s."
+/>
+
+Gire o modelo e olhe de cima: o campo elétrico some (ele está "em pé"), e só aparece o magnético. Olhe de frente, na direção em que a onda anda: os dois campos formam uma cruz que cresce e diminui. Na legenda, compare o tamanho da antena com o comprimento da onda.
+
+O desenho mostra a onda longe da antena, com os dois campos em fase. Bem perto do fio a forma é mais complicada, mas a ideia não muda.
+
+<Callout type="nota" title="Onde a analogia da corda falha">
+É comum comparar a onda com uma corda balançada. A comparação ajuda a ver a crista e o vale, mas na onda eletromagnética nada sobe e desce de verdade: o que varia é a intensidade e o sentido dos campos em cada ponto do espaço. E, diferente da corda, ela não precisa de nada para se apoiar.
+</Callout>
+
+## Frequência e comprimento de onda
+
+A antena do controle é ligada a um oscilador: um circuito que faz a corrente ir e voltar um número fixo de vezes por segundo. Esse número é a <Term id="frequencia">frequência</Term> $f$, em hertz. No controle do portão, são 433,92 milhões de vezes por segundo: 433,92 MHz.
+
+Enquanto a corrente faz um ciclo completo, a onda anda uma certa distância. Essa distância é o <Term id="comprimento-de-onda">comprimento de onda</Term>, $\lambda$ (a letra grega lambda). Se a onda anda $c$ metros por segundo e faz $f$ ciclos por segundo, cada ciclo ocupa:
+
+$$
+\lambda = \frac{c}{f}
+$$
+
+em que $\lambda$ é o comprimento de onda em metros, $c \approx 3{,}00 \times 10^8\,\text{m/s}$ é a velocidade da luz e $f$ é a frequência em hertz. Frequência alta, onda curta; frequência baixa, onda longa. O período, o tempo de um ciclo, é $T = 1/f$: em 433,92 MHz, cerca de 2,3 nanossegundos.
+
+Esse comprimento importa porque decide o **tamanho da antena**. Uma antena funciona bem quando tem um tamanho parecido com uma fração simples do comprimento de onda, como meia onda ou um quarto de onda. É por isso que a antena do rádio FM, esticada, tem perto de 75 cm, e a do Wi-Fi cabe dentro do roteador. A aula <LinkAula id="m13-sem-fio/02-antenas" /> mostra o porquê.
+
+## O espectro eletromagnético
+
+Ondas de rádio, micro-ondas, infravermelho, luz, ultravioleta e raios X são o mesmo fenômeno, com frequências diferentes. Juntas, formam o <Term id="espectro-eletromagnetico">espectro eletromagnético</Term>. Os nomes mudam porque cada faixa é produzida, captada e usada de um jeito.
+
+<Espectro client:visible />
+
+Faça estes testes na figura:
+
+1. Escolha **Controle de portão** e anote o comprimento de onda e a antena de ¼ de onda.
+2. Escolha **Wi-Fi 2,4 GHz e Bluetooth**. A frequência ficou umas 5,6 vezes maior. O que aconteceu com o comprimento de onda?
+3. Escolha **Rede elétrica**. Por que a fiação da sua casa não vira uma antena que espalha 60 Hz pelo bairro?
+4. Arraste até a luz visível. Onde fica a faixa que os olhos enxergam, comparada com o resto da régua?
+
+No passo 2, o comprimento de onda caiu na mesma proporção, de 69,1 cm para 12,3 cm: frequência e comprimento de onda são inversamente proporcionais. No passo 3, a onda de 60 Hz teria 5.000 km, e um fio de alguns metros é minúsculo perto disso: ele irradia uma fração ínfima da energia. No passo 4, a luz visível é uma tira estreita, quase perdida na régua. Quase tudo que existe no espectro é invisível para nós.
+
+### Quem usa cada faixa
+
+| Faixa | Frequência | Comprimento de onda | Onde aparece |
+| --- | --- | --- | --- |
+| Rádio AM (ondas médias) | cerca de 0,5 a 1,7 MHz | centenas de metros | Rádio AM, com torres enormes |
+| Rádio FM | 88 a 108 MHz | cerca de 3 m | Rádio FM |
+| Faixa de 433 MHz | 433,92 MHz | 69,1 cm | Controle de portão, alarmes, sensores sem fio |
+| Celular | de centenas de MHz a alguns GHz | de dezenas de centímetros a poucos centímetros | Celular 4G e 5G |
+| 2,4 GHz | 2,4 a 2,5 GHz | cerca de 12 cm | Wi-Fi, Bluetooth, forno de micro-ondas |
+| 5 GHz | 5,1 a 5,9 GHz | cerca de 6 cm | Wi-Fi |
+| Infravermelho | de 300 GHz a 400 THz | de 1 mm a 750 nm | Controle da TV (940 nm), calor, sensores de presença |
+| Luz visível | de 400 a 790 THz | de 750 a 380 nm | O que os olhos veem |
+| Ultravioleta | acima de 790 THz | abaixo de 380 nm | Sol, lâmpadas germicidas |
+| Raios X e gama | acima de cerca de 30 PHz | menor que um átomo | Radiografia, radioterapia |
+
+Quem decide quem pode transmitir em cada faixa de rádio no Brasil é a Anatel. É por isso que os controles de portão, os alarmes e os sensores sem fio dividem a faixa de 433 MHz: ela é liberada para equipamentos de baixa potência, sem licença individual, desde que o aparelho seja homologado. O preço disso é que todos competem pelo mesmo canal.
+
+## Exemplo resolvido: do rádio ao controle da TV
+
+**1. Rede elétrica, 60 Hz.**
+
+$$
+\lambda = \frac{3{,}00 \times 10^8\,\text{m/s}}{60\,\text{Hz}} = 5{,}0 \times 10^6\,\text{m} = 5.000\,\text{km}
+$$
+
+Mais que a largura do Brasil de leste a oeste.
+
+**2. Rádio FM, 100 MHz.**
+
+$$
+\lambda = \frac{3{,}00 \times 10^8}{100 \times 10^6} = 3{,}00\,\text{m}
+$$
+
+Um quarto disso dá 75 cm, a antena telescópica do rádio.
+
+**3. Controle do portão, 433,92 MHz.**
+
+$$
+\lambda = \frac{3{,}00 \times 10^8}{433{,}92 \times 10^6} \approx 0{,}691\,\text{m} = 69{,}1\,\text{cm}
+$$
+
+**4. Controle da TV.** Aqui o fabricante informa o comprimento de onda do LED, 940 nm, e a conta vai ao contrário:
+
+$$
+f = \frac{c}{\lambda} = \frac{3{,}00 \times 10^8\,\text{m/s}}{940 \times 10^{-9}\,\text{m}} \approx 3{,}19 \times 10^{14}\,\text{Hz} = 319\,\text{THz}
+$$
+
+Confira os quatro valores na figura do espectro. Ela usa o valor exato de $c$, 299.792.458 m/s, e chega aos mesmos números arredondados.
+
+<RealCase title="O micro-ondas que derruba o Wi-Fi">
+Muita gente percebe que o vídeo trava quando alguém liga o forno de micro-ondas. Não é coincidência: o forno trabalha perto de 2,45 GHz, dentro da faixa do Wi-Fi de 2,4 GHz e do Bluetooth. Ele usa centenas de watts para agitar a água da comida, e a porta com tela metálica segura quase tudo lá dentro. Mas um vazamento minúsculo, perto do roteador, já é muito mais forte que o sinal do Wi-Fi.
+
+As saídas são duas: afastar o roteador da cozinha ou usar a faixa de 5 GHz, que o forno não atinge. Um forno com a porta empenada, a vedação suja ou a tela danificada deve ser consertado ou trocado: a blindagem existe para manter a energia lá dentro.
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Achar que toda "radiação" é perigosa do mesmo jeito.** Rádio, Wi-Fi, celular, infravermelho e luz são radiações **não ionizantes**: cada fóton não tem energia para arrancar elétrons dos átomos. O efeito delas no corpo, em potência alta, é aquecer. Ultravioleta forte, raios X e gama são **ionizantes**: quebram moléculas e danificam o DNA, e por isso a radiografia usa a dose mínima e o técnico sai da sala.
+- **Ignorar o aquecimento em potência alta.** Não ligue o micro-ondas vazio nem com a porta danificada, e não fique colado a antenas de transmissão de alta potência (torres de rádio, radares). A Anatel limita a exposição do público seguindo recomendações internacionais; os aparelhos de casa, homologados, ficam abaixo desses limites.
+- **Confundir frequência com potência.** Uma onda de frequência maior não é "mais forte". A potência diz quanta energia a onda leva; a frequência diz de que tipo ela é.
+- **Esquecer que λ e f andam ao contrário.** Dobrou a frequência, o comprimento de onda cai pela metade, e a antena também.
+- **Usar 300.000 km/s em materiais.** Dentro de cabos e de plásticos a onda anda mais devagar, e as antenas impressas em placa ficam mais curtas que a conta no ar.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt: 'Qual o comprimento de onda de um sinal de 2,4 GHz, em centímetros? Use c = 3,00 × 10⁸ m/s.',
+      answer: 12.5,
+      tolerance: 0.02,
+      unit: 'cm',
+      explanation: 'λ = c/f = 3,00 × 10⁸ / 2,4 × 10⁹ = 0,125 m = 12,5 cm.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que uma onda eletromagnética atravessa o vácuo, e o som não?',
+      options: [
+        {
+          text: 'Porque os campos elétrico e magnético se criam um ao outro e não precisam de matéria',
+          correct: true,
+        },
+        {
+          text: 'Porque a onda eletromagnética é mais forte que o som',
+          feedback: 'Não é questão de força: o som é vibração de matéria e simplesmente não existe sem ela.',
+        },
+        {
+          text: 'Porque a onda eletromagnética viaja dentro de fios invisíveis',
+          feedback: 'Não há fio nenhum: os campos se sustentam sozinhos no espaço.',
+        },
+        {
+          text: 'Porque o vácuo conduz eletricidade',
+          feedback: 'O vácuo não conduz corrente. A onda não é uma corrente andando, é um campo.',
+        },
+      ],
+    },
+    {
+      type: 'multipla',
+      prompt: 'Se a frequência de uma onda triplica, o comprimento de onda:',
+      options: [
+        { text: 'Cai para um terço', correct: true },
+        { text: 'Triplica', feedback: 'λ = c/f: frequência e comprimento de onda são inversamente proporcionais.' },
+        { text: 'Não muda', feedback: 'Só a velocidade não muda. Com c fixo, mudar f muda λ.' },
+        { text: 'Cai para um nono', feedback: 'A relação é inversa simples, não inversa do quadrado.' },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'O Wi-Fi e o raio X são o mesmo tipo de fenômeno físico, com frequências diferentes.',
+      answer: true,
+      explanation:
+        'Os dois são ondas eletromagnéticas. O raio X tem frequência bilhões de vezes maior, e cada fóton tem energia para ionizar átomos; o Wi-Fi não.',
+    },
+    {
+      type: 'ordenar',
+      prompt: 'Coloque em ordem, da menor para a maior frequência.',
+      items: ['Rede elétrica', 'Rádio FM', 'Controle de portão', 'Wi-Fi', 'Controle da TV (infravermelho)', 'Luz azul'],
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Um LED infravermelho emite em 850 nm. Qual a frequência, em terahertz? Use c = 3,00 × 10⁸ m/s.',
+      answer: 353,
+      tolerance: 0.02,
+      unit: 'THz',
+      explanation: 'f = c/λ = 3,00 × 10⁸ / 850 × 10⁻⁹ ≈ 3,53 × 10¹⁴ Hz = 353 THz.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Por que a fiação de 60 Hz da casa praticamente não irradia ondas?',
+      options: [
+        {
+          text: 'Porque o comprimento de onda é de 5.000 km, e os fios são minúsculos perto disso',
+          correct: true,
+        },
+        {
+          text: 'Porque a corrente alternada não cria campo magnético',
+          feedback: 'Cria, sim: é o que faz o transformador funcionar. O campo só não se solta e viaja longe.',
+        },
+        {
+          text: 'Porque o eletroduto de PVC bloqueia as ondas',
+          feedback: 'PVC é transparente para ondas de rádio. A questão é o tamanho do fio comparado com λ.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- Corrente que vai e volta numa antena cria campos elétrico e magnético que se sustentam um ao outro e viajam pelo espaço: uma onda eletromagnética.
+- A onda anda a cerca de 300.000 km/s, com os dois campos perpendiculares entre si e à direção em que ela anda.
+- $\lambda = c/f$: em 433,92 MHz, 69,1 cm; em 2,4 GHz, cerca de 12 cm; em 60 Hz, 5.000 km. O tamanho da antena acompanha λ.
+- Rádio, micro-ondas, infravermelho, luz, ultravioleta e raios X formam o espectro eletromagnético. A Anatel organiza quem usa cada faixa de rádio.
+- Rádio, Wi-Fi e luz são radiação não ionizante; raios X, gama e ultravioleta forte são ionizantes.

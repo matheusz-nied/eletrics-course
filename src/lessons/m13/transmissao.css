@@ -1,0 +1,204 @@
+/* TransmissaoBits.tsx, lesson 13.3. */
+
+.bits {
+  --bits-sync: light-dark(#e1e5eb, #2a313c);
+  --bits-serial: light-dark(#dbe8fb, #1d2f4d);
+  --bits-botao: light-dark(#fbe7c6, #4a3712);
+  --bits-cifrado: light-dark(#ecdcf7, #3a2850);
+  --bits-status: light-dark(#d9f2e3, #173a28);
+}
+
+.bits__panels {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 52rem) {
+  .bits__panels {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.bits__panel {
+  display: grid;
+  align-content: start;
+  gap: 0.6rem;
+  min-width: 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.lw .bits__panel-t {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.bits__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.bits__led-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.9375rem;
+}
+
+.bits__led {
+  flex: none;
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.bits__led--on {
+  border-color: var(--danger);
+  background: var(--danger);
+  box-shadow: 0 0 0.5rem var(--danger);
+}
+
+.bits__memory {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.875rem;
+}
+
+.bits__frame {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+}
+
+.bits__frame svg {
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+}
+
+.bits__field--sync {
+  --bits-bg: var(--bits-sync);
+}
+
+.bits__field--serial {
+  --bits-bg: var(--bits-serial);
+}
+
+.bits__field--botao {
+  --bits-bg: var(--bits-botao);
+}
+
+.bits__field--cifrado {
+  --bits-bg: var(--bits-cifrado);
+}
+
+.bits__field--status {
+  --bits-bg: var(--bits-status);
+}
+
+.bits__field-bg {
+  fill: var(--bits-bg);
+}
+
+.bits__field-t {
+  fill: var(--fg-muted);
+  font-size: 10px;
+  text-anchor: middle;
+}
+
+.bits__base {
+  stroke: var(--fg-muted);
+  stroke-width: 1;
+}
+
+.bits__on {
+  fill: var(--fg);
+}
+
+.bits__cursor {
+  fill: var(--accent);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bits__cursor {
+    animation: bits-send 1.6s linear;
+  }
+}
+
+@keyframes bits-send {
+  from {
+    opacity: 0.85;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0.85;
+    transform: translateX(624px);
+  }
+}
+
+.bits__axis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  justify-content: space-between;
+  margin: 0.25rem 0 0.5rem;
+  color: var(--fg-subtle);
+  font-size: 0.8125rem;
+}
+
+/* On a phone the drawing shrinks to half its size: scale the labels up. */
+@media (max-width: 35.99rem) {
+  .bits__field-t {
+    font-size: 18px;
+  }
+}
+
+.bits__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.bits__chip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: baseline;
+  max-width: 100%;
+  padding: 0.3rem 0.55rem;
+  border-radius: 0.5rem;
+  background: var(--bits-bg);
+  font-size: 0.8125rem;
+}
+
+.bits__chip-t {
+  color: var(--fg-muted);
+}
+
+.bits__chip code {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.bits__log {
+  display: grid;
+  gap: 0.25rem;
+  padding-left: 1.2rem;
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+  list-style: disc;
+}
+
+.lw .bits__log {
+  list-style: disc;
+}
+
+.bits__log--bad {
+  color: var(--danger);
+}
