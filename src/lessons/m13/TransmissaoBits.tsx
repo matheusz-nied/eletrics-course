@@ -306,7 +306,9 @@ export default function TransmissaoBits() {
                   className="bits__on"
                 />
               ))}
-            <rect key={sent} x={FX0} y={16} width={3} height={64} className="bits__cursor" />
+            {sent > 0 && (
+              <rect key={sent} x={FX0} y={16} width={3} height={64} className="bits__cursor" />
+            )}
             <text x={FX0} y={94} className="bits__axis-t">
               portadora de 433,92 MHz: ligada (barra) ou desligada (linha)
             </text>
