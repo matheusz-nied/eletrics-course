@@ -1,0 +1,168 @@
+---
+/*
+ * 06.3: adding two currents of 3 A and 4 A as arrows, tip to tail: in phase
+ * (7 A), in opposition (1 A) and 90° apart (5 A, the hypotenuse).
+ */
+const K = 15; // px per ampere
+
+/** Arrow head path at (x, y) pointing along (ux, uy). */
+const head = (x: number, y: number, ux: number, uy: number) => {
+  const h = 9;
+  const bx = x - ux * h;
+  const by = y - uy * h;
+  return `M${x} ${y}L${bx - uy * 4.5} ${by + ux * 4.5}L${bx + uy * 4.5} ${by - ux * 4.5}Z`;
+};
+
+const arrow = (x0: number, y0: number, x1: number, y1: number) => {
+  const len = Math.hypot(x1 - x0, y1 - y0);
+  const ux = (x1 - x0) / len;
+  const uy = (y1 - y0) / len;
+  return { line: `M${x0} ${y0}L${x1 - ux * 8} ${y1 - uy * 8}`, head: head(x1, y1, ux, uy) };
+};
+
+// Panel 1, in phase.
+const p1 = { a: arrow(14, 90, 14 + 3 * K, 90), b: arrow(14 + 3 * K, 102, 14 + 7 * K, 102) };
+const s1 = arrow(14, 140, 14 + 7 * K, 140);
+// Panel 2, opposition (origin at x = 200).
+const O2 = 236;
+const p2 = { a: arrow(O2, 90, O2 + 3 * K, 90), b: arrow(O2 + 3 * K, 102, O2 - K, 102) };
+const s2 = arrow(O2, 140, O2 - K, 140);
+// Panel 3, 90° (origin at x = 350).
+const O3 = 352;
+const Y3 = 160;
+const p3 = { a: arrow(O3, Y3, O3 + 3 * K, Y3), b: arrow(O3 + 3 * K, Y3, O3 + 3 * K, Y3 - 4 * K) };
+const s3 = arrow(O3, Y3, O3 + 3 * K, Y3 - 4 * K);
+---
+
+<svg viewBox="0 0 480 200" width="480" height="200" class="fig" aria-hidden="true">
+  <text x="66" y="28" class="title">
+    Em fase
+  </text>
+  <text x="226" y="28" class="title">
+    Em oposição
+  </text>
+  <text x="400" y="28" class="title">
+    A 90°
+  </text>
+  <path d="M160 40 V190 M310 40 V190" class="sep" />
+
+  <path d={p1.a.line} class="a" />
+  <path d={p1.a.head} class="a-h" />
+  <path d={`M${14 + 3 * K} 90 V102`} class="guide" />
+  <path d={p1.b.line} class="b" />
+  <path d={p1.b.head} class="b-h" />
+  <path d={s1.line} class="s" />
+  <path d={s1.head} class="s-h" />
+  <text x={14 + 1.5 * K} y="80" class="lbl a-t">
+    3 A
+  </text>
+  <text x={14 + 5 * K} y="120" class="lbl b-t">
+    4 A
+  </text>
+  <text x={14 + 3.5 * K} y="166" class="lbl s-t">
+    soma: 7 A
+  </text>
+
+  <path d={p2.a.line} class="a" />
+  <path d={p2.a.head} class="a-h" />
+  <path d={`M${O2 + 3 * K} 90 V102`} class="guide" />
+  <path d={p2.b.line} class="b" />
+  <path d={p2.b.head} class="b-h" />
+  <path d={s2.line} class="s" />
+  <path d={s2.head} class="s-h" />
+  <text x={O2 + 1.5 * K} y="80" class="lbl a-t">
+    3 A
+  </text>
+  <text x={O2 + K} y="120" class="lbl b-t">
+    4 A
+  </text>
+  <text x={O2} y="166" class="lbl s-t">
+    soma: 1 A
+  </text>
+
+  <path d={p3.a.line} class="a" />
+  <path d={p3.a.head} class="a-h" />
+  <path d={p3.b.line} class="b" />
+  <path d={p3.b.head} class="b-h" />
+  <path d={s3.line} class="s" />
+  <path d={s3.head} class="s-h" />
+  <path d={`M${O3 + 3 * K - 10} ${Y3} V${Y3 - 10} H${O3 + 3 * K}`} class="guide" />
+  <text x={O3 + 1.5 * K} y={Y3 + 20} class="lbl a-t">
+    3 A
+  </text>
+  <text x={O3 + 3 * K + 8} y={Y3 - 2 * K} class="lbl b-t start">
+    4 A
+  </text>
+  <text x={O3 + 1.5 * K - 8} y={Y3 - 2 * K - 6} class="lbl s-t end">
+    5 A
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .a,
+  .b,
+  .s {
+    stroke-width: 3.5;
+  }
+  .a {
+    stroke: var(--copper);
+  }
+  .b {
+    stroke: var(--accent);
+  }
+  .s {
+    stroke: var(--success);
+  }
+  .a-h {
+    fill: var(--copper);
+  }
+  .b-h {
+    fill: var(--accent);
+  }
+  .s-h {
+    fill: var(--success);
+  }
+  .guide {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+  .sep {
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .lbl {
+    font-weight: 650;
+  }
+  .a-t {
+    fill: var(--copper);
+  }
+  .b-t {
+    fill: var(--accent);
+  }
+  .s-t {
+    fill: var(--success);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

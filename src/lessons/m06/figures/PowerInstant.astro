@@ -1,0 +1,184 @@
+---
+/*
+ * 06.5: voltage, current and instantaneous power p = v·i over two cycles.
+ * Top: a resistive load (current in phase), p is never negative. Bottom: an
+ * inductive load (current 45° behind), p dips below zero twice a cycle:
+ * energy goes back to the mains. The dashed line is the average, P.
+ */
+const X0 = 60;
+const X1 = 620;
+const N = 240;
+const CYCLES = 2;
+const V_AMP = 34;
+const I_AMP = 26;
+const P_SCALE = 44; // p of 1 (v and i at their peaks) in px
+
+interface Panel {
+  y0: number;
+  phi: number;
+  title: string;
+}
+const panels: Panel[] = [
+  { y0: 92, phi: 0, title: 'Carga resistiva (chuveiro): corrente junto com a tensão' },
+  { y0: 282, phi: 45, title: 'Carga indutiva (motor): corrente 45° atrasada' },
+];
+
+const xAt = (k: number) => X0 + ((X1 - X0) * k) / N;
+const angle = (k: number) => (2 * Math.PI * CYCLES * k) / N;
+
+function curves({ y0, phi }: Panel) {
+  const lag = (phi * Math.PI) / 180;
+  const v = (k: number) => Math.sin(angle(k));
+  const i = (k: number) => Math.sin(angle(k) - lag);
+  const p = (k: number) => v(k) * i(k);
+  const line = (f: (k: number) => number, amp: number) =>
+    Array.from({ length: N + 1 }, (_, k) => {
+      const y = y0 - amp * f(k);
+      return `${k === 0 ? 'M' : 'L'}${xAt(k).toFixed(1)} ${y.toFixed(1)}`;
+    }).join(' ');
+  // Filled areas of p: above the axis (from the mains) and below it (back to the mains).
+  const area = (sign: 1 | -1) => {
+    let d = `M${X0} ${y0}`;
+    for (let k = 0; k <= N; k++) {
+      const value = sign > 0 ? Math.max(0, p(k)) : Math.min(0, p(k));
+      d += ` L${xAt(k).toFixed(1)} ${(y0 - P_SCALE * value).toFixed(1)}`;
+    }
+    return `${d} L${X1} ${y0} Z`;
+  };
+  const average = Math.cos(lag) / 2;
+  return {
+    v: line(v, V_AMP),
+    i: line(i, I_AMP),
+    p: line(p, P_SCALE),
+    pos: area(1),
+    neg: area(-1),
+    avgY: y0 - P_SCALE * average,
+    hasNeg: phi > 0,
+  };
+}
+
+const drawn = panels.map((panel) => ({ ...panel, ...curves(panel) }));
+---
+
+<svg viewBox="0 0 660 392" width="660" height="392" class="fig" aria-hidden="true">
+  {drawn.map((d) => (
+    <g>
+      <text x={X0} y={d.y0 - 62} class="title">
+        {d.title}
+      </text>
+      <path d={d.pos} class="area-pos" />
+      {d.hasNeg && <path d={d.neg} class="area-neg" />}
+      <path d={`M${X0} ${d.y0} H${X1 + 8}`} class="axis" />
+      <path d={`M${X0} ${d.y0 - 48} V${d.y0 + 44}`} class="axis" />
+      <path d={d.v} class="v" />
+      <path d={d.i} class="i" />
+      <path d={d.p} class="p" />
+      <path d={`M${X0} ${d.avgY} H${X1}`} class="avg" />
+      <text x={X1 + 12} y={d.avgY + 4} class="lbl start">
+        P
+      </text>
+      <text x={X0 - 8} y={d.y0 + 4} class="lbl end">
+        0
+      </text>
+    </g>
+  ))}
+
+  <text x={xAt(18)} y={drawn[1]!.y0 - 44} class="lbl start note-pos">
+    a rede entrega energia
+  </text>
+  <path
+    d={`M${xAt(7.5)} ${drawn[1]!.y0 + 9} L${xAt(37.5) - 30} ${drawn[1]!.y0 + 44} M${xAt(67.5)} ${drawn[1]!.y0 + 9} L${xAt(37.5) + 30} ${drawn[1]!.y0 + 44}`}
+    class="leader"
+  />
+  <text x={xAt(37.5)} y={drawn[1]!.y0 + 58} class="lbl note-neg">
+    a energia volta para a rede
+  </text>
+
+  <g transform="translate(60 378)" class="legend">
+    <path d="M0 0 H24" class="v" />
+    <text x="30" y="4" class="lbl start">
+      tensão v
+    </text>
+    <path d="M130 0 H154" class="i" />
+    <text x="160" y="4" class="lbl start">
+      corrente i
+    </text>
+    <path d="M270 0 H294" class="p" />
+    <text x="300" y="4" class="lbl start">
+      potência p = v · i
+    </text>
+    <path d="M450 0 H474" class="avg" />
+    <text x="480" y="4" class="lbl start">
+      média (P)
+    </text>
+  </g>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1.5;
+  }
+  .v {
+    stroke: var(--accent);
+    stroke-width: 2.5;
+  }
+  .i {
+    stroke: var(--warning);
+    stroke-width: 2.5;
+    stroke-dasharray: 7 4;
+  }
+  .p {
+    stroke: var(--fg);
+    stroke-width: 2;
+  }
+  .area-pos {
+    fill: var(--success);
+    fill-opacity: 0.16;
+    stroke: none;
+  }
+  .area-neg {
+    fill: var(--danger);
+    fill-opacity: 0.5;
+    stroke: none;
+  }
+  .leader {
+    stroke: var(--danger);
+    stroke-width: 1.2;
+  }
+  .avg {
+    stroke: var(--success);
+    stroke-width: 2;
+    stroke-dasharray: 3 4;
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 13px;
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .lbl {
+    font-weight: 600;
+  }
+  .note-pos {
+    fill: var(--success);
+  }
+  .note-neg {
+    fill: var(--danger);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>

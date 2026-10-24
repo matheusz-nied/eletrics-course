@@ -1,0 +1,115 @@
+/* Lesson 6.7: three-phase phasors and waves (TrifasicoFasores.tsx). */
+
+.trifasico__views {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 40rem) {
+  .trifasico__views {
+    grid-template-columns: 2fr 3fr;
+    align-items: center;
+  }
+}
+
+.trifasico__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--font-sans);
+  fill: none;
+  stroke-linecap: round;
+}
+
+.trifasico__time {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: end;
+}
+
+.trifasico__out {
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
+.trifasico__now {
+  grid-column: 1 / -1;
+}
+
+.trifasico .tf-l1 {
+  --tf: var(--danger);
+}
+
+.trifasico .tf-l2 {
+  --tf: var(--success);
+}
+
+.trifasico .tf-l3 {
+  --tf: var(--info);
+}
+
+.trifasico .tf-orbit {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.trifasico .tf-axis {
+  stroke: var(--fg-subtle);
+  stroke-width: 1;
+}
+
+.trifasico .tf-arrow {
+  stroke: var(--tf);
+  stroke-width: 3.5;
+}
+
+.trifasico .tf-dot {
+  fill: var(--tf);
+  stroke: none;
+}
+
+.trifasico .tf-wave {
+  stroke: var(--tf);
+  stroke-width: 2;
+}
+
+.trifasico .tf-line,
+.trifasico .tf-line-wave {
+  stroke: var(--fg);
+  stroke-width: 3;
+  stroke-dasharray: 7 5;
+}
+
+.trifasico .tf-line-wave {
+  stroke-width: 2.5;
+}
+
+.trifasico .tf-cursor {
+  stroke: var(--fg-muted);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.trifasico text {
+  stroke: none;
+  fill: var(--fg);
+  font-size: 13px;
+  text-anchor: middle;
+}
+
+.trifasico .tf-label {
+  fill: var(--tf);
+  font-weight: 700;
+}
+
+.trifasico .tf-tick {
+  fill: var(--fg-muted);
+  font-size: 11px;
+  text-anchor: end;
+}
+
+.trifasico .tf-caption {
+  fill: var(--fg-muted);
+  font-size: 11.5px;
+}

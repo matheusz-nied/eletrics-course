@@ -12,11 +12,17 @@ const LESSONS = [
   '06-reles-e-contatores',
 ];
 
+/**
+ * How long an island may take to hydrate: with software WebGL (CI), the 3D
+ * views of a lesson block the page for a few seconds while they start.
+ */
+const HYDRATION = { timeout: 20_000 };
+
 /** Scrolls through the page so every island hydrates, and waits for the simulations. */
 async function hydrateAll(page: Page) {
   for (const island of await page.locator('astro-island').all()) {
     await island.scrollIntoViewIfNeeded();
-    await expect(island).not.toHaveAttribute('ssr');
+    await expect(island).not.toHaveAttribute('ssr', HYDRATION);
   }
   for (const sim of await page.locator('[data-simulation]').all()) {
     await expect(sim).toHaveAttribute('data-ready', '');

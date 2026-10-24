@@ -1,0 +1,315 @@
+---
+titulo: Fase e fasores
+modulo: m06-corrente-alternada
+ordem: 3
+nivel: I
+duracaoMin: 30
+objetivos:
+  - Medir a defasagem entre duas ondas em milissegundos e em graus
+  - Representar uma senoide por uma seta que gira (fasor) e ler um diagrama fasorial
+  - Explicar por que a corrente atrasa numa bobina e adianta num capacitor
+  - Somar correntes alternadas com fasores, e não com uma soma simples
+  - Entender como o capacitor do motor monofásico cria a segunda corrente
+prerequisitos:
+  - m06-corrente-alternada/02-pico-eficaz-e-medio
+  - m04-passivos/04-circuito-rc
+  - m04-passivos/05-indutores-e-circuito-rl
+tags: [fase, defasagem, fasor, diagrama fasorial, atraso, adiantamento, capacitor de motor, osciloscópio]
+seguranca: baixa-tensao
+rascunho: false
+---
+
+import Fasores from '../../../lessons/m06/Fasores.tsx';
+import PhaseShiftWaves from '../../../lessons/m06/figures/PhaseShiftWaves.astro';
+import PhaseRlc from '../../../lessons/m06/figures/PhaseRlc.astro';
+import PhasorAddition from '../../../lessons/m06/figures/PhasorAddition.astro';
+import MotorCapacitorPhasors from '../../../lessons/m06/figures/MotorCapacitorPhasors.astro';
+
+Tire o capacitor de um ventilador de teto e ligue: o motor só zumbe e não sai do lugar. Dê um empurrão na pá e ele pega, para qualquer lado. O técnico explica que o capacitor "cria uma segunda fase" para o motor. Mas a casa tem uma fase só. De onde sai a outra?
+
+A resposta está numa palavra que, em corrente alternada, quer dizer outra coisa: **fase** como atraso entre duas ondas. Nesta aula você vai medir esse atraso, desenhar as ondas como setas que giram e ver por que uma bobina atrasa a corrente e um capacitor adianta.
+
+## Duas ondas no mesmo ritmo
+
+Na aula <LinkAula id="m06-corrente-alternada/01-da-cc-a-ca" /> você viu que a tensão da tomada é uma senoide de 60 Hz: cada ciclo dura $1/60 \approx 16{,}7\,\text{ms}$. Num circuito de CA, todas as tensões e correntes balançam nesse mesmo ritmo. Só que nem todas chegam ao pico ao mesmo tempo.
+
+Ponha duas ondas de mesma frequência lado a lado. Se uma chega ao pico um pouco antes da outra, existe entre elas uma <Term id="defasagem">defasagem</Term>. A que chega primeiro está **adiantada**; a outra, **atrasada**. Se as duas sobem e descem juntas, estão **em fase**. Se uma está no pico positivo quando a outra está no negativo, estão **em oposição**.
+
+<Figure caption="Figura 1. Duas senoides de 60 Hz. A onda B chega ao pico 4,17 ms depois da onda A: está atrasada um quarto de ciclo, ou 90°. Medir a defasagem é medir essa distância entre dois picos iguais (ou entre duas passagens por zero subindo).">
+  <PhaseShiftWaves />
+</Figure>
+
+O atraso pode ser dado em tempo, mas o costume é dar em **graus**: um ciclo inteiro vale 360°, como uma volta. Assim o número não depende da frequência:
+
+$$
+\varphi = 360^\circ \cdot \frac{\Delta t}{T} = 360^\circ \cdot f \cdot \Delta t
+$$
+
+- $\varphi$ (a letra grega "fi") é a defasagem, em graus;
+- $\Delta t$ é o tempo entre os dois picos, em segundos;
+- $T$ é o período, em segundos, e $f = 1/T$ é a frequência, em hertz (Hz).
+
+Em 60 Hz, um quarto de ciclo é $16{,}7 / 4 \approx 4{,}17\,\text{ms}$, ou 90°. Meio ciclo, 8,33 ms, é 180°. E cada milissegundo vale $360 \times 60 \times 0{,}001 = 21{,}6^\circ$.
+
+Só faz sentido falar em defasagem entre ondas de **mesma frequência**. Duas ondas de frequências diferentes escorregam uma em relação à outra o tempo todo, e o atraso nunca fica parado.
+
+<Callout type="nota" title="Fase, a palavra com dois sentidos">
+  No quadro de luz, <Term id="fase">fase</Term> é o fio energizado. Em CA, fase também é a
+  posição de uma onda no ciclo, e defasagem é a diferença de fase entre duas ondas. O contexto diz
+  qual é qual. Nesta aula, "fase" é quase sempre o ângulo. O fio volta na aula{' '}
+  <LinkAula id="m06-corrente-alternada/07-monofasico-bifasico-e-trifasico" />.
+</Callout>
+
+## O fasor: uma seta que gira
+
+Lembre da espira girando entre os polos do ímã, na aula <LinkAula id="m05-magnetismo/03-inducao-eletromagnetica" />: uma volta, um ciclo de senoide. Dá para fazer o caminho contrário e desenhar qualquer senoide como uma coisa que gira.
+
+Imagine uma seta presa pelo pé no centro de um círculo, girando no sentido anti-horário, uma volta por ciclo. A altura da ponta da seta, medida a partir da linha do meio, sobe, chega ao máximo, desce, fica negativa e volta. Essa altura, desenhada ao longo do tempo, é exatamente uma senoide. A seta se chama <Term id="fasor">fasor</Term>:
+
+- o **comprimento** da seta é a amplitude da onda (o pico, ou o valor eficaz, conforme o costume de quem desenha; o importante é usar o mesmo para todas);
+- o **ângulo** da seta é a fase da onda.
+
+Duas ondas de mesma frequência viram duas setas que giram juntas, sempre com o mesmo ângulo entre elas. Como o giro é igual para todas, dá para congelar o desenho num instante qualquer: o que interessa é o comprimento de cada seta e o ângulo entre elas. Esse desenho parado é o **diagrama fasorial**. A seta adiantada fica à frente, no sentido do giro (anti-horário); a atrasada fica atrás.
+
+<Fasores client:visible />
+
+1. **Aperte "Girar".** A onda B está 60° atrasada: a seta azul vem atrás da laranja e chega ao topo depois. Repare que o ponto de cada onda sempre tem a mesma altura que a ponta da seta da mesma cor.
+2. **Pause e use "Instante no ciclo".** Em 90°, a seta A aponta para cima e a onda A está no pico.
+3. **Escolha "Adiantada 90° (capacitor)".** Agora a onda B chega ao pico 4,17 ms antes da A, e a seta azul fica um quarto de volta à frente.
+4. **Ligue a soma.** Com "Em fase", as duas ondas de 100 % somam 200 %. Com 90° de defasagem, a soma dá só 141 %. Leve a defasagem até 120°: a soma cai para 100 %. Em oposição, a soma é zero.
+
+Duas ondas de 100 % nem sempre somam 200 %. Depende do ângulo entre elas.
+
+## Somando com setas
+
+A soma de duas senoides de mesma frequência é outra senoide de mesma frequência. O fasor da soma sai de uma conta de desenho: **ponha uma seta na ponta da outra**. A seta que vai do começo da primeira até a ponta da segunda é a soma. É assim que se somam forças e deslocamentos, e as ondas obedecem à mesma regra porque a altura da ponta (o valor da onda) se soma direitinho a cada instante.
+
+<Figure caption="Figura 2. Três somas de duas correntes de 3 A e 4 A. Em fase, as setas ficam na mesma direção e a soma é 7 A. Em oposição, uma desconta a outra e sobra 1 A. A 90°, as setas formam um triângulo retângulo e a soma é a hipotenusa: 5 A.">
+  <PhasorAddition />
+</Figure>
+
+O caso mais comum é o de duas setas a 90°, que formam um triângulo retângulo. A soma é a hipotenusa, pelo teorema de Pitágoras:
+
+$$
+I = \sqrt{I_1^2 + I_2^2}
+$$
+
+Você já viu essa conta na aula <LinkAula id="m05-magnetismo/04-transformadores" />: o primário do trafo da central puxava 54 mA por causa da carga e 29 mA para magnetizar o núcleo. As duas correntes estão a 90° uma da outra, então o total não é $54 + 29 = 83\,\text{mA}$, e sim $\sqrt{54^2 + 29^2} \approx 61\,\text{mA}$, o que o multímetro mostrava.
+
+<DeepDive title="A soma para qualquer ângulo, e os números complexos">
+
+Cada fasor pode ser quebrado em duas partes: a horizontal, $A\cos\varphi$, e a vertical, $A\sin\varphi$. Para somar, some as partes horizontais entre si e as verticais entre si. A amplitude e o ângulo da soma saem do triângulo:
+
+$$
+A_\text{soma} = \sqrt{x^2 + y^2} \qquad \varphi_\text{soma} = \arctan\frac{y}{x}
+$$
+
+com $x = A_1\cos\varphi_1 + A_2\cos\varphi_2$ e $y = A_1\sin\varphi_1 + A_2\sin\varphi_2$. Para duas ondas de mesma amplitude $A$ separadas por um ângulo $\varphi$, isso dá $2A\cos(\varphi/2)$: $2A$ em fase, $\sqrt{2}\,A \approx 1{,}41\,A$ a 90°, $A$ a 120° e zero a 180°. São os números do interativo.
+
+Engenheiros escrevem um fasor como um número complexo, $x + jy$, em que $j$ é a unidade imaginária ($j^2 = -1$; a letra $i$ já é a corrente). A parte real é a horizontal e a imaginária, a vertical. Multiplicar por $j$ gira a seta 90° para a frente. Com isso, a bobina e o capacitor viram números, e a lei de Ohm de CA fica igual à de CC: $V = Z \cdot I$, com $Z$ complexo. A próxima aula usa essa ideia sem os números complexos.
+
+</DeepDive>
+
+## Quem adianta e quem atrasa
+
+Ligue um componente sozinho numa tensão senoidal e compare a corrente com a tensão:
+
+- **Resistor:** a corrente segue a tensão ao pé da letra, $i = v/R$ a cada instante. Corrente e tensão estão **em fase**.
+- **Bobina:** você viu em <LinkAula id="m04-passivos/05-indutores-e-circuito-rl" /> que a bobina segura a corrente: a tensão nela depende de quão depressa a corrente muda. A tensão é máxima quando a corrente está passando por zero (mudando mais depressa) e é zero quando a corrente chega ao pico (parada por um instante). A corrente chega ao pico um quarto de ciclo depois da tensão: numa bobina ideal, a corrente fica **atrasada 90°**.
+- **Capacitor:** é o contrário. Em <LinkAula id="m04-passivos/04-circuito-rc" />, a corrente do capacitor é grande quando a tensão nele muda depressa. Ela é máxima quando a tensão passa por zero e zero quando a tensão chega ao pico. A corrente chega ao pico antes da tensão: no capacitor, a corrente fica **adiantada 90°**.
+
+<Figure caption="Figura 3. Tensão (laranja) e corrente (azul) em cada componente, com o diagrama fasorial embaixo. No resistor, em fase. Na bobina, a corrente chega ao pico um quarto de ciclo depois. No capacitor, um quarto de ciclo antes.">
+  <PhaseRlc />
+</Figure>
+
+Uma forma de lembrar: no capacitor, a corrente vem antes, porque ele precisa receber carga para a tensão subir. Na bobina, a corrente vem depois, porque ela resiste a qualquer mudança de corrente.
+
+Nenhuma bobina de verdade é ideal: o fio tem resistência, e a defasagem fica entre 0° e 90°. Num motor, que tem fio e também entrega trabalho mecânico, a corrente costuma ficar algumas dezenas de graus atrasada. A conta desse ângulo está na próxima aula, e as consequências na conta de luz, na aula <LinkAula id="m06-corrente-alternada/05-potencia-e-fator-de-potencia" />.
+
+## Explore: três ramos no mesmo gerador
+
+A simulação tem um gerador de 10 V de pico (7,07 V eficazes) e 60 Hz e três ramos em paralelo, cada um com uma chave: um resistor de 100 Ω, uma bobina de 265 mH (com 5 Ω de fio) e um capacitor de 26,5 µF (com 0,5 Ω de fios em série). Os valores foram escolhidos para que, em 60 Hz, a bobina e o capacitor também se oponham à corrente com 100 Ω, como o resistor. Cada ramo sozinho puxa a mesma corrente. Os multímetros mostram a corrente de cada ramo e a total. Na aba do osciloscópio, o canal 1 mostra a tensão do gerador e o canal 2, a corrente total que sai dele.
+
+<Simulation
+  circuit="m06/fase-ramos"
+  instruments={[
+    { kind: 'multimetro', series: ['IR', 'IL', 'IC', 'IT'] },
+    { kind: 'osciloscopio', series: ['VE', 'IT'] },
+  ]}
+  height={340}
+/>
+
+1. **Aperte o play (▶), só com o resistor ligado.** A corrente total marca 70,7 mA. Abra a aba do osciloscópio: as duas ondas sobem e descem juntas, em fase. Daqui em diante, alterne entre as duas abas.
+2. **Desligue o resistor e ligue a bobina.** A corrente quase não muda (70,6 mA), mas agora chega ao pico quase um quarto de ciclo depois da tensão. São 87°, e não 90°, porque o fio da bobina tem 5 Ω de resistência.
+3. **Troque a bobina pelo capacitor.** A corrente volta a 70,7 mA e chega ao pico um quarto de ciclo **antes** da tensão.
+4. **Ligue o resistor e a bobina juntos.** Os multímetros dos ramos marcam 70,7 mA e 70,6 mA. O da corrente total não marca 141 mA: marca 102 mA, e a corrente fica uns 44° atrasada. Os dois fasores estão quase a 90°, e a soma é a hipotenusa.
+5. **Agora a bobina e o capacitor, sem o resistor.** Cada ramo puxa uns 70 mA, mas o gerador fornece só uns 4 mA. As duas correntes estão em oposição: quando a bobina puxa, o capacitor devolve, e a corrente passa de um para o outro sem sair do gerador.
+6. **Ligue os três.** A corrente total fica em uns 75 mA, quase em fase com a tensão. A bobina e o capacitor se anulam, e o gerador "vê" praticamente só o resistor.
+
+O passo 5 parece mágica, mas é o que os eletricistas fazem para corrigir o fator de potência de motores (aula <LinkAula id="m06-corrente-alternada/05-potencia-e-fator-de-potencia" />), e é a base da ressonância (aula <LinkAula id="m06-corrente-alternada/06-ressonancia-e-filtros" />).
+
+## Exemplo resolvido: resistor e capacitor juntos
+
+Com o resistor e o capacitor ligados, quanto o gerador fornece, e com que defasagem?
+
+1. **Corrente em cada ramo:** $7{,}07\,\text{V} / 100\,\Omega = 70{,}7\,\text{mA}$ nos dois, porque o capacitor também se opõe com 100 Ω em 60 Hz.
+2. **Ângulos:** a do resistor está em fase com a tensão (0°); a do capacitor, adiantada 90°.
+3. **Soma:** as setas formam um triângulo retângulo com dois lados iguais: $I = \sqrt{70{,}7^2 + 70{,}7^2} \approx 100\,\text{mA}$.
+4. **Defasagem da soma:** o triângulo tem dois catetos iguais, então o ângulo é de 45°, com a corrente adiantada. Em tempo: $45/360 \times 16{,}7\,\text{ms} \approx 2{,}08\,\text{ms}$.
+
+Confira na simulação: ligue só o resistor e o capacitor. O multímetro da corrente total marca 100 mA, e no osciloscópio a corrente chega ao pico cerca de 2 ms antes da tensão.
+
+<RealCase title="O capacitor que faz o motor do portão e o ventilador girarem">
+
+Motores monofásicos, como o do portão eletrônico, o do ventilador de teto e o da bomba d'água, têm dois enrolamentos montados a um quarto de volta um do outro. Para girar, eles precisam de duas correntes defasadas perto de 90°: é isso que forma o campo girante, explicado na aula <LinkAula id="m16-portao/02-o-motor-do-portao" />.
+
+A rede dá uma tensão só. O truque está no capacitor:
+
+- o enrolamento ligado direto na fase se comporta como bobina com resistência: a corrente fica **atrasada**;
+- o enrolamento que recebe a fase pelo capacitor tem a corrente **adiantada**, porque o capacitor domina.
+
+Com os valores do modelo de ensino da aula 16.2 (cada enrolamento com 30 Ω e 66 mH, capacitor de 40 µF, em 127 V), as contas dão 39,7° de atraso num enrolamento e 54,1° de adiantamento no outro: uns 94° entre as duas correntes.
+
+<Figure caption="Figura 4. Diagrama fasorial do motor com capacitor, com a tensão da rede como referência. A corrente do enrolamento direto fica 39,7° atrasada; a do enrolamento com o capacitor, 54,1° adiantada. Entre as duas, uns 94°, quase o quarto de ciclo que o motor precisa.">
+  <MotorCapacitorPhasors />
+</Figure>
+
+Agora os defeitos fazem sentido:
+
+- **Capacitor aberto (rompido):** só um enrolamento recebe corrente. O campo pulsa, mas não gira. O motor zumbe e esquenta parado, e pega para o lado em que for empurrado.
+- **Capacitor fraco (perdeu capacitância):** o adiantamento diminui, as duas correntes ficam mais perto da mesma fase e o campo gira "torto". A partida fica fraca, e o portão pode parar no meio do curso com carga.
+- **Capacitor trocado por outro de valor muito diferente:** o ângulo e as correntes mudam. Troque sempre por um de mesma capacitância (µF) e de tensão igual ou maior, escrita em VCA.
+
+O capacitor de motor fica ligado na rede e pode guardar carga depois de desligado. Antes de mexer nele, desligue o disjuntor, teste a ausência de tensão e descarregue o capacitor como mostra a aula <LinkAula id="m04-passivos/03-capacitores" />. O passo a passo da troca está em <LinkAula id="m16-portao/07-trocar-motor-e-central" />, e o motor em detalhe, em <LinkAula id="m08-motores/04-motor-monofasico-capacitor" />.
+
+</RealCase>
+
+## Erros comuns e segurança
+
+- **Somar correntes alternadas direto.** Dois ramos de 70 mA não dão 140 mA se as correntes estão defasadas. Com o alicate amperímetro, a corrente no cabo geral de um quadro costuma ser menor que a soma das correntes dos circuitos medidas uma a uma, por esse motivo (e porque nem tudo liga ao mesmo tempo).
+- **Comparar fases de ondas com frequências diferentes.** A defasagem só existe entre ondas de mesma frequência.
+- **Esquecer quem é a referência.** "Atrasada 30°" sempre quer dizer "em relação a alguma coisa", em geral a tensão da rede. Diga sempre qual.
+- **Medir defasagem na rede com o osciloscópio comum.** A garra do terra das pontas de um osciloscópio comum é ligada ao pino terra da tomada. Prender essa garra na fase faz um curto-circuito pelo próprio instrumento. Medições na rede exigem pontas diferenciais ou isoladas e a categoria de medição certa, como explica a aula <LinkAula id="m03-medicoes/05-osciloscopio" />. Na simulação não há esse risco.
+- **Testar o motor sem o capacitor "para ver se gira".** Parado e zumbindo, o enrolamento esquenta depressa. Desligue em poucos segundos.
+
+## Exercícios
+
+<Quiz
+  questions={[
+    {
+      type: 'numerica',
+      prompt:
+        'No osciloscópio, a corrente de um motor ligado em 60 Hz chega ao pico 2 ms depois da tensão. Qual a defasagem, em graus?',
+      answer: 43.2,
+      tolerance: 0.02,
+      unit: '°',
+      explanation:
+        'φ = 360° × f × Δt = 360 × 60 × 0,002 = 43,2°. A corrente está atrasada, como é comum em motores.',
+    },
+    {
+      type: 'numerica',
+      prompt:
+        'Dois ramos em paralelo puxam 3 A e 4 A, e as duas correntes estão defasadas 90°. Quanto marca um alicate amperímetro no fio que alimenta os dois?',
+      answer: 5,
+      tolerance: 0.02,
+      unit: 'A',
+      explanation:
+        'As setas formam um triângulo retângulo, e a soma é a hipotenusa: √(3² + 4²) = √25 = 5 A, e não 7 A.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'Numa bobina ideal ligada em CA, a corrente:',
+      options: [
+        {
+          text: 'Fica atrasada 90° em relação à tensão',
+          correct: true,
+          feedback:
+            'A bobina segura a mudança de corrente. A tensão é máxima quando a corrente passa por zero, e a corrente só chega ao pico um quarto de ciclo depois.',
+        },
+        {
+          text: 'Fica adiantada 90° em relação à tensão',
+          feedback: 'Isso acontece no capacitor. Na bobina, a corrente vem depois da tensão.',
+        },
+        {
+          text: 'Fica em fase com a tensão',
+          feedback:
+            'Só no resistor a corrente segue a tensão ao pé da letra. A bobina guarda energia no campo magnético e atrasa a corrente.',
+        },
+      ],
+    },
+    {
+      type: 'vf',
+      prompt: 'Duas senoides de mesma frequência e mesma amplitude, defasadas 180°, somam zero.',
+      answer: true,
+      explanation:
+        'Em oposição, quando uma está no pico positivo a outra está no negativo, e a cada instante uma anula a outra. As setas apontam para lados opostos.',
+    },
+    {
+      type: 'multipla',
+      prompt:
+        'Na simulação, a bobina e o capacitor juntos puxam uns 70 mA cada um, mas o gerador fornece só uns 4 mA. Por quê?',
+      options: [
+        {
+          text: 'As duas correntes estão em oposição: a energia vai e volta entre a bobina e o capacitor',
+          correct: true,
+          feedback:
+            'A da bobina está atrasada quase 90° e a do capacitor, adiantada 90°. Elas ficam quase opostas e quase se anulam no fio do gerador.',
+        },
+        {
+          text: 'O multímetro da corrente total está com defeito',
+          feedback:
+            'Ele mede certo. Correntes alternadas defasadas não se somam direto: os fasores, quase opostos, quase se anulam.',
+        },
+        {
+          text: 'O capacitor bloqueia a corrente do gerador',
+          feedback:
+            'O capacitor bloqueia corrente contínua, não alternada. Aqui ele conduz 70 mA, só que adiantados, enquanto a bobina puxa 70 mA atrasados.',
+        },
+      ],
+    },
+    {
+      type: 'associar',
+      prompt: 'Associe cada componente ligado sozinho em CA à posição da corrente em relação à tensão.',
+      pairs: [
+        ['Resistor', 'Em fase'],
+        ['Bobina ideal', 'Atrasada 90°'],
+        ['Capacitor', 'Adiantada 90°'],
+      ],
+      explanation:
+        'No resistor, a corrente segue a tensão. A bobina atrasa a corrente, e o capacitor adianta. Componentes reais, como uma bobina com fio resistivo, ficam no meio do caminho.',
+    },
+    {
+      type: 'multipla',
+      prompt: 'O motor de um portão só zumbe e não parte, e o capacitor está aberto. O que falta para o motor girar?',
+      options: [
+        {
+          text: 'A segunda corrente, defasada perto de 90°, que forma o campo girante',
+          correct: true,
+          feedback:
+            'Sem o capacitor, só um enrolamento recebe corrente. O campo pulsa no lugar, mas não gira, e o rotor não sabe para que lado ir.',
+        },
+        {
+          text: 'Tensão: o capacitor aumenta a tensão do motor',
+          feedback:
+            'O capacitor de motor não serve para aumentar tensão. Ele adianta a corrente de um dos enrolamentos.',
+        },
+        {
+          text: 'Nada: o motor precisa só de um empurrão para sempre funcionar sem capacitor',
+          feedback:
+            'Empurrado, o motor até pega, mas sem torque de partida e com o enrolamento esquentando. Troque o capacitor por um de mesmo valor.',
+        },
+      ],
+    },
+  ]}
+/>
+
+## Resumo
+
+- **Defasagem** é o atraso entre duas ondas de mesma frequência, em graus: $\varphi = 360^\circ \cdot f \cdot \Delta t$. Em 60 Hz, 90° são 4,17 ms.
+- Um **fasor** é uma seta que gira uma volta por ciclo: o comprimento é a amplitude e o ângulo, a fase. A altura da ponta é o valor da onda.
+- Correntes e tensões alternadas se somam como setas, **ponta com pé**. A 90°, a soma é a hipotenusa: $\sqrt{I_1^2 + I_2^2}$.
+- No resistor, corrente e tensão estão em fase. Na **bobina**, a corrente atrasa até 90°. No **capacitor**, adianta 90°.
+- Correntes opostas de bobina e capacitor se anulam no fio que alimenta os dois.
+- O capacitor do motor monofásico adianta a corrente de um enrolamento, cria a segunda corrente defasada e faz o campo girar.
+
+Na próxima aula você vai calcular quanto a bobina e o capacitor se opõem à corrente e como isso muda com a frequência: <LinkAula id="m06-corrente-alternada/04-reatancia-e-impedancia" />.

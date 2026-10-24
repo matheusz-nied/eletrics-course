@@ -1,0 +1,79 @@
+/* Lesson 6.5: the power triangle widget. */
+
+.tri-pot__fig {
+  width: 100%;
+  max-width: 30rem;
+  height: auto;
+  margin: 0 auto;
+  font-family: var(--font-sans);
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tri-pot__axis {
+  stroke: var(--fg-subtle);
+  stroke-width: 1.5;
+}
+
+.tri-pot__ghost {
+  fill: var(--surface-2, var(--surface));
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.tri-pot__p {
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+
+.tri-pot__q {
+  stroke: var(--warning);
+  stroke-width: 4;
+}
+
+.tri-pot__s {
+  stroke: var(--fg);
+  stroke-width: 3;
+}
+
+.tri-pot__cap {
+  stroke: var(--info);
+  stroke-width: 3;
+  stroke-dasharray: 5 3;
+}
+
+.tri-pot__lbl {
+  stroke: none;
+  fill: var(--fg);
+  font-size: 14px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.tri-pot__lbl.start {
+  text-anchor: start;
+}
+
+.tri-pot__lbl.end {
+  text-anchor: end;
+}
+
+.tri-pot__values {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.tri-pot__values dd {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 650;
+}
+
+.tri-pot__was {
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+}

@@ -1,0 +1,154 @@
+---
+/*
+ * 06.3: phasors of the single-phase motor with capacitor (teaching model of
+ * lesson 16.2: each winding 30 Ω and 66 mH, 40 µF capacitor, 127 V, 60 Hz).
+ * The direct winding's current lags 39,7°, the capacitor winding's leads
+ * 54,1°: about 94° between them. Lengths in proportion to the currents.
+ */
+const w = 2 * Math.PI * 60;
+const R = 30;
+const XL = w * 0.066;
+const XC = 1 / (w * 40e-6);
+const direct = { amp: 127 / Math.hypot(R, XL), deg: -(Math.atan(XL / R) * 180) / Math.PI };
+const withCap = {
+  amp: 127 / Math.hypot(R, XL - XC),
+  deg: -(Math.atan((XL - XC) / R) * 180) / Math.PI,
+};
+
+const CX = 120;
+const CY = 140;
+const K = 32; // px per ampere
+
+const end = (amp: number, deg: number, k = K) => {
+  const a = (deg * Math.PI) / 180;
+  return { x: CX + amp * k * Math.cos(a), y: CY - amp * k * Math.sin(a) };
+};
+const head = (x: number, y: number) => {
+  const len = Math.hypot(x - CX, y - CY);
+  const ux = (x - CX) / len;
+  const uy = (y - CY) / len;
+  const bx = x - ux * 10;
+  const by = y - uy * 10;
+  return {
+    line: `M${CX} ${CY}L${bx} ${by}`,
+    head: `M${x} ${y}L${bx - uy * 5} ${by + ux * 5}L${bx + uy * 5} ${by - ux * 5}Z`,
+  };
+};
+
+const v = head(CX + 170, CY);
+const pd = end(direct.amp, direct.deg);
+const pc = end(withCap.amp, withCap.deg);
+const i1 = head(pd.x, pd.y);
+const i2 = head(pc.x, pc.y);
+
+// Arc between the two currents.
+const r = 46;
+const a0 = end(r / K, direct.deg);
+const a1 = end(r / K, withCap.deg);
+const arc = `M${a0.x.toFixed(1)} ${a0.y.toFixed(1)}A${r} ${r} 0 0 0 ${a1.x.toFixed(1)} ${a1.y.toFixed(1)}`;
+const mid = end(60 / K, 24);
+const between = Math.round(withCap.deg - direct.deg);
+const fmt = (d: number) => Math.abs(d).toFixed(1).replace('.', ',');
+---
+
+<svg viewBox="0 0 400 270" width="400" height="270" class="fig" aria-hidden="true">
+  <path d={`M${CX - 30} ${CY}H${CX + 190}`} class="axis" />
+  <path d={arc} class="arc" />
+  <text x={mid.x + 4} y={mid.y + 5} class="ang start">
+    {between}°
+  </text>
+
+  <path d={v.line} class="v" />
+  <path d={v.head} class="v-h" />
+  <text x={CX + 176} y={CY + 24} class="lbl v-t end">
+    tensão da rede
+  </text>
+
+  <path d={i1.line} class="i1" />
+  <path d={i1.head} class="i1-h" />
+  <text x={pd.x + 8} y={pd.y + 18} class="lbl i1-t start">
+    enrolamento direto
+  </text>
+  <text x={pd.x + 8} y={pd.y + 36} class="small start">
+    atrasada {fmt(direct.deg)}°
+  </text>
+
+  <path d={i2.line} class="i2" />
+  <path d={i2.head} class="i2-h" />
+  <text x={pc.x + 8} y={pc.y - 22} class="lbl i2-t start">
+    com o capacitor
+  </text>
+  <text x={pc.x + 8} y={pc.y - 4} class="small start">
+    adiantada {fmt(withCap.deg)}°
+  </text>
+</svg>
+
+<style>
+  .fig {
+    font-family: var(--font-sans);
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .axis {
+    stroke: var(--fg-subtle);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+  }
+  .arc {
+    stroke: var(--fg-muted);
+    stroke-width: 1.5;
+  }
+  .v {
+    stroke: var(--copper);
+    stroke-width: 3.5;
+  }
+  .v-h {
+    fill: var(--copper);
+  }
+  .i1 {
+    stroke: var(--accent);
+    stroke-width: 3.5;
+  }
+  .i1-h {
+    fill: var(--accent);
+  }
+  .i2 {
+    stroke: var(--success);
+    stroke-width: 3.5;
+  }
+  .i2-h {
+    fill: var(--success);
+  }
+  text {
+    stroke: none;
+    fill: var(--fg);
+    font-size: 14px;
+    text-anchor: middle;
+  }
+  .lbl {
+    font-weight: 700;
+  }
+  .small {
+    fill: var(--fg-muted);
+    font-size: 13px;
+  }
+  .ang {
+    font-weight: 700;
+  }
+  .v-t {
+    fill: var(--copper);
+  }
+  .i1-t {
+    fill: var(--accent);
+  }
+  .i2-t {
+    fill: var(--success);
+  }
+  .start {
+    text-anchor: start;
+  }
+  .end {
+    text-anchor: end;
+  }
+</style>
